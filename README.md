@@ -1,45 +1,12 @@
-Hello GL2
+HintView
 =========
-Hello GL2 is an Android C++ sample that draws a triangle using GLES 2.0 API.
-
-It uses JNI to do the rendering in C++ over a
-[GLSurfaceView](http://developer.android.com/reference/android/opengl/GLSurfaceView.html)
-created from a regular Android Java Activity.
-
-This sample uses the new [Android Studio CMake plugin](http://tools.android.com/tech-docs/external-c-builds) with C++ support.
-
-Pre-requisites
---------------
-- Android Studio 2.2 preview+ with [NDK](https://developer.android.com/ndk/) bundle.
-
-Getting Started
----------------
-1. [Download Android Studio](http://developer.android.com/sdk/index.html)
-1. Launch Android Studio.
-1. Open the sample directory.
-1. Open *File/Project Structure...*
-  - Click *Download* or *Select NDK location*.
-1. Click *Tools/Android/Sync Project with Gradle Files*.
-1. Click *Run/Run 'app'*.
-
-Screenshots
------------
-![screenshot](screenshot.png)
-
-Support
+HintView is a simple Android Viewer for HINT files.
+It is using GLES 2.0 to render the HINT files
+It uses lots of C to read and layout HINT files
+It uses some Java to implement a simple GUI
 -------
-If you've found an error in these samples, please [file an issue](https://github.com/googlesamples/android-ndk/issues/new).
+Copyright 2019 Martin Ruckert
 
-Patches are encouraged, and may be submitted by [forking this project](https://github.com/googlesamples/android-ndk/fork) and
-submitting a pull request through GitHub. Please see [CONTRIBUTING.md](../CONTRIBUTING.md) for more details.
-
-- [Stack Overflow](http://stackoverflow.com/questions/tagged/android-ndk)
-- [Google+ Community](https://plus.google.com/communities/105153134372062985968)
-- [Android Tools Feedbacks](http://tools.android.com/feedback)
-
-License
--------
-Copyright 2015 Google, Inc.
 
 Licensed to the Apache Software Foundation (ASF) under one or more contributor
 license agreements.  See the NOTICE file distributed with this work for
