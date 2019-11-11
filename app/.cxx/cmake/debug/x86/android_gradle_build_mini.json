@@ -1,0 +1,16 @@
+{
+  "buildFiles": [
+    "C:\\home\\HintView\\app\\src\\main\\cpp\\CMakeLists.txt"
+  ],
+  "cleanCommands": [
+    "C:\\Users\\ruckert\\AppData\\Local\\Android\\Sdk\\cmake\\3.6.4111459\\bin\\cmake.exe --build C:\\home\\HintView\\app\\.cxx\\cmake\\debug\\x86 --target clean"
+  ],
+  "libraries": {
+    "hintview-Debug-x86": {
+      "artifactName": "hintview",
+      "buildCommand": "C:\\Users\\ruckert\\AppData\\Local\\Android\\Sdk\\cmake\\3.6.4111459\\bin\\cmake.exe --build C:\\home\\HintView\\app\\.cxx\\cmake\\debug\\x86 --target hintview",
+      "abi": "x86",
+      "output": "C:\\home\\HintView\\app\\build\\intermediates\\cmake\\debug\\obj\\x86\\libhintview.so"
+    }
+  }
+}

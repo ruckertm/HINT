@@ -1,0 +1,26 @@
+# ninja log v5
+93	1773	0	CMakeFiles/hintview.dir/gl_code.cpp.o	543ebe7e1cc1fa88
+1788	2444	0	C:/home/HintView/app/build/intermediates/cmake/debug/obj/armeabi-v7a/libhintview.so	7afabfbce1119f1c
+63	636	0	CMakeFiles/hintview.dir/hformat.c.o	d3692ece3c08272f
+99	664	0	CMakeFiles/hintview.dir/hdefaults.c.o	29adc6e826e348d4
+1527	2081	0	CMakeFiles/hintview.dir/harith.c.o	701bae7a5eb796fd
+262	1064	0	CMakeFiles/hintview.dir/htex.c.o	ab6b745c414461
+69	1100	0	CMakeFiles/hintview.dir/hinttop.c.o	7cd9e204a6768389
+48	955	0	CMakeFiles/hintview.dir/pkfonts.c.o	6c0a9e1445ccb109
+955	2011	0	CMakeFiles/hintview.dir/hlinebreak.c.o	4c3e6ce705adaf73
+113	654	0	CMakeFiles/hintview.dir/hmem.c.o	8d9820db35533ba0
+1645	2202	0	CMakeFiles/hintview.dir/hdisplay.c.o	cf31626cbccfb423
+654	1905	0	CMakeFiles/hintview.dir/hrender.c.o	fae0754d7ba52efb
+189	1527	0	CMakeFiles/hintview.dir/hbox.c.o	8c684bed743929d
+1100	2118	0	CMakeFiles/hintview.dir/hfont.c.o	1083ad9642dc7449
+6	773	0	CMakeFiles/hintview.dir/rendergl.cpp.o	eed350d469dd1e3
+1064	1620	0	CMakeFiles/hintview.dir/hlist.c.o	4e80ebe2ad1ab93d
+135	1774	0	CMakeFiles/hintview.dir/hpos.c.o	46bc5dc9c38d4752
+1620	2229	0	CMakeFiles/hintview.dir/hbuildpage.c.o	66e446edc59a0cae
+165	1645	0	CMakeFiles/hintview.dir/hpack.c.o	15d5f176902893be
+8	2336	0	CMakeFiles/hintview.dir/hget.c.o	d38f727789c0437f
+7	235	0	CMakeFiles/hintview.dir/fonts.c.o	483afd78ebe60ec6
+6	706	0	CMakeFiles/hintview.dir/rendergl.cpp.o	eed350d469dd1e3
+707	907	0	C:/home/HintView/app/build/intermediates/cmake/debug/obj/armeabi-v7a/libhintview.so	7de11d4c0e00680a
+6	290	0	CMakeFiles/hintview.dir/hbuildpage.c.o	66e446edc59a0cae
+6	170	0	C:/home/HintView/app/build/intermediates/cmake/debug/obj/armeabi-v7a/libhintview.so	7de11d4c0e00680a

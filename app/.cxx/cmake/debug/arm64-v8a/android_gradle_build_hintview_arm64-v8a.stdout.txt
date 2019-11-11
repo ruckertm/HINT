@@ -1,0 +1,2 @@
+[1/2] Building C object CMakeFiles/hintview.dir/hbuildpage.c.o
+[2/2] Linking CXX shared library C:\home\HintView\app\build\intermediates\cmake\debug\obj\arm64-v8a\libhintview.so
