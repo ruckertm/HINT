@@ -1,8 +1,0 @@
-Executable : C:\Users\ruckert\AppData\Local\Android\Sdk\cmake\3.6.4111459\bin\cmake.exe
-arguments : 
---build
-C:\home\HintView\app\.cxx\cmake\debug\armeabi-v7a
---target
-hintview
-jvmArgs : 
-
