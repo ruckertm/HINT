@@ -26,8 +26,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 1729 ${}$}
-\def\lastdate{${}$Date: 2019-10-21 16:28:09 +0200 (Mon, 21 Oct 2019) ${}$}
+\def\lastrevision{${}$Revision: 1750 ${}$}
+\def\lastdate{${}$Date: 2019-11-04 14:40:59 +0100 (Mon, 04 Nov 2019) ${}$}
 
 \input titlepage.tex
 
@@ -362,7 +362,7 @@ void hget_max_definitions(void)
   while (true) @/
   { uint8_t n;
     if (hpos>=hend) QUIT("Unexpected end of maximum list");
-    node_pos2=hpos-hstart;
+    node_pos=hpos-hstart;
     HGETTAG(a);
     if  (KIND(a)==list_kind) break;
     if (INFO(a)!=1) QUIT("Maximum info %d not supported",INFO(a));
@@ -404,7 +404,7 @@ void hget_def_node(void)
   else if (KIND(a)==param_kind)  param_def[n]=hget_param_list(a);
   else if (KIND(a)==range_kind) hget_range_def(a,n);
   else if (KIND(a)==page_kind) hget_page_def(a,n);
-  else  pointer_def[KIND(a)][n]=hget_node_def(a);
+  else  pointer_def[KIND(a)][n]=hget_definition(a);
   @<read and check the end byte |z|@>@;
 }
 
@@ -469,7 +469,7 @@ static param_def_t *hget_param_list(uint8_t a);
 static void hget_range_def(uint8_t a, uint8_t pg);
 static void hget_page_def(uint8_t a, uint8_t n);
 static void hget_font_metrics();
-static pointer hget_node_def(uint8_t a);
+static pointer hget_definition(uint8_t a);
 @
 
 
@@ -593,7 +593,7 @@ static pointer hget_glue_def(uint8_t a)
   return p;
 }
 
-static pointer hget_glue_ref(uint8_t n)
+pointer hget_glue_ref(uint8_t n)
 { @+REF(glue_kind,n);
   return  pointer_def[glue_kind][n];
 }
@@ -649,7 +649,7 @@ static void hget_baseline_def(uint8_t a, uint8_t n)
 { HGET_BASELINE(INFO(a),baseline_def[n]);
 }
 
-static void hget_baseline_ref(uint8_t n, bs_t *b)
+void hget_baseline_ref(uint8_t n, bs_t *b)
 { REF(baseline_kind,n);
   *b=baseline_def[n];
 }
@@ -668,7 +668,7 @@ if (needs_bs && prev_depth > ignore_depth)
     } 
   link(tail)=p;tail=p;
   if (nest_ptr==0)
-    store_map(p,node_pos2,0,0);
+    store_map(p,node_pos,0,0);
   } 
 link(tail)=b;tail=b;prev_depth=depth(b);
 needs_bs=false;
@@ -742,7 +742,7 @@ static void hget_font_params(uint8_t n, font_def_t *f)
         k!=hyphen_kind && k!=glue_kind && k!=math_kind && @| k!=rule_kind && k!=image_kind)
       QUIT("Font parameter %d has invalid type %s",n, content_name[n]);
     RNG("Font parameter",n,0,MAX_FONT_PARAMS);
-    f->p[n]=hget_node_def(a);
+    f->p[n]=hget_definition(a);
     @<read and check the end byte |z|@>@;
   }
   DBG(dbgdef,"End font definition\n");
@@ -763,13 +763,12 @@ static void hget_font_metrics(void)
 extern void read_font_info(int f, char *n, scaled s);
 @
 
-\subsection{Parameter Lists}
+\subsection{Parameter Lists}\label{getparamlist}
 There are three types of data that we allow in parameter lists: integers, dimensions,
 and glue. Hence, for each parameter, we store the parameter number |n|, its kind |k|, and its value |i|, |d|, or |g|.
 To form linked lists of parameter definitions, we add a |next| pointer. The variable |param_def| contains the dynamically allocated 
 array of lists of parameter definitions.
-
-@<get variables@>=
+@<get types@>=
 typedef struct param_t {
 uint8_t n,k;
 union {@+ int32_t i;@+
@@ -779,8 +778,11 @@ union {@+ int32_t i;@+
 
 typedef struct param_def_t {
 struct param_def_t *next;@+
-param_t p; } param_def_t;@#
+param_t p; } param_def_t;
+@
 
+
+@<get variables@>=
 param_def_t **param_def;
 @
 
@@ -843,7 +845,7 @@ static param_def_t *hget_param_list(uint8_t a)
   return p;
 }
 
-static param_def_t *hget_param_list_node(void)
+param_def_t *hget_param_list_node(void)
 { @+if (KIND(*hpos)!=param_kind) return NULL;
   else 
   { @+param_def_t *p;
@@ -854,7 +856,7 @@ static param_def_t *hget_param_list_node(void)
   }
 }
 
-static param_def_t *hget_param_list_ref(uint8_t n)
+param_def_t *hget_param_list_ref(uint8_t n)
 {@+ REF(param_kind,n);
   return param_def[n];
 }
@@ -977,32 +979,32 @@ static void hget_page_def(uint8_t a, uint8_t n)
 \subsection{References}
 There are only a few functions that still need to be defined.
 @<get functions@>=
-static pointer hget_ligature_ref(uint8_t n)
+pointer hget_ligature_ref(uint8_t n)
 { @+REF(ligature_kind,n);
   return copy_node_list(pointer_def[ligature_kind][n]);
 }
 
-static pointer hget_math_ref(uint8_t n)
+pointer hget_math_ref(uint8_t n)
 { @+REF(math_kind,n);
   return copy_node_list(pointer_def[math_kind][n]);
 }
 
-static pointer hget_rule_ref(uint8_t n)
+pointer hget_rule_ref(uint8_t n)
 { @+REF(rule_kind,n);
   return copy_node_list(pointer_def[rule_kind][n]);
 }
 
-static pointer hget_image_ref(uint16_t n)
+pointer hget_image_ref(uint16_t n)
 { @+REF(image_kind,n);
   return copy_node_list(pointer_def[image_kind][n]);
 }
 
-static pointer hget_hyphen_ref(uint8_t n)
+pointer hget_hyphen_ref(uint8_t n)
 { @+REF(hyphen_kind,n);
   return copy_node_list(pointer_def[hyphen_kind][n]);
 }
 
-static pointer hget_leaders_ref(uint8_t n)
+pointer hget_leaders_ref(uint8_t n)
 { @+REF(leaders_kind,n);
   return copy_node_list(pointer_def[leaders_kind][n]);
 }
@@ -1013,22 +1015,37 @@ static pointer hget_leaders_ref(uint8_t n)
 @
 
 \section{Reading Content Nodes}
+The following section explains how to read the content section and convert the \HINT/
+representation of the content to the \TeX\ representation. While in the future we might have
+a renderer that does not use the \TeX\ representation, which was designed about 50 years ago,
+at present the reuse of \TeX's functions and data structure saves development time.
+
+Because we will need to read the content section in both directions, almost all code
+in this chapter is given in two symetric versions: 
+The forward version will start reading
+a node with |hpos| pointing to the first byte of the data and ends with |hpos| pointing
+past the last byte of the data; these functions or macros have the word |get| or |GET| in their
+name. 
+The backward version will start reading
+a node with |hpos| pointing past the last byte of the data and ends with |hpos| pointing 
+to the first byte of the data; these functions or macros have the word |teg| or |TEG| in their
+name.
 
 \subsection{The Content Section}
+To position the input stream on the content section we use the following function:
 @<get functions@>=
 void hget_content_section()
-{ DBG(dbgbasic,"Get Content\n");
-  hget_section(2);
+{ @+DBG(dbgbasic,"Get Content\n");
+  hget_section(2);@+
 }
 @
+There is no separate ``|teg|'' function in this case. If necessary, one can set |hpos=hend|.
 
 
-The basic data structure of a \HINT/ file is a node. We will distinguish content nodes
-and definition nodes. In both cases, a node consists of a start byte followed by
- some content or a definition and a matching end byte.
+The basic data structure of a \HINT/ file is a node. We distinguish content- and definition-nodes. 
+In both cases, a node consists of a start byte followed by
+the content or the definition and a matching end byte.
  
-We start with reading the start and end byte and the top level functions
-to read a content node.
 
 @<read the start byte |a|@>=
 uint8_t a,z; /* the start and the end byte*/
@@ -1040,15 +1057,14 @@ HGETTAG(z);@+
 if (a!=z) TAGSERR(a,z);@/@t~@>
 @
 
-The |hget_content_nodes| gets the next node from the input based on the tag byte |a|
-and adds it to the current list.
-The |hget_node_def| function expects a single node and returns it.
-The |hget_content| function just adds zero or more nodes to the current list reading and checking the tag bytes.
+The |hget_node| function gets the next node from the input based on the tag byte |a|
+and adds it to the current list. The function is used in |hget_content| to read a content node
+but also in the function |hget_definition| to get the content of a definition. 
 
 @<get functions@>=
 
-static void hget_content_nodes(uint8_t a)
-{ switch (a)@/
+static void hget_node(uint8_t a)
+{ @+switch (a)@/
   {@+ 
     @<cases to get content@>@;@t\1@>@/
     default:
@@ -1056,27 +1072,75 @@ static void hget_content_nodes(uint8_t a)
   }
 }
 
-static pointer hget_node_def(uint8_t a)
+void hget_content(void)
+{ @+@<read the start byte |a|@>@;
+  node_pos=(hpos-hstart)-1;
+  hget_node(a);
+  @<read and check the end byte |z|@>@;
+  if (nest_ptr==0 && tail!=head && (type(tail)==penalty_node || type(tail)==glue_node || type(tail)==kern_node))
+      store_map(tail,node_pos,0,0);
+}
+
+static pointer hget_definition(uint8_t a)
 {@+pointer p;
   if (link(head)!=null) QUIT("Calling get_node with nonempty curent list");
-  hget_content_nodes(a);
+  hget_node(a);
   p=link(head);
   if (p!=null && link(p)!=null) QUIT("get_node returns multiple nodes");
   link(head)=null;
   tail=head;
   return p;
 }
+@
 
-void hget_content(void)
-{ @+@<read the start byte |a|@>@;
-  node_pos2=(hpos-hstart)-1;
-  hget_content_nodes(a);
-  @<read and check the end byte |z|@>@;
-  if (nest_ptr==0 && link(head)!=null)
-  { pointer p=link(head);
-    if (type(p)==penalty_node || type(p)==glue_node || type(p)==kern_node) 
-      store_map(link(head),node_pos2,0,0);
+Now let's turn to the backwards version.
+The primitive reading operations are defined by the following macros:
+@<TEG macros@>=
+#define @[HBACK(X)@] @[((hpos-(X)<hstart)?(QUIT("HTEG underflow\n"),NULL):(hpos-=(X)))@]
+
+#define @[HTEG8@]     (HBACK(1),*(hpos))
+#define @[HTEG16(X)@] (HBACK(2),(X)=(hpos[0]<<8)+hpos[1])
+#define @[HTEG24(X)@] (HBACK(3),(X)=(hpos[0]<<16)+(hpos[1]<<8)+hpos[2])
+#define @[HTEG32(X)@] (HBACK(4),(X)=(hpos[0]<<24)+(hpos[1]<<16)+(hpos[2]<<8)+hpos[3])
+@
+
+The next macros read and check start and end byte.
+
+@<read the end byte |z|@>=
+  uint8_t a,z; /* the start and the end byte*/
+  z=HTEG8,DBGTAG(z,hpos);
+@
+
+@<read and check the start byte |a|@>=
+  a=HTEG8,DBGTAG(a,hpos);
+  if (z!=a) 
+    QUIT(@["Tag mismatch [%s,%d]!=[%s,%d] at " SIZE_F " to 0x%x\n"@],@|
+         NAME(a),INFO(a),NAME(z),INFO(z),hpos-hstart,node_pos);
+
+@
+
+We conclude the section with the equivalents of |hget_node| and |hget_content|.
+ The |node_pos| points to
+the end byte while reading the node and points to the start byte when reading the node is done.
+
+@<teg functions@>=
+static void hteg_node(uint8_t z)
+{ @+switch (z)@/
+  {@+ 
+    @<cases to teg content@>@;@t\1@>@/
+    default:
+      TAGERR(z);@t\2@>@/
   }
+}
+
+void hteg_content(void)
+{ @+@<read the end byte |z|@>@;
+  node_pos=hpos-hstart;
+  hteg_node(z);
+  @<read and check the start byte |a|@>@;
+  node_pos=hpos-hstart;
+  if (nest_ptr==0 && tail!=head && (type(tail)==penalty_node || type(tail)==glue_node || type(tail)==kern_node))
+      store_map(tail,node_pos,0,0);
 }
 @
 
@@ -1094,6 +1158,66 @@ We need the following definitions from \TeX:
 Next we continue with basic data types and then progress from the most simple to 
 the most complex nodes.
 
+\subsection{Testing the Backwards Reading}
+The following code  is similar to the code for the {\tt skip} program described in \cite{MR:format}.
+
+@(hteg.h@>=
+extern void hteg_content(void);
+#if 0
+extern void hteg_content(uint8_t z);
+extern void hteg_xdimen_node(xdimen_t *x);
+extern void hteg_list(list_t *l);
+extern float32_t hteg_float32(void);
+extern void hteg_rule_node(void);
+extern void hteg_hbox_node(void);
+extern void hteg_vbox_node(void);
+extern void hteg_glue_node(void);
+#endif
+@
+
+@(back.c@>=
+#include <stdio.h>
+#include <string.h>
+#include "htex.h"
+#include "hformat.h"
+#include "hget.h"
+#include "hteg.h"
+
+@<command line variables@>@;
+
+@<command line functions@>@;
+
+int main(int argc, char *argv[])
+{ char stem_name[MAX_NAME];
+  int stem_length=0, path_length=0;
+  bool option_log=false;
+
+  @<process the command line@>@;
+  @<open the log file@>@;
+  hmem_init();
+  hlist_init();
+  hopen_file(in_name);
+  hget_banner();
+  hget_directory_section();
+  hget_definition_section();
+  hget_content_section();
+  hpage_init();
+  hpos=hend;
+  while (hpos>hstart)
+  { hteg_content();
+    while (hbuild_page_up())  
+    { hship_out(stream[0].p); stream[0].p=0; hresume_after_output(); hpage_init();}
+  }
+  if (!hits_all_over())
+  { if (hbuild_page_up()) 
+    { hship_out(stream[0].p); stream[0].p=0;}
+  }
+  @<close the log file@>@;
+  return 0;
+}
+
+@
+
 \subsection{Strings}
 \noindent
 @<GET macros@>=
@@ -1101,6 +1225,7 @@ the most complex nodes.
  while(hpos<hend && *hpos!=0) { RNG("String character",*hpos,0x20,0x7E); hpos++;}\
  hpos++;
 @
+Strings occur only in the definition section. Hence, there is no need to parse strings in the backward direction.
 
 \subsection{UTF8 Character Codes}
 @<GET macros@>=
@@ -1130,6 +1255,26 @@ uint32_t hget_utf8(void)
   }
 }
 @
+We will parse UTF-8 codes only in forward direction.
+
+\subsection{Floating Point Numbers}
+We need a way to read binary floating point numbers.
+
+@<get functions@>=
+float32_t hget_float32(void)
+{  @+union {@+float32_t d; @+ uint32_t bits; @+} u;
+   HGET32(u.bits);
+   return u.d;
+}
+@
+
+@<teg auxiliar functions@>=
+float32_t hteg_float32(void)
+{  @+union {@+float32_t d; @+ uint32_t bits; @+} u;
+   HTEG32(u.bits);
+   return u.d;
+}
+@
 
 \subsection{Extended dimensions}
 The viewer can convert extended dimensions immediately to regular dimensions
@@ -1141,6 +1286,13 @@ because |hsize| and |vsize| are known.
   if((I)&b010) (X).h=hget_float32(); @+ else (X).h=0.0;\
   if((I)&b001) (X).v=hget_float32(); @+else (X).v=0.0;\
 }
+@
+
+@<TEG macros@>=
+#define @[HTEG_XDIMEN(I,X)@] \
+  if((I)&b001) (X).v=hteg_float32(); @+else (X).v=0.0;\
+  if((I)&b010) (X).h=hteg_float32(); @+ else (X).h=0.0;\
+  if((I)&b100) HTEG32((X).w);@+ else (X).w=0;\
 @
 
 @<get functions@>=
@@ -1169,23 +1321,53 @@ scaled hget_xdimen_node(void)
   if (KIND(a)==xdimen_kind)
     x=hget_xdimen(a);
   else
-     QUIT("Extent expected at 0x%x got %s",node_pos2,NAME(a));
+     QUIT("Extent expected at 0x%x got %s",node_pos,NAME(a));
   @<read and check the end byte |z|@>@;
   return x;
 }
 @
 
+@<teg auxiliar  functions@>=
+scaled hteg_xdimen(uint8_t a)
+{ @+xdimen_t x;
+  switch(a)
+  { 
+    case TAG(xdimen_kind,b000): return hget_xdimen_ref(HTEG8);
+    case TAG(xdimen_kind,b001): HTEG_XDIMEN(b001,x);@+break;
+    case TAG(xdimen_kind,b010): HTEG_XDIMEN(b010,x);@+break;
+    case TAG(xdimen_kind,b011): HTEG_XDIMEN(b011,x);@+break;
+    case TAG(xdimen_kind,b100): HTEG_XDIMEN(b100,x);@+break;
+    case TAG(xdimen_kind,b101): HTEG_XDIMEN(b101,x);@+break;
+    case TAG(xdimen_kind,b110): HTEG_XDIMEN(b110,x);@+break;
+    case TAG(xdimen_kind,b111): HTEG_XDIMEN(b111,x);@+break;
+    default:
+     x.w=0;x.h=x.v=0.0;
+     QUIT("Extent expected got [%s,%d]",NAME(a),INFO(a));
+  }
+  return  x.w+x.h*hhsize+x.v*hvsize;  
+ }
 
-\subsection{Floating Point Numbers}
-We need a way to read binary floating point numbers.
-
-@<get functions@>=
-float32_t hget_float32(void)
-{  @+union {@+float32_t d; @+ uint32_t bits; @+} u;
-   HGET32(u.bits);
-   return u.d;
+scaled hteg_xdimen_node(void)
+{ @+scaled x=0;
+  @<read the end byte |z|@>@;
+  if (KIND(z)==xdimen_kind)
+    x=hteg_xdimen(z);
+  else
+     QUIT("Extent expected at 0x%x got %s",node_pos,NAME(z));
+  @<read and check the start byte |a|@>@;
+  return x;
 }
 @
+
+@<get declarations@>=
+static scaled hget_xdimen_node(void);
+@
+
+@<teg declarations@>=
+static scaled hteg_xdimen_node(void);
+@
+
+
 
 \subsection{Stretch and Shrink}
 @<hint types@>=
@@ -1194,6 +1376,9 @@ typedef union {@+float32_t f; @+ uint32_t u; @+} stch_t;
 
 @<GET macros@>=
 #define @[HGET_STRETCH(F,O)@] @+{@+ stch_t _st; @+ HGET32(_st.u);@/ (O)=_st.u&3;  _st.u&=~3; (F)=(scaled)(_st.f*ONE); @+}
+@
+@<TEG macros@>=
+#define @[HTEG_STRETCH(F,O)@] @+{@+ stch_t _st; @+ HTEG32(_st.u);@/ (O)=_st.u&3;  _st.u&=~3; (F)=(scaled)(_st.f*ONE); @+}
 @
 
 
@@ -1212,11 +1397,29 @@ typedef union {@+float32_t f; @+ uint32_t u; @+} stch_t;
 }
 @
 
+@<TEG macros@>=
+#define @[HTEG_GLYPH(I)@] \
+{@+uint8_t f; @+uint32_t c;\
+  f=HTEG8; @+REF(font_kind,f);@/\
+  if (I==1) c=HTEG8;\
+  else if (I==2) HTEG16(c);\
+  else if (I==3) HTEG24(c);\
+  else if (I==4) HTEG32(c);\
+  tail_append(new_character(f,c));\
+}
+@
+
 @<cases to get content@>=
 case TAG(glyph_kind,1): @+HGET_GLYPH(1);@+break;
 case TAG(glyph_kind,2): @+HGET_GLYPH(2);@+break;
 case TAG(glyph_kind,3): @+HGET_GLYPH(3);@+break;
 case TAG(glyph_kind,4): @+HGET_GLYPH(4);@+break;
+@
+@<cases to teg content@>=
+case TAG(glyph_kind,1): @+HTEG_GLYPH(1);@+break;
+case TAG(glyph_kind,2): @+HTEG_GLYPH(2);@+break;
+case TAG(glyph_kind,3): @+HTEG_GLYPH(3);@+break;
+case TAG(glyph_kind,4): @+HTEG_GLYPH(4);@+break;
 @
 
 @<\TeX\ declarations@>=
@@ -1225,17 +1428,35 @@ extern pointer new_character(uint8_t f, uint8_t c);
 
 
 \subsection{Penalties}
-
+\noindent
 @<cases to get content@>=
 case TAG(penalty_kind,0): @+ tail_append(new_penalty(hget_integer_ref(HGET8))); @+break;
 case TAG(penalty_kind,1): @+ {@+tail_append(new_penalty(HGET8));@+} @+break;
 case TAG(penalty_kind,2): @+ {@+int16_t n;@+ HGET16(n);@+RNG("Penalty",n,-20000,+20000); @+tail_append(new_penalty(n)); @+} @+break;
 @
+
+@<cases to teg content@>=
+case TAG(penalty_kind,0):  @+ tail_append(new_penalty(hget_integer_ref(HTEG8))); @+break;
+case TAG(penalty_kind,1):  @+ {@+tail_append(new_penalty(HTEG8));@+} @+break;
+case TAG(penalty_kind,2):  @+{@+int16_t n;@+ HTEG16(n);@+RNG("Penalty",n,-20000,+20000); @+tail_append(new_penalty(n)); @+} @+break;
+@
+
 @<\TeX\ declarations@>=
 extern pointer new_penalty(int m);
 @
+
+
+
 \subsection{Mathematics}
-The second parameter of |new_math| is 0 for before and 1 for after the formula.
+I recently was pointed to the problem of accessibility. While the \HINT/ format makes a big contribution
+for the visual impaired because font sizes can scale without degrading the layout, it does not support
+text to speech conversion in multiple languages. Hence, \HINT/ should be extended to contain language 
+information which is present in \TeX\ sources. The math node can be easily modified to provide not only
+the switch between text and math, it can also provide language information.  The IETF has specified in BCP 47\cite{rfc5646} a set of language tags. Language tags can be stored in the
+definition section and referenced from the content section using a single byte value.
+
+
+
 @<GET macros@>=
 #define @[HGET_MATH(I,M)@]  \
 { @+scaled w;\
@@ -1244,6 +1465,13 @@ if ((I)&b100)  tail_append(new_math(w,before)); \
 if ((I)&b010)  tail_append(new_math(w,after)); }
 @
 
+@<TEG macros@>=
+#define @[HTEG_MATH(I,M)@]  \
+{ @+scaled w;\
+if ((I)&b001) HTEG32(w); @+else w=0; \
+if ((I)&b100)  tail_append(new_math(w,before)); \
+if ((I)&b010)  tail_append(new_math(w,after)); }
+@
 
 @<cases to get content@>=
 case TAG(math_kind,b000):  @+tail_append(hget_math_ref(HGET8));@+break;
@@ -1252,7 +1480,15 @@ case TAG(math_kind,b010):  @+HGET_MATH(b010,m);@+break;
 case TAG(math_kind,b101):  @+HGET_MATH(b101,m);@+break;
 case TAG(math_kind,b011):  @+HGET_MATH(b011,m);@+break;
 @
+@<cases to teg content@>=
+case TAG(math_kind,b000):  @+tail_append(hget_math_ref(HTEG8));@+break;
+case TAG(math_kind,b100):  @+HTEG_MATH(b100,m);@+break;
+case TAG(math_kind,b010):  @+HTEG_MATH(b010,m);@+break;
+case TAG(math_kind,b101):  @+HTEG_MATH(b101,m);@+break;
+case TAG(math_kind,b011):  @+HTEG_MATH(b011,m);@+break;
+@
 
+The second parameter of |new_math| is 0 for before and 1 for after the formula.
 @<\TeX\ macros@>=
 #define before 0
 #define after 1
@@ -1266,7 +1502,7 @@ typedef uint8_t small_number; /*this type is self-explanatory*/
 extern pointer new_math(scaled w, small_number s);
 @
 \subsection{Rules}
-
+\noindent
 
 
 @<GET macros@>=
@@ -1275,6 +1511,16 @@ extern pointer new_math(scaled w, small_number s);
 if ((I)&b100) HGET32(height(p)); @+else height(p)=null_flag;\
 if ((I)&b010) HGET32(depth(p)); @+else depth(p)=null_flag;\
 if ((I)&b001) HGET32(width(p)); @+else width(p)=null_flag;\
+tail_append(p);}
+@
+
+
+@<TEG macros@>=
+#define @[HTEG_RULE(I)@]@/\
+{ pointer p=new_rule();\
+if ((I)&b001) HTEG32(width(p)); @+else width(p)=null_flag;\
+if ((I)&b010) HTEG32(depth(p)); @+else depth(p)=null_flag;\
+if ((I)&b100) HTEG32(height(p)); @+else height(p)=null_flag;\
 tail_append(p);}
 @
 
@@ -1287,14 +1533,34 @@ case TAG(rule_kind,b110): @+ HGET_RULE(b110);	prev_depth=ignore_depth; break;
 case TAG(rule_kind,b111): @+ HGET_RULE(b111);	prev_depth=ignore_depth; break;
 @
 
+@<cases to teg content@>=
+case TAG(rule_kind,b000): @+ tail_append(hget_rule_ref(HTEG8));	prev_depth=ignore_depth; @+break;
+case TAG(rule_kind,b011): @+ HTEG_RULE(b011); 	prev_depth=ignore_depth; break;
+case TAG(rule_kind,b101): @+ HTEG_RULE(b101);	prev_depth=ignore_depth; break;
+case TAG(rule_kind,b001): @+ HTEG_RULE(b001);	prev_depth=ignore_depth; break;
+case TAG(rule_kind,b110): @+ HTEG_RULE(b110);	prev_depth=ignore_depth; break;
+case TAG(rule_kind,b111): @+ HTEG_RULE(b111);	prev_depth=ignore_depth; break;
+@
+
 
 @<get functions@>=
 pointer hget_rule_node(void)
 { @+ pointer p=null;
   @<read the start byte |a|@>@;
   if (KIND(a)==rule_kind) { HGET_RULE(INFO(a));}
-  else  QUIT("Rule expected at 0x%x got %s",node_pos2,NAME(a));
+  else  QUIT("Rule expected at 0x%x got %s",node_pos,NAME(a));
   @<read and check the end byte |z|@>@;
+  return p;
+}
+@
+
+@<teg auxiliar functions@>=
+pointer hteg_rule_node(void)
+{ @+ pointer p=null;
+  @<read the end byte |z|@>@;
+  if (KIND(z)==rule_kind) { HTEG_RULE(INFO(z));}
+  else  QUIT("Rule expected at 0x%x got %s",node_pos,NAME(z));
+  @<read and check the start byte |a|@>@;
   return p;
 }
 @
@@ -1327,15 +1593,50 @@ pointer hget_rule_node(void)
 @
 
 \subsection{Glue}
+\noindent
 
 @<GET macros@>=
 #define @[HGET_GLUE(I)@] @/\
   p= get_node(glue_spec_size); \
   if(I==b111) width(p)=hget_xdimen_node(); \
-  else { width(p)=0; @+if((I)&b100) HGET32(width(p));} \
+  else {@+ width(p)=0; @+if((I)&b100) HGET32(width(p));@+} \
   if((I)&b010) HGET_STRETCH(stretch(p),stretch_order(p))@; else stretch(p)=0, stretch_order(p)=normal;\
   if((I)&b001) HGET_STRETCH(shrink(p),shrink_order(p))@; else shrink(p)=0, shrink_order(p)=normal;
 @
+
+@<TEG macros@>=
+#define @[HTEG_GLUE(I)@] @/\
+  p= get_node(glue_spec_size); \
+  if((I)&b001) HTEG_STRETCH(shrink(p),shrink_order(p))@; else shrink(p)=0, shrink_order(p)=normal;\
+  if((I)&b010) HTEG_STRETCH(stretch(p),stretch_order(p))@; else stretch(p)=0, stretch_order(p)=normal;\
+  if(I==b111) width(p)=hteg_xdimen_node(); \
+  else {@+ width(p)=0; @+if((I)&b100) HTEG32(width(p));@+} 
+@
+
+
+@<cases to get content@>=
+case TAG(glue_kind,b000): @+tail_append(new_glue(hget_glue_ref(HGET8)));@+  break;
+case TAG(glue_kind,b001): {@+pointer p;@+HGET_GLUE(b001);@+  tail_append(new_glue(p));@+}@+break;
+case TAG(glue_kind,b010): {@+pointer p;@+HGET_GLUE(b010);@+  tail_append(new_glue(p));@+}@+break;
+case TAG(glue_kind,b011): {@+pointer p;@+HGET_GLUE(b011);@+  tail_append(new_glue(p));@+}@+break;
+case TAG(glue_kind,b100): {@+pointer p;@+HGET_GLUE(b100);@+  tail_append(new_glue(p));@+}@+break;
+case TAG(glue_kind,b101): {@+pointer p;@+HGET_GLUE(b101);@+  tail_append(new_glue(p));@+}@+break;
+case TAG(glue_kind,b110): {@+pointer p;@+HGET_GLUE(b110);@+  tail_append(new_glue(p));@+}@+break;
+case TAG(glue_kind,b111): {@+pointer p;@+HGET_GLUE(b111);@+  tail_append(new_glue(p));@+}@+break;
+@
+
+
+@<cases to teg content@>=
+case TAG(glue_kind,b000): @+tail_append(new_glue(hget_glue_ref(HTEG8)));@+  break;
+case TAG(glue_kind,b001): {@+pointer p;@+HTEG_GLUE(b001);@+  tail_append(new_glue(p));@+}@+break;
+case TAG(glue_kind,b010): {@+pointer p;@+HTEG_GLUE(b010);@+  tail_append(new_glue(p));@+}@+break;
+case TAG(glue_kind,b011): {@+pointer p;@+HTEG_GLUE(b011);@+  tail_append(new_glue(p));@+}@+break;
+case TAG(glue_kind,b100): {@+pointer p;@+HTEG_GLUE(b100);@+  tail_append(new_glue(p));@+}@+break;
+case TAG(glue_kind,b101): {@+pointer p;@+HTEG_GLUE(b101);@+  tail_append(new_glue(p));@+}@+break;
+case TAG(glue_kind,b110): {@+pointer p;@+HTEG_GLUE(b110);@+  tail_append(new_glue(p));@+}@+break;
+case TAG(glue_kind,b111): {@+pointer p;@+HTEG_GLUE(b111);@+  tail_append(new_glue(p));@+}@+break;
+@
+
 
 We used the following definitions:
 @<\TeX\ macros@>=
@@ -1347,20 +1648,7 @@ We used the following definitions:
 #define shrinking	2 /*glue setting applies to the shrink components*/ 
 @
 
-@<cases to get content@>=
-case TAG(glue_kind,b000): @+tail_append(new_glue(hget_glue_ref(HGET8)));@+  break;
-case TAG(glue_kind,b001): {pointer p;@+HGET_GLUE(b001);@+  tail_append(new_glue(p));}@+break;
-case TAG(glue_kind,b010): {pointer p;@+HGET_GLUE(b010);@+  tail_append(new_glue(p));}@+break;
-case TAG(glue_kind,b011): {pointer p;@+HGET_GLUE(b011);@+  tail_append(new_glue(p));}@+break;
-case TAG(glue_kind,b100): {pointer p;@+HGET_GLUE(b100);@+  tail_append(new_glue(p));}@+break;
-case TAG(glue_kind,b101): {pointer p;@+HGET_GLUE(b101);@+  tail_append(new_glue(p));}@+break;
-case TAG(glue_kind,b110): {pointer p;@+HGET_GLUE(b110);@+  tail_append(new_glue(p));}@+break;
-case TAG(glue_kind,b111): {pointer p;@+HGET_GLUE(b111);@+  tail_append(new_glue(p));}@+break;
-@
 
-@<get declarations@>=
-static scaled hget_xdimen_node(void);
-@
 @<\TeX\ types@>=
 typedef uint8_t glue_ord; /*infinity to the 0, 1, 2, or 3 power*/ 
 typedef float32_t @!glue_ratio; /*one-word representation of a glue expansion factor*/ 
@@ -1372,7 +1660,7 @@ pointer hget_glue_spec(void)
   uint8_t a,z; /* the start and the end byte*/
   if (hpos>=hend) return null;
   if (KIND(*hpos)!=glue_kind) return null;
-  node_pos2=hpos-hstart;
+  node_pos=hpos-hstart;
   HGETTAG(a);
   if (INFO(a)==b000) p=hget_glue_ref(HGET8);
   else
@@ -1388,6 +1676,32 @@ pointer hget_glue_node(void)
   return p;
 }
 @
+
+@<teg auxiliar functions@>=
+pointer hteg_glue_spec(void)
+{ @+pointer p=null;
+  uint8_t a,z; /* the start and the end byte*/
+  if (hpos<=hstart) return null;
+  if (KIND(*(hpos-1))!=glue_kind) return null;
+  z=HTEG8,DBGTAG(z,hpos);
+  if (INFO(z)==b000) p=hget_glue_ref(HTEG8);
+  else
+  { @+HTEG_GLUE(INFO(z));@+}
+  @<read and check the start byte |a|@>@;
+  return p;
+}
+
+
+pointer hteg_glue_node(void)
+{ @+pointer p=hteg_glue_spec();
+  if (p!=null) p=new_glue(p);
+  return p;
+}
+@
+
+
+
+
 
 @<\TeX\ macros@>=
 #define glue_spec_size 4
@@ -1423,15 +1737,17 @@ For now, we use \TeX's features:
 
 
 @<GET macros@>=
-#define IS_LIST  (KIND(*hpos)==list_kind || KIND(*hpos)==adjust_kind || @/\
-        KIND(*hpos)==text_kind  ||@| KIND(*hpos)==param_kind)
-
-
+#define @[IS_LIST(X)@]  (KIND(X)==list_kind || KIND(X)==adjust_kind || @/\
+        KIND(X)==text_kind  ||@| KIND(X)==param_kind)
+@
+@<TEG macros@>=
+#define @[IS_LIST(X)@]  (KIND(X)==list_kind || KIND(X)==adjust_kind || @/\
+        KIND(X)==text_kind  ||@| KIND(X)==param_kind)
 @
 
 @<get functions@>=
 void hget_size_boundary(info_t info)
-{ uint32_t n;
+{ @+uint32_t n;
   if (info<2) return;
   n=HGET8;
   if (n-1!=0x100-info) QUIT(@["Size boundary byte 0x%x with info value %d at " SIZE_F@],
@@ -1439,7 +1755,7 @@ void hget_size_boundary(info_t info)
 }
 
 uint32_t hget_list_size(info_t info)
-{ uint32_t n;  
+{ @+uint32_t n;  
   if (info==1) return 0;
   else if (info==2) n=HGET8;
   else if (info==3) HGET16(n);
@@ -1469,7 +1785,7 @@ pointer hget_text_list(uint32_t s)
 }
 
 pointer hget_list(void)
-{ @+if (!IS_LIST) return null;
+{ @+if (!IS_LIST(*hpos)) return null;
   else
   {@+pointer p;
     uint32_t s, t;
@@ -1483,20 +1799,146 @@ pointer hget_list(void)
     hget_size_boundary(INFO(a));
     t=hget_list_size(INFO(a)); 
     if (t!=s) 
-     QUIT("List sizes at 0x%x and " SIZE_F " do not match 0x%x != 0x%x",node_pos2+1,hpos-hstart-s-1,s,t);
+     QUIT("List sizes at 0x%x and " SIZE_F " do not match 0x%x != 0x%x",node_pos+1,hpos-hstart-s-1,s,t);
     @<read and check the end byte |z|@>@;
    return p;
   }
 }
 @
 
+When we need to parse a list backwards that is part of a node. We still want the resulting list
+in forward order. The simplest way to do this, is moving to the beginning of the list and then
+parsing it in forward order.
+
+@<teg auxiliar functions@>=
+#if 0
+void hteg_size_boundary(info_t info)
+{ @+uint32_t n;
+  if (info<2) return;
+  n=HTEG8;
+  if (n-1!=0x100-info) QUIT(@["Size boundary byte 0x%x with info value %d at " SIZE_F@],
+                            n, info,hpos-hstart);
+}
+#endif
+
+uint32_t hteg_list_size(info_t info)
+{ @+uint32_t n;  
+  if (info==1) return 0;
+  else if (info==2) n=HTEG8;
+  else if (info==3) HTEG16(n);
+  else if (info==4) HTEG24(n);
+  else if (info==5) HTEG32(n);
+  else QUIT("List info %d must be 1, 2, 3, 4, or 5",info);
+  return n;
+} 
+
+#if 0
+pointer hteg_node_list(uint32_t s)
+{ @+ uint8_t *list_start=hpos-s;
+  pointer p;
+  push_nest();
+  needs_bs=false;
+  while (hpos>list_start)
+    hteg_content();
+  if (needs_bs) 
+    QUIT("Unexpected trailing baseline node");
+  p=link(head);
+  pop_nest();
+  return p;  
+}
+#endif
+
+void hskip_list()
+{ uint8_t z; 
+  uint32_t s;
+  if (!IS_LIST(*(hpos-1))) return;
+  z=HTEG8;
+  s=hteg_list_size(INFO(z)); 
+  hpos = hpos - (1+ s + 1+ (INFO(z)-1) +1); /*boundary tag+s+boundary tag+size+tag*/
+}
+
+pointer hteg_list(void)
+{ uint8_t *list_start;
+  pointer p;
+  hskip_list();
+  list_start=hpos;
+  p=hget_list();
+  hpos=list_start;
+  return p;
+}
+@
+
+\subsection{Parameter Lists}
+
+We have defined a function to read parameter lists in section~\secref{getparamlist}.
+Here we define the function that reads parameter lists backwards. Having seen how to read regular lists backwards,
+the function should contain no surprises. We start with a simple functions to read an integer definition.
+
+
+@<teg auxiliar functions@>=
+#if 0
+static int32_t hteg_integer_def(uint8_t z)
+{ if (INFO(z)==1) { int8_t n=HTEG8; return n;}
+  else  if (INFO(z)==2) { int16_t n; HTEG16(n); return n;}
+  else if (INFO(z)==4) {int32_t n; HTEG32(n); return n;}
+  else TAGERR(z);
+  return 0;
+}
+
+static param_def_t *hteg_param_list(uint8_t z)
+{ uint32_t s,t;
+  param_def_t *p=NULL;
+  uint8_t *list_start,*list_end;
+  list_end=hpos;
+  s=hteg_list_size(INFO(z)); 
+  hteg_size_boundary(INFO(z));
+  list_start=hpos-s;
+  if (list_start<=hstart) 
+    QUIT("list start before stream start\n"); 
+  while (list_start < hpos)
+  { @+param_def_t *r; param_t *q;
+    @<read the end byte |z|@>@;
+    ALLOCATE(r,1,param_def_t);
+    q=&(r->p);
+    q->k=KIND(z);
+    if (KIND(z)==int_kind) q->i=hteg_integer_def(a);
+    else if (KIND(a)==dimen_kind) HTEG32(q->d);
+    else if (KIND(a)==glue_kind) { pointer p;  HTEG_GLUE(INFO(z)); q->g=p;}
+    else TAGERR(a);
+    q->n=HTEG8;
+    DBG(dbgtags,"Defining %s %d\n", definition_name[KIND(z)],q->n);
+    @<read and check the start byte |a|@>@;
+    r->next=p;
+    p=r;
+  }
+  hteg_size_boundary(INFO(z));
+  t=hteg_list_size(INFO(z)); 
+  if (t!=s) 
+    QUIT("List sizes at " SIZE_F " and " SIZE_F " do not match 0x%x != 0x%x",list_start-hstart,list_end-hstart,s,t);
+  return p;
+}
+#endif
+
+static param_def_t *hteg_param_list_node(void)
+{ param_def_t *p;
+  uint8_t *list_start;
+  hskip_list();
+  list_start=hpos;
+  p=hget_param_list_node();
+  hpos=list_start;
+  return p;
+}
+@
+
+
 \subsection{Texts}
 not yet implemented.
 
 \subsection{Boxes}
+\noindent
 @<GET macros@>=
 #define @[HGET_BOX(I)@] \
-p=new_null_box();\
+pointer p=new_null_box();\
 HGET32(height(p));\
 if ((I)&b001) HGET32(depth(p));\ 
 HGET32(width(p));\
@@ -1506,51 +1948,108 @@ if ((I)&b100) @/{@+uint8_t x; glue_set(p)=hget_float32();@/\
 list_ptr(p)=hget_list();
 @
 
+@<TEG macros@>=
+#define @[HTEG_BOX(I)@] \
+pointer p=new_null_box();\
+list_ptr(p)=hteg_list();\
+if ((I)&b100) @/{@+uint8_t x=HTEG8;@+ glue_order(p)=x&0xF; @+glue_sign(p)=x>>4; glue_set(p)=hteg_float32(); }\
+if ((I)&b010) HTEG32(shift_amount(p));\ 
+HTEG32(width(p));\
+if ((I)&b001) HTEG32(depth(p));\ 
+HTEG32(height(p));
+@
+
+
+
 @<get declarations@>=
 static float32_t hget_float32(void);
 @
 
 
 @<cases to get content@>=
-case TAG(hbox_kind,b000): @+{pointer p;@+HGET_BOX(b000);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hbox_kind,b001): @+{pointer p;@+HGET_BOX(b001);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hbox_kind,b010): @+{pointer p;@+HGET_BOX(b010);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hbox_kind,b011): @+{pointer p;@+HGET_BOX(b011);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hbox_kind,b100): @+{pointer p;@+HGET_BOX(b100);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hbox_kind,b101): @+{pointer p;@+HGET_BOX(b101);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hbox_kind,b110): @+{pointer p;@+HGET_BOX(b110);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hbox_kind,b111): @+{pointer p;@+HGET_BOX(b111);@+happend_to_vlist(p);@+}@+ break;
-case TAG(vbox_kind,b000): @+{pointer p;@+HGET_BOX(b000);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
-case TAG(vbox_kind,b001): @+{pointer p;@+HGET_BOX(b001);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
-case TAG(vbox_kind,b010): @+{pointer p;@+HGET_BOX(b010);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
-case TAG(vbox_kind,b011): @+{pointer p;@+HGET_BOX(b011);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
-case TAG(vbox_kind,b100): @+{pointer p;@+HGET_BOX(b100);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
-case TAG(vbox_kind,b101): @+{pointer p;@+HGET_BOX(b101);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
-case TAG(vbox_kind,b110): @+{pointer p;@+HGET_BOX(b110);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
-case TAG(vbox_kind,b111): @+{pointer p;@+HGET_BOX(b111);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
+case TAG(hbox_kind,b000): @+{@+HGET_BOX(b000);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hbox_kind,b001): @+{@+HGET_BOX(b001);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hbox_kind,b010): @+{@+HGET_BOX(b010);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hbox_kind,b011): @+{@+HGET_BOX(b011);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hbox_kind,b100): @+{@+HGET_BOX(b100);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hbox_kind,b101): @+{@+HGET_BOX(b101);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hbox_kind,b110): @+{@+HGET_BOX(b110);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hbox_kind,b111): @+{@+HGET_BOX(b111);@+happend_to_vlist(p);@+}@+ break;
+case TAG(vbox_kind,b000): @+{HGET_BOX(b000);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
+case TAG(vbox_kind,b001): @+{HGET_BOX(b001);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
+case TAG(vbox_kind,b010): @+{HGET_BOX(b010);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
+case TAG(vbox_kind,b011): @+{HGET_BOX(b011);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
+case TAG(vbox_kind,b100): @+{HGET_BOX(b100);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
+case TAG(vbox_kind,b101): @+{HGET_BOX(b101);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
+case TAG(vbox_kind,b110): @+{HGET_BOX(b110);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
+case TAG(vbox_kind,b111): @+{HGET_BOX(b111);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
 @
 
+@<cases to teg content@>=
+case TAG(hbox_kind,b000): @+{@+HTEG_BOX(b000);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hbox_kind,b001): @+{@+HTEG_BOX(b001);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hbox_kind,b010): @+{@+HTEG_BOX(b010);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hbox_kind,b011): @+{@+HTEG_BOX(b011);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hbox_kind,b100): @+{@+HTEG_BOX(b100);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hbox_kind,b101): @+{@+HTEG_BOX(b101);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hbox_kind,b110): @+{@+HTEG_BOX(b110);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hbox_kind,b111): @+{@+HTEG_BOX(b111);@+happend_to_vlist(p);@+}@+ break;
+case TAG(vbox_kind,b000): @+{HTEG_BOX(b000);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
+case TAG(vbox_kind,b001): @+{HTEG_BOX(b001);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
+case TAG(vbox_kind,b010): @+{HTEG_BOX(b010);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
+case TAG(vbox_kind,b011): @+{HTEG_BOX(b011);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
+case TAG(vbox_kind,b100): @+{HTEG_BOX(b100);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
+case TAG(vbox_kind,b101): @+{HTEG_BOX(b101);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
+case TAG(vbox_kind,b110): @+{HTEG_BOX(b110);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
+case TAG(vbox_kind,b111): @+{HTEG_BOX(b111);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
+@
 
 @<get functions@>=
 pointer hget_hbox_node(void)
-{ @+pointer p;
-  @<read the start byte |a|@>@;
-   if (KIND(a)!=hbox_kind) QUIT("Hbox expected at 0x%x got %s",node_pos2,NAME(a));
-   HGET_BOX(INFO(a));@/
-   @<read and check the end byte |z|@>@;
-  return p;
+{ @+  @<read the start byte |a|@>@;
+   if (KIND(a)!=hbox_kind) QUIT("Hbox expected at 0x%x got %s",node_pos,NAME(a));
+   { @+  
+    HGET_BOX(INFO(a));@/
+    @<read and check the end byte |z|@>@;
+    return p;
+   }
 }
 
 
 pointer hget_vbox_node(void)
-{@+ pointer p;
+{@+
   @<read the start byte |a|@>@;
-  if (KIND(a)!=vbox_kind) QUIT("Vbox expected at 0x%x got %s",node_pos2,NAME(a));
+  if (KIND(a)!=vbox_kind) QUIT("Vbox expected at 0x%x got %s",node_pos,NAME(a));
+  {@+
   HGET_BOX(INFO(a));@/
   @<read and check the end byte |z|@>@;
   type(p)=vlist_node; 
   return p;
 }
+}
+@
+
+@<teg auxiliar functions@>=
+pointer hteg_hbox_node(void)
+{ @+  @<read the end byte |z|@>@;
+   if (KIND(z)!=hbox_kind) QUIT("Hbox expected at 0x%x got %s",node_pos,NAME(z));
+   { @+  
+    HTEG_BOX(INFO(z));@/
+    @<read and check the start byte |a|@>@;
+    return p;
+   }
+}
+pointer hteg_vbox_node(void)
+{ @+  @<read the end byte |z|@>@;
+   if (KIND(z)!=vbox_kind) QUIT("Vbox expected at 0x%x got %s",node_pos,NAME(z));
+   { @+  
+    HTEG_BOX(INFO(z));@/
+    @<read and check the start byte |a|@>@;
+   type(p)=vlist_node; 
+   return p;
+   }
+}
+
 @
 
 @<\TeX\ macros@>=
@@ -1575,7 +2074,7 @@ extern pointer new_null_box(void);
 We start with boxes that just need their glue to be set.
 
 @<GET macros@>=
-#define @[HGET_UNSET(I)@] @/\
+#define @[HGET_SET(I)@] @/\
  scaled x, st, sh; @+uint8_t sto, sho; \
  p=new_null_box();\
  if ((I)&b100) x= hget_xdimen_node();  else x=hget_xdimen_ref(HGET8);\
@@ -1585,51 +2084,81 @@ We start with boxes that just need their glue to be set.
  list_ptr(p)=hget_list();
 @
 
+@<TEG macros@>=
+#define @[HTEG_SET(I)@] @/\
+  scaled x, st, sh; @+uint8_t sto, sho; \
+  p=new_null_box();\
+  list_ptr(p)=hteg_list();\
+  HTEG_STRETCH(sh,sho);@+HTEG_STRETCH(st,sto);\
+  if ((I)&b010) HTEG32(shift_amount(p)); \
+  HTEG32(width(p));@+if ((I)&b001) HTEG32(depth(p));@+HTEG32(height(p)); \
+  if ((I)&b100) x=hteg_xdimen_node(); else x=hget_xdimen_ref(HTEG8);
+@
 
 
 @<cases to get content@>=
-case TAG(hset_kind,b000): {@+pointer p;@+HGET_UNSET(b000); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+break;
-case TAG(hset_kind,b001): {@+pointer p;@+HGET_UNSET(b001); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hset_kind,b010): {@+pointer p;@+HGET_UNSET(b010); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hset_kind,b011): {@+pointer p;@+HGET_UNSET(b011); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hset_kind,b100): {@+pointer p;@+HGET_UNSET(b100); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hset_kind,b101): {@+pointer p;@+HGET_UNSET(b101); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hset_kind,b110): {@+pointer p;@+HGET_UNSET(b110); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hset_kind,b111): {@+pointer p;@+HGET_UNSET(b111); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;@#
+case TAG(hset_kind,b000): @+{@+pointer p;HGET_SET(b000); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+break;
+case TAG(hset_kind,b001): @+{@+pointer p;HGET_SET(b001); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hset_kind,b010): @+{@+pointer p;HGET_SET(b010); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hset_kind,b011): @+{@+pointer p;HGET_SET(b011); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hset_kind,b100): @+{@+pointer p;HGET_SET(b100); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hset_kind,b101): @+{@+pointer p;HGET_SET(b101); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hset_kind,b110): @+{@+pointer p;HGET_SET(b110); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hset_kind,b111): @+{@+pointer p;HGET_SET(b111); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;@#
 
-case TAG(vset_kind,b000): {@+pointer p;@+HGET_UNSET(b000); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(vset_kind,b001): {@+pointer p;@+HGET_UNSET(b001); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(vset_kind,b010): {@+pointer p;@+HGET_UNSET(b010); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(vset_kind,b011): {@+pointer p;@+HGET_UNSET(b011); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(vset_kind,b100): {@+pointer p;@+HGET_UNSET(b100); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(vset_kind,b101): {@+pointer p;@+HGET_UNSET(b101); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(vset_kind,b110): {@+pointer p;@+HGET_UNSET(b110); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(vset_kind,b111): {@+pointer p;@+HGET_UNSET(b111); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(vset_kind,b000): @+{@+pointer p;HGET_SET(b000); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(vset_kind,b001): @+{@+pointer p;HGET_SET(b001); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(vset_kind,b010): @+{@+pointer p;HGET_SET(b010); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(vset_kind,b011): @+{@+pointer p;HGET_SET(b011); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(vset_kind,b100): @+{@+pointer p;HGET_SET(b100); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(vset_kind,b101): @+{@+pointer p;HGET_SET(b101); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(vset_kind,b110): @+{@+pointer p;HGET_SET(b110); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(vset_kind,b111): @+{@+pointer p;HGET_SET(b111); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+@
+
+
+@<cases to teg content@>=
+case TAG(hset_kind,b000): @+{@+pointer p;HTEG_SET(b000); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+break;
+case TAG(hset_kind,b001): @+{@+pointer p;HTEG_SET(b001); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hset_kind,b010): @+{@+pointer p;HTEG_SET(b010); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hset_kind,b011): @+{@+pointer p;HTEG_SET(b011); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hset_kind,b100): @+{@+pointer p;HTEG_SET(b100); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hset_kind,b101): @+{@+pointer p;HTEG_SET(b101); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hset_kind,b110): @+{@+pointer p;HTEG_SET(b110); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(hset_kind,b111): @+{@+pointer p;HTEG_SET(b111); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;@#
+
+case TAG(vset_kind,b000): @+{@+pointer p;HTEG_SET(b000); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(vset_kind,b001): @+{@+pointer p;HTEG_SET(b001); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(vset_kind,b010): @+{@+pointer p;HTEG_SET(b010); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(vset_kind,b011): @+{@+pointer p;HTEG_SET(b011); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(vset_kind,b100): @+{@+pointer p;HTEG_SET(b100); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(vset_kind,b101): @+{@+pointer p;HTEG_SET(b101); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(vset_kind,b110): @+{@+pointer p;HTEG_SET(b110); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(vset_kind,b111): @+{@+pointer p;HTEG_SET(b111); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
 @
 
 The function |hset| computes |glue_set(p)| of a hlist node
 depending on the available stretch, shrink, and the target width |x|;
 the function |vset| does the equivalent for vlist nodes.
-
 @<\TeX\ functions@>=
-void hset(pointer p, uint8_t sto, scaled st,
-					uint8_t sho,scaled sh, scaled w)
-{ scaled x;
+void hset(pointer p,@/
+          uint8_t sto, scaled st,uint8_t sho,scaled sh, scaled w)
+{ @+scaled x;
   x =width(p); /* natural width */ 
   width(p)=w; /* target width */
 
   x = w-x; /*now |x| is the excess to be made up*/ 
-  if (x==0)
-    { glue_sign(p)= normal; glue_order(p)= normal;
-      glue_set(p)=0.0;
+  if (x==0)@/
+    { @+glue_sign(p)= normal; glue_order(p)= normal;
+      glue_set(p)=0.0;@+
     }
   else if (x>0)
   { glue_order(p)= sto; glue_sign(p)= stretching;
     if (st!=0)
 	  glue_set(p)= (float32_t)(x/(double)st);
     else
-	{ glue_sign(p)= normal;
-	  glue_set(p)=0.0;
+	{ @+glue_sign(p)= normal;
+	  glue_set(p)=0.0;@+
 	}
   }
   else 
@@ -1637,8 +2166,8 @@ void hset(pointer p, uint8_t sto, scaled st,
     if (sh!=0) 
       glue_set(p)= (float32_t)((-x)/(double)sh);
     else
-	{ glue_sign(p)= normal;
-	  glue_set(p)=0.0;
+	{ @+glue_sign(p)= normal;
+	  glue_set(p)=0.0;@+
 	}
 	if((sh<-x)&&(sho==normal)&&(list_ptr(p)!=null))
       glue_set(p)=1.0;
@@ -1650,7 +2179,7 @@ void hset(pointer p, uint8_t sto, scaled st,
 
 void vset(pointer p, uint8_t sto, scaled st,
 					uint8_t sho,scaled sh, scaled h)
-{ scaled x;
+{ @+scaled x;
   type(p)=vlist_node;
   x =height(p); /* natural height adjusted such that depth <= limit */ 
   height(p)=h;
@@ -1664,8 +2193,8 @@ void vset(pointer p, uint8_t sto, scaled st,
     if (st!=0)
 	  glue_set(p)= (float32_t)(x/(double)st);
     else
-	{ glue_sign(p)= normal;
-	  glue_set(p)=0.0;
+	{ @+glue_sign(p)= normal;
+	  glue_set(p)=0.0;@+
 	}
   }
   else 
@@ -1673,14 +2202,14 @@ void vset(pointer p, uint8_t sto, scaled st,
     if (sh!=0) 
       glue_set(p)= (float32_t)((-x)/(double)sh);
     else
-	{ glue_sign(p)= normal;
-	  glue_set(p)=0.0;
+	{ @+glue_sign(p)= normal;
+	  glue_set(p)=0.0;@+
 	}
   }
 }
 @
 
-It the natural dimensions of a box are not known, we
+If the natural dimensions of a box are not known, we
 need to traverse the content list before we can set the glue.
 
 @<GET macros@>=
@@ -1692,6 +2221,14 @@ need to traverse the content list before we can set the glue.
  p=hget_list();
 @
 
+@<TEG macros@>=
+#define @[HTEG_PACK(I)@] @/\
+ pointer p; scaled x, d; @+ uint8_t m; \
+ p=hteg_list();\
+ if ((I)&b001)  @+HTEG32(d); else d= MAX_DIMEN; \
+ if ((I)&b010) m=additional; else m=exactly; \
+ if ((I)&b100) x=hteg_xdimen_node();@+  else x=hget_xdimen_ref(HTEG8);
+@
 
 @<cases to get content@>=
 case TAG(hpack_kind,b000): @+{@+HGET_PACK(b000);@+ p=hpack(p,x,m);@+happend_to_vlist(p);@+} @+ break;
@@ -1708,6 +2245,21 @@ case TAG(vpack_kind,b011): @+{@+HGET_PACK(b011);@+ p=vpackage(p,x,m,d);@+happend
 case TAG(vpack_kind,b101): @+{@+HGET_PACK(b101);@+ p=vpackage(p,x,m,d);@+happend_to_vlist(p); @+} @+ break;
 case TAG(vpack_kind,b111): @+{@+HGET_PACK(b111);@+ p=vpackage(p,x,m,d);@+happend_to_vlist(p); @+} @+ break;
 @
+@<cases to teg content@>=
+case TAG(hpack_kind,b000): @+{@+HTEG_PACK(b000);@+ p=hpack(p,x,m);@+happend_to_vlist(p);@+} @+ break;
+case TAG(hpack_kind,b010): @+{@+HTEG_PACK(b010);@+ p=hpack(p,x,m);@+happend_to_vlist(p);@+} @+ break;
+case TAG(hpack_kind,b100): @+{@+HTEG_PACK(b100);@+ p=hpack(p,x,m);@+happend_to_vlist(p);@+} @+ break;
+case TAG(hpack_kind,b110): @+{@+HTEG_PACK(b110);@+ p=hpack(p,x,m);@+happend_to_vlist(p);@+} @+ break;@#
+
+case TAG(vpack_kind,b000): @+{@+HTEG_PACK(b000);@+ p=vpackage(p,x,m,d);@+happend_to_vlist(p); @+} @+ break;
+case TAG(vpack_kind,b010): @+{@+HTEG_PACK(b010);@+ p=vpackage(p,x,m,d);@+happend_to_vlist(p); @+} @+ break;
+case TAG(vpack_kind,b100): @+{@+HTEG_PACK(b100);@+ p=vpackage(p,x,m,d);@+happend_to_vlist(p); @+} @+ break;
+case TAG(vpack_kind,b110): @+{@+HTEG_PACK(b110);@+ p=vpackage(p,x,m,d);@+happend_to_vlist(p); @+} @+ break;
+case TAG(vpack_kind,b001): @+{@+HTEG_PACK(b001);@+ p=vpackage(p,x,m,d);@+happend_to_vlist(p); @+} @+ break;
+case TAG(vpack_kind,b011): @+{@+HTEG_PACK(b011);@+ p=vpackage(p,x,m,d);@+happend_to_vlist(p); @+} @+ break;
+case TAG(vpack_kind,b101): @+{@+HTEG_PACK(b101);@+ p=vpackage(p,x,m,d);@+happend_to_vlist(p); @+} @+ break;
+case TAG(vpack_kind,b111): @+{@+HTEG_PACK(b111);@+ p=vpackage(p,x,m,d);@+happend_to_vlist(p); @+} @+ break;
+@
 
 
 @<\TeX\ macros@>=
@@ -1715,20 +2267,37 @@ case TAG(vpack_kind,b111): @+{@+HGET_PACK(b111);@+ p=vpackage(p,x,m,d);@+happend
 #define additional 1
 @
 
+@<\TeX\ declarations@>=
+extern pointer hpack(pointer @!p, scaled @!w, small_number @!m);
+@
 
 \subsection{Kerns}
 
 @<GET macros@>=
 #define @[HGET_KERN(I)@] \
 pointer p; @+scaled x; \
-if (((I)&b011)==0) {uint8_t n; n=HGET8; x=hget_dimen_ref(n); }\
-if (((I)&b011)==1) {uint8_t n; n=HGET8; x=hget_xdimen_ref(n); }\
-if (((I)&b011)==2) HGET32(x);\
+if (((I)&b011)==0) x=hget_dimen_ref(HGET8);\
+else if (((I)&b011)==1) x=hget_xdimen_ref(HGET8);\
+else if (((I)&b011)==2) HGET32(x);\
 else if (((I)&b011)==3) x=hget_xdimen_node();\
 p=new_kern(x);\
 if ((I)&b100) subtype(p)=explicit;\
 tail_append(p);
 @
+
+
+@<TEG macros@>=
+#define @[HTEG_KERN(I)@] \
+pointer p; @+scaled x; \
+if (((I)&b011)==0) x=hget_dimen_ref(HTEG8);\
+else if (((I)&b011)==1) x=hget_xdimen_ref(HTEG8);\
+else if (((I)&b011)==2) HTEG32(x);\
+else if (((I)&b011)==3) x=hteg_xdimen_node();\
+p=new_kern(x);\
+if ((I)&b100) subtype(p)=explicit;\
+tail_append(p);
+@
+
 
 @<cases to get content@>=
 case TAG(kern_kind,b000): @+  { @+HGET_KERN(b000);@+ } @+break;
@@ -1740,6 +2309,19 @@ case TAG(kern_kind,b101): @+  { @+HGET_KERN(b101);@+ } @+break;
 case TAG(kern_kind,b110): @+  { @+HGET_KERN(b110);@+ } @+break;
 case TAG(kern_kind,b111): @+  { @+HGET_KERN(b111);@+ } @+break;
 @
+
+@<cases to teg content@>=
+case TAG(kern_kind,b000): @+  { @+HTEG_KERN(b000);@+ } @+break;
+case TAG(kern_kind,b001): @+  { @+HTEG_KERN(b001);@+ } @+break;
+case TAG(kern_kind,b010): @+  { @+HTEG_KERN(b010);@+ } @+break;
+case TAG(kern_kind,b011): @+  { @+HTEG_KERN(b011);@+ } @+break;
+case TAG(kern_kind,b100): @+  { @+HTEG_KERN(b100);@+ } @+break;
+case TAG(kern_kind,b101): @+  { @+HTEG_KERN(b101);@+ } @+break;
+case TAG(kern_kind,b110): @+  { @+HTEG_KERN(b110);@+ } @+break;
+case TAG(kern_kind,b111): @+  { @+HTEG_KERN(b111);@+ } @+break;
+@
+
+
 @<\TeX\ macros@>=
 #define explicit 1
 @
@@ -1753,11 +2335,19 @@ extern pointer new_kern(scaled w);
 
 @<GET macros@>=
 #define @[HGET_LEADERS(I)@]@/ \
-{pointer p=hget_glue_node();\
-subtype(p)=a_leaders+((I)&b011)-1;\
+{@+pointer p=hget_glue_node();@+subtype(p)=a_leaders+((I)&b011)-1;\
 if (KIND(*hpos)==rule_kind) leader_ptr(p)=hget_rule_node(); \
 else if (KIND(*hpos)==hbox_kind) leader_ptr(p)=hget_hbox_node(); \
 else  leader_ptr(p)=hget_vbox_node();\
+tail_append(p);}
+@
+
+@<TEG macros@>=
+#define @[HTEG_LEADERS(I)@]@/ \
+{@+pointer p=hteg_glue_node();@+subtype(p)=a_leaders+((I)&b011)-1;\
+if (KIND(*(hpos-1))==rule_kind) leader_ptr(p)=hteg_rule_node(); \
+else if (KIND(*(hpos-1))==hbox_kind) leader_ptr(p)=hteg_hbox_node(); \
+else  leader_ptr(p)=hteg_vbox_node();\
 tail_append(p);}
 @
 
@@ -1767,6 +2357,16 @@ case TAG(leaders_kind,1):        @+ HGET_LEADERS(1); @+break;
 case TAG(leaders_kind,2):        @+ HGET_LEADERS(2); @+break;
 case TAG(leaders_kind,3):        @+ HGET_LEADERS(3); @+break;
 @
+@<cases to teg content@>=
+case TAG(leaders_kind,0):        @+ tail_append(hget_leaders_ref(HTEG8)); @+break;
+case TAG(leaders_kind,1):        @+ HTEG_LEADERS(1); @+break;
+case TAG(leaders_kind,2):        @+ HTEG_LEADERS(2); @+break;
+case TAG(leaders_kind,3):        @+ HTEG_LEADERS(3); @+break;
+@
+
+
+
+
 @<\TeX\ macros@>=
 #define a_leaders 100
 #define leader_ptr(X) link(X+1) 
@@ -1781,6 +2381,14 @@ case TAG(leaders_kind,3):        @+ HGET_LEADERS(3); @+break;
   if((I)&b001) HGET32((B).lsl); @+else (B).lsl=0; \
 @
 
+@<TEG macros@>=
+#define @[HTEG_BASELINE(I,B)@] \
+  if((I)&b001) HTEG32((B).lsl); @+else B.lsl=0; \
+  if((I)&b010) hteg_glue_spec(); else (B).ls=zero_glue; \
+  if((I)&b100) hteg_glue_spec(); else (B).bs=zero_glue; 
+@
+
+
 
 @<cases to get content@>=
 case TAG(baseline_kind,b000): @+{@+ hget_baseline_ref(HGET8,&cur_list.bs_field);@+ needs_bs=true;@+ }@+break;
@@ -1790,6 +2398,16 @@ case TAG(baseline_kind,b100): @+{@+ HGET_BASELINE(b100,cur_list.bs_field);@+ nee
 case TAG(baseline_kind,b101): @+{@+ HGET_BASELINE(b101,cur_list.bs_field);@+ needs_bs=true;@+}@+break;
 case TAG(baseline_kind,b110): @+{@+ HGET_BASELINE(b110,cur_list.bs_field);@+ needs_bs=true;@+}@+break;
 case TAG(baseline_kind,b111): @+{@+ HGET_BASELINE(b111,cur_list.bs_field);@+ needs_bs=true;@+}@+break;
+@
+
+@<cases to teg content@>=
+case TAG(baseline_kind,b000): @+{@+ hget_baseline_ref(HTEG8,&cur_list.bs_field);@+ needs_bs=true;@+ }@+break;
+case TAG(baseline_kind,b010): @+{@+ HTEG_BASELINE(b010,cur_list.bs_field);@+ needs_bs=true;@+}@+break;
+case TAG(baseline_kind,b011): @+{@+ HTEG_BASELINE(b011,cur_list.bs_field);@+ needs_bs=true;@+}@+break;
+case TAG(baseline_kind,b100): @+{@+ HTEG_BASELINE(b100,cur_list.bs_field);@+ needs_bs=true;@+}@+break;
+case TAG(baseline_kind,b101): @+{@+ HTEG_BASELINE(b101,cur_list.bs_field);@+ needs_bs=true;@+}@+break;
+case TAG(baseline_kind,b110): @+{@+ HTEG_BASELINE(b110,cur_list.bs_field);@+ needs_bs=true;@+}@+break;
+case TAG(baseline_kind,b111): @+{@+ HTEG_BASELINE(b111,cur_list.bs_field);@+ needs_bs=true;@+}@+break;
 @
 
 @<\TeX\ macros@>=
@@ -1805,9 +2423,21 @@ f=HGET8;\
 if ((I)==7) s=HGET8;@+else s=(I);\
 t=hpos+s; c=hget_utf8(); hpos=t;\
 if ((I)==7)@/\
-{ uint8_t t;@+ t=HGET8; \
+{ @+uint8_t t;@+ t=HGET8; \
   if(t!=s) @/\
   QUIT("Sizes in ligature don't match %d!=%d",s,t);}\
+p=new_ligature(f, c, null); tail_append(p); \
+}
+@
+
+@<TEG macros@>=
+#define @[HTEG_LIG(I)@] @/\
+{@+pointer p;@+uint8_t f;@+ uint32_t c; @+uint8_t s,*t;\
+if ((I)==7) @+s=HTEG8; @+else s=(I);\
+t=hpos-s; hpos=t; c=hget_utf8(); hpos=t;\
+if ((I)==7) { uint8_t n;@+ n=HTEG8;\
+  if(n!=s)   QUIT("Sizes in ligature don't match %d!=%d",s,n);}\
+f=HTEG8;\
 p=new_ligature(f, c, null); tail_append(p); \
 }
 @
@@ -1823,6 +2453,18 @@ case TAG(ligature_kind,5):@+ HGET_LIG(5); @+break;
 case TAG(ligature_kind,6):@+ HGET_LIG(6); @+break;
 case TAG(ligature_kind,7):@+ HGET_LIG(7); @+break;
 @
+
+@<cases to teg content@>=
+case TAG(ligature_kind,0):@+ tail_append(hget_ligature_ref(HTEG8)); @+break;
+case TAG(ligature_kind,1):@+ HTEG_LIG(1); @+break;
+case TAG(ligature_kind,2):@+ HTEG_LIG(2); @+break;
+case TAG(ligature_kind,3):@+ HTEG_LIG(3); @+break;
+case TAG(ligature_kind,4):@+ HTEG_LIG(4); @+break;
+case TAG(ligature_kind,5):@+ HTEG_LIG(5); @+break;
+case TAG(ligature_kind,6):@+ HTEG_LIG(6); @+break;
+case TAG(ligature_kind,7):@+ HTEG_LIG(7); @+break;
+@
+
 @<\TeX\ declarations@>=
 extern pointer new_ligature(uint8_t f, uint8_t c,pointer q);
 @
@@ -1834,7 +2476,7 @@ new node.
 
 @<GET macros@>=
 #define @[HGET_HYPHEN(I)@]\
-  p=new_disc(); \
+  pointer p=new_disc(); \
   if ((I)&b100) pre_break(p)=hget_list(); \
   if ((I)&b010) post_break(p)=hget_list(); \
   if ((I)&b001) {uint8_t r; @+r=HGET8; set_replace_count(p,r); \
@@ -1842,43 +2484,79 @@ new node.
   else  set_auto_disc(p);
 @
 
+@<TEG macros@>=
+#define @[HTEG_HYPHEN(I)@]\
+  pointer p=new_disc(); \
+  if ((I)&b001) {uint8_t r; @+r=HTEG8; set_replace_count(p,r); \
+                 if ((r&0x80)==0) set_auto_disc(p); @+}\
+  else  set_auto_disc(p);\
+  if ((I)&b010) post_break(p)=hteg_list(); \
+  if ((I)&b100) pre_break(p)=hteg_list(); 
+@
+
+
+
+@<cases to get content@>=
+case TAG(hyphen_kind,b000): @+tail_append(hget_hyphen_ref(HGET8));  @+break;
+case TAG(hyphen_kind,b001): @+{@+HGET_HYPHEN(b001);@+tail_append(p);@+} @+break;
+case TAG(hyphen_kind,b010): @+{@+HGET_HYPHEN(b010);@+tail_append(p);@+} @+break;
+case TAG(hyphen_kind,b011): @+{@+HGET_HYPHEN(b011);@+tail_append(p);@+} @+break;
+case TAG(hyphen_kind,b100): @+{@+HGET_HYPHEN(b100);@+tail_append(p);@+} @+break;
+case TAG(hyphen_kind,b101): @+{@+HGET_HYPHEN(b101);@+tail_append(p);@+} @+break;
+case TAG(hyphen_kind,b110): @+{@+HGET_HYPHEN(b110);@+tail_append(p);@+} @+break;
+case TAG(hyphen_kind,b111): @+{@+HGET_HYPHEN(b111);@+tail_append(p);@+} @+break;
+@
+@<cases to teg content@>=
+case TAG(hyphen_kind,b000): @+tail_append(hget_hyphen_ref(HTEG8));  @+break;
+case TAG(hyphen_kind,b001): @+{@+HTEG_HYPHEN(b001);@+tail_append(p);@+} @+break;
+case TAG(hyphen_kind,b010): @+{@+HTEG_HYPHEN(b010);@+tail_append(p);@+} @+break;
+case TAG(hyphen_kind,b011): @+{@+HTEG_HYPHEN(b011);@+tail_append(p);@+} @+break;
+case TAG(hyphen_kind,b100): @+{@+HTEG_HYPHEN(b100);@+tail_append(p);@+} @+break;
+case TAG(hyphen_kind,b101): @+{@+HTEG_HYPHEN(b101);@+tail_append(p);@+} @+break;
+case TAG(hyphen_kind,b110): @+{@+HTEG_HYPHEN(b110);@+tail_append(p);@+} @+break;
+case TAG(hyphen_kind,b111): @+{@+HTEG_HYPHEN(b111);@+tail_append(p);@+} @+break;
+@
+
+
+@<get functions@>=
+pointer hget_hyphen_node(void)
+{  @+@<read the start byte |a|@>@;
+   if (KIND(a)!=hyphen_kind || INFO(a)==b000) 
+      QUIT("Hyphen expected at 0x%x got %s,%d",node_pos,NAME(a),INFO(a));
+   { @+
+   HGET_HYPHEN(INFO(a));
+   @<read and check the end byte |z|@>@;
+   return p;
+   }
+}
+@
+
+@<teg functions@>=
+pointer hteg_hyphen_node(void)
+{  @+@<read the end byte |z|@>@;
+   if (KIND(z)!=hyphen_kind || INFO(z)==b000) 
+      QUIT("Hyphen expected at 0x%x got %s,%d",node_pos,NAME(z),INFO(z));
+   { @+
+   HTEG_HYPHEN(INFO(z));
+   @<read and check the start byte |a|@>@;
+   return p;
+   }
+}
+@
+
+
+
 @<\TeX\ macros@>=
 #define set_replace_count(X,Y) (mem[X].hh.b1= (Y) &0x7F) 
 #define replace_count(X)   (mem[X].hh.b1&0x7F) 
 #define set_auto_disc(X) (mem[X].hh.b1|= 0x80) 
 #define is_auto_disc(X)  (mem[X].hh.b1 & 0x80) 
-
-@
-
-@<cases to get content@>=
-case TAG(hyphen_kind,b000): @+tail_append(hget_hyphen_ref(HGET8));  @+break;
-case TAG(hyphen_kind,b001): @+{@+pointer p;@+HGET_HYPHEN(b001);@+tail_append(p);} @+break;
-case TAG(hyphen_kind,b010): @+{@+pointer p;@+HGET_HYPHEN(b010);@+tail_append(p);} @+break;
-case TAG(hyphen_kind,b011): @+{@+pointer p;@+HGET_HYPHEN(b011);@+tail_append(p);} @+break;
-case TAG(hyphen_kind,b100): @+{@+pointer p;@+HGET_HYPHEN(b100);@+tail_append(p);} @+break;
-case TAG(hyphen_kind,b101): @+{@+pointer p;@+HGET_HYPHEN(b101);@+tail_append(p);} @+break;
-case TAG(hyphen_kind,b110): @+{@+pointer p;@+HGET_HYPHEN(b110);@+tail_append(p);} @+break;
-case TAG(hyphen_kind,b111): @+{@+pointer p;@+HGET_HYPHEN(b111);@+tail_append(p);} @+break;
-@
-@<get functions@>=
-pointer hget_hyphen_node(void)
-{ pointer p=null;
-  @<read the start byte |a|@>@;
-   if (KIND(a)!=hyphen_kind || INFO(a)==b000) 
-      QUIT("Hyphen expected at 0x%x got %s,%d",node_pos2,NAME(a),INFO(a));
-   HGET_HYPHEN(INFO(a));
-   @<read and check the end byte |z|@>@;
-  return p;
-}
-@
-@<\TeX\ macros@>=
 #define pre_break llink
 #define post_break rlink 
 #define info(X) mem[X].hh.lh 
 #define llink(X) info(X+1) 
 #define rlink(X) link(X+1)  
 extern pointer new_disc(void);
-
 @
 
 
@@ -1886,19 +2564,12 @@ extern pointer new_disc(void);
 
 @<GET macros@>=
 #define @[HGET_PAR(I)@] @/\
-{ scaled x=0;\
+{ @+scaled x=0;\
   param_def_t *q;\
   if ((I)&b100) x=hget_xdimen_node(); else x=hget_xdimen_ref(HGET8);\
   if ((I)&b010) q=hget_param_list_node(); else q=hget_param_list_ref(HGET8);\
-  hparagraph(x,q,0);\
+  hget_paragraph(x,q,0);\
 }
-@
-
-@<get declarations@>=
-static param_def_t *hget_param_list_node(void);
-static param_def_t *hget_param_list_ref(uint8_t n);
-static void hset_param_list(param_def_t *p);
-static void hrestore_param_list(void);
 @
 
 @<cases to get content@>=
@@ -1908,51 +2579,66 @@ case TAG(par_kind,b100): @+HGET_PAR(b100);@+break;
 case TAG(par_kind,b110): @+HGET_PAR(b110);@+break;
 @
 
-The function |hparagraph| uses \TeX's |line_break| routine.
 
+
+The function |hget_paragraph| uses \TeX's |line_break| routine.
 If a page is broken in the middle of a paragraph,
-we will need the the exact position of the line that starts
-the new page. Since break nodes always point to a |glue_node|, |math_node|, |penalty_node|, or |disc_node|,
+we will need the exact position of the line that starts
+the new page. Since break nodes always point to a |kern_node|, |glue_node|, |math_node|, |penalty_node|, or |disc_node|,
 we record the positions of these nodes. By the way, glue nodes are not legal breakpoints when they appear
-in formulas and when the previous node is not a glue node, penalty node, explicit kern node, or math node.
+in formulas and when the previous node is not a glue node, penalty node, math node, or explicit kern node.
+In the latter case, the explicit kern node preceeding the glue is a legal breakpoint.
 % see section 888 in TeX the program
-
-It seems like breaks also occur at explicit kern nodes.
-
 It should be possible to store all these positions in a local table and clear it once the lines
-are appended to the main list and the positions are set for the inter line glues.
+are appended to the main list and the positions are set for the inter line glues. But for the
+sake of simplicity, we stick with one big global table for now.
 
-It is possible to call |hparagraph| with an |offset| to obtain only the trailing lines
+It is possible to call |hget_paragraph| with an |offset| to obtain only the trailing lines
 of the paragraphs. This feature is used when a page starts in the middle of a paragraph.
 Currently only the remainder of the paragraph is passed to the |line_break| routine.
 It might be better to generate the whole paragraph, forcing a line break at the position
 indicated by the offset, because this would allow a simple implementation of correct hanging
 indentation and the parshape feature of \TeX.
 If the offset is positive, unwanted nodes are pruned from the beginning of the list
-in the same way \TeX\ does it.
+in the same way \TeX\ does it. We also transplant the post-break list of a discretionary hyphen.
 
 @<get functions@>=
+static void transplant_post_break_list(void)
+{ @+pointer r, q=link(head);
+  int t=replace_count(q);
+  pointer s=post_break(q);
+  r=q;
+  while (t>0) {@+ r=link(r); t--;@+ }
+  if (s!=null)
+  { while (link(s)!=null) s=link(s);
+    link(s)=link(r);link(r)=post_break(q); post_break(q)=null; 
+  }
+  q=link(r);
+  if (r!=head) 
+  {@+link(r)=null;flush_node_list(link(head));
+    link(head)=q;
+  }
+}
 
-static hprune_unwanted_nodes(void)
-{ pointer q, r=head;
+static void hprune_unwanted_nodes(void)
+{ @+pointer q, r=head;
   while (true)@+{@+q=link(r);
-  if (q==null) goto done1;
-  if (is_char_node(q)) goto done1;
-  if (non_discardable(q)) goto done1;
-  if (type(q)==kern_node && subtype(q)!=explicit) goto done1;
+  if (q==null) goto done;
+  if (is_char_node(q)) goto done;
+  if (non_discardable(q)) goto done;
+  if (type(q)==kern_node && subtype(q)!=explicit) goto done;
   r=q; /*now |type(q)==glue_node|, |kern_node|, |math_node| or |penalty_node|*/ 
   } 
-done1: if (r!=head) 
+done: if (r!=head) 
   {@+link(r)=null;flush_node_list(link(head));
   link(head)=q;
   } 
 } 
 
-
-static void hparagraph(scaled x, param_def_t *q, uint32_t offset)
-{ uint32_t s, t;
+void hget_paragraph(scaled x, param_def_t *q, uint32_t offset)
+{ @+uint32_t s, t;
   uint8_t a,z; /* the start and the end byte*/
-  if (!IS_LIST) return;
+  if (!IS_LIST(*hpos)) return;
   HGETTAG(a);
   s=hget_list_size(INFO(a));
   hget_size_boundary(INFO(a)); 
@@ -1968,17 +2654,21 @@ static void hparagraph(scaled x, param_def_t *q, uint32_t offset)
       if (nest_ptr==1) 
       { pointer p=tail;
          if (p!=head && !is_char_node(p) && 
-         (type(p)==glue_node || type(p)==kern_node || type(p)==penalty_node || type(p)==disc_node))
-           store_map(p,node_pos2,0,0);
+         (type(p)==glue_node || type(p)==kern_node || type(p)==penalty_node || type(p)==disc_node || type(p)==math_node))
+           store_map(p,node_pos,0,0);
       }
     }
     hget_size_boundary(INFO(a));
     t=hget_list_size(INFO(a)); 
     if (t!=s) 
-      QUIT("List sizes at 0x%x and " SIZE_F " do not match 0x%x != 0x%x",node_pos2+1,hpos-hstart-s-1,s,t);
+      QUIT("List sizes at 0x%x and " SIZE_F " do not match 0x%x != 0x%x",node_pos+1,hpos-hstart-s-1,s,t);
     @<read and check the end byte |z|@>@;
-    if (offset>0)
-      hprune_unwanted_nodes(); 
+    if (offset>0 && link(head)!=null && !is_char_node(link(head)))
+    { if (type(link(head))==disc_node)
+        transplant_post_break_list();
+      else
+        hprune_unwanted_nodes(); 
+    }
     if (needs_bs) 
       QUIT("Unexpected trailing baseline node");
     if (head==tail) 
@@ -1996,13 +2686,40 @@ void hget_par_node(uint32_t offset)
 { @+ scaled x=0;
   param_def_t *q;
   @<read the start byte |a|@>@;
-  node_pos2=(hpos-hstart)-1;
-  if (INFO(a)&b100) x=hget_xdimen_node(); else x=hget_xdimen_ref(HGET8);\
-  if (INFO(a)&b010) q=hget_param_list_node(); else q=hget_param_list_ref(HGET8);\
-  hparagraph(x,q,offset);\
+  node_pos=(hpos-hstart)-1;
+  if (INFO(a)&b100) x=hget_xdimen_node(); else x=hget_xdimen_ref(HGET8);
+  if (INFO(a)&b010) q=hget_param_list_node(); else q=hget_param_list_ref(HGET8);
+  hget_paragraph(x,q,offset);
   @<read and check the end byte |z|@>@;
 }
+@
 
+When we need to read a paragraph node backwards, we simply skip to the beginning and read the node
+in forward direction. The function |hteg_paragraph| therefore simply returns a ponter to the
+start of the paragraph node.
+
+
+@<cases to teg content@>=
+case TAG(par_kind,b000): @+hteg_paragraph(b000,0);@+break;
+case TAG(par_kind,b010): @+hteg_paragraph(b010,0);@+break;
+case TAG(par_kind,b100): @+hteg_paragraph(b100,0);@+break;
+case TAG(par_kind,b110): @+hteg_paragraph(b110,0);@+break;
+@
+
+@<teg auxiliar functions@>=
+void hteg_paragraph(info_t i, uint32_t offset)
+{@+scaled x=0;
+  param_def_t *q;
+  uint8_t *list_start, *par_start;
+  hskip_list();
+  list_start=hpos;
+  if (INFO(i)&b010) q=hteg_param_list_node(); else q=hget_param_list_ref(HTEG8);
+  if (INFO(i)&b100) x=hteg_xdimen_node(); else x=hget_xdimen_ref(HTEG8);
+  par_start=hpos;
+  hpos=list_start;
+  hget_paragraph(x,q,0);
+  hpos=par_start;
+}
 @
 
 @<\TeX\ declarations@>=
@@ -2028,6 +2745,17 @@ hset_param_list(q); hdisplay(p,a,((I)&b010)!=0); hrestore_param_list();\
 }
 @
 
+@<TEG macros@>=
+#define @[HTEG_DISPLAY(I)@] \
+{@+ param_def_t *q;@+ pointer p=null, a=null;\
+if ((I)&b001) a=hteg_hbox_node();\
+p=hteg_list(); \
+if ((I)&b010) a=hteg_hbox_node(); \
+if ((I)&b100) q=hteg_param_list_node(); else q=hget_param_list_ref(HTEG8);\
+hset_param_list(q); hdisplay(p,a,((I)&b010)!=0); hrestore_param_list();\
+}
+@
+
 
 @<cases to get content@>=
 case TAG(display_kind,b000): HGET_DISPLAY(b000); @+ break;
@@ -2036,6 +2764,15 @@ case TAG(display_kind,b010): HGET_DISPLAY(b010); @+ break;
 case TAG(display_kind,b100): HGET_DISPLAY(b100); @+ break;
 case TAG(display_kind,b101): HGET_DISPLAY(b101); @+ break;
 case TAG(display_kind,b110): HGET_DISPLAY(b110); @+ break;
+@
+
+@<cases to teg content@>=
+case TAG(display_kind,b000): HTEG_DISPLAY(b000); @+ break;
+case TAG(display_kind,b001): HTEG_DISPLAY(b001); @+ break;
+case TAG(display_kind,b010): HTEG_DISPLAY(b010); @+ break;
+case TAG(display_kind,b100): HTEG_DISPLAY(b100); @+ break;
+case TAG(display_kind,b101): HTEG_DISPLAY(b101); @+ break;
+case TAG(display_kind,b110): HTEG_DISPLAY(b110); @+ break;
 @
 
 The |hdisplay| function now needs to do all the things we have skipped
@@ -2049,9 +2786,16 @@ the display gets the proper baseline skip, we modify the current list.
 
 
 \subsection{Adjustments}
+Vertical adjustments are inside horizontal lists. They migrate to the enclosing vertical list
+where they are unpacked and added after the horizontal material.
+Inside a paragraph, this means the adjustment comes after the line that contains the adjustment.
+Outside a paragraph, \TeX\ will do the moving and unpacking even before the adjustment has a
+chance to get into the \HINT/ file. If we parse paragraphs in forward direction, we do not 
+need to parse adjustments in backward direction.
+
 @<GET macros@>=
 #define @[HGET_ADJUST(I)@] @/\ 
-{ pointer p; uint32_t s,t;\
+{ @+pointer p; uint32_t s,t;\
   p=get_node(small_node_size); type(p)=adjust_node; subtype(p)=normal;\
   s=hget_list_size(I); hget_size_boundary(I); \
   adjust_ptr(p)=hget_node_list(s);\
@@ -2078,8 +2822,8 @@ case TAG(adjust_kind,5):  @+HGET_ADJUST(5); @+ break;
 
 \subsection{Images}
 @<GET macros@>=
-#define @[HGET_IMAGE(I,X)@] @/\
-{ pointer p;\
+#define @[HGET_IMAGE(I)@] @/\
+{ @+pointer p;\
   p=get_node(image_node_size);  type(p)=whatsit_node; subtype(p)=image_node;\
   HGET16(image_no(p));RNG("Section number",image_no(p),3,max_section_no);  \
   if (I&b010) {@+HGET32(image_width(p)); @+HGET32(image_height(p));@+} \
@@ -2090,17 +2834,36 @@ case TAG(adjust_kind,5):  @+HGET_ADJUST(5); @+ break;
   tail_append(p);}
 @
 
-@<cases to get content@>=
-case TAG(image_kind,b000): @+ hget_image_ref(HGET8); @+break;
-case TAG(image_kind,b100): @+ HGET_IMAGE(b100,x);@+break;
-case TAG(image_kind,b101): @+ HGET_IMAGE(b101,x);@+break;
-case TAG(image_kind,b110): @+ HGET_IMAGE(b110,x);@+break;
-case TAG(image_kind,b111): @+ HGET_IMAGE(b111,x);@+break;
+@<TEG macros@>=
+#define @[HTEG_IMAGE(I)@] @/\
+{ @+pointer p;\
+  p=get_node(image_node_size);  type(p)=whatsit_node; subtype(p)=image_node;\
+  if (I&b001) {HTEG_STRETCH(image_shrink(p),image_shrink_order(p));\
+               HTEG_STRETCH(image_stretch(p),image_stretch_order(p)); @+}\
+  else { image_stretch(p)=image_shrink(p)=0;image_stretch_order(p)=image_shrink_order(p)=normal;@+}\
+  if (I&b010) {@+@+HTEG32(image_height(p)); HTEG32(image_width(p)); @+} \
+  else image_width(p)=image_height(p)=0;\
+  HTEG16(image_no(p));RNG("Section number",image_no(p),3,max_section_no);  \
+  tail_append(p);}
 @
 
-@<get declarations@>=
-static pointer hget_image_ref(uint16_t n);
+@<cases to get content@>=
+case TAG(image_kind,b000): @+ hget_image_ref(HGET8); @+break;
+case TAG(image_kind,b100): @+ HGET_IMAGE(b100);@+break;
+case TAG(image_kind,b101): @+ HGET_IMAGE(b101);@+break;
+case TAG(image_kind,b110): @+ HGET_IMAGE(b110);@+break;
+case TAG(image_kind,b111): @+ HGET_IMAGE(b111);@+break;
 @
+@<cases to teg content@>=
+case TAG(image_kind,b000): @+ hget_image_ref(HTEG8); @+break;
+case TAG(image_kind,b100): @+ HTEG_IMAGE(b100);@+break;
+case TAG(image_kind,b101): @+ HTEG_IMAGE(b101);@+break;
+case TAG(image_kind,b110): @+ HTEG_IMAGE(b110);@+break;
+case TAG(image_kind,b111): @+ HTEG_IMAGE(b111);@+break;
+@
+
+
+
 
 @<\TeX\ macros@>=
 #define whatsit_node	8 /*|type| of special extension nodes*/
@@ -2115,47 +2878,6 @@ static pointer hget_image_ref(uint16_t n);
 #define image_stretch_order(X) stretch_order(X+9) 
 #define image_shrink_order(X) shrink_order(X+9) 
 @
-
-\section{Rendering Glyphs}
-Currently only so called PK files are supported. Here we describe how these are used 
-on the WIN32 operatig system using its API.
-
-PK Files (Tomas Rokicki,Packed (PK) Font File Format) TUGboat, Volume 6, 1985, No. 3, pp. 115--120)
-contain a compressed representation of bitmap fonts  produced by METAFONT and gftopk.
-After unpacking these fonts, we obtain a device independent bitmap for each glyph
-which can be displayed on a Device Context using the |StretchDIBits|.
-This function is used to display the character on a memory device context given
-by the handle |hmem|. 
-This function is capable of stretching or shrinking and hence can adjust the
-resolution. The resolution of the bitmap in the pk file is given be the 
-two parameters |hppp| (horizonttap pixel per point) and vppp (vertical pixel per point) which
-are found in the preamble of the pk file.
-
-For the memory device context we maintain its width, height aa well as its
-horizontal and vertical resolution in dpi (dots per inch).
-Given the pixel position $(x,y)$ on |hmem|, the offset |d_h| and |d_v| of the hotspot of the
-glyph, and |w| and |h| the width and height of the glyph, we can compute the necessary
-parameters to display the glyph on |hmem| using the function |StretchDIBits|.
-
-With the assembled page on |hmem| in the correct size and resolutio ends the job of the
-user interface independent part of the hint viewer and the user interface takes over.
-
-The user interface knows the size of the client window (in pixel) and its resolution. 
-From this information, it can compute the true size in scaled point of the client window
-and the desired resolution of |hmem|. The user interface for the WIN32 viewer makes the
-resolution of |hmem| by a ceratin factor, called |render_factor| bigger. This has two advantages:
-scaling a high resolution black and white image down produces grey pixels around the border
-which makes the glyphs appear smoother; further, positions of glyphs are rounded to whole
-pixels when rendering them on |hmem| and these positions translate to sub-pixel position when scaling
-down. The user factor can also use a scale factor to display the page larger or smaller than its
-true size. For example with a scale factor of 2, a glyph 10pt high would measure 20pt on the screen.
-To make the enlaged page fit on the window, the user interface would request a window of only
-half the actual width and height, but would double the render factor. The image it receives
-cann then be displayed stretching it only be half the render factor thus obtaining an image
-that is scaled down by exactly the render factor filling the complete client window.
-
-
-
 
 
 
@@ -2334,7 +3056,7 @@ extern void pop_nest(void);
 #define cur_ls 	cur_list.bs_field.ls 
 #define cur_lsl	cur_list.bs_field.lsl
 #define needs_bs cur_list.insert_bs
-#define node_pos2 cur_list.np_field
+#define node_pos cur_list.np_field
 #define node_pos1 (nest_ptr==0?0:nest[nest_ptr-1].np_field)
 #define tail_append(X)	{@+link(tail)=X;tail=link(tail); } 
 @
@@ -2357,7 +3079,9 @@ hpage_init();
 extern void print_ln(void); /*prints an end-of-line*/ 
 extern int @!font_in_short_display; /*an internal font number*/ 
 @
-\subsection{\TeX's page builder}
+
+
+\subsection{\TeX's page builder}\label{texbuildpage}
 
 \changestyle{hbuildpage.tex}
 
@@ -2370,11 +3094,61 @@ scaled s;
 } stream_t;
 @
 
+
+@<\TeX\ functions@>=
+
+void hpage_init(void)
+{
+prev_depth=ignore_depth; prev_graf=0;
+page_contents=empty;page_tail=page_head;link(page_head)=null;@/
+page_depth=0;page_max_depth=0;
+}
+
+
+void hresume_after_output(void)
+{
+  if (link(page_head)!=null) 
+  {@+if (link(contrib_head)==null) 
+    if (nest_ptr==0) tail=page_tail;@+else contrib_tail=page_tail;
+  else link(page_tail)=link(contrib_head);
+  link(contrib_head)=link(page_head);
+  link(page_head)=null;page_tail=page_head;
+  } 
+}
+
+@
+
 @<\TeX\ declarations@>=
 extern scaled *const @!total_stretch,*const @!total_shrink;
 extern stream_t stream[256];
 extern bool hbuild_page(void);
 extern bool hits_all_over(void);
+extern void hpage_init(void);
+extern void hresume_after_output(void);
+extern uint8_t page_contents;
+extern scaled page_depth, page_max_depth;
+extern int insert_penalties;
+extern pointer best_page_break;
+extern scaled best_size;
+@
+
+@<\TeX\ variables@>=
+scaled page_depth, page_max_depth;
+pointer page_tail=page_head; /*the final node on the current page*/ 
+uint8_t @!page_contents; /*what is on the current page so far?*/ 
+
+scaled hvsize, hhsize;
+@
+
+@<\TeX\ macros@>=
+
+#define mem_top	30000 
+#define contrib_head	mem_top-1 
+#define page_head	mem_top-2 /*vlist for current page*/ 
+#define vmode	1 /*vertical mode*/ 
+#define empty	0 /*symbolic name for a null constant*/ 
+#define contrib_tail	nest[0].tail_field /*tail of the contribution list*/
+#define max_depth      dimen_par(max_depth_code)
 @
 
 
@@ -2426,68 +3200,331 @@ extern void append_to_vlist(pointer @!b, uint32_t offset);
 
 
 
-\subsection{Ship out the page}
-
-@<\TeX\ declarations@>=
-extern void show_box(pointer p);
-extern pointer hpack(pointer @!p, scaled @!w, small_number @!m);
-@
-
-\subsection{Building Pages}
-
-@<\TeX\ functions@>=
-
-void hpage_init(void)
-{
-prev_depth=ignore_depth; prev_graf=0;
-page_contents=empty;page_tail=page_head;link(page_head)=null;@/
-page_depth=0;page_max_depth=0;
-}
-
-
-void hresume_after_output(void)
-{
-  if (link(page_head)!=null) 
-  {@+if (link(contrib_head)==null) 
-    if (nest_ptr==0) tail=page_tail;@+else contrib_tail=page_tail;
-  else link(page_tail)=link(contrib_head);
-  link(contrib_head)=link(page_head);
-  link(page_head)=null;page_tail=page_head;
-  } 
-}
-
-@
-
-@<\TeX\ declarations@>=
-extern void hpage_init(void);
-extern void hresume_after_output(void);
-@
-
-@<\TeX\ macros@>=
-
-#define mem_top	30000 
-#define contrib_head	mem_top-1 
-#define page_head	mem_top-2 /*vlist for current page*/ 
-#define vmode	1 /*vertical mode*/ 
-#define empty	0 /*symbolic name for a null constant*/ 
-#define contrib_tail	nest[0].tail_field /*tail of the contribution list*/
-@
-
-@<\TeX\ variables@>=
-scaled page_depth, page_max_depth;
-pointer page_tail=page_head; /*the final node on the current page*/ 
-uint8_t @!page_contents; /*what is on the current page so far?*/ 
-
-scaled hvsize, hhsize;
-@
-
-
 \subsection{Page positions}
 
 @(hpage.c@>=
 #include "htex.h"
 #include "hpos.h"
 @
+
+
+
+\section{Building Pages Bottom Up}
+\TeX's page builder (see section~\secref{texbuildpage}) moves nodes from the contribution list 
+to the current page, filling it from top to bottom, and finds an optimal page break to end the page.
+When a \HINT/ viewer needs to move to the previous page, only the start of the present page 
+might be known. In this situation, the start of the present page determines the end of the
+previous page and the \HINT/ page builder needs to find an optimal page break to start the previous page.
+
+We have seen already, how parsing the \HINT/ file backwards will fill the contribution list,
+moving the current position backwards, and adding new nodes at the end of the list.
+Now we need to construct a page builder, that
+moves these nodes from the head of the contribution list to the top of the current page,
+building it from the bottom up until the optimal
+page start is found. It is clear that optimizing different objectives will produce different
+outcomes. So the pages \HINT/ finds in backward direction might be different from the ones
+\TeX\ or \HINT/ find when paging forward. Therefore complete compatibility with \TeX\ is
+not an issue. Still we want to do a good job and therefore the following exposition follows
+closely the exposition of \TeX's page builder in part 45 of {\it \TeX: The Program\/}\cite{Knuth:tex}.
+
+So here is the outline of the function |hbuild_page_up|
+@(hbuildpageup.c@>=
+#include <string.h>
+#include "htex.h"
+#include "hformat.h"
+#include "hdefaults.h"
+#include "texdef.h"
+
+scaled page_max_height;
+
+bool hbuild_page_up(void) /*append contributions to the current page*/ 
+{@+
+static scaled page_height;
+static scaled top_so_far[8];
+pointer p; /*the node being appended*/ 
+pointer @!q; /*nodes being examined*/ 
+int @!b, @!c; /*badness and cost of current page*/ 
+int @!pi; /*penalty to be added to the badness*/ 
+/* |uint8_t n;| insertion box number*/ 
+/* |scaled delta, h, w;| sizes used for insertion calculations*/ 
+if (link(contrib_head)==null) return false;
+@/do@+{ p=link(contrib_head);@/
+@<Prepend node |p| to the current page; if it is time for a page break, |fire_up| the renderer@>;
+}@+ while (!(link(contrib_head)==null));
+tail=contrib_head;
+return false;
+} 
+@
+
+@<\TeX\ declarations@>=
+extern bool hbuild_page_up(void);
+@
+We deleted references to |output_active| and output routines as well as the code to update
+the values of |last_glue|, |last_penalty|, and |last_kern|.
+
+Before we consider the core of this routine, let's start at the beginning and look at the
+variables |page_contents| and |page_total|
+
+
+The variable |page_contents| is |empty| when the
+current page contains only mark nodes and content-less whatsit nodes; it
+is |inserts_only| if the page contains only insertion nodes in addition to
+marks and whatsits, penalties, kern, and glue.  At the bottom of a page, only penalty nodes are
+discarded until |page_contents| is no longer |empty|.
+(At the page bottom, glue is not discarded!) 
+As soon as |page_contents| becomes non-|empty|,
+the current |vsize| and |max_depth| are squirreled away into |page_goal|
+and |page_max_depth|; the latter values will be used until the page has
+been forwarded to the renderer. The \.{\\topskip} adjustment
+is made when |page_contents| changes to |box_there|.
+
+
+The variable |page_total| is supposed to reflect the size of the page so far from the
+top of the page down to the baseline of the last item on the page. Not included is the
+depth of the last item on the page as long as it does not exceed |page_max_depth|.
+If it does, the excess is included in the |page_total|.
+Also the natural size of the topskip glue is included in the |page_total| and its value is
+set asside in the variable |page_max_height|. When we add a box or rule, we keep the height
+of it in the variable |page_height| and make sure it does not exceed |page_max_height|.
+If it does, the excess is again included in the |page_total|. 
+Before we ship out the page, we add the topskip glue and
+ then the height plus depth of the page shoud be less or equal to
+$|page_total|+|max_page_depth|$, and it should be less only by the amount that the depth of the
+last node on the page is less than |page_max_depth|.
+
+We judge the goodness of a page break amoung other things by the amount of material
+that is supposed to fill the page. But \TeX\ discards penalties, glues and kerns at the top of a
+page. So we do not incorporate these nodes immediately into the |page_so_far| variables
+but keep track of them in the |top_so_far| variables. Whenever we add a node that makes the
+accumulated nodes at the top non-discardable, we add them to the |page_so_far| variables.
+
+Now we consider how to prepend the different types of nodes.
+We start with nodes that have height and depth.
+
+\subsection{Boxes and Rules}
+
+@<Prepend a box or rule node to the current page@>=
+if (page_contents==empty) 
+{ @<Freeze page specs@>@;
+  if(depth(p)> page_max_depth)
+    page_total=depth(p)-page_max_depth;
+  depth(p)=0;
+}
+if (page_contents<box_there)  
+  @<Account for the insertion of the \.{\\topskip} glue@>@;
+page_contents=box_there;
+@<Add in the |top_so_far|@>@;
+page_total+= page_height+depth(p);
+if (height(p)>page_max_height)
+{ page_total=page_total+height(p)-page_max_height;
+  page_height=page_max_height;
+}
+else
+  page_height= height(p);
+@
+
+Here we used
+
+@<Freeze page specs@>=
+memset(page_so_far,0,sizeof(page_so_far));
+memset(top_so_far,0,sizeof(top_so_far));
+page_goal= hvsize;
+page_max_depth= max_depth;
+page_height= 0;
+least_page_cost= awful_bad;
+@
+
+
+@<Account for the insertion of the \.{\\topskip} glue@>=
+{ page_max_height=width(pointer_def[glue_kind][top_skip_no]);
+  page_total=page_total+page_max_height;
+}
+@
+
+@<Add in the |top_so_far|@>=
+{ int i;
+  for (i=1; i<=6; i++)
+  { page_so_far[i]+=top_so_far[i];
+    top_so_far[i]=0;
+  } 
+}
+@
+
+@<\TeX\ declarations@>=
+extern scaled page_so_far[8];
+extern int least_page_cost;
+@
+
+\subsection{Stacking up the Page}
+
+This is (more or less) \TeX's way of building the page: 
+If the current page is empty and node |p| is to be deleted, |goto done1|; otherwise
+use node |p| to update the state of the current page; if this node is an insertion,
+|goto contribute|; otherwise if this node is not a legal breakpoint, |goto contribute|
+or |update_heights|; otherwise set |pi| to the penalty associated with this breakpoint.
+Check if node |p| is a new champion breakpoint; then if it is time for a page
+break, prepare for output, fire up the renderer, and |return|.
+
+And here is our new code:
+
+@<Prepend node |p| to the current page;...@>=
+switch (type(p)) {
+case hlist_node: case vlist_node: case rule_node: 
+    @<Prepend a box or rule node to the current page@>@; goto contribute;
+case whatsit_node: goto contribute;
+case glue_node: @<Prepend a glue node to the current page@>@; break;
+case kern_node: @<Prepend a kern node to the current page@>@; break;
+
+case penalty_node: if (page_contents == empty) goto done1;@+else pi=penalty(p);@+break;
+case mark_node: goto contribute;
+case ins_node: @<Prepend an insertion to the current page and |goto contribute|@>@;
+default: MESSAGE("Unexpected node type %d in build_page_up ignored\n",type(p));
+} 
+if (pi < inf_penalty) 
+  @<Check if node |p| is a new champion breakpoint@>@;
+contribute:
+@<Prepend node |p| to the current page and |goto done|@>@;
+done1: @<Recycle node |p|@>@;
+done: 
+@
+
+@<Prepend node |p| to the current page and |goto done|@>=
+link(contrib_head)=link(p);
+link(p)=link(page_head);
+link(page_head)=p;
+goto done;
+@
+
+@<Recycle node |p|@>=
+link(contrib_head)=link(p);link(p)=null;flush_node_list(p);
+@
+\subsection{Glues and Kerns}
+
+Page breaks are possible at a glue node, it the node just above the glue node is a
+|hlist_node|, |vlist_node|,
+|rule_node|, |ins_node|, |mark_node|, |adjust_node|, |ligature_node|,
+|disc_node|, or |whatsit_node|. We test this with the |precedes_break| macro.
+We silently return if the node above the glue is not yet known.
+
+
+@<Prepend a glue node to the current page@>=
+if(link(p)==null) return false;
+if (page_contents==empty) 
+{ @<Freeze page specs@>@;
+  page_contents=inserts_only;
+}
+@<Add glue to |top_so_far|@>@;
+if (!precedes_break(link(p))) goto contribute;
+pi=0;
+@
+
+@<Add glue to |top_so_far|@>=
+#define top_shrink top_so_far[6]
+#define top_total top_so_far[1]
+
+{ pointer q=glue_ptr(p);
+  top_so_far[2+stretch_order(q)]+=stretch(q);
+  top_shrink+=shrink(q);
+  if((shrink_order(q)!=normal)&&(shrink(q)!=0))
+    MESSAGE("Infinite glue shrinkage found on current page");
+  top_total+=width(q);
+}
+@
+
+Handling kern nodes is similar.A kern node is a possible page break if the 
+node below it is a glue node.
+
+@<Prepend a kern node to the current page@>=
+if (page_contents==empty) 
+{ @<Freeze page specs@>@;
+  page_contents=inserts_only;
+}
+top_total+=width(p);
+if (page_contents < box_there) goto done1;
+  else if (link(page_head)==null) return false;
+  else if (type(link(page_head))!=glue_node)
+  goto contribute;
+pi=0;
+@
+
+\subsection{Insertions}
+@<Prepend an insertion to the current page and |goto contribute|@>=
+QUIT("Prepending insertions not yet implemented\n");
+@
+
+
+\subsection{Checking Breakpoints}
+At this point |p| is a possible breakpoint and |pi| is the penalty associated with it.
+First we compute |c|, the cost or badness of the current page.
+
+@<Compute the cost |c| of a possible break at |p|@>=
+@<Compute the badness, |b|, of the current page, using |awful_bad| if the box is too full@>;
+if (b < awful_bad) 
+{ if (pi <= eject_penalty) c=pi;
+  else if (b < inf_bad) c=b+pi+insert_penalties;
+  else c=deplorable;
+}
+else c=b;
+if (insert_penalties >= 10000) c=awful_bad;
+@
+
+@<Compute the badness, |b|, of the current page...@>=
+if (page_total < page_goal) 
+{  if ((page_so_far[3]!=0)||(page_so_far[4]!=0)||(page_so_far[5]!=0)) b=0;
+  else b=badness(page_goal-page_total, page_so_far[2]);
+}
+else if (page_total-page_goal > page_shrink) b=awful_bad;
+else b=badness(page_total-page_goal, page_shrink)
+@
+
+@<Check if node |p| is a new champion breakpoint@>=
+{@+@<Compute the cost |c| of a possible break at |p|@>@;
+  if (c <= least_page_cost) 
+  {@+best_page_break=p;best_size=page_goal;
+    least_page_cost=c;
+#if 0
+    r=link(page_ins_head);
+    while (r!=page_ins_head) 
+      {@+best_ins_ptr(r)=last_ins_ptr(r);
+      r=link(r);
+      }
+#endif 
+  } 
+  if ((c==awful_bad)||(pi <= eject_penalty)) 
+  {@+@<Replace leading white-space by the topskip glue@>@;
+     @<Put the \(o)optimal current page into box 255@>@; 
+     return true;
+  } 
+} 
+@
+
+@<Replace leading white-space by the topskip glue@>=
+while (true) {
+  q=link(page_head);
+  if (q==null) return false; /* empty page */
+  else if (type(q)==penalty_node || type(q)==glue_node || type(q)==kern_node)
+  { link(page_head)=link(q);link(q)=null;flush_node_list(q); }
+  else break;
+}  
+temp_ptr= new_spec(pointer_def[glue_kind][top_skip_no]);
+q= new_glue(temp_ptr);glue_ref_count(temp_ptr)= null;
+if(width(temp_ptr)> page_height) width(temp_ptr)= width(temp_ptr)-page_height;
+else width(temp_ptr)= 0;
+link(q)=link(page_head);
+link(page_head)=q;
+@
+
+@<Put the \(o)optimal current page into box 255@>=
+if(box(0)!=null)QUIT("Box 0 must be empty");
+box(0)=vpackage(link(page_head), best_size, exactly, 0x100000);
+@<clean up the lists used while building the page@>@;
+@
+
+
+@<clean up the lists used while building the page@>=
+@
+
+
 
 \section{The Command Line Interface}
 
@@ -2657,9 +3694,60 @@ void hship_out(pointer p)
 
 @
 
-\section{A WIN32 Graphical User Interface}\label{gui}
 
-To be written.
+@<\TeX\ declarations@>=
+extern void show_box(pointer p);
+@
+
+\section{Rendering \HINT/ Files}
+How to render a \HINT/ file on any specific device depends largely on the
+operating system and its API encapsulating the device. Never the less, there
+are some functions that can be shared accross many different operating systems
+or at least can serve as a starting point for implementing operating system specific
+versions.
+
+In the following, we show functions that were used on Windows using the WIN32 API
+and on Android using OpenGL~2.0 to implement such renderers.  
+
+\subsection{Rendering Glyphs}
+Currently only so called PK files are supported. Here we describe how these are used 
+on the WIN32 operatig system using its API.
+
+PK Files\cite{TR:pkfile}
+contain a compressed representation of bitmap fonts  produced by METAFONT and gftopk.
+After unpacking these fonts, we obtain a device independent bitmap for each glyph
+which can be displayed on a Device Context using the |StretchDIBits|.
+This function is used to display the character on a memory device context given
+by the handle |hmem|. 
+This function is capable of stretching or shrinking and hence can adjust the
+resolution. The resolution of the bitmap in the pk file is given be the 
+two parameters |hppp| (horizonttap pixel per point) and vppp (vertical pixel per point) which
+are found in the preamble of the pk file.
+
+For the memory device context we maintain its width, height as well as its
+horizontal and vertical resolution in dpi (dots per inch).
+Given the pixel position $(x,y)$ on |hmem|, the offset |d_h| and |d_v| of the hotspot of the
+glyph, and |w| and |h| the width and height of the glyph, we can compute the necessary
+parameters to display the glyph on |hmem| using the function |StretchDIBits|.
+
+With the assembled page on |hmem| in the correct size and resolutio ends the job of the
+user interface independent part of the hint viewer and the user interface takes over.
+
+The user interface knows the size of the client window (in pixel) and its resolution. 
+From this information, it can compute the true size in scaled point of the client window
+and the desired resolution of |hmem|. The user interface for the WIN32 viewer makes the
+resolution of |hmem| by a ceratin factor, called |render_factor| bigger. This has two advantages:
+scaling a high resolution black and white image down produces grey pixels around the border
+which makes the glyphs appear smoother; further, positions of glyphs are rounded to whole
+pixels when rendering them on |hmem| and these positions translate to sub-pixel position when scaling
+down. The user factor can also use a scale factor to display the page larger or smaller than its
+true size. For example with a scale factor of 2, a glyph 10pt high would measure 20pt on the screen.
+To make the enlaged page fit on the window, the user interface would request a window of only
+half the actual width and height, but would double the render factor. The image it receives
+cann then be displayed stretching it only be half the render factor thus obtaining an image
+that is scaled down by exactly the render factor filling the complete client window.
+
+
 
 \appendix
 
@@ -2671,15 +3759,7 @@ We need types from \TeX.
 
 We need functions from hint:
 @<get declarations@>=
-extern scaled  hget_dimen_ref(uint8_t n);
-static pointer hget_ligature_ref(uint8_t n);
-static pointer hget_math_ref(uint8_t n);
-static pointer hget_rule_ref(uint8_t n);
-static pointer hget_glue_ref(uint8_t n);
-static pointer hget_leaders_ref(uint8_t n);
-static pointer hget_hyphen_ref(uint8_t n);
 static void hget_font_params(uint8_t n, font_def_t *f);
-static void hparagraph(scaled x, param_def_t *q, uint32_t offset);
 extern pointer hget_node_list(uint32_t s);
 extern pointer hget_list(void);
 extern pointer hget_text_list(uint32_t s);
@@ -2689,13 +3769,9 @@ extern pointer hget_glue_spec(void);
 extern pointer hget_hyphen_node(void);
 extern pointer hget_hbox_node(void);
 extern pointer hget_vbox_node(void);
-extern uint32_t hget_utf8(void);
-extern void hset(pointer p, uint8_t sto, scaled st,
-					uint8_t sho,scaled sh, scaled w);
-extern void vset(pointer p, uint8_t sto, scaled st,
-					uint8_t sho,scaled sh, scaled h);
 
-static void hget_baseline_ref(uint8_t n, bs_t *b);
+
+
 static void free_param_list(param_def_t *p);
 @
 
@@ -2720,6 +3796,21 @@ the interface to the \HINT/ file.
 
 extern font_def_t *font_def;
 extern void hset_default_definitions(void);
+extern int32_t hget_integer_ref(uint8_t n);
+extern scaled  hget_dimen_ref(uint8_t n);
+extern pointer hget_rule_ref(uint8_t n);
+extern pointer hget_math_ref(uint8_t n);
+extern pointer hget_glue_ref(uint8_t n);
+extern pointer hget_leaders_ref(uint8_t n);
+extern scaled hget_xdimen_ref(uint8_t n);
+extern pointer hget_hyphen_ref(uint8_t n);
+extern pointer hget_ligature_ref(uint8_t n);
+extern void hget_baseline_ref(uint8_t n, bs_t *b);
+extern pointer hget_image_ref(uint16_t n);
+extern uint32_t hget_utf8(void);
+extern param_def_t *hget_param_list_ref(uint8_t n);
+extern void hset_param_list(param_def_t *p);
+extern void hrestore_param_list(void);
 extern void hopen_file(const char *in_name);
 extern bool hget_banner(void);
 extern void hget_section(uint16_t n);
@@ -2730,7 +3821,17 @@ extern void hget_content_section(void);
 extern void hget_content(void);
 extern void hget_size_boundary(info_t info);
 extern uint32_t hget_list_size(info_t info);
+extern pointer hget_list(void);
 extern void hget_par_node(uint32_t offset);
+extern void hget_paragraph(scaled x, param_def_t *q, uint32_t offset);
+extern void hset(pointer p, uint8_t sto, scaled st,
+					uint8_t sho,scaled sh, scaled w);
+extern void vset(pointer p, uint8_t sto, scaled st,
+					uint8_t sho,scaled sh, scaled h);
+
+extern param_def_t *hget_param_list_node(void);
+@
+
 @
 
 \subsection{{\tt hget.c}}
@@ -2760,6 +3861,34 @@ extern void hget_par_node(uint32_t offset);
 
 @<get functions@>@;
 @
+
+\subsection{{\tt hteg.c}}
+@(hteg.c@>=
+#ifndef WIN32
+#include <sys/mman.h>
+#else
+#include <windows.h>
+#endif
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
+#include <math.h>
+#include <zlib.h>
+#include "htex.h"
+#include "hformat.h"
+#include "hdefaults.h"
+#include "hpos.h"
+#include "hget.h"
+#include "hteg.h"
+@<\TeX\ macros@>
+
+@<TEG macros@>@;
+
+@<teg auxiliar functions@>@;
+
+@<teg functions@>@;
+@
+
 
 
 \subsection{{\tt htex.h}}

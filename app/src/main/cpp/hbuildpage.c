@@ -383,7 +383,7 @@ link(page_head)= null;page_tail= page_head;
 /*:1044*/
 #line 19441 ".\\dummy.w"
 
-bool hbuild_page()
+bool hbuild_page(void)
 {
 pointer p;
 pointer q,r;
