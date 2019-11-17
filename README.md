@@ -45,6 +45,8 @@ Move the contained GLM folder to ~/AppData/Local/Android/SDK/ndk-bundle/toolchai
 
 Setup
 -----
-copy files from examples/*.hnt to Download Folder on Android Device
-
+- copy files from examples/*.hnt to Download Folder on Android Device
 (if you can't access the Download Folder, send all files via email and download them on your device)
+- give app permission to access storage on Android Device
+
+
