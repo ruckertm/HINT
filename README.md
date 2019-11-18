@@ -22,3 +22,31 @@ distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
 License for the specific language governing permissions and limitations under
 the License.
+
+Compile using Android Studio
+============================
+
+
+- install Android Studio [https://developer.android.com/studio/install](https://developer.android.com/studio/install)
+- set Android SDK Path correctly (accept Adroid Studio to modify project's local.properties file)
+- install NDK
+- go to Gradle Scripts local.properties, correct ndk.dir and sdk.dir
+- File -> Sync Project With Gradle Files
+- Run/Debug Configurations select Android App and make sure no errors are given
+
+GLM
+---
+
+Download https://github.com/g-truc/glm/releases/tag/0.9.9.5
+
+Move the contained GLM folder to ~/AppData/Local/Android/SDK/ndk-bundle/toolchains/llvm/prebuilt/windowsx86_64/sysroot/usr/include/glm
+
+- Run
+
+Setup
+-----
+- copy files from examples/*.hnt to Download Folder on Android Device
+(if you can't access the Download Folder, send all files via email and download them on your device)
+- give app permission to access storage on Android Device
+
+
