@@ -1,3 +1,0 @@
-C:/home/HintView/app/.cxx/cmake/debug/x86_64/CMakeFiles/hintview.dir
-C:/home/HintView/app/.cxx/cmake/debug/x86_64/CMakeFiles/edit_cache.dir
-C:/home/HintView/app/.cxx/cmake/debug/x86_64/CMakeFiles/rebuild_cache.dir
