@@ -13,13 +13,6 @@ public class TouchGestureHandler extends GestureDetector.SimpleOnGestureListener
     }
 
     @Override
-    public boolean onSingleTapConfirmed(MotionEvent motionEvent) {
-        view.scale *= 0.95;
-        view.requestRender();
-        return true;
-    }
-
-    @Override
     public boolean onFling(MotionEvent start, MotionEvent end, float v, float v1) {
         float deltaX = start.getX() - end.getX();
         if (Math.abs(deltaX) > HORIZONTAL_SWIPE_THRESHOLD) {
