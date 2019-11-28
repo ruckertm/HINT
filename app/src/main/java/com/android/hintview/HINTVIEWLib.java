@@ -28,4 +28,6 @@ public class HINTVIEWLib {
      public static native void change(int width, int height);
      public static native void draw(int width, int height, double xdpi, double ydpi);
      public static native void next();
+
+    public static native void prev();
 }

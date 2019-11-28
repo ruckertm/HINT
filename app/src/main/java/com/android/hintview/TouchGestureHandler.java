@@ -29,7 +29,8 @@ public class TouchGestureHandler extends GestureDetector.SimpleOnGestureListener
                 view.requestRender();
             } else {
                 // Swipe to left
-                // TODO implement prev in HINTVIEWLib
+                HINTVIEWLib.prev();
+                view.requestRender();
             }
         }
         return false;
