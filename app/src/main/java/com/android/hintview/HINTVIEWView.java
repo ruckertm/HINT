@@ -33,15 +33,14 @@ package com.android.hintview;
 
 
 import android.content.Context;
-import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
-import android.util.AttributeSet;
-import android.util.Log;
-import android.view.View;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.util.DisplayMetrics;
-import android.view.WindowManager;
+import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
+import android.view.View;
+
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
@@ -66,12 +65,14 @@ import javax.microedition.khronos.opengles.GL10;
  *   that matches it exactly (with regards to red/green/blue/alpha channels
  *   bit depths). Failure to do so would result in an EGL_BAD_MATCH error.
  */
-class HINTVIEWView extends GLSurfaceView {
+class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener {
     private static String TAG = "HINTVIEWView";
     private static final boolean DEBUG = false;
     public static double xdpi, ydpi;
     public static double scale=1.0;
     public static int width, height;
+    private final GestureDetector touchGestureDetector;
+    private final ScaleGestureDetector scaleGestureDetector;
 
     public HINTVIEWView(Context context) {
         super(context);
@@ -83,26 +84,19 @@ class HINTVIEWView extends GLSurfaceView {
         setEGLConfigChooser( new ConfigChooser(5, 6, 5, 0, 0,0) );
         setRenderer(new Renderer());
         setRenderMode(RENDERMODE_WHEN_DIRTY);
-        setOnClickListener(HintClickListener);
-        setOnLongClickListener(HintLongClickListener);
+
+        // Add gesture detector
+        touchGestureDetector = new GestureDetector(context, new TouchGestureHandler(this));
+        scaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureHandler(this));
+        setOnTouchListener(this);
     }
-    // Create an anonymous implementation of OnClickListener
-    private OnClickListener HintClickListener = new OnClickListener() {
-        public void onClick(View v) {
 
-            scale=scale*0.95;
-            requestRender();
-        }
-    };
-
-    // Create an anonymous implementation of OnLongClickListener
-    private OnLongClickListener HintLongClickListener = new OnLongClickListener() {
-        public boolean onLongClick(View v) {
-            HINTVIEWLib.next();
-            requestRender();
-            return true;
-        }
-    };
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        scaleGestureDetector.onTouchEvent(motionEvent);
+        touchGestureDetector.onTouchEvent(motionEvent);
+        return true;
+    }
 
     private static class ContextFactory implements GLSurfaceView.EGLContextFactory {
 
