@@ -30,6 +30,7 @@ Compile using Android Studio
 - install Android Studio [https://developer.android.com/studio/install](https://developer.android.com/studio/install)
 - set Android SDK Path correctly (accept Adroid Studio to modify project's local.properties file)
 - install NDK
+  - In Android Studio: Tools -> SDK Manager -> SDK Tools -> NDK
 - go to Gradle Scripts local.properties, correct ndk.dir and sdk.dir
 - File -> Sync Project With Gradle Files
 - Run/Debug Configurations select Android App and make sure no errors are given
