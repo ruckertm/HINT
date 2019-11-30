@@ -42,6 +42,7 @@ JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_create(JNIEnv * env
 JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_change(JNIEnv * env, jobject obj,  jint width, jint height);
 JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_draw(JNIEnv * env, jobject obj, jint width, jint height, jdouble xdpi, jdouble ydpi);
 JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_next(JNIEnv * env, jobject obj);
+JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_prev(JNIEnv *env, jobject obj);
 };
 
 
@@ -91,4 +92,9 @@ JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_draw(JNIEnv * env, 
 JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_next(JNIEnv * env, jobject obj)
 {   LOGI("next()\n");
     hpos_next();
+}
+
+JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_prev(JNIEnv *env, jobject obj) {
+    LOGI("prev()\n");
+    hpos_prev();
 }
