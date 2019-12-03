@@ -65,7 +65,7 @@ JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_create(JNIEnv * env
     //hint_start("/sdcard/Download/head.hnt");
     //hint_start("/storage/emulated/0/Download/image.hnt");
     //hint_start("/storage/emulated/0/Download/math.hnt");
-    hint_start("/storage/emulated/0/Download/mfpreface.hnt");
+    hint_start("/storage/emulated/0/Download/ueb2.hnt");
 }
 
 
