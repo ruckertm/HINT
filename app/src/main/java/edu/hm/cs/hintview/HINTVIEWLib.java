@@ -14,33 +14,23 @@
  * limitations under the License.
  */
 
-package com.android.hintview;
+package edu.hm.cs.hintview;
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.WindowManager;
+// Wrapper for native library
 
-import java.io.File;
+public class HINTVIEWLib {
 
-
-public class HINTVIEWActivity extends Activity {
-
-    HINTVIEWView mView;
-
-    @Override protected void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
-        mView = new HINTVIEWView(getApplication());
-	    setContentView(mView);
+    static {
+        System.loadLibrary("hintview");
     }
 
-    @Override protected void onPause() {
-        super.onPause();
-        mView.onPause();
-    }
+    public static native void create(double xdpi, double ydpi, int foreground_color, int background_color);
 
-    @Override protected void onResume() {
-        super.onResume();
-        mView.onResume();
-    }
+    public static native void change(int width, int height);
+
+    public static native void draw(int width, int height, double xdpi, double ydpi);
+
+    public static native void next();
+
+    public static native void prev();
 }

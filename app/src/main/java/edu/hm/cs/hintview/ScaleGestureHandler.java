@@ -1,4 +1,4 @@
-package com.android.hintview;
+package edu.hm.cs.hintview;
 
 import android.view.ScaleGestureDetector;
 

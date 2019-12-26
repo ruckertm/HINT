@@ -1,4 +1,4 @@
-package com.android.hintview;
+package edu.hm.cs.hintview;
 
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -25,6 +25,7 @@ public class TouchGestureHandler extends GestureDetector.SimpleOnGestureListener
                 HINTVIEWLib.prev();
                 view.requestRender();
             }
+            return true;
         }
         return false;
     }

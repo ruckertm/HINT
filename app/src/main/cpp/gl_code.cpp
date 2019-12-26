@@ -38,11 +38,11 @@ extern "C" {
 
 
 extern "C" {
-JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_create(JNIEnv * env, jobject obj,  jdouble xdpi, jdouble ydpi);
-JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_change(JNIEnv * env, jobject obj,  jint width, jint height);
-JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_draw(JNIEnv * env, jobject obj, jint width, jint height, jdouble xdpi, jdouble ydpi);
-JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_next(JNIEnv * env, jobject obj);
-JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_prev(JNIEnv *env, jobject obj);
+JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv * env, jobject obj,  jdouble xdpi, jdouble ydpi, jint foreground_color, jint background_color);
+JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv * env, jobject obj,  jint width, jint height);
+JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv * env, jobject obj, jint width, jint height, jdouble xdpi, jdouble ydpi);
+JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_next(JNIEnv * env, jobject obj);
+JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_prev(JNIEnv *env, jobject obj);
 };
 
 
@@ -57,12 +57,22 @@ GLfloat hdpi, vdpi; // resolution of canvas
 #define px2pt(X)   (72.27f*(X)/hdpi)
 #define pt2px(T)   ((T)*hdpi/72.27f)
 
-JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_create(JNIEnv * env, jobject obj,  jdouble xdpi, jdouble ydpi)
+JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv * env, jobject obj,  jdouble xdpi, jdouble ydpi, jint foreground_color, jint background_color)
 {   LOGI("create(xdpi=%f ydpi=%f)\n", xdpi, ydpi);
     hdpi=xdpi;
     vdpi=ydpi;
     nativeInit();
-    nativeSetColors(0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 0.8f);
+    LOGI("change(foreground_color=%i background_color=%i)\n", foreground_color, background_color);
+
+    double foreground_R = (foreground_color >> 16) & 0xff;
+    double foreground_G = (foreground_color >>  8) & 0xff;
+    double foreground_B = (foreground_color      ) & 0xff;
+    double background_R = (background_color >> 16) & 0xff;
+    double background_G = (background_color >>  8) & 0xff;
+    double background_B = (background_color      ) & 0xff;
+
+    nativeSetColors(foreground_R, foreground_G, foreground_B, background_R, background_G, background_B);
+    //nativeSetColors(0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 0.8f);
     //hint_start("/sdcard/Download/head.hnt");
     //hint_start("/storage/emulated/0/Download/image.hnt");
     //hint_start("/storage/emulated/0/Download/math.hnt");
@@ -70,7 +80,7 @@ JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_create(JNIEnv * env
 }
 
 
-JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_change(JNIEnv * env, jobject obj,  jint width, jint height)
+JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv * env, jobject obj,  jint width, jint height)
 {   LOGI("change(width=%d height=%d)\n", width, height);
 
     nativeSetSize(width,height,hdpi);
@@ -78,23 +88,23 @@ JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_change(JNIEnv * env
     //renderFrame();
 }
 
-JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_draw(JNIEnv * env, jobject obj, jint width, jint height, jdouble xdpi, jdouble ydpi)
+JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv * env, jobject obj, jint width, jint height, jdouble xdpi, jdouble ydpi)
 {   LOGI("draw(width=%d height=%d xdpi=%f ydpi=%f))\n", width, height, xdpi, ydpi);
     hdpi=xdpi;
     vdpi=ydpi;
 
     nativeSetSize(width,height,hdpi);
-
     renderFrame();
 
 }
 
-JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_next(JNIEnv * env, jobject obj)
+JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_next(JNIEnv * env, jobject obj)
 {   LOGI("next()\n");
     hpos_next();
 }
 
-JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_prev(JNIEnv *env, jobject obj) {
+JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_prev(JNIEnv *env, jobject obj) {
     LOGI("prev()\n");
     hpos_prev();
 }
+

@@ -3,8 +3,8 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId 'com.android.hintview'
-        minSdkVersion 14
+        applicationId 'edu.hm.cs.hintview'
+        minSdkVersion 21
         targetSdkVersion 28
         externalNativeBuild {
             cmake {
@@ -26,6 +26,9 @@ android {
             version '3.6.0'
             path 'src/main/cpp/CMakeLists.txt'
         }
+    }
+    dependencies {
+        implementation "androidx.appcompat:appcompat:1.1.0"
     }
 }
 
