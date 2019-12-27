@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="toolbar_color">#111111</color>
-    <color name="foreground_color">#FFFFFF</color>
+    <color name="toolbar_color">#222222</color>
+    <color name="foreground_color">#EEEEEE</color>
     <color name="background_color">#000000</color>
 </resources>

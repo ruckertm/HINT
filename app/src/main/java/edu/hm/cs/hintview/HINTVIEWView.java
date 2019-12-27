@@ -34,6 +34,8 @@ package edu.hm.cs.hintview;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -41,6 +43,8 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+
+import androidx.annotation.Nullable;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -119,6 +123,23 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         //touchGestureDetector = new GestureDetector(context, new TouchGestureHandler(this));
         //scaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureHandler(this));
         setOnTouchListener(this);
+    }
+
+    @Nullable
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Parcelable superState = super.onSaveInstanceState();
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("superState", superState);
+        bundle.putInt("curPos", HINTVIEWLib.getPos());
+        return bundle;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        Bundle bundle = (Bundle) state;
+        super.onRestoreInstanceState(bundle.getParcelable("superState"));
+        HINTVIEWLib.setPos(bundle.getInt("curPos"));
     }
 
     @Override
