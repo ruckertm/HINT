@@ -38,34 +38,34 @@ extern "C" {
 
 extern "C" {
 JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jobject obj, jdouble xdpi, jdouble ydpi,
+Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jdouble xdpi, jdouble ydpi,
                                            jint foreground_color, jint background_color);
 JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jobject obj, jint width, jint height);
+Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, jint height);
 JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jobject obj, jint width, jint height,
+Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jclass obj, jint width, jint height,
                                          jdouble xdpi, jdouble ydpi);
-JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_next(JNIEnv *env, jobject obj);
-JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_prev(JNIEnv *env, jobject obj);
-JNIEXPORT int JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_getPos(JNIEnv *env, jobject obj);
+JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_next(JNIEnv *env, jclass obj);
+JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_prev(JNIEnv *env, jclass obj);
+JNIEXPORT int JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_getPos(JNIEnv *env, jclass obj);
 JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_setPos(JNIEnv *env, jobject obj, jint pos);
+Java_edu_hm_cs_hintview_HINTVIEWLib_setPos(JNIEnv *env, jclass obj, jint pos);
 };
 
 
-static void renderFrame(void) {
+static void renderFrame() {
     LOGI("Render Frame");
     nativeBlank();
     hint_page();
 }
 
 GLfloat hdpi, vdpi; // resolution of canvas
-// converting pixel to pointe and back
+// converting pixel to point and back
 #define px2pt(X)   (72.27f*(X)/hdpi)
 #define pt2px(T)   ((T)*hdpi/72.27f)
 
-JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jobject obj, jdouble xdpi, jdouble ydpi,
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jdouble xdpi, jdouble ydpi,
                                            jint foreground_color, jint background_color) {
     LOGI("create(xdpi=%f ydpi=%f)\n", xdpi, ydpi);
     hdpi = xdpi;
@@ -83,15 +83,19 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jobject obj, jdouble xdp
     nativeSetColors(foreground_R, foreground_G, foreground_B, background_R, background_G,
                     background_B);
     //nativeSetColors(0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 0.8f);
-    //hint_start("/sdcard/Download/head.hnt");
-    //hint_start("/storage/emulated/0/Download/image.hnt");
+    //hint_start("/storage/emulated/0/Download/paging.hnt");
     //hint_start("/storage/emulated/0/Download/math.hnt");
-    hint_start("/storage/emulated/0/Download/mfpreface.hnt");
+    //hint_start("/storage/emulated/0/Download/mfpreface.hnt");
+    //hint_start("/storage/emulated/0/Download/bmp.hnt");
+    hint_start("/storage/emulated/0/Download/png.hnt");
+    //hint_start("/storage/emulated/0/Download/display.hnt");
+    //hint_start("/storage/emulated/0/Download/opentype.hnt");
+    //hint_start("/storage/emulated/0/Download/ligature.hnt");
+    //hint_start("/storage/emulated/0/Download/jpg.hnt");
 }
 
-
-JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jobject obj, jint width, jint height) {
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, jint height) {
     LOGI("change(width=%d height=%d)\n", width, height);
 
     nativeSetSize(width, height, hdpi);
@@ -99,8 +103,8 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jobject obj, jint width,
     //renderFrame();
 }
 
-JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jobject obj, jint width, jint height,
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jclass obj, jint width, jint height,
                                          jdouble xdpi, jdouble ydpi) {
     LOGI("draw(width=%d height=%d xdpi=%f ydpi=%f))\n", width, height, xdpi, ydpi);
     hdpi = xdpi;
@@ -111,23 +115,23 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jobject obj, jint width, j
 
 }
 
-JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_next(JNIEnv *env, jobject obj) {
+extern "C" JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_next(JNIEnv *env, jclass obj) {
     LOGI("next()\n");
     hpos_next();
 }
 
-JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_prev(JNIEnv *env, jobject obj) {
+extern "C" JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_prev(JNIEnv *env, jclass obj) {
     LOGI("prev()\n");
     hpos_prev();
 }
 
-JNIEXPORT int JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_getPos(JNIEnv *env, jobject obj) {
+extern "C" JNIEXPORT int JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_getPos(JNIEnv *env, jclass obj) {
     LOGI("getPos()\n");
     return hpos_get_cur();
 }
 
-JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_setPos(JNIEnv *env, jobject obj, jint pos) {
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_setPos(JNIEnv *env, jclass obj, jint pos) {
     LOGI("setPos(%d)\n", pos);
     /* TODO implement correctly */
 }

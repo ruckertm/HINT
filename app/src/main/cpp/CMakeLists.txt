@@ -19,6 +19,7 @@ find_library( # Defines the name of the path variable that stores the
 add_library(hintview SHARED
             gl_code.cpp
             rendergl.cpp
+            stb_image.cpp
             pkfonts.c
             fonts.c
             hinttop.c
