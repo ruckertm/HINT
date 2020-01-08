@@ -7,7 +7,7 @@
 #include "hget.h"
 #include "error.h"
 #include "fonts.h"
-#include "rendernative.h"
+#include "rendergl.h"
 
 /* Handling the glyph cache of a font */
 static gcache_t g_undefined ={0}; /* if a glyph is undefined it can point to this glyph. */

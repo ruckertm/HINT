@@ -1,7 +1,7 @@
 #include <math.h>
 #include "basetypes.h"
 #include "fonts.h"
-#include "rendernative.h"
+#include "rendergl.h"
 #include "hformat.h"
 #include "htex.h"
 #include "texdef.h"

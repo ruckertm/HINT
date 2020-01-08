@@ -24,11 +24,11 @@ public class HINTVIEWLib {
         System.loadLibrary("hintview");
     }
 
-    public static native void create(double xdpi, double ydpi, int foreground_color, int background_color);
+    public static native void create(double xdpi, double ydpi, int background_color, int mode);
 
     public static native void change(int width, int height);
 
-    public static native void draw(int width, int height, double xdpi, double ydpi);
+    public static native void draw(int width, int height, double xdpi, double ydpi, int background_color);
 
     public static native void next();
 
@@ -37,4 +37,10 @@ public class HINTVIEWLib {
     public static native int getPos();
 
     public static native void setPos(int pos);
+
+    public static native void home();
+
+    public static native void lightMode();
+
+    public static native void darkMode();
 }

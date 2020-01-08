@@ -10,7 +10,7 @@
 #include "hget.h"
 #include "error.h"
 #include "fonts.h"
-#include "rendernative.h"
+#include "rendergl.h"
 
 
 

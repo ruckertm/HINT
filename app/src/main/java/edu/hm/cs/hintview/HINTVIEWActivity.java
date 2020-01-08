@@ -16,6 +16,7 @@
 
 package edu.hm.cs.hintview;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -32,6 +33,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+
+import static edu.hm.cs.hintview.HINTVIEWLib.darkMode;
+import static edu.hm.cs.hintview.HINTVIEWLib.lightMode;
 
 
 public class HINTVIEWActivity extends AppCompatActivity {
@@ -113,6 +117,37 @@ public class HINTVIEWActivity extends AppCompatActivity {
             }
         }, 80);
     }
+
+    /*@Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        //check if theme is changed
+        super.onConfigurationChanged(newConfig);
+        int background_color = mView.getContext().getResources().getColor(R.color.background_color);
+
+        Log.d("HINTVIEWActivity", "Configuration " + newConfig.toString());
+        int currentNightMode = newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        Log.d("HINTVIEWActivity", "currentNightMode: " + currentNightMode);
+        switch (currentNightMode) {
+            case Configuration.UI_MODE_NIGHT_NO:
+                Log.d("HINTVIEWActivity", "lightMode");
+                lightMode();
+                break;
+            case Configuration.UI_MODE_NIGHT_YES:
+                Log.d("HINTVIEWActivity", "darkMode");
+                darkMode();
+                break;
+        }
+         //HINTVIEWLib.draw(mView.width, mView.height, mView.scale * mView.xdpi, mView.scale * mView.ydpi, background_color);
+
+        // Checks the orientation of the screen
+        *//*if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            Log.d("HINTVIEWActivity", "orientation landscape");
+            HINTVIEWLib.draw(mView.height, mView.width, mView.scale * mView.ydpi, mView.scale * mView.xdpi, background_color);
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            Log.d("HINTVIEWActivity", "orientation portrait");
+            HINTVIEWLib.draw(mView.width, mView.height, mView.scale * mView.xdpi, mView.scale * mView.ydpi, background_color);
+        }*//*
+    }*/
 
     @Override
     protected void onPause() {

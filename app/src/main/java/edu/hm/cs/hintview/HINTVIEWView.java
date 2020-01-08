@@ -33,6 +33,7 @@ package edu.hm.cs.hintview;
 
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -76,34 +77,24 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
     public static double xdpi, ydpi;
     public static double scale = 1.0;
     public static int width, height;
-    public static int foreground_color, background_color;
-    private final GestureDetector touchGestureDetector;
-    private final ScaleGestureDetector scaleGestureDetector;
+    public static int background_color;
+    public static int mode = 0;
+    private GestureDetector touchGestureDetector;
+    private ScaleGestureDetector scaleGestureDetector;
 
     public HINTVIEWView(Context context) {
         super(context);
-        // Add gesture detector
-        touchGestureDetector = new GestureDetector(context, new TouchGestureHandler(this));
-        scaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureHandler(this));
 
         init(context, null, 0);
     }
 
     public HINTVIEWView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        // Add gesture detector
-        touchGestureDetector = new GestureDetector(context, new TouchGestureHandler(this));
-        scaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureHandler(this));
-
         init(context, attrs, 0);
     }
 
     public HINTVIEWView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs);
-        // Add gesture detector
-        touchGestureDetector = new GestureDetector(context, new TouchGestureHandler(this));
-        scaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureHandler(this));
-
         init(context, attrs, defStyle);
     }
 
@@ -112,16 +103,27 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         Log.w(TAG, String.format("Resolution xdpi=%f ydpi=%f\n", metrics.xdpi, metrics.ydpi));
         xdpi = metrics.xdpi;
         ydpi = metrics.ydpi;
-        foreground_color = context.getResources().getColor(R.color.foreground_color);
         background_color = context.getResources().getColor(R.color.background_color);
+        int modeConfig = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        Log.d("HINTVIEWView", "currentNightMode: " + mode);
+        switch (modeConfig) {
+            case Configuration.UI_MODE_NIGHT_NO:
+                Log.d("HINTVIEWActivity", "lightMode");
+                mode = 0;
+                break;
+            case Configuration.UI_MODE_NIGHT_YES:
+                Log.d("HINTVIEWActivity", "darkMode");
+                mode = 1;
+                break;
+        }
         setEGLContextFactory(new ContextFactory());
         setEGLConfigChooser(new ConfigChooser(5, 6, 5, 0, 0, 0));
         setRenderer(new Renderer());
         setRenderMode(RENDERMODE_WHEN_DIRTY);
 
         // Add gesture detector
-        //touchGestureDetector = new GestureDetector(context, new TouchGestureHandler(this));
-        //scaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureHandler(this));
+        touchGestureDetector = new GestureDetector(context, new TouchGestureHandler(this));
+        scaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureHandler(this));
         setOnTouchListener(this);
     }
 
@@ -373,18 +375,18 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
 
         public void onDrawFrame(GL10 gl) {
 
-            HINTVIEWLib.draw(width, height, scale * xdpi, scale * ydpi);
+            HINTVIEWLib.draw(width, height, scale * xdpi, scale * ydpi, background_color);
         }
 
         public void onSurfaceChanged(GL10 gl, int w, int h) {
             width = w;
             height = h;
-            //HINTVIEWLib.change(w, h);
+            HINTVIEWLib.change(w, h);
         }
 
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 
-            HINTVIEWLib.create(xdpi, ydpi, foreground_color, background_color);
+            HINTVIEWLib.create(xdpi, ydpi, background_color, mode);
         }
     }
 

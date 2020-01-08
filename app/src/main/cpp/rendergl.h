@@ -3,7 +3,7 @@
 
 
 
-void nativeInit(void); 
+void nativeInit();
 /* initialize the renderer */
 
 void nativeSetSize(int px_h, int px_v, double dpi);
@@ -12,7 +12,10 @@ void nativeSetSize(int px_h, int px_v, double dpi);
 void nativeSetColors(double fr, double fg, double fb, double br, double bg, double bb);
 /* set foreground and background colors as rgb values in the range 0 to 255 */
 
-void nativeBlank(void); 
+void setLightMode();
+void setDarkMode();
+
+void nativeBlank();
 /* renders an empty page */
 
 /* Dimensions

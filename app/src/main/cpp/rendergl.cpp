@@ -20,7 +20,7 @@
 extern "C" {
 #include "hinttop.h"
 #include "fonts.h"
-#include "rendernative.h"
+#include "rendergl.h"
 #include "stb_image.h"
 };
 
@@ -41,7 +41,6 @@ static void checkGlError(const char *op) {
     }
 }
 
-
 static GLuint gProgram;
 static GLuint gvPositionHandle;
 
@@ -61,16 +60,15 @@ auto gFragmentShader =
         "varying vec2 TexCoord;\n"
         "uniform sampler2D ourTexture;\n"
         "uniform vec4 ourColor;\n"
+        "uniform int ourMode;\n"
         "void main() {\n"
-        "  gl_FragColor = vec4(texture2D(ourTexture,TexCoord));\n"
-//        "float mean_fg_color = (ourColor.x + ourColor.y + ourColor.z)/3.f;\n"
-        //        "float mean_texture_color = (texture2D(ourTexture,TexCoord).x + texture2D(ourTexture,TexCoord).y + texture2D(ourTexture,TexCoord).z)/3.f\n"
-        //        "if (mean_fg_color > mean_texture_color) { \n "
-        //        //"  gl_FragColor = vec4(texture2D(ourTexture,TexCoord));\n"
-        //        "  gl_FragColor = vec4(ourColor.x,ourColor.y,ourColor.z, texture2D(ourTexture,TexCoord).w);\n"
-        //        "} else{\n"
-        //        "  gl_FragColor = vec4(texture2D(ourTexture,TexCoord));\n"
-        //        "}\n"
+        "  if(ourMode>0) { \n"
+        "     vec3 invColor = (vec3(1)-texture2D(ourTexture,TexCoord).xyz);"
+        "     gl_FragColor = vec4(invColor.xyz, texture2D(ourTexture,TexCoord).w);\n"
+        "  } else { \n"
+        //"     gl_FragColor = vec4(texture2D(ourTexture,TexCoord).x, 0.9f, 0.9f ,0.9f );\n"
+        "     gl_FragColor = vec4(texture2D(ourTexture,TexCoord));\n"
+        "  }\n"
         "}\n";
 
 static GLuint loadShader(GLenum shaderType, const char *pSource) {
@@ -191,6 +189,9 @@ extern "C" void nativeInit(void) {
 
     // Default Text Forground Color
     glUniform4f(ourColorLocation, 0.0f, 0.0f, 0.0f, 0.0f);
+    // set light or dark mode by default to light (=texture colors)
+    //int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
+    //glUniform1i(ourModeLocation, 1);
 
     mkRuleTexture();
 #if 0
@@ -217,6 +218,20 @@ extern "C" void nativeSetColors(double fr, double fg, double fb, double br, doub
     int ourColorLocation = glGetUniformLocation(gProgram, "ourColor");
     glClearColor(br, bg, bb, 1.0f);
     glUniform4f(ourColorLocation, fr, fg, fb, 0.0f);
+}
+
+extern "C" void setDarkMode() {
+    LOGI("setDarkMode GL Graphics\n");
+    // set dark mode (= inverted texture colors)
+    int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
+    glUniform1i(ourModeLocation, 1);
+}
+
+extern "C" void setLightMode() {
+    LOGI("setLightMode GL Graphics\n");
+    // set light or dark mode by default to light (=texture colors)
+    int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
+    glUniform1i(ourModeLocation, 0);
 }
 
 
