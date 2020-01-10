@@ -25,6 +25,8 @@ extern "C" {
 };
 
 #define min(X, Y) ((X)<(Y)?(X):(Y))
+#define DARK_MODE 1
+#define LIGHT_MODE 0
 
 #define  LOG_TAG    "glrender"
 #define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
@@ -43,6 +45,7 @@ static void checkGlError(const char *op) {
 
 static GLuint gProgram;
 static GLuint gvPositionHandle;
+static int mode;
 
 
 auto gVertexShader =
@@ -63,10 +66,9 @@ auto gFragmentShader =
         "uniform int ourMode;\n"
         "void main() {\n"
         "  if(ourMode>0) { \n"
-        "     vec3 invColor = (vec3(1)-texture2D(ourTexture,TexCoord).xyz);"
+        "     vec3 invColor = (vec3(0.9f)-texture2D(ourTexture,TexCoord).xyz);"
         "     gl_FragColor = vec4(invColor.xyz, texture2D(ourTexture,TexCoord).w);\n"
         "  } else { \n"
-        //"     gl_FragColor = vec4(texture2D(ourTexture,TexCoord).x, 0.9f, 0.9f ,0.9f );\n"
         "     gl_FragColor = vec4(texture2D(ourTexture,TexCoord));\n"
         "  }\n"
         "}\n";
@@ -187,12 +189,6 @@ extern "C" void nativeInit(void) {
     //int ourProjectionLocation = glGetUniformLocation(gProgram, "projection");
     glUseProgram(gProgram);
 
-    // Default Text Forground Color
-    glUniform4f(ourColorLocation, 0.0f, 0.0f, 0.0f, 0.0f);
-    // set light or dark mode by default to light (=texture colors)
-    //int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
-    //glUniform1i(ourModeLocation, 1);
-
     mkRuleTexture();
 #if 0
     GLfloat mv[4];
@@ -224,14 +220,16 @@ extern "C" void setDarkMode() {
     LOGI("setDarkMode GL Graphics\n");
     // set dark mode (= inverted texture colors)
     int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
-    glUniform1i(ourModeLocation, 1);
+    glUniform1i(ourModeLocation, DARK_MODE);
+    mode = DARK_MODE;
 }
 
 extern "C" void setLightMode() {
     LOGI("setLightMode GL Graphics\n");
     // set light or dark mode by default to light (=texture colors)
     int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
-    glUniform1i(ourModeLocation, 0);
+    glUniform1i(ourModeLocation, LIGHT_MODE);
+    mode = LIGHT_MODE;
 }
 
 
@@ -315,6 +313,7 @@ nativeImage(double x, double y, double w, double h, unsigned char *b, unsigned c
  */
 {
     int width, height, nrChannels;
+    int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
     unsigned char *data = stbi_load_from_memory(b, (int) (e - b), &width, &height, &nrChannels, 0);
     if (data) {
         LOGI("image width=%d, height=%d nrChannels=%d\n", width, height, nrChannels);
@@ -349,9 +348,18 @@ nativeImage(double x, double y, double w, double h, unsigned char *b, unsigned c
 
         glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
         checkGlError("glVertexAttribPointer");
+        if (mode == DARK_MODE){
+            //set light mode
+            glUniform1i(ourModeLocation, LIGHT_MODE);
+        }
         glDrawArrays(GL_TRIANGLES, 0, 6);
         checkGlError("glDrawArrays");
         stbi_image_free(data);
+        // make sure that image is always rendered in correct colors and not inverted in dark mode
+        if (mode == DARK_MODE){
+            //set back to dark mode
+            glUniform1i(ourModeLocation, DARK_MODE);
+        }
     } else {
         LOGI("Can not read image %p", *b);
     }

@@ -118,11 +118,11 @@ public class HINTVIEWActivity extends AppCompatActivity {
         }, 80);
     }
 
-    /*@Override
+    @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         //check if theme is changed
         super.onConfigurationChanged(newConfig);
-        int background_color = mView.getContext().getResources().getColor(R.color.background_color);
+        /*int background_color = mView.getContext().getResources().getColor(R.color.background_color);
 
         Log.d("HINTVIEWActivity", "Configuration " + newConfig.toString());
         int currentNightMode = newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
@@ -138,16 +138,17 @@ public class HINTVIEWActivity extends AppCompatActivity {
                 break;
         }
          //HINTVIEWLib.draw(mView.width, mView.height, mView.scale * mView.xdpi, mView.scale * mView.ydpi, background_color);
-
+*/
         // Checks the orientation of the screen
-        *//*if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        /*int background_color = mView.getContext().getResources().getColor(R.color.background_color);
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             Log.d("HINTVIEWActivity", "orientation landscape");
             HINTVIEWLib.draw(mView.height, mView.width, mView.scale * mView.ydpi, mView.scale * mView.xdpi, background_color);
         } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             Log.d("HINTVIEWActivity", "orientation portrait");
             HINTVIEWLib.draw(mView.width, mView.height, mView.scale * mView.xdpi, mView.scale * mView.ydpi, background_color);
-        }*//*
-    }*/
+        }*/
+    }
 
     @Override
     protected void onPause() {
