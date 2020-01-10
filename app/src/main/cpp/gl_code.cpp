@@ -96,10 +96,11 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jdouble xdpi
     //hint_start("/storage/emulated/0/Download/paging.hnt");
     //hint_start("/storage/emulated/0/Download/math.hnt");
     //hint_start("/storage/emulated/0/Download/mfpreface.hnt");
-    hint_start("/storage/emulated/0/Download/bmp.hnt");
-    //hint_start("/storage/emulated/0/Download/png.hnt");
+    //hint_start("/storage/emulated/0/Download/bmp.hnt");
+    hint_start("/storage/emulated/0/Download/png.hnt");
     //hint_start("/storage/emulated/0/Download/display.hnt");
     //hint_start("/storage/emulated/0/Download/opentype.hnt");
+    //hint_start("/storage/emulated/0/Download/truetype.hnt");
     //hint_start("/storage/emulated/0/Download/ligature.hnt");
     //hint_start("/storage/emulated/0/Download/jpg.hnt");
 }
