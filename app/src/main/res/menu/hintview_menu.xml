@@ -2,8 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/item1"
-        android:title="Item 1" />
+        android:id="@+id/dark"
+        android:checkable="true"
+        android:title="Night Mode" />
 
     <item
         android:id="@+id/item2"

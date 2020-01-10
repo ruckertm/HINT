@@ -41,6 +41,7 @@ import static edu.hm.cs.hintview.HINTVIEWLib.lightMode;
 public class HINTVIEWActivity extends AppCompatActivity {
 
     HINTVIEWView mView;
+    int background_color;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +74,8 @@ public class HINTVIEWActivity extends AppCompatActivity {
                 hideToolbar(toolbar.getTranslationY() < 0);
             }
         });
+
+        background_color = mView.getContext().getResources().getColor(R.color.background_color);
 
         //example on how to get colors of color theme
         //int color = ContextCompat.getColor(this, R.color.toolbar_color);
@@ -162,6 +165,16 @@ public class HINTVIEWActivity extends AppCompatActivity {
         mView.onResume();
     }
 
+    private boolean isChecked = false;
+
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem checkable  = menu.findItem(R.id.dark);
+        checkable.setChecked(isChecked);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         new MenuInflater(this).inflate(R.menu.hintview_menu, menu);
@@ -172,8 +185,19 @@ public class HINTVIEWActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         super.onOptionsItemSelected(item);
         switch (item.getItemId()) {
-            case R.id.item1:
-                Log.d("HINTVIEWActivity", "onOptionsItemSelected: Item 1");
+            case R.id.dark:
+                Log.d("HINTVIEWActivity", "onOptionsItemSelected: dark" + item.isChecked());
+                if (item.isChecked()) {
+                    darkMode();
+                    background_color = (background_color & 0xFF000000) | (~background_color & 0x00FFFFFF);
+                }
+                else {
+                    lightMode();
+                    background_color = mView.getContext().getResources().getColor(R.color.background_color);
+                }
+                HINTVIEWLib.draw(mView.width, mView.height, mView.scale * mView.xdpi, mView.scale * mView.ydpi, background_color);
+                isChecked = !item.isChecked();
+                item.setChecked(isChecked);
                 return true;
             case R.id.item2:
                 Log.d("HINTVIEWActivity", "onOptionsItemSelected: Item 2");
