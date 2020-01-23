@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.hintview;
+package edu.hm.cs.hintview;
 /*
  * Copyright (C) 2008 The Android Open Source Project
  *
@@ -33,15 +33,20 @@ package com.android.hintview;
 
 
 import android.content.Context;
-import android.graphics.PixelFormat;
+import android.content.res.Configuration;
 import android.opengl.GLSurfaceView;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.View;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.util.DisplayMetrics;
-import android.view.WindowManager;
+import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
+import android.view.View;
+
+import androidx.annotation.Nullable;
+
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
@@ -52,57 +57,100 @@ import javax.microedition.khronos.opengles.GL10;
  * A simple GLSurfaceView sub-class that demonstrate how to perform
  * OpenGL ES 2.0 rendering into a GL Surface. Note the following important
  * details:
- *
+ * <p>
  * - The class must use a custom context factory to enable 2.0 rendering.
- *   See ContextFactory class definition below.
- *
+ * See ContextFactory class definition below.
+ * <p>
  * - The class must use a custom EGLConfigChooser to be able to select
- *   an EGLConfig that supports 2.0. This is done by providing a config
- *   specification to eglChooseConfig() that has the attribute
- *   EGL10.ELG_RENDERABLE_TYPE containing the EGL_OPENGL_ES2_BIT flag
- *   set. See ConfigChooser class definition below.
- *
+ * an EGLConfig that supports 2.0. This is done by providing a config
+ * specification to eglChooseConfig() that has the attribute
+ * EGL10.ELG_RENDERABLE_TYPE containing the EGL_OPENGL_ES2_BIT flag
+ * set. See ConfigChooser class definition below.
+ * <p>
  * - The class must select the surface's format, then choose an EGLConfig
- *   that matches it exactly (with regards to red/green/blue/alpha channels
- *   bit depths). Failure to do so would result in an EGL_BAD_MATCH error.
+ * that matches it exactly (with regards to red/green/blue/alpha channels
+ * bit depths). Failure to do so would result in an EGL_BAD_MATCH error.
  */
-class HINTVIEWView extends GLSurfaceView {
+public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener {
     private static String TAG = "HINTVIEWView";
     private static final boolean DEBUG = false;
     public static double xdpi, ydpi;
-    public static double scale=1.0;
+    public static double scale = 1.0;
     public static int width, height;
+    public static int background_color;
+    public static int mode = 0;
+    private GestureDetector touchGestureDetector;
+    private ScaleGestureDetector scaleGestureDetector;
 
     public HINTVIEWView(Context context) {
         super(context);
+
+        init(context, null, 0);
+    }
+
+    public HINTVIEWView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init(context, attrs, 0);
+    }
+
+    public HINTVIEWView(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs);
+        init(context, attrs, defStyle);
+    }
+
+    private void init(Context context, AttributeSet attrs, int defStyle) {
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        Log.w(TAG, String.format("Resolution xdpi=%f ydpi=%f\n", metrics.xdpi,metrics.ydpi));
-        xdpi=metrics.xdpi;
-        ydpi=metrics.ydpi;
+        Log.w(TAG, String.format("Resolution xdpi=%f ydpi=%f\n", metrics.xdpi, metrics.ydpi));
+        xdpi = metrics.xdpi;
+        ydpi = metrics.ydpi;
+        background_color = context.getResources().getColor(R.color.background_color);
+        int modeConfig = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        Log.d("HINTVIEWView", "currentNightMode: " + mode);
+        switch (modeConfig) {
+            case Configuration.UI_MODE_NIGHT_NO:
+                Log.d("HINTVIEWActivity", "lightMode");
+                mode = 0;
+                break;
+            case Configuration.UI_MODE_NIGHT_YES:
+                Log.d("HINTVIEWActivity", "darkMode");
+                mode = 1;
+                break;
+        }
         setEGLContextFactory(new ContextFactory());
-        setEGLConfigChooser( new ConfigChooser(5, 6, 5, 0, 0,0) );
+        setEGLConfigChooser(new ConfigChooser(5, 6, 5, 0, 0, 0));
         setRenderer(new Renderer());
         setRenderMode(RENDERMODE_WHEN_DIRTY);
-        setOnClickListener(HintClickListener);
-        setOnLongClickListener(HintLongClickListener);
+
+        // Add gesture detector
+        touchGestureDetector = new GestureDetector(context, new TouchGestureHandler(this));
+        scaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureHandler(this));
+        setOnTouchListener(this);
     }
-    // Create an anonymous implementation of OnClickListener
-    private OnClickListener HintClickListener = new OnClickListener() {
-        public void onClick(View v) {
 
-            scale=scale*0.95;
-            requestRender();
-        }
-    };
+    @Nullable
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Parcelable superState = super.onSaveInstanceState();
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("superState", superState);
+        bundle.putInt("curPos", HINTVIEWLib.getPos());
+        return bundle;
+    }
 
-    // Create an anonymous implementation of OnLongClickListener
-    private OnLongClickListener HintLongClickListener = new OnLongClickListener() {
-        public boolean onLongClick(View v) {
-            HINTVIEWLib.next();
-            requestRender();
-            return true;
-        }
-    };
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        Bundle bundle = (Bundle) state;
+        super.onRestoreInstanceState(bundle.getParcelable("superState"));
+        HINTVIEWLib.setPos(bundle.getInt("curPos"));
+    }
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        boolean s = scaleGestureDetector.onTouchEvent(motionEvent);
+        boolean t = touchGestureDetector.onTouchEvent(motionEvent);
+        Log.d(TAG, "onTouch: s: " + scaleGestureDetector.isInProgress() + ", t: " + t);
+        return t || scaleGestureDetector.isInProgress();
+    }
 
     private static class ContextFactory implements GLSurfaceView.EGLContextFactory {
 
@@ -111,7 +159,7 @@ class HINTVIEWView extends GLSurfaceView {
         public EGLContext createContext(EGL10 egl, EGLDisplay display, EGLConfig eglConfig) {
             Log.w(TAG, "creating OpenGL ES 2.0 context");
             checkEglError("Before eglCreateContext", egl);
-            int[] attrib_list = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL10.EGL_NONE };
+            int[] attrib_list = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL10.EGL_NONE};
             EGLContext context = egl.eglCreateContext(display, eglConfig, EGL10.EGL_NO_CONTEXT, attrib_list);
             checkEglError("After eglCreateContext", egl);
             return context;
@@ -146,13 +194,13 @@ class HINTVIEWView extends GLSurfaceView {
          */
         private static int EGL_OPENGL_ES2_BIT = 4;
         private static int[] s_configAttribs2 =
-        {
-            EGL10.EGL_RED_SIZE, 4,
-            EGL10.EGL_GREEN_SIZE, 4,
-            EGL10.EGL_BLUE_SIZE, 4,
-            EGL10.EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-            EGL10.EGL_NONE
-        };
+                {
+                        EGL10.EGL_RED_SIZE, 4,
+                        EGL10.EGL_GREEN_SIZE, 4,
+                        EGL10.EGL_BLUE_SIZE, 4,
+                        EGL10.EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+                        EGL10.EGL_NONE
+                };
 
         public EGLConfig chooseConfig(EGL10 egl, EGLDisplay display) {
 
@@ -173,7 +221,7 @@ class HINTVIEWView extends GLSurfaceView {
             egl.eglChooseConfig(display, s_configAttribs2, configs, numConfigs, num_config);
 
             if (DEBUG) {
-                 printConfigs(egl, display, configs);
+                printConfigs(egl, display, configs);
             }
             /* Now return the "best" one
              */
@@ -181,8 +229,8 @@ class HINTVIEWView extends GLSurfaceView {
         }
 
         public EGLConfig chooseConfig(EGL10 egl, EGLDisplay display,
-                EGLConfig[] configs) {
-            for(EGLConfig config : configs) {
+                                      EGLConfig[] configs) {
+            for (EGLConfig config : configs) {
                 int d = findConfigAttrib(egl, display, config,
                         EGL10.EGL_DEPTH_SIZE, 0);
                 int s = findConfigAttrib(egl, display, config,
@@ -196,9 +244,9 @@ class HINTVIEWView extends GLSurfaceView {
                 int r = findConfigAttrib(egl, display, config,
                         EGL10.EGL_RED_SIZE, 0);
                 int g = findConfigAttrib(egl, display, config,
-                            EGL10.EGL_GREEN_SIZE, 0);
+                        EGL10.EGL_GREEN_SIZE, 0);
                 int b = findConfigAttrib(egl, display, config,
-                            EGL10.EGL_BLUE_SIZE, 0);
+                        EGL10.EGL_BLUE_SIZE, 0);
                 int a = findConfigAttrib(egl, display, config,
                         EGL10.EGL_ALPHA_SIZE, 0);
 
@@ -209,7 +257,7 @@ class HINTVIEWView extends GLSurfaceView {
         }
 
         private int findConfigAttrib(EGL10 egl, EGLDisplay display,
-                EGLConfig config, int attribute, int defaultValue) {
+                                     EGLConfig config, int attribute, int defaultValue) {
 
             if (egl.eglGetConfigAttrib(display, config, attribute, mValue)) {
                 return mValue[0];
@@ -218,7 +266,7 @@ class HINTVIEWView extends GLSurfaceView {
         }
 
         private void printConfigs(EGL10 egl, EGLDisplay display,
-            EGLConfig[] configs) {
+                                  EGLConfig[] configs) {
             int numConfigs = configs.length;
             Log.w(TAG, String.format("%d configurations", numConfigs));
             for (int i = 0; i < numConfigs; i++) {
@@ -228,7 +276,7 @@ class HINTVIEWView extends GLSurfaceView {
         }
 
         private void printConfig(EGL10 egl, EGLDisplay display,
-                EGLConfig config) {
+                                 EGLConfig config) {
             int[] attributes = {
                     EGL10.EGL_BUFFER_SIZE,
                     EGL10.EGL_ALPHA_SIZE,
@@ -303,11 +351,11 @@ class HINTVIEWView extends GLSurfaceView {
             for (int i = 0; i < attributes.length; i++) {
                 int attribute = attributes[i];
                 String name = names[i];
-                if ( egl.eglGetConfigAttrib(display, config, attribute, value)) {
+                if (egl.eglGetConfigAttrib(display, config, attribute, value)) {
                     Log.w(TAG, String.format("  %s: %d\n", name, value[0]));
                 } else {
                     // Log.w(TAG, String.format("  %s: failed\n", name));
-                    while (egl.eglGetError() != EGL10.EGL_SUCCESS);
+                    while (egl.eglGetError() != EGL10.EGL_SUCCESS) ;
                 }
             }
         }
@@ -327,18 +375,18 @@ class HINTVIEWView extends GLSurfaceView {
 
         public void onDrawFrame(GL10 gl) {
 
-            HINTVIEWLib.draw(width,height,scale*xdpi,scale*ydpi);
+            HINTVIEWLib.draw(width, height, scale * xdpi, scale * ydpi, background_color);
         }
 
         public void onSurfaceChanged(GL10 gl, int w, int h) {
-            width=w;
-            height=h;
-            //HINTVIEWLib.change(w, h);
+            width = w;
+            height = h;
+            HINTVIEWLib.change(w, h);
         }
 
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 
-            HINTVIEWLib.create(xdpi, ydpi);
+            HINTVIEWLib.create(xdpi, ydpi, background_color, mode);
         }
     }
 

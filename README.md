@@ -30,7 +30,8 @@ Compile using Android Studio
 - install Android Studio [https://developer.android.com/studio/install](https://developer.android.com/studio/install)
 - set Android SDK Path correctly (accept Adroid Studio to modify project's local.properties file)
 - install NDK
-- go to Gradle Scripts local.properties, correct ndk.dir and sdk.dir
+  - In Android Studio: Tools -> SDK Manager -> SDK Tools -> NDK
+- go to Gradle Scripts local.properties, correct ndk.dir and sdk.dir, if there is no ndk.dir add it. Usually the ndk.dir is the sdk.dir appended by `\\ndk-bundle`
 - File -> Sync Project With Gradle Files
 - Run/Debug Configurations select Android App and make sure no errors are given
 
@@ -39,7 +40,7 @@ GLM
 
 Download https://github.com/g-truc/glm/releases/tag/0.9.9.5
 
-Move the contained GLM folder to ~/AppData/Local/Android/SDK/ndk-bundle/toolchains/llvm/prebuilt/windowsx86_64/sysroot/usr/include/glm
+Move the contained GLM folder (glm in glm) to ~/AppData/Local/Android/SDK/ndk-bundle/toolchains/llvm/prebuilt/windowsx86_64/sysroot/usr/include/glm
 
 - Run
 

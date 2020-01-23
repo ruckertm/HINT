@@ -24,12 +24,11 @@
 
 extern "C" {
 #include "fonts.h"
-#include "rendernative.h"
+#include "rendergl.h"
 #include "hinttop.h"
 #include "htex.h"
 #include "hpos.h"
 };
-
 
 
 #define  LOG_TAG    "libhintview"
@@ -38,57 +37,141 @@ extern "C" {
 
 
 extern "C" {
-JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_create(JNIEnv * env, jobject obj,  jdouble xdpi, jdouble ydpi);
-JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_change(JNIEnv * env, jobject obj,  jint width, jint height);
-JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_draw(JNIEnv * env, jobject obj, jint width, jint height, jdouble xdpi, jdouble ydpi);
-JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_next(JNIEnv * env, jobject obj);
+JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jdouble xdpi, jdouble ydpi,
+                                           jint background_color, jint mode);
+JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, jint height);
+JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jclass obj, jint width, jint height,
+                                         jdouble xdpi, jdouble ydpi, jint background_color);
+JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_next(JNIEnv *env, jclass obj);
+JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_prev(JNIEnv *env, jclass obj);
+JNIEXPORT int JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_getPos(JNIEnv *env, jclass obj);
+JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_setPos(JNIEnv *env, jclass obj, jint pos);
+JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_home(JNIEnv *env, jclass obj);
+JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_lightMode(JNIEnv *env, jclass obj);
+JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_darkMode(JNIEnv *env, jclass obj);
 };
 
 
-static void renderFrame(void) {
+static void renderFrame() {
     LOGI("Render Frame");
     nativeBlank();
     hint_page();
 }
 
 GLfloat hdpi, vdpi; // resolution of canvas
-// converting pixel to pointe and back
+// converting pixel to point and back
 #define px2pt(X)   (72.27f*(X)/hdpi)
 #define pt2px(T)   ((T)*hdpi/72.27f)
 
-JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_create(JNIEnv * env, jobject obj,  jdouble xdpi, jdouble ydpi)
-{   LOGI("create(xdpi=%f ydpi=%f)\n", xdpi, ydpi);
-    hdpi=xdpi;
-    vdpi=ydpi;
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jdouble xdpi, jdouble ydpi,
+                                           jint background_color, jint mode) {
+    LOGI("create(xdpi=%f ydpi=%f)\n", xdpi, ydpi);
+    hdpi = xdpi;
+    vdpi = ydpi;
     nativeInit();
-    nativeSetColors(0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 0.8f);
-    //hint_start("/sdcard/Download/head.hnt");
-    //hint_start("/storage/emulated/0/Download/image.hnt");
+    LOGI("change(background_color=%i)\n", background_color);
+
+//    double foreground_R = (foreground_color >> 16) & 0xff;
+//    double foreground_G = (foreground_color >> 8) & 0xff;
+//    double foreground_B = (foreground_color) & 0xff;
+    double background_R = (background_color >> 16) & 0xff;
+    double background_G = (background_color >> 8) & 0xff;
+    double background_B = (background_color) & 0xff;
+
+    nativeSetColors(0, 0, 0, background_R, background_G, background_B);
+    if (mode > 0){
+        setDarkMode();
+    } else{
+        setLightMode();
+    }
+    //nativeSetColors(0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 0.8f);
+    //hint_start("/storage/emulated/0/Download/paging.hnt");
     //hint_start("/storage/emulated/0/Download/math.hnt");
-    hint_start("/storage/emulated/0/Download/ueb2.hnt");
+    //hint_start("/storage/emulated/0/Download/ueb2.hnt");
+    //hint_start("/storage/emulated/0/Download/mfpreface.hnt");
+    //hint_start("/storage/emulated/0/Download/bmp.hnt");
+    hint_start("/storage/emulated/0/Download/png.hnt");
+    //hint_start("/storage/emulated/0/Download/display.hnt");
+    //hint_start("/storage/emulated/0/Download/opentype.hnt");
+    //hint_start("/storage/emulated/0/Download/truetype.hnt");
+    //hint_start("/storage/emulated/0/Download/ligature.hnt");
+    //hint_start("/storage/emulated/0/Download/jpg.hnt");
 }
 
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, jint height) {
+    LOGI("change(width=%d height=%d)\n", width, height);
 
-JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_change(JNIEnv * env, jobject obj,  jint width, jint height)
-{   LOGI("change(width=%d height=%d)\n", width, height);
-
-    nativeSetSize(width,height,hdpi);
+    nativeSetSize(width, height, hdpi);
 
     //renderFrame();
 }
 
-JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_draw(JNIEnv * env, jobject obj, jint width, jint height, jdouble xdpi, jdouble ydpi)
-{   LOGI("draw(width=%d height=%d xdpi=%f ydpi=%f))\n", width, height, xdpi, ydpi);
-    hdpi=xdpi;
-    vdpi=ydpi;
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jclass obj, jint width, jint height,
+                                         jdouble xdpi, jdouble ydpi, jint background_color) {
+    LOGI("draw(width=%d height=%d xdpi=%f ydpi=%f background_color=%d))\n", width, height, xdpi, ydpi, background_color);
+    hdpi = xdpi;
+    vdpi = ydpi;
 
-    nativeSetSize(width,height,hdpi);
+    double background_R = (background_color >> 16) & 0xff;
+    double background_G = (background_color >> 8) & 0xff;
+    double background_B = (background_color) & 0xff;
 
+    nativeSetColors(0, 0, 0, background_R, background_G, background_B);
+
+    nativeSetSize(width, height, hdpi);
     renderFrame();
 
 }
 
-JNIEXPORT void JNICALL Java_com_android_hintview_HINTVIEWLib_next(JNIEnv * env, jobject obj)
-{   LOGI("next()\n");
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_next(JNIEnv *env, jclass obj) {
+    LOGI("next()\n");
     hpos_next();
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_prev(JNIEnv *env, jclass obj) {
+    LOGI("prev()\n");
+    hpos_prev();
+}
+
+extern "C" JNIEXPORT int JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_getPos(JNIEnv *env, jclass obj) {
+    LOGI("getPos()\n");
+    return hpos_get_cur();
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_setPos(JNIEnv *env, jclass obj, jint pos) {
+    LOGI("setPos(%d)\n", pos);
+    /* TODO implement correctly */
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_home(JNIEnv *env, jclass obj) {
+    // go to first page
+    LOGI("hpos_home()\n");
+    hpos_home();
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_lightMode(JNIEnv *env, jclass obj) {
+    setLightMode();
+    renderFrame();
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_darkMode(JNIEnv *env, jclass obj) {
+    setDarkMode();
+    renderFrame();
 }
