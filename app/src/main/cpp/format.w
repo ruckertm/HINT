@@ -40,9 +40,9 @@
 \titletrue
 
 \def\setrevision$#1: #2 ${\gdef\lastrevision{#2}}
-\setrevision$Revision: 1715 $
+\setrevision$Revision: 1772 $
 \def\setdate$#1(#2) ${\gdef\lastdate{#2}}
-\setdate$Date: 2019-10-02 15:47:37 +0200 (Wed, 02 Oct 2019) $
+\setdate$Date: 2019-11-26 10:01:28 +0100 (Tue, 26 Nov 2019) $
 
 \null
 
@@ -1797,7 +1797,7 @@ using ``round to even'' and store the order of infinity in these bits.
 We define a union type \&{stch\_t} to simplify conversion.
 
 @<hint types@>=
-typedef enum { @+ normal=0, fil=1, fill=2, filll=3@+} order_t;
+typedef enum { @+ normal_o=0, fil_o=1, fill_o=2, filll_o=3@+} order_t;
 typedef struct {@+  float64_t f;@+ order_t o; @+} stretch_t;
 typedef union {@+float32_t f; @+ uint32_t u; @+} stch_t;
 @
@@ -1866,7 +1866,7 @@ void hput_stretch(stretch_t *s)
 @s stretch_t int
 @<parsing rules@>=
 
-order: PT {$$=normal;} | FIL  {$$=fil;}  @+| FILL  {$$=fill;} @+| FILLL  {$$=filll;};
+order: PT {$$=normal_o;} | FIL  {$$=fil_o;}  @+| FILL  {$$=fill_o;} @+| FILLL  {$$=filll_o;};
 
 stretch: number order { $$.f=$1; $$.o=$2; };
 @
@@ -1876,10 +1876,10 @@ stretch: number order { $$.f=$1; $$.o=$2; };
 @<write functions@>=
 void hwrite_order(order_t o)
 { switch (o)
-  { case normal: hwritef("pt"); @+break;
-    case fil: hwritef("fil"); @+break;
-    case fill: hwritef("fill"); @+break;
-    case filll: hwritef("filll"); @+break;
+  { case normal_o: hwritef("pt"); @+break;
+    case fil_o: hwritef("fil"); @+break;
+    case fill_o: hwritef("fill"); @+break;
+    case filll_o: hwritef("filll"); @+break;
     default: QUIT("Illegal order %d",o); @+ break;
   }
 }
@@ -4384,7 +4384,7 @@ content_node: start IMAGE image END { hput_tags($1,hput_image(&($3)));}
 @<write functions@>=
 void hwrite_image(image_t *x)
 { hwritef(" %u",x->n);
-  if (x->w!=0 ||x->h!=0) { hwrite_dimension(x->w); hwrite_dimension(x->w);}
+  if (x->w!=0 ||x->h!=0) { hwrite_dimension(x->w); hwrite_dimension(x->h);}
   hwrite_plus(&x->p);
   hwrite_minus(&x->m);
 }
@@ -4405,7 +4405,7 @@ HGET16((X).n);RNG("Section number",(X).n,3,max_section_no);  \
 if (I&b010) {HGET32((X).w);HGET32((X).h);@+} \
 else (X).w=(X).h=0;\
 if (I&b001) {HGET_STRETCH((X).p);HGET_STRETCH((X).m);@+}\
-else { (X).p.f=(X).m.f=0.0; (X).p.o=(X).m.o=normal;@+}\
+else { (X).p.f=(X).m.f=0.0; (X).p.o=(X).m.o=normal_o;@+}\
 hwrite_image(&(X));
 @
 
@@ -5356,8 +5356,8 @@ To read the banner, we have the function |hread_banner|; it returns |true| if su
 @
 @<common variables@>=
 int version=1, subversion=0;
-char banner[MAX_BANNER+1];
-int banner_size=0;
+char hbanner[MAX_BANNER+1];
+int hbanner_size=0;
 @
 \goodbreak
 \readcode\penalty+1000
@@ -5372,14 +5372,14 @@ bool hread_banner(char *magic)
   do {
     c =fgetc(hin);
     if (c!=EOF)
-      banner[i++]=(char)c;
+      hbanner[i++]=(char)c;
   } while (c!='\n' && c!=EOF && i<MAX_BANNER);
-  banner[i]=0;
-  tail=banner;
-  if (strncmp(magic,banner,4)!=0) QUIT("This is not a %s file",magic);
+  hbanner[i]=0;
+  tail=hbanner;
+  if (strncmp(magic,hbanner,4)!=0) QUIT("This is not a %s file",magic);
   else tail+=4;
-  banner_size=(int)strlen(banner);
-  if(banner[banner_size-1]!='\n') QUIT("Banner exceeds maximum size=0x%x",MAX_BANNER);
+  hbanner_size=(int)strlen(hbanner);
+  if(hbanner[hbanner_size-1]!='\n') QUIT("Banner exceeds maximum size=0x%x",MAX_BANNER);
   if (*tail!=' ') QUIT("Space expected after %s",magic);
   else tail++;
   version=strtol(tail,&tail,10);
@@ -5388,7 +5388,7 @@ bool hread_banner(char *magic)
   subversion=strtol(tail,&tail,10);
   if (*tail!=' ' && *tail!='\n') QUIT("Space expected after subversion number %d",subversion);
   MESSAGE("%s file version %d.%d:%s",magic,version, subversion, tail);
-  DBG(dbgdir,"banner size=0x%x\n",banner_size);
+  DBG(dbgdir,"banner size=0x%x\n",hbanner_size);
   return true;
 }
 @
@@ -5746,14 +5746,14 @@ void new_directory(uint32_t entries)
 
 The function |hset_entry| fills in the appropriate entry.
 @<common functions@>=
-void hset_entry(entry_t *e, uint16_t i, uint32_t size, uint32_t xsize, @|char *name)
+void hset_entry(entry_t *e, uint16_t i, uint32_t size, uint32_t xsize, @|char *file_name)
 { e->section_no=i;
   e->size=size; @+e->xsize=xsize;
-  if (name==NULL || *name==0)
+  if (file_name==NULL || *file_name==0)
     e->file_name=NULL;
   else
-    e->file_name=strdup(name);
-  DBG(dbgdir,"Creating entry %d: \"%s\" size=0x%x xsize=0x%x\n",@|i,name,size,xsize);
+    e->file_name=strdup(file_name);
+  DBG(dbgdir,"Creating entry %d: \"%s\" size=0x%x xsize=0x%x\n",@|i,file_name,size,xsize);
 }
 @
 
@@ -5847,9 +5847,9 @@ Here is the macro and function to read a directory\index{directory entry} entry:
 #define @[HGET_ENTRY(I,E)@] \
 { uint16_t i; \
   uint32_t s=0,xs=0; \
-  char *name; \
-  HGET16(i); HGET_SIZE(s,xs,I); HGET_STRING(name); @/\
-  hset_entry(&(E),i,s,xs,name); \
+  char *file_name; \
+  HGET16(i); HGET_SIZE(s,xs,I); HGET_STRING(file_name); @/\
+  hset_entry(&(E),i,s,xs,file_name); \
 }
 @
 
@@ -5889,9 +5889,9 @@ The name of the directory section must be the empty string.
 @<get functions@>=
 void hget_root(entry_t *root)
 { DBG(dbgbasic,"Get Root\n");
-  hget_file(banner_size,13); /* Big enough for the root entry*/
+  hget_file(hbanner_size,13); /* Big enough for the root entry*/
   hget_entry(root); 
-  root->pos=banner_size+(hpos-hstart);
+  root->pos=hbanner_size+(hpos-hstart);
   max_section_no=root->section_no;
   root->section_no=0;
   if (max_section_no<2) QUIT("Sections 0, 1, and 2 are mandatory");
@@ -6947,40 +6947,40 @@ max_default[glue_kind]=MAX_GLUE_DEFAULT;
 max_fixed[glue_kind]=fill_skip_no;
 
 glue_defaults[fil_skip_no].p.f=1.0;
-glue_defaults[fil_skip_no].p.o=fil;
+glue_defaults[fil_skip_no].p.o=fil_o;
 
 glue_defaults[fill_skip_no].p.f=1.0;
-glue_defaults[fill_skip_no].p.o=fill;@#
+glue_defaults[fill_skip_no].p.o=fill_o;@#
 
 glue_defaults[line_skip_no].w.w=1*ONE;
 glue_defaults[baseline_skip_no].w.w=12*ONE;
 
 glue_defaults[above_display_skip_no].w.w=12*ONE;
 glue_defaults[above_display_skip_no].p.f=3.0;
-glue_defaults[above_display_skip_no].p.o=normal;
+glue_defaults[above_display_skip_no].p.o=normal_o;
 glue_defaults[above_display_skip_no].m.f=9.0;
-glue_defaults[above_display_skip_no].m.o=normal;
+glue_defaults[above_display_skip_no].m.o=normal_o;
 
 glue_defaults[below_display_skip_no].w.w=12*ONE;
 glue_defaults[below_display_skip_no].p.f=3.0;
-glue_defaults[below_display_skip_no].p.o=normal;
+glue_defaults[below_display_skip_no].p.o=normal_o;
 glue_defaults[below_display_skip_no].m.f=9.0;
-glue_defaults[below_display_skip_no].m.o=normal;
+glue_defaults[below_display_skip_no].m.o=normal_o;
 
 glue_defaults[above_display_short_skip_no].p.f=3.0;
-glue_defaults[above_display_short_skip_no].p.o=normal;
+glue_defaults[above_display_short_skip_no].p.o=normal_o;
 
 glue_defaults[below_display_short_skip_no].w.w=7*ONE;
 glue_defaults[below_display_short_skip_no].p.f=3.0;
-glue_defaults[below_display_short_skip_no].p.o=normal;
+glue_defaults[below_display_short_skip_no].p.o=normal_o;
 glue_defaults[below_display_short_skip_no].m.f=4.0;
-glue_defaults[below_display_short_skip_no].m.o=normal;
+glue_defaults[below_display_short_skip_no].m.o=normal_o;
 
 glue_defaults[top_skip_no].w.w=10*ONE;
 glue_defaults[split_top_skip_no].w.w=10*ONE;
 
 glue_defaults[par_fill_skip_no].p.f=1.0;
-glue_defaults[par_fill_skip_no].p.o=fil;
+glue_defaults[par_fill_skip_no].p.o=fil_o;
 
 #define @[PRINT_GLUE(G)@] \
         @[printf("{{0x%x, %f, %f},{%f, %d},{%f, %d}}",\
@@ -7843,7 +7843,7 @@ case TAG(display_kind,b110): HTEG_DISPLAY(b110); @+ break;
 @<skip macros@>=
 #define @[HTEG_IMAGE(I,X)@] @/\
 if (I&b001) {HTEG_STRETCH((X).m);HTEG_STRETCH((X).p);@+}\
-else { (X).p.f=(X).m.f=0.0; (X).p.o=(X).m.o=normal;@+}\
+else { (X).p.f=(X).m.f=0.0; (X).p.o=(X).m.o=normal_o;@+}\
 if (I&b010) {HTEG32((X).h);HTEG32((X).w);@+} \
 else (X).w=(X).h=0;\
 HTEG16((X).n);
@@ -8066,16 +8066,16 @@ extern uint16_t max_section_no, section_no;
 extern size_t dir_size,def_size,content_size;
 extern uint8_t *hpos, *hend, *hstart;
 extern debugmode debugflags;
-extern int banner_size;
+extern int hbanner_size;
 extern FILE *hin, *hout, *hlog;
 extern bool option_utf8, option_hex, option_force, option_compress;
-extern char banner[MAX_BANNER+1];
+extern char hbanner[MAX_BANNER+1];
 extern void hallocate_data(void);
 extern bool xdimen_eq(xdimen_t *x, xdimen_t *y);
 extern void new_directory(uint32_t size);
 extern void new_output_buffers(void);
-extern void new_section(uint32_t i, char *name);
-extern void hset_entry(entry_t *e, uint16_t i, uint32_t size, @| uint32_t xsize, char *name);
+extern void new_section(uint32_t i, char *file_name);
+extern void hset_entry(entry_t *e, uint16_t i, uint32_t size, @| uint32_t xsize, char *file_name);
 extern void hset_max(void);
 extern void new_max_list(void);
 extern void new_content(void);

@@ -113,8 +113,8 @@ int next_range= 1,max_range;
 	#line 5357 "format.w"
 
 int version= 1,subversion= 0;
-char banner[MAX_BANNER+1];
-int banner_size= 0;
+char hbanner[MAX_BANNER+1];
+int hbanner_size= 0;
 	/*:262*/	/*265:*/
 	#line 5419 "format.w"
 
@@ -163,14 +163,14 @@ i= 0;
 do{
 c= fgetc(hin);
 if(c!=EOF)
-banner[i++]= (char)c;
+hbanner[i++]= (char)c;
 }while(c!='\n'&&c!=EOF&&i<MAX_BANNER);
-banner[i]= 0;
-tail= banner;
-if(strncmp(magic,banner,4)!=0)QUIT("This is not a %s file",magic);
+hbanner[i]= 0;
+tail= hbanner;
+if(strncmp(magic,hbanner,4)!=0)QUIT("This is not a %s file",magic);
 else tail+= 4;
-banner_size= (int)strlen(banner);
-if(banner[banner_size-1]!='\n')QUIT("Banner exceeds maximum size=0x%x",MAX_BANNER);
+hbanner_size= (int)strlen(hbanner);
+if(hbanner[hbanner_size-1]!='\n')QUIT("Banner exceeds maximum size=0x%x",MAX_BANNER);
 if(*tail!=' ')QUIT("Space expected after %s",magic);
 else tail++;
 version= strtol(tail,&tail,10);
@@ -179,7 +179,7 @@ else tail++;
 subversion= strtol(tail,&tail,10);
 if(*tail!=' '&&*tail!='\n')QUIT("Space expected after subversion number %d",subversion);
 MESSAGE("%s file version %d.%d:%s",magic,version,subversion,tail);
-DBG(dbgdir,"banner size=0x%x\n",banner_size);
+DBG(dbgdir,"banner size=0x%x\n",hbanner_size);
 return true;
 }
 	/*:263*/	/*264:*/
@@ -212,14 +212,14 @@ dir[0].section_no= 0;dir[1].section_no= 1;dir[2].section_no= 2;
 	/*:282*/	/*283:*/
 	#line 5748 "format.w"
 
-void hset_entry(entry_t*e,uint16_t i,uint32_t size,uint32_t xsize,char*name)
+void hset_entry(entry_t*e,uint16_t i,uint32_t size,uint32_t xsize,char*file_name)
 {e->section_no= i;
 e->size= size;e->xsize= xsize;
-if(name==NULL||*name==0)
+if(file_name==NULL||*file_name==0)
 e->file_name= NULL;
 else
-e->file_name= strdup(name);
-DBG(dbgdir,"Creating entry %d: \"%s\" size=0x%x xsize=0x%x\n",i,name,size,xsize);
+e->file_name= strdup(file_name);
+DBG(dbgdir,"Creating entry %d: \"%s\" size=0x%x xsize=0x%x\n",i,file_name,size,xsize);
 }
 	/*:283*/	/*298:*/
 	#line 6162 "format.w"

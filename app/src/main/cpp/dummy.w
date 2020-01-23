@@ -258,21 +258,23 @@ to specify a file name if |output| were specified here.
 
 @f type true /*but `|type|' will not be treated as a reserved word*/
 
-@(textypes.h@>=
+@ @(texdefs.h@>=
+#ifndef _TEXDEF_H_
+#define _TEXDEF_H_
+@<Compiler directives@>@;
+#endif
+
+@ @(textypes.h@>=
 #ifndef _TEX_TYPES_H_
 #define _TEX_TYPES_H_
-#include "basetypes.h"
-@<Compiler directives@>@;
 @<Constants in the outer block@>@;
 @<Types in the outer block@>@;
 #endif
 
-@ As a replacement for the type and macro definitions, the header file {\tt textypes.h} is included.
-The  header file {\tt texfuncs.h} contains a prototype for the new function |display_node|.
+@ As a replacement for the type and macro definitions, the header files are now included:
 @p
-#include <math.h>
+#include "texdefs.h"
 #include "textypes.h"
-#include "texfuncs.h"
 @<Global variables@>@;
 @#
 void initialize(void) /*this procedure gets things started properly*/
@@ -348,10 +350,8 @@ Arithmetic overflow will be detected in all cases.
 @s to   do
 
 @<Compiler directives@>=
-#include <stdint.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "basetypes.h"
+#include "error.h"
 #include <string.h>
 #include <math.h>
 
@@ -367,26 +367,7 @@ typedef float float32_t;
 #error  float type must have size 4
 #endif
 
-@ @(texdef.h@>=
-#ifndef _TEXDEF_H_
-#define _TEXDEF_H_
 @h
-
-#define odd(X)       ((X)&1)
-#define chr(X)       ((unsigned char)(X))
-#define ord(X)       ((int)(X))
-#define abs(X)       ((X)>-(X)?(X):-(X))
-#define round(X)     ((int)((X)>=0.0?floor((X)+0.5):ceil((X)-0.5)))
-
-#ifdef @!DEBUG
-#define incr_dyn_used @[incr(dyn_used)@]
-#define decr_dyn_used @[decr(dyn_used)@]
-#else
-#define incr_dyn_used
-#define decr_dyn_used
-#endif
-
-#endif
 
 @ This \TeX\ implementation conforms to the rules of the {\sl Pascal User
 @:PASCAL}{\PASCAL@>
@@ -425,13 +406,13 @@ in production versions of \TeX.
 @^system dependencies@>
 
 @<Constants...@>=
-enum {@+@!mem_max=30000@+}; /*greatest index in \TeX's internal |mem| array;
+enum {@+@!mem_max=65534@+}; /*greatest index in \TeX's internal |mem| array;
   must be strictly less than |max_halfword|;
   must be equal to |mem_top| in \.{INITEX}, otherwise | >= mem_top|*/
 enum {@+@!mem_min=0@+}; /*smallest index in \TeX's internal |mem| array;
   must be |min_halfword| or more;
   must be equal to |mem_bot| in \.{INITEX}, otherwise | <= mem_bot|*/
-enum {@+@!buf_size=500@+}; /*maximum number of characters simultaneously present in
+enum {@+@!buf_size=1024@+}; /*maximum number of characters simultaneously present in
   current lines of open files and in control sequences between
   \.{\\csname} and \.{\\endcsname}; must not exceed |max_halfword|*/
 enum {@+@!error_line=72@+}; /*width of context lines on terminal error messages*/
@@ -446,23 +427,22 @@ enum {@+@!font_max=75@+}; /*maximum internal font number; must not exceed |max_q
 enum {@+@!font_mem_size=20000@+}; /*number of words of |font_info| for all fonts*/
 enum {@+@!param_size=60@+}; /*maximum number of simultaneous macro parameters*/
 enum {@+@!nest_size=40@+}; /*maximum number of semantic levels simultaneously active*/
-enum {@+@!max_strings=3000@+}; /*maximum number of strings; must not exceed |max_halfword|*/
-enum {@+@!string_vacancies=8000@+}; /*the minimum number of characters that should be
+enum {@+@!max_strings=15000@+}; /*maximum number of strings; must not exceed |max_halfword|*/
+enum {@+@!string_vacancies=75000@+}; /*the minimum number of characters that should be
   available for the user's control sequences and font names,
   after \TeX's own error messages are stored*/
-enum {@+@!pool_size=32000@+}; /*maximum number of characters in strings, including all
+enum {@+@!pool_size=200000@+}; /*maximum number of characters in strings, including all
   error messages and help texts, and the names of all fonts and
   control sequences; must exceed |string_vacancies| by the total
   length of \TeX's own strings, which is currently about 23000*/
 enum {@+@!save_size=600@+}; /*space for saving values outside of current group; must be
   at most |max_halfword|*/
-enum {@+@!trie_size=8000@+}; /*space for hyphenation patterns; should be larger for
+enum {@+@!trie_size=20000@+}; /*space for hyphenation patterns; should be larger for
   \.{INITEX} than it is in production versions of \TeX*/
 enum {@+@!trie_op_size=500@+}; /*space for ``opcodes'' in the hyphenation patterns*/
-enum {@+@!dvi_buf_size=800@+}; /*size of the output buffer; must be a multiple of 8*/
-enum {@+@!file_name_size=40@+}; /*file names shouldn't be longer than this*/
-@
-@<Global variables@>=
+enum {@+@!dvi_buf_size=16384@+}; /*size of the output buffer; must be a multiple of 8*/
+enum {@+@!file_name_size=255@+}; /*file names shouldn't be longer than this*/
+@ @<Global variables@>=
 const char *@!pool_name="TeXformats:TEX.POOL                     ";
    /*string of length |file_name_size|; tells where the string pool appears*/
 @.TeXformats@>
@@ -480,14 +460,14 @@ emphasize this distinction.
 
 @d mem_bot	0 /*smallest index in the |mem| array dumped by \.{INITEX};
   must not be less than |mem_min|*/
-@d mem_top	30000 /*largest index in the |mem| array dumped by \.{INITEX};
+@d mem_top	mem_max /*largest index in the |mem| array dumped by \.{INITEX};
   must be substantially larger than |mem_bot|
   and not greater than |mem_max|*/
 @d font_base	0 /*smallest internal font number; must not be less
   than |min_quarterword|*/
-@d hash_size	2100 /*maximum number of control sequences; it should be at most
+@d hash_size	15000 /*maximum number of control sequences; it should be at most
   about |(mem_max-mem_min)/(double)10|*/
-@d hash_prime	1777 /*a prime number equal to about 85\pct! of |hash_size|*/
+@d hash_prime	12721 /*a prime number equal to about 85\pct! of |hash_size|*/
 @d hyph_size	307 /*another prime; the number of \.{\\hyphenation} exceptions*/
 @^system dependencies@>
 
@@ -598,7 +578,10 @@ that |text_char| consists of the elements |chr(first_text_char)| through
 adjusted if necessary.
 @^system dependencies@>
 
-@d text_char	unsigned char /*the data type of characters in text files*/
+@<Types in the outer block@>=
+typedef unsigned char text_char; /*the data type of characters in text files*/
+
+@
 @d first_text_char	0 /*ordinal number of the smallest element of |text_char|*/
 @d last_text_char	255 /*ordinal number of the largest element of |text_char|*/
 
@@ -883,27 +866,27 @@ bool w_open_out(word_file *f)
 {@+rewrite((*f), name_of_file,"wb");return rewrite_OK((*f));
 }
 
-@ Files can be closed with the \ph\ routine `|close(f)|', which
+@ Files can be closed with the \ph\ routine `|pascal_close(f)|', which
 @:PASCAL H}{\ph@>
 @^system dependencies@>
 should be used when all input or output with respect to |f| has been completed.
 This makes |f| available to be opened again, if desired; and if |f| was used for
-output, the |close| operation makes the corresponding external file appear
+output, the |pascal_close| operation makes the corresponding external file appear
 on the user's area, ready to be read.
 
 These procedures should not generate error messages if a file is
 being closed before it has been successfully opened.
 
 @p void a_close(alpha_file *f) /*close a text file*/
-{@+close((*f));
+{@+pascal_close((*f));
 }
 @#
 void b_close(byte_file *f) /*close a binary file*/
-{@+close((*f));
+{@+pascal_close((*f));
 }
 @#
 void w_close(word_file *f) /*close a word file*/
-{@+close((*f));
+{@+pascal_close((*f));
 }
 
 @ Binary input and output are done with \PASCAL's ordinary |get| and |put|
@@ -1100,11 +1083,11 @@ if the system permits them.
 @p bool init_terminal(void) /*gets the terminal input started*/
 {@+
 t_open_in;
-loop@+{@+wake_up_terminal;write(term_out,"**");update_terminal;
+loop@+{@+wake_up_terminal;pascal_write(term_out,"**");update_terminal;
 @.**@>
   if (!input_ln(&term_in, true))  /*this shouldn't happen*/
     {@+write_ln(term_out);
-    write(term_out,"! End of file on the terminal... why?");
+    pascal_write(term_out,"! End of file on the terminal... why?");
 @.End of file on the terminal@>
     return false;
     }
@@ -1163,7 +1146,7 @@ we access the string pool only via macros that can easily be redefined.
 @d so(X)	X /*convert from |packed_ASCII_code| to |ASCII_code|*/
 
 @<Types...@>=
-typedef uint16_t pool_pointer; /*for variables that point into |str_pool|*/
+typedef uint32_t pool_pointer; /*for variables that point into |str_pool|*/
 typedef uint16_t str_number; /*for variables that point into |str_start|*/
 typedef uint8_t packed_ASCII_code; /*elements of |str_pool| array*/
 
@@ -1369,7 +1352,7 @@ else bad_pool("! I can't read TEX.POOL.")
 @ @<Read one string...@>=
 {@+if (eof(pool_file)) bad_pool("! TEX.POOL has no check sum.");
 @.TEX.POOL has no check sum@>
-read(pool_file, m);@+read(pool_file, n); /*read two digits of string length*/
+pascal_read(pool_file, m); pascal_read(pool_file, n); /*read two digits of string length*/
 if (m== '*' ) @<Check the pool check sum@>@;
 else{@+if ((xord[m] < '0')||(xord[m] > '9')||@|
       (xord[n] < '0')||(xord[n] > '9'))
@@ -1380,7 +1363,7 @@ else{@+if ((xord[m] < '0')||(xord[m] > '9')||@|
     bad_pool("! You have to increase POOLSIZE.");
 @.You have to increase POOLSIZE@>
   for (k=1; k<=l; k++)
-    {@+if (eoln(pool_file)) m= ' ' ;@+else read(pool_file, m);
+    {@+if (eoln(pool_file)) m= ' ' ;@+else pascal_read(pool_file, m);
     append_char(xord[m]);
     }
   read_ln(pool_file);g=make_string();
@@ -1399,7 +1382,7 @@ loop@+{@+if ((xord[n] < '0')||(xord[n] > '9'))
 @.TEX.POOL check sum...@>
   a=10*a+xord[n]-'0';
   if (k==9) goto done;
-  incr(k);read(pool_file, n);
+  incr(k);pascal_read(pool_file, n);
   }
 done: if (a!=0) bad_pool("! TEX.POOL doesn't match; TANGLE me again.");
 @.TEX.POOL doesn't match@>
@@ -1484,63 +1467,74 @@ by changing |wterm|, |wterm_ln|, and |wterm_cr| in this section.
 #define reset(file,name,mode)   @[((file).f=fopen((char *)(name)+1,mode),\
                                  (file).f!=NULL?get(file):0)@]
 #define rewrite(file,name,mode) @[((file).f=fopen((char *)(name)+1,mode))@]
-#define close(file)    @[fclose((file).f)@]
+#define pascal_close(file)    @[fclose((file).f)@]
 #define eof(file)    @[feof((file).f)@]
 #define eoln(file)    @[((file).d=='\n'||eof(file))@]
 #define erstat(file)   @[((file).f==NULL?-1:ferror((file).f))@]
 
-#define read(file,x) @[((x)=(file).d,get(file))@]
+#define pascal_read(file,x) @[((x)=(file).d,get(file))@]
 #define read_ln(file)  @[do get(file); while (!eoln(file))@]
 
-#define write(file, format,...)    @[fprintf(file.f,format,## __VA_ARGS__)@]
-#define write_ln(file,...)	   @[write(file,__VA_ARGS__"\n")@]
+#define pascal_write(file, format,...)    @[fprintf(file.f,format,## __VA_ARGS__)@]
+#define write_ln(file,...)	   @[pascal_write(file,__VA_ARGS__"\n")@]
 
-#define wterm(format,...)	@[write(term_out,format, ## __VA_ARGS__)@]
+#define wterm(format,...)	@[pascal_write(term_out,format, ## __VA_ARGS__)@]
 #define wterm_ln(format,...)	@[wterm(format "\n", ## __VA_ARGS__)@]
-#define wterm_cr	        @[write(term_out,"\n")@]
-#define wlog(format, ...)	@[write(log_file,format, ## __VA_ARGS__)@]
+#define wterm_cr	        @[pascal_write(term_out,"\n")@]
+#define wlog(format, ...)	@[pascal_write(log_file,format, ## __VA_ARGS__)@]
 #define wlog_ln(format, ...)   @[wlog(format "\n", ## __VA_ARGS__)@]
-#define wlog_cr	        @[write(log_file,"\n")@]
+#define wlog_cr	        @[pascal_write(log_file,"\n")@]
 
-@ @(hprint.c@>=
-#include <math.h>
-#include "htex.h"
-#include "texdef.h"
+@ To end a line of text output, we call |print_ln|.
 
-#define round(X)     ((int)((X)>=0.0?floor((X)+0.5):ceil((X)-0.5)))
-#define odd(X)       ((X)&1)
+@(libtex.c@>=
+#include "texdefs.h"
+#include "libtex.h"
 
+static int @!file_offset=0;/*the number of characters on the current file line*/
+static int @!tally=0; /*the number of characters recently printed*/
 
-typedef uint16_t pool_pointer; /*for variables that point into |str_pool|*/
-typedef uint16_t str_number; /*for variables that point into |str_start|*/
-typedef uint8_t packed_ASCII_code; /*elements of |str_pool| array*/
-typedef uint8_t ASCII_code; /*eight-bit numbers*/
-enum {@+@!max_print_line=79@+}; /*width of longest text lines output; should be at least 60*/
-
-void print_char(ASCII_code @!s);
-
-@<prepare for string pool initialization@>@;
-packed_ASCII_code @!str_pool[]= @<|str_pool| initialization@>; /*the characters*/
-pool_pointer @!str_start[]= {@<|str_start| initialization@>}; /*the starting pointers*/
-pool_pointer @!pool_ptr=@<|pool_ptr| initialization@>; /*first unused position in |str_pool|*/
-str_number @!str_ptr=@<|str_ptr| initialization@>; /*number of the current string being created*/
-pool_pointer @!init_pool_ptr; /*the starting value of |pool_ptr|*/
-str_number @!init_str_ptr; /*the starting value of |str_ptr|*/
-
-int @!depth_threshold=200; /*maximum nesting depth in box displays*/
-int @!breadth_max=200; /*maximum number of items shown at the same list level*/
-static int depth_level=0; /*current nesting level of |show_node_list|*/
-
-
-uint8_t @!selector=log_only; /*where to print a message*/
-uint8_t @!dig[23]; /*digits in a number being output*/
-int @!tally=0; /*the number of characters recently printed*/
-int @!term_offset=0, file_offset=0;  /*the number of characters on the current file line*/
 void print_ln(void) /*prints an end-of-line*/
-{ putc('\n',hlog); file_offset=0;
+{ @+putc('\n',hlog); file_offset=0;
 }
 
-@<Basic printing procedures@>@;
+void print_char(ASCII_code @!s) /*prints a single character*/
+{@+putc(s,hlog); file_offset++; tally++;
+  if (file_offset==max_print_line) print_ln();
+}
+
+void print_nl(char *@!s) /*prints string |s| at beginning of line*/
+{@+if (file_offset > 0) print_ln();
+print_str(s);
+}
+
+void print(int @!s);
+
+void print_esc(str_number @!s) /*prints escape character, then |s|*/
+{ @+print_char('\\');
+  print(s);
+}
+
+void print_int(int @!n) /*prints an integer in decimal form*/
+{ @+int k=fprintf(hlog,"%d",n);
+  file_offset+=k;@+ tally+=k;
+  if (file_offset==max_print_line) print_ln();
+}
+
+@ @<Basic print...@>=
+void print_ln(void) /*prints an end-of-line*/
+{@+switch (selector) {
+case term_and_log: {@+wterm_cr;wlog_cr;
+  term_offset=0;file_offset=0;
+  } @+break;
+case log_only: {@+wlog_cr;file_offset=0;
+  } @+break;
+case term_only: {@+wterm_cr;term_offset=0;
+  } @+break;
+case no_print: case pseudo: case new_string: do_nothing;@+break;
+default:write_ln(write_file[selector]);
+} @/
+}  /*|tally| is not affected*/
 
 @ The |print_char| procedure sends one character to the desired destination,
 using the |xchr| array to map it into an external character compatible with
@@ -1548,8 +1542,34 @@ using the |xchr| array to map it into an external character compatible with
 
 @<Basic printing...@>=
 void print_char(ASCII_code @!s) /*prints a single character*/
-{@+putc(s,hlog); file_offset++; tally++;
+{@+
+if (@<Character |s| is the current new-line character@>)
+ if (selector < pseudo)
+  {@+print_ln();return;
+  }
+switch (selector) {
+case term_and_log: {@+wterm("%c",xchr[s]);wlog("%c",xchr[s]);
+  incr(term_offset);incr(file_offset);
+  if (term_offset==max_print_line)
+    {@+wterm_cr;term_offset=0;
+    }
+  if (file_offset==max_print_line)
+    {@+wlog_cr;file_offset=0;
+    }
+  } @+break;
+case log_only: {@+wlog("%c",xchr[s]);incr(file_offset);
   if (file_offset==max_print_line) print_ln();
+  } @+break;
+case term_only: {@+wterm("%c",xchr[s]);incr(term_offset);
+  if (term_offset==max_print_line) print_ln();
+  } @+break;
+case no_print: do_nothing;@+break;
+case pseudo: if (tally < trick_count) trick_buf[tally%error_line]=s;@+break;
+case new_string: {@+if (pool_ptr < pool_size) append_char(s);
+  } @+break; /*we drop characters if the string space is full*/
+default:pascal_write(write_file[selector],"%c", xchr[s]);
+} @/
+incr(tally);
 }
 
 @ An entire string is output by calling |print|. Note that if we are outputting
@@ -1560,7 +1580,19 @@ routine when it knows that this is safe. (The present implementation
 assumes that it is always safe to print a visible ASCII character.)
 @^system dependencies@>
 
-@<Basic print...@>=
+@(libtex.c@>=
+
+@<prepare for string pool initialization@>@;
+packed_ASCII_code @!str_pool[]= @<|str_pool| initialization@>; /*the characters*/
+pool_pointer @!str_start[]= {@<|str_start| initialization@>}; /*the starting pointers*/
+pool_pointer @!pool_ptr=@<|pool_ptr| initialization@>; /*first unused position in |str_pool|*/
+str_number @!str_ptr=@<|str_ptr| initialization@>; /*number of the current string being created*/
+pool_pointer @!init_pool_ptr; /*the starting value of |pool_ptr|*/
+str_number @!init_str_ptr; /*the starting value of |str_ptr|*/
+
+unsigned int @!depth_threshold=200; /*maximum nesting depth in box displays*/
+int @!breadth_max=200; /*maximum number of items shown at the same list level*/
+
 void print(int @!s) /*prints string |s|*/
 {@+
 pool_pointer j; /*current character code position*/
@@ -1605,7 +1637,8 @@ string appears at the beginning of a new line.
 
 @<Basic print...@>=
 void print_nl(char *@!s) /*prints string |s| at beginning of line*/
-{@+if (file_offset > 0) print_ln();
+{@+if (((term_offset > 0)&&(odd(selector)))||@|
+  ((file_offset > 0)&&(selector >= log_only))) print_ln();
 print_str(s);
 }
 
@@ -1614,8 +1647,10 @@ the user's escape character (which is usually a backslash).
 
 @<Basic print...@>=
 void print_esc(str_number @!s) /*prints escape character, then |s|*/
-{ print_char('\\');
-  slow_print(s);
+{@+int c; /*the escape character code*/
+@<Set variable |c| to the current escape character@>;
+if (c >= 0) if (c < 256) print(c);
+slow_print(s);
 }
 
 @ An array of digits in the range |0 dotdot 15| is printed by |print_the_digs|.
@@ -1709,8 +1744,7 @@ loop@+{@+while (n >= v)
 @ The |print| subroutine will not print a string that is still being
 created. The following procedure will.
 
-@ @(hprint.c@>=
- void print_current_string(void) /*prints a yet-unmade string*/
+@p void print_current_string(void) /*prints a yet-unmade string*/
 {@+pool_pointer j; /*points to current character code*/
 j=str_start[str_ptr];
 while (j < pool_ptr)
@@ -2092,14 +2126,9 @@ print_err("Emergency stop");help1(s);succumb;
 @ Here is the most dreaded error message.
 
 @<Error hand...@>=
+@ @(libtex.c@>=
 void overflow(char *@!s, int @!n) /*stop due to finiteness*/
-{@+normalize_selector();
-print_err("TeX capacity exceeded, sorry [");
-@.TeX capacity exceeded ...@>
-print_str(s);print_char('=');print_int(n);print_char(']');
-help2("If you really absolutely need more capacity,")@/
-  ("you can ask a wizard to enlarge me.");
-succumb;
+{@+ QUIT("Capacity exceeded, sorry [%s=%d=0x%X]\n",s,n,n);@+
 }
 
 @ The program might sometime run completely amok, at which point there is
@@ -2111,21 +2140,10 @@ help to pinpoint the problem.
 @^dry rot@>
 
 @<Error hand...@>=
+@ @(libtex.c@>=
 void confusion(str_number @!s)
    /*consistency check violated; |s| tells where*/
-{@+normalize_selector();
-if (history < error_message_issued)
-  {@+print_err("This can't happen (");print(s);print_char(')');
-@.This can't happen@>
-  help1("I'm broken. Please show this to someone who can fix can fix");
-  }
-else{@+print_err("I can't go on meeting you like this");
-@.I can't go on...@>
-  help2("One of your faux pas seems to have wounded me deeply...")@/
-    ("in fact, I'm barely conscious. Please fix it and try again.");
-  }
-succumb;
-}
+{@+ QUIT("This can't happen(%.*s)",length(s),str_pool+str_start[s]);@+ }
 
 @ Users occasionally want to interrupt \TeX\ while it's running.
 If the \PASCAL\ runtime system allows this, one can implement
@@ -2189,14 +2207,7 @@ apply for |%| as well as for |/|.)
 @ Here is a routine that calculates half of an integer, using an
 unambiguous convention with respect to signed odd numbers.
 
-@(harith.c@>=
-#include "htex.h"
-#include "texdef.h"
-
-typedef uint32_t nonnegative_integer; /*$0\L x<2^{31}$*/
-
-bool @!arith_error; /*has arithmetic overflow occurred recently?*/
-scaled @!rem; /*amount subtracted to get an exact division*/
+@(libtex.c@>=
 
 int half(int @!x)
 {@+if (odd(x)) return(x+1)/2;
@@ -2241,7 +2252,7 @@ they form a fraction~$f$ in the range $s-\delta\L10\cdot2^{16}f<s$.
 We can stop if and only if $f=0$ satisfies this condition; the loop will
 terminate before $s$ can possibly become zero.
 
-@ @(hprint.c@>=
+@ @(libtex.c@>=
    void print_scaled(scaled @!s) /*prints scaled real, rounded to five
   digits*/
 {@+scaled delta; /*amount of allowable inaccuracy*/
@@ -2282,6 +2293,7 @@ instead of reporting errors directly to the user. Another global variable,
 |rem|, holds the remainder after a division.
 
 @<Glob...@>=
+@ @(libtex.c@>=
 bool @!arith_error; /*has arithmetic overflow occurred recently?*/
 scaled @!rem; /*amount subtracted to get an exact division*/
 
@@ -2305,7 +2317,7 @@ else{@+arith_error=true;return 0;
 
 @ We also need to divide scaled dimensions by integers.
 
-@(harith.c@>=
+@(libtex.c@>=
 scaled x_over_n(scaled @!x, int @!n)
 {@+bool negative; /*should |rem| be negated?*/
 scaled x_over_n; negative=false;
@@ -2331,7 +2343,7 @@ by~|d|, in separate operations, since overflow might well occur; and it
 would be too inaccurate to divide by |d| and then multiply by |n|. Hence
 this subroutine simulates 1.5-precision arithmetic.
 
-@(harith.c@>=
+@(libtex.c@>=
 scaled xn_over_d(scaled @!x, int @!n, int @!d)
 {@+bool positive; /*was |x >= 0|?*/
 nonnegative_integer @!t, @!u, @!v; /*intermediate quantities*/
@@ -2368,7 +2380,7 @@ computing at most 1095 distinct values, but that is plenty.
 
 @d inf_bad	10000 /*infinitely bad value*/
 
-@(harith.c@>=
+@(libtex.c@>=
 halfword badness(scaled @!t, scaled @!s) /*compute badness, given |t >= 0|*/
 {@+int r; /*approximation to $\alpha t/s$, where $\alpha^3\approx
   100\cdot2^{18}$*/
@@ -2536,16 +2548,22 @@ typedef struct {@+FILE *f;@+memory_word@,d;@+} word_file;
 
 @ When debugging, we may want to print a |memory_word| without knowing
 what type it is; so we print it in all modes.
+@^dirty \PASCAL@>@^debugging@>
 
-@(hmem.c@>=
-#include "htex.h"
-#include "texdef.h"
-
-@<Memory variables@>@;
+@p
+#ifdef @!DEBUG
 void print_word(memory_word @!w)
    /*prints |w| in all ways*/
-{@+ MESSAGE("0x%08X, %d, %f\n",w.i, w.i, w.gr);
+{@+print_int(w.i);print_char(' ');@/
+print_scaled(w.sc);print_char(' ');@/
+print_scaled(round(unity*float(w.gr)));print_ln();@/
+@^real multiplication@>
+print_int(w.hh.lh);print_char('=');print_int(w.hh.b0);print_char(':');
+print_int(w.hh.b1);print_char(';');print_int(w.hh.rh);print_char(' ');@/
+print_int(w.qqqq.b0);print_char(':');print_int(w.qqqq.b1);print_char(':');
+print_int(w.qqqq.b2);print_char(':');print_int(w.qqqq.b3);
 }
+#endif
 
 @* Dynamic memory allocation.
 The \TeX\ system does nearly all of its own memory allocation, so that it
@@ -2561,11 +2579,15 @@ also be a special flag that lies outside the bounds of |mem|, so we
 allow pointers to assume any |halfword| value. The minimum halfword
 value represents a null pointer. \TeX\ does not assume that |mem[null]| exists.
 
-@d pointer	halfword /*a flag or a location in |mem| or |eqtb|*/
+@<Types in the outer block@>=
+typedef halfword pointer;  /*a flag or a location in |mem| or |eqtb|*/
+
+@
 @s pointer int
 @d null	min_halfword /*the null pointer*/
 
-@<Memory variables@>=
+@<Glob...@>=
+@ @<Memory variables@>=
 pointer @!temp_ptr; /*a pointer variable for occasional emergency use*/
 
 @ The |mem| array is divided into two regions that are allocated separately,
@@ -2610,9 +2632,9 @@ maximum memory usage. When code between the delimiters |
 |tats| is not ``commented out,'' \TeX\ will run a bit slower but it will
 report these statistics when |tracing_stats| is sufficiently large.
 
-@<Glob...@>=
-@ @<Memory variables@>=
+@<Memory variables@>=
 int @!var_used, @!dyn_used; /*how much memory is in use*/
+@ @<Compiler directives@>=
 #ifdef @!DEBUG
 #define incr_dyn_used @[incr(dyn_used)@]
 #define decr_dyn_used @[decr(dyn_used)@]
@@ -2634,9 +2656,9 @@ terminated by |null|.
 @d link(X)	mem[X].hh.rh /*the |link| field of a memory word*/
 @d info(X)	mem[X].hh.lh /*the |info| field of a memory word*/
 
+@d mem_end mem_top
 @<Memory variables@>=
 pointer @!avail; /*head of the list of available one-word nodes*/
-pointer @!mem_end; /*the last one-word node used in |mem|*/
 
 @ If memory is exhausted, it might mean that the user has forgotten
 a right brace. We will define some procedures later that try to help
@@ -2654,16 +2676,14 @@ we try first to increase |mem_end|. If that cannot be done, i.e., if
 |mem_end==mem_max|, we try to decrease |hi_mem_min|. If that cannot be
 done, i.e., if |hi_mem_min==lo_mem_max+1|, we have to quit.
 
-@(hmem.c@>=  pointer get_avail(void) /*single-word node allocation*/
+@(libtex.c@>=  pointer get_avail(void) /*single-word node allocation*/
 {@+pointer p; /*the new node being got*/
 p=avail; /*get top location in the |avail| stack*/
 if (p!=null) avail=link(avail); /*and pop it off*/
-else if (mem_end < mem_max)  /*or go into virgin territory*/
-  {@+incr(mem_end);p=mem_end;
-  }
 else{@+decr(hi_mem_min);p=hi_mem_min;
   if (hi_mem_min <= lo_mem_max)
-    {@+ QUIT("Memory overflow 0x%X", mem_max+1-mem_min);
+    {@+
+    overflow("main memory size", mem_max+1-mem_min);
        /*quit; all one-word nodes are busy*/
 @:TeX capacity exceeded main memory size}{\quad main memory size@>
     }
@@ -2699,8 +2719,9 @@ the places that would otherwise account for the most calls of |get_avail|.
 one-word nodes that starts at position |p|.
 @^inner loop@>
 
-@(hmem.c@>= void flush_list(pointer @!p) /*makes list of single-word nodes
-  available*/
+@(libtex.c@>=
+@<Memory variables@>@;
+void flush_list(pointer @!p) /*makes list of single-word nodes available*/
 {@+pointer @!q, @!r; /*list traversers*/
 if (p!=null)
   {@+r=p;
@@ -2734,7 +2755,7 @@ when |max_halfword| appears in the |link| field of a nonempty node.)
 @d rlink(X)	link(X+1) /*right link in doubly-linked list of empty nodes*/
 
 @<Memory variables@>=
-pointer @!rover; /*points to some node in the list of empties*/
+static pointer @!rover; /*points to some node in the list of empties*/
 
 @ A call to |get_node| with argument |s| returns a pointer to a new node
 of size~|s|, which must be 2~or more. The |link| field of the first word
@@ -2744,7 +2765,7 @@ space exists.
 If |get_node| is called with $s=2^{30}$, it simply merges adjacent free
 areas and returns the value |max_halfword|.
 
-@(hmem.c@>= pointer get_node(int @!s) /*variable-size node allocation*/
+@(libtex.c@>= pointer get_node(int @!s) /*variable-size node allocation*/
 {@+
 pointer p; /*the node currently under inspection*/
 pointer @!q; /*the node physically after node |p|*/
@@ -2761,7 +2782,7 @@ if (s==010000000000)
   }
 if (lo_mem_max+2 < hi_mem_min) if (lo_mem_max+2 <= mem_bot+max_halfword)
   @<Grow more variable-size memory and |goto restart|@>;
-QUIT("Memory overflow 0x%X", mem_max+1-mem_min);
+overflow("main memory size", mem_max+1-mem_min);
    /*sorry, nothing satisfactory is left*/
 @:TeX capacity exceeded main memory size}{\quad main memory size@>
 found: link(r)=null; /*this node is now nonempty*/
@@ -2769,6 +2790,7 @@ found: link(r)=null; /*this node is now nonempty*/
 var_used=var_used+s; /*maintain usage statistics*/
 #endif
 @;@/
+leak_in(r,s);
 return r;
 }
 
@@ -2829,9 +2851,12 @@ the operation |free_node(p, s)| will make its words available, by inserting
 |p| as a new empty node just before where |rover| now points.
 @^inner loop@>
 
-@(hmem.c@>= void free_node(pointer @!p, halfword @!s) /*variable-size node
+@(libtex.c@>=
+void free_node(pointer @!p, halfword @!s) /*variable-size node
   liberation*/
 {@+pointer q; /*|llink(rover)|*/
+leak_out(p,s);
+delete_map(p);
 node_size(p)=s;link(p)=empty_flag;
 q=llink(rover);llink(p)=q;rlink(p)=rover; /*set both links*/
 llink(rover)=p;rlink(q)=p; /*insert |p| into the ring*/
@@ -2977,12 +3002,7 @@ which all subfields have the values corresponding to `\.{\\hbox\{\}}'.
 The |subtype| field is set to |min_quarterword|, since that's the desired
 |span_count| value if this |hlist_node| is changed to an |unset_node|.
 
-@(hbox.c@>=
-#include "htex.h"
-#include "texdef.h"
-
-extern void free_node(pointer @!p, halfword @!s); /*variable-size node liberation*/
-
+@(libtex.c@>=
 pointer new_null_box(void) /*creates a new box node*/
 {@+pointer p; /*the new node*/
 p=get_node(box_node_size);type(p)=hlist_node;
@@ -3013,7 +3033,7 @@ an hlist; the |height| and |depth| are never running in a~vlist.
 makes all the dimensions ``running,'' so you have to change the
 ones that are not allowed to run.
 
-@(hbox.c@>= pointer new_rule(void)
+@(libtex.c@>= pointer new_rule(void)
 {@+pointer p; /*the new node*/
 p=get_node(rule_node_size);type(p)=rule_node;
 subtype(p)=0; /*the |subtype| is not used*/
@@ -3082,7 +3102,8 @@ a |new_lig_item| function, which returns a two-word node having a given
 |character| field. Such nodes are used for temporary processing as ligatures
 are being created.
 
-@(hbox.c@>= pointer new_ligature(quarterword @!f, quarterword @!c, pointer @!q)
+@(libtex.c@>=
+pointer new_ligature(quarterword @!f, quarterword @!c, pointer @!q)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=ligature_node;
 font(lig_char(p))=f;character(lig_char(p))=c;lig_ptr(p)=q;
@@ -3120,7 +3141,7 @@ not chosen.
 @d pre_break	llink /*text that precedes a discretionary break*/
 @d post_break	rlink /*text that follows a discretionary break*/
 
-@(hbox.c@>= pointer new_disc(void) /*creates an empty |disc_node|*/
+@(libtex.c@>= pointer new_disc(void) /*creates an empty |disc_node|*/
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=disc_node;
 subtype(p)=0;pre_break(p)=null;post_break(p)=null;
@@ -3154,7 +3175,7 @@ the amount of surrounding space inserted by \.{\\mathsurround}.
 @d before	0 /*|subtype| for math node that introduces a formula*/
 @d after	1 /*|subtype| for math node that winds up a formula*/
 
-@(hbox.c@>= pointer new_math(scaled @!w, small_number @!s)
+@(libtex.c@>= pointer new_math(scaled @!w, small_number @!s)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=math_node;
 subtype(p)=s;width(p)=w;return p;
@@ -3236,7 +3257,7 @@ typedef uint8_t glue_ord; /*infinity to the 0, 1, 2, or 3 power*/
 The reference count in the copy is |null|, because there is assumed
 to be exactly one reference to the new specification.
 
-@(hbox.c@>= pointer new_spec(pointer @!p) /*duplicates a glue specification*/
+@(libtex.c@>= pointer new_spec(pointer @!p) /*duplicates a glue specification*/
 {@+pointer q; /*the new spec*/
 q=get_node(glue_spec_size);@/
 mem[q]=mem[p];glue_ref_count(q)=null;@/
@@ -3262,7 +3283,7 @@ return p;
 @ Glue nodes that are more or less anonymous are created by |new_glue|,
 whose argument points to a glue specification.
 
-@(hbox.c@>= pointer new_glue(pointer @!q)
+@(libtex.c@>= pointer new_glue(pointer @!q)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=glue_node;subtype(p)=normal;
 leader_ptr(p)=null;glue_ptr(p)=q;incr(glue_ref_count(q));
@@ -3300,7 +3321,7 @@ inserted from \.{\\mkern} specifications in math formulas).
 
 @ The |new_kern| function creates a kern node having a given width.
 
-@(hbox.c@>= pointer new_kern(scaled @!w)
+@(libtex.c@>= pointer new_kern(scaled @!w)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=kern_node;
 subtype(p)=normal;
@@ -3323,7 +3344,7 @@ break will be forced.
 @ Anyone who has been reading the last few sections of the program will
 be able to guess what comes next.
 
-@(hbox.c@>= pointer new_penalty(int @!m)
+@(libtex.c@>= pointer new_penalty(int @!m)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=penalty_node;
 subtype(p)=0; /*the |subtype| is not used*/
@@ -3376,12 +3397,7 @@ appear in locations |hi_mem_stat_min| through |mem_top|, inclusive. It is
 harmless to let |lig_trick| and |garbage| share the same location of |mem|.
 
 @d zero_glue	mem_bot /*specification for \.{0pt plus 0pt minus 0pt}*/
-@d fil_glue	zero_glue+glue_spec_size /*\.{0pt plus 1fil minus 0pt}*/
-@d fill_glue	fil_glue+glue_spec_size /*\.{0pt plus 1fill minus 0pt}*/
-@d ss_glue	fill_glue+glue_spec_size /*\.{0pt plus 1fil minus 1fil}*/
-@d fil_neg_glue	ss_glue+glue_spec_size /*\.{0pt plus -1fil minus 0pt}*/
-@d lo_mem_stat_max	fil_neg_glue+glue_spec_size-1 /*largest statically
-  allocated word in the variable-size |mem|*/
+@d lo_mem_stat_max	zero_glue+glue_spec_size-1 /*largest statically allocated word in the variable-size |mem|*/
 @#
 @d page_ins_head	mem_top /*list of insertion data for current page*/
 @d contrib_head	mem_top-1 /*vlist of items not yet on current page*/
@@ -3407,8 +3423,8 @@ initializing itself the slow~way.
 @<Local variables for init...@>=
 int @!k; /*index into |mem|, |eqtb|, etc.*/
 
-@ @(hmem.c@>=
-void hmem_init(void)
+@ @(libtex.c@>=
+void mem_init(void)
 { @+ int k;
   @<Initialize |mem|@>@;
 }
@@ -3423,11 +3439,6 @@ k=mem_bot;@+while (k <= lo_mem_stat_max)
   stretch_order(k)=normal;shrink_order(k)=normal;
   k=k+glue_spec_size;
   }
-stretch(fil_glue)=unity;stretch_order(fil_glue)=fil;@/
-stretch(fill_glue)=unity;stretch_order(fill_glue)=fill;@/
-stretch(ss_glue)=unity;stretch_order(ss_glue)=fil;@/
-shrink(ss_glue)=unity;shrink_order(ss_glue)=fil;@/
-stretch(fil_neg_glue)=-unity;stretch_order(fil_neg_glue)=fil;@/
 rover=lo_mem_stat_max+1;
 link(rover)=empty_flag; /*now initialize the dynamic memory*/
 node_size(rover)=1000; /*which is a 1000-word available node*/
@@ -3436,7 +3447,7 @@ lo_mem_max=rover+1000;link(lo_mem_max)=null;info(lo_mem_max)=null;@/
 for (k=hi_mem_stat_min; k<=mem_top; k++)
   mem[k]=mem[lo_mem_max]; /*clear list heads*/
 @<Initialize the special list heads and constant nodes@>;
-avail=null;mem_end=mem_top;
+avail=null;
 hi_mem_min=hi_mem_stat_min; /*initialize the one-word memory*/
 var_used=lo_mem_stat_max+1-mem_bot;dyn_used=hi_mem_stat_usage;
    /*initialize statistics*/
@@ -3611,9 +3622,7 @@ int @!font_in_short_display; /*an internal font number*/
 @ Boxes, rules, inserts, whatsits, marks, and things in general that are
 sort of ``complicated'' are indicated only by printing `\.{[]}'.
 
-@ @(hprint.c@>=
-int @!font_in_short_display; /*an internal font number*/
-void short_display(int @!p) /*prints highlights of list |p|*/
+@p void short_display(int @!p) /*prints highlights of list |p|*/
 {@+int n; /*for replacement counts*/
 while (p > mem_min)
   {@+if (is_char_node(p))
@@ -3656,7 +3665,7 @@ default:do_nothing;
 print a font-and-character combination, one to print a token list without
 its reference count, and one to print a rule dimension.
 
-@ @(hprint.c@>=
+@(libtex.c@>=
 void print_font_and_char(int @!p) /*prints |char_node| data*/
 {@+if (p > mem_end) print_esc(@[@<|"CLOBBERED."|@>@]);
 else{@<Print the font identifier for |font(p)|@>;
@@ -3665,7 +3674,7 @@ else{@<Print the font identifier for |font(p)|@>;
 }
 @#
 void print_mark(int @!p) /*prints token list data in braces*/
-{@+print_char('{');print_char('}');
+{@+print_char('{');print_char('}');@+
 }
 @#
 void print_rule_dimen(scaled @!d) /*prints dimension in rule node*/
@@ -3676,7 +3685,7 @@ void print_rule_dimen(scaled @!d) /*prints dimension in rule node*/
 @ Then there is a subroutine that prints glue stretch and shrink, possibly
 followed by the name of finite units:
 
-@ @(hprint.c@>=
+@ @(libtex.c@>=
    void print_glue(scaled @!d, int @!order, str_number @!s)
    /*prints a glue component*/
 {@+print_scaled(d);
@@ -3692,7 +3701,7 @@ else if (s!=0) print(s);
 
 @ The next subroutine prints a whole glue specification.
 
-@ @(hprint.c@>=
+@ @(libtex.c@>=
    void print_spec(int @!p, str_number @!s)
    /*prints a glue specification*/
 {@+if ((p < mem_min)||(p >= lo_mem_max)) print_char('*');
@@ -3722,6 +3731,11 @@ the length of this string, namely |cur_length|, is the depth of nesting.
 
 Recursive calls on |show_node_list| therefore use the following pattern:
 
+@(libtex.c@>=
+
+static int depth_level=0; /*current nesting level of |show_node_list|*/
+
+#define @[node_list_display(X)@] @[{@+depth_level++;show_node_list(X);depth_level--;@+}@]
 
 @ A global variable called |depth_threshold| is used to record the maximum
 depth of nesting for which |show_node_list| will show information.  If we
@@ -3746,10 +3760,7 @@ for example, it might try to read |mem[p].hh| when |mem[p]|
 contains a scaled integer, if |p| is a pointer that has been
 clobbered or chosen at random.
 
-@ @(hprint.c@>=
-
-#define @[node_list_display(X)@] {depth_level++;show_node_list(X);depth_level--;}
-
+@ @(libtex.c@>=
 void show_node_list(int @!p) /*prints a node list symbolically*/
 {@+
 int n; /*the number of items already printed at this level*/
@@ -3863,9 +3874,7 @@ node_list_display(ins_ptr(p)); /*recursive call*/
 
 @ @<Display glue |p|@>=
 if (subtype(p) >= a_leaders) @<Display leaders |p|@>@;
-else{@+print_esc(@[@<|"glue"|@>@]);
-       print_char(' '); print_spec(glue_ptr(p), 0);
-    }
+else{@+print_str("\\glue "); print_spec(glue_ptr(p), 0);@+ }
 
 @ @<Display leaders |p|@>=
 {@+print_esc(empty_string);
@@ -3900,7 +3909,7 @@ if (width(p)!=0)
 @ @<Display ligature |p|@>=
 {@+print_font_and_char(lig_char(p));print_str(" (ligature ");
 if (subtype(p) > 1) print_char('|');
-font_in_short_display=font(lig_char(p));short_display(lig_ptr(p));
+node_list_display(lig_ptr(p));
 if (odd(subtype(p))) print_char('|');
 print_char(')');
 }
@@ -3932,7 +3941,7 @@ node_list_display(post_break(p)); /*recursive call*/
 @ The recursive machinery is started by calling |show_box|.
 @^recursion@>
 
-@ @(hprint.c@>=
+@ @(libtex.c@>=
 void show_box(pointer @!p)
 {@+depth_threshold=200; breadth_max=200;
 show_node_list(p); /*the show starts at |p|*/
@@ -3967,7 +3976,7 @@ specification is being withdrawn.
   else decr(glue_ref_count(X));
   }
 
-@(hbox.c@>= void delete_glue_ref(pointer @!p) /*|p| points to a glue specification*/
+@(libtex.c@>= void delete_glue_ref(pointer @!p) /*|p| points to a glue specification*/
 fast_delete_glue_ref(p)
 
 @ Now we are ready to delete any node list, recursively.
@@ -3975,7 +3984,7 @@ In practice, the nodes deleted are usually charnodes (about 2/3 of the time),
 and they are glue nodes in about half of the remaining cases.
 @^recursion@>
 
-@ @(hmem.c@>=
+@(libtex.c@>=
    void flush_node_list(pointer @!p) /*erase list of nodes starting at |p|*/
 {@+ /*go here when node |p| has been freed*/
 pointer q; /*successor to node |p|*/
@@ -3990,7 +3999,7 @@ while (p!=null)
     case rule_node: {@+free_node(p, rule_node_size);goto done;
       }
     case ins_node: {@+flush_node_list(ins_ptr(p));
-      fast_delete_glue_ref(split_top_ptr(p));
+      delete_glue_ref(split_top_ptr(p));
       free_node(p, ins_node_size);goto done;
       }
     case whatsit_node: goto done;
@@ -4036,7 +4045,7 @@ example, if the size is altered, or if some link field is moved to another
 relative position---then this code may need to be changed too.
 @^data structure assumptions@>
 
-@(hbox.c@>=
+@(libtex.c@>=
 pointer copy_node_list(pointer @!p) /*makes a duplicate of the
   node list that starts at |p| and returns a pointer to the new list*/
 {@+pointer h; /*temporary head of copied list*/
@@ -4097,7 +4106,7 @@ case mark_node: {@+r=get_node(small_node_size);add_token_ref(mark_ptr(p));
 case adjust_node: {@+r=get_node(small_node_size);
   adjust_ptr(r)=copy_node_list(adjust_ptr(p));
   } @+break; /*|words==1==small_node_size-1|*/
-default:QUIT("Error in copying a node list");
+default:confusion(@[@<|"copying"|@>@]);
 @:this can't happen copying}{\quad copying@>
 }
 
@@ -4379,9 +4388,12 @@ be pushed onto |nest| if necessary.
 @<Types...@>=
 typedef struct { int16_t @!mode_field;@+
   pointer @!head_field, @!tail_field;
-  int @!pg_field;@+
-  bs_t bs_field; @+
-  uint32_t np_field;
+ int pg_field;
+ pointer bs_field,ls_field;
+ scaled lsl_field;
+ uint8_t *bs_pos;
+ scaled ds_field, dw_field, di_field,hs_field;
+ uint32_t np_field;
   memory_word @!aux_field;
   } list_state_record;
 
@@ -4394,11 +4406,11 @@ typedef struct { int16_t @!mode_field;@+
 @d space_factor	aux.hh.lh /*part of |aux| in horizontal mode*/
 @d clang	aux.hh.rh /*the other part of |aux| in horizontal mode*/
 @d incompleat_noad	aux.i /*the name of |aux| in math mode*/
-@d cur_bs      cur_list.bs_field.bs /*baseline skip glue specification*/
-@d cur_ls      cur_list.bs_field.ls /*line skip glue specification*/
-@d cur_lsl     cur_list.bs_field.lsl /*line skip limit*/
-@d needs_bs    cur_list.insert_bs /*is a baseline skip needed?*/
-@d node_pos   cur_list.np_field /*position in the \HINT/ file*/
+@d cur_bs      cur_list.bs_field /*baseline skip glue specification*/
+@d cur_ls      cur_list.ls_field /*line skip glue specification*/
+@d cur_lsl     cur_list.lsl_field /*line skip limit*/
+@d needs_bs    (cur_list.bs_pos!=NULL) /*is a baseline skip needed?*/
+@d node_pos     cur_list.np_field /*baseline position in the \HINT/ file or |NULL|*/
 @d node_pos1   (nest_ptr==0?0:nest[nest_ptr-1].np_field) /*position of enclosing node*/
 
 @<List variables@>=
@@ -4421,33 +4433,36 @@ vertical mode, then ``contributed'' to the current page (during which time
 the page-breaking decisions are made). For now, we don't need to know
 any more details about the page-building process.
 
-@<Set init...@>=
-nest_ptr=0;max_nest_stack=0;
+@(libtex.c@>=
+
+@<List variables@>@;
+
+void list_init(void)
+{@+
+nest_ptr=0;max_nest_stack=0;@/
+memset(&cur_list,0,sizeof(cur_list));
 mode=vmode;head=contrib_head;tail=contrib_head;
-prev_depth=ignore_depth;mode_line=0;
-prev_graf=0;shown_mode=0;
+prev_depth=ignore_depth;
+}
+@ @<Set init...@>=
+list_init();
 @<Start a new current page@>;
 
 @ When \TeX's work on one level is interrupted, the state is saved by
 calling |push_nest|. This routine changes |head| and |tail| so that
 a new (empty) list is begun; it does not change |mode| or |aux|.
 
-@(hlist.c@>=
-#include "htex.h"
-#include "hformat.h"
-#include "hdefaults.h"
-#include "texdef.h"
-@<List variables@>@;
-
-
+@s line mode_line
+@(libtex.c@>=
 void push_nest(void) /*enter a new semantic level, save the old*/
 {@+if (nest_ptr > max_nest_stack)
   {@+max_nest_stack=nest_ptr;
-  if (nest_ptr==nest_size) QUIT("Overflow in semantic nest size %d", nest_size);
+  if (nest_ptr==nest_size) overflow("semantic nest size", nest_size);
+@:TeX capacity exceeded semantic nest size}{\quad semantic nest size@>
   }
 nest[nest_ptr]=cur_list; /*stack the record*/
 incr(nest_ptr);head=get_avail();tail=head;prev_graf=0;
-needs_bs=false; cur_bs=baseline_skip; cur_ls=line_skip; cur_lsl=line_skip_limit;
+cur_list.bs_pos=NULL; cur_bs=baseline_skip; cur_ls=line_skip; cur_lsl=line_skip_limit;
 }
 
 @ Conversely, when \TeX\ is finished on the current level, the former
@@ -4455,8 +4470,7 @@ state is restored by calling |pop_nest|. This routine will never be
 called at the lowest semantic level, nor will it be called unless |head|
 is a node that should be returned to free memory.
 
-@(hlist.c@>=
-
+@(libtex.c@>=
 void pop_nest(void) /*leave a semantic level, re-enter the old*/
 {@+free_avail(head);decr(nest_ptr);cur_list=nest[nest_ptr];
 }
@@ -5664,18 +5678,31 @@ void print_cs(int @!p) /*prints a purported control sequence*/
       {@+print_esc(@[@<|"csname"|@>@]);print_esc(@[@<|"endcsname"|@>@]);print_char(' ');
       }
     else{@+print_esc(p-single_base);
-         print_char(' ');
+      if (cat_code(p-single_base)==letter) print_char(' ');
       }
   else if (p < active_base) print_esc(@[@<|"IMPOSSIBLE."|@>@]);
+@.IMPOSSIBLE@>
   else print(p-active_base);
 else if (p >= undefined_control_sequence) print_esc(@[@<|"IMPOSSIBLE."|@>@]);
-else print_str("\\controlsequence ");
+else if ((text(p) < 0)||(text(p) >= str_ptr)) print_esc(@[@<|"NONEXISTENT."|@>@]);
+@.NONEXISTENT@>
+else{@+print_esc(text(p));
+  print_char(' ');
+  }
 }
 
 @ Here is a similar procedure; it avoids the error checks, and it never
 prints a space after the control sequence.
 
 @<Basic printing procedures@>=
+void sprint_cs(pointer @!p) /*prints a control sequence*/
+{@+if (p < hash_base)
+  if (p < single_base) print(p-active_base);
+  else if (p < null_cs) print_esc(p-single_base);
+    else{@+print_esc(@[@<|"csname"|@>@]);print_esc(@[@<|"endcsname"|@>@]);
+      }
+else print_esc(text(p));
+}
 
 @ We need to put \TeX's ``primitive'' control sequences into the hash
 table, together with their command code (which will be the |eq_type|)
@@ -10757,10 +10784,13 @@ typedef uint16_t font_index; /*index into |font_info|*/
 @d non_address	0 /*a spurious |bchar_label|*/
 
 @<Glob...@>=
-@ @<Font variables@>=
+@
+@s font_index int
+@s str_number int
+@(libtex.c@>=
 memory_word @!font_info[font_mem_size+1];
    /*the big collection of font data*/
-font_index @!fmem_ptr=0; /*first unused word of |font_info|*/
+static font_index @!fmem_ptr=0; /*first unused word of |font_info|*/
 internal_font_number @!font_ptr; /*largest internal font number in use*/
 four_quarters @!font_check0[font_max-font_base+1], *const @!font_check = @!font_check0-font_base; /*check sum*/
 scaled @!font_size0[font_max-font_base+1], *const @!font_size = @!font_size0-font_base; /*``at'' size*/
@@ -10797,7 +10827,7 @@ part of this word (the |b0| field), the width of the character is
 |min_quarterword| has already been added to |c| and to |w|, since \TeX\
 stores its quarterwords that way.)
 
-@<Font variables@>=
+@(libtex.c@>=
 int @!char_base0[font_max-font_base+1], *const @!char_base = @!char_base0-font_base;
    /*base addresses for |char_info|*/
 int @!width_base0[font_max-font_base+1], *const @!width_base = @!width_base0-font_base;
@@ -10950,12 +10980,7 @@ information is stored; |null_font| is returned in this case.
 
 @d abort	goto bad_tfm /*do this when the \.{TFM} data is wrong*/
 
-@(hfont.c@>=
-#include "htex.h"
-#include "texdef.h"
-
-@<Font variables@>@;
-
+@(libtex.c@>=
 void read_font_info(int f, char *nom, scaled s)
 {@+
 font_index k; /*index into |font_info|*/
@@ -11256,6 +11281,8 @@ if (bchar <= ec) if (bchar >= bc)
   }
 font_name[f]=nom;
 font_bc[f]=bc;font_ec[f]=ec;font_glue[f]=null;
+adjust(char_base);adjust(width_base);adjust(lig_kern_base);
+adjust(kern_base);adjust(exten_base);
 decr(param_base[f]);
 fmem_ptr=fmem_ptr+lf; goto done
 
@@ -11344,11 +11371,13 @@ prints a warning message unless the user has suppressed it.
 given character in a given font. If that character doesn't exist,
 |null| is returned instead.
 
-@(hbox.c@>=
+@(libtex.c@>=
 pointer new_character(internal_font_number @!f, eight_bits @!c)
 {@+ pointer p; /*newly allocated node*/
+#ifdef DEBUG
 if (font_bc[f] > c || font_ec[f] < c || ! char_exists(char_info(f)(c)))
   MESSAGE("Warning: Character 0x%0X in font %d does not exist\n",c,f);
+#endif
 p=get_avail();font(p)=f;character(p)=c;
 return p;
 }
@@ -11953,7 +11982,7 @@ output an array of words with one system call.
 
 @p void write_dvi(dvi_index @!a, dvi_index @!b)
 {@+int k;
-for (k=a; k<=b; k++) write(dvi_file, "%c", dvi_buf[k]);
+for (k=a; k<=b; k++) pascal_write(dvi_file, "%c", dvi_buf[k]);
 }
 
 @ To put a byte in the buffer without paying the cost of invoking a procedure
@@ -12916,7 +12945,7 @@ glue of each kind is present. A global variable |last_badness| is used
 to implement \.{\\badness}.
 
 @<Glob...@>=
-@ @<Page building variables@>=
+@ @<Packing variables@>=
 scaled @!total_stretch0[filll-normal+1], *const @!total_stretch = @!total_stretch0-normal, @!total_shrink0[filll-normal+1], *const @!total_shrink = @!total_shrink0-normal;
    /*glue found by |hpack| or |vpack|*/
 int @!last_badness; /*badness of the most recently packaged box*/
@@ -12935,12 +12964,7 @@ pointer @!adjust_tail; /*tail of adjustment list*/
 
 @ Here now is |hpack|, which contains few if any surprises.
 
-@(hpack.c@>=
-#include "htex.h"
-#include "hformat.h"
-#include "hdefaults.h"
-#include "texdef.h"
-
+@(libtex.c@>=
 @<Packing variables@>@;
 
 pointer hpack(pointer @!p, scaled @!w, small_number @!m)
@@ -13175,10 +13199,12 @@ maximum depth of the page box that is constructed. The depth is first
 computed by the normal rules; if it exceeds this limit, the reference
 point is simply moved down until the limiting depth is attained.
 
-@(hpack.c@>=
+@p
+@ @(texdefs.h@>=
 #define vpack(...)	@[vpackage(__VA_ARGS__, max_dimen)@]
     /*special case of unconstrained depth*/
 
+@ @(libtex.c@>=
 pointer vpackage(pointer @!p, scaled @!h, small_number @!m, scaled @!l)
 {@+
 pointer r; /*the box node that will be returned*/
@@ -13203,7 +13229,7 @@ end: return r;
 }
 
 @ @<Examine node |p| in the vlist, taking account of its effect...@>=
-{@+if (is_char_node(p)) QUIT("Char node in vlist");
+{@+if (is_char_node(p)) confusion(@[@<|"vpack"|@>@]);
 @:this can't happen vpack}{\quad vpack@>
 else switch (type(p)) {
   case hlist_node: case vlist_node: case rule_node: case unset_node:
@@ -13324,12 +13350,12 @@ void append_to_vlist(pointer @!b, uint32_t offset)
 pointer @!p; /*a new glue node*/
 if (prev_depth > ignore_depth)
   {@+d=width(baseline_skip)-prev_depth-height(b);
-  if (d < line_skip_limit) p=hget_param_glue(line_skip_no);
-  else{@+temp_ptr=new_spec(pointer_def[glue_kind][baseline_skip_no]);
+  if (d < line_skip_limit) p=new_glue(line_skip);
+  else{@+temp_ptr=new_spec(baseline_skip);
        p=new_glue(temp_ptr);glue_ref_count(temp_ptr)=null;
     width(temp_ptr)=d; /*|temp_ptr==glue_ptr(p)|*/
     }
-   store_map(p, node_pos,offset,0);
+   store_map(p, node_pos,offset);
   link(tail)=p;tail=p;
   }
 link(tail)=b;tail=b;prev_depth=depth(b);
@@ -16044,19 +16070,13 @@ itself---we must build it up little by little, somewhat more cautiously
 than we have done with the simpler procedures of \TeX. Here is the
 general outline.
 
-@(hlinebreak.c@>=
-#include "htex.h"
-#include "hformat.h"
-#include "hdefaults.h"
-#include "hpos.h"
-#include "texdef.h"
-
+@(libtex.c@>=
 @<Line break variables@>@;
 
 @<Declare subprocedures for |line_break|@>@;
 
-void line_break(int final_widow_penalty)
-{@+ scaled x; /* the |hsize| for this paragraph */
+void line_break(int final_widow_penalty, pointer par_ptr)
+{@+ scaled x=cur_list.hs_field; /* the |hsize| for this paragraph */
 @<Local variables for line breaking@>@;
 @<Get ready to start line breaking@>;
 @<Find optimal breakpoints@>;
@@ -16077,15 +16097,18 @@ same number of |mem|~words.
 @^data structure assumptions@>
 
 @<Get ready to start...@>=
-link(temp_head)=link(head);
-if (is_char_node(tail)) tail_append(new_penalty(inf_penalty))@;
-else if (type(tail)!=glue_node) tail_append(new_penalty(inf_penalty))@;
-else{@+type(tail)=penalty_node;delete_glue_ref(glue_ptr(tail));
-  flush_node_list(leader_ptr(tail));penalty(tail)=inf_penalty;
+link(temp_head)=par_ptr;
+
+@ @<Declare subprocedures for |line_break|@>=
+void add_par_fill_skip(void)
+{ if (is_char_node(tail)) tail_append(new_penalty(inf_penalty))@;
+  else if (type(tail)!=glue_node) tail_append(new_penalty(inf_penalty))@;
+  else
+  {@+type(tail)=penalty_node;delete_glue_ref(glue_ptr(tail));
+     flush_node_list(leader_ptr(tail));penalty(tail)=inf_penalty;
   }
-link(tail)=hget_param_glue(par_fill_skip_no);
-pop_nest();
-x=cur_list.hs_field;
+  link(tail)=new_glue(par_fill_skip);
+}
 
 @ When looking for optimal line breaks, \TeX\ creates a ``break node'' for
 each break that is {\sl feasible}, in the sense that there is a way to end
@@ -16328,7 +16351,7 @@ stretchability and set |final_pass==true|.
 
 @<Glob...@>=
 @ @<Line break variables@>=
-pointer @!cur_p; /*the current breakpoint under consideration*/
+static pointer @!cur_p; /*the current breakpoint under consideration*/
 bool @!second_pass; /*is this our second attempt to break this paragraph?*/
 bool @!final_pass; /*is this our final attempt to break this paragraph?*/
 int @!threshold; /*maximum badness on feasible lines*/
@@ -16580,7 +16603,7 @@ else switch (type(v)) {
     } @+break;
   case hlist_node: case vlist_node: case rule_node: case kern_node:
     break_width[1]=break_width[1]-width(v);@+break;
-  default: QUIT("Replacement texts must contain only characters, kerns, ligatures, boxes or rules got %d",type(v));
+  default:confusion(@[@<|"disc1"|@>@]);
 @:this can't happen disc1}{\quad disc1@>
   }
 
@@ -16596,7 +16619,7 @@ else switch (type(s)) {
     } @+break;
   case hlist_node: case vlist_node: case rule_node: case kern_node:
     break_width[1]=break_width[1]+width(s);@+break;
-  default: QUIT("Replacement texts must contain only characters, kerns, ligatures, boxes or rules got %d",type(s));
+  default:confusion(@[@<|"disc2"|@>@]);
 @:this can't happen disc2}{\quad disc2@>
   }
 
@@ -17032,7 +17055,6 @@ link(q)=last_active;break_node(q)=null;
 line_number(q)=prev_graf+1;total_demerits(q)=0;link(active)=q;
 do_all_six(store_background);@/
 passive=null;printed_node=temp_head;pass_number=0;
-font_in_short_display=null_font
 
 @ @<Clean...@>=
 q=link(active);
@@ -17080,7 +17102,7 @@ case math_node: {@+auto_breaking=(subtype(cur_p)==after);kern_break;
   } @+break;
 case penalty_node: try_break(penalty(cur_p), unhyphenated);@+break;
 case mark_node: case ins_node: case adjust_node: do_nothing;@+break;
-default: QUIT("Error in line break");
+default:confusion(@[@<|"paragraph"|@>@]);
 @:this can't happen paragraph}{\quad paragraph@>
 } @/
 prev_p=cur_p;cur_p=link(cur_p);
@@ -17152,7 +17174,7 @@ else switch (type(s)) {
     } @+break;
   case hlist_node: case vlist_node: case rule_node: case kern_node:
     disc_width=disc_width+width(s);@+break;
-  default: QUIT("Error in line break");
+  default:confusion(@[@<|"disc3"|@>@]);
 @:this can't happen disc3}{\quad disc3@>
   }
 
@@ -17168,7 +17190,7 @@ else switch (type(s)) {
     } @+break;
   case hlist_node: case vlist_node: case rule_node: case kern_node:
     act_width=act_width+width(s);@+break;
-  default: QUIT("Error in line break");
+  default:confusion(@[@<|"disc4"|@>@]);
 @:this can't happen disc4}{\quad disc4@>
   }
 
@@ -17269,7 +17291,7 @@ int @!pen; /*use when calculating penalties between lines*/
 halfword @!cur_line; /*the current line number being justified*/
 @<Reverse the links of the relevant passive nodes, setting |cur_p| to the first breakpoint@>;
 cur_line=prev_graf+1;
-next_offset=hmap(link(temp_head));
+next_offset=hposition(link(temp_head));
 if (next_offset>node_pos)
   next_offset=next_offset-node_pos;
 else
@@ -17280,7 +17302,7 @@ line_offset=next_offset;
   if (q==null)
     next_offset=(hstart-hpos); /*necessary if the paragraph has a display at |hpos|*/
   else
-    next_offset= hmap(q);
+    next_offset= hposition(q);
   if (next_offset>node_pos)
     next_offset=next_offset-node_pos;
   else
@@ -17288,14 +17310,12 @@ line_offset=next_offset;
 }
 @<Justify the line ending at breakpoint |cur_p|, and append it to the current
 vertical list, together with associated penalties and other insertions@>;
-
 incr(cur_line);cur_p=next_break(cur_p);
-
 if (cur_p!=null) if (!post_disc_break)
   @<Prune unwanted nodes at the beginning of the next line@>;
 }@+ while (!(cur_p==null));
 if ((cur_line!=best_line)||(link(temp_head)!=null))
-  QUIT("Error in line breaking");
+  confusion(@[@<|"line breaking"|@>@]);
 @:this can't happen line breaking}{\quad line breaking@>
 prev_graf=best_line-1;
 }
@@ -17412,7 +17432,7 @@ pre_break(q)=null;q=s;
 }
 
 @ @<Put the \(r)\.{\\rightskip} glue after node |q|@>=
-r=hget_param_glue(right_skip_no);link(r)=link(q);link(q)=r;q=r
+r=new_glue(right_skip);link(r)=link(q);link(q)=r;q=r
 
 @ The following code begins with |q| at the end of the list to be
 justified. It ends with |q| at the beginning of that list, and with
@@ -17421,14 +17441,15 @@ justified. It ends with |q| at the beginning of that list, and with
 @<Put the \(l)\.{\\leftskip} glue at the left...@>=
 r=link(q);link(q)=null;q=link(temp_head);link(temp_head)=r;
 if (left_skip!=zero_glue)
-  {@+r=hget_param_glue(left_skip_no);
+  {@+r=new_glue(left_skip);
   link(r)=q;q=r;
   }
 
 @ @<Append the new box to the current vertical list...@>=
 if (first_line)
 { pointer p=happend_to_vlist(just_box);
-  hset_map_offset(p,line_offset);
+  uint32_t pos=hposition(p);
+  store_map(p,pos,line_offset);
   first_line=false;
 }
 else
@@ -17470,7 +17491,7 @@ if (cur_line+1!=best_line)
   if (cur_line+2==best_line) pen=pen+final_widow_penalty;
   if (disc_break) pen=pen+broken_penalty;
   if (pen!=0)
-    {@+r=new_penalty(pen); store_map(r, node_pos, next_offset,0);
+    {@+r=new_penalty(pen); store_map(r, node_pos, next_offset);
     link(tail)=r;tail=r;
     }
   }
@@ -18883,19 +18904,12 @@ vertical list contains no character nodes, hence the |type| field exists
 for each node in the list.
 @^data structure assumptions@>
 
-@(hbuildpage.c@>=
-#include "htex.h"
-#include "hformat.h"
-#include "hdefaults.h"
-#include "texdef.h"
-#include "hpos.h"
+@(libtex.c@>=
 
+#define ensure_vbox(N) /* no longer needed */
 
-#define ensure_vbox(N)
-
-@<Page building variables@>@;
 bool output_active=false;
-int holding_inserts=0;
+static int holding_inserts=0;
 
 extern void freeze_page_specs(small_number s);
 extern pointer vert_break(pointer p,scaled h,scaled d);
@@ -18904,7 +18918,9 @@ extern void hship_out(pointer p);
 
 stream_t stream[256]={{0}};
 
-extern scaled hvsize;
+extern scaled hvsize;@/
+
+@<Page building variables@>@;
 
 pointer prune_page_top(pointer @!p) /*adjust top after page break*/
 {@+pointer prev_p; /*lags one step behind |p|*/
@@ -18919,7 +18935,7 @@ and set~|p:=null|@>@;@+break;
   case glue_node: case kern_node: case penalty_node: {@+q=p;p=link(q);link(q)=null;
     link(prev_p)=p;flush_node_list(q);
     } @+break;
-  default: QUIT("Confusion in prune page top");
+  default:confusion(@[@<|"pruning"|@>@]);
 @:this can't happen pruning}{\quad pruning@>
   }
 return link(temp_head);
@@ -18950,7 +18966,7 @@ its new significance.
 @d cur_height	active_height[1] /*the natural height*/
 @d set_height_zero(X)	active_height[X]=0 /*initialize the height to zero*/
 @#
-@(hbuildpage.c@>=
+@(libtex.c@>=
 pointer vert_break(pointer @!p, scaled @!h, scaled @!d)
    /*finds optimum page break*/
 {@+
@@ -19016,7 +19032,7 @@ case kern_node: {@+if (link(p)==null) t=penalty_node;
   } @+break;
 case penalty_node: pi=penalty(p);@+break;
 case mark_node: case ins_node: goto not_found;
-default: QUIT("Confusion in vert_break");
+default:confusion(@[@<|"vertbreak"|@>@]);
 @:this can't happen vertbreak}{\quad vertbreak@>
 }
 
@@ -19180,8 +19196,7 @@ stored in |best_size|.
    /*|page_contents| when an insert node has been contributed, but no boxes*/
 @d box_there	2 /*|page_contents| when a box or rule has been contributed*/
 
-@<Glob...@>=
-@ @<Page building variables@>=
+@<Page building variables@>=
 pointer @!page_tail; /*the final node on the current page*/
 uint8_t @!page_contents; /*what is on the current page so far?*/
 scaled @!page_max_depth; /*maximum box depth on page being built*/
@@ -19261,11 +19276,11 @@ all split and floating insertions.
 @d page_goal	page_so_far[0] /*desired height of information on page being built*/
 @d page_total	page_so_far[1] /*height of the current page*/
 @d page_shrink	page_so_far[6] /*shrinkability of the current page*/
-@d page_depth	page_so_far[7] /*depth of the current page*/
 
 @<Glob...@>=
 @ @<Page building variables@>=
-scaled @!page_so_far[8]; /*height and glue of the current page*/
+scaled @!page_so_far[7]; /*height and glue of the current page*/
+scaled page_depth;
 int @!insert_penalties; /*sum of the penalties for held-over insertions*/
 
 @ @<Put each...@>=
@@ -19348,7 +19363,7 @@ from |empty| to |inserts_only| or |box_there|.
 
 @d set_page_so_far_zero(X)	page_so_far[X]=0
 
-@(hbuildpage.c@>=
+@(libtex.c@>=
 void freeze_page_specs(small_number @!s)
 {@+page_contents=s;
 page_goal=hvsize;page_max_depth=max_depth;
@@ -19437,7 +19452,7 @@ be immediately followed by `|goto big_switch|', which is \TeX's central
 control point.
 
 @
-@(hbuildpage.c@>=
+@(libtex.c@>=
 @t\4@>@<Declare the procedure called |fire_up|@>@;@/
 bool hbuild_page(void) /*append contributions to the current page*/
 {@+
@@ -19525,7 +19540,8 @@ case kern_node: if (page_contents < box_there) goto done1;
 case penalty_node: if (page_contents < box_there) goto done1;@+else pi=penalty(p);@+break;
 case mark_node: goto contribute;
 case ins_node: @<Append an insertion to the current page and |goto contribute|@>@;
-default: QUIT("This cant happen in build page");
+default:confusion(@[@<|"page"|@>@]);
+@:this can't happen page}{\quad page@>
 }
 
 @ @<Initialize the current page, insert the \.{\\topskip} glue...@>=
@@ -19722,7 +19738,7 @@ pointer @!prev_p; /*predecessor of |p|*/
 uint8_t @!n; /*insertion box number*/
 bool @!wait; /*should the present insertion be held over?*/
 pointer @!save_split_top_skip; /*saved value of |split_top_skip|*/
-hpos_set_next(best_page_break);
+hloc_set_next(best_page_break);
 @<Put the \(o)optimal current page into box 255, update |first_mark| and |bot_mark|,
 append insertions to their boxes, and put the remaining nodes back on the contribution
 list@>;
@@ -19743,7 +19759,8 @@ are being held over for a subsequent page.
 
 @<Put the \(o)optimal current page into box 255...@>=
 if (c==best_page_break) best_page_break=null; /*|c| not yet linked in*/
-if (box(0)!=null) QUIT("Box 0 must be empty");
+if (box(0)!=null)
+{ flush_node_list(box(0)); box(0)=null; }
 insert_penalties=0; /*this will count the number of insertions held over*/
 save_split_top_skip=split_top_skip;
 if (holding_inserts <= 0)
@@ -20460,17 +20477,19 @@ and contribution list are empty, and when the last output was not a
 ``dead cycle.''
 
 @<Declare act...@>=
-@
-@(hbuildpage.c@>=
-bool hits_all_over(void) /*do this when \.{\\end} or \.{\\dump} occurs*/
+bool its_all_over(void) /*do this when \.{\\end} or \.{\\dump} occurs*/
 {@+
-  if ((link(page_head)==null)&&(head==tail)) return true;
+if (privileged())
+  {@+if ((page_head==page_tail)&&(head==tail)&&(dead_cycles==0))
+    {@+return true;
+    }
+  back_input(); /*we will try to end again after ejecting residual material*/
   tail_append(new_null_box());
-  width(tail)=hhsize;
-  tail_append(hget_param_glue(fill_skip_no));
-  store_map(tail, 0xffffffff, 0,0);
-  tail_append(new_penalty(-010000000000));
-  store_map(tail, 0xffffffff, 0,0);
+  width(tail)=hsize;
+  tail_append(new_glue(fill_glue));
+  tail_append(new_penalty(-010000000000));@/
+  build_page(); /*append \.{\\hbox to \\hsize\{\}\\vfill\\penalty-'10000000000}*/
+  }
 return false;
 }
 
@@ -21726,12 +21745,7 @@ display. Then we can set the proper values of |display_width| and
 |display_indent| and |pre_display_size|.
 
 @<Go into display math mode@>=
-@ @(hdisplay.c@>=
-#include "htex.h"
-#include "hformat.h"
-#include "hdefaults.h"
-#include "hpos.h"
-#include "texdef.h"
+@ @(libtex.c@>=
 
 void hdisplay(pointer p, pointer a, bool l)
 {@+
@@ -21749,7 +21763,10 @@ scaled @!d; /*increment to |v|*/
 if (head==tail)  /*`\.{\\noindent\$\$}' or `\.{\$\${ }\$\$}'*/
   {@+pop_nest();w=-max_dimen; x=cur_list.hs_field; offset=0;
   }
-else{@+line_break(display_widow_penalty);@/
+else{@+ pointer par_ptr=link(head);
+     add_par_fill_skip();
+     pop_nest();
+     line_break(display_widow_penalty,par_ptr);@/
      x=cur_list.hs_field;
   @<Calculate the natural width, |w|, by which the characters of the final line extend
 to the right of the reference point, plus two ems; or set |w:=max_dimen| if the non-blank
@@ -22483,7 +22500,7 @@ pointer @!t; /*tail of adjustment list*/
 vertical mode (or internal vertical mode).
 
 @<Finish displayed math@>=
-@ @(hdisplay.c@>=
+@ @(libtex.c@>=
 {@<Local variables for finishing a displayed formula@>@;
 adjust_tail=adjust_head;b=hpack(p, natural);p=list_ptr(b);
 t=adjust_tail;adjust_tail=null;@/
@@ -22502,7 +22519,7 @@ to the line size |z|, assuming that |l=false|@>;
 @<Append the display and perhaps also the equation number@>;
 @<Append the glue or equation number following the display@>;
 prev_graf=prev_graf+3;
-needs_bs=true;
+cur_list.bs_pos=hpos+node_pos;
 push_nest();mode=hmode;
 } /* end of \<Finish displayed math> */
 } /* end of |hdisplay| */
@@ -22561,7 +22578,7 @@ displacement for all three potential lines of the display, even though
 
 @<Append the glue or equation number preceding the display@>=
 tail_append(new_penalty(pre_display_penalty));@/
-store_map(tail, node_pos, offset, 0);
+store_map(tail, node_pos, offset);
 if ((d+s <= pre_display_size)||l)  /*not enough clearance*/
   {@+g1=above_display_skip_no;g2=below_display_skip_no;
   }
@@ -22570,9 +22587,9 @@ else{@+g1=above_display_short_skip_no;
   }
 if (l&&(e==0))  /*it follows that |type(a)==hlist_node|*/
   {@+shift_amount(a)=s;append_to_vlist(a,offset);
-  tail_append(new_penalty(inf_penalty)); store_map(tail, node_pos, offset, 0);
+  tail_append(new_penalty(inf_penalty)); store_map(tail, node_pos, offset);
   }
-else {tail_append(hget_param_glue(g1)); store_map(tail, node_pos, offset,0); };
+else {tail_append(new_glue(pointer_def[glue_kind][g1])); store_map(tail, node_pos, offset); }
 
 @ @<Append the display and perhaps also the equation number@>=
 if (e!=0)
@@ -22598,8 +22615,8 @@ if (t!=adjust_head)  /*migrating material comes after equation number*/
   }
 tail_append(new_penalty(post_display_penalty));
 offset=(hpos-hstart)+1-node_pos; /*offset after the display*/
-store_map(tail, node_pos,offset ,0);
-if (g2 > 0) { tail_append(hget_param_glue(g2));store_map(tail, node_pos, offset,0);}
+store_map(tail, node_pos,offset);
+if (g2 > 0) { tail_append(new_glue(pointer_def[glue_kind][g2]));store_map(tail, node_pos, offset);}
 
 @ When \.{\\halign} appears in a display, the alignment routines operate
 essentially as they do in vertical mode. Then the following program is
@@ -24743,12 +24760,15 @@ case open_node: @<Implement \.{\\openout}@>@;@+break;
 case write_node: @<Implement \.{\\write}@>@;@+break;
 case close_node: @<Implement \.{\\closeout}@>@;@+break;
 case special_node: @<Implement \.{\\special}@>@;@+break;
-case par_node:  break;
-case graf_node:  break;
-case disp_node:  break;
-case baseline_node:  break;
-case hpack_node:  case vpack_node: case hset_node: case vset_node: break;
-case align_node: break;
+case par_node:
+case graf_node:
+case disp_node:
+case baseline_node:
+case hpack_node:
+case vpack_node:
+case hset_node:
+case vset_node:
+case align_node: @+break;@#
 case image_node: break; /* see section~\secref{imageext}, page~\pageref{imageext} */
 case immediate_code: @<Implement \.{\\immediate}@>@;@+break;
 case set_language_code: @<Implement \.{\\setlanguage}@>@;@+break;
@@ -24825,13 +24845,6 @@ else print_char('-');
 
 @ @<Display the whatsit...@>=
 switch (subtype(p)) {
-case open_node: {@+print_write_whatsit(@[@<|"openout"|@>@], p);
-  print_char('=');print_file_name(open_name(p), open_area(p), open_ext(p));
-  } @+break;
-case write_node: {@+print_write_whatsit(@[@<|"write"|@>@], p);
-  print_mark(write_tokens(p));
-  } @+break;
-case close_node: print_write_whatsit(@[@<|"closeout"|@>@], p);@+break;
 case special_node: {@+print_esc(@[@<|"special"|@>@]);
   print_mark(write_tokens(p));
   } @+break;
@@ -24858,7 +24871,7 @@ case disp_node: print_str("\\display ");
   node_list_display(display_formula(p));
   node_list_display(display_params(p));
   break;
-case baseline_node: print_str("\\baseline_skip ");
+case baseline_node: print_str("\\baselineskip ");
   print_baseline_skip(baseline_node_no(p));
   break;
 case hset_node: case vset_node:
@@ -24891,11 +24904,13 @@ case hpack_node: case vpack_node:
   break;
 case image_node:
   print_str("\\image(");
-  print_scaled(image_height(p)); print_char('x'); print_scaled(image_width(p));
+  print_char('(');print_scaled(image_height(p));
+   print_char('+'); print_scaled(image_depth(p));
+   print_str(")x"); print_scaled(image_width(p));
   if (image_stretch(p)!=0) { print_str(" plus ");print_glue(image_stretch(p), image_stretch_order(p),@[@<|"pt"|@>@]); }
   if (image_shrink(p)!=0) { print_str(" minus ");print_glue(image_shrink(p), image_shrink_order(p), @[@<|"pt"|@>@]); }
-  print_str(")=");print_int(image_no(p));print_char(',');
-  print_file_name(image_name(p), image_area(p), image_ext(p));
+  print_str(", section ");print_int(image_no(p));
+  if (image_name(p)!=0) {print_str(", "); print(image_name(p));}
   break;
 case align_node:
   print_str("\\align(");
@@ -24907,6 +24922,12 @@ case align_node:
   break;
 default: print_str("whatsit?");
 }
+
+@ We add declarations for the procedures to print extended dimensions and baseline skips.
+
+@<Basic printing...@>=
+extern void print_xdimen(int i);
+extern void print_baseline_skip(int i);
 
 @ @<Make a partial copy of the whatsit...@>=
 switch (subtype(p)) {
@@ -24965,7 +24986,7 @@ case baseline_node:
      align_list(r)=copy_node_list(align_list(p));
      words=align_node_size-1;
   } @+break;
-default:QUIT("Error when copying a whatsit node");
+default:confusion(@[@<|"ext2"|@>@]);
 @:this can't happen ext2}{\quad ext2@>
 }
 
@@ -25008,9 +25029,21 @@ default:confusion(@[@<|"ext3"|@>@]);
 goto done;
 }
 
-@ @<Incorporate a whatsit node into a vbox@>=do_nothing
+@ @<Incorporate a whatsit node into a vbox@>=
+{ @+glue_ord o;
+  if (image_width(p)> w) w= image_width(p);
+  x= x+d+image_height(p);d=0;
+  o= image_stretch_order(p);total_stretch[o]= total_stretch[o]+image_stretch(p);
+  o= image_shrink_order(p);total_shrink[o]= total_shrink[o]+image_shrink(p);
+}
 
-@ @<Incorporate a whatsit node into an hbox@>=do_nothing
+@ @<Incorporate a whatsit node into an hbox@>=
+{@+glue_ord o;
+  if (image_height(p)> h) h= image_height(p);
+  x= x+image_width(p);
+  o= image_stretch_order(p);total_stretch[o]= total_stretch[o]+image_stretch(p);
+  o= image_shrink_order(p);total_shrink[o]= total_shrink[o]+image_shrink(p);
+}
 
 @ @<Let |d| be the width of the whatsit |p|@>=d=0
 

@@ -1,71 +1,18 @@
-/*4:*/
-#line 261 ".\\dummy.w"
+/*6:*/
+#line 267 ".\\dummy.w"
 
 #ifndef _TEX_TYPES_H_
 #define _TEX_TYPES_H_
-#include "basetypes.h"
-/*10:*/
-#line 350 ".\\dummy.w"
+/*14:*/
+#line 408 ".\\dummy.w"
 
-#include <stdint.h> 
-#include <stdbool.h> 
-#include <stdio.h> 
-#include <stdlib.h> 
-#include <string.h> 
-#include <math.h> 
-
-#define odd(X)       ((X)&1)
-#define chr(X)       ((unsigned char)(X))
-#define ord(X)       ((int)(X))
-#define abs(X)       ((X)> -(X)?(X):-(X))
-#define round(X)     ((int)((X)>=0.0?floor((X)+0.5):ceil((X)-0.5)))
-
-#if __SIZEOF_FLOAT__==4
-typedef float float32_t;
-#else
-#error  float type must have size 4
-#endif
-
-/*:10*//*59:*/
-#line 1480 ".\\dummy.w"
-
-#define put(file)    fwrite(&((file).d),sizeof((file).d),1,(file).f)
-#define get(file)    fread(&((file).d),sizeof((file).d),1,(file).f)
-
-#define reset(file,name,mode)   ((file).f= fopen((char *)(name)+1,mode),\
-                                 (file).f!=NULL?get(file):0)
-#define rewrite(file,name,mode) ((file).f= fopen((char *)(name)+1,mode))
-#define close(file)    fclose((file).f)
-#define eof(file)    feof((file).f)
-#define eoln(file)    ((file).d=='\n'||eof(file))
-#define erstat(file)   ((file).f==NULL?-1:ferror((file).f))
-
-#define read(file,x) ((x)= (file).d,get(file))
-#define read_ln(file)  do get(file); while (!eoln(file))
-
-#define write(file, format,...)    fprintf(file.f,format,## __VA_ARGS__)
-#define write_ln(file,...)    write(file,__VA_ARGS__"\n")
-
-#define wterm(format,...) write(term_out,format, ## __VA_ARGS__)
-#define wterm_ln(format,...) wterm(format "\n", ## __VA_ARGS__)
-#define wterm_cr         write(term_out,"\n")
-#define wlog(format, ...) write(log_file,format, ## __VA_ARGS__)
-#define wlog_ln(format, ...)   wlog(format "\n", ## __VA_ARGS__)
-#define wlog_cr         write(log_file,"\n")
-
-/*:59*/
-#line 265 ".\\dummy.w"
-
-/*13:*/
-#line 427 ".\\dummy.w"
-
-enum{mem_max= 30000};
+enum{mem_max= 65534};
 
 
 enum{mem_min= 0};
 
 
-enum{buf_size= 500};
+enum{buf_size= 1024};
 
 
 enum{error_line= 72};
@@ -80,57 +27,62 @@ enum{font_max= 75};
 enum{font_mem_size= 20000};
 enum{param_size= 60};
 enum{nest_size= 40};
-enum{max_strings= 3000};
-enum{string_vacancies= 8000};
+enum{max_strings= 15000};
+enum{string_vacancies= 75000};
 
 
-enum{pool_size= 32000};
+enum{pool_size= 200000};
 
 
 
 enum{save_size= 600};
 
-enum{trie_size= 8000};
+enum{trie_size= 20000};
 
 enum{trie_op_size= 500};
-enum{dvi_buf_size= 800};
-enum{file_name_size= 40};
-/*:13*/
-#line 266 ".\\dummy.w"
+enum{dvi_buf_size= 16384};
+enum{file_name_size= 255};
+/*:14*/
+#line 270 ".\\dummy.w"
 
-/*21:*/
-#line 572 ".\\dummy.w"
+/*22:*/
+#line 552 ".\\dummy.w"
 
 typedef uint8_t ASCII_code;
 
-/*:21*//*28:*/
-#line 807 ".\\dummy.w"
+/*:22*//*23:*/
+#line 581 ".\\dummy.w"
+
+typedef unsigned char text_char;
+
+/*:23*//*30:*/
+#line 790 ".\\dummy.w"
 
 typedef uint8_t eight_bits;
 typedef struct{FILE*f;text_char d;}alpha_file;
 typedef struct{FILE*f;eight_bits d;}byte_file;
 
-/*:28*//*41:*/
-#line 1165 ".\\dummy.w"
+/*:30*//*43:*/
+#line 1148 ".\\dummy.w"
 
-typedef uint16_t pool_pointer;
+typedef uint32_t pool_pointer;
 typedef uint16_t str_number;
 typedef uint8_t packed_ASCII_code;
 
-/*:41*//*105:*/
-#line 2213 ".\\dummy.w"
+/*:43*//*109:*/
+#line 2224 ".\\dummy.w"
 
 typedef int scaled;
 typedef uint32_t nonnegative_integer;
 typedef uint8_t small_number;
 
-/*:105*//*114:*/
-#line 2407 ".\\dummy.w"
+/*:109*//*119:*/
+#line 2419 ".\\dummy.w"
 
 typedef float32_t glue_ratio;
 
-/*:114*//*118:*/
-#line 2511 ".\\dummy.w"
+/*:119*//*123:*/
+#line 2523 ".\\dummy.w"
 
 typedef uint8_t quarterword;
 typedef uint16_t halfword;
@@ -157,59 +109,67 @@ four_quarters qqqq;
 };}memory_word;
 typedef struct{FILE*f;memory_word d;}word_file;
 
-/*:118*//*156:*/
-#line 3232 ".\\dummy.w"
+/*:123*//*125:*/
+#line 2582 ".\\dummy.w"
+
+typedef halfword pointer;
+
+/*:125*//*163:*/
+#line 3253 ".\\dummy.w"
 
 typedef uint8_t glue_ord;
 
-/*:156*//*226:*/
-#line 4379 ".\\dummy.w"
+/*:163*//*230:*/
+#line 4388 ".\\dummy.w"
 
 typedef struct{int16_t mode_field;
 pointer head_field,tail_field;
 int pg_field;
-bs_t bs_field;
+pointer bs_field,ls_field;
+scaled lsl_field;
+uint8_t*bs_pos;
+scaled ds_field,dw_field,di_field,hs_field;
 uint32_t np_field;
 memory_word aux_field;
 }list_state_record;
 
-/*:226*//*283:*/
-#line 5941 ".\\dummy.w"
+/*:230*//*288:*/
+#line 5968 ".\\dummy.w"
 
 typedef uint8_t group_code;
 
-/*:283*//*314:*/
-#line 6521 ".\\dummy.w"
+/*:288*//*319:*/
+#line 6548 ".\\dummy.w"
 
 typedef struct{
 quarterword state_field,index_field;
 halfword start_field,loc_field,limit_field,name_field;
 }in_state_record;
 
-/*:314*//*562:*/
-#line 10750 ".\\dummy.w"
+/*:319*//*567:*/
+#line 10777 ".\\dummy.w"
 
 typedef uint8_t internal_font_number;
 typedef uint16_t font_index;
 
-/*:562*//*609:*/
-#line 11920 ".\\dummy.w"
+/*:567*//*614:*/
+#line 11949 ".\\dummy.w"
 
 typedef uint16_t dvi_index;
 
-/*:609*//*948:*/
-#line 18139 ".\\dummy.w"
+/*:614*//*956:*/
+#line 18160 ".\\dummy.w"
 
 typedef uint16_t trie_pointer;
 
-/*:948*//*953:*/
-#line 18205 ".\\dummy.w"
+/*:956*//*961:*/
+#line 18226 ".\\dummy.w"
 
 typedef uint16_t hyph_pointer;
 
-/*:953*/
-#line 267 ".\\dummy.w"
+/*:961*/
+#line 271 ".\\dummy.w"
 
 #endif
 
-/*:4*/
+/*:6*/

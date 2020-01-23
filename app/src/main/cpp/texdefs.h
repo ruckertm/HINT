@@ -1,20 +1,40 @@
-/*11:*/
-#line 370 ".\\dummy.w"
+/*5:*/
+#line 261 ".\\dummy.w"
 
 #ifndef _TEXDEF_H_
 #define _TEXDEF_H_
+/*12:*/
+#line 352 ".\\dummy.w"
+
+#include "basetypes.h"
+#include "error.h"
+#include <string.h> 
+#include <math.h> 
+
+#define odd(X)       ((X)&1)
+#define chr(X)       ((unsigned char)(X))
+#define ord(X)       ((int)(X))
+#define abs(X)       ((X)> -(X)?(X):-(X))
+#define round(X)     ((int)((X)>=0.0?floor((X)+0.5):ceil((X)-0.5)))
+
+#if __SIZEOF_FLOAT__==4
+typedef float float32_t;
+#else
+#error  float type must have size 4
+#endif
+
 #define banner "This is TeX, Version 3.14159265 (HINT)" \
 
 #define mem_bot 0 \
 
-#define mem_top 30000 \
+#define mem_top mem_max \
  \
 
 #define font_base 0 \
 
-#define hash_size 2100 \
+#define hash_size 15000 \
 
-#define hash_prime 1777
+#define hash_prime 12721
 #define hyph_size 307 \
  \
 
@@ -26,7 +46,6 @@
 #define do_nothing 
 #define empty 0 \
 
-#define text_char unsigned char
 #define first_text_char 0
 #define last_text_char 255 \
 
@@ -153,12 +172,12 @@ history= fatal_error_stop;jump_out() ; \
 
 #define sc i \
 
-#define pointer halfword
 #define null min_halfword \
 
 #define link(X) mem[X].hh.rh
 #define info(X) mem[X].hh.lh \
 
+#define mem_end mem_top
 #define free_avail(X)  \
 {link(X) = avail;avail= X; \
 decr_dyn_used; \
@@ -281,12 +300,7 @@ incr_dyn_used; \
 #define span_count subtype \
 
 #define zero_glue mem_bot
-#define fil_glue zero_glue+glue_spec_size
-#define fill_glue fil_glue+glue_spec_size
-#define ss_glue fill_glue+glue_spec_size
-#define fil_neg_glue ss_glue+glue_spec_size
-#define lo_mem_stat_max fil_neg_glue+glue_spec_size-1 \
- \
+#define lo_mem_stat_max zero_glue+glue_spec_size-1 \
 
 #define page_ins_head mem_top
 #define contrib_head mem_top-1
@@ -474,10 +488,10 @@ else decr(glue_ref_count(X) ) ; \
 #define space_factor aux.hh.lh
 #define clang aux.hh.rh
 #define incompleat_noad aux.i
-#define cur_bs cur_list.bs_field.bs
-#define cur_ls cur_list.bs_field.ls
-#define cur_lsl cur_list.bs_field.lsl
-#define needs_bs cur_list.insert_bs
+#define cur_bs cur_list.bs_field
+#define cur_ls cur_list.ls_field
+#define cur_lsl cur_list.lsl_field
+#define needs_bs (cur_list.bs_pos!=NULL) 
 #define node_pos cur_list.np_field
 #define node_pos1 (nest_ptr==0?0:nest[nest_ptr-1].np_field)  \
 
@@ -1440,8 +1454,7 @@ else cur_lang= language \
 
 #define page_goal page_so_far[0]
 #define page_total page_so_far[1]
-#define page_shrink page_so_far[6]
-#define page_depth page_so_far[7] \
+#define page_shrink page_so_far[6] \
 
 #define print_plus_end(X) print_str(X) ;}
 #define print_plus(X) if(page_so_far[X]!=0)  \
@@ -2100,14 +2113,38 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define str_666 "endwrite"
 #define str_667 "ext4"
 
-#line 373 ".\\dummy.w"
+#line 370 ".\\dummy.w"
 
 
-#define odd(X)       ((X)&1)
-#define chr(X)       ((unsigned char)(X))
-#define ord(X)       ((int)(X))
-#define abs(X)       ((X)> -(X)?(X):-(X))
-#define round(X)     ((int)((X)>=0.0?floor((X)+0.5):ceil((X)-0.5)))
+/*:12*//*61:*/
+#line 1463 ".\\dummy.w"
+
+#define put(file)    fwrite(&((file).d),sizeof((file).d),1,(file).f)
+#define get(file)    fread(&((file).d),sizeof((file).d),1,(file).f)
+
+#define reset(file,name,mode)   ((file).f= fopen((char *)(name)+1,mode),\
+                                 (file).f!=NULL?get(file):0)
+#define rewrite(file,name,mode) ((file).f= fopen((char *)(name)+1,mode))
+#define pascal_close(file)    fclose((file).f)
+#define eof(file)    feof((file).f)
+#define eoln(file)    ((file).d=='\n'||eof(file))
+#define erstat(file)   ((file).f==NULL?-1:ferror((file).f))
+
+#define pascal_read(file,x) ((x)= (file).d,get(file))
+#define read_ln(file)  do get(file); while (!eoln(file))
+
+#define pascal_write(file, format,...)    fprintf(file.f,format,## __VA_ARGS__)
+#define write_ln(file,...)    pascal_write(file,__VA_ARGS__"\n")
+
+#define wterm(format,...) pascal_write(term_out,format, ## __VA_ARGS__)
+#define wterm_ln(format,...) wterm(format "\n", ## __VA_ARGS__)
+#define wterm_cr         pascal_write(term_out,"\n")
+#define wlog(format, ...) pascal_write(log_file,format, ## __VA_ARGS__)
+#define wlog_ln(format, ...)   wlog(format "\n", ## __VA_ARGS__)
+#define wlog_cr         pascal_write(log_file,"\n")
+
+/*:61*//*130:*/
+#line 2637 ".\\dummy.w"
 
 #ifdef DEBUG
 #define incr_dyn_used incr(dyn_used)
@@ -2117,6 +2154,15 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define decr_dyn_used
 #endif
 
+/*:130*/
+#line 264 ".\\dummy.w"
+
 #endif
 
-/*:11*/
+/*:5*//*692:*/
+#line 13203 ".\\dummy.w"
+
+#define vpack(...) vpackage(__VA_ARGS__, max_dimen)
+
+
+/*:692*/

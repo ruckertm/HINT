@@ -173,7 +173,7 @@ dimen_t w;float32_t h,v;
 	/*:85*/	/*93:*/
 	#line 1799 "format.w"
 
-typedef enum{normal= 0,fil= 1,fill= 2,filll= 3}order_t;
+typedef enum{normal_o= 0,fil_o= 1,fill_o= 2,filll_o= 3}order_t;
 typedef struct{float64_t f;order_t o;}stretch_t;
 typedef union{float32_t f;uint32_t u;}stch_t;
 	/*:93*/	/*106:*/
@@ -301,16 +301,16 @@ extern uint16_t max_section_no,section_no;
 extern size_t dir_size,def_size,content_size;
 extern uint8_t*hpos,*hend,*hstart;
 extern debugmode debugflags;
-extern int banner_size;
+extern int hbanner_size;
 extern FILE*hin,*hout,*hlog;
 extern bool option_utf8,option_hex,option_force,option_compress;
-extern char banner[MAX_BANNER+1];
+extern char hbanner[MAX_BANNER+1];
 extern void hallocate_data(void);
 extern bool xdimen_eq(xdimen_t*x,xdimen_t*y);
 extern void new_directory(uint32_t size);
 extern void new_output_buffers(void);
-extern void new_section(uint32_t i,char*name);
-extern void hset_entry(entry_t*e,uint16_t i,uint32_t size,uint32_t xsize,char*name);
+extern void new_section(uint32_t i,char*file_name);
+extern void hset_entry(entry_t*e,uint16_t i,uint32_t size,uint32_t xsize,char*file_name);
 extern void hset_max(void);
 extern void new_max_list(void);
 extern void new_content(void);

@@ -18,9 +18,9 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 extern "C" {
-#include "hinttop.h"
-#include "fonts.h"
-#include "rendergl.h"
+#include "libfonts.h"
+#include "librender.h"
+#include "rendernative.h"
 #include "stb_image.h"
 };
 
@@ -208,7 +208,9 @@ extern "C" void nativeInit(void) {
     LOGI("nativeInit done\n");
 }
 
+
 extern "C" void nativeSetColors(double fr, double fg, double fb, double br, double bg, double bb)
+/* DEPRECATED !!! Use setDarkMode */
 /* set foreground and background rgb colors */
 {
     int ourColorLocation = glGetUniformLocation(gProgram, "ourColor");
@@ -216,7 +218,7 @@ extern "C" void nativeSetColors(double fr, double fg, double fb, double br, doub
     glUniform4f(ourColorLocation, fr, fg, fb, 0.0f);
 }
 
-extern "C" void setDarkMode() {
+static void setDarkMode() {
     LOGI("setDarkMode GL Graphics\n");
     // set dark mode (= inverted texture colors)
     int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
@@ -224,12 +226,17 @@ extern "C" void setDarkMode() {
     mode = DARK_MODE;
 }
 
-extern "C" void setLightMode() {
+static void setLightMode() {
     LOGI("setLightMode GL Graphics\n");
     // set light or dark mode by default to light (=texture colors)
     int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
     glUniform1i(ourModeLocation, LIGHT_MODE);
     mode = LIGHT_MODE;
+}
+
+extern "C" void nativeSetDark(int dark) {
+    if (dark) setDarkMode();
+    else setLightMode();
 }
 
 
