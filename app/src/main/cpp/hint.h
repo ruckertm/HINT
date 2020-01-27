@@ -1,5 +1,5 @@
 /*293:*/
-#line 5480 "hint.w"
+#line 5481 ".\\hint.w"
 
 #ifndef _HINT_H_
 #define _HINT_H_
@@ -20,50 +20,50 @@ extern bool hbuild_page_up(void);
 
 
 /*46:*/
-#line 809 "hint.w"
+#line 809 ".\\hint.w"
 
 extern uint16_t hglyph_section(uint8_t f);
 extern int32_t font_at_size(uint8_t f);
 
 /*:46*//*161:*/
-#line 2739 "hint.w"
+#line 2739 ".\\hint.w"
 
 extern void hget_par_node(uint32_t offset);
 /*:161*//*165:*/
-#line 2799 "hint.w"
+#line 2799 ".\\hint.w"
 
 extern void hteg_par_node(uint32_t offset);
 /*:165*//*190:*/
-#line 3208 "hint.w"
+#line 3208 ".\\hint.w"
 
 extern void hclear_page(void);
 /*:190*//*216:*/
-#line 3671 "hint.w"
+#line 3671 ".\\hint.w"
 
 extern uint64_t page_loc[];
 extern int cur_loc;
 /*:216*//*218:*/
-#line 3717 "hint.w"
+#line 3717 ".\\hint.w"
 
 extern void hloc_clear(void);
 extern bool hloc_next(void);
 extern bool hloc_prev(void);
 /*:218*//*220:*/
-#line 3740 "hint.w"
+#line 3740 ".\\hint.w"
 
 extern void hloc_init(void);
 /*:220*//*224:*/
-#line 3834 "hint.w"
+#line 3835 ".\\hint.w"
 
 extern void hint_open(const char*file_name);
 extern void hint_close(void);
 /*:224*//*227:*/
-#line 3901 "hint.w"
+#line 3902 ".\\hint.w"
 
 extern bool hint_forward(void);
 extern bool hint_backward(void);
 /*:227*/
-#line 5499 "hint.w"
+#line 5500 ".\\hint.w"
 
 
 #endif

@@ -1,10 +1,10 @@
 /*5:*/
-#line 261 "dummy.w"
+#line 261 ".\\dummy.w"
 
 #ifndef _TEXDEF_H_
 #define _TEXDEF_H_
 /*12:*/
-#line 352 "dummy.w"
+#line 352 ".\\dummy.w"
 
 #include "basetypes.h"
 #include "error.h"
@@ -2113,11 +2113,11 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define str_666 "endwrite"
 #define str_667 "ext4"
 
-#line 370 "dummy.w"
+#line 370 ".\\dummy.w"
 
 
 /*:12*//*61:*/
-#line 1463 "dummy.w"
+#line 1463 ".\\dummy.w"
 
 #define put(file)    fwrite(&((file).d),sizeof((file).d),1,(file).f)
 #define get(file)    fread(&((file).d),sizeof((file).d),1,(file).f)
@@ -2144,7 +2144,7 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define wlog_cr         pascal_write(log_file,"\n")
 
 /*:61*//*130:*/
-#line 2638 "dummy.w"
+#line 2638 ".\\dummy.w"
 
 #ifdef DEBUG
 #define incr_dyn_used incr(dyn_used)
@@ -2155,12 +2155,12 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #endif
 
 /*:130*/
-#line 264 "dummy.w"
+#line 264 ".\\dummy.w"
 
 #endif
 
 /*:5*//*692:*/
-#line 13204 "dummy.w"
+#line 13204 ".\\dummy.w"
 
 #define vpack(...) vpackage(__VA_ARGS__, max_dimen)
 

@@ -3822,7 +3822,8 @@ void hint_open(const char *file_name)
 }
 
 void hint_close(void)
-{ hclear_page();
+{ if (!hint_is_open) return;
+  hclear_page();
   list_leaks();
   hclose_file();
   hclear_dir();

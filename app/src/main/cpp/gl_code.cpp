@@ -89,9 +89,9 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jdouble xdpi
     //hint_open("/storage/emulated/0/Download/paging.hnt");
     //hint_open("/storage/emulated/0/Download/math.hnt");
     //hint_open("/storage/emulated/0/Download/ueb2.hnt");
-    //hint_open("/storage/emulated/0/Download/mfpreface.hnt");
+    hint_open("/storage/emulated/0/Download/mfpreface.hnt");
     //hint_open("/storage/emulated/0/Download/bmp.hnt");
-    hint_open("/storage/emulated/0/Download/png.hnt");
+    //hint_open("/storage/emulated/0/Download/png.hnt");
     //hint_open("/storage/emulated/0/Download/display.hnt");
     //hint_open("/storage/emulated/0/Download/opentype.hnt");
     //hint_open("/storage/emulated/0/Download/truetype.hnt");
@@ -119,7 +119,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jclass obj, jint width, ji
     double background_G = (background_color >> 8) & 0xff;
     double background_B = (background_color) & 0xff;
 
-    nativeSetColors(0, 0, 0, background_R, background_G, background_B);
+   // nativeSetColors(0, 0, 0, background_R, background_G, background_B);
 
     hint_resize(width, height, hdpi);
     hint_page();
