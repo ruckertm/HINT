@@ -27,8 +27,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 1797 ${}$}
-\def\lastdate{${}$Date: 2020-01-21 14:27:55 +0100 (Tue, 21 Jan 2020) ${}$}
+\def\lastrevision{${}$Revision: 1800 ${}$}
+\def\lastdate{${}$Date: 2020-01-27 15:03:00 +0100 (Mon, 27 Jan 2020) ${}$}
 
 \input titlepage.tex
 
@@ -218,12 +218,13 @@ void hclose_file(void)
 {
 #ifdef WIN32
  UnmapViewOfFile(hbase);
- hbase=NULL;
  CloseHandle(hMap);
  hMap=NULL;
 #else
  munmap(hbase,hbase_size);
 #endif
+ hbase=NULL;
+ hpos=hstart=hend=NULL;
 }
 
 @
@@ -636,11 +637,6 @@ extern pointer hget_param_glue(uint8_t n);
 
 @<allocate definitions@>=
 ALLOCATE(pointer_def[glue_kind],max_ref[glue_kind]+1, pointer);
-@
-
-
-@<\TeX\ macros@>=
-#define null 0
 @
 
 \subsection{Baseline Skips}
@@ -1207,17 +1203,6 @@ void hteg_content(void)
 }
 @
 
-
-We need the following definitions from \TeX:
-@<\TeX\ macros@>=
-#define is_char_node(X)	(X >= hi_mem_min)   /*does the argument point to a |char_node|?*/ 
-#define disc_node	7 /*|type| of a discretionary node*/ 
-#define glue_node	10 /*|type| of node that points to a glue specification*/ 
-#define kern_node	11 /*|type| of a kern node*/ 
-#define penalty_node	12 /*|type| of a penalty node*/ 
-#define empty_flag 0xFFFF
-@
-
 Next we continue with basic data types and then progress from the most simple to 
 the most complex nodes.
 
@@ -1481,12 +1466,6 @@ case TAG(math_kind,b101):  @+HTEG_MATH(b101,m);@+break;
 case TAG(math_kind,b011):  @+HTEG_MATH(b011,m);@+break;
 @
 
-The second parameter of |new_math| is 0 for before and 1 for after the formula.
-@<\TeX\ macros@>=
-#define before 0
-#define after 1
-@
-
 @<\TeX\ |extern|@>=
 extern pointer new_math(scaled w, small_number s);
 @
@@ -1554,32 +1533,6 @@ static pointer hteg_rule_node(void)
 }
 @
 
-@<\TeX\ macros@>=
-#define null_flag	-010000000000 /*$-2^{30}$, signifies a missing item*/
-#define prev_depth aux.sc /*the name of |aux| in vertical mode*/
-#define ignore_depth	-65536000 /*|prev_depth| value that is ignored*/
-@
-
-
-
-@<\TeX\ macros@>=
-#ifdef @!DEBUG
-#define incr_dyn_used @[(dyn_used++)@]
-#define decr_dyn_used @[(dyn_used--)@]
-#else
-#define incr_dyn_used
-#define decr_dyn_used
-#endif
-#define width_offset 1
-#define depth_offset 2
-#define height_offset 3
-#define sc i  /* really not nice but \TeX\ uses the |i| field for scaled values*/
-#define width(X) mem[X+width_offset].i
-#define depth(X) mem[X+depth_offset].i
-#define height(X) mem[X+height_offset].i
-
-
-@
 
 \subsection{Glue}
 \noindent
@@ -1631,17 +1584,6 @@ case TAG(glue_kind,b111): {@+pointer p;@+HTEG_GLUE(b111);@+  tail_append(new_glu
 @
 
 
-We used the following definitions:
-@<\TeX\ macros@>=
-#define glue_order(X)	subtype(X+list_offset) /*applicable order of infinity*/ 
-#define glue_sign(X)	type(X+list_offset) /*stretching or shrinking*/ 
-#define glue_spec_size 4
-#define normal	0 /*the most common case when several cases are named*/ 
-#define stretching	1 /*glue setting applies to the stretch components*/ 
-#define shrinking	2 /*glue setting applies to the shrink components*/ 
-@
-
-
 @<\HINT/ auxiliar functions@>=
 static pointer hget_glue_spec(void)
 { @+pointer p=null;
@@ -1689,19 +1631,6 @@ static pointer hteg_glue_node(void)
 
 
 
-
-
-@<\TeX\ macros@>=
-#define glue_spec_size 4
-
-#define type(X) mem[X].hh.b0
-#define subtype(X) mem[X].hh.b1 
-
-#define stretch(X) mem[X+2].i
-#define shrink(X) mem[X+3].i
-#define stretch_order type
-#define shrink_order subtype
-@
 
 @<\TeX\ |extern|@>=
 extern pointer new_glue(pointer q);
@@ -2044,21 +1973,6 @@ static pointer hteg_vbox_node(void)
 
 @
 
-@<\TeX\ macros@>=
-#define vlist_node 1 
-
-#define link(X) mem[X].hh.rh /*the |link| field of a memory word*/ 
-
-#define shift_amount(X) mem[X+4].i
-#define list_offset 5
-#define list_ptr(X) link(X+list_offset) 
-#define glue_offset 6
-#define glue_set(X) mem[X+glue_offset].gr
-#define glue_order(X) subtype(X+list_offset) 
-#define glue_sign(X) type(X+list_offset) 
-@
-
-
 \subsection{Extended Boxes}
 We start with boxes that just need their glue to be set.
 
@@ -2255,12 +2169,6 @@ case TAG(vpack_kind,b101): @+{@+HTEG_PACK(b101);@+ p=vpackage(p,x,m,d);@+happend
 case TAG(vpack_kind,b111): @+{@+HTEG_PACK(b111);@+ p=vpackage(p,x,m,d);@+happend_to_vlist(p); @+} @+ break;
 @
 
-
-@<\TeX\ macros@>=
-#define exactly 0
-#define additional 1
-@
-
 \subsection{Kerns}
 
 @<GET macros@>=
@@ -2312,11 +2220,6 @@ case TAG(kern_kind,b111): @+  { @+HTEG_KERN(b111);@+ } @+break;
 @
 
 
-@<\TeX\ macros@>=
-#define explicit 1
-@
-
-
 \subsection{Leaders}
 
 @<GET macros@>=
@@ -2352,13 +2255,6 @@ case TAG(leaders_kind,2):        @+ HTEG_LEADERS(2); @+break;
 case TAG(leaders_kind,3):        @+ HTEG_LEADERS(3); @+break;
 @
 
-
-
-
-@<\TeX\ macros@>=
-#define a_leaders 100
-#define leader_ptr(X) link(X+1) 
-@
 
 \subsection{Baseline Skips}
 
@@ -2400,9 +2296,6 @@ case TAG(baseline_kind,b110): @+{@+ HTEG_BASELINE(b110);@+}@+break;
 case TAG(baseline_kind,b111): @+{@+ HTEG_BASELINE(b111);@+}@+break;
 @
 
-@<\TeX\ macros@>=
-#define zero_glue 0
-@
 
 \subsection{Ligatures}
 We ignore the replacement characters because we do not need them for the display.
@@ -2529,21 +2422,6 @@ pointer hteg_hyphen_node(void)
    return p;
    }
 }
-@
-
-
-
-@<\TeX\ macros@>=
-#define set_replace_count(X,Y) (mem[X].hh.b1= (Y) &0x7F) 
-#define replace_count(X)   (mem[X].hh.b1&0x7F) 
-#define set_auto_disc(X) (mem[X].hh.b1|= 0x80) 
-#define is_auto_disc(X)  (mem[X].hh.b1 & 0x80) 
-#define pre_break llink
-#define post_break rlink 
-#define info(X) mem[X].hh.lh 
-#define llink(X) info(X+1) 
-#define rlink(X) link(X+1)  
-extern pointer new_disc(void);
 @
 
 
@@ -2944,14 +2822,6 @@ current list, reverses the links, and attaches the list again in the new order.
 @
 
 
-
-
-
-@<\TeX\ macros@>=
-#define math_node	9 /*|type| of a math node*/ 
-#define non_discardable(X)	(type(X) < math_node)
-@
-
 \subsection{Displays}
 @<GET macros@>=
 #define @[HGET_DISPLAY(I)@] \
@@ -3024,11 +2894,6 @@ need to parse adjustments in backward direction.
 }
 @
 
-@<\TeX\ macros@>=
-#define adjust_node 5
-#define adjust_ptr(X) mem[X+1].i
-#define small_node_size	2 /*number of words to allocate for most node types*/
-@
 
 @<cases to get content@>=
 case TAG(adjust_kind,1):  @+HGET_ADJUST(1); @+ break;
@@ -3082,26 +2947,6 @@ case TAG(image_kind,b111): @+ HTEG_IMAGE(b111);@+break;
 @
 
 
-We need
-
-@<\TeX\ macros@>=
-#define whatsit_node	8 /*|type| of special extension nodes*/ 
-#define image_node	   10 /*|subtype| that records an image */
-#define image_node_size 9  /* width, depth, height, |shift_amount| like a hbox */
-#define image_width(X)  width(X)  /*width of image */
-#define image_height(X) height(X) /*height of image */
-#define image_depth(X)  depth(X) /* depth of image==zero */
-#define image_no(X)     mem[X+4].i   /* the section number */
-#define image_stretch(X) mem[X+5].sc  /*stretchability of image */
-#define image_shrink(X) mem[X+6].sc  /*shrinkability of image */
-#define image_stretch_order(X) stretch_order(X+7)
-#define image_shrink_order(X) shrink_order(X+7)
-#define image_name(X)   link(X+7) /*string number of file name */ 
-#define image_area(X)   info(X+8) /*string number of file area */ 
-#define image_ext(X)	   link(X+8) /*string number of file extension */
-@
-
-
 \section{Routines from \TeX}
 \subsection{Header Files and the \TeX\ Library}
 In the following, we will extract code directly from \TeX's sources to form
@@ -3116,10 +2961,10 @@ included in the code extracted from \TeX.
 The file {\tt textypes.h} is dependent only on the definition of 
 basic types as given in the file {\tt basetypes.h} which is defined in {\tt format.w}.
 
-A third file, {\tt libtex.h}, is included in the code extracted from \TeX.
-@(libtex.h@>=
-#ifndef _LIBTEX_H_
-#define _LIBTEX_H_
+A third file, {\tt texextern.h}, is included in the code extracted from \TeX.
+@(texextern.h@>=
+#ifndef _TEXEXTERN_H_
+#define _TEXEXTERN_H_
 #include "basetypes.h"
 #include "textypes.h"
 #include "hformat.h"
@@ -3152,19 +2997,7 @@ This entails the risk of using a macro name in\-ad\-ver\-tent\-ly as a
 variable, type, or field name.  For example, \TeX\ defines the macro
 ``\hbox{|#define|} |x0| |152|'' which makes it impossible to use a variable
 named ``|x0|'' because it would be renamed into ``|152|''.
-Therefore we list in the following a small subset of \TeX's macros as 
-\<\TeX\ macros> and put them in the  {\tt htexdefs.h} header file as an alternative to
-the  {\tt texdefs.h} header file
-It is important to note that these macros are not automatically checked against the macros
-contained in {\tt texdefs.h}. Hence those macros should be restricted to a selected few that are
-unlikely to change in \TeX.
-%So possibly this file should be generated using the other files.
-@(htexdefs.h@>=
-#ifndef _HTEXDEF_H_
-#define _HTEXDEF_H_
-@<\TeX\ macros@>@;
-#endif
-@
+
 
 Now let's see how to extract code from \TeX.
 \changestyle{texdef.tex}
@@ -3274,18 +3107,6 @@ extern void push_nest(void);
 extern void pop_nest(void);
 @
 
-@<\TeX\ macros@>=
-#define aux	cur_list.aux_field /*auxiliary data about the current list*/
-#define node_pos cur_list.np_field
-#define cur_bs 	cur_list.bs_field 
-#define cur_ls 	cur_list.ls_field
-#define cur_lsl	cur_list.lsl_field
-#define needs_bs (cur_list.bs_pos!=NULL)
-#define head	cur_list.head_field /*header node of current list*/
-#define tail	cur_list.tail_field /*final node on current list*/
-#define @[tail_append(X)@] @[@+{@+link(tail)=X;tail=link(tail);@+}@]
-#define prev_graf	cur_list.pg_field /*number of paragraph lines accumulated*/
-@
 \subsection{Line Breaking}
 
 \changestyle{hlinebreak.tex}
@@ -3325,14 +3146,6 @@ scaled *const @!total_stretch, *const @!total_shrink;  /*glue found by |hpack| o
 \changestyle{hbuildpage.tex}
 
 @<\TeX\ |extern|@>=
-
-typedef struct {
-pointer p;
-int i;
-pointer g;
-scaled s;
-} stream_t;
-
 extern stream_t stream[256];
 extern bool hbuild_page(void);
 extern halfword badness(scaled @!t, scaled @!s); /*compute badness, given |t >= 0|*/ 
@@ -3394,15 +3207,6 @@ void hclear_page(void)
 
 @<\HINT/ |extern|@>=
 extern void hclear_page(void);
-@
-We used the following macros:
-@<\TeX\ macros@>=
-#define contrib_head (mem_max-1) /*vlist of items not yet on current page*/ 
-#define page_head (mem_max-2) /*vlist for current page*/ 
-#define vmode	1 /*vertical mode*/ 
-#define empty	0 /*symbolic name for an empty page */ 
-#define contrib_tail	nest[0].tail_field /*tail of the contribution list*/
-#define max_depth      dimen_par(max_depth_code)
 @
 
 
@@ -3860,9 +3664,15 @@ of locations sorted by their position in a circular buffer.
 @<\HINT/ variables@>=
 #define MAX_PAGE_POS (1<<5) /* must be a power of 2 */
 
-static uint64_t page_loc[MAX_PAGE_POS];
-static int lo_loc, cur_loc, hi_loc;
+uint64_t page_loc[MAX_PAGE_POS];
+int cur_loc;
+static int lo_loc, hi_loc;
 @
+@<\HINT/ |extern|@>=
+extern uint64_t page_loc[];
+extern int cur_loc;
+@
+
 The location of the current page is found at |page_loc[cur_loc]| which
 is always defined. Pages preceeding the current page may be found
 in |page_loc| at an index $i$ that is strictly beween |lo_loc| and $|cur_loc|$ 
@@ -3882,7 +3692,7 @@ void hloc_clear(void)
 
 bool hloc_next(void)
 { @+int i=cur_loc;
-  if ((page_loc[cur_loc]&0xffffffff)>=hend-hstart)
+  if ((page_loc[cur_loc]&0xffffffff)>=hend-hstart) 
     return false;
   INCR(i);
   if (i==hi_loc) 
@@ -3930,18 +3740,10 @@ void hloc_init(void)
 @<\HINT/ |extern|@>=
 extern void hloc_init(void);
 @
-We conclude this section with a getter and two setters:
-|hloc_get| returns the location of the current page coded as a |uint64_t|,
+We conclude this section with two setters:
 |hloc_set_next(p)| caches the location of |p| as the start of the next page,
 and |hloc_set_prev(p)| does the same for the previous page.
 
-@<\HINT/ auxiliar functions@>=
-uint64_t hloc_get(void)
-{@+ return page_loc[cur_loc];@+ }
-@
-@<\HINT/ |extern|@>=
-extern uint64_t hloc_get(void);
-@
 
 @<\HINT/ auxiliar functions@>=
 #define @[INCR(X)@] (X=(X+1)&(MAX_PAGE_POS-1))
@@ -4020,11 +3822,9 @@ void hint_open(const char *file_name)
 }
 
 void hint_close(void)
-{ render_blank();
-  hclear_page();
+{ hclear_page();
   list_leaks();
   hclose_file();
-  hclear_fonts();
   hclear_dir();
   hint_is_open=false;
 }
@@ -4129,8 +3929,11 @@ We needed:
 scaled hvsize, hhsize;
 @
 @<\TeX\ |extern|@>=
-extern scaled hvsize, hhsize; /* page size as determined by the GUI */
+extern scaled hvsize, hhsize;
 @
+The variables |hvsize| and |hhsize| give the vertical and horizontal size
+of the main body of text. They are determined by subtracting the margins from
+|page_v| and |page_h| as determined by the GUI.
 
 The five functions defined so far consitute a minimal basis for processing \HINT/ files.
 Section~\secref{testing} presents two programs, used to test the \HINT/ engine, which are
@@ -4200,21 +4003,24 @@ static void houtput_template0(void)
 
 \subsection{Moving around in the \HINT/ file}
 The basic capability of \HINT/ is rendering a page that starts at a given position in the
-\HINT/ file. The function |hint_page_at| provides this capability.
+\HINT/ file. The function |hint_page_top| provides this capability.
 It starts by clearing the memory from all traces left from building previous pages
 and computes |hhsize| and |hvsize|.
 Then it parses a partial paragraph---if necessary---and calls |hint_forward| to build the page.
 It attaches the margins and ships it out.
-As all functions in this section, it returns the location of new current page.
+As all functions in this section, it returns the location of the new current page.
 The viewer might store this location to be able to return to this page at a later time.
 
 @<render functions@>=
 static void hship_out(pointer p);
 
-uint64_t hint_page_at(uint64_t h)
-{ hclear_page();
+uint64_t hint_page_top(uint64_t h)
+{ if (hpos==NULL) return hint_blank();
+  hclear_page();
   hset_margins();
   hpos=hstart+(h&0xffffffff);
+  if (hpos>=hend)
+    return hint_page_bottom(hend-hstart);
   if (h>0xffffffff)
     hget_par_node(h>>32);
   hint_forward();
@@ -4226,22 +4032,20 @@ uint64_t hint_page_at(uint64_t h)
 }
 @
 
-
-We can use this function to render---or rerender---the current page or move to the first page:
+Using the previous function, all we need to rerender the current page
+is a function to obtain its top position:
+|hint_page_get| returns the location of the current page coded as a |uint64_t|.
 @<render functions@>=
+uint64_t hint_page_get(void)
+{@+ return page_loc[cur_loc];@+ }
+
 uint64_t hint_page(void)
-{ 
-  return hint_page_at(hloc_get());
-}
-
-
-uint64_t hint_home_page(void)
-{ hloc_init();
-  return hint_page();
+{ return hint_page_top(hint_page_get());
 }
 @
+To display the first page simply call |hint_page_top(0)|.
 
-Now let's consider moving on to the next page. 
+Now let's consider moving to the next page. 
 If we produced the current page using |hint_forward|, we can simply call
 |hint_forward| again. For this reason we use the variables  |forward_mode| and |backward_mode|
 to keep track of the direction.
@@ -4252,7 +4056,8 @@ If we are neither in forward nor backward mode, there is no current page and hen
 In this case, we just render the first page.
 @<render functions@>=
 uint64_t hint_next_page(void)
-{ if (hloc_next()&& forward_mode)
+{ if (hpos==NULL) return hint_blank();
+  if (hloc_next()&& forward_mode)
   { hset_margins();
     if (!hint_forward())
 	{ hloc_prev(); return hint_page(); }	
@@ -4260,7 +4065,7 @@ uint64_t hint_next_page(void)
     backward_mode=false;
     houtput_template0();
     hship_out(stream[0].p);
-    return hloc_get();
+    return hint_page_get();
   }
   else 
     return hint_page();
@@ -4272,42 +4077,60 @@ different from what \HINT/ will produce in forward mode.
 First we check the location cache. If there is an entry for the preceeding page,
 we will take the location and produce the page in forward mode, because this way the
 reader can get the same page as seen before. If we do not have a cached page location,
-we check whether we are in backward mode. In this case, we do not need to
+we build the page based on its bottom position.
+If we are lucky, we are in backward mode. In this case, we do not need to
 throw away the information in the contribution list and we call |hint_backward|.
-In the worst case, we don't have a cached location and are not in backward mode.
-As we did in |hint_page_at|, we clear the memory from all traces left from building other pages,
-compute |hhsize| and |hvsize|, parse a partial paragraph---if necessary---and call |hint_backward| 
-to build the page.
-In both cases, after calling  |hint_backward| , we set |cur_loc| to the current page,
-attach the margins, and return the new location.
-
 @<render functions@>=
 uint64_t hint_prev_page(void)
-{ if (hloc_prev())
+{ if (hpos==NULL) return hint_blank();
+  if (hloc_prev())
     return hint_page();
   else if (backward_mode)
   { hset_margins();
     if (!hint_backward())  return hint_page();
     backward_mode=true;
     forward_mode=false;
+    hloc_prev();
+    houtput_template0();
+    hship_out(stream[0].p);
+    return hint_page_get();
   }
   else
-  { uint64_t h=hloc_get();
-    hclear_page();
-    hset_margins();
-    hpos=hstart+(h&0xffffffff);
-    if (h>0xffffffff)
-      hteg_par_node(h>>32);
-    if (!hint_backward())  return hint_page();
-    backward_mode=true;
-    forward_mode=false;
-  }
+    return hint_page_bottom(hint_page_get());
+}
+@
+In the worst case, we don't have a cached location and are not in backward mode.
+As we did in |hint_page_top|, we clear the memory from all traces left from building other pages,
+compute |hhsize| and |hvsize|, parse a partial paragraph---if necessary---and call |hint_backward| 
+to build the page.
+In both cases, after calling  |hint_backward| , we set |cur_loc| to the current page,
+attach the margins, and return the new location.
+@<render functions@>=
+uint64_t  hint_page_bottom(uint64_t h)
+{ if (hpos==NULL) return hint_blank(); 
+  hclear_page();
+  hset_margins();
+  hpos=hstart+(h&0xffffffff);
+  if (h>0xffffffff)
+    hteg_par_node(h>>32);
+  if (!hint_backward())  return hint_page();
+  backward_mode=true;
+  forward_mode=false;
   hloc_prev();
   houtput_template0();
   hship_out(stream[0].p);
-  return hloc_get();
+  return hint_page_get();
 }
 @
+A function to build a page centered around a given location completes the set of
+page building functions.
+@<render functions@>=
+uint64_t  hint_page_center(uint64_t h)
+{ if (hpos==NULL) return hint_blank();
+  QUIT("hint_page_center not yet implemented");
+}
+@
+
 
 \subsection{Changing the page dimensions}
 A central feature of a \HINT/ viewer is its ability to change the dimensions and the
@@ -4399,7 +4222,6 @@ To initialize the |fonts| table and remove  all fonts form memory, the |hclear_f
 static void hfree_glyph_cache(font_t *f);
 
 void hclear_fonts(void)
-/* remove all fonts from memory */
 { int f;
   for (f=0;f<=max_ref[font_kind];f++)
     if (fonts[f]!=NULL)
@@ -4673,9 +4495,9 @@ task to the native rendering engine. The native renderer is not part of this
 document, but its reponsibilities ar listed in section~\secref{native}.
 
 @<render functions@>=
-void render_blank(void)
-{ 
-  nativeBlank();
+uint64_t hint_blank(void)
+{ nativeBlank();
+  return 0;
 }
 @
 
@@ -5097,7 +4919,7 @@ To set the size of the drawing aerea in pixel and the resolution in dots (pixel)
 extern void nativeSetSize(int px_h, int px_v, double dpi);
 @ 
 
-To set foreground and background colors as rgb values in the range 0 to 255.
+The native Renderer may implement an optional procedure to switch between Dark and light mode.
 @<native rendering definitions@>=
 extern void nativeSetDark(int dark);
 @
@@ -5442,8 +5264,8 @@ the \TeX\ library and the \HINT/ library. Here is the main program:
 @(main.c@>=
 #include <stdio.h>
 #include <string.h>
-#include "libtex.h"
-#include "libhint.h"
+#include "texextern.h"
+#include "hint.h"
 
 @<test variables@>@;
 
@@ -5577,8 +5399,8 @@ The following code  is similar to the code for the {\tt skip} program described 
 @(back.c@>=
 #include <stdio.h>
 #include <string.h>
-#include "libtex.h"
-#include "libhint.h"
+#include "texextern.h"
+#include "hint.h"
 
 @<test variables@>@;
 
@@ -5654,10 +5476,10 @@ extern void leak_out(pointer p, int s);
 
 \section{The Source Files}
 
-\subsection{{\tt libhint.h}}
-@(libhint.h@>=
-#ifndef _LIBHINT_H_
-#define _LIBHINT_H_
+\subsection{{\tt hint.h}}
+@(hint.h@>=
+#ifndef _HINT_H_
+#define _HINT_H_
 
 extern void hopen_file(const char *in_name);
 extern bool hget_banner(void);
@@ -5679,8 +5501,8 @@ extern bool hbuild_page_up(void); /*append contributions to the current page*/
 #endif
 @
 
-\subsection{{\tt libhint.c}}
-@(libhint.c@>=
+\subsection{{\tt hint.c}}
+@(hint.c@>=
 #ifndef WIN32
 #include <sys/mman.h>
 #else
@@ -5692,10 +5514,10 @@ extern bool hbuild_page_up(void); /*append contributions to the current page*/
 #include <math.h>
 #include <zlib.h>@#
 
-#include "libtex.h"
-#include "libhint.h"
-#include "librender.h"
-#include "libfonts.h"
+#include "texextern.h"
+#include "hint.h"
+#include "hrender.h"
+#include "hfonts.h"
 
 #include "texdefs.h"
 
@@ -5714,16 +5536,19 @@ extern bool hbuild_page_up(void); /*append contributions to the current page*/
 
 @
 
-\subsection{{\tt librender.h}}
-@(librender.h@>=
-#ifndef _LIBRENDER_H
-#define _LIBRENDER_H
+\subsection{{\tt hrender.h}}
+@(hrender.h@>=
+#ifndef _HRENDER_H
+#define _HRENDER_H
 @<render macros@>@;
 
-extern void render_blank(void);
-extern uint64_t hint_page_at(uint64_t h);
+extern int page_h, page_v;
+extern uint64_t hint_blank(void);
+extern uint64_t hint_page_get(void);
+extern uint64_t hint_page_top(uint64_t h);
+extern uint64_t hint_page_center(uint64_t h);
+extern uint64_t hint_page_bottom(uint64_t h);
 extern uint64_t hint_page(void);
-extern uint64_t hint_home_page(void);
 extern uint64_t hint_next_page(void);
 extern uint64_t hint_prev_page(void);
 extern void hint_resize(int px_h, int px_v, double dpi);
@@ -5731,13 +5556,13 @@ extern void hint_resize(int px_h, int px_v, double dpi);
 #endif 
 @
 
-\subsection{{\tt librender.c}}
-@(librender.c@>=
+\subsection{{\tt hrender.c}}
+@(hrender.c@>=
 #include <math.h>
-#include "libtex.h"
-#include "libhint.h"
-#include "libfonts.h"
-#include "librender.h"
+#include "texextern.h"
+#include "hint.h"
+#include "hfonts.h"
+#include "hrender.h"
 #include "rendernative.h"
 #include "texdefs.h"
 @<render variables@>@;
@@ -5745,10 +5570,10 @@ extern void hint_resize(int px_h, int px_v, double dpi);
 @
 
 
-\subsection{{\tt libfonts.h}}
-@(libfonts.h@>=
-#ifndef _LIBFONTS_H
-#define _LIBFONTS_H
+\subsection{{\tt hfonts.h}}
+@(hfonts.h@>=
+#ifndef _HFONTS_H
+#define _HFONTS_H
 @<font types@>@;
 
 extern void render_char(int x, int y, font_t *f, int32_t s, uint32_t cc);
@@ -5757,15 +5582,15 @@ extern void hclear_fonts(void);
 #endif
 @
 
-\subsection{{\tt libfonts.c}}
-@(libfonts.c@>=
+\subsection{{\tt hfonts.c}}
+@(hfonts.c@>=
 #include "basetypes.h"
 #include "error.h"
 #include "hformat.h"
 #include "textypes.h"
-#include "libhint.h"
-#include "libfonts.h"
-#include "librender.h"
+#include "hint.h"
+#include "hfonts.h"
+#include "hrender.h"
 #include "rendernative.h"
 
 @<font variables@>@;

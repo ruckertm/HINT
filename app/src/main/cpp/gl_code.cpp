@@ -23,10 +23,12 @@
 #include <GLES2/gl2ext.h>
 
 extern "C" {
-#include "libhint.h"
-#include "libfonts.h"
-#include "librender.h"
+#include "hint.h"
+#include "hfonts.h"
+#include "hrender.h"
 #include "rendernative.h"
+// DEPRECATED use nativeSetDark
+extern void nativeSetColors(double fr, double fg, double fb, double br, double bg, double bb);
 };
 
 
@@ -139,20 +141,20 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_prev(JNIEnv *env, jclass obj) {
 extern "C" JNIEXPORT int JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_getPos(JNIEnv *env, jclass obj) {
     LOGI("getPos()\n");
-    return hloc_get();
+    return hint_page_get();
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_setPos(JNIEnv *env, jclass obj, jint pos) {
     LOGI("setPos(%d)\n", pos);
-    hint_page_at(pos);
+    hint_page_top(pos);
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_home(JNIEnv *env, jclass obj) {
     // go to first page
     LOGI("hpos_home()\n");
-    hint_home_page();
+    hint_page_top(0);
 }
 
 extern "C" JNIEXPORT void JNICALL

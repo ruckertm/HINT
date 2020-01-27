@@ -21,10 +21,10 @@ add_library(hintview SHARED
         rendergl.cpp
         stb_image.cpp
         stb_truetype.cpp
-        libtex.c
-        libhint.c
-        librender.c
-        libfonts.c
+        htex.c
+        hint.c
+        hrender.c
+        hfonts.c
         hdefaults.c
         hformat.c
         )

@@ -1464,9 +1464,9 @@ by changing |wterm|, |wterm_ln|, and |wterm_cr| in this section.
 #define put(file)    @[fwrite(&((file).d),sizeof((file).d),1,(file).f)@]
 #define get(file)    @[fread(&((file).d),sizeof((file).d),1,(file).f)@]
 
-#define reset(file,name,mode)   @[((file).f=fopen((char *)(name)+1,mode),\
+#define reset(file,file_name,mode)   @[((file).f=fopen((char *)(file_name)+1,mode),\
                                  (file).f!=NULL?get(file):0)@]
-#define rewrite(file,name,mode) @[((file).f=fopen((char *)(name)+1,mode))@]
+#define rewrite(file,file_name,mode) @[((file).f=fopen((char *)(file_name)+1,mode))@]
 #define pascal_close(file)    @[fclose((file).f)@]
 #define eof(file)    @[feof((file).f)@]
 #define eoln(file)    @[((file).d=='\n'||eof(file))@]
@@ -1487,9 +1487,10 @@ by changing |wterm|, |wterm_ln|, and |wterm_cr| in this section.
 
 @ To end a line of text output, we call |print_ln|.
 
-@(libtex.c@>=
+@(htex.c@>=
 #include "texdefs.h"
-#include "libtex.h"
+#include "textypes.h"
+#include "texextern.h"
 
 static int @!file_offset=0;/*the number of characters on the current file line*/
 static int @!tally=0; /*the number of characters recently printed*/
@@ -1580,7 +1581,7 @@ routine when it knows that this is safe. (The present implementation
 assumes that it is always safe to print a visible ASCII character.)
 @^system dependencies@>
 
-@(libtex.c@>=
+@(htex.c@>=
 
 @<prepare for string pool initialization@>@;
 packed_ASCII_code @!str_pool[]= @<|str_pool| initialization@>; /*the characters*/
@@ -2126,7 +2127,7 @@ print_err("Emergency stop");help1(s);succumb;
 @ Here is the most dreaded error message.
 
 @<Error hand...@>=
-@ @(libtex.c@>=
+@ @(htex.c@>=
 void overflow(char *@!s, int @!n) /*stop due to finiteness*/
 {@+ QUIT("Capacity exceeded, sorry [%s=%d=0x%X]\n",s,n,n);@+
 }
@@ -2140,7 +2141,7 @@ help to pinpoint the problem.
 @^dry rot@>
 
 @<Error hand...@>=
-@ @(libtex.c@>=
+@ @(htex.c@>=
 void confusion(str_number @!s)
    /*consistency check violated; |s| tells where*/
 {@+ QUIT("This can't happen(%.*s)",length(s),str_pool+str_start[s]);@+ }
@@ -2207,7 +2208,7 @@ apply for |%| as well as for |/|.)
 @ Here is a routine that calculates half of an integer, using an
 unambiguous convention with respect to signed odd numbers.
 
-@(libtex.c@>=
+@(htex.c@>=
 
 int half(int @!x)
 {@+if (odd(x)) return(x+1)/2;
@@ -2252,7 +2253,7 @@ they form a fraction~$f$ in the range $s-\delta\L10\cdot2^{16}f<s$.
 We can stop if and only if $f=0$ satisfies this condition; the loop will
 terminate before $s$ can possibly become zero.
 
-@ @(libtex.c@>=
+@ @(htex.c@>=
    void print_scaled(scaled @!s) /*prints scaled real, rounded to five
   digits*/
 {@+scaled delta; /*amount of allowable inaccuracy*/
@@ -2293,7 +2294,7 @@ instead of reporting errors directly to the user. Another global variable,
 |rem|, holds the remainder after a division.
 
 @<Glob...@>=
-@ @(libtex.c@>=
+@ @(htex.c@>=
 bool @!arith_error; /*has arithmetic overflow occurred recently?*/
 scaled @!rem; /*amount subtracted to get an exact division*/
 
@@ -2317,7 +2318,7 @@ else{@+arith_error=true;return 0;
 
 @ We also need to divide scaled dimensions by integers.
 
-@(libtex.c@>=
+@(htex.c@>=
 scaled x_over_n(scaled @!x, int @!n)
 {@+bool negative; /*should |rem| be negated?*/
 scaled x_over_n; negative=false;
@@ -2343,7 +2344,7 @@ by~|d|, in separate operations, since overflow might well occur; and it
 would be too inaccurate to divide by |d| and then multiply by |n|. Hence
 this subroutine simulates 1.5-precision arithmetic.
 
-@(libtex.c@>=
+@(htex.c@>=
 scaled xn_over_d(scaled @!x, int @!n, int @!d)
 {@+bool positive; /*was |x >= 0|?*/
 nonnegative_integer @!t, @!u, @!v; /*intermediate quantities*/
@@ -2380,7 +2381,7 @@ computing at most 1095 distinct values, but that is plenty.
 
 @d inf_bad	10000 /*infinitely bad value*/
 
-@(libtex.c@>=
+@(htex.c@>=
 halfword badness(scaled @!t, scaled @!s) /*compute badness, given |t >= 0|*/
 {@+int r; /*approximation to $\alpha t/s$, where $\alpha^3\approx
   100\cdot2^{18}$*/
@@ -2676,7 +2677,7 @@ we try first to increase |mem_end|. If that cannot be done, i.e., if
 |mem_end==mem_max|, we try to decrease |hi_mem_min|. If that cannot be
 done, i.e., if |hi_mem_min==lo_mem_max+1|, we have to quit.
 
-@(libtex.c@>=  pointer get_avail(void) /*single-word node allocation*/
+@(htex.c@>=  pointer get_avail(void) /*single-word node allocation*/
 {@+pointer p; /*the new node being got*/
 p=avail; /*get top location in the |avail| stack*/
 if (p!=null) avail=link(avail); /*and pop it off*/
@@ -2719,7 +2720,7 @@ the places that would otherwise account for the most calls of |get_avail|.
 one-word nodes that starts at position |p|.
 @^inner loop@>
 
-@(libtex.c@>=
+@(htex.c@>=
 @<Memory variables@>@;
 void flush_list(pointer @!p) /*makes list of single-word nodes available*/
 {@+pointer @!q, @!r; /*list traversers*/
@@ -2765,7 +2766,7 @@ space exists.
 If |get_node| is called with $s=2^{30}$, it simply merges adjacent free
 areas and returns the value |max_halfword|.
 
-@(libtex.c@>= pointer get_node(int @!s) /*variable-size node allocation*/
+@(htex.c@>= pointer get_node(int @!s) /*variable-size node allocation*/
 {@+
 pointer p; /*the node currently under inspection*/
 pointer @!q; /*the node physically after node |p|*/
@@ -2851,7 +2852,7 @@ the operation |free_node(p, s)| will make its words available, by inserting
 |p| as a new empty node just before where |rover| now points.
 @^inner loop@>
 
-@(libtex.c@>=
+@(htex.c@>=
 void free_node(pointer @!p, halfword @!s) /*variable-size node
   liberation*/
 {@+pointer q; /*|llink(rover)|*/
@@ -3002,7 +3003,7 @@ which all subfields have the values corresponding to `\.{\\hbox\{\}}'.
 The |subtype| field is set to |min_quarterword|, since that's the desired
 |span_count| value if this |hlist_node| is changed to an |unset_node|.
 
-@(libtex.c@>=
+@(htex.c@>=
 pointer new_null_box(void) /*creates a new box node*/
 {@+pointer p; /*the new node*/
 p=get_node(box_node_size);type(p)=hlist_node;
@@ -3033,7 +3034,7 @@ an hlist; the |height| and |depth| are never running in a~vlist.
 makes all the dimensions ``running,'' so you have to change the
 ones that are not allowed to run.
 
-@(libtex.c@>= pointer new_rule(void)
+@(htex.c@>= pointer new_rule(void)
 {@+pointer p; /*the new node*/
 p=get_node(rule_node_size);type(p)=rule_node;
 subtype(p)=0; /*the |subtype| is not used*/
@@ -3102,7 +3103,7 @@ a |new_lig_item| function, which returns a two-word node having a given
 |character| field. Such nodes are used for temporary processing as ligatures
 are being created.
 
-@(libtex.c@>=
+@(htex.c@>=
 pointer new_ligature(quarterword @!f, quarterword @!c, pointer @!q)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=ligature_node;
@@ -3141,7 +3142,7 @@ not chosen.
 @d pre_break	llink /*text that precedes a discretionary break*/
 @d post_break	rlink /*text that follows a discretionary break*/
 
-@(libtex.c@>= pointer new_disc(void) /*creates an empty |disc_node|*/
+@(htex.c@>= pointer new_disc(void) /*creates an empty |disc_node|*/
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=disc_node;
 subtype(p)=0;pre_break(p)=null;post_break(p)=null;
@@ -3175,7 +3176,7 @@ the amount of surrounding space inserted by \.{\\mathsurround}.
 @d before	0 /*|subtype| for math node that introduces a formula*/
 @d after	1 /*|subtype| for math node that winds up a formula*/
 
-@(libtex.c@>= pointer new_math(scaled @!w, small_number @!s)
+@(htex.c@>= pointer new_math(scaled @!w, small_number @!s)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=math_node;
 subtype(p)=s;width(p)=w;return p;
@@ -3257,7 +3258,7 @@ typedef uint8_t glue_ord; /*infinity to the 0, 1, 2, or 3 power*/
 The reference count in the copy is |null|, because there is assumed
 to be exactly one reference to the new specification.
 
-@(libtex.c@>= pointer new_spec(pointer @!p) /*duplicates a glue specification*/
+@(htex.c@>= pointer new_spec(pointer @!p) /*duplicates a glue specification*/
 {@+pointer q; /*the new spec*/
 q=get_node(glue_spec_size);@/
 mem[q]=mem[p];glue_ref_count(q)=null;@/
@@ -3283,7 +3284,7 @@ return p;
 @ Glue nodes that are more or less anonymous are created by |new_glue|,
 whose argument points to a glue specification.
 
-@(libtex.c@>= pointer new_glue(pointer @!q)
+@(htex.c@>= pointer new_glue(pointer @!q)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=glue_node;subtype(p)=normal;
 leader_ptr(p)=null;glue_ptr(p)=q;incr(glue_ref_count(q));
@@ -3321,7 +3322,7 @@ inserted from \.{\\mkern} specifications in math formulas).
 
 @ The |new_kern| function creates a kern node having a given width.
 
-@(libtex.c@>= pointer new_kern(scaled @!w)
+@(htex.c@>= pointer new_kern(scaled @!w)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=kern_node;
 subtype(p)=normal;
@@ -3344,7 +3345,7 @@ break will be forced.
 @ Anyone who has been reading the last few sections of the program will
 be able to guess what comes next.
 
-@(libtex.c@>= pointer new_penalty(int @!m)
+@(htex.c@>= pointer new_penalty(int @!m)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=penalty_node;
 subtype(p)=0; /*the |subtype| is not used*/
@@ -3423,7 +3424,7 @@ initializing itself the slow~way.
 @<Local variables for init...@>=
 int @!k; /*index into |mem|, |eqtb|, etc.*/
 
-@ @(libtex.c@>=
+@ @(htex.c@>=
 void mem_init(void)
 { @+ int k;
   @<Initialize |mem|@>@;
@@ -3665,7 +3666,7 @@ default:do_nothing;
 print a font-and-character combination, one to print a token list without
 its reference count, and one to print a rule dimension.
 
-@(libtex.c@>=
+@(htex.c@>=
 void print_font_and_char(int @!p) /*prints |char_node| data*/
 {@+if (p > mem_end) print_esc(@[@<|"CLOBBERED."|@>@]);
 else{@<Print the font identifier for |font(p)|@>;
@@ -3685,7 +3686,7 @@ void print_rule_dimen(scaled @!d) /*prints dimension in rule node*/
 @ Then there is a subroutine that prints glue stretch and shrink, possibly
 followed by the name of finite units:
 
-@ @(libtex.c@>=
+@ @(htex.c@>=
    void print_glue(scaled @!d, int @!order, str_number @!s)
    /*prints a glue component*/
 {@+print_scaled(d);
@@ -3701,7 +3702,7 @@ else if (s!=0) print(s);
 
 @ The next subroutine prints a whole glue specification.
 
-@ @(libtex.c@>=
+@ @(htex.c@>=
    void print_spec(int @!p, str_number @!s)
    /*prints a glue specification*/
 {@+if ((p < mem_min)||(p >= lo_mem_max)) print_char('*');
@@ -3731,7 +3732,7 @@ the length of this string, namely |cur_length|, is the depth of nesting.
 
 Recursive calls on |show_node_list| therefore use the following pattern:
 
-@(libtex.c@>=
+@(htex.c@>=
 
 static int depth_level=0; /*current nesting level of |show_node_list|*/
 
@@ -3760,7 +3761,7 @@ for example, it might try to read |mem[p].hh| when |mem[p]|
 contains a scaled integer, if |p| is a pointer that has been
 clobbered or chosen at random.
 
-@ @(libtex.c@>=
+@ @(htex.c@>=
 void show_node_list(int @!p) /*prints a node list symbolically*/
 {@+
 int n; /*the number of items already printed at this level*/
@@ -3941,7 +3942,7 @@ node_list_display(post_break(p)); /*recursive call*/
 @ The recursive machinery is started by calling |show_box|.
 @^recursion@>
 
-@ @(libtex.c@>=
+@ @(htex.c@>=
 void show_box(pointer @!p)
 {@+depth_threshold=200; breadth_max=200;
 show_node_list(p); /*the show starts at |p|*/
@@ -3976,7 +3977,7 @@ specification is being withdrawn.
   else decr(glue_ref_count(X));
   }
 
-@(libtex.c@>= void delete_glue_ref(pointer @!p) /*|p| points to a glue specification*/
+@(htex.c@>= void delete_glue_ref(pointer @!p) /*|p| points to a glue specification*/
 fast_delete_glue_ref(p)
 
 @ Now we are ready to delete any node list, recursively.
@@ -3984,7 +3985,7 @@ In practice, the nodes deleted are usually charnodes (about 2/3 of the time),
 and they are glue nodes in about half of the remaining cases.
 @^recursion@>
 
-@(libtex.c@>=
+@(htex.c@>=
    void flush_node_list(pointer @!p) /*erase list of nodes starting at |p|*/
 {@+ /*go here when node |p| has been freed*/
 pointer q; /*successor to node |p|*/
@@ -4045,7 +4046,7 @@ example, if the size is altered, or if some link field is moved to another
 relative position---then this code may need to be changed too.
 @^data structure assumptions@>
 
-@(libtex.c@>=
+@(htex.c@>=
 pointer copy_node_list(pointer @!p) /*makes a duplicate of the
   node list that starts at |p| and returns a pointer to the new list*/
 {@+pointer h; /*temporary head of copied list*/
@@ -4433,7 +4434,7 @@ vertical mode, then ``contributed'' to the current page (during which time
 the page-breaking decisions are made). For now, we don't need to know
 any more details about the page-building process.
 
-@(libtex.c@>=
+@(htex.c@>=
 
 @<List variables@>@;
 
@@ -4453,7 +4454,7 @@ calling |push_nest|. This routine changes |head| and |tail| so that
 a new (empty) list is begun; it does not change |mode| or |aux|.
 
 @s line mode_line
-@(libtex.c@>=
+@(htex.c@>=
 void push_nest(void) /*enter a new semantic level, save the old*/
 {@+if (nest_ptr > max_nest_stack)
   {@+max_nest_stack=nest_ptr;
@@ -4470,7 +4471,7 @@ state is restored by calling |pop_nest|. This routine will never be
 called at the lowest semantic level, nor will it be called unless |head|
 is a node that should be returned to free memory.
 
-@(libtex.c@>=
+@(htex.c@>=
 void pop_nest(void) /*leave a semantic level, re-enter the old*/
 {@+free_avail(head);decr(nest_ptr);cur_list=nest[nest_ptr];
 }
@@ -10787,7 +10788,7 @@ typedef uint16_t font_index; /*index into |font_info|*/
 @
 @s font_index int
 @s str_number int
-@(libtex.c@>=
+@(htex.c@>=
 memory_word @!font_info[font_mem_size+1];
    /*the big collection of font data*/
 static font_index @!fmem_ptr=0; /*first unused word of |font_info|*/
@@ -10827,7 +10828,7 @@ part of this word (the |b0| field), the width of the character is
 |min_quarterword| has already been added to |c| and to |w|, since \TeX\
 stores its quarterwords that way.)
 
-@(libtex.c@>=
+@(htex.c@>=
 int @!char_base0[font_max-font_base+1], *const @!char_base = @!char_base0-font_base;
    /*base addresses for |char_info|*/
 int @!width_base0[font_max-font_base+1], *const @!width_base = @!width_base0-font_base;
@@ -10980,7 +10981,7 @@ information is stored; |null_font| is returned in this case.
 
 @d abort	goto bad_tfm /*do this when the \.{TFM} data is wrong*/
 
-@(libtex.c@>=
+@(htex.c@>=
 void read_font_info(int f, char *nom, scaled s)
 {@+
 font_index k; /*index into |font_info|*/
@@ -11371,7 +11372,7 @@ prints a warning message unless the user has suppressed it.
 given character in a given font. If that character doesn't exist,
 |null| is returned instead.
 
-@(libtex.c@>=
+@(htex.c@>=
 pointer new_character(internal_font_number @!f, eight_bits @!c)
 {@+ pointer p; /*newly allocated node*/
 #ifdef DEBUG
@@ -12964,7 +12965,7 @@ pointer @!adjust_tail; /*tail of adjustment list*/
 
 @ Here now is |hpack|, which contains few if any surprises.
 
-@(libtex.c@>=
+@(htex.c@>=
 @<Packing variables@>@;
 
 pointer hpack(pointer @!p, scaled @!w, small_number @!m)
@@ -13204,7 +13205,7 @@ point is simply moved down until the limiting depth is attained.
 #define vpack(...)	@[vpackage(__VA_ARGS__, max_dimen)@]
     /*special case of unconstrained depth*/
 
-@ @(libtex.c@>=
+@ @(htex.c@>=
 pointer vpackage(pointer @!p, scaled @!h, small_number @!m, scaled @!l)
 {@+
 pointer r; /*the box node that will be returned*/
@@ -16070,7 +16071,7 @@ itself---we must build it up little by little, somewhat more cautiously
 than we have done with the simpler procedures of \TeX. Here is the
 general outline.
 
-@(libtex.c@>=
+@(htex.c@>=
 @<Line break variables@>@;
 
 @<Declare subprocedures for |line_break|@>@;
@@ -18904,7 +18905,16 @@ vertical list contains no character nodes, hence the |type| field exists
 for each node in the list.
 @^data structure assumptions@>
 
-@(libtex.c@>=
+@<Types...@>=
+
+typedef struct {
+pointer p;
+int i;
+pointer g;
+scaled s;
+} stream_t;
+
+@ @(htex.c@>=
 
 #define ensure_vbox(N) /* no longer needed */
 
@@ -18966,7 +18976,7 @@ its new significance.
 @d cur_height	active_height[1] /*the natural height*/
 @d set_height_zero(X)	active_height[X]=0 /*initialize the height to zero*/
 @#
-@(libtex.c@>=
+@(htex.c@>=
 pointer vert_break(pointer @!p, scaled @!h, scaled @!d)
    /*finds optimum page break*/
 {@+
@@ -19363,7 +19373,7 @@ from |empty| to |inserts_only| or |box_there|.
 
 @d set_page_so_far_zero(X)	page_so_far[X]=0
 
-@(libtex.c@>=
+@(htex.c@>=
 void freeze_page_specs(small_number @!s)
 {@+page_contents=s;
 page_goal=hvsize;page_max_depth=max_depth;
@@ -19452,7 +19462,7 @@ be immediately followed by `|goto big_switch|', which is \TeX's central
 control point.
 
 @
-@(libtex.c@>=
+@(htex.c@>=
 @t\4@>@<Declare the procedure called |fire_up|@>@;@/
 bool hbuild_page(void) /*append contributions to the current page*/
 {@+
@@ -21745,7 +21755,7 @@ display. Then we can set the proper values of |display_width| and
 |display_indent| and |pre_display_size|.
 
 @<Go into display math mode@>=
-@ @(libtex.c@>=
+@ @(htex.c@>=
 
 void hdisplay(pointer p, pointer a, bool l)
 {@+
@@ -22500,7 +22510,7 @@ pointer @!t; /*tail of adjustment list*/
 vertical mode (or internal vertical mode).
 
 @<Finish displayed math@>=
-@ @(libtex.c@>=
+@ @(htex.c@>=
 {@<Local variables for finishing a displayed formula@>@;
 adjust_tail=adjust_head;b=hpack(p, natural);p=list_ptr(b);
 t=adjust_tail;adjust_tail=null;@/

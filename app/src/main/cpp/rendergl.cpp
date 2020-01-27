@@ -18,8 +18,8 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 extern "C" {
-#include "libfonts.h"
-#include "librender.h"
+#include "hfonts.h"
+#include "hrender.h"
 #include "rendernative.h"
 #include "stb_image.h"
 };
