@@ -1,6 +1,8 @@
 #ifndef FONTS_H
 #define FONTS_H
 
+
+
 /* HINT does support the following font formats:
 TeX PK Fonts, TrueType Fonts PostScript Type 1 Fonts, OpenType Fonts
 The decoding routines depend in some way on the format used for the cached glyphs 
@@ -63,9 +65,6 @@ typedef struct {
     unsigned char flag; /* encoding in the pk file */
 } pkfont;
 
-typedef struct {
-    int dummy;
-} ttfont;
 
 typedef struct {
     int dummy;
@@ -92,7 +91,7 @@ typedef struct {
     font_format ff; /* the type of font described in the following union */
     union {
         pkfont pk;
-        ttfont tt;
+        struct stbtt_fontinfo *tt;
         t1font t1;
         otfont ot;
     };
@@ -111,7 +110,8 @@ extern gcache_t *hnew_glyph(font_ptr f, unsigned int cc);
 
 extern void pkunpack_glyph(gcache_t *g);
 
-extern void stb_unpack_glyph(gcache_t *g);
+extern void stb_unpack_glyph(gcache_t *g, font_t *fp, unsigned int cc);
+extern bool stb_unpack_font (font_t *fp);
 
 /* unpack the data in the glyph into its internal representation */
 extern int unpack_pkfile(font_t *pk);

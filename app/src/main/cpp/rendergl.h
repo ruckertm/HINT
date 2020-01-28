@@ -57,4 +57,6 @@ void nativeSetBitmaped(gcache_t *g, unsigned char *data);
 
 /* OpenType fonts */
 
+static void GLtexture(gcache_t *g);
+
 #endif /* RENDERNATIVE_H */

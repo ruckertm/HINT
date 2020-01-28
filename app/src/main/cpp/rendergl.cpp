@@ -554,3 +554,5 @@ void nativeFreeGlyph(gcache_t *g)
     if (g->GLtexture != 0)
         glDeleteTextures(1, &(g->GLtexture));
 }
+
+

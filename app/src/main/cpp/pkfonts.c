@@ -64,14 +64,7 @@ void pkunpack_glyph(gcache_t *g)
     //MESSAGE("Unpacked glyph %c (0x%x) w=%d h=%d hoff=%d voff=%d",g->cc,g->cc, g->w, g->h, g-> hoff, g->voff);
 }
 
-void stb_unpack_glyph (gcache_t *g){
-    /* unpack the data in the glyph into its internal representation */
-    /* data is stored as bitmap, just return bitmap */
-    unsigned char *data;
-    if (g == NULL || g->pk.data == NULL) return; /* no glyph, no data */
-    data = g->tt.data;
-    nativeSetBitmaped(g, data);
-}
+
 
 /* opcodes of pk files */
 #define pk_xxx1 240

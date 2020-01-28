@@ -6,9 +6,9 @@
 #include "htex.h"
 #include "hget.h"
 #include "error.h"
+#include "stb_truetype.h"
 #include "fonts.h"
 #include "rendergl.h"
-#include "stb_truetype.h"
 
 /* Handling the glyph cache of a font */
 static gcache_t g_undefined = {0}; /* if a glyph is undefined it can point to this glyph. */
@@ -181,7 +181,7 @@ gcache_t *hget_glyph(font_t *fp, unsigned int cc) {
 
     if (g->ff == no_format) {
         if (fp->ff == pk_format) pkunpack_glyph(g);
-        else if (fp->ff == tt_format) stb_unpack_glyph(g);
+        else if (fp->ff == tt_format) stb_unpack_glyph(g, fp, cc);
         else
             QUIT("tt t1 and ot formats not yet supported");
     }
@@ -215,27 +215,10 @@ font_t *hget_font(unsigned char f) {
             free(fp);
             fp = NULL;
         }
-    } else {
-        stbtt_fontinfo info;
-        if (stbtt_InitFont(&info, fp->data, 0)) {
-            fp->ff = tt_format;
-            int i;
-            for (i = 0; i < info.numGlyphs; i++) {
-                gcache_t *g;
-                int w, h;
-                g = hnew_glyph(fp, i);
-                g->tt.data = stbtt_GetCodepointBitmap(&info, 0,
-                                                      stbtt_ScaleForPixelHeight(&info, 20), i, &w,
-                                                      &h, 0, 0);
-                g->bits = NULL;
-                MESSAGE(" character %d, width %d, height %d\n", i, w, h);
-            }
-        } else
-            QUIT("font not yet implemented");
-    }
+    } else if (!stb_unpack_font(fp))
+        QUIT("font not yet implemented");
 
-    fonts[f] =
-            fp;
+    fonts[f] = fp;
     return fonts[f];
 }
 
@@ -250,3 +233,4 @@ void hclear_fonts(void)
             fonts[f] = NULL;
         }
 }
+
