@@ -133,7 +133,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         Parcelable superState = super.onSaveInstanceState();
         Bundle bundle = new Bundle();
         bundle.putParcelable("superState", superState);
-        bundle.putInt("curPos", HINTVIEWLib.getPos());
+        bundle.putLong("curPos", HINTVIEWLib.getPos());
         return bundle;
     }
 
@@ -141,7 +141,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
     protected void onRestoreInstanceState(Parcelable state) {
         Bundle bundle = (Bundle) state;
         super.onRestoreInstanceState(bundle.getParcelable("superState"));
-        HINTVIEWLib.setPos(bundle.getInt("curPos"));
+        HINTVIEWLib.setPos(bundle.getLong("curPos"));
     }
 
     @Override

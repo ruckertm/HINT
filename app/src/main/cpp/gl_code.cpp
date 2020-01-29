@@ -48,9 +48,9 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jclass obj, jint width, ji
                                          jdouble xdpi, jdouble ydpi, jint background_color);
 JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_next(JNIEnv *env, jclass obj);
 JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_prev(JNIEnv *env, jclass obj);
-JNIEXPORT int JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_getPos(JNIEnv *env, jclass obj);
+JNIEXPORT uint64_t JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_getPos(JNIEnv *env, jclass obj);
 JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_setPos(JNIEnv *env, jclass obj, jint pos);
+Java_edu_hm_cs_hintview_HINTVIEWLib_setPos(JNIEnv *env, jclass obj, jlong pos);
 JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_home(JNIEnv *env, jclass obj);
 JNIEXPORT void JNICALL
@@ -138,15 +138,16 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_prev(JNIEnv *env, jclass obj) {
     hint_prev_page();
 }
 
-extern "C" JNIEXPORT int JNICALL
+extern "C" JNIEXPORT uint64_t JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_getPos(JNIEnv *env, jclass obj) {
-    LOGI("getPos()\n");
-    return hint_page_get();
+    uint64_t pos = hint_page_get();
+    LOGI("getPos = %x %x\n", pos>>32, pos &0xFFFFFFFF);
+    return pos;
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_setPos(JNIEnv *env, jclass obj, jint pos) {
-    LOGI("setPos(%d)\n", pos);
+Java_edu_hm_cs_hintview_HINTVIEWLib_setPos(JNIEnv *env, jclass obj, jlong pos) {
+    LOGI("setPos(%x %x)\n",  pos>>32, pos &0xFFFFFFFF);
     hint_page_top(pos);
 }
 

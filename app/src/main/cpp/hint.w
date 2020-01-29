@@ -27,8 +27,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 1800 ${}$}
-\def\lastdate{${}$Date: 2020-01-27 15:03:00 +0100 (Mon, 27 Jan 2020) ${}$}
+\def\lastrevision{${}$Revision: 1810 ${}$}
+\def\lastdate{${}$Date: 2020-01-29 13:17:52 +0100 (Wed, 29 Jan 2020) ${}$}
 
 \input titlepage.tex
 
@@ -3524,7 +3524,8 @@ if (p!=best_page_break)
   }
 }
 @
-
+The following code may start with recording the newly found top of the page in the page location cache.
+For a dission of why this location should or should not be recorded see section~\secref{locsetprev}.
 @<Replace leading white-space by the topskip glue@>= 
 hloc_set_prev(link(page_head));
 while (true) {
@@ -3574,7 +3575,7 @@ I implement a table to map node pointers to positions.
 Unfortunately , the position alone is not sufficient. Page breaks
 often occur in the middle of a paragraph, and for the line breaking
 algorithm, the information stored in the paragraph node is essential.
-Therefore the table will store also an offset to the enclosing node.
+Therefore the table will store also an offset to the enclosing top level node.
 (A text node---not implemented yet---will possibly need the current font.)
 We call the complete information associated with the position a ``location''
 and the location is what we store in the table.
@@ -3604,26 +3605,19 @@ void clear_map(void)
 
 Next, we implement two
 functions that operate on the table:
-|store_map| stores or updates information inside the table,and
-|hposition| returns for a given pointer the position inside the 
+|store_map| stores or updates information inside the table,
+and |hposition| returns for a given pointer the position inside the 
 content section, or zero if no such position is known.
-
+To delete an entry, simply call |store_map(p,0,0)|.
 
 @<\HINT/ functions@>=
 void store_map(pointer p, uint32_t pos, uint32_t offset)
-{ @+
-  map[p]=pos;
+{ map[p]=pos;
   map[p+1]=offset;
 }
 
-void delete_map(pointer p)
-{ @+
-  map[p]=0;
-  map[p+1]=0;
-}
-
-uint32_t hposition(pointer p) /* return the position of |p| or 0*/
-{ @+return map[p];
+uint32_t hposition(pointer p) 
+{ return map[p];
 }
 @  
 
@@ -3640,9 +3634,8 @@ offset in the high 32 bits.
 
 
 @<\HINT/ auxiliar functions@>=
-#define @[LOCATION(X)@] @+@[((uint64_t)(map[X]) + (((uint64_t)map[(X)+1])<<32))@]
 uint64_t hlocation(pointer p) /* return the location of |p| or 0*/
-{ @+return LOCATION(p);
+{ @+return (uint64_t)(map[p]) + (((uint64_t)map[p+1])<<32);
 }
 @  
 
@@ -3662,7 +3655,7 @@ not remember to many pages either. We keep a limited amount
 of locations sorted by their position in a circular buffer.
 
 @<\HINT/ variables@>=
-#define MAX_PAGE_POS (1<<5) /* must be a power of 2 */
+#define MAX_PAGE_POS (1<<3) /* must be a power of 2 */
 
 uint64_t page_loc[MAX_PAGE_POS];
 int cur_loc;
@@ -3681,20 +3674,23 @@ Similarly, we have $|cur_loc| < i <|hi_loc|$ for the index of a page
 following the current page.
 
 So lets define routines to initialize and move around the indices
-in the circular buffer.
+in the circular buffer. |hloc_clear| clears the page location cache
+except for the current page. |hloc_next| moves the current location to the next page
+if there is a next page in the cache. |hloc_prev| does the same for the preceeding page.
 
-@<\HINT/ functions@>=
-
+@<\HINT/ auxiliar functions@>=
+#define @[NEXT_PAGE(X)@] (X=(X+1)&(MAX_PAGE_POS-1))
+#define @[PREV_PAGE(X)@] (X=(X-1)&(MAX_PAGE_POS-1))
+@#
 void hloc_clear(void)
-{ @+lo_loc=cur_loc;DECR(lo_loc);
-  hi_loc=cur_loc;INCR(hi_loc);@+
+{ @+lo_loc=hi_loc=cur_loc;PREV_PAGE(lo_loc);NEXT_PAGE(hi_loc);@+
 }
 
 bool hloc_next(void)
 { @+int i=cur_loc;
   if ((page_loc[cur_loc]&0xffffffff)>=hend-hstart) 
     return false;
-  INCR(i);
+  NEXT_PAGE(i);
   if (i==hi_loc) 
     return false;
   cur_loc=i;
@@ -3705,7 +3701,7 @@ bool hloc_prev(void)
 { @+int i=cur_loc;
   if (page_loc[cur_loc]==0) 
     return false;
-  DECR(i);
+  PREV_PAGE(i);
   if (i==lo_loc) 
     return false;
   cur_loc=i;
@@ -3721,73 +3717,118 @@ extern bool hloc_prev(void);  /* advance to the previous page if possible */
 @
 
 After these preparations, we can turn our attention to the functions that manage
-the page cache itself. We start with two simple functions:
-|hloc_home| makes the current page refer to the start of the content section, and
-|hloc_init| initializes the page cache. The function to clear the cache is already
-defined above.
+the page cache itself. We start with the initialization function:
 
 @<\HINT/ functions@>=
-void hloc_home(void)
-{@+ page_loc[cur_loc]=0;
-}
-
 void hloc_init(void)
-{ @+cur_loc=0;
+{ cur_loc=0;
   hloc_clear();
-  hloc_home(); @+
+  page_loc[cur_loc]=0;
+  MESSAGE("loc_init: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
 }  
 @ 
-@<\HINT/ |extern|@>=
-extern void hloc_init(void);
-@
-We conclude this section with two setters:
-|hloc_set_next(p)| caches the location of |p| as the start of the next page,
-and |hloc_set_prev(p)| does the same for the previous page.
 
+The function |hloc_set(h)| sets the location for the current page to 
+the value |h|.
+In many cases, |h| {\it is} the position of the current page.
+For example if only the format of the page changes. Then no action is necessary.
+In other cases, the new position is already somewhere in the page cache,
+for example if we follow a link, and later return to the same position.
+In this case we just change |cur_loc| to point to the new position in the cache.
+A more drastic action needs to be taken if the value of |h| is not in the page location cache.
+if the location of the current page is new, we do not know anything about the position
+of following or preceeding pages and we have to clear the cache. 
 
 @<\HINT/ auxiliar functions@>=
-#define @[INCR(X)@] (X=(X+1)&(MAX_PAGE_POS-1))
-#define @[DECR(X)@] (X=(X-1)&(MAX_PAGE_POS-1))
-@#
-static int hnext_loc(void)
+
+void hloc_set(uint64_t h)
+{ int i;
+  if (page_loc[cur_loc]==h) return;
+  for (i=lo_loc,NEXT_PAGE(i); i!=hi_loc; NEXT_PAGE(i))
+   if (page_loc[i]==h)
+   { cur_loc=i; return;}
+  page_loc[cur_loc]=h;
+  hloc_clear();
+  MESSAGE("loc_set: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
+ }
+ @
+ 
+ When we generate new pages, we discover new page locations: When paging forward,
+ the bottom of the current page is the top of the next page and similar for
+ paging backward. The actions required when storing the location of the next page in the
+ page location cache differ in two aspects from storing the location of the current page:
+ first, we might need to allocate a new entry in the cache; and second,
+ assuming that the location of the current page does not change, a new location
+ for the next page will not affect the locations of preceeding pages and we can
+ keep them in the cache.
+ 
+ 
+ @<\HINT/ auxiliar functions@>=
+
+void hloc_set_next(pointer p)
 { @+int i=cur_loc;
-  INCR(i);
+  uint64_t h=hlocation(p); 
+
+  NEXT_PAGE(i);
   if (i==hi_loc) /* allocation needed */
   {@+ if (hi_loc==lo_loc) /* deallocation needed */
-      INCR(lo_loc);
-    INCR(hi_loc);
+      NEXT_PAGE(lo_loc);
+    NEXT_PAGE(hi_loc);
+    page_loc[i]=h;
   }
-  return i;
+  else if (h!=page_loc[i])
+  { page_loc[i]=h;
+    NEXT_PAGE(i);
+    hi_loc=i;
+  }
+  MESSAGE("loc_set_next: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
 }
+@
 
-static int hprev_loc(void)
+
+After these preparations, setting the position of the previous page should be no surprise.
+It is, however, questionable whether we should record these positions in the page 
+location cache. Just consider the following:\label{locsetprev}
+We discover new preceeding pages when paging backwards.
+While doing so, we generate pages in backward mode, optimizing the start of the page.
+When we later return to these pages, we are paging forward and therefore
+generate pages in forward mode optimizing the bottom of the page.
+Hence, the pages might still look different. 
+
+Since the function |hloc_set_prev| is called only after generating a new page in backward
+mode, we will set the current page to the new location and keep only the position of the 
+old current page as position of the next page in the cache.
+
+@<\HINT/ auxiliar functions@>=
+void hloc_set_prev(pointer p)
 { @+int i=cur_loc;
-  DECR(i);
+  uint64_t h=hlocation(p); 
+  PREV_PAGE(i);
   if (i==lo_loc) /* allocation needed */
   {@+ if (lo_loc==hi_loc) /* deallocation needed */
-      DECR(hi_loc);
-    DECR(lo_loc);
+      PREV_PAGE(hi_loc);
+    PREV_PAGE(lo_loc);
+    page_loc[i]=h;
   }
-  return i;
-}
-void hloc_set_next(pointer p)
-{ int i;
-   i= hnext_loc();
-  page_loc[i]=hlocation(p); 
- }
-
-void hloc_set_prev(pointer p)
-{ int i= hprev_loc();
-  page_loc[i]=hlocation(p);
+  else if (h!=page_loc[i])
+  { page_loc[i]=h;
+    lo_loc=i;
+    PREV_PAGE(lo_loc);
+  }
+  hi_loc=cur_loc;
+  NEXT_PAGE(hi_loc);
+  cur_loc=i;
+  MESSAGE("loc_set_prev: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
 }
 @
 
 The following functions are used inside the \TeX\ library:
 
 @<\TeX\ |extern|@>=
+extern void hloc_init(void);
 extern void store_map(pointer p, uint32_t pos, uint32_t offset); /*store the location of |p|*/
-extern void delete_map(pointer p); /*delete the location of |p|*/
 extern uint32_t hposition(pointer p); /* return the position of |p| or 0*/
+extern void hloc_set(uint64_t h);
 extern void hloc_set_next(pointer p);/* record the location of |p| as the start of the next page */
 @
 
@@ -4017,6 +4058,7 @@ static void hship_out(pointer p);
 
 uint64_t hint_page_top(uint64_t h)
 { if (hpos==NULL) return hint_blank();
+  hloc_set(h);
   hclear_page();
   hset_margins();
   hpos=hstart+(h&0xffffffff);
@@ -4038,7 +4080,9 @@ is a function to obtain its top position:
 |hint_page_get| returns the location of the current page coded as a |uint64_t|.
 @<render functions@>=
 uint64_t hint_page_get(void)
-{@+ return page_loc[cur_loc];@+ }
+{@+
+ MESSAGE("page_get: %d : 0x%08x %08x\n",cur_loc,(uint32_t)(page_loc[cur_loc]>>32), (uint32_t)(page_loc[cur_loc]&0xFFFFFFFF));
+ return page_loc[cur_loc];@+ }
 
 uint64_t hint_page(void)
 { return hint_page_top(hint_page_get());
@@ -4091,7 +4135,6 @@ uint64_t hint_prev_page(void)
     if (!hint_backward())  return hint_page();
     backward_mode=true;
     forward_mode=false;
-    hloc_prev();
     houtput_template0();
     hship_out(stream[0].p);
     return hint_page_get();
@@ -4117,7 +4160,6 @@ uint64_t  hint_page_bottom(uint64_t h)
   if (!hint_backward())  return hint_page();
   backward_mode=true;
   forward_mode=false;
-  hloc_prev();
   houtput_template0();
   hship_out(stream[0].p);
   return hint_page_get();

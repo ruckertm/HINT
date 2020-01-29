@@ -263,7 +263,7 @@ extern "C" void nativeSetSize(int px_h, int px_v, double dpi)
     glUniformMatrix4fv(ourProjectionLocation, 1, 0, glm::value_ptr(projection));
     glViewport(0, 0, px_h, px_v);
 }
-
+static void GLtexture(gcache_t *g);
 
 extern "C" void nativeGlyph(double x, double y, double w, double h, gcache_t *g)
 /* Using GL to render a character texture
@@ -273,7 +273,7 @@ extern "C" void nativeGlyph(double x, double y, double w, double h, gcache_t *g)
 
   */
 { //LOGI("Rendering texture %i at (%f,%f) sized %fx%f",GLtexture,x/SPf,y/SPf,w/SPf,h/SPf);
-
+    GLtexture(g);
     GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
                        (GLfloat) x, (GLfloat) (y + h), 0.0f, 0.0f,
                        (GLfloat) (x + w), (GLfloat) (y + h), 1.0f, 0.0f,
@@ -372,52 +372,6 @@ nativeImage(double x, double y, double w, double h, unsigned char *b, unsigned c
     }
 }
 
-/*extern "C" void nativeImage(double x, double y, double w, double h, unsigned char *b, unsigned char *e)
-*//* WARNING: This function currently works only with grayscale images using
-   the grayscale as alpha value, resulting in an inverted image (except in dark mode).
-   We would like to have no inversion or even arbitrary colored images, retaining color in dark mode.
-*//*
-
-{
-    uint32_t dataPos, imageSize, width, height;
-    unsigned char *data;
-    *//* check signature *//*
-    if (b[0]!='B' || b[1]!='M')
-    { LOGE("This is not a BMP image\n");
-        return;
-    }
-    *//* extracting header data (little-endian) *//*
-#define LittleEndian32(X)   (b[(X)]+(b[(X)+1]<<8)+(b[(X)+2]<<16)+(b[(X)+3]<<24))
-    dataPos    = LittleEndian32(0xA);
-    width      = LittleEndian32(0x12);
-    height     = LittleEndian32(0x16);
-    imageSize  = LittleEndian32(0x22);
-
-    LOGI("BMP image at %d, size=%d, width=%d, height=%d\n", dataPos, imageSize, width, height);
-    data=b+dataPos;
-
-    GLuint textureID;
-    glGenTextures(1, &textureID);
-    // "Bind" the newly created texture : all future texture functions will modify this texture
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    // Give the image to OpenGL
-    glTexImage2D(GL_TEXTURE_2D, 0,GL_ALPHA, width, height, 0, *//* GL_BGR  GL_RGB *//* GL_ALPHA, GL_UNSIGNED_BYTE, data);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-    GLfloat gQuad[] = {   (GLfloat)x ,        (GLfloat)y,     0.0f,0.0f,
-                          (GLfloat)x,     (GLfloat)(y-h),     0.0f,1.0f,
-                          (GLfloat)(x+w), (GLfloat)(y-h),     1.0f,1.0f,
-                          (GLfloat)x,         (GLfloat)y,     0.0f,0.0f,
-                          (GLfloat)(x+w), (GLfloat)(y-h),     1.0f,1.0f,
-                          (GLfloat)(x+w),     (GLfloat)y,     1.0f,0.0f
-    };
-    glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4*sizeof(float), gQuad);
-    checkGlError("glVertexAttribPointer");
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    checkGlError("glDrawArrays");
-}*/
 
 extern "C" void nativeBlank(void) {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);

@@ -925,7 +925,7 @@ void free_node(pointer p,halfword s)
 
 {pointer q;
 leak_out(p,s);
-delete_map(p);
+store_map(p,0,0);
 node_size(p)= s;link(p)= empty_flag;
 q= llink(rover);llink(p)= q;rlink(p)= rover;
 llink(rover)= p;rlink(q)= p;
