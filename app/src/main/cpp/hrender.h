@@ -1,8 +1,27 @@
-#ifndef _HRENDER_H_
-#define _HRENDER_H_
+/*300:*/
+#line 5645 "hint.w"
 
-extern void hship_out(pointer p); 
-extern void render_blank(void);
-extern void init_page(int w, int h, int dpi);
+#ifndef _HRENDER_H
+#define _HRENDER_H
+/*259:*/
+#line 4601 "hint.w"
+
+#define SP2PT(X) ((X)/(double)(1<<16))
+/*:259*/
+#line 5648 "hint.w"
+
+
+extern int page_h,page_v;
+extern uint64_t hint_blank(void);
+extern uint64_t hint_page_get(void);
+extern uint64_t hint_page_top(uint64_t h);
+extern uint64_t hint_page_center(uint64_t h);
+extern uint64_t hint_page_bottom(uint64_t h);
+extern uint64_t hint_page(void);
+extern uint64_t hint_next_page(void);
+extern uint64_t hint_prev_page(void);
+extern void hint_resize(int px_h,int px_v,double dpi);
+extern void hint_clear_fonts(bool delete);
 
 #endif
+/*:300*/

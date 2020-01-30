@@ -396,13 +396,13 @@ in production versions of \TeX.
 @^system dependencies@>
 
 @<Constants...@>=
-enum {@+@!mem_max=30000@+}; /*greatest index in \TeX's internal |mem| array;
+enum {@+@!mem_max=65534@+}; /*greatest index in \TeX's internal |mem| array;
   must be strictly less than |max_halfword|;
   must be equal to |mem_top| in \.{INITEX}, otherwise | >= mem_top|*/ 
 enum {@+@!mem_min=0@+}; /*smallest index in \TeX's internal |mem| array;
   must be |min_halfword| or more;
   must be equal to |mem_bot| in \.{INITEX}, otherwise | <= mem_bot|*/ 
-enum {@+@!buf_size=500@+}; /*maximum number of characters simultaneously present in
+enum {@+@!buf_size=1024@+}; /*maximum number of characters simultaneously present in
   current lines of open files and in control sequences between
   \.{\\csname} and \.{\\endcsname}; must not exceed |max_halfword|*/ 
 enum {@+@!error_line=72@+}; /*width of context lines on terminal error messages*/ 
@@ -417,21 +417,21 @@ enum {@+@!font_max=75@+}; /*maximum internal font number; must not exceed |max_q
 enum {@+@!font_mem_size=20000@+}; /*number of words of |font_info| for all fonts*/ 
 enum {@+@!param_size=60@+}; /*maximum number of simultaneous macro parameters*/ 
 enum {@+@!nest_size=40@+}; /*maximum number of semantic levels simultaneously active*/ 
-enum {@+@!max_strings=3000@+}; /*maximum number of strings; must not exceed |max_halfword|*/ 
-enum {@+@!string_vacancies=8000@+}; /*the minimum number of characters that should be
+enum {@+@!max_strings=15000@+}; /*maximum number of strings; must not exceed |max_halfword|*/ 
+enum {@+@!string_vacancies=75000@+}; /*the minimum number of characters that should be
   available for the user's control sequences and font names,
   after \TeX's own error messages are stored*/ 
-enum {@+@!pool_size=32000@+}; /*maximum number of characters in strings, including all
+enum {@+@!pool_size=200000@+}; /*maximum number of characters in strings, including all
   error messages and help texts, and the names of all fonts and
   control sequences; must exceed |string_vacancies| by the total
   length of \TeX's own strings, which is currently about 23000*/ 
 enum {@+@!save_size=600@+}; /*space for saving values outside of current group; must be
   at most |max_halfword|*/ 
-enum {@+@!trie_size=8000@+}; /*space for hyphenation patterns; should be larger for
+enum {@+@!trie_size=20000@+}; /*space for hyphenation patterns; should be larger for
   \.{INITEX} than it is in production versions of \TeX*/ 
 enum {@+@!trie_op_size=500@+}; /*space for ``opcodes'' in the hyphenation patterns*/ 
-enum {@+@!dvi_buf_size=800@+}; /*size of the output buffer; must be a multiple of 8*/ 
-enum {@+@!file_name_size=40@+}; /*file names shouldn't be longer than this*/ 
+enum {@+@!dvi_buf_size=16384@+}; /*size of the output buffer; must be a multiple of 8*/ 
+enum {@+@!file_name_size=255@+}; /*file names shouldn't be longer than this*/ 
 const char *@!pool_name="TeXformats:TEX.POOL                     ";
    /*string of length |file_name_size|; tells where the string pool appears*/ 
 @.TeXformats@>
@@ -449,14 +449,14 @@ emphasize this distinction.
 
 @d mem_bot	0 /*smallest index in the |mem| array dumped by \.{INITEX};
   must not be less than |mem_min|*/ 
-@d mem_top	30000 /*largest index in the |mem| array dumped by \.{INITEX};
+@d mem_top	65534 /*largest index in the |mem| array dumped by \.{INITEX};
   must be substantially larger than |mem_bot|
   and not greater than |mem_max|*/ 
 @d font_base	0 /*smallest internal font number; must not be less
   than |min_quarterword|*/ 
-@d hash_size	2100 /*maximum number of control sequences; it should be at most
+@d hash_size	15000 /*maximum number of control sequences; it should be at most
   about |(mem_max-mem_min)/(double)10|*/ 
-@d hash_prime	1777 /*a prime number equal to about 85\pct! of |hash_size|*/ 
+@d hash_prime	12721 /*a prime number equal to about 85\pct! of |hash_size|*/ 
 @d hyph_size	307 /*another prime; the number of \.{\\hyphenation} exceptions*/ 
 @^system dependencies@>
 
@@ -852,27 +852,27 @@ bool w_open_out(word_file *f)
 {@+rewrite((*f), name_of_file,"wb");return rewrite_OK((*f));
 } 
 
-@ Files can be closed with the \ph\ routine `|close(f)|', which
+@ Files can be closed with the \ph\ routine `|pascal_close(f)|', which
 @:PASCAL H}{\ph@>
 @^system dependencies@>
 should be used when all input or output with respect to |f| has been completed.
 This makes |f| available to be opened again, if desired; and if |f| was used for
-output, the |close| operation makes the corresponding external file appear
+output, the |pascal_close| operation makes the corresponding external file appear
 on the user's area, ready to be read.
 
 These procedures should not generate error messages if a file is
 being closed before it has been successfully opened.
 
 @p void a_close(alpha_file *f) /*close a text file*/ 
-{@+close((*f));
+{@+pascal_close((*f));
 } 
 @#
 void b_close(byte_file *f) /*close a binary file*/ 
-{@+close((*f));
+{@+pascal_close((*f));
 } 
 @#
 void w_close(word_file *f) /*close a word file*/ 
-{@+close((*f));
+{@+pascal_close((*f));
 } 
 
 @ Binary input and output are done with \PASCAL's ordinary |get| and |put|
@@ -1069,11 +1069,11 @@ if the system permits them.
 @p bool init_terminal(void) /*gets the terminal input started*/ 
 {@+
 t_open_in;
-loop@+{@+wake_up_terminal;write(term_out,"**");update_terminal;
+loop@+{@+wake_up_terminal;pascal_write(term_out,"**");update_terminal;
 @.**@>
   if (!input_ln(&term_in, true))  /*this shouldn't happen*/ 
     {@+write_ln(term_out);
-    write(term_out,"! End of file on the terminal... why?");
+    pascal_write(term_out,"! End of file on the terminal... why?");
 @.End of file on the terminal@>
     return false;
     } 
@@ -1132,7 +1132,7 @@ we access the string pool only via macros that can easily be redefined.
 @d so(X)	X /*convert from |packed_ASCII_code| to |ASCII_code|*/ 
 
 @<Types...@>=
-typedef uint16_t pool_pointer; /*for variables that point into |str_pool|*/ 
+typedef uint32_t pool_pointer; /*for variables that point into |str_pool|*/ 
 typedef uint16_t str_number; /*for variables that point into |str_start|*/ 
 typedef uint8_t packed_ASCII_code; /*elements of |str_pool| array*/ 
 
@@ -1338,7 +1338,7 @@ else bad_pool("! I can't read TEX.POOL.")
 @ @<Read one string...@>=
 {@+if (eof(pool_file)) bad_pool("! TEX.POOL has no check sum.");
 @.TEX.POOL has no check sum@>
-read(pool_file, m);@+read(pool_file, n); /*read two digits of string length*/ 
+pascal_read(pool_file, m); pascal_read(pool_file, n); /*read two digits of string length*/ 
 if (m== '*' ) @<Check the pool check sum@>@;
 else{@+if ((xord[m] < '0')||(xord[m] > '9')||@|
       (xord[n] < '0')||(xord[n] > '9')) 
@@ -1349,7 +1349,7 @@ else{@+if ((xord[m] < '0')||(xord[m] > '9')||@|
     bad_pool("! You have to increase POOLSIZE.");
 @.You have to increase POOLSIZE@>
   for (k=1; k<=l; k++) 
-    {@+if (eoln(pool_file)) m= ' ' ;@+else read(pool_file, m);
+    {@+if (eoln(pool_file)) m= ' ' ;@+else pascal_read(pool_file, m);
     append_char(xord[m]);
     } 
   read_ln(pool_file);g=make_string();
@@ -1368,7 +1368,7 @@ loop@+{@+if ((xord[n] < '0')||(xord[n] > '9'))
 @.TEX.POOL check sum...@>
   a=10*a+xord[n]-'0';
   if (k==9) goto done;
-  incr(k);read(pool_file, n);
+  incr(k);pascal_read(pool_file, n);
   } 
 done: if (a!=0) bad_pool("! TEX.POOL doesn't match; TANGLE me again.");
 @.TEX.POOL doesn't match@>
@@ -1450,26 +1450,26 @@ by changing |wterm|, |wterm_ln|, and |wterm_cr| in this section.
 #define put(file)    @[fwrite(&((file).d),sizeof((file).d),1,(file).f)@]
 #define get(file)    @[fread(&((file).d),sizeof((file).d),1,(file).f)@]
 
-#define reset(file,name,mode)   @[((file).f=fopen((char *)(name)+1,mode),\
+#define reset(file,file_name,mode)   @[((file).f=fopen((char *)(file_name)+1,mode),\
                                  (file).f!=NULL?get(file):0)@]
-#define rewrite(file,name,mode) @[((file).f=fopen((char *)(name)+1,mode))@]
-#define close(file)    @[fclose((file).f)@]
+#define rewrite(file,file_name,mode) @[((file).f=fopen((char *)(file_name)+1,mode))@]
+#define pascal_close(file)    @[fclose((file).f)@]
 #define eof(file)    @[feof((file).f)@]
 #define eoln(file)    @[((file).d=='\n'||eof(file))@]
 #define erstat(file)   @[((file).f==NULL?-1:ferror((file).f))@]
 
-#define read(file,x) @[((x)=(file).d,get(file))@]
+#define pascal_read(file,x) @[((x)=(file).d,get(file))@]
 #define read_ln(file)  @[do get(file); while (!eoln(file))@]
 
-#define write(file, format,...)    @[fprintf(file.f,format,## __VA_ARGS__)@]
-#define write_ln(file,...)	   @[write(file,__VA_ARGS__"\n")@]
+#define pascal_write(file, format,...)    @[fprintf(file.f,format,## __VA_ARGS__)@]
+#define write_ln(file,...)	   @[pascal_write(file,__VA_ARGS__"\n")@]
 
-#define wterm(format,...)	@[write(term_out,format, ## __VA_ARGS__)@]
+#define wterm(format,...)	@[pascal_write(term_out,format, ## __VA_ARGS__)@]
 #define wterm_ln(format,...)	@[wterm(format "\n", ## __VA_ARGS__)@]
-#define wterm_cr	        @[write(term_out,"\n")@]
-#define wlog(format, ...)	@[write(log_file,format, ## __VA_ARGS__)@]
+#define wterm_cr	        @[pascal_write(term_out,"\n")@]
+#define wlog(format, ...)	@[pascal_write(log_file,format, ## __VA_ARGS__)@]
 #define wlog_ln(format, ...)   @[wlog(format "\n", ## __VA_ARGS__)@]
-#define wlog_cr	        @[write(log_file,"\n")@]
+#define wlog_cr	        @[pascal_write(log_file,"\n")@]
 
 @ To end a line of text output, we call |print_ln|.
 
@@ -1519,7 +1519,7 @@ case no_print: do_nothing;@+break;
 case pseudo: if (tally < trick_count) trick_buf[tally%error_line]=s;@+break;
 case new_string: {@+if (pool_ptr < pool_size) append_char(s);
   } @+break; /*we drop characters if the string space is full*/ 
-default:write(write_file[selector],"%c", xchr[s]);
+default:pascal_write(write_file[selector],"%c", xchr[s]);
 } @/
 incr(tally);
 } 
@@ -11958,7 +11958,7 @@ output an array of words with one system call.
 
 @p void write_dvi(dvi_index @!a, dvi_index @!b)
 {@+int k;
-for (k=a; k<=b; k++) write(dvi_file, "%c", dvi_buf[k]);
+for (k=a; k<=b; k++) pascal_write(dvi_file, "%c", dvi_buf[k]);
 } 
 
 @ To put a byte in the buffer without paying the cost of invoking a procedure
