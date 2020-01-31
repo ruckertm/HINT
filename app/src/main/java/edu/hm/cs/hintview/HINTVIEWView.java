@@ -381,7 +381,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         public void onSurfaceChanged(GL10 gl, int w, int h) {
             width = w;
             height = h;
-            //HINTVIEWLib.change(w, h);
+            HINTVIEWLib.change(w, h);
         }
 
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
