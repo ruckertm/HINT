@@ -1,16 +1,35 @@
+<<<<<<< HEAD
 /*299:*/
 #line 5629 "hint.w"
+=======
+/*303:*/
+#line 5694 "hint.w"
+>>>>>>> socher
 
 #include "basetypes.h"
 #include "error.h"
 #include "hformat.h"
+<<<<<<< HEAD
 #include "textypes.h"
 #include "hint.h"
+=======
+#include "hint.h"
+/*279:*/
+#line 5272 "hint.w"
+
+#define STB_TRUETYPE_IMPLEMENTATION
+#define STBTT_STATIC
+#include "stb_truetype.h"
+/*:279*/
+#line 5699 "hint.w"
+
+>>>>>>> socher
 #include "hfonts.h"
 #include "hrender.h"
 #include "rendernative.h"
 
 /*245:*/
+<<<<<<< HEAD
 #line 4234 "hint.w"
 
 static font_t*fonts[0x100]= {NULL};
@@ -24,6 +43,48 @@ static gcache_t g_undefined= {0};
 
 /*276:*/
 #line 5095 "hint.w"
+=======
+#line 4244 "hint.w"
+
+static font_t*fonts[0x100]= {NULL};
+/*:245*//*252:*/
+#line 4370 "hint.w"
+
+static gcache_t g_undefined= {0};
+/*:252*/
+#line 5704 "hint.w"
+
+
+/*281:*/
+#line 5296 "hint.w"
+
+int unpack_ttfile(font_t*f)
+{
+if(!stbtt_InitFont(&(f->tt),f->font_data,0))
+return 0;
+f->ds= font_at_size(f->n)/(double)(1<<16);
+f->hppp= f->vppp= 600.0/72.27;
+f->ff= tt_format;
+return 1;
+}
+
+
+static void ttunpack_glyph(font_t*f,gcache_t*g,uint32_t cc)
+{float em= f->hppp*f->ds;
+float scale;
+scale= stbtt_ScaleForMappingEmToPixels(&(f->tt),em);
+g->bits= stbtt_GetCodepointBitmap(&(f->tt),scale,scale,cc,&(g->w),&(g->h),&(g->hoff),&(g->voff));
+g->ff= tt_format;
+nativeSetTrueType(g);
+}
+
+/*:281*/
+#line 5706 "hint.w"
+
+
+/*278:*/
+#line 5134 "hint.w"
+>>>>>>> socher
 
 
 #define PK_READ_1_BYTE() (data[i++])
@@ -153,6 +214,7 @@ break;
 return 1;
 }
 
+<<<<<<< HEAD
 #if 0
 
 unsigned char test_data[]= {
@@ -183,6 +245,16 @@ unsigned char test_data[]= {
 #line 4241 "hint.w"
 
 font_t*hget_font(unsigned char f)
+=======
+/*:278*/
+#line 5708 "hint.w"
+
+
+/*246:*/
+#line 4251 "hint.w"
+
+struct font_s*hget_font(unsigned char f)
+>>>>>>> socher
 {font_t*fp;
 if(fonts[f]!=NULL)return fonts[f];
 fp= calloc(1,sizeof(*fp));
@@ -191,18 +263,28 @@ QUIT("Out of memory for font %d",f);
 else
 {unsigned char*spos,*sstart,*send;
 spos= hpos;sstart= hstart;send= hend;
+<<<<<<< HEAD
+=======
+fp->n= f;
+>>>>>>> socher
 hget_section(hglyph_section(f));
 fp->size= hend-hstart;
 fp->font_data= hstart;
 hpos= spos;hstart= sstart;hend= send;
 }
+<<<<<<< HEAD
 /*273:*/
 #line 5061 "hint.w"
+=======
+/*275:*/
+#line 5104 "hint.w"
+>>>>>>> socher
 
 if(fp->font_data[0]==0xF7&&fp->font_data[1]==0x59)
 {fp->ff= pk_format;
 if(!unpack_pkfile(fp)){free(fp);fp= NULL;}
 }
+<<<<<<< HEAD
 
 /*:273*//*277:*/
 #line 5250 "hint.w"
@@ -211,10 +293,24 @@ else
 QUIT("tt, t1, ot fonts not yet implemented");
 /*:277*/
 #line 4256 "hint.w"
+=======
+/*:275*//*282:*/
+#line 5321 "hint.w"
+
+else if(unpack_ttfile(fp))
+fp->ff= tt_format;
+else
+{QUIT("Font format not supported for font %d\n",fp->n);
+free(fp);fp= NULL;
+}
+/*:282*/
+#line 4267 "hint.w"
+>>>>>>> socher
 
 fonts[f]= fp;
 return fonts[f];
 }
+<<<<<<< HEAD
 /*:246*//*247:*/
 #line 4264 "hint.w"
 
@@ -231,6 +327,23 @@ fonts[f]= NULL;
 }
 /*:247*//*250:*/
 #line 4305 "hint.w"
+=======
+/*:246*//*248:*/
+#line 4282 "hint.w"
+
+static void hfree_glyph_cache(font_t*f,bool rm);
+
+void hint_clear_fonts(bool rm)
+{int f;
+for(f= 0;f<=max_ref[font_kind];f++)
+if(fonts[f]!=NULL)
+{hfree_glyph_cache(fonts[f],rm);
+if(rm){free(fonts[f]);fonts[f]= NULL;}
+}
+}
+/*:248*//*251:*/
+#line 4327 "hint.w"
+>>>>>>> socher
 
 #define G0_BITS 7
 #define G0_SIZE (1<<G0_BITS)
@@ -264,8 +377,13 @@ else if(f->g0)
 return f->g0[cc];
 return NULL;
 }
+<<<<<<< HEAD
 /*:250*//*252:*/
 #line 4352 "hint.w"
+=======
+/*:251*//*253:*/
+#line 4374 "hint.w"
+>>>>>>> socher
 
 static gcache_t*hnew_g(gcache_t**g)
 {if(*g==NULL)
@@ -319,25 +437,43 @@ else if(cc<G123_SIZE*G123_SIZE*G0_SIZE)return hnew_g2(&(pk->g2),cc);
 else if(cc<G123_SIZE*G123_SIZE*G123_SIZE*G0_SIZE)return hnew_g3(&(pk->g3),cc);
 else return&g_undefined;
 }
+<<<<<<< HEAD
 /*:252*//*253:*/
 #line 4409 "hint.w"
 
 static void hfree_g0(struct gcache_s**g)
+=======
+/*:253*//*254:*/
+#line 4433 "hint.w"
+
+static void hfree_g0(struct gcache_s**g,bool rm)
+>>>>>>> socher
 {int i;
 if(g==NULL)return;
 for(i= 0;i<G0_SIZE;i++)
 if(g[i]!=NULL)
 {nativeFreeGlyph(g[i]);
+<<<<<<< HEAD
 free(g[i]);
 g[i]= NULL;
 }
 }
 
 static void hfree_g1(struct gcache_s***g)
+=======
+if(rm){
+if(g[i]->bits!=NULL)free(g[i]->bits);
+free(g[i]);g[i]= NULL;}
+}
+}
+
+static void hfree_g1(struct gcache_s***g,bool rm)
+>>>>>>> socher
 {int i;
 if(g==NULL)return;
 for(i= 0;i<G123_SIZE;i++)
 if(g[i]!=NULL)
+<<<<<<< HEAD
 {hfree_g0(g[i]);
 free(g[i]);
 g[i]= NULL;
@@ -345,29 +481,52 @@ g[i]= NULL;
 }
 
 static void hfree_g2(struct gcache_s****g)
+=======
+{hfree_g0(g[i],rm);
+if(rm){free(g[i]);g[i]= NULL;}
+}
+}
+
+static void hfree_g2(struct gcache_s****g,bool rm)
+>>>>>>> socher
 {int i;
 if(g==NULL)return;
 for(i= 0;i<G123_SIZE;i++)
 if(g[i]!=NULL)
+<<<<<<< HEAD
 {hfree_g1(g[i]);
 free(g[i]);
 g[i]= NULL;
+=======
+{hfree_g1(g[i],rm);
+if(rm){free(g[i]);g[i]= NULL;}
+>>>>>>> socher
 }
 }
 
 
+<<<<<<< HEAD
 static void hfree_g3(struct gcache_s*****g)
+=======
+static void hfree_g3(struct gcache_s*****g,bool rm)
+>>>>>>> socher
 {int i;
 if(g==NULL)return;
 for(i= 0;i<G123_SIZE;i++)
 if(g[i]!=NULL)
+<<<<<<< HEAD
 {hfree_g2(g[i]);
 free(g[i]);
 g[i]= NULL;
+=======
+{hfree_g2(g[i],rm);
+if(rm){free(g[i]);g[i]= NULL;}
+>>>>>>> socher
 }
 }
 
 
+<<<<<<< HEAD
 static void hfree_glyph_cache(font_t*f)
 {if(f->g0!=NULL)
 {hfree_g0(f->g0);
@@ -401,15 +560,58 @@ if(g==NULL)return NULL;
 
 if(g->ff==no_format)
 {if(fp->ff==pk_format)pkunpack_glyph(g);
+=======
+static void hfree_glyph_cache(font_t*f,bool rm)
+{if(f->g0!=NULL)
+{hfree_g0(f->g0,rm);
+if(rm){free(f->g0);f->g0= NULL;}
+}
+if(f->g1!=NULL)
+{hfree_g1(f->g1,rm);
+if(rm){free(f->g1);f->g1= NULL;}
+}
+if(f->g2!=NULL)
+{hfree_g2(f->g2,rm);
+if(rm){free(f->g2);f->g2= NULL;}
+}
+if(f->g3!=NULL)
+{hfree_g3(f->g3,rm);
+if(rm){free(f->g3);f->g3= NULL;}
+}
+}
+/*:254*//*256:*/
+#line 4551 "hint.w"
+
+gcache_t*hget_glyph(font_t*fp,unsigned int cc)
+{
+gcache_t*g= NULL;
+g= g_lookup(fp,cc);
+if(g==NULL)
+{if(fp->ff==tt_format)
+g= hnew_glyph(fp,cc);
+else
+return NULL;
+}
+if(g->ff==no_format)
+{if(fp->ff==pk_format)pkunpack_glyph(g);
+else if(fp->ff==tt_format)ttunpack_glyph(fp,g,cc);
+>>>>>>> socher
 else
 QUIT("tt t1 and ot formats not yet supported");
 }
 return g;
 }
+<<<<<<< HEAD
 /*:255*//*260:*/
 #line 4581 "hint.w"
 
 void render_char(int x,int y,font_t*f,int32_t s,uint32_t cc)
+=======
+/*:256*//*257:*/
+#line 4575 "hint.w"
+
+void render_char(int x,int y,struct font_s*f,int32_t s,uint32_t cc)
+>>>>>>> socher
 
 {double w,h,dx,dy,m;
 gcache_t*g= hget_glyph(f,cc);
@@ -425,8 +627,16 @@ h= ((double)g->h/f->vppp)*m;
 nativeGlyph(SP2PT(x)-dx,SP2PT(y)-dy,w,h,g);
 }
 
+<<<<<<< HEAD
 /*:260*/
 #line 5643 "hint.w"
 
 
 /*:299*/
+=======
+/*:257*/
+#line 5710 "hint.w"
+
+
+/*:303*/
+>>>>>>> socher

@@ -27,8 +27,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 1810 ${}$}
-\def\lastdate{${}$Date: 2020-01-29 13:17:52 +0100 (Wed, 29 Jan 2020) ${}$}
+\def\lastrevision{${}$Revision: 1815 ${}$}
+\def\lastdate{${}$Date: 2020-01-30 17:33:00 +0100 (Thu, 30 Jan 2020) ${}$}
 
 \input titlepage.tex
 
@@ -3302,7 +3302,7 @@ Also the natural size of the topskip glue is included in the |page_total| and it
 set asside in the variable |page_max_height|. When we add a box or rule, we keep the height
 of it in the variable |page_height| and make sure it does not exceed |page_max_height|.
 If it does, the excess is again included in the |page_total|. 
-Before we ship out the page, we add the topskip glue and
+Before we render the page, we add the topskip glue and
  then the height plus depth of the page shoud be less or equal to
 $|page_total|+|max_page_depth|$, and it should be less only by the amount that the depth of the
 last node on the page is less than |page_max_depth|.
@@ -3897,26 +3897,26 @@ return false;
 @
 The function sets the |forward_mode| variable to |true| to indicate that the current page
 was produced in forward mode.
-Then the function |hpage_init| returns the "old current pahe" stored in |stream[0].p| to
+Then the function |hpage_init| returns the ``old'' current page, stored in |stream[0].p|, to
 free storage and initializes the variables that control the page building process.
 It is then assumed that any material still on the contribution list should fill the
 new page top to bottom. The call to |hbuild_page| will move any such material 
-to the new page. Further material is then taken from the \HINT/ file starting to
-parse it at |hpos| which should point to a top level node.
-If the end of file is reached before the (nonempty) page is completed, a call to |flush_pages|
+to the new page. Further material is then taken from the \HINT/ file with parsing starting 
+at |hpos| which should point to a top level node.
+If the end-of-file is reached before the (nonempty) page is completed, a call to |flush_pages|
 adds some glue and a penalty to eject the page.
 
-The page builder usually considers material from the hint file until the page
-would be overfull before deciding on the position of the best page break.
-The extra material past this break will be put back to the contribution list
-in preparation for the next page and the |hpos| pointer to the \HINT/ file will
-still point to the position where parsing should continue.
+The page builder usually considers material from the \HINT/ file until the page
+becomes overfull before it backs up to the position of the best page break.
+The extra material past this break is put back on the contribution list
+in preparation for the next page. The |hpos| pointer to the \HINT/ file will then
+point to the position where parsing should continue.
 Last not least, the page builder will store the location of the page break
 in the location cache as starting point for the next page.
 
 To summarize: If the variable |forward_mode| is |true|, the |hint_forward| function
 can be called to produce the next page reusing all the work already done while
-producing the current page. In the location cache we will have at least two enties: 
+producing the current page. In the location cache, we will have at least two enties: 
 the top of the current page and the top of the next page.
 
 
@@ -3938,14 +3938,14 @@ bool hint_backward(void)
 Here the |backward_mode| variable is set to |true|. It imples that the material in the contribution list
 belongs to the bottom of the preceeding page and |hpos| will
 indicate where parsing should contine when producing the previous page.
-Again we have in the location cache at least two enties: for the top of the current page and the top of the next page.
+Again in the location cache are at least two enties: the top of the current page and the top of the next page.
 
 @<\HINT/ |extern|@>=
 extern bool hint_forward(void);
 extern bool hint_backward(void);
 @
 
-When the page bulider has reached the end of the \HINT/ file, it must make sure that
+When the page builder has reached the end of the \HINT/ file, it must make sure that
 the material that might still be in the contribution list gets flushed out.
 To do so the function |flush_pages| adds some space and a large negative penalty.
 Calling one of the previous functions will then deliver the remaining pages.
@@ -3983,13 +3983,13 @@ implemented with just these functions.
 
 \subsection{Page Composition}
 The page builder of \HINT/, to tell the truth, is not building the page, it is just assembling
-the material that should be displayed on the page: the main body of text and floting material
+the material that should be displayed on the page: the main body of text and floating material
 like footnotes or illustrations.
 To make a nice looking page, we need to combine the material properly and put margins around all that.
 
 The next function is the default function to compute the margins.
 Given the horizontal and vertical dimensions of the page as |page_h| and |page_v|,
-it computes the horizontal and vertical dimensions of the main body of text as |hhsize| and |hvsize|
+it computes the horizontal and vertical dimensions of the main body of text 
 as well as the offset of its top/left position. The dimensions are given in scaled points.
 
 @<render variables@>=
@@ -3998,7 +3998,7 @@ int page_v, page_h, offset_v, offset_h;
 
 
 The formula use here will result in a 1 inch margin for a 
-letter size page---that the old default of \TeX---and decreases the magins for smaller pages
+letter size page---that's the old default of plain \TeX---and decreases the magins for smaller pages
 until the margin becomes zero for a page that is merely 1 inch wide.
 
 
@@ -4018,7 +4018,7 @@ until the margin becomes zero for a page that is merely 1 inch wide.
 @
 A more sophisticated page composition can be achived with page templates (which are not yet
 implemented). Here is the build-in page template number 0 which attaches the margins to
-the box contructed by the page builder and ships it out.
+the box contructed by the page builder.
 
 @<render functions@>=
 static void houtput_template0(void)
@@ -4049,12 +4049,12 @@ The basic capability of \HINT/ is rendering a page that starts at a given positi
 It starts by clearing the memory from all traces left from building previous pages
 and computes |hhsize| and |hvsize|.
 Then it parses a partial paragraph---if necessary---and calls |hint_forward| to build the page.
-It attaches the margins and ships it out.
+It attaches the margins and renders it.
 As all functions in this section, it returns the location of the new current page.
 The viewer might store this location to be able to return to this page at a later time.
 
 @<render functions@>=
-static void hship_out(pointer p);
+static void hrender_page(pointer p);
 
 uint64_t hint_page_top(uint64_t h)
 { if (hpos==NULL) return hint_blank();
@@ -4070,19 +4070,22 @@ uint64_t hint_page_top(uint64_t h)
   forward_mode=true;
   backward_mode=false;
   houtput_template0();
-  hship_out(stream[0].p);
+  hrender_page(stream[0].p);
   return h;
 }
 @
 
-Using the previous function, all we need to rerender the current page
-is a function to obtain its top position:
-|hint_page_get| returns the location of the current page coded as a |uint64_t|.
+Using the previous function, we implement |hint_page| which rerenders the current page
+possibly in a different format.
+All we need to so is a function to obtain its top position: |hint_page_get|.
+
 @<render functions@>=
 uint64_t hint_page_get(void)
 {@+
- MESSAGE("page_get: %d : 0x%08x %08x\n",cur_loc,(uint32_t)(page_loc[cur_loc]>>32), (uint32_t)(page_loc[cur_loc]&0xFFFFFFFF));
- return page_loc[cur_loc];@+ }
+ MESSAGE("page_get: %d : 0x%" PRIx64 "\n",cur_loc,page_loc[cur_loc]);
+@/ 
+return page_loc[cur_loc];
+ }
 
 uint64_t hint_page(void)
 { return hint_page_top(hint_page_get());
@@ -4109,7 +4112,7 @@ uint64_t hint_next_page(void)
     forward_mode=true;
     backward_mode=false;
     houtput_template0();
-    hship_out(stream[0].p);
+    hrender_page(stream[0].p);
     return hint_page_get();
   }
   else 
@@ -4117,7 +4120,7 @@ uint64_t hint_next_page(void)
 }
 @
 
-Things are bit more complex for paging backwards. The page that we produce here is usually
+Things are a bit more complex for paging backwards. The page that we produce here is usually
 different from what \HINT/ will produce in forward mode.
 First we check the location cache. If there is an entry for the preceeding page,
 we will take the location and produce the page in forward mode, because this way the
@@ -4136,19 +4139,21 @@ uint64_t hint_prev_page(void)
     backward_mode=true;
     forward_mode=false;
     houtput_template0();
-    hship_out(stream[0].p);
+    hrender_page(stream[0].p);
     return hint_page_get();
   }
   else
     return hint_page_bottom(hint_page_get());
 }
 @
-In the worst case, we don't have a cached location and are not in backward mode.
+In the worst case, we don't have a cached location and are not in backward mode. This is the
+case handled by |hint_page_bottom|.
+
 As we did in |hint_page_top|, we clear the memory from all traces left from building other pages,
-compute |hhsize| and |hvsize|, parse a partial paragraph---if necessary---and call |hint_backward| 
+compute the margins, parse a partial paragraph---if necessary---and call |hint_backward| 
 to build the page.
-In both cases, after calling  |hint_backward| , we set |cur_loc| to the current page,
-attach the margins, and return the new location.
+If successfull, it will set |cur_loc| to the current page. Finally, we attach the margins, render the page,
+and return the new location.
 @<render functions@>=
 uint64_t  hint_page_bottom(uint64_t h)
 { if (hpos==NULL) return hint_blank(); 
@@ -4161,7 +4166,7 @@ uint64_t  hint_page_bottom(uint64_t h)
   backward_mode=true;
   forward_mode=false;
   houtput_template0();
-  hship_out(stream[0].p);
+  hrender_page(stream[0].p);
   return hint_page_get();
 }
 @
@@ -4203,25 +4208,30 @@ versions.
 The \HINT/ file format supports four different types of fonts: The traditional PK fonts\cite{TR:pkfile},
 PostScript Type1 fonts\cite{PST1} which are used by many \TeX\ engines, 
 TrueType\cite{TTT:TT} fonts, and OpenType fonts\cite{MS:OTF}\cite{ISO:OTF}.
+
 @<font types@>=
 typedef	enum {@+ no_format, pk_format, t1_format, ot_format, tt_format@+ } font_format_t;
 @
 
-The features of a font are described in a |font_t| structure.
+
+The features of a font are described in a |font_s| structure.
 A major part of the structure is the glyph cache that provides fast access to the individual glyphs
 belonging to the font. Further, it includes an |ff| field containing the font format and a variant part 
 that differs for the different font formats.
+
+
 @<font types@>=
 @<definitions of |pk_t|, |t1_t|, |ot_t|, and |tt_t| types@>@;
 
-typedef struct {
-  unsigned char *font_data; /* pointer to the glyph data in the HINT file */
-  int size; /* the size of the glyph data in byte */
+typedef struct font_s {
+  unsigned char n; /* the font number */
+  unsigned char *font_data; /* pointer to the font data in the HINT file */
+  int size; /* the size of the font data in byte */
   double ds; /* the design size in pt */
   double hppp,vppp; /* the horizontal and vertical pixel per point */
   @<the font cache@>@;
   font_format_t ff; /* the font format */
-  union { /* font format specific part */
+  union { /* the font format specific parts */
 	  pk_t pk;
 	  tt_t tt;
 	  t1_t t1;
@@ -4239,7 +4249,7 @@ Given a font number |f| the following function returns a pointer to the
 corresponding font structure, extracting the necessary information from the \HINT/
 file if necessary.
 @<font functions@>=
-font_t *hget_font(unsigned char f)
+struct font_s *hget_font(unsigned char f)
 { font_t *fp;
   if (fonts[f]!=NULL) return fonts[f];
   fp = calloc(1,sizeof(*fp));
@@ -4248,6 +4258,7 @@ font_t *hget_font(unsigned char f)
   else
   { unsigned char *spos, *sstart, *send;
     spos=hpos; sstart=hstart;send=hend;
+    fp->n=f;
     hget_section(hglyph_section(f));
     fp->size=hend-hstart;
     fp->font_data=hstart;
@@ -4258,25 +4269,36 @@ font_t *hget_font(unsigned char f)
   return fonts[f];
 }
 @
+This function is used in the renderer, so it is exported together with an
+opaque pointer type to the font structure.
+@<font |extern|@>=
+typedef struct font_s *font_s_ptr;
+extern struct font_s *hget_font(unsigned char f);
+@
 
-To initialize the |fonts| table and remove  all fonts form memory, the |hclear_fonts| function is used.
+To initialize the |fonts| table and remove all fonts form memory, the |hint_clear_fonts| function is used
+with the |rm| parameter set to |true|.
 
 @<font functions@>=
-static void hfree_glyph_cache(font_t *f);
+static void hfree_glyph_cache(font_t *f, bool rm);
 
-void hclear_fonts(void)
+void hint_clear_fonts(bool rm)
 { int f;
   for (f=0;f<=max_ref[font_kind];f++)
     if (fonts[f]!=NULL)
-    { hfree_glyph_cache(fonts[f]);
-	  free(fonts[f]);
-	  fonts[f]=NULL;
+    { hfree_glyph_cache(fonts[f],rm);
+      if (rm) {  free(fonts[f]); fonts[f]=NULL; }
     }
 }
 @
 
+
+
+
+
+
 \subsubsection{The Font Cache}
-It possible, the glyphs belonging to a font are extracted only once from the font data,
+If possible, the glyphs belonging to a font are extracted only once from the font data,
 converted into a format suitable for the native rendering engine, and then cached for repeated use.
 The cached glyph representation for glyph |g| is stored in one of four trees. 
 The order and depth of the trees reflects UTF-8 encoding.
@@ -4293,14 +4315,14 @@ The order and depth of the trees reflects UTF-8 encoding.
 @
 
 
-The glyphs are described using a |glyph_s| structure. 
+The glyphs are described using a |gcache_s| structure. 
 We use |gcache_t| as a shorthand for |struct gcache_s|.
 
 @<font types@>=
 typedef struct gcache_s gcache_t;
 @
  
-To look up the cached glyph date we use this function:
+To look up the cached glyph data for font |f| and charactercode |cc|, we use the function |g_lookup|.
 
 @<font functions@>=
 #define G0_BITS 7
@@ -4311,7 +4333,7 @@ To look up the cached glyph date we use this function:
 #define G123_MASK (G123_SIZE-1)
 
 static gcache_t *g_lookup(font_t *f, unsigned int cc)
-/* given a font and a charactercode return a pointer to the glyph or NULL */
+
 { if (cc >> G0_BITS) {
 	unsigned int cc1= (cc>>G0_BITS);
 	if (cc1>>G123_BITS) {
@@ -4338,11 +4360,11 @@ static gcache_t *g_lookup(font_t *f, unsigned int cc)
 @
 
 But of course, before we can look up entries, we have to allocate new entries.
-The actual entries are allocated with |hnew_g|, the functions |hnew_g0| to
+The actual entries are allocated with |hnew_g|. The functions |hnew_g0| to
 |hnew_g3| allocate the necessary path from the root to the leaf, and 
 the function |hnew_glyph| provides the top level function:
 Given a font and a charactercode it returns a pointer to the glyph,
-allocating a glyph if none is yet allocated, and returning a pointer to the undefined glyph
+allocating a glyph if none is yet allocated, and returning a pointer to ``the undefined glyph''
 if no more memory is available.
 
 @<font variables@>=
@@ -4405,74 +4427,70 @@ static gcache_t *hnew_glyph(font_t *pk, unsigned int cc)
 @
 
 The next set of functions is used to clear the glyph cache.
+If the boolean parameter |rm| is true, the complete cache will 
+be deallocated.
 
 @<font functions@>=
-static void hfree_g0(struct gcache_s **g)
+static void hfree_g0(struct gcache_s **g, bool rm)
 { int i;
   if (g==NULL) return;
   for (i=0;i<G0_SIZE;i++)
     if (g[i]!=NULL)
-	{ nativeFreeGlyph(g[i]);
-      free(g[i]);
-      g[i]=NULL;
+    { nativeFreeGlyph(g[i]);
+      if (rm) {
+      if (g[i]->bits!=NULL) free(g[i]->bits);
+      free(g[i]); g[i]=NULL;@+ }
     }
 }
 
-static void hfree_g1(struct gcache_s ***g)
+static void hfree_g1(struct gcache_s ***g, bool rm)
 { int i;
   if (g==NULL) return;
   for (i=0;i<G123_SIZE;i++)
 	if (g[i]!=NULL)
-	{ hfree_g0(g[i]);
-	  free(g[i]);
-          g[i]=NULL;
+	{ hfree_g0(g[i],rm);
+      if (rm) {free(g[i]); g[i]=NULL;@+ }
 	}
 }
 
-static void hfree_g2(struct gcache_s ****g)
+static void hfree_g2(struct gcache_s ****g, bool rm)
 { int i;
   if (g==NULL) return;
   for (i=0;i<G123_SIZE;i++)
 	if (g[i]!=NULL)
-	{ hfree_g1(g[i]);
-	  free(g[i]);
-          g[i]=NULL;
+	{ hfree_g1(g[i],rm);
+      if (rm) {free(g[i]); g[i]=NULL;@+ }
 	}
 }
 
 
-static void hfree_g3(struct gcache_s *****g)
+static void hfree_g3(struct gcache_s *****g, bool rm)
 { int i;
   if (g==NULL) return;
   for (i=0;i<G123_SIZE;i++)
 	if (g[i]!=NULL)
-	{ hfree_g2(g[i]);
-	  free(g[i]);
-          g[i]=NULL;
+	{ hfree_g2(g[i],rm);
+      if (rm) {free(g[i]); g[i]=NULL;@+ }
 	}
 }
 
 
-static void hfree_glyph_cache(font_t *f)
+static void hfree_glyph_cache(font_t *f, bool rm)
 { if (f->g0!=NULL)
-  { hfree_g0(f->g0);
-    free(f->g0);
-    f->g0=NULL;
+  { hfree_g0(f->g0,rm);
+     if (rm) {free(f->g0); f->g0=NULL;@+}
   }
   if (f->g1!=NULL)
-  { hfree_g1(f->g1);
-    free(f->g1);
-    f->g1=NULL;
+  { hfree_g1(f->g1,rm);
+     if (rm) {free(f->g1); f->g1=NULL;@+}
   }
   if (f->g2!=NULL)
-  { hfree_g2(f->g2);
-    free(f->g2);
-    f->g2=NULL;
+  { hfree_g2(f->g2,rm);
+     if (rm) {free(f->g2); f->g2=NULL;@+}
   }
   if (f->g3!=NULL)
-  { hfree_g3(f->g3);
-    free(f->g3);
-    f->g3=NULL;
+  { hfree_g3(f->g3,rm);
+     if (rm) {free(f->g3); f->g3=NULL;@+}
   }
 }
 @
@@ -4480,12 +4498,13 @@ static void hfree_glyph_cache(font_t *f)
 The |gcache_s| structure may depend on the font encoding
 but also on the rendering engine that is used to display the glyphs. While the dependency on the
 font encoding is dynamic, the dependency on the rendering engine can be resolved at compile time.
+
 Every |gcache_s| structure stores |w| and |h|, the width and height of the minimum bounding box in pixel;
  |hoff| and |voff|, the horizontal and vertical offset in pixel from the upper left pixel to the 
-reference pixel (right and down are positive);
+reference pixel (right and down are positive).
 Then follows the representation of the glyph that is most convenient for rendering on the
 target sytem. For the Windows operating system, this is a byte array containing a device independent bitmap.
-For the Android operting system using OpenGLE 2.0 its again a byte array for the bitmap and an identifier
+For the Android operting system using OpenGLE 2.0 it's again a byte array for the bitmap and an identifier
 for the texture.
 Then there is a last part that is different for the different font encodings; it is prefixed
 by the font format number |ff|. The information in this last part 
@@ -4496,7 +4515,7 @@ helps with on-demand decoding of glyphs.
 @<definitions of |pkg_t|, |t1g_t|, |otg_t|, and |ttg_t| types@>@;
 
 struct gcache_s {
-  unsigned int w,h; 
+  int w,h; 
   int hoff,voff; 
   unsigned char *bits; 
 #ifdef __ANDROID__
@@ -4512,18 +4531,37 @@ struct gcache_s {
 };
 @
 
+The above structure has a |GLtexture| member if rendering is done on the Android operating system
+using OpenEGL 2.0. To speed up the rendering of glyphs, the glyph bitmap is loaded into the graphics cards
+as a texture and from then on identified by a single integer, the |GLtexture|.
+
+Occasionaly, however, the front-end will change the OpenGL context and the texture identifiers
+will loose their meaning. In this situation, it is not necessary to wipe out the entire glyph
+cache with all the extracted bitmaps but only the invalidation of the texture identifiers is needed.
+This effect can be achived by calling |hint_clear_fonts(false)|. It will call |nativeFreeGlyph|
+for all glyphs and this function can set the |GLtexture| value to zero.
+
+
 The top level function to access a glyph is |hget_glyph|. Given a font pointer |fp| 
-and a character code |cc| it looks up the glyph in the font cache and unpacks it if necessary.
+and a character code |cc| it looks up the glyph in the font cache.
+For PK fonts, all cache entries are made when initializing the font.
+For TrueType fonts, a cache entry is made when the glyph is accessed the first time.
+For both types of fonts, the unpacking is done just before the first use.
 
 @<font functions@>=
 gcache_t *hget_glyph(font_t *fp, unsigned int cc)
 {
-  gcache_t *g=g_lookup(fp,cc);
-  
-  if (g==NULL) return NULL;
-
+  gcache_t *g=NULL;
+  g=g_lookup(fp,cc);
+  if (g==NULL)
+  { if (fp->ff==tt_format)
+      g=hnew_glyph(fp,cc);
+    else  
+      return NULL;
+  }
   if (g->ff==no_format)           
   { if (fp->ff==pk_format) pkunpack_glyph(g);
+    else if (fp->ff==tt_format) ttunpack_glyph(fp,g,cc);
     else
                 QUIT("tt t1 and ot formats not yet supported");
   }
@@ -4531,55 +4569,11 @@ gcache_t *hget_glyph(font_t *fp, unsigned int cc)
 }
 @
 
-\subsection{Pages}
-Now we can consider how to render one page from the vertical box assembled by \HINT/'s page
-builder. Let's start with the most simple case: an empty page. We simply forward this
-task to the native rendering engine. The native renderer is not part of this
-document, but its reponsibilities ar listed in section~\secref{native}.
-
-@<render functions@>=
-uint64_t hint_blank(void)
-{ nativeBlank();
-  return 0;
-}
-@
-
-A slightly more complex case are rules, that is black rectangles.
-The only task here is to convert \TeX's and \HINT/'s measuring system,
-that is scaled points stored as 32 bit integers, into a representation that is more convenient for
-non \TeX{nical} sytems, namely regular points stored as floating point values. The macro |SP2PT|
-does the job.
-@<render macros@>=
-#define SP2PT(X) ((X)/(double)(1<<16))
-@
-Now we can render a rule:
-@<render functions@>=
-static void render_rule(int x, int y, int w, int h)
-{ if (w<=0) return;
-  if (h<=0) return;
-  nativeRule(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h));
-}
-@
-
-When we need to render an image, we should not bother the native renderer with finding the
-image data in segment |n| of the \HINT/ file. Instead we pass a pointer to the first byte and a pointer
-past the last byte. We also pass the position and size as we did for rules.
-@<render functions@>=
-void render_image(int x, int y, int w, int h, uint32_t n)
-{ 
-  uint8_t *spos, *sstart, *send;
-  spos=hpos; sstart=hstart;send=hend;
-  hget_section(n);
-  nativeImage(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),hstart,hend);
-  hpos=spos; hstart=sstart;hend=send;
-}
-@
-
-The most complicated part is rendering of a glyph. But with all the preparations,
-it boils down to a pretty short function to display a glyph given by its charcter code |cc|
+Rendering a glyph is the most complex rendering procedure. But with all the preparations,
+it boils down to a pretty short function to display a glyph, given by its charcter code |cc|,
 from font |f| at |x|, |y| in size |s|.
 @<font functions@>=
-void render_char(int x, int y, font_t *f, int32_t s, uint32_t cc)
+void render_char(int x, int y, struct font_s *f, int32_t s, uint32_t cc)
 
 { double w, h, dx, dy, m;
   gcache_t *g=hget_glyph(f,cc);
@@ -4596,7 +4590,47 @@ void render_char(int x, int y, font_t *f, int32_t s, uint32_t cc)
 }
 
 @
-Now at last we can render vertical and horizontal list. Two mutualy recursive procedures will
+@<font |extern|@>=
+extern void render_char(int x, int y, struct font_s *f, int32_t s, uint32_t cc);
+@
+
+\subsection{Rules}
+Rendering rules, that is black rectangles, is simpler.
+The only task here is to convert \TeX's and \HINT/'s measuring system,
+that is scaled points stored as 32 bit integers, into a representation that is more convenient for
+non \TeX{nical} sytems, namely regular points stored as floating point values. The macro |SP2PT|
+does the job.
+@<render macros@>=
+#define SP2PT(X) ((X)/(double)(1<<16))
+@
+Now we can render a rule:
+@<render functions@>=
+static void render_rule(int x, int y, int w, int h)
+{ if (w<=0) return;
+  if (h<=0) return;
+  nativeRule(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h));
+}
+@
+
+\subsection{Images}
+When we need to render an image, we should not bother the native renderer with finding the
+image data in segment |n| of the \HINT/ file. Instead we pass a pointer to the first byte and a pointer
+past the last byte. We also pass the position and size as we did for rules.
+@<render functions@>=
+void render_image(int x, int y, int w, int h, uint32_t n)
+{ 
+  uint8_t *spos, *sstart, *send;
+  spos=hpos; sstart=hstart;send=hend;
+  hget_section(n);
+  nativeImage(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),hstart,hend);
+  hpos=spos; hstart=sstart;hend=send;
+}
+@
+
+
+
+\subsection{Lists}
+Now at last, we can render vertical and horizontal list. Two mutualy recursive procedures will
 accomplish the rendering. The functions are more or less modifications of \TeX's functions
 that write DVI files. They share a few global static variables that implement the
 current state of the renderer: |cur_h| and |cur_v| contain the current horizontal
@@ -4610,7 +4644,7 @@ be output next;
 static scaled cur_h, cur_v;
 static scaled rule_ht, rule_dp, rule_wd; 
 static int cur_f; 
-static font_t *cur_fp;
+static struct font_s *cur_fp;
 static int32_t cur_at_size; 
 
 static void vlist_render(pointer this_box);
@@ -4929,12 +4963,23 @@ move_past:
 
 @
 
+\subsection{Pages}
+Let's start with the most simple case: an empty page. We simply forward this
+task to the native rendering engine. The native renderer is not part of this
+document, but its reponsibilities are listed in section~\secref{native}.
+
+@<render functions@>=
+uint64_t hint_blank(void)
+{ nativeBlank();
+  return 0;
+}
+@
 
 We conclude this section with the function that is called after the page builder has finished
-the page: the |hship_out| function.
+the page: the |hrender_page| function.
 @<render functions@>=
 
-static void hship_out(pointer p)
+static void hrender_page(pointer p)
 { nativeBlank();
   cur_h= 0;
   cur_v= height(p);
@@ -4949,15 +4994,16 @@ static void hship_out(pointer p)
 
 @
 \section{Native Rendering}\label{native}
-The following header file list all functions that the native renderer must implement.
+The {\tt rendernative.h} header file list all functions that the native renderer must implement.
 
-To initialize the renderer call:
+To initialize the renderer call |nativeInit|. To release all resorces allocated call |nativeClear|.
 @<native rendering definitions@>=
 extern void nativeInit(void); 
+extern void nativeClear(void);
 @
 
 
-To set the size of the drawing aerea in pixel and the resolution in dots (pixel) per inch.
+To set the size of the drawing aerea in pixel and the resolution in dots (pixel) per inch call |nativeSetSize|
 @<native rendering definitions@>=
 extern void nativeSetSize(int px_h, int px_v, double dpi);
 @ 
@@ -4967,18 +5013,19 @@ The native Renderer may implement an optional procedure to switch between Dark a
 extern void nativeSetDark(int dark);
 @
 
-To  render an empty page.
+To  render an empty page call |nativeBlank|.
 @<native rendering definitions@>=
 extern void nativeBlank(void); 
 @
 
 In the following, if not otherwise stated, all dimensions are given as double values in point.
-We have $72.27 \hbox{pt} = 1 \hbox{inch}$ and $1\hbox{inch} = 2.54 \hbox{cm}$.
+We have $72.27\,\hbox{pt} = 1\,\hbox{inch}$ and $1\,\hbox{inch} = 2.54\, \hbox{cm}$.
 
 
 To render the glyph |g| at position $(|x|,|y|)$ with width |w| and height |h| call:
 @<native rendering definitions@>=
-extern void nativeGlyph(double x, double y, double w, double h, gcache_t *g);
+typedef struct gcache_s *gcache_s_ptr;
+extern void nativeGlyph(double x, double y, double w, double h, struct gcache_s *g);
 @
 
 To render a black rectangle at position  $(|x|,|y|)$ with width |w| and height |h| call:
@@ -4992,67 +5039,63 @@ with the image data in memory from |istart| to (but not including) |iend| call:
 void nativeImage(double x, double y, double w, double h, unsigned char *istart, unsigned char *iend);
 @
 
-
-\subsection{Fonts and Glyphs}
-
 For PK fonts we need two functions, one to extract a runlength encoded
-glyph and on the extract a glyph coded as a bitmap.
+glyph and on the extract a glyph coded as a bitmap. For True4Type fonts,
+we need just one to align the bitmap to |DWORD|s.
 @<native rendering definitions@>= 
-extern void nativeSetRunlength(gcache_t *g, unsigned char *g_data);
-extern void nativeSetBitmaped(gcache_t *g, unsigned char *g_data);
+extern void nativeSetRunlength(struct gcache_s *g, unsigned char *g_data);
+extern void nativeSetBitmaped(struct gcache_s *g, unsigned char *g_data);
+extern void nativeSetTrueType(struct gcache_s *g);
 @
 
-Functions for PostScript Type 1 fonts, TrueType fonts, and  OpenType fonts 
+Functions for PostScript Type 1 fonts and  OpenType fonts 
 still need a specification.
 
 To free any resources associated with a cached glyph |g| call:
 
 @<native rendering definitions@>=
-void nativeFreeGlyph(gcache_t *g);
+void nativeFreeGlyph(struct gcache_s *g);
 @
-
-
+This function is also called for all glyphs by the function |hint_clear_fonts|
+If the |rm| parameter to that function is |false|, the glyph cache is not deallocated
+only |nativeFreeGlyph| is executed for all glyphs.
 
 
 \section{Font Encodings}
-Currently only so called PK files are supported. Here we describe how these are used 
-on the WIN32 operatig system using its API.
 
 \subsection{PK Fonts}
 
 PK Files\cite{TR:pkfile}
 contain a compressed representation of bitmap fonts  produced by METAFONT and gftopk.
-After unpacking these fonts, we obtain a device independent bitmap for each glyph
-which can be displayed on a Device Context using the |StretchDIBits|.
-This function is used to display the character on a memory device context given
-by the handle |hmem|. 
+After unpacking these fonts, we obtain a (device independent) bitmap for each glyph.
+On Windows the bitmap can be displayed on a Device Context using the |StretchDIBits| function.
 This function is capable of stretching or shrinking and hence can adjust the
 resolution. The resolution of the bitmap in the pk file is given be the 
 two parameters |hppp| (horizonttap pixel per point) and vppp (vertical pixel per point) which
 are found in the preamble of the pk file.
 
-For the memory device context we maintain its width, height as well as its
-horizontal and vertical resolution in dpi (dots per inch).
-Given the pixel position $(x,y)$ on |hmem|, the offset |d_h| and |d_v| of the hotspot of the
-glyph, and |w| and |h| the width and height of the glyph, we can compute the necessary
-parameters to display the glyph on |hmem| using the function |StretchDIBits|.
+%For the memory device context we maintain its width, height as well as its
+%horizontal and vertical resolution in dpi (dots per inch).
+%Given the pixel position $(x,y)$ on |hmem|, the offset |d_h| and |d_v| of the hotspot of the
+%glyph, and |w| and |h| the width and height of the glyph, we can compute the necessary
+%parameters to display the glyph on |hmem| using the function |StretchDIBits|.
 
-With the assembled page on |hmem| in the correct size and resolutio ends the job of the
-user interface independent part of the hint viewer and the user interface takes over.
+%With the assembled page on |hmem| in the correct size and resolutio ends the job of the
+%user interface independent part of the hint viewer and the user interface takes over.
 
-The user interface knows the size of the client window (in pixel) and its resolution. 
-From this information, it can compute the true size in scaled point of the client window
-and the desired resolution of |hmem|. The user interface for the WIN32 viewer makes the
-resolution of |hmem| by a ceratin factor, called |render_factor| bigger. This has two advantages:
-scaling a high resolution black and white image down produces grey pixels around the border
-which makes the glyphs appear smoother; further, positions of glyphs are rounded to whole
-pixels when rendering them on |hmem| and these positions translate to sub-pixel position when scaling
-down. The user factor can also use a scale factor to display the page larger or smaller than its
-true size. For example with a scale factor of 2, a glyph 10pt high would measure 20pt on the screen.
-To make the enlaged page fit on the window, the user interface would request a window of only
-half the actual width and height, but would double the render factor. The image it receives
-cann then be displayed stretching it only be half the render factor thus obtaining an image
-that is scaled down by exactly the render factor filling the complete client window.
+%The user interface knows the size of the client window (in pixel) and its resolution. 
+%From this information, it can compute the true size in scaled point of the client window
+%and the desired resolution of |hmem|. The user interface for the WIN32 viewer makes the
+%resolution of |hmem| by a ceratin factor, called |render_factor| bigger. This has two advantages:
+%scaling a high resolution black and white image down produces grey pixels around the border
+%which makes the glyphs appear smoother; further, positions of glyphs are rounded to whole
+%pixels when rendering them on |hmem| and these positions translate to sub-pixel position when scaling
+%down. The user factor can also use a scale factor to display the page larger or smaller than its
+%true size. For example with a scale factor of 2, a glyph 10pt high would measure 20pt on the screen.
+%To make the enlaged page fit on the window, the user interface would request a window of only
+%half the actual width and height, but would double the render factor. The image it receives
+%cann then be displayed stretching it only be half the render factor thus obtaining an image
+%that is scaled down by exactly the render factor filling the complete client window.
 
 The first thing we need to know when a section of a \HINT/ file contains a font is
 the font format. We know, it contains a PK font if the first two byte contain the
@@ -5063,19 +5106,15 @@ values |0xF7| and |0x59|.
   { fp->ff=pk_format;
     if (!unpack_pkfile(fp)) { free(fp); fp=NULL; }
   }
-
 @
 
 There is some information in the PK font that is specific to a PK font.
 @<definitions of |pk_t|, |t1_t|, |ot_t|, and |tt_t| types@>=
 
 typedef struct
-{ unsigned char *pk_comment; /* usualy the program that made the pk font */
+{ unsigned char *pk_comment; /* the program that made the pk font */
   unsigned int cs; /* checksum */
   unsigned char id; /* the id currently allways 89 */
-#if 0
-  unsigned char flag; /* encoding in the pk file */
-#endif
 } pk_t;
 @
 
@@ -5221,35 +5260,76 @@ int unpack_pkfile(font_t *pk)
 	return 1;
 }
 
-#if 0
+@
 
-unsigned char test_data[] ={ 
-/*	See: Thomas Rokicki, Packed (PK) Font File Firmat, TUGboat, Volume 6 (1985), No. 3 */
-	0x88, // Flag Byte
-	0x1A, // Packet length
-	0x04, // char code
-	0x09, 0xc7, 0x1C, // tfm width
-	0x19, // horiz. escapement
-	0x14, // width
-	0x1D, // height
-	0xFE, // h offset
-	0x1C, // v offset
-	0xD9, 0xE2, 0x97, // Raster Data
-	0x2B, 0x1E, 0x22,
-	0x93, 0x24, 0xE3,
-	0x97, 0x4E, 0x22,
-	0x93, 0x2C, 0x5E,
-	0x22, 0x97, 0xD9 };
 
-#endif
+\subsection{TrueType Fonts}
 
+
+To unpack TrueType fonts, we use the {\tt stb\_truetype.h} single C header file library\cite{SB:truetype}
+by Sean Barrett.
+
+@<include the STB TrueType Implementation@>=
+#define STB_TRUETYPE_IMPLEMENTATION
+#define STBTT_STATIC
+#include "stb_truetype.h"
+@
+
+The above header  file defines the proper data type for our |tt_t| type.
+A dummy type is sufficient for the glyphs.
+
+@<definitions of |pk_t|, |t1_t|, |ot_t|, and |tt_t| types@>=
+typedef stbtt_fontinfo tt_t;
+typedef struct
+{ int dummy;
+} ttg_t;
+@
+
+We use |stbtt_InitFont| to unpack the font and initialize the |font_t| structure
+and we use |stbtt_GetCodepointBitmap| to obtain the bitmap for a glyph.
+To determine the rendering size, we use the function |font_at_size| to
+obtain the design size of the font in scaled point, and we set the resolution to 600dpi.
+From the font size and the resolution, we get the size of one em and
+the function |stbtt_ScaleForMappingEmToPixels| then computes
+the right scale factor for the TrueType renderer.
+
+@<TrueType font functions@>=
+int unpack_ttfile(font_t *f)
+{
+  if (!stbtt_InitFont(&(f->tt),f->font_data,0))
+    return 0;
+f->ds=font_at_size(f->n)/(double)(1<<16); /* design size*/
+f->hppp=f->vppp=600.0/72.27;
+f->ff=tt_format;
+return 1;
+}
+
+
+static void ttunpack_glyph(font_t *f, gcache_t *g, uint32_t cc)
+{ float em =f->hppp*f->ds;
+  float scale;
+  scale =stbtt_ScaleForMappingEmToPixels(&(f->tt),em);
+  g->bits=stbtt_GetCodepointBitmap(&(f->tt), scale, scale, cc, &(g->w), &(g->h), &(g->hoff),&(g->voff));
+  g->ff=tt_format;
+  nativeSetTrueType(g);
+}
+
+@
+
+The function |unpack_ttfile| returns |false| if the font is not a TrueType font.
+
+@<determine the font format and unpack the font@>=
+  else if (unpack_ttfile(fp)) 
+      fp->ff=tt_format;
+  else
+      { QUIT("Font format not supported for font %d\n",fp->n);
+        free(fp); fp=NULL; 
+      }
 @
 
 
 \subsection{PostScript Type 1 Fonts}
- @<determine the font format and unpack the font@>=
- else 
-    QUIT("tt, t1, ot fonts not yet implemented");
+ 
 @
 @<definitions of |pk_t|, |t1_t|, |ot_t|, and |tt_t| types@>=
 typedef struct
@@ -5274,21 +5354,6 @@ typedef struct
 { int dummy;
 } otg_t;
 @
-\subsection{TrueType Fonts}
-
-@<definitions of |pk_t|, |t1_t|, |ot_t|, and |tt_t| types@>=
-typedef struct
-{ int dummy;
-} tt_t;
-@
-@<definitions of |pkg_t|, |t1g_t|, |otg_t|, and |ttg_t| types@>=
-typedef struct
-{ int dummy;
-} ttg_t;
-@
-
-
-
 
 \section{Testing \HINT/}\label{testing}
 One objective of \HINT/ is to make the following diagram is commutative:
@@ -5560,7 +5625,6 @@ extern bool hbuild_page_up(void); /*append contributions to the current page*/
 #include "texextern.h"
 #include "hint.h"
 #include "hrender.h"
-#include "hfonts.h"
 
 #include "texdefs.h"
 
@@ -5595,6 +5659,7 @@ extern uint64_t hint_page(void);
 extern uint64_t hint_next_page(void);
 extern uint64_t hint_prev_page(void);
 extern void hint_resize(int px_h, int px_v, double dpi);
+extern void hint_clear_fonts(bool rm);
 
 #endif 
 @
@@ -5604,10 +5669,12 @@ extern void hint_resize(int px_h, int px_v, double dpi);
 #include <math.h>
 #include "texextern.h"
 #include "hint.h"
-#include "hfonts.h"
 #include "hrender.h"
 #include "rendernative.h"
 #include "texdefs.h"
+
+@<font |extern|@>@;
+
 @<render variables@>@;
 @<render functions@>@;
 @
@@ -5619,9 +5686,7 @@ extern void hint_resize(int px_h, int px_v, double dpi);
 #define _HFONTS_H
 @<font types@>@;
 
-extern void render_char(int x, int y, font_t *f, int32_t s, uint32_t cc);
-extern font_t *hget_font(unsigned char f);
-extern void hclear_fonts(void);
+
 #endif
 @
 
@@ -5630,13 +5695,15 @@ extern void hclear_fonts(void);
 #include "basetypes.h"
 #include "error.h"
 #include "hformat.h"
-#include "textypes.h"
 #include "hint.h"
+@<include the STB TrueType Implementation@>@;
 #include "hfonts.h"
 #include "hrender.h"
 #include "rendernative.h"
 
 @<font variables@>@;
+
+@<TrueType font functions@>@;
 
 @<PK font functions@>@;
 
