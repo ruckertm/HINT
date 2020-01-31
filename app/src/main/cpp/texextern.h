@@ -153,21 +153,12 @@ extern void hloc_set_next(pointer p);
 #line 3973 "hint.w"
 
 extern scaled hvsize,hhsize;
-<<<<<<< HEAD
-/*:231*//*293:*/
-#line 5513 "hint.w"
-
-extern void leak_in(pointer p,int s);
-extern void leak_out(pointer p,int s);
-/*:293*/
-=======
 /*:231*//*297:*/
 #line 5578 "hint.w"
 
 extern void leak_in(pointer p,int s);
 extern void leak_out(pointer p,int s);
 /*:297*/
->>>>>>> socher
 #line 2973 "hint.w"
 
 #endif

@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-/*295:*/
-#line 5548 "hint.w"
-=======
 /*299:*/
 #line 5613 "hint.w"
->>>>>>> socher
 
 #ifndef WIN32
 #include <sys/mman.h> 
@@ -20,10 +15,6 @@
 #include "texextern.h"
 #include "hint.h"
 #include "hrender.h"
-<<<<<<< HEAD
-#include "hfonts.h"
-=======
->>>>>>> socher
 
 #include "texdefs.h"
 
@@ -260,11 +251,7 @@ hset_param_list(q); hdisplay(p,a,((I)&b010)!=0); hrestore_param_list();\
   else { image_stretch(p)= image_shrink(p)= 0;image_stretch_order(p)= image_shrink_order(p)= normal;}\
   tail_append(p);}
 /*:173*/
-<<<<<<< HEAD
-#line 5567 "hint.w"
-=======
 #line 5631 "hint.w"
->>>>>>> socher
 
 /*68:*/
 #line 1157 "hint.w"
@@ -439,11 +426,7 @@ hset_param_list(q); hdisplay(p,a,((I)&b010)!=0); hrestore_param_list();\
   HTEG16(image_no(p));RNG("Section number",image_no(p),3,max_section_no);  \
   tail_append(p);}
 /*:174*/
-<<<<<<< HEAD
-#line 5568 "hint.w"
-=======
 #line 5632 "hint.w"
->>>>>>> socher
 
 
 /*33:*/
@@ -476,11 +459,7 @@ typedef struct param_def_t{
 struct param_def_t*next;
 param_t p;}param_def_t;
 /*:47*/
-<<<<<<< HEAD
-#line 5570 "hint.w"
-=======
 #line 5634 "hint.w"
->>>>>>> socher
 
 
 
@@ -554,11 +533,7 @@ static int lo_loc,hi_loc;
 
 scaled hvsize,hhsize;
 /*:230*/
-<<<<<<< HEAD
-#line 5573 "hint.w"
-=======
 #line 5637 "hint.w"
->>>>>>> socher
 
 /*13:*/
 #line 489 "hint.w"
@@ -600,11 +575,7 @@ static pointer hteg_list(void);
 
 static scaled hget_xdimen_node(void);
 /*:124*/
-<<<<<<< HEAD
-#line 5574 "hint.w"
-=======
 #line 5638 "hint.w"
->>>>>>> socher
 
 /*19:*/
 #line 537 "hint.w"
@@ -1827,13 +1798,8 @@ NEXT_PAGE(hi_loc);
 cur_loc= i;
 MESSAGE("loc_set_prev: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
 }
-<<<<<<< HEAD
-/*:222*//*292:*/
-#line 5474 "hint.w"
-=======
 /*:222*//*296:*/
 #line 5539 "hint.w"
->>>>>>> socher
 
 static pointer leaks[1<<16]= {0};
 
@@ -1871,13 +1837,8 @@ if(leaks[i]!=0)
 fprintf(stderr,"p=%d, s=%d\n",i,leaks[i]);
 #endif
 }
-<<<<<<< HEAD
-/*:292*/
-#line 5575 "hint.w"
-=======
 /*:296*/
 #line 5639 "hint.w"
->>>>>>> socher
 
 /*3:*/
 #line 131 "hint.w"
@@ -2583,11 +2544,7 @@ hpos= hstart+node_pos;
 }
 
 /*:164*/
-<<<<<<< HEAD
-#line 5576 "hint.w"
-=======
 #line 5640 "hint.w"
->>>>>>> socher
 
 /*71:*/
 #line 1185 "hint.w"
@@ -2830,11 +2787,7 @@ return p;
 }
 }
 /*:153*/
-<<<<<<< HEAD
-#line 5577 "hint.w"
-=======
 #line 5641 "hint.w"
->>>>>>> socher
 
 /*29:*/
 #line 608 "hint.w"
@@ -3478,14 +3431,7 @@ store_map(tail,pos,0);
 return false;
 }
 /*:229*/
-<<<<<<< HEAD
-#line 5578 "hint.w"
-
-
-/*:295*/
-=======
 #line 5642 "hint.w"
 
 
 /*:299*/
->>>>>>> socher
