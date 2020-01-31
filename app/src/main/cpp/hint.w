@@ -4277,17 +4277,17 @@ extern struct font_s *hget_font(unsigned char f);
 @
 
 To initialize the |fonts| table and remove all fonts form memory, the |hint_clear_fonts| function is used
-with the |delete| parameter set to |true|.
+with the |rm| parameter set to |true|.
 
 @<font functions@>=
-static void hfree_glyph_cache(font_t *f, bool delete);
+static void hfree_glyph_cache(font_t *f, bool rm);
 
-void hint_clear_fonts(bool delete)
+void hint_clear_fonts(bool rm)
 { int f;
   for (f=0;f<=max_ref[font_kind];f++)
     if (fonts[f]!=NULL)
-    { hfree_glyph_cache(fonts[f],delete);
-      if (delete) {  free(fonts[f]); fonts[f]=NULL; }
+    { hfree_glyph_cache(fonts[f],rm);
+      if (rm) {  free(fonts[f]); fonts[f]=NULL; }
     }
 }
 @
@@ -4427,68 +4427,70 @@ static gcache_t *hnew_glyph(font_t *pk, unsigned int cc)
 @
 
 The next set of functions is used to clear the glyph cache.
-If the boolean parameter |delete| is true, the complete cache will 
+If the boolean parameter |rm| is true, the complete cache will 
 be deallocated.
 
 @<font functions@>=
-static void hfree_g0(struct gcache_s **g, bool delete)
+static void hfree_g0(struct gcache_s **g, bool rm)
 { int i;
   if (g==NULL) return;
   for (i=0;i<G0_SIZE;i++)
     if (g[i]!=NULL)
     { nativeFreeGlyph(g[i]);
-      if (delete) {free(g[i]); g[i]=NULL;@+ }
+      if (rm) {
+      if (g[i]->bits!=NULL) free(g[i]->bits);
+      free(g[i]); g[i]=NULL;@+ }
     }
 }
 
-static void hfree_g1(struct gcache_s ***g, bool delete)
+static void hfree_g1(struct gcache_s ***g, bool rm)
 { int i;
   if (g==NULL) return;
   for (i=0;i<G123_SIZE;i++)
 	if (g[i]!=NULL)
-	{ hfree_g0(g[i],delete);
-      if (delete) {free(g[i]); g[i]=NULL;@+ }
+	{ hfree_g0(g[i],rm);
+      if (rm) {free(g[i]); g[i]=NULL;@+ }
 	}
 }
 
-static void hfree_g2(struct gcache_s ****g, bool delete)
+static void hfree_g2(struct gcache_s ****g, bool rm)
 { int i;
   if (g==NULL) return;
   for (i=0;i<G123_SIZE;i++)
 	if (g[i]!=NULL)
-	{ hfree_g1(g[i],delete);
-      if (delete) {free(g[i]); g[i]=NULL;@+ }
+	{ hfree_g1(g[i],rm);
+      if (rm) {free(g[i]); g[i]=NULL;@+ }
 	}
 }
 
 
-static void hfree_g3(struct gcache_s *****g, bool delete)
+static void hfree_g3(struct gcache_s *****g, bool rm)
 { int i;
   if (g==NULL) return;
   for (i=0;i<G123_SIZE;i++)
 	if (g[i]!=NULL)
-	{ hfree_g2(g[i],delete);
-      if (delete) {free(g[i]); g[i]=NULL;@+ }
+	{ hfree_g2(g[i],rm);
+      if (rm) {free(g[i]); g[i]=NULL;@+ }
 	}
 }
 
 
-static void hfree_glyph_cache(font_t *f, bool delete)
+static void hfree_glyph_cache(font_t *f, bool rm)
 { if (f->g0!=NULL)
-  { hfree_g0(f->g0,delete);
-     if (delete) {free(f->g0); f->g0=NULL;@+}
+  { hfree_g0(f->g0,rm);
+     if (rm) {free(f->g0); f->g0=NULL;@+}
   }
   if (f->g1!=NULL)
-  { hfree_g1(f->g1,delete);
-     if (delete) {free(f->g1); f->g1=NULL;@+}
+  { hfree_g1(f->g1,rm);
+     if (rm) {free(f->g1); f->g1=NULL;@+}
   }
   if (f->g2!=NULL)
-  { hfree_g2(f->g2,delete);
-     if (delete) {free(f->g2); f->g2=NULL;@+}
+  { hfree_g2(f->g2,rm);
+     if (rm) {free(f->g2); f->g2=NULL;@+}
   }
   if (f->g3!=NULL)
-  { hfree_g3(f->g3,delete);
-     if (delete) {free(f->g3); f->g3=NULL;@+}
+  { hfree_g3(f->g3,rm);
+     if (rm) {free(f->g3); f->g3=NULL;@+}
   }
 }
 @
@@ -4513,7 +4515,7 @@ helps with on-demand decoding of glyphs.
 @<definitions of |pkg_t|, |t1g_t|, |otg_t|, and |ttg_t| types@>@;
 
 struct gcache_s {
-  unsigned int w,h; 
+  int w,h; 
   int hoff,voff; 
   unsigned char *bits; 
 #ifdef __ANDROID__
@@ -5055,7 +5057,7 @@ To free any resources associated with a cached glyph |g| call:
 void nativeFreeGlyph(struct gcache_s *g);
 @
 This function is also called for all glyphs by the function |hint_clear_fonts|
-If the |delete| parameter to that function is |false|, the glyph cache is not deallocated
+If the |rm| parameter to that function is |false|, the glyph cache is not deallocated
 only |nativeFreeGlyph| is executed for all glyphs.
 
 
@@ -5657,7 +5659,7 @@ extern uint64_t hint_page(void);
 extern uint64_t hint_next_page(void);
 extern uint64_t hint_prev_page(void);
 extern void hint_resize(int px_h, int px_v, double dpi);
-extern void hint_clear_fonts(bool delete);
+extern void hint_clear_fonts(bool rm);
 
 #endif 
 @

@@ -18,9 +18,10 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 extern "C" {
-#include "hinttop.h"
-#include "fonts.h"
-#include "rendergl.h"
+#include "stb_truetype.h"
+#include "hfonts.h"
+#include "hrender.h"
+#include "rendernative.h"
 #include "stb_image.h"
 };
 
@@ -208,7 +209,7 @@ extern "C" void nativeInit(void) {
     LOGI("nativeInit done\n");
 }
 
-extern "C" void nativeSetColors(double fr, double fg, double fb, double br, double bg, double bb)
+static void nativeSetColors(GLfloat fr, GLfloat fg, GLfloat fb, GLfloat br, GLfloat bg, GLfloat bb)
 /* set foreground and background rgb colors */
 {
     int ourColorLocation = glGetUniformLocation(gProgram, "ourColor");
@@ -216,20 +217,21 @@ extern "C" void nativeSetColors(double fr, double fg, double fb, double br, doub
     glUniform4f(ourColorLocation, fr, fg, fb, 0.0f);
 }
 
-extern "C" void setDarkMode() {
-    LOGI("setDarkMode GL Graphics\n");
+extern "C" void nativeSetDark(int dark) {
+    LOGI("SetDark %d GL Graphics\n",dark);
     // set dark mode (= inverted texture colors)
-    int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
-    glUniform1i(ourModeLocation, DARK_MODE);
-    mode = DARK_MODE;
-}
-
-extern "C" void setLightMode() {
-    LOGI("setLightMode GL Graphics\n");
-    // set light or dark mode by default to light (=texture colors)
-    int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
-    glUniform1i(ourModeLocation, LIGHT_MODE);
-    mode = LIGHT_MODE;
+    if (dark)
+    { int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
+      glUniform1i(ourModeLocation, DARK_MODE);
+      mode = DARK_MODE;
+      nativeSetColors(1.0,1.0,1.0,0.0,0.0,0.0);
+    }
+    else
+    { int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
+      glUniform1i(ourModeLocation, LIGHT_MODE);
+      mode = LIGHT_MODE;
+      nativeSetColors(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+    }
 }
 
 
@@ -258,6 +260,36 @@ extern "C" void nativeSetSize(int px_h, int px_v, double dpi)
 }
 
 
+static void GLtexture(gcache_t *g) {
+    unsigned GLtex;
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    checkGlError("glPixelStorei");
+    glGenTextures(1, &GLtex);
+    checkGlError("glGenTextures");
+    glBindTexture(GL_TEXTURE_2D, GLtex);
+    checkGlError("glBindTexture");
+    glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_ALPHA,
+            g->w,
+            g->h,
+            0,
+            GL_ALPHA,
+            GL_UNSIGNED_BYTE,
+            g->bits
+    );
+    checkGlError("glTeXImage2D");
+
+    // Set texture options
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    g->GLtexture = GLtex;
+    //MESSAGE("Generated GL texture %d",g->GLtexture);
+}
+
 extern "C" void nativeGlyph(double x, double y, double w, double h, gcache_t *g)
 /* Using GL to render a character texture
    Coordinates in points, origin bottom left, x and w right, y and h up
@@ -266,6 +298,9 @@ extern "C" void nativeGlyph(double x, double y, double w, double h, gcache_t *g)
 
   */
 { //LOGI("Rendering texture %i at (%f,%f) sized %fx%f",GLtexture,x/SPf,y/SPf,w/SPf,h/SPf);
+
+    if (g->GLtexture==0)
+        GLtexture(g);
 
     GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
                        (GLfloat) x, (GLfloat) (y + h), 0.0f, 0.0f,
@@ -417,36 +452,6 @@ extern "C" void nativeBlank(void) {
 }
 
 
-static void GLtexture(gcache_t *g) {
-    unsigned GLtex;
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    checkGlError("glPixelStorei");
-    glGenTextures(1, &GLtex);
-    checkGlError("glGenTextures");
-    glBindTexture(GL_TEXTURE_2D, GLtex);
-    checkGlError("glBindTexture");
-    glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_ALPHA,
-            g->w,
-            g->h,
-            0,
-            GL_ALPHA,
-            GL_UNSIGNED_BYTE,
-            g->bits
-    );
-    checkGlError("glTeXImage2D");
-
-    // Set texture options
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    g->GLtexture = GLtex;
-    //MESSAGE("Generated GL texture %d",g->GLtexture);
-}
-
 /* reading packed numbers from pk files */
 
 static int j; /* position of next nybble in data */
@@ -549,10 +554,31 @@ extern "C" void nativeSetBitmaped(gcache_t *g, unsigned char *data) {
 void nativeFreeGlyph(gcache_t *g)
 /* Free resources associated with g. */
 {
-    if (g->bits != NULL) free(g->bits);
-    g->bits = NULL;
-    if (g->GLtexture != 0)
+    if (g->GLtexture != 0) {
         glDeleteTextures(1, &(g->GLtexture));
+        g->GLtexture = 0;
+    }
 }
 
+extern "C" void nativeSetTrueType(struct gcache_s*g)
+{  unsigned int x,y; /* position in bitmap */
+    unsigned char *bits;
+    unsigned int ww; /* width in Bytes */
+    unsigned char *line;
 
+    bits=g->bits;
+    g->bits=NULL;
+    ww= g->w;
+    g->bits=(unsigned char *)calloc(ww*g->h, 1);
+    if (g->bits==NULL)
+    { g->w=g->h=0; return; } /* out of memory */
+    for (y=0;y<g->h;y++)
+    {     line =g->bits+(g->h-y-1)*ww;
+        for (x=0; x< g->w;x++)
+            line[x]=bits[y*g->w+x];
+    }
+    free(bits);
+    g->voff=-g->voff;
+    g->hoff=-g->hoff;
+    GLtexture(g);
+}

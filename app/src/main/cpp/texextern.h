@@ -154,7 +154,7 @@ extern void hloc_set_next(pointer p);
 
 extern scaled hvsize,hhsize;
 /*:231*//*297:*/
-#line 5576 "hint.w"
+#line 5578 "hint.w"
 
 extern void leak_in(pointer p,int s);
 extern void leak_out(pointer p,int s);

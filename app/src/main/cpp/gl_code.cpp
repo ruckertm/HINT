@@ -23,11 +23,15 @@
 #include <GLES2/gl2ext.h>
 
 extern "C" {
-#include "fonts.h"
-#include "rendergl.h"
-#include "hinttop.h"
-#include "htex.h"
-#include "hpos.h"
+//include "stb_truetype.h"
+//include "hfonts.h"
+#include "basetypes.h"
+#include "hint.h"
+#include "hrender.h"
+#include "rendernative.h"
+//DEPRECATED
+//extern void nativeSetColors(double fr, double fg, double fb, double br, double bg, double bb);
+
 };
 
 
@@ -47,9 +51,9 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jclass obj, jint width, ji
                                          jdouble xdpi, jdouble ydpi, jint background_color);
 JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_next(JNIEnv *env, jclass obj);
 JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_prev(JNIEnv *env, jclass obj);
-JNIEXPORT int JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_getPos(JNIEnv *env, jclass obj);
+JNIEXPORT jlong JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_getPos(JNIEnv *env, jclass obj);
 JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_setPos(JNIEnv *env, jclass obj, jint pos);
+Java_edu_hm_cs_hintview_HINTVIEWLib_setPos(JNIEnv *env, jclass obj, jlong pos);
 JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_home(JNIEnv *env, jclass obj);
 JNIEXPORT void JNICALL
@@ -58,12 +62,6 @@ JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_darkMode(JNIEnv *env, jclass obj);
 };
 
-
-static void renderFrame() {
-    LOGI("Render Frame");
-    nativeBlank();
-    hint_page();
-}
 
 GLfloat hdpi, vdpi; // resolution of canvas
 // converting pixel to point and back
@@ -86,23 +84,22 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jdouble xdpi
     double background_G = (background_color >> 8) & 0xff;
     double background_B = (background_color) & 0xff;
 
-    nativeSetColors(0, 0, 0, background_R, background_G, background_B);
     if (mode > 0){
-        setDarkMode();
+        nativeSetDark(true);
     } else{
-        setLightMode();
+        nativeSetDark(false);
     }
     //nativeSetColors(0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 0.8f);
-    //hint_start("/storage/emulated/0/Download/paging.hnt");
-    //hint_start("/storage/emulated/0/Download/math.hnt");
-    //hint_start("/storage/emulated/0/Download/mfpreface.hnt");
-    //hint_start("/storage/emulated/0/Download/bmp.hnt");
-    //hint_start("/storage/emulated/0/Download/png.hnt");
-    //hint_start("/storage/emulated/0/Download/display.hnt");
-    //hint_start("/storage/emulated/0/Download/opentype.hnt");
-    hint_start("/storage/emulated/0/Download/truetype.hnt");
-    //hint_start("/storage/emulated/0/Download/ligature.hnt");
-    //hint_start("/storage/emulated/0/Download/jpg.hnt");
+    //hint_open("/storage/emulated/0/Download/paging.hnt");
+    //hint_open("/storage/emulated/0/Download/math.hnt");
+    hint_open("/storage/emulated/0/Download/mfpreface.hnt");
+    //hint_open("/storage/emulated/0/Download/bmp.hnt");
+    //hint_open("/storage/emulated/0/Download/png.hnt");
+    //hint_open("/storage/emulated/0/Download/display.hnt");
+    //hint_open("/storage/emulated/0/Download/opentype.hnt");
+    //hint_open("/storage/emulated/0/Download/truetype.hnt");
+    //hint_open("/storage/emulated/0/Download/ligature.hnt");
+    //hint_open("/storage/emulated/0/Download/jpg.hnt");
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -111,7 +108,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, 
 
     nativeSetSize(width, height, hdpi);
 
-    //renderFrame();
+    //hint_page();
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -125,52 +122,55 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jclass obj, jint width, ji
     double background_G = (background_color >> 8) & 0xff;
     double background_B = (background_color) & 0xff;
 
-    nativeSetColors(0, 0, 0, background_R, background_G, background_B);
-
     nativeSetSize(width, height, hdpi);
-    renderFrame();
+    hint_page();
 
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_next(JNIEnv *env, jclass obj) {
     LOGI("next()\n");
-    hpos_next();
+    hint_next_page();
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_prev(JNIEnv *env, jclass obj) {
     LOGI("prev()\n");
-    hpos_prev();
+    hint_prev_page();
 }
 
-extern "C" JNIEXPORT int JNICALL
+extern "C" JNIEXPORT jlong JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_getPos(JNIEnv *env, jclass obj) {
-    LOGI("getPos()\n");
-    return hpos_get_cur();
+    uint64_t hpos;
+    jlong pos;
+    hpos = hint_page_get();
+    pos=hpos;
+    LOGI("getPos(0x%x %x)-> (0x%x %x)\n", (int)(hpos>>32), (int)(hpos&0xffffffff), (int)(pos>>32), (int)(pos&0xffffffff));
+    hint_clear_fonts(false);
+    return pos;
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_setPos(JNIEnv *env, jclass obj, jint pos) {
-    LOGI("setPos(%d)\n", pos);
-    /* TODO implement correctly */
+Java_edu_hm_cs_hintview_HINTVIEWLib_setPos(JNIEnv *env, jclass obj, jlong pos) {
+    LOGI("setPos(0x%x %x)\n", (int)(pos>>32), (int)(pos&0xffffffff));
+    hint_page_top(pos);
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_home(JNIEnv *env, jclass obj) {
     // go to first page
     LOGI("hpos_home()\n");
-    hpos_home();
+    hint_page_top(0);
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_lightMode(JNIEnv *env, jclass obj) {
-    setLightMode();
-    renderFrame();
+    nativeSetDark(false);
+    hint_page();
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_darkMode(JNIEnv *env, jclass obj) {
-    setDarkMode();
-    renderFrame();
+    nativeSetDark(true);
+    hint_page();
 }

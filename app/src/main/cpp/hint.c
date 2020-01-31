@@ -1,5 +1,5 @@
 /*299:*/
-#line 5611 "hint.w"
+#line 5613 "hint.w"
 
 #ifndef WIN32
 #include <sys/mman.h> 
@@ -251,7 +251,7 @@ hset_param_list(q); hdisplay(p,a,((I)&b010)!=0); hrestore_param_list();\
   else { image_stretch(p)= image_shrink(p)= 0;image_stretch_order(p)= image_shrink_order(p)= normal;}\
   tail_append(p);}
 /*:173*/
-#line 5629 "hint.w"
+#line 5631 "hint.w"
 
 /*68:*/
 #line 1157 "hint.w"
@@ -426,7 +426,7 @@ hset_param_list(q); hdisplay(p,a,((I)&b010)!=0); hrestore_param_list();\
   HTEG16(image_no(p));RNG("Section number",image_no(p),3,max_section_no);  \
   tail_append(p);}
 /*:174*/
-#line 5630 "hint.w"
+#line 5632 "hint.w"
 
 
 /*33:*/
@@ -459,7 +459,7 @@ typedef struct param_def_t{
 struct param_def_t*next;
 param_t p;}param_def_t;
 /*:47*/
-#line 5632 "hint.w"
+#line 5634 "hint.w"
 
 
 
@@ -533,7 +533,7 @@ static int lo_loc,hi_loc;
 
 scaled hvsize,hhsize;
 /*:230*/
-#line 5635 "hint.w"
+#line 5637 "hint.w"
 
 /*13:*/
 #line 489 "hint.w"
@@ -575,7 +575,7 @@ static pointer hteg_list(void);
 
 static scaled hget_xdimen_node(void);
 /*:124*/
-#line 5636 "hint.w"
+#line 5638 "hint.w"
 
 /*19:*/
 #line 537 "hint.w"
@@ -1799,7 +1799,7 @@ cur_loc= i;
 MESSAGE("loc_set_prev: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
 }
 /*:222*//*296:*/
-#line 5537 "hint.w"
+#line 5539 "hint.w"
 
 static pointer leaks[1<<16]= {0};
 
@@ -1838,7 +1838,7 @@ fprintf(stderr,"p=%d, s=%d\n",i,leaks[i]);
 #endif
 }
 /*:296*/
-#line 5637 "hint.w"
+#line 5639 "hint.w"
 
 /*3:*/
 #line 131 "hint.w"
@@ -2544,7 +2544,7 @@ hpos= hstart+node_pos;
 }
 
 /*:164*/
-#line 5638 "hint.w"
+#line 5640 "hint.w"
 
 /*71:*/
 #line 1185 "hint.w"
@@ -2787,7 +2787,7 @@ return p;
 }
 }
 /*:153*/
-#line 5639 "hint.w"
+#line 5641 "hint.w"
 
 /*29:*/
 #line 608 "hint.w"
@@ -3431,7 +3431,7 @@ store_map(tail,pos,0);
 return false;
 }
 /*:229*/
-#line 5640 "hint.w"
+#line 5642 "hint.w"
 
 
 /*:299*/

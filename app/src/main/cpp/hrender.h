@@ -1,14 +1,14 @@
 /*300:*/
-#line 5645 "hint.w"
+#line 5647 "hint.w"
 
 #ifndef _HRENDER_H
 #define _HRENDER_H
 /*259:*/
-#line 4601 "hint.w"
+#line 4603 "hint.w"
 
 #define SP2PT(X) ((X)/(double)(1<<16))
 /*:259*/
-#line 5648 "hint.w"
+#line 5650 "hint.w"
 
 
 extern int page_h,page_v;
@@ -21,7 +21,7 @@ extern uint64_t hint_page(void);
 extern uint64_t hint_next_page(void);
 extern uint64_t hint_prev_page(void);
 extern void hint_resize(int px_h,int px_v,double dpi);
-extern void hint_clear_fonts(bool delete);
+extern void hint_clear_fonts(bool rm);
 
 #endif
 /*:300*/

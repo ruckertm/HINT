@@ -20,25 +20,12 @@ add_library(hintview SHARED
         gl_code.cpp
         rendergl.cpp
         stb_image.cpp
-        stb_truetype.cpp
-        pkfonts.c
-        fonts.c
-        hinttop.c
-        hget.c
-        hmem.c
+        hfonts.c
         hformat.c
         hdefaults.c
         htex.c
-        hbuildpage.c
         hrender.c
-        hbox.c
-        hpack.c
-        hlinebreak.c
-        hlist.c
-        hdisplay.c
-        harith.c
-        hfont.c
-        hpos.c
+        hint.c
         )
 target_compile_options(hintview PRIVATE -Wno-dangling-else)
 

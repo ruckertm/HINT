@@ -34,9 +34,9 @@ public class HINTVIEWLib {
 
     public static native void prev();
 
-    public static native int getPos();
+    public static native long getPos();
 
-    public static native void setPos(int pos);
+    public static native void setPos(long pos);
 
     public static native void home();
 

@@ -1,5 +1,5 @@
 /*302:*/
-#line 5682 "hint.w"
+#line 5684 "hint.w"
 
 #ifndef _HFONTS_H
 #define _HFONTS_H
@@ -11,7 +11,7 @@ typedef enum{no_format,pk_format,t1_format,ot_format,tt_format}font_format_t;
 #line 4223 "hint.w"
 
 /*276:*/
-#line 5110 "hint.w"
+#line 5112 "hint.w"
 
 
 typedef struct
@@ -20,20 +20,20 @@ unsigned int cs;
 unsigned char id;
 }pk_t;
 /*:276*//*280:*/
-#line 5279 "hint.w"
+#line 5281 "hint.w"
 
 typedef stbtt_fontinfo tt_t;
 typedef struct
 {int dummy;
 }ttg_t;
 /*:280*//*284:*/
-#line 5332 "hint.w"
+#line 5334 "hint.w"
 
 typedef struct
 {int dummy;
 }t1_t;
 /*:284*//*286:*/
-#line 5345 "hint.w"
+#line 5347 "hint.w"
 
 typedef struct
 {int dummy;
@@ -72,33 +72,33 @@ ot_t ot;
 
 typedef struct gcache_s gcache_t;
 /*:250*//*255:*/
-#line 4512 "hint.w"
+#line 4514 "hint.w"
 
 /*277:*/
-#line 5122 "hint.w"
+#line 5124 "hint.w"
 
 typedef struct
 {unsigned char flag;
 unsigned char*encoding;
 }pkg_t;
 /*:277*//*285:*/
-#line 5337 "hint.w"
+#line 5339 "hint.w"
 
 typedef struct
 {int dummy;
 }t1g_t;
 /*:285*//*287:*/
-#line 5350 "hint.w"
+#line 5352 "hint.w"
 
 typedef struct
 {int dummy;
 }otg_t;
 /*:287*/
-#line 4513 "hint.w"
+#line 4515 "hint.w"
 
 
 struct gcache_s{
-unsigned int w,h;
+int w,h;
 int hoff,voff;
 unsigned char*bits;
 #ifdef __ANDROID__
@@ -113,7 +113,7 @@ otg_t ot;
 };
 };
 /*:255*/
-#line 5685 "hint.w"
+#line 5687 "hint.w"
 
 
 
