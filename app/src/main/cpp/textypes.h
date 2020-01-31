@@ -153,22 +153,22 @@ typedef uint8_t internal_font_number;
 typedef uint16_t font_index;
 
 /*:567*//*614:*/
-#line 11950 ".\\dummy.w"
+#line 11954 ".\\dummy.w"
 
 typedef uint16_t dvi_index;
 
 /*:614*//*956:*/
-#line 18161 ".\\dummy.w"
+#line 18165 ".\\dummy.w"
 
 typedef uint16_t trie_pointer;
 
 /*:956*//*961:*/
-#line 18227 ".\\dummy.w"
+#line 18231 ".\\dummy.w"
 
 typedef uint16_t hyph_pointer;
 
 /*:961*//*1004:*/
-#line 18908 ".\\dummy.w"
+#line 18912 ".\\dummy.w"
 
 
 typedef struct{

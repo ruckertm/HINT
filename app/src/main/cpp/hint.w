@@ -27,8 +27,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 1815 ${}$}
-\def\lastdate{${}$Date: 2020-01-30 17:33:00 +0100 (Thu, 30 Jan 2020) ${}$}
+\def\lastrevision{${}$Revision: 1816 ${}$}
+\def\lastdate{${}$Date: 2020-01-31 16:50:59 +0100 (Fri, 31 Jan 2020) ${}$}
 
 \input titlepage.tex
 
@@ -785,8 +785,12 @@ static void hget_font_metrics(void)
 { int i;
   for (i=0; i<=max_ref[font_kind]; i++)
     if (font_def[i].m!=0)
-    { hget_section(font_def[i].m);
-      read_font_info(i,font_def[i].n,font_def[i].s);
+    { int s; /* optional at size */
+      hget_section(font_def[i].m);
+      s = font_def[i].s;
+      if (s==0) s=-1000;
+      read_font_info(i,font_def[i].n,s);
+      font_def[i].s=font_size[i];
     }
 }
 
@@ -794,7 +798,7 @@ uint16_t hglyph_section(uint8_t f)
 {   return font_def[f].q;
 }
 int32_t font_at_size(uint8_t f)
-{   return font_def[f].s;
+{  return font_def[f].s; /* at size */
 }
 
 @
@@ -3229,6 +3233,10 @@ extern memory_word @!font_info[];
 extern int *const @!char_base;  /*base addresses for |char_info|*/ 
 extern eight_bits *const font_bc;  /*beginning (smallest) character code*/
 extern eight_bits *const font_ec; /*ending (largest) character code*/ 
+extern scaled *const font_size; /*``at'' size*/
+extern scaled *const font_dsize; /*``design'' size*/
+
+extern void hclear_fonts(void); /*clear the font memory*/
 @
 
 
@@ -3851,6 +3859,7 @@ void hint_open(const char *file_name)
   mem_init();
   list_init(); 
   hclear_dir();
+  hclear_fonts();
   hopen_file(file_name);
   hget_banner();
   hget_directory_section();

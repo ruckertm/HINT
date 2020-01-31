@@ -10792,6 +10792,10 @@ typedef uint16_t font_index; /*index into |font_info|*/
 memory_word @!font_info[font_mem_size+1];
    /*the big collection of font data*/
 static font_index @!fmem_ptr=0; /*first unused word of |font_info|*/
+
+void hclear_fonts(void)
+{ fmem_ptr=0;
+}
 internal_font_number @!font_ptr; /*largest internal font number in use*/
 four_quarters @!font_check0[font_max-font_base+1], *const @!font_check = @!font_check0-font_base; /*check sum*/
 scaled @!font_size0[font_max-font_base+1], *const @!font_size = @!font_size0-font_base; /*``at'' size*/
