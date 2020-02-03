@@ -170,7 +170,7 @@ static size_t hbase_size;
 #endif
 @
 @<get functions@>=
-void hopen_file(const char *in_name)
+void hmap_file(int fd)
 { 
 #ifdef WIN32
   HANDLE hFile;
@@ -201,20 +201,17 @@ void hopen_file(const char *in_name)
   hend=hstart+s;
 #else 
   struct stat st;
-  int fd;
-  fd = open(in_name, O_RDONLY, 0);
   if (fd<0) QUIT("Unable to open file %s", in_name);
   if (fstat(fd, &st)<0) QUIT("Unable to get file size");
   hbase_size=st.st_size;
   hbase= mmap(NULL,hbase_size,PROT_READ,MAP_PRIVATE,fd, 0);
   if (hbase==MAP_FAILED) QUIT("Unable to map file into memory");
-  close(fd);
   hpos=hstart=hbase;
   hend=hstart+hbase_size;
 #endif
 }
 
-void hclose_file(void)
+void hunmap_file(void)
 {
 #ifdef WIN32
  UnmapViewOfFile(hbase);
@@ -3853,14 +3850,14 @@ returning the system to the state it had before calling |hint_open|.
 
 @<\HINT/ functions@>=
 static bool hint_is_open=false;
-void hint_open(const char *file_name)
+void hint_open(int fd)
 { if (hint_is_open) 
     hint_close();
   mem_init();
   list_init(); 
   hclear_dir();
   hclear_fonts();
-  hopen_file(file_name);
+  hmap_file(fd);
   hget_banner();
   hget_directory_section();
   hget_definition_section();
@@ -3875,7 +3872,7 @@ void hint_close(void)
 { if (!hint_is_open) return;
   hclear_page();
   list_leaks();
-  hclose_file();
+  hunmap_file();
   hclear_dir();
   hint_is_open=false;
 }
@@ -3883,7 +3880,7 @@ void hint_close(void)
 
 
 @<\HINT/ |extern|@>=
-extern void hint_open(const char *file_name);
+extern void hint_open(int fd);
 extern void hint_close(void);
 @
 
@@ -5395,7 +5392,7 @@ int main(int argc, char *argv[])
 
   @<process the command line@>@;
   @<open the log file@>@;
-  hint_open(in_name);
+  hint_open(0);
   while (hint_forward())
     @<show the page@>@;
   hint_close();
@@ -5530,7 +5527,7 @@ int main(int argc, char *argv[])
 
   @<process the command line@>@;
   @<open the log file@>@;
-  hint_open(in_name);
+  hint_open(0);
   hpos=hend;
   while (hint_backward()) continue;
   hint_close();
@@ -5598,7 +5595,7 @@ extern void leak_out(pointer p, int s);
 #ifndef _HINT_H_
 #define _HINT_H_
 
-extern void hopen_file(const char *in_name);
+extern void hmap_file(int fd);
 extern bool hget_banner(void);
 extern void hget_section(uint16_t n);
 extern void hget_directory_section(void);

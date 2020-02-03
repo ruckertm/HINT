@@ -67,7 +67,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jint fileDes
     //nativeSetColors(0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 0.8f);
     //hint_open("/storage/emulated/0/Download/paging.hnt");
     //hint_open("/storage/emulated/0/Download/math.hnt");
-    hint_open("/storage/emulated/0/Download/mfpreface.hnt");
+    //hint_open("/storage/emulated/0/Download/mfpreface.hnt");
     //hint_open("/storage/emulated/0/Download/bmp.hnt");
     //hint_open("/storage/emulated/0/Download/png.hnt");
     //hint_open("/storage/emulated/0/Download/display.hnt");
@@ -75,8 +75,9 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jint fileDes
     //hint_open("/storage/emulated/0/Download/truetype.hnt");
     //hint_open("/storage/emulated/0/Download/ligature.hnt");
     //hint_open("/storage/emulated/0/Download/jpg.hnt");
-
-    //hint_start(fileDescriptor);
+    hint_close();
+    hint_clear_fonts(true);
+    hint_open(fileDescriptor);
     LOGI("done create\n");
 }
 

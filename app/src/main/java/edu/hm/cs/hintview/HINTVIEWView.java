@@ -37,6 +37,7 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -403,12 +404,20 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
             try {
                 //Gets called every time, after app gets maximized. So passing just the fileDescriptor to the renderer will result in an error
                 //bc it got already closed in the cpp code
-                HINTVIEWLib.create(context.getContentResolver().openFileDescriptor(uri,"r").detachFd());
-                HINTVIEWLib.setMode(mode);
+                Log.w(TAG, "onSurfaceCreated");
+
+                ParcelFileDescriptor pfd = context.getContentResolver().openFileDescriptor(uri,"r");
+                Log.w(TAG, "onSurfaceCreated URI= "+pfd.toString());
+                int fd = pfd.detachFd();
+                Log.w(TAG, "onSurfaceCreated fd= "+fd);
+
+                HINTVIEWLib.create(fd);
+                //pfd.close();
 
             } catch (FileNotFoundException e) {
                 Log.e("","",e);
             }
+            HINTVIEWLib.setMode(mode);
         }
     }
 
