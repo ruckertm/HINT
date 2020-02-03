@@ -100,6 +100,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jdouble xdpi
     //hint_open("/storage/emulated/0/Download/truetype.hnt");
     //hint_open("/storage/emulated/0/Download/ligature.hnt");
     //hint_open("/storage/emulated/0/Download/jpg.hnt");
+    LOGI("done create(xdpi=%f ydpi=%f)\n", xdpi, ydpi);
 }
 
 extern "C" JNIEXPORT void JNICALL
