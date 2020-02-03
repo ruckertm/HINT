@@ -39,10 +39,6 @@ import androidx.appcompat.widget.Toolbar;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import static edu.hm.cs.hintview.HINTVIEWLib.darkMode;
-import static edu.hm.cs.hintview.HINTVIEWLib.lightMode;
-
-
 public class HINTVIEWActivity extends AppCompatActivity {
 
     private HINTVIEWView mView;
@@ -187,12 +183,8 @@ public class HINTVIEWActivity extends AppCompatActivity {
         super.onOptionsItemSelected(item);
         switch (item.getItemId()) {
             case R.id.dark:
-                Log.d("HINTVIEWActivity", "onOptionsItemSelected: dark" + item.isChecked());
-                if (item.isChecked()) {
-                    darkMode();
-                } else {
-                    lightMode();
-                }
+                Log.d("HINTVIEWActivity", "onOptionsItemSelected: dark=" + item.isChecked());
+                HINTVIEWLib.setMode(item.isChecked());
                 HINTVIEWLib.change(HINTVIEWView.width, HINTVIEWView.height, HINTVIEWView.scale * HINTVIEWView.xdpi, HINTVIEWView.scale * HINTVIEWView.ydpi);
                 HINTVIEWLib.draw();
                 isChecked = !item.isChecked();

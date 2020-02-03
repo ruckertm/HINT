@@ -38,11 +38,7 @@ public class HINTVIEWLib {
 
     public static native void setPos(long pos);
 
-    public static native void setMode(int mode);
+    public static native void setMode(boolean mode);
 
     public static native void home();
-
-    public static native void lightMode();
-
-    public static native void darkMode();
 }

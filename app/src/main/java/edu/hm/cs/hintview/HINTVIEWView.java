@@ -80,7 +80,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
     public static double xdpi, ydpi;
     public static double scale = 1.0;
     public static int width, height;
-    public static int mode = 0;
+    public static boolean mode = false;
     private GestureDetector touchGestureDetector;
     private ScaleGestureDetector scaleGestureDetector;
 
@@ -107,11 +107,11 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         switch (modeConfig) {
             case Configuration.UI_MODE_NIGHT_NO:
                 Log.d("HINTVIEWActivity", "lightMode");
-                mode = 0;
+                mode = false;
                 break;
             case Configuration.UI_MODE_NIGHT_YES:
                 Log.d("HINTVIEWActivity", "darkMode");
-                mode = 1;
+                mode = true;
                 break;
         }
         setEGLContextFactory(new ContextFactory());

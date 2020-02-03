@@ -53,13 +53,9 @@ JNIEXPORT jlong JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_getPos(JNIEnv *env, 
 JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_setPos(JNIEnv *env, jclass obj, jlong pos);
 JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_setMode(JNIEnv *env, jclass obj, jint mode);
+Java_edu_hm_cs_hintview_HINTVIEWLib_setMode(JNIEnv *env, jclass obj, jboolean mode);
 JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_home(JNIEnv *env, jclass obj);
-JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_lightMode(JNIEnv *env, jclass obj);
-JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_darkMode(JNIEnv *env, jclass obj);
 };
 
 
@@ -129,8 +125,8 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_setPos(JNIEnv *env, jclass obj, jlong pos) {
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_setMode(JNIEnv *env, jclass obj, jint mode) {
-if (mode > 0) nativeSetDark(true);
+Java_edu_hm_cs_hintview_HINTVIEWLib_setMode(JNIEnv *env, jclass obj, jboolean mode) {
+if (mode) nativeSetDark(true);
 else nativeSetDark(false);
 }
 
@@ -141,14 +137,3 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_home(JNIEnv *env, jclass obj) {
     hint_page_top(0);
 }
 
-extern "C" JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_lightMode(JNIEnv *env, jclass obj) {
-    nativeSetDark(false);
-    hint_page();
-}
-
-extern "C" JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_darkMode(JNIEnv *env, jclass obj) {
-    nativeSetDark(true);
-    hint_page();
-}

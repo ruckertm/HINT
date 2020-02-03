@@ -67,7 +67,7 @@ auto gFragmentShader =
         "uniform int ourMode;\n"
         "void main() {\n"
         "  if(ourMode==1) { \n"
-        "     vec3 invColor = (vec3(0.9)-texture2D(ourTexture,TexCoord).xyz);"
+        "     vec3 invColor = (vec3(1.0)-texture2D(ourTexture,TexCoord).xyz);"
         "     gl_FragColor = vec4(invColor.xyz, texture2D(ourTexture,TexCoord).w);\n"
         "  } else {\n"
         "     gl_FragColor = vec4(texture2D(ourTexture,TexCoord));\n"
@@ -224,12 +224,12 @@ extern "C" void nativeSetDark(int dark) {
         int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
         glUniform1i(ourModeLocation, DARK_MODE);
         mode = DARK_MODE;
-        nativeSetColors(1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
+        nativeSetColors(1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f);
     } else {
         int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
         glUniform1i(ourModeLocation, LIGHT_MODE);
         mode = LIGHT_MODE;
-        nativeSetColors(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+        nativeSetColors(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
     }
 }
 
