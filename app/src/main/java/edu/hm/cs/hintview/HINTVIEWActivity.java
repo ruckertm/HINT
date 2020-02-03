@@ -47,7 +47,6 @@ public class HINTVIEWActivity extends AppCompatActivity {
 
     private HINTVIEWView mView;
     private SharedPreferences sharedPref;
-    private int background_color;
     private static final int FILE_CHOOSER_REQUEST_CODE = 0x01;
     private Uri fileURI;
 
@@ -97,9 +96,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
             }
         });
 
-        background_color = mView.getContext().getResources().getColor(R.color.background_color);
-
-        //example on how to get colors of color theme
+         //example on how to get colors of color theme
         //int color = ContextCompat.getColor(this, R.color.toolbar_color);
     }
 
@@ -193,12 +190,10 @@ public class HINTVIEWActivity extends AppCompatActivity {
                 Log.d("HINTVIEWActivity", "onOptionsItemSelected: dark" + item.isChecked());
                 if (item.isChecked()) {
                     darkMode();
-                    background_color = (background_color & 0xFF000000) | (~background_color & 0x00FFFFFF);
                 } else {
                     lightMode();
-                    background_color = mView.getContext().getResources().getColor(R.color.background_color);
                 }
-                HINTVIEWLib.draw(HINTVIEWView.width, HINTVIEWView.height, HINTVIEWView.scale * HINTVIEWView.xdpi, HINTVIEWView.scale * HINTVIEWView.ydpi, background_color);
+                HINTVIEWLib.draw(HINTVIEWView.width, HINTVIEWView.height, HINTVIEWView.scale * HINTVIEWView.xdpi, HINTVIEWView.scale * HINTVIEWView.ydpi);
                 isChecked = !item.isChecked();
                 item.setChecked(isChecked);
                 return true;

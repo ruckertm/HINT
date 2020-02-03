@@ -80,7 +80,6 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
     public static double xdpi, ydpi;
     public static double scale = 1.0;
     public static int width, height;
-    public static int background_color;
     public static int mode = 0;
     private GestureDetector touchGestureDetector;
     private ScaleGestureDetector scaleGestureDetector;
@@ -103,7 +102,6 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         Log.w(TAG, String.format("Resolution xdpi=%f ydpi=%f\n", metrics.xdpi, metrics.ydpi));
         xdpi = metrics.xdpi;
         ydpi = metrics.ydpi;
-        background_color = context.getResources().getColor(R.color.background_color);
         int modeConfig = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
         Log.d("HINTVIEWView", "currentNightMode: " + mode);
         switch (modeConfig) {
@@ -391,7 +389,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
 
         public void onDrawFrame(GL10 gl) {
 
-            HINTVIEWLib.draw(width, height, scale * xdpi, scale * ydpi, background_color);
+            HINTVIEWLib.draw(width, height, scale * xdpi, scale * ydpi);
         }
 
         public void onSurfaceChanged(GL10 gl, int w, int h) {
@@ -404,7 +402,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
             try {
                 //Gets called every time, after app gets maximized. So passing just the fileDescriptor to the renderer will result in an error
                 //bc it got already closed in the cpp code
-                HINTVIEWLib.create(xdpi, ydpi, context.getContentResolver().openFileDescriptor(uri,"r").detachFd(), background_color, mode);
+                HINTVIEWLib.create(xdpi, ydpi, context.getContentResolver().openFileDescriptor(uri,"r").detachFd(), mode);
             } catch (FileNotFoundException e) {
                 Log.e("","",e);
             }
