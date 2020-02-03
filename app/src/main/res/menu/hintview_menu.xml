@@ -2,11 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/fileChooser"
+        android:title="@string/open_file" />
+    <item
         android:id="@+id/dark"
         android:checkable="true"
-        android:title="Night Mode" />
+        android:title="@string/dark_mode" />
 
-    <item
-        android:id="@+id/item2"
-        android:title="Item 2" />
 </menu>

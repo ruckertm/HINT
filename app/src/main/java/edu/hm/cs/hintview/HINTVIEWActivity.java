@@ -16,23 +16,28 @@
 
 package edu.hm.cs.hintview;
 
+import android.content.ActivityNotFoundException;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import static edu.hm.cs.hintview.HINTVIEWLib.darkMode;
 import static edu.hm.cs.hintview.HINTVIEWLib.lightMode;
@@ -40,15 +45,29 @@ import static edu.hm.cs.hintview.HINTVIEWLib.lightMode;
 
 public class HINTVIEWActivity extends AppCompatActivity {
 
-    HINTVIEWView mView;
-    int background_color;
+    private HINTVIEWView mView;
+    private SharedPreferences sharedPref;
+    private int background_color;
+    private static final int FILE_CHOOSER_REQUEST_CODE = 0x01;
+    private Uri fileURI;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //mView = new HINTVIEWView(getApplication());
         //setContentView(mView);
+
         setContentView(R.layout.activity_hintview);
+
+        //get shared preferences: file handle, page, scale
+        sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        if (sharedPref.getString("fileURI", null) == null) {
+            openFileChooser();
+            return;
+        }
+        fileURI = Uri.parse(sharedPref.getString("fileURI", null));
+        long curPos = sharedPref.getLong("curPos", 0);
+        double scale = sharedPref.getFloat("textSize", (float) 1.0);
 
         final Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -68,6 +87,9 @@ public class HINTVIEWActivity extends AppCompatActivity {
         });
 
         mView = findViewById(R.id.hintview);
+        mView.init(fileURI);
+        HINTVIEWLib.setPos(curPos);
+        HINTVIEWView.setScale(scale);
         mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -122,47 +144,29 @@ public class HINTVIEWActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onConfigurationChanged(@NonNull Configuration newConfig) {
-        //check if theme is changed
-        super.onConfigurationChanged(newConfig);
-        /*int background_color = mView.getContext().getResources().getColor(R.color.background_color);
-
-        Log.d("HINTVIEWActivity", "Configuration " + newConfig.toString());
-        int currentNightMode = newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        Log.d("HINTVIEWActivity", "currentNightMode: " + currentNightMode);
-        switch (currentNightMode) {
-            case Configuration.UI_MODE_NIGHT_NO:
-                Log.d("HINTVIEWActivity", "lightMode");
-                lightMode();
-                break;
-            case Configuration.UI_MODE_NIGHT_YES:
-                Log.d("HINTVIEWActivity", "darkMode");
-                darkMode();
-                break;
-        }
-         //HINTVIEWLib.draw(mView.width, mView.height, mView.scale * mView.xdpi, mView.scale * mView.ydpi, background_color);
-*/
-        // Checks the orientation of the screen
-        /*int background_color = mView.getContext().getResources().getColor(R.color.background_color);
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            Log.d("HINTVIEWActivity", "orientation landscape");
-            HINTVIEWLib.draw(mView.height, mView.width, mView.scale * mView.ydpi, mView.scale * mView.xdpi, background_color);
-        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            Log.d("HINTVIEWActivity", "orientation portrait");
-            HINTVIEWLib.draw(mView.width, mView.height, mView.scale * mView.xdpi, mView.scale * mView.ydpi, background_color);
-        }*/
-    }
-
-    @Override
     protected void onPause() {
         super.onPause();
-        mView.onPause();
+        if (mView != null) {
+            mView.onPause();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mView.onResume();
+        if (mView != null) {
+            mView.onResume();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("fileURI", fileURI == null ? null : fileURI.toString());
+        editor.putLong("curPos", HINTVIEWLib.getPos());
+        editor.putFloat("textSize", (float)HINTVIEWView.getScale());
+        editor.apply();
     }
 
     private boolean isChecked = false;
@@ -170,7 +174,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem checkable  = menu.findItem(R.id.dark);
+        MenuItem checkable = menu.findItem(R.id.dark);
         checkable.setChecked(isChecked);
         return super.onPrepareOptionsMenu(menu);
     }
@@ -190,20 +194,51 @@ public class HINTVIEWActivity extends AppCompatActivity {
                 if (item.isChecked()) {
                     darkMode();
                     background_color = (background_color & 0xFF000000) | (~background_color & 0x00FFFFFF);
-                }
-                else {
+                } else {
                     lightMode();
                     background_color = mView.getContext().getResources().getColor(R.color.background_color);
                 }
-                HINTVIEWLib.draw(mView.width, mView.height, mView.scale * mView.xdpi, mView.scale * mView.ydpi, background_color);
+                HINTVIEWLib.draw(HINTVIEWView.width, HINTVIEWView.height, HINTVIEWView.scale * HINTVIEWView.xdpi, HINTVIEWView.scale * HINTVIEWView.ydpi, background_color);
                 isChecked = !item.isChecked();
                 item.setChecked(isChecked);
                 return true;
-            case R.id.item2:
-                Log.d("HINTVIEWActivity", "onOptionsItemSelected: Item 2");
+            case R.id.fileChooser:
+                Log.d("HINTVIEWActivity", "onOptionsItemSelected: File Chooser");
+                openFileChooser();
                 return true;
             default:
                 return false;
         }
     }
+
+    public void openFileChooser() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        try {
+            startActivityForResult(intent, FILE_CHOOSER_REQUEST_CODE);
+        } catch (ActivityNotFoundException e) {
+            Log.e("", "", e);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == FILE_CHOOSER_REQUEST_CODE && resultCode == RESULT_OK) {
+            try {
+                //check if file is accessible
+                getContentResolver().openInputStream(data.getData()).close();
+                fileURI = data.getData();
+                //restart activity to render new hint document
+                this.recreate();
+            } catch (FileNotFoundException e) {
+                Log.e("","",e);
+                openFileChooser();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

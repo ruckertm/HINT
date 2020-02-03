@@ -218,19 +218,18 @@ static void nativeSetColors(GLfloat fr, GLfloat fg, GLfloat fb, GLfloat br, GLfl
 }
 
 extern "C" void nativeSetDark(int dark) {
-    LOGI("SetDark %d GL Graphics\n",dark);
+    LOGI("SetDark %d GL Graphics\n", dark);
     // set dark mode (= inverted texture colors)
-    if (dark)
-    { int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
-      glUniform1i(ourModeLocation, DARK_MODE);
-      mode = DARK_MODE;
-      nativeSetColors(1.0,1.0,1.0,0.0,0.0,0.0);
-    }
-    else
-    { int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
-      glUniform1i(ourModeLocation, LIGHT_MODE);
-      mode = LIGHT_MODE;
-      nativeSetColors(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+    if (dark) {
+        int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
+        glUniform1i(ourModeLocation, DARK_MODE);
+        mode = DARK_MODE;
+        nativeSetColors(1.0, 1.0, 1.0, 0.0, 0.0, 0.0);
+    } else {
+        int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
+        glUniform1i(ourModeLocation, LIGHT_MODE);
+        mode = LIGHT_MODE;
+        nativeSetColors(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
     }
 }
 
@@ -299,7 +298,7 @@ extern "C" void nativeGlyph(double x, double y, double w, double h, gcache_t *g)
   */
 { //LOGI("Rendering texture %i at (%f,%f) sized %fx%f",GLtexture,x/SPf,y/SPf,w/SPf,h/SPf);
 
-    if (g->GLtexture==0)
+    if (g->GLtexture == 0)
         GLtexture(g);
 
     GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
@@ -383,7 +382,7 @@ nativeImage(double x, double y, double w, double h, unsigned char *b, unsigned c
 
         glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
         checkGlError("glVertexAttribPointer");
-        if (mode == DARK_MODE){
+        if (mode == DARK_MODE) {
             //set light mode
             glUniform1i(ourModeLocation, LIGHT_MODE);
         }
@@ -391,7 +390,7 @@ nativeImage(double x, double y, double w, double h, unsigned char *b, unsigned c
         checkGlError("glDrawArrays");
         stbi_image_free(data);
         // make sure that image is always rendered in correct colors and not inverted in dark mode
-        if (mode == DARK_MODE){
+        if (mode == DARK_MODE) {
             //set back to dark mode
             glUniform1i(ourModeLocation, DARK_MODE);
         }
@@ -560,25 +559,27 @@ void nativeFreeGlyph(gcache_t *g)
     }
 }
 
-extern "C" void nativeSetTrueType(struct gcache_s*g)
-{  unsigned int x,y; /* position in bitmap */
+extern "C" void nativeSetTrueType(struct gcache_s *g) {
+    unsigned int x, y; /* position in bitmap */
     unsigned char *bits;
     unsigned int ww; /* width in Bytes */
     unsigned char *line;
 
-    bits=g->bits;
-    g->bits=NULL;
-    ww= g->w;
-    g->bits=(unsigned char *)calloc(ww*g->h, 1);
-    if (g->bits==NULL)
-    { g->w=g->h=0; return; } /* out of memory */
-    for (y=0;y<g->h;y++)
-    {     line =g->bits+(g->h-y-1)*ww;
-        for (x=0; x< g->w;x++)
-            line[x]=bits[y*g->w+x];
+    bits = g->bits;
+    g->bits = NULL;
+    ww = g->w;
+    g->bits = (unsigned char *) calloc(ww * g->h, 1);
+    if (g->bits == NULL) {
+        g->w = g->h = 0;
+        return;
+    } /* out of memory */
+    for (y = 0; y < g->h; y++) {
+        line = g->bits + (g->h - y - 1) * ww;
+        for (x = 0; x < g->w; x++)
+            line[x] = bits[y * g->w + x];
     }
     free(bits);
-    g->voff=-g->voff;
-    g->hoff=-g->hoff;
+    g->voff = -g->voff;
+    g->hoff = -g->hoff;
     GLtexture(g);
 }

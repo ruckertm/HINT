@@ -43,6 +43,7 @@ extern "C" {
 extern "C" {
 JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jdouble xdpi, jdouble ydpi,
+                                           jint fileDescriptor,
                                            jint background_color, jint mode);
 JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, jint height);
@@ -70,7 +71,7 @@ GLfloat hdpi, vdpi; // resolution of canvas
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jdouble xdpi, jdouble ydpi,
-                                           jint background_color, jint mode) {
+                                           jint fileDescriptor, jint background_color, jint mode) {
     LOGI("create(xdpi=%f ydpi=%f)\n", xdpi, ydpi);
     hdpi = xdpi;
     vdpi = ydpi;
@@ -100,6 +101,8 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jdouble xdpi
     //hint_open("/storage/emulated/0/Download/truetype.hnt");
     //hint_open("/storage/emulated/0/Download/ligature.hnt");
     //hint_open("/storage/emulated/0/Download/jpg.hnt");
+
+    //hint_start(fileDescriptor);
     LOGI("done create(xdpi=%f ydpi=%f)\n", xdpi, ydpi);
 }
 

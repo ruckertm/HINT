@@ -34,6 +34,7 @@ package edu.hm.cs.hintview;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -46,6 +47,8 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 
 import androidx.annotation.Nullable;
+
+import java.io.FileNotFoundException;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -84,21 +87,18 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
 
     public HINTVIEWView(Context context) {
         super(context);
-
-        init(context, null, 0);
     }
 
     public HINTVIEWView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context, attrs, 0);
     }
 
     public HINTVIEWView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs);
-        init(context, attrs, defStyle);
     }
 
-    private void init(Context context, AttributeSet attrs, int defStyle) {
+    public void init(Uri uri) {
+        Context context = getContext();
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         Log.w(TAG, String.format("Resolution xdpi=%f ydpi=%f\n", metrics.xdpi, metrics.ydpi));
         xdpi = metrics.xdpi;
@@ -118,7 +118,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         }
         setEGLContextFactory(new ContextFactory());
         setEGLConfigChooser(new ConfigChooser(5, 6, 5, 0, 0, 0));
-        setRenderer(new Renderer());
+        setRenderer(new Renderer(context, uri));
         setRenderMode(RENDERMODE_WHEN_DIRTY);
 
         // Add gesture detector
@@ -127,6 +127,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         setOnTouchListener(this);
     }
 
+    /*
     @Nullable
     @Override
     protected Parcelable onSaveInstanceState() {
@@ -143,13 +144,21 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         super.onRestoreInstanceState(bundle.getParcelable("superState"));
         HINTVIEWLib.setPos(bundle.getLong("curPos"));
     }
-
+*/
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
         boolean s = scaleGestureDetector.onTouchEvent(motionEvent);
         boolean t = touchGestureDetector.onTouchEvent(motionEvent);
         Log.d(TAG, "onTouch: s: " + scaleGestureDetector.isInProgress() + ", t: " + t);
         return t || scaleGestureDetector.isInProgress();
+    }
+
+    public static double getScale() {
+        return scale;
+    }
+
+    public static void setScale(double scale) {
+        HINTVIEWView.scale = scale;
     }
 
     private static class ContextFactory implements GLSurfaceView.EGLContextFactory {
@@ -372,6 +381,13 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
 
     private static class Renderer implements GLSurfaceView.Renderer {
 
+        private final Context context;
+        private final Uri uri;
+
+        public Renderer(Context context, Uri uri){
+            this.context = context;
+            this.uri = uri;
+        }
 
         public void onDrawFrame(GL10 gl) {
 
@@ -385,8 +401,13 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         }
 
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-
-            HINTVIEWLib.create(xdpi, ydpi, background_color, mode);
+            try {
+                //Gets called every time, after app gets maximized. So passing just the fileDescriptor to the renderer will result in an error
+                //bc it got already closed in the cpp code
+                HINTVIEWLib.create(xdpi, ydpi, context.getContentResolver().openFileDescriptor(uri,"r").detachFd(), background_color, mode);
+            } catch (FileNotFoundException e) {
+                Log.e("","",e);
+            }
         }
     }
 
