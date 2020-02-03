@@ -388,21 +388,24 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         }
 
         public void onDrawFrame(GL10 gl) {
+            HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi);
 
-            HINTVIEWLib.draw(width, height, scale * xdpi, scale * ydpi);
+            HINTVIEWLib.draw();
         }
 
         public void onSurfaceChanged(GL10 gl, int w, int h) {
             width = w;
             height = h;
-            HINTVIEWLib.change(w, h);
+            HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi);
         }
 
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
             try {
                 //Gets called every time, after app gets maximized. So passing just the fileDescriptor to the renderer will result in an error
                 //bc it got already closed in the cpp code
-                HINTVIEWLib.create(xdpi, ydpi, context.getContentResolver().openFileDescriptor(uri,"r").detachFd(), mode);
+                HINTVIEWLib.create(context.getContentResolver().openFileDescriptor(uri,"r").detachFd());
+                HINTVIEWLib.setMode(mode);
+
             } catch (FileNotFoundException e) {
                 Log.e("","",e);
             }

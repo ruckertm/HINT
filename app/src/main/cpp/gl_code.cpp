@@ -42,18 +42,18 @@ extern "C" {
 
 extern "C" {
 JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jdouble xdpi, jdouble ydpi,
-                                           jint fileDescriptor, jint mode);
+Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jint fileDescriptor);
 JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, jint height);
+Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, jint height, jdouble xdpi, jdouble ydpi);
 JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jclass obj, jint width, jint height,
-                                         jdouble xdpi, jdouble ydpi);
+Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jclass obj);
 JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_next(JNIEnv *env, jclass obj);
 JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_prev(JNIEnv *env, jclass obj);
 JNIEXPORT jlong JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_getPos(JNIEnv *env, jclass obj);
 JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_setPos(JNIEnv *env, jclass obj, jlong pos);
+JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_setMode(JNIEnv *env, jclass obj, jint mode);
 JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_home(JNIEnv *env, jclass obj);
 JNIEXPORT void JNICALL
@@ -63,24 +63,11 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_darkMode(JNIEnv *env, jclass obj);
 };
 
 
-GLfloat hdpi, vdpi; // resolution of canvas
-// converting pixel to point and back
-#define px2pt(X)   (72.27f*(X)/hdpi)
-#define pt2px(T)   ((T)*hdpi/72.27f)
-
 extern "C" JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jdouble xdpi, jdouble ydpi,
-                                           jint fileDescriptor, jint mode) {
-    LOGI("create(xdpi=%f ydpi=%f)\n", xdpi, ydpi);
-    hdpi = xdpi;
-    vdpi = ydpi;
+Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jint fileDescriptor) {
+    LOGI("create\n");
     nativeInit();
 
-    if (mode > 0){
-        nativeSetDark(true);
-    } else{
-        nativeSetDark(false);
-    }
     //nativeSetColors(0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 0.8f);
     //hint_open("/storage/emulated/0/Download/paging.hnt");
     //hint_open("/storage/emulated/0/Download/math.hnt");
@@ -94,28 +81,22 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jdouble xdpi
     //hint_open("/storage/emulated/0/Download/jpg.hnt");
 
     //hint_start(fileDescriptor);
-    LOGI("done create(xdpi=%f ydpi=%f)\n", xdpi, ydpi);
+    LOGI("done create\n");
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, jint height) {
-    LOGI("change(width=%d height=%d)\n", width, height);
+Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, jint height, jdouble xdpi, jdouble ydpi) {
+    LOGI("change(width=%d height=%d xdpi=%f ydpi=%f))\n", width, height, xdpi, ydpi);
 
-    hint_resize(width, height, hdpi);
+    hint_resize(width, height, xdpi);
 
     //hint_page();
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jclass obj, jint width, jint height,
-                                         jdouble xdpi, jdouble ydpi) {
-    LOGI("draw(width=%d height=%d xdpi=%f ydpi=%f))\n", width, height, xdpi, ydpi);
-    hdpi = xdpi;
-    vdpi = ydpi;
-
-    hint_resize(width, height, hdpi);
+Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jclass obj) {
+    LOGI("draw\n");
     hint_page();
-
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -145,6 +126,12 @@ extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_setPos(JNIEnv *env, jclass obj, jlong pos) {
     LOGI("setPos(0x%x %x)\n", (int)(pos>>32), (int)(pos&0xffffffff));
     hint_page_top(pos);
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_setMode(JNIEnv *env, jclass obj, jint mode) {
+if (mode > 0) nativeSetDark(true);
+else nativeSetDark(false);
 }
 
 extern "C" JNIEXPORT void JNICALL

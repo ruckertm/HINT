@@ -193,7 +193,8 @@ public class HINTVIEWActivity extends AppCompatActivity {
                 } else {
                     lightMode();
                 }
-                HINTVIEWLib.draw(HINTVIEWView.width, HINTVIEWView.height, HINTVIEWView.scale * HINTVIEWView.xdpi, HINTVIEWView.scale * HINTVIEWView.ydpi);
+                HINTVIEWLib.change(HINTVIEWView.width, HINTVIEWView.height, HINTVIEWView.scale * HINTVIEWView.xdpi, HINTVIEWView.scale * HINTVIEWView.ydpi);
+                HINTVIEWLib.draw();
                 isChecked = !item.isChecked();
                 item.setChecked(isChecked);
                 return true;
