@@ -1,5 +1,5 @@
 /*298:*/
-#line 5675 "hint.w"
+#line 5684 "hint.w"
 
 #ifndef _HINT_H_
 #define _HINT_H_
@@ -59,7 +59,7 @@ extern void hint_end(void);
 extern bool hint_forward(void);
 extern bool hint_backward(void);
 /*:228*/
-#line 5694 "hint.w"
+#line 5703 "hint.w"
 
 
 #endif

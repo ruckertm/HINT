@@ -12,6 +12,7 @@
         <activity
             android:name="edu.hm.cs.hintview.HINTVIEWActivity"
             android:launchMode="singleTask"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:theme="@style/Hintview">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

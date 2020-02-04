@@ -3255,7 +3255,7 @@ a new page.
 void hpage_init(void)
 { if (stream[0].p!=null) 
     flush_node_list(stream[0].p);
-  stream[0].p=null; 
+  stream[0].p=null;
   page_contents=empty;page_tail=page_head;link(page_head)=null;@/
   page_depth=0;page_max_depth=0;
 }
@@ -4131,8 +4131,9 @@ static void houtput_template0(void)
 @
 
 \subsection{Moving around in the \HINT/ file}
-The basic capability of \HINT/ is rendering a page that starts at a given position in the
+The basic capability of \HINT/ is producing a page that starts at a given position in the
 \HINT/ file. The function |hint_page_top| provides this capability.
+If successful, it stores a pointer to the page it created in the variable |stream[0].p|.
 It starts by clearing the memory from all traces left from building previous pages
 and computes |hhsize| and |hvsize|.
 Then it parses a partial paragraph---if necessary---and calls |hint_forward| to build the page.
@@ -4141,12 +4142,11 @@ As all functions in this section, it returns the location of the new current pag
 The viewer might store this location to be able to return to this page at a later time.
 
 @<render functions@>=
-static void hrender_page(pointer p);
 
 uint64_t hint_page_top(uint64_t h)
-{ if (hpos==NULL) return hint_blank();
+{ hclear_page();
+  if (hpos==NULL) return 0;
   hloc_set(h);
-  hclear_page();
   hset_margins();
   hpos=hstart+(h&0xffffffff);
   if (hpos>=hend)
@@ -4157,7 +4157,6 @@ uint64_t hint_page_top(uint64_t h)
   forward_mode=true;
   backward_mode=false;
   houtput_template0();
-  hrender_page(stream[0].p);
   return h;
 }
 @
@@ -4175,7 +4174,11 @@ return page_loc[cur_loc];
  }
 
 uint64_t hint_page(void)
-{ return hint_page_top(hint_page_get());
+{ uint64_t i = hint_page_get();
+  if (stream[0].p!=null)
+    return i;
+  else
+    return hint_page_top(i);
 }
 @
 To display the first page simply call |hint_page_top(0)|.
@@ -4191,7 +4194,7 @@ If we are neither in forward nor backward mode, there is no current page and hen
 In this case, we just render the first page.
 @<render functions@>=
 uint64_t hint_next_page(void)
-{ if (hpos==NULL) return hint_blank();
+{ if (hpos==NULL) return 0;
   if (hloc_next()&& forward_mode)
   { hset_margins();
     if (!hint_forward())
@@ -4199,11 +4202,12 @@ uint64_t hint_next_page(void)
     forward_mode=true;
     backward_mode=false;
     houtput_template0();
-    hrender_page(stream[0].p);
     return hint_page_get();
   }
-  else 
+  else
+  { hclear_page();
     return hint_page();
+  }
 }
 @
 
@@ -4217,16 +4221,17 @@ If we are lucky, we are in backward mode. In this case, we do not need to
 throw away the information in the contribution list and we call |hint_backward|.
 @<render functions@>=
 uint64_t hint_prev_page(void)
-{ if (hpos==NULL) return hint_blank();
+{ if (hpos==NULL) return 0;
   if (hloc_prev())
+  { hclear_page();
     return hint_page();
+  }
   else if (backward_mode)
   { hset_margins();
-    if (!hint_backward())  return hint_page();
+    if (!hint_backward())  return hint_page_top(0);
     backward_mode=true;
     forward_mode=false;
     houtput_template0();
-    hrender_page(stream[0].p);
     return hint_page_get();
   }
   else
@@ -4243,8 +4248,8 @@ If successfull, it will set |cur_loc| to the current page. Finally, we attach th
 and return the new location.
 @<render functions@>=
 uint64_t  hint_page_bottom(uint64_t h)
-{ if (hpos==NULL) return hint_blank(); 
-  hclear_page();
+{ hclear_page();
+  if (hpos==NULL) return 0;
   hset_margins();
   hpos=hstart+(h&0xffffffff);
   if (h>0xffffffff)
@@ -4253,7 +4258,6 @@ uint64_t  hint_page_bottom(uint64_t h)
   backward_mode=true;
   forward_mode=false;
   houtput_template0();
-  hrender_page(stream[0].p);
   return hint_page_get();
 }
 @
@@ -4272,7 +4276,11 @@ A central feature of a \HINT/ viewer is its ability to change the dimensions and
 resolution of the displayed pages. To do so the function |hint_resize| is called.
 @<render functions@>=
 void hint_resize(int px_h, int px_v, double dpi)
-{ nativeSetSize(px_h, px_v, dpi);
+{ static int old_px_h=0, old_px_v=0;
+  static double old_dpi=0.0;
+  nativeSetSize(px_h, px_v, dpi);
+  if (old_px_h==px_h && old_px_v==px_v && old_dpi==dpi) return;
+  old_px_h=px_h; old_px_v=px_v; old_dpi=dpi;
   hloc_clear();
   hclear_page();
   forward_mode=false;
@@ -5062,19 +5070,20 @@ uint64_t hint_blank(void)
 }
 @
 
-We conclude this section with the function that is called after the page builder has finished
-the page: the |hrender_page| function.
+We conclude this section with the function that must be called after the page builder has finished
+the page: the |hint_render| function.
 @<render functions@>=
 
-static void hrender_page(pointer p)
-{ nativeBlank();
-  cur_h= 0;
-  cur_v= height(p);
-  cur_f=-1;cur_fp=NULL; 
-  if(type(p)==vlist_node)
-	  vlist_render(p);
-  else 
-	  hlist_render(p);
+void hint_render(void)
+{  nativeBlank();
+   if (stream[0].p==null) return;
+   cur_h= 0;
+    cur_v= height(stream[0].p);
+    cur_f=-1;cur_fp=NULL; 
+    if(type(stream[0].p)==vlist_node)
+	  vlist_render(stream[0].p);
+    else 
+	  hlist_render(stream[0].p);
 }
 @
 
@@ -5738,6 +5747,7 @@ extern bool hbuild_page_up(void); /*append contributions to the current page*/
 
 extern int page_h, page_v;
 extern uint64_t hint_blank(void);
+extern void     hint_render(void);
 extern uint64_t hint_page_get(void);
 extern uint64_t hint_page_top(uint64_t h);
 extern uint64_t hint_page_center(uint64_t h);

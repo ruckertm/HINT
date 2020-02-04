@@ -165,14 +165,19 @@ public class HINTVIEWActivity extends AppCompatActivity {
         super.onStop();
         SharedPreferences.Editor editor = sharedPref.edit();
         if (fileUriStr==null) {
-            fileUriStr = mView.getFileUriStr();
-            filePos = mView.getPos();
+            if (mView!=null) {
+                fileUriStr = mView.getFileUriStr();
+                filePos = mView.getPos();
+            }
+            else
+                filePos=0;
         }
         editor.putString("fileURI",fileUriStr );
         editor.putLong("curPos",filePos );
         editor.putFloat("textSize", (float)mView.getScale());
         editor.putBoolean("darkMode", mView.getMode());
         editor.apply();
+        Log.d("HINTVIEWActivity", "onStop pos = "+Long.toHexString(filePos));
     }
 
 

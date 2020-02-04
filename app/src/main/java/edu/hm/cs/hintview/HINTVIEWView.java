@@ -405,8 +405,10 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         }
 
         public long getPos()
-        { if (fileUriStr!=null && open ) return HINTVIEWLib.getPos();
-          else return 0;
+        { long pos=0;
+            if (fileUriStr!=null && open ) pos = HINTVIEWLib.getPos();
+            Log.w(TAG, "getPos = "+Long.toHexString(pos));
+            return pos;
         }
 
         public String getFileUriStr() {

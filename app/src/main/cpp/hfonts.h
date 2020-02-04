@@ -1,17 +1,17 @@
 /*302:*/
-#line 5771 "hint.w"
+#line 5781 "hint.w"
 
 #ifndef _HFONTS_H
 #define _HFONTS_H
 /*243:*/
-#line 4299 "hint.w"
+#line 4307 "hint.w"
 
 typedef enum{no_format,pk_format,t1_format,ot_format,tt_format}font_format_t;
 /*:243*//*244:*/
-#line 4310 "hint.w"
+#line 4318 "hint.w"
 
 /*276:*/
-#line 5199 "hint.w"
+#line 5208 "hint.w"
 
 
 typedef struct
@@ -20,26 +20,26 @@ unsigned int cs;
 unsigned char id;
 }pk_t;
 /*:276*//*280:*/
-#line 5368 "hint.w"
+#line 5377 "hint.w"
 
 typedef stbtt_fontinfo tt_t;
 typedef struct
 {int dummy;
 }ttg_t;
 /*:280*//*284:*/
-#line 5421 "hint.w"
+#line 5430 "hint.w"
 
 typedef struct
 {int dummy;
 }t1_t;
 /*:284*//*286:*/
-#line 5434 "hint.w"
+#line 5443 "hint.w"
 
 typedef struct
 {int dummy;
 }ot_t;
 /*:286*/
-#line 4311 "hint.w"
+#line 4319 "hint.w"
 
 
 typedef struct font_s{
@@ -49,7 +49,7 @@ int size;
 double ds;
 double hppp,vppp;
 /*249:*/
-#line 4396 "hint.w"
+#line 4404 "hint.w"
 
 struct gcache_s**g0;
 struct gcache_s***g1;
@@ -57,7 +57,7 @@ struct gcache_s****g2;
 struct gcache_s*****g3;
 
 /*:249*/
-#line 4319 "hint.w"
+#line 4327 "hint.w"
 
 font_format_t ff;
 union{
@@ -68,33 +68,33 @@ ot_t ot;
 };
 }font_t;
 /*:244*//*250:*/
-#line 4408 "hint.w"
+#line 4416 "hint.w"
 
 typedef struct gcache_s gcache_t;
 /*:250*//*255:*/
-#line 4601 "hint.w"
+#line 4609 "hint.w"
 
 /*277:*/
-#line 5211 "hint.w"
+#line 5220 "hint.w"
 
 typedef struct
 {unsigned char flag;
 unsigned char*encoding;
 }pkg_t;
 /*:277*//*285:*/
-#line 5426 "hint.w"
+#line 5435 "hint.w"
 
 typedef struct
 {int dummy;
 }t1g_t;
 /*:285*//*287:*/
-#line 5439 "hint.w"
+#line 5448 "hint.w"
 
 typedef struct
 {int dummy;
 }otg_t;
 /*:287*/
-#line 4602 "hint.w"
+#line 4610 "hint.w"
 
 
 struct gcache_s{
@@ -113,7 +113,7 @@ otg_t ot;
 };
 };
 /*:255*/
-#line 5774 "hint.w"
+#line 5784 "hint.w"
 
 
 

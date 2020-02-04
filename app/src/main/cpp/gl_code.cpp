@@ -88,14 +88,13 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, 
     LOGI("change(width=%d height=%d xdpi=%f ydpi=%f))\n", width, height, xdpi, ydpi);
 
     hint_resize(width, height, xdpi);
-
-    //hint_page();
+    hint_page();
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jclass obj) {
     LOGI("draw\n");
-    hint_page();
+    hint_render();
 }
 
 extern "C" JNIEXPORT void JNICALL
