@@ -1,14 +1,14 @@
 /*300:*/
-#line 5653 "hint.w"
+#line 5734 "hint.w"
 
 #ifndef _HRENDER_H
 #define _HRENDER_H
 /*259:*/
-#line 4609 "hint.w"
+#line 4690 "hint.w"
 
 #define SP2PT(X) ((X)/(double)(1<<16))
 /*:259*/
-#line 5656 "hint.w"
+#line 5737 "hint.w"
 
 
 extern int page_h,page_v;

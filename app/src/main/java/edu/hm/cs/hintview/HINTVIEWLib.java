@@ -24,7 +24,7 @@ public class HINTVIEWLib {
         System.loadLibrary("hintview");
     }
 
-    public static native void create(int fileDescriptor);
+    public static native int create(int fileDescriptor);
 
     public static native void change(int width, int height, double xdpi, double ydpi);
 

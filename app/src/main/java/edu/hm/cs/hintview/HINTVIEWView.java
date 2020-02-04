@@ -82,6 +82,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
     public static double xdpi, ydpi;
     public static double scale = 1.0;
     public static int width, height;
+    public static Renderer fileRenderer;
     private static boolean darkMode = false;
     private GestureDetector touchGestureDetector;
     private ScaleGestureDetector scaleGestureDetector;
@@ -113,12 +114,22 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         scaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureHandler(this));
         setOnTouchListener(this);
     }
-    public void setFile(Uri uri, long pos) {
+    public void setFile(String fileUriStr, long pos) {
         Context context = getContext();
-        setRenderer(new Renderer(context, uri,pos));
+        fileRenderer=new Renderer(context, fileUriStr,pos);
+        setRenderer(fileRenderer);
         setRenderMode(RENDERMODE_WHEN_DIRTY);
     }
 
+    public long getPos()
+    {   if (fileRenderer==null) return 0;
+        else return fileRenderer.getPos();
+    }
+
+    public String getFileUriStr()
+    {  if (fileRenderer==null) return null;
+       return fileRenderer.getFileUriStr();
+    }
     /*
     @Nullable
     @Override
@@ -382,13 +393,25 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
     private static class Renderer implements GLSurfaceView.Renderer {
 
         private final Context context;
-        private final Uri uri;
+        private String fileUriStr;
         private long pos;
+        private boolean open;
 
-        public Renderer(Context context, Uri uri, long pos){
+        public Renderer(Context context, String fileUriStr, long pos){
             this.context = context;
-            this.uri = uri;
+            this.fileUriStr = fileUriStr;
             this.pos = pos;
+            this.open = false;
+        }
+
+        public long getPos()
+        { if (fileUriStr!=null && open ) return HINTVIEWLib.getPos();
+          else return 0;
+        }
+
+        public String getFileUriStr() {
+            if (open) return fileUriStr;
+            else return null;
         }
 
         public void onDrawFrame(GL10 gl) {
@@ -405,23 +428,34 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         }
 
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+            if (fileUriStr!=null)
             try {
                 //Gets called every time, after app gets maximized. So passing just the fileDescriptor to the renderer will result in an error
                 //bc it got already closed in the cpp code
-                Log.w(TAG, "onSurfaceCreated");
+                Log.w(TAG, "onSurfaceCreated "+fileUriStr);
+                Uri fileURI = Uri.parse(fileUriStr);
+                ParcelFileDescriptor pfd = context.getContentResolver().openFileDescriptor(fileURI,"r");
 
-                ParcelFileDescriptor pfd = context.getContentResolver().openFileDescriptor(uri,"r");
-                Log.w(TAG, "onSurfaceCreated URI= "+pfd.toString());
                 int fd = pfd.detachFd();
                 Log.w(TAG, "onSurfaceCreated fd= "+fd);
 
-                HINTVIEWLib.create(fd);
+                if (HINTVIEWLib.create(fd)!=0) {
+                    HINTVIEWLib.setPos(pos);
+                    open = true;
+                }
+                else {
+                    fileUriStr = null;
+                    pos = 0;
+                }
                 pfd.close();
-                HINTVIEWLib.setPos(pos);
             } catch (FileNotFoundException e) {
                 Log.e("","",e);
+                fileUriStr = null;
+                pos = 0;
             } catch (IOException e) {
                 Log.e("","",e);
+                fileUriStr = null;
+                pos = 0;
             }
         }
     }

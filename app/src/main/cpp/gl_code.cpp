@@ -41,7 +41,7 @@ extern "C" {
 
 
 extern "C" {
-JNIEXPORT void JNICALL
+JNIEXPORT jint JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jint fileDescriptor);
 JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, jint height, jdouble xdpi, jdouble ydpi);
@@ -59,8 +59,9 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_home(JNIEnv *env, jclass obj);
 };
 
 
-extern "C" JNIEXPORT void JNICALL
+extern "C" JNIEXPORT int JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jint fileDescriptor) {
+    int success;
     LOGI("create\n");
     nativeInit();
 
@@ -75,10 +76,11 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jint fileDes
     //hint_open("/storage/emulated/0/Download/truetype.hnt");
     //hint_open("/storage/emulated/0/Download/ligature.hnt");
     //hint_open("/storage/emulated/0/Download/jpg.hnt");
-    hint_close();
+    hint_end();
     hint_clear_fonts(true);
-    hint_open(fileDescriptor);
-    LOGI("done create\n");
+    success = hint_begin(fileDescriptor);
+    LOGI("done create %d\n",success);
+    return success;
 }
 
 extern "C" JNIEXPORT void JNICALL

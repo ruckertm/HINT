@@ -44,7 +44,8 @@ public class HINTVIEWActivity extends AppCompatActivity {
     private HINTVIEWView mView;
     private SharedPreferences sharedPref;
     private static final int FILE_CHOOSER_REQUEST_CODE = 0x01;
-    private Uri fileURI;
+    private String fileUriStr=null;
+    private long filePos;
     private boolean darkMode = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,12 +55,17 @@ public class HINTVIEWActivity extends AppCompatActivity {
 
         //get shared preferences: file, pos, scale, mode
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-        if (sharedPref.getString("fileURI", null) == null) {
+        if (fileUriStr==null) {
+            fileUriStr = sharedPref.getString("fileURI", null);
+            filePos = sharedPref.getLong("curPos", 0);
+        }
+        Log.w("HINTVIEWActivity", "onCreate URI= " + fileUriStr);
+        if (fileUriStr == null) {
+            filePos=0;
             openFileChooser();
             return;
         }
-        fileURI = Uri.parse(sharedPref.getString("fileURI", null));
-        long curPos = sharedPref.getLong("curPos", 0);
+
         double scale = sharedPref.getFloat("textSize", (float) 1.0);
         darkMode = sharedPref.getBoolean("darkMode", false);
 
@@ -89,7 +95,9 @@ public class HINTVIEWActivity extends AppCompatActivity {
         });
 
         mView.init();
-        mView.setFile(fileURI,curPos);
+        mView.setFile(fileUriStr,filePos);
+        fileUriStr=null;
+        filePos=0;
         mView.setScale(scale);
         mView.setMode(darkMode);
             //make sure the changes get rendered
@@ -156,8 +164,12 @@ public class HINTVIEWActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString("fileURI", fileURI == null ? null : fileURI.toString());
-        editor.putLong("curPos", HINTVIEWLib.getPos());
+        if (fileUriStr==null) {
+            fileUriStr = mView.getFileUriStr();
+            filePos = mView.getPos();
+        }
+        editor.putString("fileURI",fileUriStr );
+        editor.putLong("curPos",filePos );
         editor.putFloat("textSize", (float)mView.getScale());
         editor.putBoolean("darkMode", mView.getMode());
         editor.apply();
@@ -217,7 +229,8 @@ public class HINTVIEWActivity extends AppCompatActivity {
             try {
                 //check if file is accessible
                 getContentResolver().openInputStream(data.getData()).close();
-                fileURI = data.getData();
+                fileUriStr = data.getData().toString();
+                filePos=0;
                 //restart activity to render new hint document
                 this.recreate();
             } catch (FileNotFoundException e) {
