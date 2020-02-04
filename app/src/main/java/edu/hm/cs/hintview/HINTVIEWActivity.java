@@ -63,6 +63,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
         fileURI = Uri.parse(sharedPref.getString("fileURI", null));
         long curPos = sharedPref.getLong("curPos", 0);
         double scale = sharedPref.getFloat("textSize", (float) 1.0);
+        boolean darkMode = sharedPref.getBoolean("darkMode", false);
 
         final Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -83,8 +84,6 @@ public class HINTVIEWActivity extends AppCompatActivity {
 
         mView = findViewById(R.id.hintview);
         mView.init(fileURI);
-        HINTVIEWLib.setPos(curPos);
-        HINTVIEWView.setScale(scale);
         mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -92,6 +91,26 @@ public class HINTVIEWActivity extends AppCompatActivity {
             }
         });
 
+        HINTVIEWLib.setPos(curPos);
+        HINTVIEWView.setScale(scale);
+        mView.setMode(darkMode);
+        //make sure the changes get rendered
+        mView.requestRender();
+
+/*
+        int modeConfig = mView.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        switch (modeConfig) {
+            case Configuration.UI_MODE_NIGHT_NO:
+                Log.d("HINTVIEWActivity", "lightMode");
+                HINTVIEWLib.setMode(false);
+                break;
+            case Configuration.UI_MODE_NIGHT_YES:
+                Log.d("HINTVIEWActivity", "darkMode");
+                HINTVIEWLib.setMode(true);
+                break;
+        }
+
+ */
          //example on how to get colors of color theme
         //int color = ContextCompat.getColor(this, R.color.toolbar_color);
     }
@@ -159,6 +178,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
         editor.putString("fileURI", fileURI == null ? null : fileURI.toString());
         editor.putLong("curPos", HINTVIEWLib.getPos());
         editor.putFloat("textSize", (float)HINTVIEWView.getScale());
+        editor.putBoolean("darkMode", mView.getMode());
         editor.apply();
     }
 
@@ -184,11 +204,10 @@ public class HINTVIEWActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.dark:
                 Log.d("HINTVIEWActivity", "onOptionsItemSelected: dark=" + item.isChecked());
-                HINTVIEWLib.setMode(item.isChecked());
-                HINTVIEWLib.change(HINTVIEWView.width, HINTVIEWView.height, HINTVIEWView.scale * HINTVIEWView.xdpi, HINTVIEWView.scale * HINTVIEWView.ydpi);
-                HINTVIEWLib.draw();
+                mView.setMode(item.isChecked());
                 isChecked = !item.isChecked();
                 item.setChecked(isChecked);
+                mView.requestRender();
                 return true;
             case R.id.fileChooser:
                 Log.d("HINTVIEWActivity", "onOptionsItemSelected: File Chooser");

@@ -81,7 +81,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
     public static double xdpi, ydpi;
     public static double scale = 1.0;
     public static int width, height;
-    public static boolean mode = false;
+    private static boolean darkMode = false;
     private GestureDetector touchGestureDetector;
     private ScaleGestureDetector scaleGestureDetector;
 
@@ -103,18 +103,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         Log.w(TAG, String.format("Resolution xdpi=%f ydpi=%f\n", metrics.xdpi, metrics.ydpi));
         xdpi = metrics.xdpi;
         ydpi = metrics.ydpi;
-        int modeConfig = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        Log.d("HINTVIEWView", "currentNightMode: " + mode);
-        switch (modeConfig) {
-            case Configuration.UI_MODE_NIGHT_NO:
-                Log.d("HINTVIEWActivity", "lightMode");
-                mode = false;
-                break;
-            case Configuration.UI_MODE_NIGHT_YES:
-                Log.d("HINTVIEWActivity", "darkMode");
-                mode = true;
-                break;
-        }
+
         setEGLContextFactory(new ContextFactory());
         setEGLConfigChooser(new ConfigChooser(5, 6, 5, 0, 0, 0));
         setRenderer(new Renderer(context, uri));
@@ -158,6 +147,14 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
 
     public static void setScale(double scale) {
         HINTVIEWView.scale = scale;
+    }
+
+    public static boolean getMode(){
+        return darkMode;
+    }
+
+    public static void setMode(boolean mode){
+        darkMode = mode;
     }
 
     private static class ContextFactory implements GLSurfaceView.EGLContextFactory {
@@ -389,14 +386,15 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         }
 
         public void onDrawFrame(GL10 gl) {
+            HINTVIEWLib.setMode(darkMode);
             HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi);
-
             HINTVIEWLib.draw();
         }
 
         public void onSurfaceChanged(GL10 gl, int w, int h) {
             width = w;
             height = h;
+            HINTVIEWLib.setMode(darkMode);
             HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi);
         }
 
@@ -417,7 +415,6 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
             } catch (FileNotFoundException e) {
                 Log.e("","",e);
             }
-            HINTVIEWLib.setMode(mode);
         }
     }
 
