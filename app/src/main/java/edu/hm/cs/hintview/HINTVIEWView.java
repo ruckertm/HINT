@@ -50,6 +50,7 @@ import android.view.View;
 import androidx.annotation.Nullable;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -97,7 +98,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         super(context, attrs);
     }
 
-    public void init(Uri uri) {
+    public void init() {
         Context context = getContext();
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         Log.w(TAG, String.format("Resolution xdpi=%f ydpi=%f\n", metrics.xdpi, metrics.ydpi));
@@ -106,13 +107,16 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
 
         setEGLContextFactory(new ContextFactory());
         setEGLConfigChooser(new ConfigChooser(5, 6, 5, 0, 0, 0));
-        setRenderer(new Renderer(context, uri));
-        setRenderMode(RENDERMODE_WHEN_DIRTY);
 
         // Add gesture detector
         touchGestureDetector = new GestureDetector(context, new TouchGestureHandler(this));
         scaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureHandler(this));
         setOnTouchListener(this);
+    }
+    public void setFile(Uri uri, long pos) {
+        Context context = getContext();
+        setRenderer(new Renderer(context, uri,pos));
+        setRenderMode(RENDERMODE_WHEN_DIRTY);
     }
 
     /*
@@ -145,8 +149,8 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         return scale;
     }
 
-    public static void setScale(double scale) {
-        HINTVIEWView.scale = scale;
+    public static void setScale(double s) {
+        scale = s;
     }
 
     public static boolean getMode(){
@@ -379,15 +383,17 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
 
         private final Context context;
         private final Uri uri;
+        private long pos;
 
-        public Renderer(Context context, Uri uri){
+        public Renderer(Context context, Uri uri, long pos){
             this.context = context;
             this.uri = uri;
+            this.pos = pos;
         }
 
         public void onDrawFrame(GL10 gl) {
             HINTVIEWLib.setMode(darkMode);
-            HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi);
+            HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi); /* needed for zooming */
             HINTVIEWLib.draw();
         }
 
@@ -410,9 +416,11 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
                 Log.w(TAG, "onSurfaceCreated fd= "+fd);
 
                 HINTVIEWLib.create(fd);
-                //pfd.close();
-
+                pfd.close();
+                HINTVIEWLib.setPos(pos);
             } catch (FileNotFoundException e) {
+                Log.e("","",e);
+            } catch (IOException e) {
                 Log.e("","",e);
             }
         }

@@ -45,16 +45,14 @@ public class HINTVIEWActivity extends AppCompatActivity {
     private SharedPreferences sharedPref;
     private static final int FILE_CHOOSER_REQUEST_CODE = 0x01;
     private Uri fileURI;
-
+    private boolean darkMode = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //mView = new HINTVIEWView(getApplication());
-        //setContentView(mView);
 
         setContentView(R.layout.activity_hintview);
 
-        //get shared preferences: file handle, page, scale
+        //get shared preferences: file, pos, scale, mode
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         if (sharedPref.getString("fileURI", null) == null) {
             openFileChooser();
@@ -63,7 +61,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
         fileURI = Uri.parse(sharedPref.getString("fileURI", null));
         long curPos = sharedPref.getLong("curPos", 0);
         double scale = sharedPref.getFloat("textSize", (float) 1.0);
-        boolean darkMode = sharedPref.getBoolean("darkMode", false);
+        darkMode = sharedPref.getBoolean("darkMode", false);
 
         final Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -83,7 +81,6 @@ public class HINTVIEWActivity extends AppCompatActivity {
         });
 
         mView = findViewById(R.id.hintview);
-        mView.init(fileURI);
         mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -91,28 +88,12 @@ public class HINTVIEWActivity extends AppCompatActivity {
             }
         });
 
-        HINTVIEWLib.setPos(curPos);
-        HINTVIEWView.setScale(scale);
+        mView.init();
+        mView.setFile(fileURI,curPos);
+        mView.setScale(scale);
         mView.setMode(darkMode);
-        //make sure the changes get rendered
+            //make sure the changes get rendered
         mView.requestRender();
-
-/*
-        int modeConfig = mView.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        switch (modeConfig) {
-            case Configuration.UI_MODE_NIGHT_NO:
-                Log.d("HINTVIEWActivity", "lightMode");
-                HINTVIEWLib.setMode(false);
-                break;
-            case Configuration.UI_MODE_NIGHT_YES:
-                Log.d("HINTVIEWActivity", "darkMode");
-                HINTVIEWLib.setMode(true);
-                break;
-        }
-
- */
-         //example on how to get colors of color theme
-        //int color = ContextCompat.getColor(this, R.color.toolbar_color);
     }
 
     void hideToolbar(boolean toolbarVisible) {
@@ -177,18 +158,18 @@ public class HINTVIEWActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString("fileURI", fileURI == null ? null : fileURI.toString());
         editor.putLong("curPos", HINTVIEWLib.getPos());
-        editor.putFloat("textSize", (float)HINTVIEWView.getScale());
+        editor.putFloat("textSize", (float)mView.getScale());
         editor.putBoolean("darkMode", mView.getMode());
         editor.apply();
     }
 
-    private boolean isChecked = false;
+
 
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem checkable = menu.findItem(R.id.dark);
-        checkable.setChecked(isChecked);
+        checkable.setChecked(darkMode);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -203,10 +184,10 @@ public class HINTVIEWActivity extends AppCompatActivity {
         super.onOptionsItemSelected(item);
         switch (item.getItemId()) {
             case R.id.dark:
-                Log.d("HINTVIEWActivity", "onOptionsItemSelected: dark=" + item.isChecked());
-                mView.setMode(item.isChecked());
-                isChecked = !item.isChecked();
-                item.setChecked(isChecked);
+                darkMode = !item.isChecked();
+                Log.d("HINTVIEWActivity", "onOptionsItemSelected: dark=" + darkMode);
+                mView.setMode(darkMode);
+                item.setChecked(darkMode);
                 mView.requestRender();
                 return true;
             case R.id.fileChooser:
