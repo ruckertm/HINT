@@ -113,12 +113,14 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         touchGestureDetector = new GestureDetector(context, new TouchGestureHandler(this));
         scaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureHandler(this));
         setOnTouchListener(this);
-    }
-    public void setFile(String fileUriStr, long pos) {
-        Context context = getContext();
-        fileRenderer=new Renderer(context, fileUriStr,pos);
+        fileRenderer=new Renderer(context);
         setRenderer(fileRenderer);
         setRenderMode(RENDERMODE_WHEN_DIRTY);
+    }
+
+       public void setFile(String fileUriStr, long pos) {
+        fileRenderer.setFile(fileUriStr, pos);
+
     }
 
     public long getPos()
@@ -395,25 +397,44 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         private final Context context;
         private String fileUriStr;
         private long pos;
-        private boolean open;
 
-        public Renderer(Context context, String fileUriStr, long pos){
+        public Renderer(Context context) {
             this.context = context;
-            this.fileUriStr = fileUriStr;
-            this.pos = pos;
-            this.open = false;
+        }
+
+        public void setFile(String fileUriStr, long pos) {
+            if(fileUriStr!=null)
+            try
+            {   //Gets called every time, after app gets maximized. So passing just the fileDescriptor to the renderer will result in an error
+                //bc it got already closed in the cpp code
+                Log.w(TAG, "setFile " + fileUriStr +" at "+Long.toHexString(pos));
+                Uri fileURI = Uri.parse(fileUriStr);
+                ParcelFileDescriptor pfd = context.getContentResolver().openFileDescriptor(fileURI, "r");
+                int fd = pfd.detachFd();
+                Log.w(TAG, "setFile fd = " + fd);
+
+                if (HINTVIEWLib.begin(fd) != 0) {
+                    HINTVIEWLib.setPos(pos);
+                    this.fileUriStr = fileUriStr;
+                    this.pos = pos;
+                }
+                pfd.close();
+            } catch(FileNotFoundException e) {
+                Log.e("", "", e);
+            } catch(IOException e) {
+                Log.e("", "", e);
+            }
         }
 
         public long getPos()
         { long pos=0;
-            if (fileUriStr!=null && open ) pos = HINTVIEWLib.getPos();
+            if (fileUriStr!=null ) pos = HINTVIEWLib.getPos();
             Log.w(TAG, "getPos = "+Long.toHexString(pos));
             return pos;
         }
 
         public String getFileUriStr() {
-            if (open) return fileUriStr;
-            else return null;
+            return fileUriStr;
         }
 
         public void onDrawFrame(GL10 gl) {
@@ -430,35 +451,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         }
 
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-            if (fileUriStr!=null)
-            try {
-                //Gets called every time, after app gets maximized. So passing just the fileDescriptor to the renderer will result in an error
-                //bc it got already closed in the cpp code
-                Log.w(TAG, "onSurfaceCreated "+fileUriStr);
-                Uri fileURI = Uri.parse(fileUriStr);
-                ParcelFileDescriptor pfd = context.getContentResolver().openFileDescriptor(fileURI,"r");
-
-                int fd = pfd.detachFd();
-                Log.w(TAG, "onSurfaceCreated fd= "+fd);
-
-                if (HINTVIEWLib.create(fd)!=0) {
-                    HINTVIEWLib.setPos(pos);
-                    open = true;
-                }
-                else {
-                    fileUriStr = null;
-                    pos = 0;
-                }
-                pfd.close();
-            } catch (FileNotFoundException e) {
-                Log.e("","",e);
-                fileUriStr = null;
-                pos = 0;
-            } catch (IOException e) {
-                Log.e("","",e);
-                fileUriStr = null;
-                pos = 0;
-            }
+            HINTVIEWLib.init();
         }
     }
 

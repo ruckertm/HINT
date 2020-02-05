@@ -41,8 +41,10 @@ extern "C" {
 
 
 extern "C" {
+JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_init(JNIEnv *env, jclass obj);
 JNIEXPORT jint JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jint fileDescriptor);
+Java_edu_hm_cs_hintview_HINTVIEWLib_begin(JNIEnv *env, jclass obj, jint fileDescriptor);
 JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, jint height, jdouble xdpi, jdouble ydpi);
 JNIEXPORT void JNICALL
@@ -58,12 +60,16 @@ JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_home(JNIEnv *env, jclass obj);
 };
 
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_init(JNIEnv *env, jclass obj) {
+    nativeInit();
+}
 
 extern "C" JNIEXPORT int JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jint fileDescriptor) {
+Java_edu_hm_cs_hintview_HINTVIEWLib_begin(JNIEnv *env, jclass obj, jint fileDescriptor) {
     int success;
-    LOGI("create\n");
-    nativeInit();
+    LOGI("begin\n");
+
 
     //nativeSetColors(0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 0.8f);
     //hint_open("/storage/emulated/0/Download/paging.hnt");
@@ -79,7 +85,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_create(JNIEnv *env, jclass obj, jint fileDes
     hint_end();
     hint_clear_fonts(true);
     success = hint_begin(fileDescriptor);
-    LOGI("done create %d\n",success);
+    LOGI("done begin %d\n",success);
     return success;
 }
 

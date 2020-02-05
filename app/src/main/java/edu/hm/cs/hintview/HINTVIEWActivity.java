@@ -44,8 +44,6 @@ public class HINTVIEWActivity extends AppCompatActivity {
     private HINTVIEWView mView;
     private SharedPreferences sharedPref;
     private static final int FILE_CHOOSER_REQUEST_CODE = 0x01;
-    private String fileUriStr=null;
-    private long filePos;
     private boolean darkMode = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,19 +53,16 @@ public class HINTVIEWActivity extends AppCompatActivity {
 
         //get shared preferences: file, pos, scale, mode
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-        if (fileUriStr==null) {
-            fileUriStr = sharedPref.getString("fileURI", null);
-            filePos = sharedPref.getLong("curPos", 0);
-        }
-        Log.w("HINTVIEWActivity", "onCreate URI= " + fileUriStr);
-        if (fileUriStr == null) {
+        String fileUriStr = sharedPref.getString("fileURI", null);
+        long filePos;
+        if (fileUriStr == null)
             filePos=0;
-            openFileChooser();
-            return;
-        }
-
+        else
+            filePos = sharedPref.getLong("curPos", 0);
         double scale = sharedPref.getFloat("textSize", (float) 1.0);
         darkMode = sharedPref.getBoolean("darkMode", false);
+
+        Log.w("HINTVIEWActivity", "onCreate URI= " + fileUriStr);
 
         final Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -96,12 +91,9 @@ public class HINTVIEWActivity extends AppCompatActivity {
 
         mView.init();
         mView.setFile(fileUriStr,filePos);
-        fileUriStr=null;
-        filePos=0;
         mView.setScale(scale);
         mView.setMode(darkMode);
-            //make sure the changes get rendered
-        mView.requestRender();
+        if (fileUriStr==null)   openFileChooser();
     }
 
     void hideToolbar(boolean toolbarVisible) {
@@ -157,6 +149,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
         super.onResume();
         if (mView != null) {
             mView.onResume();
+            mView.requestRender();
         }
     }
 
@@ -164,15 +157,9 @@ public class HINTVIEWActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         SharedPreferences.Editor editor = sharedPref.edit();
-        if (fileUriStr==null) {
-            if (mView!=null) {
-                fileUriStr = mView.getFileUriStr();
-                filePos = mView.getPos();
-            }
-            else
-                filePos=0;
-        }
+        String fileUriStr=mView.getFileUriStr();
         editor.putString("fileURI",fileUriStr );
+        long filePos=mView.getPos();
         editor.putLong("curPos",filePos );
         editor.putFloat("textSize", (float)mView.getScale());
         editor.putBoolean("darkMode", mView.getMode());
@@ -234,10 +221,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
             try {
                 //check if file is accessible
                 getContentResolver().openInputStream(data.getData()).close();
-                fileUriStr = data.getData().toString();
-                filePos=0;
-                //restart activity to render new hint document
-                this.recreate();
+                mView.setFile(data.getData().toString(),0);
             } catch (FileNotFoundException e) {
                 Log.e("","",e);
                 openFileChooser();
