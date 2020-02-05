@@ -129,7 +129,7 @@ This is taken directly from~\cite{MR:format}
 @
 
 @<get functions@>=
-static bool hget_entry(entry_t *e)
+void hget_entry(entry_t *e)
 { @<read the start byte |a|@>@;
   DBG(dbgdir,"Reading directory entry\n");
   switch(a)
@@ -141,13 +141,10 @@ static bool hget_entry(entry_t *e)
     case TAG(0,b100+1): HGET_ENTRY(b100+1,*e);@+ break;
     case TAG(0,b100+2): HGET_ENTRY(b100+2,*e);@+ break;
     case TAG(0,b100+3): HGET_ENTRY(b100+3,*e);@+ break;
-    default:  MESSAGE("Illegal tag %d in directory entry\n",a); return false; 
+    default:  TAGERR(a); @+ break; 
   }
-  HGETTAG(z);@+
-  if (a!=z)
-  { MESSAGE("Tag %d does not match end tag %d in directory entry %d\n",a,z,e->section_no); return false; }
+  @<read and check the end byte |z|@>@;
   DBG(dbgdir,"entry %d: size=0x%x xsize=0x%x\n",@|e->section_no,e->size,e->xsize);
-  return true;
 }
 @
 
@@ -173,16 +170,14 @@ static size_t hbase_size;
 #endif
 @
 @<get functions@>=
-bool hmap_file(int fd)
+void hmap_file(int fd)
 { 
 #ifdef WIN32
   HANDLE hFile;
   uint64_t s;
   hFile = CreateFile(in_name,FILE_READ_DATA,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_READONLY,NULL);
   if (hFile==INVALID_HANDLE_VALUE)
-  {  MESSAGE("Unable to open file %s", in_name);
-     return false;
-  }
+    QUIT("Unable to open file %s", in_name);
   { DWORD hs,ls;
     ls=GetFileSize(hFile,&hs); 
     s=hs;
@@ -197,35 +192,23 @@ bool hmap_file(int fd)
            0,                    /* size: high 32-bits */
            0,            /* size: low 32-bits */
            NULL);     /* name of map object */
-  if (hMap == NULL)
-  { MESSAGE("Unable to map file into memory");
-    CloseHandle(hFile);
-    return false;
-  }
+  if (hMap == NULL) QUIT("Unable to map file into memory");
   hbase = MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);  
   if (hbase==NULL)
-  { MESSAGE("Unable to obtain address of mapping for file %s", in_name);
-    CloseHandle(hFile);
-    return false;
-  }
+    QUIT("Unable to obtain address of mapping for file %s", in_name);
+  CloseHandle(hFile);
   hpos=hstart=hbase;
   hend=hstart+s;
 #else 
   struct stat st;
-  if (fstat(fd, &st)<0)
-  { MESSAGE("Unable to get file size");
-    return false;
-  }
+  if (fd<0) QUIT("Unable to open file %s", in_name);
+  if (fstat(fd, &st)<0) QUIT("Unable to get file size");
   hbase_size=st.st_size;
   hbase= mmap(NULL,hbase_size,PROT_READ,MAP_PRIVATE,fd, 0);
-  if (hbase==MAP_FAILED)
-  { MESSAGE("Unable to map file into memory");
-    return false;
-  }
+  if (hbase==MAP_FAILED) QUIT("Unable to map file into memory");
   hpos=hstart=hbase;
   hend=hstart+hbase_size;
 #endif
-  return true;
 }
 
 void hunmap_file(void)
@@ -256,32 +239,17 @@ bool hget_banner(void)
   } 
   hbanner[++i]=0;
   t=hbanner;
-  if (strncmp("hint",hbanner,4)!=0)
-  { MESSAGE("This is not a hint file");
-    return false;
-  }
+  if (strncmp("hint",hbanner,4)!=0) QUIT("This is not a hint file");
   else t+=4;
   hbanner_size=(int)strlen(hbanner);
-  if(hbanner[hbanner_size-1]!='\n')
-  { MESSAGE("Banner exceeds maximum size=0x%x",MAX_BANNER);
-    return false;
-  }
-  if (*t!=' ')
-  { MESSAGE("Space expected after hint");
-    return false;
-  }
+  if(hbanner[hbanner_size-1]!='\n') QUIT("Banner exceeds maximum size=0x%x",MAX_BANNER);
+  if (*t!=' ') QUIT("Space expected after hint");
   else t++;
   version=strtol(t,&t,10);
-  if (*t!='.')
-  { MESSAGE("Dot expected after version number %d",version);
-    return false;
-  }
+  if (*t!='.') QUIT("Dot expected after version number %d",version);
   else t++;
   subversion=strtol(t,&t,10);
-  if (*t!=' ' && *t!='\n')
-  { MESSAGE("Space expected after subversion number %d",subversion);
-    return false;
-  }
+  if (*t!=' ' && *t!='\n') QUIT("Space expected after subversion number %d",subversion);
   MESSAGE("hint file version %d.%d:%s",version, subversion, t);
   DBG(dbgdir,"banner size=0x%x\n",hbanner_size);
   return true;
@@ -294,14 +262,9 @@ to map the entire file into memory and then just need to adjust the |hpos| point
 Further buffer management is needed only for compressed sections.
 
 @<get functions@>=
-static bool hbdecompress(uint16_t n);
-bool hget_section(uint16_t n)
+void hget_section(uint16_t n)
 { DBG(dbgbasic,"Reading section %d\n",n);
   RNG("Section number",n,0,max_section_no);
-  if (n>max_section_no)
-  { MESSAGE("Section number %d out of range [0 %d]\n",n,max_section_no);
-    return false;
-  }
   if (dir[n].buffer!=NULL && dir[n].xsize>0)
   { hpos=hstart=dir[n].buffer;
     hend=hstart+dir[n].xsize;
@@ -309,10 +272,8 @@ bool hget_section(uint16_t n)
   else
   { hpos=hstart=hbase+dir[n].pos; 
     hend=hstart+dir[n].size;
-    if (dir[n].xsize>0)
-    { if (! hbdecompress(n)) return false; }
+    if (dir[n].xsize>0) hdecompress(n);
   }
-  return true;
 }
 @
 
@@ -329,7 +290,7 @@ compression will be known after deflating it.
 
 @s z_stream int
 @<get functions@>=
-static bool hbdecompress(uint16_t n) /* the bool version should move to format.w */
+void hdecompress(uint16_t n)
 { z_stream z; /* decompression stream */
   uint8_t *buffer;
   int i;
@@ -341,9 +302,7 @@ static bool hbdecompress(uint16_t n) /* the bool version should move to format.w
   z.next_in  = hstart;
   z.avail_in = hend-hstart;
   if (inflateInit(&z)!=Z_OK)
-  { MESSAGE("Unable to initialize decompression: %s",z.msg);
-    return false;
-  }
+    QUIT("Unable to initialize decompression: %s",z.msg);
   ALLOCATE(buffer,dir[n].xsize+SAFETY_MARGIN,uint8_t);
   DBG(dbgbuffer,"Allocating output buffer size=0x%x, margin=0x%x\n",dir[n].xsize,SAFETY_MARGIN);
   z.next_out = buffer;           
@@ -352,26 +311,17 @@ static bool hbdecompress(uint16_t n) /* the bool version should move to format.w
   DBG(dbgcompress,"in: avail/total=0x%x/0x%lx "@|"out: avail/total=0x%x/0x%lx, return %d;\n",@|
     z.avail_in,z.total_in, z.avail_out, z.total_out,i);
   if (i!=Z_STREAM_END)
-  { MESSAGE("Unable to complete decompression: %s",z.msg);
-    return false;
-  }
+    QUIT("Unable to complete decompression: %s",z.msg);
   if (z.avail_in != 0) 
-  { MESSAGE("Decompression missed input data");
-    return false;
-  }
+    QUIT("Decompression missed input data");
   if (z.total_out != dir[n].xsize)
-  { MESSAGE("Decompression output size missmatch 0x%lx != 0x%x",z.total_out, dir[n].xsize );
-    return false;
-  }
+    QUIT("Decompression output size missmatch 0x%lx != 0x%x",z.total_out, dir[n].xsize );
   if (inflateEnd(&z)!=Z_OK)
-  { MESSAGE("Unable to finalize decompression: %s",z.msg);
-    return false;
-  }
+    QUIT("Unable to finalize decompression: %s",z.msg);
   dir[n].buffer=buffer;
   dir[n].bsize=dir[n].xsize;
   hpos=hstart=buffer;
   hend=hstart+dir[n].xsize;
-  return true;
 }
 @
 
@@ -379,33 +329,27 @@ static bool hbdecompress(uint16_t n) /* the bool version should move to format.w
 \subsection{Directory Section}
 Except for the computation of the position, this is taken directly from~\cite{MR:format}.
 @<get functions@>=
-
-static bool hget_root(entry_t *root)
+void hget_root(entry_t *root)
 { DBG(dbgbasic,"Get Root\n");
-  if (!hget_entry(root)) return false;
+  hget_entry(root); 
   root->pos=hpos-hstart;
   max_section_no=root->section_no;
   root->section_no=0;
-  if (max_section_no<2)
-  { MESSAGE("Sections 0, 1, and 2 are mandatory");
-    return false;
-  }
-  return true;
+  if (max_section_no<2) QUIT("Sections 0, 1, and 2 are mandatory");
 }
 
-bool hget_directory_section(void)
+void hget_directory_section(void)
 { int i;
   entry_t root={0};
-  if (!hget_root(&root)) return false;
+  hget_root(&root);
   DBG(dbgbasic,"Get Directory\n");
   new_directory(max_section_no+1);
   dir[0]=root;
-  if (!hget_section(0)) return false;
+  hget_section(0);
   for (i=1;i<=max_section_no;i++)@/
-  { if (!hget_entry(&(dir[i]))) return false;
+  { hget_entry(&(dir[i]));@+
     dir[i].pos=dir[i-1].pos +dir[i-1].size;@+
   }
-  return true;
 }
 
 void hclear_dir(void)
@@ -438,48 +382,31 @@ void hallocate_definitions(void)
   @<allocate definitions@>@;
 }
 
-bool hget_max_definitions(void)
+void hget_max_definitions(void)
 { kind_t k;
   @<read the start byte |a|@>@;
-  if (a!=TAG(list_kind,0))
-  { MESSAGE("Start of maximum list expected");
-    return false;
-  }
+  if (a!=TAG(list_kind,0)) QUIT("Start of maximum list expected");
   @<free definitions@>@;
   hset_max();
   while (true) @/
   { uint8_t n;
-    if (hpos>=hend)
-    { MESSAGE("Unexpected end of maximum list");
-      return false;
-    }
+    if (hpos>=hend) QUIT("Unexpected end of maximum list");
     node_pos=hpos-hstart;
     HGETTAG(a);
     if  (KIND(a)==list_kind) break;
-    if (INFO(a)!=1)
-    { MESSAGE("Maximum info %d not supported",INFO(a));
-      return false;
-    }
+    if (INFO(a)!=1) QUIT("Maximum info %d not supported",INFO(a));
     k=KIND(a);
-    if (max_fixed[k]>max_default[k])
-    { MESSAGE("Maximum value for kind %s not supported",definition_name[k]);
-      return false;
-    }
+   if (max_fixed[k]>max_default[k]) QUIT("Maximum value for kind %s not supported",definition_name[k]);
     n=HGET8;
     RNG("Maximum number",n,max_ref[k],0xFF);
     max_ref[k]=n;
     DBG(dbgdef,"max(%s) = %d\n",definition_name[k],max_ref[k]);
    @<read and check the end byte |z|@>@;
   }
-  if (INFO(a)!=0)
-  { MESSAGE("End of maximum list with info %d", INFO(a));
-    return false;
-  }
-  hallocate_definitions();
-  return true;
+  if (INFO(a)!=0) QUIT("End of maximum list with info %d", INFO(a));
+  hallocate_definitions(); 
 }
 @
-
 \subsection{Definitions}
 The following function reads a single definition and stores it.
 By default, we store definitions as pointers to \TeX's data structures.
@@ -536,11 +463,11 @@ void hset_default_definitions(void)
 }
 
 
-bool hget_definition_section(void)
+void hget_definition_section(void)
 { DBG(dbgbasic,"Definitions\n");
-  if (!hget_section(1)) return false;
+  hget_section(1);
   DBG(dbgdef,"Reading list of maximum values\n");
-  if (!hget_max_definitions()) return false;
+  hget_max_definitions();
   hset_default_definitions();
   DBG(dbgdef,"Reading list of definitions\n");
   while (hpos<hend) @/
@@ -548,7 +475,6 @@ bool hget_definition_section(void)
   hget_font_metrics();
   hvsize=dimen_def[vsize_dimen_no];
   hhsize=dimen_def[hsize_dimen_no];
-  return true;
 }
 @
 
@@ -1166,9 +1092,9 @@ name.
 \subsection{The Content Section}
 To position the input stream on the content section we use the following function:
 @<get functions@>=
-bool hget_content_section()
+void hget_content_section()
 { @+DBG(dbgbasic,"Get Content\n");
-  return hget_section(2);@+
+  hget_section(2);@+
 }
 @
 There is no separate ``|teg|'' function in this case. If necessary, one can set |hpos=hend|.
@@ -3255,7 +3181,7 @@ a new page.
 void hpage_init(void)
 { if (stream[0].p!=null) 
     flush_node_list(stream[0].p);
-  stream[0].p=null;
+  stream[0].p=null; 
   page_contents=empty;page_tail=page_head;link(page_head)=null;@/
   page_depth=0;page_max_depth=0;
 }
@@ -3924,28 +3850,22 @@ returning the system to the state it had before calling |hint_begin|.
 
 @<\HINT/ functions@>=
 static bool hint_is_open=false;
-int hint_begin(int fd)
+void hint_begin(int fd)
 { if (hint_is_open) 
     hint_end();
   mem_init();
   list_init(); 
   hclear_dir();
   hclear_fonts();
+  hmap_file(fd);
+  hget_banner();
+  hget_directory_section();
+  hget_definition_section();
+  hget_content_section();
+  leak_clear();
+  clear_map();
   hloc_init();
-  if (hmap_file(fd)&&
-      hget_banner()&&
-      hget_directory_section() &&
-      hget_definition_section() &&
-      hget_content_section())
-  { leak_clear();
-    clear_map();
-    hint_is_open=true;
-    return 1;
-  }
-  else
-  { hstart=hpos=hend=NULL;
-    return 0;
-  }
+  hint_is_open=true;
 }
 
 
@@ -3961,7 +3881,7 @@ void hint_end(void)
 
 
 @<\HINT/ |extern|@>=
-extern int hint_begin(int fd);
+extern void hint_begin(int fd);
 extern void hint_end(void);
 @
 
@@ -5685,13 +5605,13 @@ extern void leak_out(pointer p, int s);
 #ifndef _HINT_H_
 #define _HINT_H_
 
-extern bool hmap_file(int fd);
+extern void hmap_file(int fd);
 extern bool hget_banner(void);
-extern bool hget_section(uint16_t n);
-extern bool hget_directory_section(void);
+extern void hget_section(uint16_t n);
+extern void hget_directory_section(void);
 extern void hclear_dir(void);
-extern bool hget_definition_section(void);
-extern bool hget_content_section(void);
+extern void hget_definition_section(void);
+extern void hget_content_section(void);
 extern void hget_content(void);
 extern void hteg_content(void);
 
