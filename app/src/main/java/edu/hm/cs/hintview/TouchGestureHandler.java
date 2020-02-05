@@ -8,7 +8,7 @@ public class TouchGestureHandler extends GestureDetector.SimpleOnGestureListener
     private final HINTVIEWView view;
     private final int HORIZONTAL_SWIPE_THRESHOLD = 100;
 
-    public TouchGestureHandler(HINTVIEWView view) {
+    TouchGestureHandler(HINTVIEWView view) {
         this.view = view;
     }
 

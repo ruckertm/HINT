@@ -224,7 +224,7 @@ extern "C" void nativeSetDark(int dark) {
         int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
         glUniform1i(ourModeLocation, DARK_MODE);
         mode = DARK_MODE;
-        nativeSetColors(1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.2f);
+        nativeSetColors(1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f);
     } else {
         int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
         glUniform1i(ourModeLocation, LIGHT_MODE);

@@ -26,6 +26,7 @@
     <string name="hintview_activity">HintView</string>
     <string name="dark_mode">Night Mode</string>
     <string name="open_file">Open File…</string>
+    <string name="first_page">To first page</string>
 
 </resources>
 

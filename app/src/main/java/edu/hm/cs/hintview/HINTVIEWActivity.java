@@ -16,12 +16,12 @@
 
 package edu.hm.cs.hintview;
 
+import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
-import android.net.Uri;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -30,11 +30,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowInsets;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -42,12 +45,31 @@ import java.io.IOException;
 public class HINTVIEWActivity extends AppCompatActivity {
 
     private HINTVIEWView mView;
+    private Toolbar toolbar;
+    private Toolbar toolbar_light;
+    private Toolbar toolbar_dark;
+
     private SharedPreferences sharedPref;
-    private static final int FILE_CHOOSER_REQUEST_CODE = 0x01;
     private boolean darkMode = false;
+
+
+    private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 2;
+    private static final int FILE_CHOOSER_REQUEST_CODE = 0x01;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //check if storage permissions are there
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 2;
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+        }
 
         setContentView(R.layout.activity_hintview);
 
@@ -56,7 +78,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
         String fileUriStr = sharedPref.getString("fileURI", null);
         long filePos;
         if (fileUriStr == null)
-            filePos=0;
+            filePos = 0;
         else
             filePos = sharedPref.getLong("curPos", 0);
         double scale = sharedPref.getFloat("textSize", (float) 1.0);
@@ -64,17 +86,21 @@ public class HINTVIEWActivity extends AppCompatActivity {
 
         Log.w("HINTVIEWActivity", "onCreate URI= " + fileUriStr);
 
-        final Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        toolbar_light = findViewById(R.id.toolbar_light);
+        toolbar_dark = findViewById(R.id.toolbar_dark);
+        setToolbar(darkMode);
 
         findViewById(R.id.root).setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
             @Override
             public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
-                toolbar.setPadding(toolbar.getPaddingStart() + insets.getSystemWindowInsetLeft(),
-                        toolbar.getPaddingTop() + insets.getSystemWindowInsetTop(),
-                        toolbar.getPaddingEnd() + insets.getSystemWindowInsetRight(),
-                        toolbar.getPaddingBottom());
-
+                toolbar_light.setPadding(toolbar_light.getPaddingStart() + insets.getSystemWindowInsetLeft(),
+                        toolbar_light.getPaddingTop() + insets.getSystemWindowInsetTop(),
+                        toolbar_light.getPaddingEnd() + insets.getSystemWindowInsetRight(),
+                        toolbar_light.getPaddingBottom());
+                toolbar_dark.setPadding(toolbar_dark.getPaddingStart() + insets.getSystemWindowInsetLeft(),
+                        toolbar_dark.getPaddingTop() + insets.getSystemWindowInsetTop(),
+                        toolbar_dark.getPaddingEnd() + insets.getSystemWindowInsetRight(),
+                        toolbar_dark.getPaddingBottom());
                 v.setOnApplyWindowInsetsListener(null);
 
                 return insets;
@@ -90,15 +116,15 @@ public class HINTVIEWActivity extends AppCompatActivity {
         });
 
         mView.init();
-        mView.setFile(fileUriStr,filePos);
+        mView.setFile(fileUriStr, filePos);
         mView.setScale(scale);
         mView.setMode(darkMode);
-        if (fileUriStr==null)   openFileChooser();
+        if (fileUriStr == null) openFileChooser();
     }
 
     void hideToolbar(boolean toolbarVisible) {
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setTranslationY(toolbarVisible ? 0 : -toolbar.getHeight());
+        toolbar_light.setTranslationY(toolbarVisible ? 0 : -toolbar_light.getHeight());
+        toolbar_dark.setTranslationY(toolbarVisible ? 0 : -toolbar_dark.getHeight());
         // hide Nav- & Status-bar
         getWindow().getDecorView().setSystemUiVisibility(toolbarVisible ?
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -113,11 +139,22 @@ public class HINTVIEWActivity extends AppCompatActivity {
                         | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 
+    void setToolbar (boolean darkMode) {
+        //FrameLayout frameLayout = findViewById(R.id.root);
+        if (darkMode) {
+            toolbar = toolbar_dark;
+        } else {
+            toolbar = toolbar_light;
+        }
+        setSupportActionBar(toolbar);
+        toolbar.bringToFront();
+    }
+
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        Toolbar toolbar = findViewById(R.id.toolbar);
         outState.putBoolean("toolbarVisible", toolbar.getTranslationY() >= 0);
+        outState.putBoolean("darkMode", darkMode);
         Log.d("HINTVIEWActivity", "toolbarVisible: " + (toolbar.getTranslationY() >= 0));
     }
 
@@ -128,9 +165,8 @@ public class HINTVIEWActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                Toolbar toolbar = findViewById(R.id.toolbar);
                 final boolean toolbarVisible = savedInstanceState.getBoolean("toolbarVisible");
-
+                darkMode = savedInstanceState.getBoolean("darkMode");
                 hideToolbar(toolbarVisible);
             }
         }, 80);
@@ -157,17 +193,15 @@ public class HINTVIEWActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         SharedPreferences.Editor editor = sharedPref.edit();
-        String fileUriStr=mView.getFileUriStr();
-        editor.putString("fileURI",fileUriStr );
-        long filePos=mView.getPos();
-        editor.putLong("curPos",filePos );
-        editor.putFloat("textSize", (float)mView.getScale());
+        String fileUriStr = mView.getFileUriStr();
+        editor.putString("fileURI", fileUriStr);
+        long filePos = mView.getPos();
+        editor.putLong("curPos", filePos);
+        editor.putFloat("textSize", (float) mView.getScale());
         editor.putBoolean("darkMode", mView.getMode());
         editor.apply();
-        Log.d("HINTVIEWActivity", "onStop pos = "+Long.toHexString(filePos));
+        Log.d("HINTVIEWActivity", "onStop pos = " + Long.toHexString(filePos));
     }
-
-
 
 
     @Override
@@ -192,11 +226,17 @@ public class HINTVIEWActivity extends AppCompatActivity {
                 Log.d("HINTVIEWActivity", "onOptionsItemSelected: dark=" + darkMode);
                 mView.setMode(darkMode);
                 item.setChecked(darkMode);
+                setToolbar(darkMode);
                 mView.requestRender();
                 return true;
             case R.id.fileChooser:
                 Log.d("HINTVIEWActivity", "onOptionsItemSelected: File Chooser");
                 openFileChooser();
+                return true;
+            case R.id.toHome:
+                Log.d("HINTVIEWActivity", "to first page");
+                HINTVIEWLib.home();
+                mView.requestRender();
                 return true;
             default:
                 return false;
@@ -221,9 +261,9 @@ public class HINTVIEWActivity extends AppCompatActivity {
             try {
                 //check if file is accessible
                 getContentResolver().openInputStream(data.getData()).close();
-                mView.setFile(data.getData().toString(),0);
+                mView.setFile(data.getData().toString(), 0);
             } catch (FileNotFoundException e) {
-                Log.e("","",e);
+                Log.e("", "", e);
                 openFileChooser();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -231,4 +271,23 @@ public class HINTVIEWActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE) {
+            // If request is cancelled, the result arrays are empty.
+            if (grantResults.length < 1
+                    || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                //continue asking for permissions until granted
+                Toast.makeText(this, "Permission required to access files!", Toast.LENGTH_LONG).show();
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+            }
+        }
+    }
 }

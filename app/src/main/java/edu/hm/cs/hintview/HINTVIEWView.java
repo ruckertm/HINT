@@ -33,12 +33,9 @@ package edu.hm.cs.hintview;
 
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
-import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
-import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -46,8 +43,6 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-
-import androidx.annotation.Nullable;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -79,10 +74,10 @@ import javax.microedition.khronos.opengles.GL10;
 public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener {
     private static String TAG = "HINTVIEWView";
     private static final boolean DEBUG = false;
-    public static double xdpi, ydpi;
-    public static double scale = 1.0;
-    public static int width, height;
-    public static Renderer fileRenderer;
+    private static double xdpi, ydpi;
+    private static double scale = 1.0;
+    private static int width, height;
+    private Renderer fileRenderer;
     private static boolean darkMode = false;
     private GestureDetector touchGestureDetector;
     private ScaleGestureDetector scaleGestureDetector;
@@ -113,43 +108,26 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         touchGestureDetector = new GestureDetector(context, new TouchGestureHandler(this));
         scaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureHandler(this));
         setOnTouchListener(this);
-        fileRenderer=new Renderer(context);
+        fileRenderer = new Renderer(context);
         setRenderer(fileRenderer);
         setRenderMode(RENDERMODE_WHEN_DIRTY);
     }
 
-       public void setFile(String fileUriStr, long pos) {
+    public void setFile(String fileUriStr, long pos) {
         fileRenderer.setFile(fileUriStr, pos);
 
     }
 
-    public long getPos()
-    {   if (fileRenderer==null) return 0;
+    public long getPos() {
+        if (fileRenderer == null) return 0;
         else return fileRenderer.getPos();
     }
 
-    public String getFileUriStr()
-    {  if (fileRenderer==null) return null;
-       return fileRenderer.getFileUriStr();
-    }
-    /*
-    @Nullable
-    @Override
-    protected Parcelable onSaveInstanceState() {
-        Parcelable superState = super.onSaveInstanceState();
-        Bundle bundle = new Bundle();
-        bundle.putParcelable("superState", superState);
-        bundle.putLong("curPos", HINTVIEWLib.getPos());
-        return bundle;
+    public String getFileUriStr() {
+        if (fileRenderer == null) return null;
+        return fileRenderer.getFileUriStr();
     }
 
-    @Override
-    protected void onRestoreInstanceState(Parcelable state) {
-        Bundle bundle = (Bundle) state;
-        super.onRestoreInstanceState(bundle.getParcelable("superState"));
-        HINTVIEWLib.setPos(bundle.getLong("curPos"));
-    }
-*/
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
         boolean s = scaleGestureDetector.onTouchEvent(motionEvent);
@@ -158,29 +136,32 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         return t || scaleGestureDetector.isInProgress();
     }
 
-    public static double getScale() {
+    public double getScale() {
         return scale;
     }
 
-    public static void setScale(double s) {
+    public void setScale(double s) {
         scale = s;
     }
 
-    public static boolean getMode(){
+    public void multScale(float scaleFactor) {
+        HINTVIEWView.scale *= scaleFactor;
+    }
+
+    public boolean getMode() {
         return darkMode;
     }
 
-    public static void setMode(boolean mode){
+    public void setMode(boolean mode) {
         darkMode = mode;
     }
 
     private static class ContextFactory implements GLSurfaceView.EGLContextFactory {
 
-        private static int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
-
         public EGLContext createContext(EGL10 egl, EGLDisplay display, EGLConfig eglConfig) {
             Log.w(TAG, "creating OpenGL ES 2.0 context");
             checkEglError("Before eglCreateContext", egl);
+            int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
             int[] attrib_list = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL10.EGL_NONE};
             EGLContext context = egl.eglCreateContext(display, eglConfig, EGL10.EGL_NO_CONTEXT, attrib_list);
             checkEglError("After eglCreateContext", egl);
@@ -201,7 +182,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
 
     private static class ConfigChooser implements GLSurfaceView.EGLConfigChooser {
 
-        public ConfigChooser(int r, int g, int b, int a, int depth, int stencil) {
+        ConfigChooser(int r, int g, int b, int a, int depth, int stencil) {
             mRedSize = r;
             mGreenSize = g;
             mBlueSize = b;
@@ -250,8 +231,8 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
             return chooseConfig(egl, display, configs);
         }
 
-        public EGLConfig chooseConfig(EGL10 egl, EGLDisplay display,
-                                      EGLConfig[] configs) {
+        EGLConfig chooseConfig(EGL10 egl, EGLDisplay display,
+                               EGLConfig[] configs) {
             for (EGLConfig config : configs) {
                 int d = findConfigAttrib(egl, display, config,
                         EGL10.EGL_DEPTH_SIZE, 0);
@@ -375,9 +356,6 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
                 String name = names[i];
                 if (egl.eglGetConfigAttrib(display, config, attribute, value)) {
                     Log.w(TAG, String.format("  %s: %d\n", name, value[0]));
-                } else {
-                    // Log.w(TAG, String.format("  %s: failed\n", name));
-                    while (egl.eglGetError() != EGL10.EGL_SUCCESS) ;
                 }
             }
         }
@@ -396,44 +374,41 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
 
         private final Context context;
         private String fileUriStr;
-        private long pos;
 
-        public Renderer(Context context) {
+        Renderer(Context context) {
             this.context = context;
         }
 
-        public void setFile(String fileUriStr, long pos) {
-            if(fileUriStr!=null)
-            try
-            {   //Gets called every time, after app gets maximized. So passing just the fileDescriptor to the renderer will result in an error
-                //bc it got already closed in the cpp code
-                Log.w(TAG, "setFile " + fileUriStr +" at "+Long.toHexString(pos));
-                Uri fileURI = Uri.parse(fileUriStr);
-                ParcelFileDescriptor pfd = context.getContentResolver().openFileDescriptor(fileURI, "r");
-                int fd = pfd.detachFd();
-                Log.w(TAG, "setFile fd = " + fd);
+        void setFile(String fileUriStr, long pos) {
+            if (fileUriStr != null)
+                try {   //Gets called every time, after app gets maximized. So passing just the fileDescriptor to the renderer will result in an error
+                    //bc it got already closed in the cpp code
+                    Log.w(TAG, "setFile " + fileUriStr + " at " + Long.toHexString(pos));
+                    Uri fileURI = Uri.parse(fileUriStr);
+                    ParcelFileDescriptor pfd = context.getContentResolver().openFileDescriptor(fileURI, "r");
+                    int fd = pfd.detachFd();
+                    Log.w(TAG, "setFile fd = " + fd);
 
-                if (HINTVIEWLib.begin(fd) != 0) {
-                    HINTVIEWLib.setPos(pos);
-                    this.fileUriStr = fileUriStr;
-                    this.pos = pos;
+                    if (HINTVIEWLib.begin(fd) != 0) {
+                        HINTVIEWLib.setPos(pos);
+                        this.fileUriStr = fileUriStr;
+                    }
+                    pfd.close();
+                } catch (FileNotFoundException e) {
+                    Log.e("", "", e);
+                } catch (IOException e) {
+                    Log.e("", "", e);
                 }
-                pfd.close();
-            } catch(FileNotFoundException e) {
-                Log.e("", "", e);
-            } catch(IOException e) {
-                Log.e("", "", e);
-            }
         }
 
-        public long getPos()
-        { long pos=0;
-            if (fileUriStr!=null ) pos = HINTVIEWLib.getPos();
-            Log.w(TAG, "getPos = "+Long.toHexString(pos));
+        public long getPos() {
+            long pos = 0;
+            if (fileUriStr != null) pos = HINTVIEWLib.getPos();
+            Log.w(TAG, "getPos = " + Long.toHexString(pos));
             return pos;
         }
 
-        public String getFileUriStr() {
+        String getFileUriStr() {
             return fileUriStr;
         }
 

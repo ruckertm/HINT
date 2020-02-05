@@ -14,7 +14,8 @@ public class ScaleGestureHandler extends ScaleGestureDetector.SimpleOnScaleGestu
     @Override
     public boolean onScale(ScaleGestureDetector detector) {
         float scaleFactor = detector.getScaleFactor();
-        view.scale *= scaleFactor;
+        view.multScale(scaleFactor);
+        //view.scale *= scaleFactor;
         view.requestRender();
         return true;
     }

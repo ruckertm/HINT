@@ -46,7 +46,8 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_init(JNIEnv *env, jclass obj);
 JNIEXPORT jint JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_begin(JNIEnv *env, jclass obj, jint fileDescriptor);
 JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, jint height, jdouble xdpi, jdouble ydpi);
+Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, jint height,
+                                           jdouble xdpi, jdouble ydpi);
 JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jclass obj);
 JNIEXPORT void JNICALL Java_edu_hm_cs_hintview_HINTVIEWLib_next(JNIEnv *env, jclass obj);
@@ -85,12 +86,13 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_begin(JNIEnv *env, jclass obj, jint fileDesc
     hint_end();
     hint_clear_fonts(true);
     success = hint_begin(fileDescriptor);
-    LOGI("done begin %d\n",success);
+    LOGI("done begin %d\n", success);
     return success;
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, jint height, jdouble xdpi, jdouble ydpi) {
+Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, jint height,
+                                           jdouble xdpi, jdouble ydpi) {
     LOGI("change(width=%d height=%d xdpi=%f ydpi=%f))\n", width, height, xdpi, ydpi);
 
     hint_resize(width, height, xdpi);
@@ -120,22 +122,23 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_getPos(JNIEnv *env, jclass obj) {
     uint64_t hpos;
     jlong pos;
     hpos = hint_page_get();
-    pos=hpos;
-    LOGI("getPos(0x%x %x)-> (0x%x %x)\n", (int)(hpos>>32), (int)(hpos&0xffffffff), (int)(pos>>32), (int)(pos&0xffffffff));
+    pos = hpos;
+    LOGI("getPos(0x%x %x)-> (0x%x %x)\n", (int) (hpos >> 32), (int) (hpos & 0xffffffff),
+         (int) (pos >> 32), (int) (pos & 0xffffffff));
     hint_clear_fonts(false);
     return pos;
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_setPos(JNIEnv *env, jclass obj, jlong pos) {
-    LOGI("setPos(0x%x %x)\n", (int)(pos>>32), (int)(pos&0xffffffff));
+    LOGI("setPos(0x%x %x)\n", (int) (pos >> 32), (int) (pos & 0xffffffff));
     hint_page_top(pos);
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_setMode(JNIEnv *env, jclass obj, jboolean mode) {
-if (mode) nativeSetDark(true);
-else nativeSetDark(false);
+    if (mode) nativeSetDark(true);
+    else nativeSetDark(false);
 }
 
 extern "C" JNIEXPORT void JNICALL
