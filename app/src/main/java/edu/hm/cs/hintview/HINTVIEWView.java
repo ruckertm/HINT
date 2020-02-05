@@ -402,6 +402,19 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
             this.context = context;
         }
 
+        private boolean render_OK()
+        {   String msg = HINTVIEWLib.error();
+            if (msg!=null) {
+                Log.w(TAG, "Error in renderer: " + msg + "!");
+                this.fileUriStr = null;
+                this.pos = 0;
+                return false;
+            }
+            else
+                  return true;
+        }
+
+
         public void setFile(String fileUriStr, long pos) {
             if(fileUriStr!=null)
             try
@@ -413,8 +426,9 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
                 int fd = pfd.detachFd();
                 Log.w(TAG, "setFile fd = " + fd);
 
-                if (HINTVIEWLib.begin(fd) != 0) {
-                    HINTVIEWLib.setPos(pos);
+                HINTVIEWLib.begin(fd);
+                if (render_OK())
+                {   HINTVIEWLib.setPos(pos);
                     this.fileUriStr = fileUriStr;
                     this.pos = pos;
                 }
@@ -438,9 +452,13 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         }
 
         public void onDrawFrame(GL10 gl) {
+
             HINTVIEWLib.setMode(darkMode);
             HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi); /* needed for zooming */
-            HINTVIEWLib.draw();
+            if (render_OK()) {
+                HINTVIEWLib.draw();
+                render_OK();
+            }
         }
 
         public void onSurfaceChanged(GL10 gl, int w, int h) {
@@ -448,6 +466,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
             height = h;
             HINTVIEWLib.setMode(darkMode);
             HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi);
+            render_OK();
         }
 
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
