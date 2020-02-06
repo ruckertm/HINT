@@ -8,6 +8,9 @@
         android:id="@+id/toHome"
         android:title="@string/first_page" />
     <item
+        android:id="@+id/scaleOne"
+        android:title="@string/scale_one" />
+    <item
         android:id="@+id/dark"
         android:checkable="true"
         android:title="@string/dark_mode" />

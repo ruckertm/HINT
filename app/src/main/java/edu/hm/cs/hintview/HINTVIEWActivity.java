@@ -238,6 +238,14 @@ public class HINTVIEWActivity extends AppCompatActivity {
                 HINTVIEWLib.home();
                 mView.requestRender();
                 return true;
+            case R.id.scaleOne:
+                Log.d("HINTVIEWActivity", "scale one");
+                mView.setScale(1.0);
+                mView.requestRender();
+                return true;
+
+
+
             default:
                 return false;
         }
