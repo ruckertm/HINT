@@ -43,6 +43,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.widget.Toast;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -386,6 +387,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
             String msg = HINTVIEWLib.error();
             if (msg != null) {
                 Log.w(TAG, "Error in renderer: " + msg + "!");
+                Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
                 this.fileUriStr = null;
                 this.pos = 0;
                 return false;
