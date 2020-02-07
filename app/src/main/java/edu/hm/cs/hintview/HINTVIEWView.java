@@ -76,10 +76,11 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
     private static String TAG = "HINTVIEWView";
     private static final boolean DEBUG = false;
     private static double xdpi, ydpi;
-    private static double scale = 1.0;
+    public static double scale = 1.0;
     private static int width, height;
-    private Renderer fileRenderer;
+    protected Renderer fileRenderer;
     private static boolean darkMode = false;
+    protected static boolean TeXzoom = false;
     private GestureDetector touchGestureDetector;
     private ScaleGestureDetector scaleGestureDetector;
 
@@ -143,11 +144,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
     }
 
     public void setScale(double s) {
-        scale = s;
-    }
-
-    public void multScale(float scaleFactor) {
-        HINTVIEWView.scale *= scaleFactor;
+        scale = s; if (scale<0.1) scale=0.1;
     }
 
     public boolean getMode() {
@@ -156,6 +153,10 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
 
     public void setMode(boolean mode) {
         darkMode = mode;
+    }
+
+    public void setZoom(boolean mode) {
+        TeXzoom = mode;
     }
 
     private static class ContextFactory implements GLSurfaceView.EGLContextFactory {
@@ -372,11 +373,13 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         private int[] mValue = new int[1];
     }
 
-    private static class Renderer implements GLSurfaceView.Renderer {
+    protected static class Renderer implements GLSurfaceView.Renderer {
 
         private final Context context;
         private String fileUriStr;
         private long pos;
+        private boolean is_zooming=false, has_zoom=false;
+        private double f,x,y;
 
         Renderer(Context context) {
             this.context = context;
@@ -432,13 +435,22 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         }
 
         public void onDrawFrame(GL10 gl) {
-
             HINTVIEWLib.setMode(darkMode);
-            HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi); /* needed for zooming */
-            if (render_OK()) {
-                HINTVIEWLib.draw();
+
+            Log.w(TAG, "is_zooming " + is_zooming + " && " + TeXzoom);
+                if (is_zooming && TeXzoom) {
+                    if (!has_zoom) {
+                        HINTVIEWLib.zoomBegin();
+                        has_zoom = true;
+                    }
+                    Log.w(TAG, "zoom " + f + " at (" + x + "x" + y +")");
+                    HINTVIEWLib.zoom(f, x, y);
+                }
+                else {
+                    HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi); /* needed for zooming */
+                    HINTVIEWLib.draw();
+                }
                 render_OK();
-            }
         }
 
         public void onSurfaceChanged(GL10 gl, int w, int h) {
@@ -451,6 +463,25 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
 
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
             HINTVIEWLib.init();
+        }
+
+        public void zoomBegin()
+        { is_zooming  = true;
+          has_zoom =false;
+           }
+
+        public void zoom(double f, double x, double y)
+        { Log.w(TAG, "zoom " + f + " at (" + x + "x" + y +")");
+          this.f=f;
+          this.x=x;
+          this.y=y;
+        }
+
+        public double zoomEnd()
+        {
+         is_zooming=false;
+         has_zoom=false;
+         return   HINTVIEWLib.zoomEnd();
         }
     }
 }

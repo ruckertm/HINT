@@ -40,7 +40,7 @@ static void printGLString(const char *name, GLenum s) {
 
 static void checkGlError(const char *op) {
     for (GLint error = glGetError(); error; error = glGetError()) {
-        LOGI("after %s() glError (0x%x)\n", op, error);
+        LOGE("after %s() glError (0x%x)\n", op, error);
     }
 }
 
@@ -197,6 +197,7 @@ extern "C" void nativeInit(void) {
     LOGI("maxviewport(%f, %f)", mv[0], mv[1]);
     glGetFloatv(GL_VIEWPORT,mv);
     LOGI("viewport(%f, %f)", mv[2], mv[3]);
+    SurfaceTexture.
 #endif
     //glViewport(0,0,1920,1080); // seems unnecessary mv[2]==1920 and mv[3]==1080
 
@@ -233,7 +234,7 @@ extern "C" void nativeSetDark(int dark) {
     }
 }
 
-
+static int cur_h=600, cur_v=800;
 extern "C" void nativeSetSize(int px_h, int px_v, double dpi)
 /* Given the size of the output area px_h,px_v in pixel and the resolution in dpi,
    make sure the projection is set up properly.
@@ -256,6 +257,8 @@ extern "C" void nativeSetSize(int px_h, int px_v, double dpi)
     glm::mat4 projection = glm::ortho(0.0f, pt_h, pt_v, 0.0f);
     glUniformMatrix4fv(ourProjectionLocation, 1, 0, glm::value_ptr(projection));
     glViewport(0, 0, px_h, px_v);
+    cur_h=px_h;
+    cur_v=px_v;
 }
 
 
@@ -582,4 +585,91 @@ extern "C" void nativeSetTrueType(struct gcache_s *g) {
     g->voff = -g->voff;
     g->hoff = -g->hoff;
     GLtexture(g);
+}
+
+/* ZOOMING */
+
+static GLuint GLzoom=0;
+static double zScale;
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_zoomBegin(JNIEnv *env, jclass obj) {
+    //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    //glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    if (GLzoom!=0) return;
+    LOGI("GL Zoom Begin\n");
+    unsigned int fbo;
+    glGenFramebuffers(1, &fbo); // create framebuffer object
+    checkGlError("glGenFramebuffers");
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo); // bind it
+    checkGlError("glBindFramebuffer");
+
+    // creating the texture attachment
+    glGenTextures(1, &GLzoom);
+    glBindTexture(GL_TEXTURE_2D, GLzoom);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, cur_h, cur_v, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    // attach to framebuffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, GLzoom, 0);
+
+    // we skip the attachment of depth and stencil attachments
+#if 0
+    unsigned int rbo;
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo)
+#endif
+    // check for completeness
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        LOGE("ERROR::FRAMEBUFFER:: Framebuffer is not complete!\n");
+
+    glClearColor(1.0f, 1.0f, 0.5f, 1.0f);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    glViewport(0, 0, cur_h, cur_v);
+    hint_render();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); // unbind
+    checkGlError("glBindFramebuffer");
+    glDeleteFramebuffers(1, &fbo); // delete
+    checkGlError("glDeleteFramebuffers");
+
+
+    zScale=1.0;
+    LOGI("GL Zoom Begin done\n");
+
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_zoomEnd(JNIEnv *env, jclass obj) {
+    LOGI("GL Zoom End\n");
+    glDeleteTextures(1, &GLzoom);
+    GLzoom=0;
+}
+
+extern "C" JNIEXPORT jdouble JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_zoom(JNIEnv *env, jclass obj, jdouble f, jdouble xf, jdouble yf) {
+    zScale*=f;
+    LOGI("GL Zooming scale=%f x=%f y=%f\n",zScale,xf,yf);
+    GLfloat x = 30.0;
+    GLfloat y = 30.0;
+    GLfloat w = cur_h*0.1;
+    GLfloat h = cur_v*0.1;
+    GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
+                       (GLfloat) x, (GLfloat) (y + h), 0.0f, 0.0f,
+                       (GLfloat) (x + w), (GLfloat) (y + h), 1.0f, 0.0f,
+                       (GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
+                       (GLfloat) (x + w), (GLfloat) (y + h), 1.0f, 0.0f,
+                       (GLfloat) (x + w), (GLfloat) y, 1.0f, 1.0f
+    };
+
+    glBindTexture(GL_TEXTURE_2D, GLzoom);
+    checkGlError("glBindTexture");
+    glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
+    checkGlError("glVertexAttribPointer");
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    checkGlError("glDrawArrays");
+    return zScale;
 }

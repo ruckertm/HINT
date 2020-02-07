@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package edu.hm.cs.hintview;
+       package edu.hm.cs.hintview;
 
 // Wrapper for native library
 
@@ -45,4 +44,11 @@ public class HINTVIEWLib {
     public static native void setMode(boolean mode);
 
     public static native void home();
+
+    public static native void zoomBegin();
+
+    public static native double zoomEnd();
+
+    public static native void zoom(double f,double x, double y);
+
 }

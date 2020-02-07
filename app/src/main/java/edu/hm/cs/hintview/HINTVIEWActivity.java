@@ -51,6 +51,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
 
     private SharedPreferences sharedPref;
     private boolean darkMode = false;
+    private boolean TeXzoom = false;
 
 
     private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 2;
@@ -83,6 +84,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
             filePos = sharedPref.getLong("curPos", 0);
         double scale = sharedPref.getFloat("textSize", (float) 1.0);
         darkMode = sharedPref.getBoolean("darkMode", false);
+        TeXzoom = sharedPref.getBoolean("TeXzoom", false);
 
         Log.w("HINTVIEWActivity", "onCreate URI= " + fileUriStr);
 
@@ -119,6 +121,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
         mView.setFile(fileUriStr, filePos);
         mView.setScale(scale);
         mView.setMode(darkMode);
+        mView.setZoom(TeXzoom);
         if (fileUriStr == null) openFileChooser();
     }
 
@@ -155,6 +158,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
         outState.putBoolean("toolbarVisible", toolbar.getTranslationY() >= 0);
         outState.putBoolean("darkMode", darkMode);
+        outState.putBoolean("TeXzoom", TeXzoom);
         Log.d("HINTVIEWActivity", "toolbarVisible: " + (toolbar.getTranslationY() >= 0));
     }
 
@@ -167,6 +171,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
             public void run() {
                 final boolean toolbarVisible = savedInstanceState.getBoolean("toolbarVisible");
                 darkMode = savedInstanceState.getBoolean("darkMode");
+                TeXzoom = savedInstanceState.getBoolean("TeXzoom");
                 hideToolbar(toolbarVisible);
             }
         }, 80);
@@ -206,8 +211,11 @@ public class HINTVIEWActivity extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem checkable = menu.findItem(R.id.dark);
+        MenuItem checkable;
+        checkable = menu.findItem(R.id.dark);
         checkable.setChecked(darkMode);
+        checkable = menu.findItem(R.id.zoom);
+        checkable.setChecked(TeXzoom);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -221,6 +229,12 @@ public class HINTVIEWActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         super.onOptionsItemSelected(item);
         switch (item.getItemId()) {
+            case R.id.zoom:
+                TeXzoom = !item.isChecked();
+                Log.d("HINTVIEWActivity", "onOptionsItemSelected: TeXzoom=" + TeXzoom);
+                mView.setZoom(TeXzoom);
+                item.setChecked(TeXzoom);
+                return true;
             case R.id.dark:
                 darkMode = !item.isChecked();
                 Log.d("HINTVIEWActivity", "onOptionsItemSelected: dark=" + darkMode);
@@ -229,6 +243,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
                 setToolbar(darkMode);
                 mView.requestRender();
                 return true;
+
             case R.id.fileChooser:
                 Log.d("HINTVIEWActivity", "onOptionsItemSelected: File Chooser");
                 openFileChooser();

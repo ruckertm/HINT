@@ -6,7 +6,7 @@
         android:title="@string/open_file" />
     <item
         android:id="@+id/toHome"
-        android:title="@string/first_page" />
+        android:title= "@string/first_page" />
     <item
         android:id="@+id/scaleOne"
         android:title="@string/scale_one" />
@@ -14,5 +14,8 @@
         android:id="@+id/dark"
         android:checkable="true"
         android:title="@string/dark_mode" />
-
+    <item
+        android:id="@+id/zoom"
+        android:checkable="true"
+        android:title="@string/zoom_mode" />
 </menu>

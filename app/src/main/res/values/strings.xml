@@ -27,7 +27,7 @@
     <string name="dark_mode">Night Mode</string>
     <string name="open_file">Open File…</string>
     <string name="first_page">To first page</string>
-    <string name="scale_one">Zoom 100%</string>
-
+    <string name="scale_one">Zoom to 100%</string>
+    <string name="zoom_mode">TeX Zoom</string>
 </resources>
 

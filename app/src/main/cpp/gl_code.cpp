@@ -62,6 +62,12 @@ JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_home(JNIEnv *env, jclass obj);
 JNIEXPORT jstring JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_error(JNIEnv *env, jclass obj);
+JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_zoomBegin(JNIEnv *env, jclass obj);
+JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_zoomEnd(JNIEnv *env, jclass obj);
+JNIEXPORT jdouble JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_zoom(JNIEnv *env, jclass obj, jdouble f, jdouble xf, jdouble yf);
 };
 
 
@@ -117,10 +123,16 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, 
     }
 }
 
+
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jclass obj) {
     LOGI("draw\n");
-    HINT_TRY hint_render();
+    HINT_TRY {
+        hint_blank();
+        // just for testing
+        Java_edu_hm_cs_hintview_HINTVIEWLib_zoomBegin(env, obj);
+        Java_edu_hm_cs_hintview_HINTVIEWLib_zoom(env, obj, 1.0, 0.0, 0.0);
+    }
 }
 
 extern "C" JNIEXPORT void JNICALL
