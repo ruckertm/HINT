@@ -1,8 +1,10 @@
 package edu.hm.cs.hintview;
 
+import android.util.Log;
 import android.view.ScaleGestureDetector;
 
 public class ScaleGestureHandler extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+    private static String TAG = "ScaleGestureDetector";
 
     private final HINTVIEWView view;
 
@@ -13,27 +15,24 @@ public class ScaleGestureHandler extends ScaleGestureDetector.SimpleOnScaleGestu
 
     @Override
     public boolean onScaleBegin(ScaleGestureDetector detector) {
-        if (view.TeXzoom)
-            view.fileRenderer.zoomBegin();
-              return true;
+       HINTVIEWView.ZoomOn=true;
+        view.requestRender();
+        return true;
     }
     @Override
     public void onScaleEnd(ScaleGestureDetector detector) {
-        if (view.TeXzoom) {
-            HINTVIEWView.scale *= view.fileRenderer.zoomEnd();;
-            view.requestRender();
-        }
+        HINTVIEWView.ZoomOff=true;
+        Log.w(TAG, "onScaleEnd ");
+        view.requestRender();
     }
     @Override
     public boolean onScale(ScaleGestureDetector detector) {
         float f = detector.getScaleFactor();
-        float x = detector.getFocusX();
-        float y = detector.getFocusY();
+        //float x = detector.getFocusX();
+        //float y = detector.getFocusY();
 
-        if (view.TeXzoom)
-            view.fileRenderer.zoom(f,x,y);
-        else
-            HINTVIEWView.scale *= f;
+        HINTVIEWView.scale *= f;
+        HINTVIEWView.Zooming = true;
 
         view.requestRender();
 

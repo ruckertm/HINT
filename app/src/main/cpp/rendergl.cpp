@@ -23,7 +23,15 @@ extern "C" {
 #include "hrender.h"
 #include "rendernative.h"
 #include "stb_image.h"
+#include <setjmp.h>
+extern jmp_buf error_exit;
+extern char herror_string[];
+#
 };
+
+
+#define HINT_TRY if ((herror_string[0]=0,setjmp(error_exit)==0))
+#define HINT_CATCH else
 
 #define min(X, Y) ((X)<(Y)?(X):(Y))
 #define DARK_MODE 1
@@ -235,12 +243,13 @@ extern "C" void nativeSetDark(int dark) {
 }
 
 static int cur_h=600, cur_v=800;
+static float pt_h=600.0, pt_v=800.0;
+
 extern "C" void nativeSetSize(int px_h, int px_v, double dpi)
 /* Given the size of the output area px_h,px_v in pixel and the resolution in dpi,
    make sure the projection is set up properly.
  */
 {
-    float pt_h, pt_v;
     int ourProjectionLocation;
 
     /* convert pixel to point */
@@ -402,53 +411,6 @@ nativeImage(double x, double y, double w, double h, unsigned char *b, unsigned c
     }
 }
 
-/*extern "C" void nativeImage(double x, double y, double w, double h, unsigned char *b, unsigned char *e)
-*//* WARNING: This function currently works only with grayscale images using
-   the grayscale as alpha value, resulting in an inverted image (except in dark mode).
-   We would like to have no inversion or even arbitrary colored images, retaining color in dark mode.
-*//*
-
-{
-    uint32_t dataPos, imageSize, width, height;
-    unsigned char *data;
-    *//* check signature *//*
-    if (b[0]!='B' || b[1]!='M')
-    { LOGE("This is not a BMP image\n");
-        return;
-    }
-    *//* extracting header data (little-endian) *//*
-#define LittleEndian32(X)   (b[(X)]+(b[(X)+1]<<8)+(b[(X)+2]<<16)+(b[(X)+3]<<24))
-    dataPos    = LittleEndian32(0xA);
-    width      = LittleEndian32(0x12);
-    height     = LittleEndian32(0x16);
-    imageSize  = LittleEndian32(0x22);
-
-    LOGI("BMP image at %d, size=%d, width=%d, height=%d\n", dataPos, imageSize, width, height);
-    data=b+dataPos;
-
-    GLuint textureID;
-    glGenTextures(1, &textureID);
-    // "Bind" the newly created texture : all future texture functions will modify this texture
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    // Give the image to OpenGL
-    glTexImage2D(GL_TEXTURE_2D, 0,GL_ALPHA, width, height, 0, *//* GL_BGR  GL_RGB *//* GL_ALPHA, GL_UNSIGNED_BYTE, data);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-    GLfloat gQuad[] = {   (GLfloat)x ,        (GLfloat)y,     0.0f,0.0f,
-                          (GLfloat)x,     (GLfloat)(y-h),     0.0f,1.0f,
-                          (GLfloat)(x+w), (GLfloat)(y-h),     1.0f,1.0f,
-                          (GLfloat)x,         (GLfloat)y,     0.0f,0.0f,
-                          (GLfloat)(x+w), (GLfloat)(y-h),     1.0f,1.0f,
-                          (GLfloat)(x+w),     (GLfloat)y,     1.0f,0.0f
-    };
-    glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4*sizeof(float), gQuad);
-    checkGlError("glVertexAttribPointer");
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    checkGlError("glDrawArrays");
-}*/
-
 extern "C" void nativeBlank(void) {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 }
@@ -590,12 +552,13 @@ extern "C" void nativeSetTrueType(struct gcache_s *g) {
 /* ZOOMING */
 
 static GLuint GLzoom=0;
-static double zScale;
+static GLfloat zoom_w, zoom_h;
+
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_zoomBegin(JNIEnv *env, jclass obj) {
     //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     //glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    if (GLzoom!=0) return;
+    //if (GLzoom!=0) return;
     LOGI("GL Zoom Begin\n");
     unsigned int fbo;
     glGenFramebuffers(1, &fbo); // create framebuffer object
@@ -607,6 +570,8 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_zoomBegin(JNIEnv *env, jclass obj) {
     glGenTextures(1, &GLzoom);
     glBindTexture(GL_TEXTURE_2D, GLzoom);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, cur_h, cur_v, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -626,18 +591,20 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_zoomBegin(JNIEnv *env, jclass obj) {
     // check for completeness
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         LOGE("ERROR::FRAMEBUFFER:: Framebuffer is not complete!\n");
-
-    glClearColor(1.0f, 1.0f, 0.5f, 1.0f);
+    nativeSetDark(mode);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, cur_h, cur_v);
-    hint_render();
+    zoom_h=pt_v;
+    zoom_w=pt_h;
+
+    HINT_TRY hint_render();
     glBindFramebuffer(GL_FRAMEBUFFER, 0); // unbind
     checkGlError("glBindFramebuffer");
     glDeleteFramebuffers(1, &fbo); // delete
     checkGlError("glDeleteFramebuffers");
 
 
-    zScale=1.0;
+
     LOGI("GL Zoom Begin done\n");
 
 }
@@ -650,13 +617,14 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_zoomEnd(JNIEnv *env, jclass obj) {
 }
 
 extern "C" JNIEXPORT jdouble JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_zoom(JNIEnv *env, jclass obj, jdouble f, jdouble xf, jdouble yf) {
-    zScale*=f;
-    LOGI("GL Zooming scale=%f x=%f y=%f\n",zScale,xf,yf);
-    GLfloat x = 30.0;
-    GLfloat y = 30.0;
-    GLfloat w = cur_h*0.1;
-    GLfloat h = cur_v*0.1;
+Java_edu_hm_cs_hintview_HINTVIEWLib_zoom(JNIEnv *env, jclass obj) {
+    int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
+    LOGI("GL Zooming scale=%f \n",1.0);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT); // blank the canvas
+    GLfloat x = 0.0;
+    GLfloat y = 00.0;
+    GLfloat w = zoom_w;
+    GLfloat h = zoom_h;
     GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
                        (GLfloat) x, (GLfloat) (y + h), 0.0f, 0.0f,
                        (GLfloat) (x + w), (GLfloat) (y + h), 1.0f, 0.0f,
@@ -669,7 +637,15 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_zoom(JNIEnv *env, jclass obj, jdouble f, jdo
     checkGlError("glBindTexture");
     glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
     checkGlError("glVertexAttribPointer");
+    if (mode == DARK_MODE) {
+        //set light mode
+        glUniform1i(ourModeLocation, LIGHT_MODE);
+    }
     glDrawArrays(GL_TRIANGLES, 0, 6);
     checkGlError("glDrawArrays");
-    return zScale;
+    if (mode == DARK_MODE) {
+        //set back to dark mode
+        glUniform1i(ourModeLocation, DARK_MODE);
+    }
+    return 1.0;
 }

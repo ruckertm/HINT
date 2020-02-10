@@ -49,6 +49,6 @@ public class HINTVIEWLib {
 
     public static native double zoomEnd();
 
-    public static native void zoom(double f,double x, double y);
+    public static native void zoom();
 
 }

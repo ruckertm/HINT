@@ -80,7 +80,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
     private static int width, height;
     protected Renderer fileRenderer;
     private static boolean darkMode = false;
-    protected static boolean TeXzoom = false;
+    protected static boolean TeXzoom = false, ZoomOn=false, ZoomOff=false, Zooming=false;
     private GestureDetector touchGestureDetector;
     private ScaleGestureDetector scaleGestureDetector;
 
@@ -135,7 +135,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
     public boolean onTouch(View view, MotionEvent motionEvent) {
         boolean s = scaleGestureDetector.onTouchEvent(motionEvent);
         boolean t = touchGestureDetector.onTouchEvent(motionEvent);
-        Log.d(TAG, "onTouch: s: " + scaleGestureDetector.isInProgress() + ", t: " + t);
+        //Log.d(TAG, "onTouch: s: " + scaleGestureDetector.isInProgress() + ", t: " + t);
         return t || scaleGestureDetector.isInProgress();
     }
 
@@ -378,8 +378,6 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         private final Context context;
         private String fileUriStr;
         private long pos;
-        private boolean is_zooming=false, has_zoom=false;
-        private double f,x,y;
 
         Renderer(Context context) {
             this.context = context;
@@ -412,8 +410,10 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
                     HINTVIEWLib.begin(fd);
                     if (render_OK()) {
                         HINTVIEWLib.setPos(pos);
-                        this.fileUriStr = fileUriStr;
-                        this.pos = pos;
+                        if (render_OK()) {
+                            this.fileUriStr = fileUriStr;
+                            this.pos = pos;
+                        }
                     }
                     pfd.close();
                 } catch (FileNotFoundException e) {
@@ -436,21 +436,26 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
 
         public void onDrawFrame(GL10 gl) {
             HINTVIEWLib.setMode(darkMode);
-
-            Log.w(TAG, "is_zooming " + is_zooming + " && " + TeXzoom);
-                if (is_zooming && TeXzoom) {
-                    if (!has_zoom) {
-                        HINTVIEWLib.zoomBegin();
-                        has_zoom = true;
-                    }
-                    Log.w(TAG, "zoom " + f + " at (" + x + "x" + y +")");
-                    HINTVIEWLib.zoom(f, x, y);
+            HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi); /* needed for zooming */
+            if (!render_OK()) return;
+            if (HINTVIEWView.TeXzoom)
+                HINTVIEWLib.draw();
+            else {
+                if (HINTVIEWView.ZoomOn) {
+                    HINTVIEWLib.zoomBegin();
+                    HINTVIEWView.ZoomOn = false;
+                    HINTVIEWView.Zooming = true;
+                } else if (HINTVIEWView.ZoomOff) {
+                    HINTVIEWLib.zoomEnd();
+                    HINTVIEWView.ZoomOff = false;
+                    HINTVIEWView.Zooming = false;
                 }
-                else {
-                    HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi); /* needed for zooming */
+                if (HINTVIEWView.Zooming)
+                    HINTVIEWLib.zoom();
+                else
                     HINTVIEWLib.draw();
-                }
-                render_OK();
+            }
+            render_OK();
         }
 
         public void onSurfaceChanged(GL10 gl, int w, int h) {
@@ -463,25 +468,8 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
 
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
             HINTVIEWLib.init();
+            render_OK();
         }
 
-        public void zoomBegin()
-        { is_zooming  = true;
-          has_zoom =false;
-           }
-
-        public void zoom(double f, double x, double y)
-        { Log.w(TAG, "zoom " + f + " at (" + x + "x" + y +")");
-          this.f=f;
-          this.x=x;
-          this.y=y;
-        }
-
-        public double zoomEnd()
-        {
-         is_zooming=false;
-         has_zoom=false;
-         return   HINTVIEWLib.zoomEnd();
-        }
     }
 }
