@@ -33,13 +33,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowInsets;
-import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -51,9 +48,7 @@ import java.io.IOException;
 public class HINTVIEWActivity extends AppCompatActivity {
 
     private HINTVIEWView mView;
-    private Toolbar toolbar;
-    private Toolbar toolbar_light;
-    private Toolbar toolbar_dark;
+    private static Toolbar toolbar;
 
     private SharedPreferences sharedPref;
     private boolean darkMode = false;
@@ -94,11 +89,14 @@ public class HINTVIEWActivity extends AppCompatActivity {
 
         mView = findViewById(R.id.hintview);
         mView.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View v) {
-                hideToolbar(toolbar.getTranslationY() < 0);
+                //Gesture Handlers in HINTVIEWView are taking care of touchEvents
+                //  hideToolbar(mView, toolbar.getTranslationY() < 0);
             }
         });
+
 
         mView.init();
         mView.setFile(fileUriStr, filePos);
@@ -106,7 +104,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
         mView.setMode(darkMode);
         mView.setZoom(TeXzoom);
 
-        toolbar= findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setToolbar(darkMode);
 
@@ -135,10 +133,10 @@ public class HINTVIEWActivity extends AppCompatActivity {
         if (fileUriStr == null) openFileChooser();
     }
 
-    void hideToolbar(boolean toolbarVisible) {
+    public static void hideToolbar(View view, boolean toolbarVisible) {
         toolbar.setTranslationY(toolbarVisible ? 0 : -toolbar.getHeight());
         // hide Nav- & Status-bar
-        getWindow().getDecorView().setSystemUiVisibility(toolbarVisible ?
+        view.setSystemUiVisibility(toolbarVisible ?
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                         | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN :
@@ -171,7 +169,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
 
     private void setOverflowButtonColor(final int color) {
         Drawable drawable = toolbar.getOverflowIcon();
-        if(drawable != null) {
+        if (drawable != null) {
             drawable = DrawableCompat.wrap(drawable);
             DrawableCompat.setTint(drawable.mutate(), color);
             toolbar.setOverflowIcon(drawable);
@@ -198,7 +196,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
                 final boolean toolbarVisible = savedInstanceState.getBoolean("toolbarVisible");
                 darkMode = savedInstanceState.getBoolean("darkMode");
                 TeXzoom = savedInstanceState.getBoolean("TeXzoom");
-                hideToolbar(toolbarVisible);
+                hideToolbar(mView, toolbarVisible);
             }
         }, 80);
     }
