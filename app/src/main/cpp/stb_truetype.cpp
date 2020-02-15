@@ -1,6 +1,7 @@
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h" /* http://nothings.org/stb/stb_truetype.h */
 
+
 #define pixel_height 100
 
 //
@@ -10,7 +11,7 @@
 //
 
 extern "C" {
-#include "fonts.h"
+#include "hfonts.h"
 #include "basetypes.h"
 #include <stdlib.h>
 #include "error.h"

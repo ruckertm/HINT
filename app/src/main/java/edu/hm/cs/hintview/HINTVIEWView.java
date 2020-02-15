@@ -80,7 +80,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
     private static int width, height;
     protected Renderer fileRenderer;
     private static boolean darkMode = false;
-    protected static boolean TeXzoom = false, ZoomOn=false, ZoomOff=false, Zooming=false;
+    protected static boolean TeXzoom = false, ZoomOn = false, ZoomOff = false, Zooming = false;
     private GestureDetector touchGestureDetector;
     private ScaleGestureDetector scaleGestureDetector;
 
@@ -144,7 +144,8 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
     }
 
     public void setScale(double s) {
-        scale = s; if (scale<0.1) scale=0.1;
+        scale = s;
+        if (scale < 0.1) scale = 0.1;
     }
 
     public boolean getMode() {

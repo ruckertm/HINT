@@ -11,16 +11,10 @@
         android:layout_height="match_parent" />
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar_light"
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/toolbar_color"/>
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar_dark"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/toolbar_dark_color"
-        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
 </FrameLayout>
