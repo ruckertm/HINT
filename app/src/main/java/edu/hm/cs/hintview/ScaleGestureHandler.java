@@ -1,7 +1,6 @@
 package edu.hm.cs.hintview;
 
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 
 public class ScaleGestureHandler extends ScaleGestureDetector.SimpleOnScaleGestureListener {

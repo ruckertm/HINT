@@ -21,12 +21,15 @@
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
 #include "erroras.h"
 
 extern "C" {
 //include "stb_truetype.h"
 //include "hfonts.h"
 #include "basetypes.h"
+#include "hformat.h"
 #include "hint.h"
 #include "hrender.h"
 #include "rendernative.h"
@@ -90,10 +93,32 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_init(JNIEnv *env, jclass obj) {
 #define HINT_TRY if ((herror_string[0]=0,setjmp(error_exit)==0))
 #define HINT_CATCH else
 
+int fd=-1;
+static size_t hbase_size;
+extern "C" void hint_map(void)
+{ struct stat st;
+    if (fd<0) QUIT("Unable to open file %s", in_name);
+    if (fstat(fd, &st)<0) QUIT("Unable to get file size");
+    hbase_size=st.st_size;
+    hbase=(uint8_t *) mmap(NULL,hbase_size,PROT_READ,MAP_PRIVATE,fd, 0);
+    if (hbase==MAP_FAILED) QUIT("Unable to map file into memory");
+    close(fd);
+    hpos=hstart=hbase;
+    hend=hstart+hbase_size;
+}
+
+extern "C" void hint_unmap(void)
+{  munmap(hbase,hbase_size);
+    hbase=NULL;
+    hpos=hstart=hend=NULL;
+
+}
+
+
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_begin(JNIEnv *env, jclass obj, jint fileDescriptor) {
     LOGI("begin\n");
-
+     fd=fileDescriptor;
      HINT_TRY {
         //nativeSetColors(0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 0.8f);
         //hint_open("/storage/emulated/0/Download/paging.hnt");
@@ -108,7 +133,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_begin(JNIEnv *env, jclass obj, jint fileDesc
         //hint_open("/storage/emulated/0/Download/jpg.hnt");
         hint_end();
         hint_clear_fonts(true);
-        hint_begin(fileDescriptor);
+        hint_begin();
         LOGI("done begin");
     }
 }

@@ -27,8 +27,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 1818 ${}$}
-\def\lastdate{${}$Date: 2020-02-03 18:23:51 +0100 (Mon, 03 Feb 2020) ${}$}
+\def\lastrevision{${}$Revision: 1819 ${}$}
+\def\lastdate{${}$Date: 2020-02-14 16:22:46 +0100 (Fri, 14 Feb 2020) ${}$}
 
 \input titlepage.tex
 
@@ -154,76 +154,13 @@ Since modern computers with 64bit hardware have a huge address space,
 mapping the entire file into virtual memory is the most efficient way to read a large file.
 Mapping is not the same as reading and it is not the same as allocating precious memory,
 all that is done by the operating system when needed. Mapping just reserves adresses.
-Still we provide the function |hclose_file| to release all resources that may be accquired when
-calling |ħopen_file|.
 
-After mapping the file to the address |hbase|, access to sections of the file is provided by setting the
-three pointers |hpos|, |hstart|, and |hend|.
+After mapping the file at address |hbase|, access to sections of the file is provided by setting the
+three pointers |hpos|, |hstart|, and |hend|. The value |hbase==NULL| indicates, that
+no file is open.
 
 @<\HINT/ variables@>=
-uint8_t *hpos, *hstart, *hend;
-static uint8_t *hbase;
-#ifdef WIN32
-static HANDLE hMap; 
-#else
-static size_t hbase_size;
-#endif
-@
-@<get functions@>=
-void hmap_file(int fd)
-{ 
-#ifdef WIN32
-  HANDLE hFile;
-  uint64_t s;
-  hFile = CreateFile(in_name,FILE_READ_DATA,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_READONLY,NULL);
-  if (hFile==INVALID_HANDLE_VALUE)
-    QUIT("Unable to open file %s", in_name);
-  { DWORD hs,ls;
-    ls=GetFileSize(hFile,&hs); 
-    s=hs;
-    s=s<<32;
-    s=s+ls; 
-  }
-  if (s==0) QUIT("File %s is empty", in_name);
-  hMap = CreateFileMapping( 
-           hFile, /* use paging file */
-           NULL,                 /* no security attributes */
-           PAGE_READONLY,       /* read only access */
-           0,                    /* size: high 32-bits */
-           0,            /* size: low 32-bits */
-           NULL);     /* name of map object */
-  if (hMap == NULL) QUIT("Unable to map file into memory");
-  hbase = MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);  
-  if (hbase==NULL)
-    QUIT("Unable to obtain address of mapping for file %s", in_name);
-  CloseHandle(hFile);
-  hpos=hstart=hbase;
-  hend=hstart+s;
-#else 
-  struct stat st;
-  if (fd<0) QUIT("Unable to open file %s", in_name);
-  if (fstat(fd, &st)<0) QUIT("Unable to get file size");
-  hbase_size=st.st_size;
-  hbase= mmap(NULL,hbase_size,PROT_READ,MAP_PRIVATE,fd, 0);
-  if (hbase==MAP_FAILED) QUIT("Unable to map file into memory");
-  hpos=hstart=hbase;
-  hend=hstart+hbase_size;
-#endif
-}
-
-void hunmap_file(void)
-{
-#ifdef WIN32
- UnmapViewOfFile(hbase);
- CloseHandle(hMap);
- hMap=NULL;
-#else
- munmap(hbase,hbase_size);
-#endif
- hbase=NULL;
- hpos=hstart=hend=NULL;
-}
-
+uint8_t *hbase=NULL, *hpos, *hstart, *hend;
 @
 
 A \HINT/ file starts with a file banner\index{banner}. 
@@ -233,6 +170,8 @@ To read the banner, we have the function |hread_banner|; it returns |true| if su
 bool hget_banner(void)
 { char *t;
   int i;
+  if (hbase==NULL) 
+  return false;
   for (i=0;i<MAX_BANNER;i++)
   { hbanner[i]=HGET8;
     if (hbanner[i]=='\n') break;
@@ -3844,20 +3783,27 @@ the necessary functionality to allow different viewers on different systems.
 
 \subsection{Opening and Closing a \HINT/ File}
 The first function an application needs to call is |hint_begin| and the last function is |hint_end|.
-The former opens the file and prepares the system to be ready for all the functions that follow;
+The former initialized \TeX's memory, maps the file, and prepares the system to be ready for all 
+the functions that follow;
 the latter will release all resources obtained when calling one of the top level \HINT/ functions
 returning the system to the state it had before calling |hint_begin|.
+Since mapping (and unmapping) the \HINT/ file to memory is system depended,
+the functions |hint_begin| and |hint_end| delegate the work to two functions, |hint_map| and |hint_unmap|,
+that must be implemented by the framework using the \HINT/ backend. 
+If mapping the file fails, the function |hint_map| should
+not return  and it should leave the variables |hpos|, |hstart|, and |hend| untouched;
+otherwise, it should set these variables to the appropriate values.
 
 @<\HINT/ functions@>=
 static bool hint_is_open=false;
-void hint_begin(int fd)
+void hint_begin(void)
 { if (hint_is_open) 
     hint_end();
   mem_init();
   list_init(); 
   hclear_dir();
   hclear_fonts();
-  hmap_file(fd);
+  hint_map();
   hget_banner();
   hget_directory_section();
   hget_definition_section();
@@ -3868,12 +3814,11 @@ void hint_begin(int fd)
   hint_is_open=true;
 }
 
-
 void hint_end(void)
 { if (!hint_is_open) return;
   hclear_page();
   list_leaks();
-  hunmap_file();
+  hint_unmap();
   hclear_dir();
   hint_is_open=false;
 }
@@ -3881,8 +3826,42 @@ void hint_end(void)
 
 
 @<\HINT/ |extern|@>=
-extern void hint_begin(int fd);
+extern void hint_begin(void);
 extern void hint_end(void);
+extern void hint_map(void);
+extern uint8_t *hbase;
+extern void hint_unmap(void);
+@
+
+As an example for the mapping and unmapping functions,
+here are the functions used in the test programs
+of section~\secref{testing}.
+@<test variables@>=
+static size_t hbase_size;
+@
+
+@<test functions@>=
+void hint_map(void)
+{ struct stat st;
+  int fd;
+  fd = open(in_name, O_RDONLY, 0);
+  if (fd<0) QUIT("Unable to open file %s", in_name);
+  if (fstat(fd, &st)<0) QUIT("Unable to get file size");
+  hbase_size=st.st_size;
+  hbase= mmap(NULL,hbase_size,PROT_READ,MAP_PRIVATE,fd, 0);
+  if (hbase==MAP_FAILED) 
+    QUIT("Unable to map file into memory");
+  close(fd);
+  hpos=hstart=hbase;
+  hend=hstart+hbase_size;
+}
+
+void hunmap_file(void)
+{ munmap(hbase,hbase_size);
+  hbase=NULL;
+  hbase_size=0;
+  hpos=hstart=hend=NULL;
+}
 @
 
 \subsection{Building Pages Forward and Backward}
@@ -4065,7 +4044,7 @@ The viewer might store this location to be able to return to this page at a late
 
 uint64_t hint_page_top(uint64_t h)
 { hclear_page();
-  if (hpos==NULL) return 0;
+  if (hbase==NULL) return 0;
   hloc_set(h);
   hset_margins();
   hpos=hstart+(h&0xffffffff);
@@ -4114,7 +4093,7 @@ If we are neither in forward nor backward mode, there is no current page and hen
 In this case, we just render the first page.
 @<render functions@>=
 uint64_t hint_next_page(void)
-{ if (hpos==NULL) return 0;
+{ if (hbase==NULL) return 0;
   if (hloc_next()&& forward_mode)
   { hset_margins();
     if (!hint_forward())
@@ -4141,7 +4120,7 @@ If we are lucky, we are in backward mode. In this case, we do not need to
 throw away the information in the contribution list and we call |hint_backward|.
 @<render functions@>=
 uint64_t hint_prev_page(void)
-{ if (hpos==NULL) return 0;
+{ if (hbase==NULL) return 0;
   if (hloc_prev())
   { hclear_page();
     return hint_page();
@@ -4169,7 +4148,7 @@ and return the new location.
 @<render functions@>=
 uint64_t  hint_page_bottom(uint64_t h)
 { hclear_page();
-  if (hpos==NULL) return 0;
+  if (hbase==NULL) return 0;
   hset_margins();
   hpos=hstart+(h&0xffffffff);
   if (h>0xffffffff)
@@ -4185,7 +4164,7 @@ A function to build a page centered around a given location completes the set of
 page building functions.
 @<render functions@>=
 uint64_t  hint_page_center(uint64_t h)
-{ if (hpos==NULL) return hint_blank();
+{ if (hbase==NULL) return hint_blank();
   QUIT("hint_page_center not yet implemented");
 }
 @
@@ -5605,7 +5584,6 @@ extern void leak_out(pointer p, int s);
 #ifndef _HINT_H_
 #define _HINT_H_
 
-extern void hmap_file(int fd);
 extern bool hget_banner(void);
 extern void hget_section(uint16_t n);
 extern void hget_directory_section(void);
