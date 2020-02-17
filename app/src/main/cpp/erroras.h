@@ -15,4 +15,4 @@ char herror_string[MAX_HERROR];
 #else
 #define MESSAGE(...) ((void)0)
 #endif
-#define  QUIT(...)    (hpos=NULL,snprintf(herror_string,MAX_HERROR-1,__VA_ARGS__),MESSAGE("ERROR: %s",herror_string),longjmp(error_exit,1))
+#define  QUIT(...)    (hbase=NULL,snprintf(herror_string,MAX_HERROR-1,__VA_ARGS__),MESSAGE("ERROR: %s",herror_string),longjmp(error_exit,1))
