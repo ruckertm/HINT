@@ -27,8 +27,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 1819 ${}$}
-\def\lastdate{${}$Date: 2020-02-14 16:22:46 +0100 (Fri, 14 Feb 2020) ${}$}
+\def\lastrevision{${}$Revision: 1827 ${}$}
+\def\lastdate{${}$Date: 2020-02-18 12:37:39 +0100 (Tue, 18 Feb 2020) ${}$}
 
 \input titlepage.tex
 
@@ -3841,6 +3841,9 @@ static size_t hbase_size;
 @
 
 @<test functions@>=
+
+@<|mmap| and |munmap| declarations@>@;
+
 void hint_map(void)
 { struct stat st;
   int fd;
@@ -3856,12 +3859,54 @@ void hint_map(void)
   hend=hstart+hbase_size;
 }
 
-void hunmap_file(void)
+void hint_unmap(void)
 { munmap(hbase,hbase_size);
   hbase=NULL;
   hbase_size=0;
   hpos=hstart=hend=NULL;
 }
+@
+
+A small complication arrises from the fact that the |mmap| and |munmap| functions and the associated header files
+are not available under the Windows operating system and not even under MinGW.
+
+So we need to implement our own version of these functions.
+We do not implement general purpose replacements but only a replacement for the
+calls with the parameters used above.
+We start with the function |_get_osfhandle| to obtain a Windows |HANDLE| for the given
+file descriptor, then use |GetFileSize|, |CreateFileMapping|, and finally |MapViewOfFile|.
+The file is closed with |CloseHandle|.
+
+
+@<|mmap| and |munmap| declarations@>=
+#ifdef WIN32
+#include <windows.h>
+#include <io.h>
+#define PROT_READ   0x1
+#define MAP_PRIVATE 0x02
+#define MAP_FAILED   ((void *) -1)
+static HANDLE hMap;
+void *mmap(void *addr, size_t length, int prot, int flags,
+                  int fd, off_t offset)
+{ HANDLE hFile=(HANDLE)_get_osfhandle(fd);
+  if (hFile==INVALID_HANDLE_VALUE) QUIT("Unable to get file handle");
+  hMap = CreateFileMapping(hFile, NULL, PAGE_READONLY, 0, 0, NULL);
+  if (hMap == NULL) QUIT("Unable to map file into memory");
+  hbase = MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);
+  if (hbase==NULL) QUIT("Unable to obtain address of file mapping");
+  CloseHandle(hFile);
+  return hbase;
+}
+
+int munmap(void *addr, size_t length)
+{ UnmapViewOfFile(hbase);
+  CloseHandle(hMap);
+  hMap=NULL;
+  return 0;
+}
+#else
+#include <sys/mman.h>
+#endif
 @
 
 \subsection{Building Pages Forward and Backward}
@@ -5367,6 +5412,8 @@ the \TeX\ library and the \HINT/ library. Here is the main program:
 @(main.c@>=
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include "texextern.h"
 #include "hint.h"
 
@@ -5381,7 +5428,7 @@ int main(int argc, char *argv[])
 
   @<process the command line@>@;
   @<open the log file@>@;
-  hint_begin(0);
+  hint_begin();
   while (hint_forward())
     @<show the page@>@;
   hint_end();
@@ -5497,10 +5544,10 @@ FILE *hlog;
 \subsection{Testing the Backwards Reading}
 The following code  is similar to the code for the {\tt skip} program described in \cite{MR:format}. It test reading the \HINT/ file from end to start.
 
-
-
 @(back.c@>=
 #include <stdio.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <string.h>
 #include "texextern.h"
 #include "hint.h"
@@ -5516,7 +5563,7 @@ int main(int argc, char *argv[])
 
   @<process the command line@>@;
   @<open the log file@>@;
-  hint_begin(0);
+  hint_begin();
   hpos=hend;
   while (hint_backward()) continue;
   hint_end();
@@ -5605,13 +5652,6 @@ extern bool hbuild_page_up(void); /*append contributions to the current page*/
 
 \subsection{{\tt hint.c}}
 @(hint.c@>=
-#ifndef WIN32
-#include <sys/mman.h>
-#else
-#include <windows.h>
-#endif
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <string.h>
 #include <math.h>
 #include <zlib.h>@#

@@ -153,16 +153,16 @@ extern void store_map(pointer p,uint32_t pos,uint32_t offset);
 extern uint32_t hposition(pointer p);
 extern void hloc_set(uint64_t h);
 extern void hloc_set_next(pointer p);
-/*:222*//*232:*/
-#line 3959 ".\\hint.w"
+/*:222*//*233:*/
+#line 4004 ".\\hint.w"
 
 extern scaled hvsize,hhsize;
-/*:232*//*298:*/
-#line 5573 ".\\hint.w"
+/*:233*//*299:*/
+#line 5620 ".\\hint.w"
 
 extern void leak_in(pointer p,int s);
 extern void leak_out(pointer p,int s);
-/*:298*/
+/*:299*/
 #line 2913 ".\\hint.w"
 
 #endif

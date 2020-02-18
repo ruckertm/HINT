@@ -7,6 +7,7 @@ extern "C" {
 jmp_buf error_exit;
 #define MAX_HERROR 1024
 char herror_string[MAX_HERROR];
+extern uint8_t *hbase;
 #ifdef __cplusplus
 }
 #endif
@@ -15,4 +16,5 @@ char herror_string[MAX_HERROR];
 #else
 #define MESSAGE(...) ((void)0)
 #endif
+
 #define  QUIT(...)    (hbase=NULL,snprintf(herror_string,MAX_HERROR-1,__VA_ARGS__),MESSAGE("ERROR: %s",herror_string),longjmp(error_exit,1))

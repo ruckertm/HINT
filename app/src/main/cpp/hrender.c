@@ -1,5 +1,5 @@
-/*302:*/
-#line 5663 ".\\hint.w"
+/*303:*/
+#line 5703 ".\\hint.w"
 
 #include <math.h> 
 #include "texextern.h"
@@ -8,32 +8,32 @@
 #include "rendernative.h"
 #include "texdefs.h"
 
-/*248:*/
-#line 4268 ".\\hint.w"
+/*249:*/
+#line 4313 ".\\hint.w"
 
 typedef struct font_s*font_s_ptr;
 extern struct font_s*hget_font(unsigned char f);
-/*:248*//*259:*/
-#line 4587 ".\\hint.w"
+/*:249*//*260:*/
+#line 4632 ".\\hint.w"
 
 extern void render_char(int x,int y,struct font_s*f,int32_t s,uint32_t cc);
-/*:259*/
-#line 5671 ".\\hint.w"
+/*:260*/
+#line 5711 ".\\hint.w"
 
-
-/*233:*/
-#line 3981 ".\\hint.w"
-
-int page_v,page_h,offset_v,offset_h;
-/*:233*//*238:*/
-#line 4089 ".\\hint.w"
-
-static bool forward_mode= false,backward_mode= false;
-/*:238*/
-#line 5673 ".\\hint.w"
 
 /*234:*/
-#line 3991 ".\\hint.w"
+#line 4026 ".\\hint.w"
+
+int page_v,page_h,offset_v,offset_h;
+/*:234*//*239:*/
+#line 4134 ".\\hint.w"
+
+static bool forward_mode= false,backward_mode= false;
+/*:239*/
+#line 5713 ".\\hint.w"
+
+/*235:*/
+#line 4036 ".\\hint.w"
 
 static void hset_margins(void)
 {offset_h= page_h/8-0x48000;
@@ -47,8 +47,8 @@ hvsize= page_v-2*offset_v;
 if(hhsize<=0)hhsize= page_h,offset_h= 0;
 if(hvsize<=0)hvsize= page_v,offset_v= 0;
 }
-/*:234*//*235:*/
-#line 4009 ".\\hint.w"
+/*:235*//*236:*/
+#line 4054 ".\\hint.w"
 
 static void houtput_template0(void)
 {pointer p,q,t,b,l,r;
@@ -70,8 +70,8 @@ link(t)= p;
 p= vpackage(t,page_v,exactly,0);
 stream[0].p= p;
 }
-/*:235*//*236:*/
-#line 4043 ".\\hint.w"
+/*:236*//*237:*/
+#line 4088 ".\\hint.w"
 
 
 uint64_t hint_page_top(uint64_t h)
@@ -90,8 +90,8 @@ backward_mode= false;
 houtput_template0();
 return h;
 }
-/*:236*//*237:*/
-#line 4067 ".\\hint.w"
+/*:237*//*238:*/
+#line 4112 ".\\hint.w"
 
 uint64_t hint_page_get(void)
 {
@@ -107,8 +107,8 @@ return i;
 else
 return hint_page_top(i);
 }
-/*:237*//*239:*/
-#line 4094 ".\\hint.w"
+/*:238*//*240:*/
+#line 4139 ".\\hint.w"
 
 uint64_t hint_next_page(void)
 {if(hbase==NULL)return 0;
@@ -126,8 +126,8 @@ else
 return hint_page();
 }
 }
-/*:239*//*240:*/
-#line 4121 ".\\hint.w"
+/*:240*//*241:*/
+#line 4166 ".\\hint.w"
 
 uint64_t hint_prev_page(void)
 {if(hbase==NULL)return 0;
@@ -146,8 +146,8 @@ return hint_page_get();
 else
 return hint_page_bottom(hint_page_get());
 }
-/*:240*//*241:*/
-#line 4148 ".\\hint.w"
+/*:241*//*242:*/
+#line 4193 ".\\hint.w"
 
 uint64_t hint_page_bottom(uint64_t h)
 {hclear_page();
@@ -162,15 +162,15 @@ forward_mode= false;
 houtput_template0();
 return hint_page_get();
 }
-/*:241*//*242:*/
-#line 4165 ".\\hint.w"
+/*:242*//*243:*/
+#line 4210 ".\\hint.w"
 
 uint64_t hint_page_center(uint64_t h)
 {if(hbase==NULL)return hint_blank();
 QUIT("hint_page_center not yet implemented");
 }
-/*:242*//*243:*/
-#line 4176 ".\\hint.w"
+/*:243*//*244:*/
+#line 4221 ".\\hint.w"
 
 void hint_resize(int px_h,int px_v,double dpi)
 {static int old_px_h= 0,old_px_v= 0;
@@ -183,16 +183,16 @@ hclear_page();
 forward_mode= false;
 backward_mode= false;
 }
-/*:243*//*261:*/
-#line 4601 ".\\hint.w"
+/*:244*//*262:*/
+#line 4646 ".\\hint.w"
 
 static void render_rule(int x,int y,int w,int h)
 {if(w<=0)return;
 if(h<=0)return;
 nativeRule(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h));
 }
-/*:261*//*262:*/
-#line 4613 ".\\hint.w"
+/*:262*//*263:*/
+#line 4658 ".\\hint.w"
 
 void render_image(int x,int y,int w,int h,uint32_t n)
 {
@@ -202,8 +202,8 @@ hget_section(n);
 nativeImage(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),hstart,hend);
 hpos= spos;hstart= sstart;hend= send;
 }
-/*:262*//*263:*/
-#line 4637 ".\\hint.w"
+/*:263*//*264:*/
+#line 4682 ".\\hint.w"
 
 static scaled cur_h,cur_v;
 static scaled rule_ht,rule_dp,rule_wd;
@@ -525,15 +525,15 @@ next_p:p= link(p);
 }
 }
 
-/*:263*//*264:*/
-#line 4965 ".\\hint.w"
+/*:264*//*265:*/
+#line 5010 ".\\hint.w"
 
 uint64_t hint_blank(void)
 {nativeBlank();
 return 0;
 }
-/*:264*//*265:*/
-#line 4974 ".\\hint.w"
+/*:265*//*266:*/
+#line 5019 ".\\hint.w"
 
 
 void hint_render(void)
@@ -547,7 +547,7 @@ vlist_render(stream[0].p);
 else
 hlist_render(stream[0].p);
 }
-/*:265*/
-#line 5674 ".\\hint.w"
+/*:266*/
+#line 5714 ".\\hint.w"
 
-/*:302*/
+/*:303*/

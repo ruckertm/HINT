@@ -19,6 +19,7 @@
 
 extern "C" {
 #include "stb_truetype.h"
+#include "hint.h"
 #include "hfonts.h"
 #include "hrender.h"
 #include "rendernative.h"

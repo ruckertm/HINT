@@ -2122,9 +2122,9 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define put(file)    fwrite(&((file).d),sizeof((file).d),1,(file).f)
 #define get(file)    fread(&((file).d),sizeof((file).d),1,(file).f)
 
-#define reset(file,file_name,mode)   ((file).f= fopen((char *)(file_name)+1,mode),\
+#define reset(file,name,mode)   ((file).f= fopen((char *)(name)+1,mode),\
                                  (file).f!=NULL?get(file):0)
-#define rewrite(file,file_name,mode) ((file).f= fopen((char *)(file_name)+1,mode))
+#define rewrite(file,name,mode) ((file).f= fopen((char *)(name)+1,mode))
 #define pascal_close(file)    fclose((file).f)
 #define eof(file)    feof((file).f)
 #define eoln(file)    ((file).d=='\n'||eof(file))
