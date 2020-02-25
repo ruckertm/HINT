@@ -22,7 +22,7 @@ add_library(hintview SHARED
         stb_image.cpp
         hfonts.c
         hformat.c
-        hdefaults.c
+        hget.c
         htex.c
         hrender.c
         hint.c

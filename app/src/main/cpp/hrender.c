@@ -1,39 +1,40 @@
-/*303:*/
-#line 5703 ".\\hint.w"
+/*294:*/
+#line 5523 ".\\hint.w"
 
 #include <math.h> 
 #include "texextern.h"
+#include "hget.h"
 #include "hint.h"
 #include "hrender.h"
 #include "rendernative.h"
 #include "texdefs.h"
 
-/*249:*/
-#line 4313 ".\\hint.w"
+/*237:*/
+#line 4017 ".\\hint.w"
 
 typedef struct font_s*font_s_ptr;
 extern struct font_s*hget_font(unsigned char f);
-/*:249*//*260:*/
-#line 4632 ".\\hint.w"
+/*:237*//*248:*/
+#line 4336 ".\\hint.w"
 
 extern void render_char(int x,int y,struct font_s*f,int32_t s,uint32_t cc);
-/*:260*/
-#line 5711 ".\\hint.w"
+/*:248*/
+#line 5532 ".\\hint.w"
 
 
-/*234:*/
-#line 4026 ".\\hint.w"
+/*222:*/
+#line 3730 ".\\hint.w"
 
 int page_v,page_h,offset_v,offset_h;
-/*:234*//*239:*/
-#line 4134 ".\\hint.w"
+/*:222*//*227:*/
+#line 3838 ".\\hint.w"
 
 static bool forward_mode= false,backward_mode= false;
-/*:239*/
-#line 5713 ".\\hint.w"
+/*:227*/
+#line 5534 ".\\hint.w"
 
-/*235:*/
-#line 4036 ".\\hint.w"
+/*223:*/
+#line 3740 ".\\hint.w"
 
 static void hset_margins(void)
 {offset_h= page_h/8-0x48000;
@@ -47,8 +48,8 @@ hvsize= page_v-2*offset_v;
 if(hhsize<=0)hhsize= page_h,offset_h= 0;
 if(hvsize<=0)hvsize= page_v,offset_v= 0;
 }
-/*:235*//*236:*/
-#line 4054 ".\\hint.w"
+/*:223*//*224:*/
+#line 3758 ".\\hint.w"
 
 static void houtput_template0(void)
 {pointer p,q,t,b,l,r;
@@ -70,8 +71,8 @@ link(t)= p;
 p= vpackage(t,page_v,exactly,0);
 stream[0].p= p;
 }
-/*:236*//*237:*/
-#line 4088 ".\\hint.w"
+/*:224*//*225:*/
+#line 3792 ".\\hint.w"
 
 
 uint64_t hint_page_top(uint64_t h)
@@ -90,12 +91,12 @@ backward_mode= false;
 houtput_template0();
 return h;
 }
-/*:237*//*238:*/
-#line 4112 ".\\hint.w"
+/*:225*//*226:*/
+#line 3816 ".\\hint.w"
 
 uint64_t hint_page_get(void)
 {
-MESSAGE("page_get: %d : 0x%"PRIx64"\n",cur_loc,page_loc[cur_loc]);
+DBG(DBGPAGE,"page_get: %d : 0x%"PRIx64"\n",cur_loc,page_loc[cur_loc]);
 
 return page_loc[cur_loc];
 }
@@ -107,8 +108,8 @@ return i;
 else
 return hint_page_top(i);
 }
-/*:238*//*240:*/
-#line 4139 ".\\hint.w"
+/*:226*//*228:*/
+#line 3843 ".\\hint.w"
 
 uint64_t hint_next_page(void)
 {if(hbase==NULL)return 0;
@@ -126,8 +127,8 @@ else
 return hint_page();
 }
 }
-/*:240*//*241:*/
-#line 4166 ".\\hint.w"
+/*:228*//*229:*/
+#line 3870 ".\\hint.w"
 
 uint64_t hint_prev_page(void)
 {if(hbase==NULL)return 0;
@@ -146,8 +147,8 @@ return hint_page_get();
 else
 return hint_page_bottom(hint_page_get());
 }
-/*:241*//*242:*/
-#line 4193 ".\\hint.w"
+/*:229*//*230:*/
+#line 3897 ".\\hint.w"
 
 uint64_t hint_page_bottom(uint64_t h)
 {hclear_page();
@@ -162,15 +163,15 @@ forward_mode= false;
 houtput_template0();
 return hint_page_get();
 }
-/*:242*//*243:*/
-#line 4210 ".\\hint.w"
+/*:230*//*231:*/
+#line 3914 ".\\hint.w"
 
 uint64_t hint_page_center(uint64_t h)
 {if(hbase==NULL)return hint_blank();
 QUIT("hint_page_center not yet implemented");
 }
-/*:243*//*244:*/
-#line 4221 ".\\hint.w"
+/*:231*//*232:*/
+#line 3925 ".\\hint.w"
 
 void hint_resize(int px_h,int px_v,double dpi)
 {static int old_px_h= 0,old_px_v= 0;
@@ -183,16 +184,16 @@ hclear_page();
 forward_mode= false;
 backward_mode= false;
 }
-/*:244*//*262:*/
-#line 4646 ".\\hint.w"
+/*:232*//*250:*/
+#line 4350 ".\\hint.w"
 
 static void render_rule(int x,int y,int w,int h)
 {if(w<=0)return;
 if(h<=0)return;
 nativeRule(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h));
 }
-/*:262*//*263:*/
-#line 4658 ".\\hint.w"
+/*:250*//*251:*/
+#line 4362 ".\\hint.w"
 
 void render_image(int x,int y,int w,int h,uint32_t n)
 {
@@ -202,8 +203,8 @@ hget_section(n);
 nativeImage(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),hstart,hend);
 hpos= spos;hstart= sstart;hend= send;
 }
-/*:263*//*264:*/
-#line 4682 ".\\hint.w"
+/*:251*//*252:*/
+#line 4386 ".\\hint.w"
 
 static scaled cur_h,cur_v;
 static scaled rule_ht,rule_dp,rule_wd;
@@ -403,7 +404,7 @@ g_sign= glue_sign(this_box);p= list_ptr(this_box);
 left_edge= cur_h;cur_v= cur_v-height(this_box);
 top_edge= cur_v;
 while(p!=null)
-{if(is_char_node(p))MESSAGE("Glyph in vertical list ignored");
+{if(is_char_node(p))DBG(DBGTEX,"Glyph in vertical list ignored");
 else
 {switch(type(p))
 {case hlist_node:
@@ -525,15 +526,15 @@ next_p:p= link(p);
 }
 }
 
-/*:264*//*265:*/
-#line 5010 ".\\hint.w"
+/*:252*//*253:*/
+#line 4714 ".\\hint.w"
 
 uint64_t hint_blank(void)
 {nativeBlank();
 return 0;
 }
-/*:265*//*266:*/
-#line 5019 ".\\hint.w"
+/*:253*//*254:*/
+#line 4723 ".\\hint.w"
 
 
 void hint_render(void)
@@ -547,7 +548,7 @@ vlist_render(stream[0].p);
 else
 hlist_render(stream[0].p);
 }
-/*:266*/
-#line 5714 ".\\hint.w"
+/*:254*/
+#line 5535 ".\\hint.w"
 
-/*:303*/
+/*:294*/

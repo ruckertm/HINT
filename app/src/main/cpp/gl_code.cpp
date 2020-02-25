@@ -23,16 +23,21 @@
 #include <GLES2/gl2ext.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
-#include "erroras.h"
+#include <unistd.h>
+
+
 
 extern "C" {
 //include "stb_truetype.h"
 //include "hfonts.h"
 #include "basetypes.h"
+#include "error.h"
 #include "hformat.h"
+#include "hget.h"
 #include "hint.h"
 #include "hrender.h"
 #include "rendernative.h"
+char in_name[1]; /* to keep hget happy */
 
 //DEPRECATED
 //extern void nativeSetColors(double fr, double fg, double fb, double br, double bg, double bb);
@@ -90,14 +95,12 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_init(JNIEnv *env, jclass obj) {
     nativeInit();
 }
 
-#define HINT_TRY if ((herror_string[0]=0,setjmp(error_exit)==0))
-#define HINT_CATCH else
 
 int fd=-1;
 static size_t hbase_size;
 extern "C" void hint_map(void)
 { struct stat st;
-    if (fd<0) QUIT("Unable to open file %s", in_name);
+    if (fd<0) QUIT("Unable to open file");
     if (fstat(fd, &st)<0) QUIT("Unable to get file size");
     hbase_size=st.st_size;
     hbase=(uint8_t *) mmap(NULL,hbase_size,PROT_READ,MAP_PRIVATE,fd, 0);

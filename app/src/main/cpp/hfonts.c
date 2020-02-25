@@ -1,37 +1,38 @@
-/*305:*/
-#line 5729 ".\\hint.w"
+/*296:*/
+#line 5550 ".\\hint.w"
 
 #include "basetypes.h"
 #include "error.h"
 #include "hformat.h"
 #include "hint.h"
-/*281:*/
-#line 5312 ".\\hint.w"
+#include "hget.h"
+/*269:*/
+#line 5016 ".\\hint.w"
 
 #define STB_TRUETYPE_IMPLEMENTATION
 #define STBTT_STATIC
 #include "stb_truetype.h"
-/*:281*/
-#line 5734 ".\\hint.w"
+/*:269*/
+#line 5556 ".\\hint.w"
 
 #include "hfonts.h"
 #include "hrender.h"
 #include "rendernative.h"
 
-/*247:*/
-#line 4283 ".\\hint.w"
+/*235:*/
+#line 3987 ".\\hint.w"
 
 static font_t*fonts[0x100]= {NULL};
-/*:247*//*254:*/
-#line 4409 ".\\hint.w"
+/*:235*//*242:*/
+#line 4113 ".\\hint.w"
 
 static gcache_t g_undefined= {0};
-/*:254*/
-#line 5739 ".\\hint.w"
+/*:242*/
+#line 5561 ".\\hint.w"
 
 
-/*283:*/
-#line 5336 ".\\hint.w"
+/*271:*/
+#line 5040 ".\\hint.w"
 
 int unpack_ttfile(font_t*f)
 {
@@ -53,12 +54,12 @@ g->ff= tt_format;
 nativeSetTrueType(g);
 }
 
-/*:283*/
-#line 5741 ".\\hint.w"
+/*:271*/
+#line 5563 ".\\hint.w"
 
 
-/*280:*/
-#line 5174 ".\\hint.w"
+/*268:*/
+#line 4878 ".\\hint.w"
 
 
 #define PK_READ_1_BYTE() (data[i++])
@@ -76,7 +77,7 @@ if(g==NULL||g->pk.encoding==NULL)return;
 g->ff= pk_format;
 if(g->bits!=NULL)return;
 #if 0
-MESSAGE("Unpacking glyph %c (0x%x)",g->cc,g->cc);
+DBG(DBGRENDER,"Unpacking glyph %c (0x%x)",g->cc,g->cc);
 #endif
 data= g->pk.encoding;
 i= 0;
@@ -107,7 +108,7 @@ g->voff= (signed int)PK_READ_4_BYTE();
 if((g->pk.flag>>4)==14)nativeSetBitmaped(g,data+i);
 else nativeSetRunlength(g,data+i);
 #if 0
-MESSAGE("Unpacked glyph %c (0x%x) w=%d h=%d hoff=%d voff=%d",g->cc,g->cc,g->w,g->h,g->hoff,g->voff);
+DBG(DBGRENDER,"Unpacked glyph %c (0x%x) w=%d h=%d hoff=%d voff=%d",g->cc,g->cc,g->w,g->h,g->hoff,g->voff);
 #endif
 }
 
@@ -188,12 +189,12 @@ break;
 return 1;
 }
 
-/*:280*/
-#line 5743 ".\\hint.w"
+/*:268*/
+#line 5565 ".\\hint.w"
 
 
-/*248:*/
-#line 4290 ".\\hint.w"
+/*236:*/
+#line 3994 ".\\hint.w"
 
 struct font_s*hget_font(unsigned char f)
 {font_t*fp;
@@ -210,15 +211,15 @@ fp->size= hend-hstart;
 fp->font_data= hstart;
 hpos= spos;hstart= sstart;hend= send;
 }
-/*277:*/
-#line 5144 ".\\hint.w"
+/*265:*/
+#line 4848 ".\\hint.w"
 
 if(fp->font_data[0]==0xF7&&fp->font_data[1]==0x59)
 {fp->ff= pk_format;
 if(!unpack_pkfile(fp)){free(fp);fp= NULL;}
 }
-/*:277*//*284:*/
-#line 5361 ".\\hint.w"
+/*:265*//*272:*/
+#line 5065 ".\\hint.w"
 
 else if(unpack_ttfile(fp))
 fp->ff= tt_format;
@@ -226,14 +227,14 @@ else
 {QUIT("Font format not supported for font %d\n",fp->n);
 free(fp);fp= NULL;
 }
-/*:284*/
-#line 4306 ".\\hint.w"
+/*:272*/
+#line 4010 ".\\hint.w"
 
 fonts[f]= fp;
 return fonts[f];
 }
-/*:248*//*250:*/
-#line 4321 ".\\hint.w"
+/*:236*//*238:*/
+#line 4025 ".\\hint.w"
 
 static void hfree_glyph_cache(font_t*f,bool rm);
 
@@ -245,8 +246,8 @@ if(fonts[f]!=NULL)
 if(rm){free(fonts[f]);fonts[f]= NULL;}
 }
 }
-/*:250*//*253:*/
-#line 4366 ".\\hint.w"
+/*:238*//*241:*/
+#line 4070 ".\\hint.w"
 
 #define G0_BITS 7
 #define G0_SIZE (1<<G0_BITS)
@@ -280,8 +281,8 @@ else if(f->g0)
 return f->g0[cc];
 return NULL;
 }
-/*:253*//*255:*/
-#line 4413 ".\\hint.w"
+/*:241*//*243:*/
+#line 4117 ".\\hint.w"
 
 static gcache_t*hnew_g(gcache_t**g)
 {if(*g==NULL)
@@ -335,8 +336,8 @@ else if(cc<G123_SIZE*G123_SIZE*G0_SIZE)return hnew_g2(&(pk->g2),cc);
 else if(cc<G123_SIZE*G123_SIZE*G123_SIZE*G0_SIZE)return hnew_g3(&(pk->g3),cc);
 else return&g_undefined;
 }
-/*:255*//*256:*/
-#line 4472 ".\\hint.w"
+/*:243*//*244:*/
+#line 4176 ".\\hint.w"
 
 static void hfree_g0(struct gcache_s**g,bool rm)
 {int i;
@@ -400,8 +401,8 @@ if(f->g3!=NULL)
 if(rm){free(f->g3);f->g3= NULL;}
 }
 }
-/*:256*//*258:*/
-#line 4590 ".\\hint.w"
+/*:244*//*246:*/
+#line 4294 ".\\hint.w"
 
 gcache_t*hget_glyph(font_t*fp,unsigned int cc)
 {
@@ -421,8 +422,8 @@ QUIT("tt t1 and ot formats not yet supported");
 }
 return g;
 }
-/*:258*//*259:*/
-#line 4614 ".\\hint.w"
+/*:246*//*247:*/
+#line 4318 ".\\hint.w"
 
 void render_char(int x,int y,struct font_s*f,int32_t s,uint32_t cc)
 
@@ -440,8 +441,8 @@ h= ((double)g->h/f->vppp)*m;
 nativeGlyph(SP2PT(x)-dx,SP2PT(y)-dy,w,h,g);
 }
 
-/*:259*/
-#line 5745 ".\\hint.w"
+/*:247*/
+#line 5567 ".\\hint.w"
 
 
-/*:305*/
+/*:296*/

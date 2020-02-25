@@ -40,9 +40,9 @@
 \titletrue
 
 \def\setrevision$#1: #2 ${\gdef\lastrevision{#2}}
-\setrevision$Revision: 1772 $
+\setrevision$Revision: 1850 $
 \def\setdate$#1(#2) ${\gdef\lastdate{#2}}
-\setdate$Date: 2019-11-26 10:01:28 +0100 (Tue, 26 Nov 2019) $
+\setdate$Date: 2020-02-25 11:05:17 +0100 (Tue, 25 Feb 2020) $
 
 \null
 
@@ -470,20 +470,35 @@ we define two arrays of strings as well. Keeping the definitions consistent
 is achieved by creating all definitions from the same list
 of identifiers using different definitions of the macro |DEF_KIND|.
 
-@<hint types@>=
+@<hint basic types@>=
 #define DEF_KIND(C,D,N) @[C##_kind=N@]
 typedef enum {@+@<kinds@>@+,@+ @<alternative kind names@> @+} kind_t;
 #undef DEF_KIND
 @
-@<common variables@>=
+
+@<define |content_name| and |definition_name|@>=
 #define DEF_KIND(C,D,N) @[#C@]
-const char *content_name[0x20]=@+{@+@<kinds@>@;@+}@+;
+const char *content_name[32]=@+{@+@<kinds@>@;@+}@+;
 #undef DEF_KIND@#
+printf("const char *content_name[32]={");
+for (k=0; k<= 31;k++)
+{ printf("\"%s\"",content_name[k]);
+  if (k<31) printf(", ");
+}
+printf("};\n\n");
 
 #define DEF_KIND(C,D,N) @[#D@]
 const char *definition_name[0x20]=@+{@+@<kinds@>@;@+}@+;
 #undef DEF_KIND
+printf("const char *definition_name[32]={");
+for (k=0; k<= 31;k++)
+{ printf("\"%s\"",definition_name[k]);
+  if (k<31) printf(", ");
+}
+printf("};\n\n");
+
 @ 
+
 \goodbreak
 \index{glyph kind+\\{glyph\_kind}}
 \index{font kind+\\{font\_kind}}
@@ -582,7 +597,7 @@ enumeration type.
 \index{b101+\\{b101}}
 \index{b110+\\{b110}}
 \index{b111+\\{b111}}
-@<hint types@>=
+@<hint basic types@>=
 typedef enum {@+ b000=0,b001=1,b010=2,b011=3,b100=4,b101=5,b110=6,b111=7@+ } info_t;
 @
 
@@ -669,13 +684,15 @@ Here is the code for the initial and final part of a get function:
 @<read the start byte |a|@>=
 uint8_t a,z; /* the start and the end byte*/
 uint32_t node_pos=hpos-hstart;
-if (hpos>=hend) return;
+if (hpos>=hend) QUIT("Attempt to read a start byte at the end of the section");
 HGETTAG(a);
 @
 
 @<read and check the end byte |z|@>=
 HGETTAG(z);@+
-if (a!=z) TAGSERR(a,z);@/@t~@>
+if (a!=z)
+  QUIT(@["Tag mismatch [%s,%d]!=[%s,%d] at 0x%x to " SIZE_F "\n"@],@|
+    NAME(a),INFO(a),NAME(z),INFO(z),@|node_pos, hpos-hstart-1);
 @
 
 
@@ -733,13 +750,13 @@ After that, the \.{stretch} program calls |hwrite_glyph| to produce the glyph
 node in long format.
 
 \codesection{\getsymbol}{Reading the Short Format}\getindex{1}{2}{Glyphs}
-@<GET macros@>=
+@<get macros@>=
 #define @[HGET_GLYPH(I,G)@] \
-  if (I==1) HGET8((G).c);\
+  if (I==1) (G).c=HGET8;\
   else if (I==2) HGET16((G).c);\
   else if (I==3) HGET24((G).c);\
   else if (I==4) HGET32((G).c);\
-  HGET8((G).f); @+REF(font_kind,(G).f);@/\
+  (G).f=HGET8; @+REF(font_kind,(G).f);@/\
   hwrite_glyph(&(G));\
 @
 
@@ -897,28 +914,22 @@ you should probably be even more restrictive. For example you should avoid chara
 ``\.{\\}'' or ``\.{/}'' which are used in different ways for directories.
 
 The internal representation of a string is a simple zero terminated \CEE/ string.
-When scanning a string, we copy it to the |scratch_buffer| keeping track
-of its length in |scratch_length|. When done,
+When scanning a string, we copy it to the |str_buffer| keeping track
+of its length in |str_length|. When done,
 we make a copy for permanent storage and return the pointer to the parser.
-To operate on the |scratch_buffer|, we define a few macros.
-The |scratch_buffer| is much larger than what one would expect but it is used
-not only for strings but also for file I/O (see page~\pageref{scratch}).
-
-@<hint macros@>=
-#define MAX_SCRATCH    (1<<13) /* 8kByte */
-@
-
-@<common variables@>=
-char scratch_buffer[MAX_SCRATCH];
-@
+To operate on the |str_buffer|, we define a few macros.
+The constant |MAX_STR| determines the maximum size of a string (including the zero byte) to be $2^{10}$ byte.
+This restriction is part of the \HINT/ file format specification.
 
 @<scanning macros@>=
-static int scratch_length;
-#define STR_START      @[(scratch_length=0)@]
-#define @[STR_PUT(C)@] @[(scratch_buffer[scratch_length++]=(C))@]
-#define @[STR_ADD(C)@] @[STR_PUT(C);RNG("String length",scratch_length,0,MAX_SCRATCH-1)@]
-#define STR_END        @[scratch_buffer[scratch_length]=0@]
-#define SCAN_STR       @[yylval.s=scratch_buffer@]
+#define MAX_STR    (1<<10) /* $2^{10}$ Byte or 1kByte */
+static char str_buffer[MAX_STR];
+static int str_length;
+#define STR_START      @[(str_length=0)@]
+#define @[STR_PUT(C)@] @[(str_buffer[str_length++]=(C))@]
+#define @[STR_ADD(C)@] @[STR_PUT(C);RNG("String length",str_length,0,MAX_STR-1)@]
+#define STR_END        @[str_buffer[str_length]=0@]
+#define SCAN_STR       @[yylval.s=str_buffer@]
 @
 
 
@@ -985,7 +996,7 @@ void hput_string(char *str)
 @ 
 
 \getcode
-@<GET macros@>=
+@<get file macros@>=
 #define @[HGET_STRING(S)@] @[S=(char*)hpos;\
  while(hpos<hend && *hpos!=0) { RNG("String character",*hpos,0x20,0x7E); hpos++;}\
  hpos++;
@@ -1118,21 +1129,23 @@ string: STRING @+ | CHARCODE { static char s[2];
 
 The function |hwrite_charcode| will write a character code. While ASCII codes are handled directly,
 larger character codes are passed to the function |hwrite_utf8|.
+It returns the number of characters written.
 
 \writecode
 @<write functions@>=
-void hwrite_utf8(uint32_t c)
+int hwrite_utf8(uint32_t c)
 {@+ if (c<0x80) 
-    hwritec(c);
+  {  hwritec(c); return 1; }
   else if (c<0x800)
-  { hwritec(0xC0|(c>>6));@+ hwritec(0x80|(c&0x3F));@+ } 
+  { hwritec(0xC0|(c>>6));@+ hwritec(0x80|(c&0x3F));@+ return 2;} 
   else if (c<0x10000)@/
-  { hwritec(0xE0|(c>>12)); hwritec(0x80|((c>>6)&0x3F));@+ hwritec(0x80|(c&0x3F)); } 
+  { hwritec(0xE0|(c>>12)); hwritec(0x80|((c>>6)&0x3F));@+ hwritec(0x80|(c&0x3F)); return 3; } 
   else if (c<0x200000)@/
   { hwritec(0xF0|(c>>18));@+ hwritec(0x80|((c>>12)&0x3F)); 
-    hwritec(0x80|((c>>6)&0x3F));@+ hwritec(0x80|(c&0x3F)); } 
+    hwritec(0x80|((c>>6)&0x3F));@+ hwritec(0x80|(c&0x3F)); return 4;} 
   else
    RNG("character code",c,0,0x1FFFFF);
+  return 0;
 } 
 
 void hwrite_charcode(uint32_t c)
@@ -1150,12 +1163,12 @@ void hwrite_charcode(uint32_t c)
 
 \getcode
 @<get functions@>=
-#define @[HGET_UTF8C(X)@]  HGET8(X);@+ if ((X&0xC0)!=0x80) \
+#define @[HGET_UTF8C(X)@]  (X)=HGET8;@+ if ((X&0xC0)!=0x80) \
   QUIT(@["UTF8 continuation byte expected at " SIZE_F " got 0x%02X\n"@],hpos-hstart-1,X)@;
 
 uint32_t hget_utf8(void)
 { uint8_t a;
-  HGET8(a);
+  a=HGET8;
   if (a<0x80) return a;
   else
   { if ((a&0xE0)==0xC0) @/
@@ -1214,24 +1227,16 @@ We use the following definitions:
 
 \index{float32 t+\&{float32\_t}}
 \index{float64 t+\&{float64\_t}}
-@<hint types@>=
+
+@<hint basic types@>=
 
 #define FLT_M_BITS 23
 #define FLT_E_BITS 8
 #define FLT_EXCESS 127
-#if __SIZEOF_DOUBLE__==8
-typedef double float64_t;
-#else
-#error @=double type must have size 8@>
-#endif
+
 #define DBL_M_BITS 52
 #define DBL_E_BITS 11
 #define DBL_EXCESS 1023
-#if __SIZEOF_FLOAT__==4
-typedef float float32_t;
-#else
-#error @=float type must have size 4@>
-#endif
 
 @
 
@@ -1298,7 +1303,7 @@ its binary representation. Its outline is very simple:
 float64_t xtof(char *x)
 { int sign, digits, exp;
   uint64_t mantissa=0;
-  DBG(dbgfloat,"converting %s:\n",x);
+  DBG(DBGFLOAT,"converting %s:\n",x);
   @<read the optional sign@>@;
   x=x+2; /* skip ``\.{0x}'' */
   @<read the mantissa@>@;
@@ -1314,7 +1319,7 @@ Now the pieces:
   if (*x=='-') { sign=-1;@+ x++;@+ }
   else if (*x=='+') { sign=+1;@+ x++;@+ }
   else @+sign=+1;
-  DBG(dbgfloat,"\tsign=%d\n",sign);
+  DBG(DBGFLOAT,"\tsign=%d\n",sign);
 @
 
 When we read the mantissa, we use the temporary variable |mantissa|, keep track
@@ -1339,7 +1344,7 @@ of the number of digits, and adjust the exponent while reading the fractional pa
     x++;
     digits++;
   } 
-  DBG(dbgfloat,"\tdigits=%d mantissa=0x%" PRIx64 ", exp=%d\n",@|digits,mantissa,exp);
+  DBG(DBGFLOAT,"\tdigits=%d mantissa=0x%" PRIx64 ", exp=%d\n",@|digits,mantissa,exp);
 @
 
 To normalize the mantissa, first we shift it to place exactly one nonzero hexadecimal
@@ -1358,11 +1363,11 @@ if (mantissa==0) return 0.0;
   else if (s<1)
    mantissa=mantissa<<(4*(1-s)); 
   exp=exp+4*(digits-1); 
-  DBG(dbgfloat,"\tdigits=%d mantissa=0x%" PRIx64 ", exp=%d\n",@|digits,mantissa,exp);
+  DBG(DBGFLOAT,"\tdigits=%d mantissa=0x%" PRIx64 ", exp=%d\n",@|digits,mantissa,exp);
   while ((mantissa>>DBL_M_BITS)>1)@/  { mantissa=mantissa>>1; @+ exp++;@+ }
-  DBG(dbgfloat,"\tdigits=%d mantissa=0x%" PRIx64 ", exp=%d\n",@|digits,mantissa,exp);
+  DBG(DBGFLOAT,"\tdigits=%d mantissa=0x%" PRIx64 ", exp=%d\n",@|digits,mantissa,exp);
   mantissa=mantissa&~((uint64_t)1<<DBL_M_BITS); 
-  DBG(dbgfloat,"\tdigits=%d mantissa=0x%" PRIx64 ", exp=%d\n",@|digits,mantissa,exp);
+  DBG(DBGFLOAT,"\tdigits=%d mantissa=0x%" PRIx64 ", exp=%d\n",@|digits,mantissa,exp);
 }
 @
 
@@ -1378,13 +1383,13 @@ multiplication by ${16}^2$.
     if (*x=='-') {s=-1;@+x++;@+}
     else if (*x=='+') {s=+1;@+x++;@+}
     else s=+1;
-    DBG(dbgfloat,"\texpsign=%d\n",s);
-    DBG(dbgfloat,"\texp=%d\n",exp);
+    DBG(DBGFLOAT,"\texpsign=%d\n",s);
+    DBG(DBGFLOAT,"\texp=%d\n",exp);
     while (*x!=0 )
     { if (*x<'A') exp=exp+4*s*(*x-'0');
       else exp=exp+4*s*(*x-'A'+10);
       x++;
-      DBG(dbgfloat,"\texp=%d\n",exp);
+      DBG(DBGFLOAT,"\texp=%d\n",exp);
     }
   }
   RNG("Floating point exponent",@|exp,-DBL_EXCESS,DBL_EXCESS);
@@ -1399,7 +1404,7 @@ To assemble the binary representation, we use a |union| of a |float64_t| and |ui
   exp=exp+DBL_EXCESS; /* the exponent bits */
   u.bits=((uint64_t)sign<<63)@/ 
         | ((uint64_t)exp<<DBL_M_BITS) | mantissa;
-  DBG(dbgfloat," return %f\n",u.d);
+  DBG(DBGFLOAT," return %f\n",u.d);
   return u.d;
 }
 @
@@ -1421,7 +1426,7 @@ void hwrite_float64(float64_t d)
   { hwritef("%d",(int)d);@+ return;@+}
   if (floor(10000.0*d)==10000.0*d)
   { hwritef("%g",d); @+return;@+}
-  DBG(dbgfloat,"Writing hexadecimal float %f\n",d);
+  DBG(DBGFLOAT,"Writing hexadecimal float %f\n",d);
   if (d<0) { hwritec('-');@+ d=-d;@+}
   hwritef("0x");
   @<extract mantissa and exponent@>@;
@@ -1442,7 +1447,7 @@ The extraction just reverses the creation of the binary representation.
   mantissa=mantissa+((uint64_t)1<<DBL_M_BITS);
   exp= ((bits>>DBL_M_BITS)&((1<<DBL_E_BITS)-1))-DBL_EXCESS;
   digits=DBL_M_BITS+1; 
-  DBG(dbgfloat,"\tdigits=%d mantissa=0x%" PRIx64 " binary exp=%d\n",@|digits,mantissa,exp);
+  DBG(DBGFLOAT,"\tdigits=%d mantissa=0x%" PRIx64 " binary exp=%d\n",@|digits,mantissa,exp);
 @
 
 After we have obtained the binary exponent, 
@@ -1462,7 +1467,7 @@ exponent.
     }
   }
   exp=exp/4;
-  DBG(dbgfloat,"\tdigits=%d mantissa=0x%" PRIx64 " hex exp=%d\n",@|digits,mantissa,exp);
+  DBG(DBGFLOAT,"\tdigits=%d mantissa=0x%" PRIx64 " hex exp=%d\n",@|digits,mantissa,exp);
 @
 
 In preparation for writing, 
@@ -1478,7 +1483,7 @@ use an exponent even if the mantissa uses only a few digits.
 When we use an exponent, we always write exactly one digit preceding the radix point.
 
 @<write large numbers@>=
-{ DBG(dbgfloat,"writing large number\n");
+{ DBG(DBGFLOAT,"writing large number\n");
   hwritef("%X.",(uint8_t)(mantissa>>60));
   mantissa=mantissa<<4;
   do {
@@ -1492,7 +1497,7 @@ If the exponent is small and non negative, we can write the
 number without an exponent by writing the radix point at the
 appropriate place.
  @<write medium numbers@>=
-  {  DBG(dbgfloat,"writing medium number\n");
+  {  DBG(DBGFLOAT,"writing medium number\n");
      do {
 	  hwritef("%X",(uint8_t)(mantissa>>60));
 	  mantissa=mantissa<<4;
@@ -1503,7 +1508,7 @@ appropriate place.
 Last non least, we write numbers that would require additional zeros after the
 radix point with an exponent, because it keeps the mantissa shorter.
 @<write small numbers@>=
-   { DBG(dbgfloat,"writing small number\n");
+   { DBG(DBGFLOAT,"writing small number\n");
 	hwritef("%X.",(uint8_t)(mantissa>>60));
 	mantissa=mantissa<<4;
 	do {
@@ -1547,9 +1552,12 @@ into a scaled number, we multiply it by |ONE| and |ROUND| the result to the near
 to convert a scaled number to a floating point number we divide it by |(float64_t)ONE|.
 
 \noindent
-@<hint types@>=
+@<hint basic types@>=
 typedef int32_t scaled_t;
 #define ONE ((scaled_t)(1<<16))
+@
+
+@<hint macros@>=
 #define ROUND(X)     ((int)((X)>=0.0?floor((X)+0.5):ceil((X)-0.5)))
 @
 
@@ -1600,7 +1608,7 @@ store dimensions as ``scaled points''\index{scaled point} that is a dimension of
 stored as $d\cdot2^{16}$ rounded to the nearest integer. 
 The maximum absolute value of a dimension is $(2^{30}-1)$ scaled points. 
 
-@<hint types@>=
+@<hint basic types@>=
 typedef scaled_t dimen_t;
 #define MAX_DIMEN ((dimen_t)(0x3FFFFFFF))
 @
@@ -1654,7 +1662,7 @@ Until then, we do symbolic computations on linear functions\index{linear functio
 We call such a linear function $w+h\cdot\.{hsize}+v\cdot\.{vsize}$
 an extended dimension and represent it by the three numbers $w$, $h$, and $v$.
 
-@<hint types@>=
+@<hint basic types@>=
 typedef struct {@+
 dimen_t w; @+ float32_t h, v; @+
 } xdimen_t;
@@ -1708,7 +1716,7 @@ void hwrite_xdimen_node(xdimen_t *x)
 
 \getcode
 
-@<GET macros@>=
+@<get macros@>=
 #define @[HGET_XDIMEN(I,X)@] \
   if((I)&b100) HGET32((X).w);@+ else (X).w=0;\
   if((I)&b010) (X).h=hget_float32(); @+ else (X).h=0.0;\
@@ -1722,7 +1730,7 @@ void hget_xdimen(uint8_t a, xdimen_t *x)
 #if 0
 /* currently the info value 0 is not supported */
 case TAG(xdimen_kind,b000): /* see section~\secref{reference} */
-    {uint8_t n;@+ HGET8(n); @+ REF(xdimen_kind,n); @+}@+ break;
+    {@+ REF(xdimen_kind,HGET8); @+}@+ break;
 #endif
     case TAG(xdimen_kind,b001): HGET_XDIMEN(b001,*x);@+break;
     case TAG(xdimen_kind,b010): HGET_XDIMEN(b010,*x);@+break;
@@ -1796,7 +1804,7 @@ we round the two lowest bit of the |float32_t| variable to zero
 using ``round to even'' and store the order of infinity in these bits.
 We define a union type \&{stch\_t} to simplify conversion.
 
-@<hint types@>=
+@<hint basic types@>=
 typedef enum { @+ normal_o=0, fil_o=1, fill_o=2, filll_o=3@+} order_t;
 typedef struct {@+  float64_t f;@+ order_t o; @+} stretch_t;
 typedef union {@+float32_t f; @+ uint32_t u; @+} stch_t;
@@ -1808,12 +1816,12 @@ void hput_stretch(stretch_t *s)
 { uint32_t mantissa, lowbits, sign, exponent;
   stch_t st;
   st.f=s->f;
-  DBG(dbgfloat,"joining %f->%f(0x%X),%d:",s->f,st.f,st.u,s->o);
+  DBG(DBGFLOAT,"joining %f->%f(0x%X),%d:",s->f,st.f,st.u,s->o);
   mantissa = st.u &(((uint32_t)1<<FLT_M_BITS)-1);
   lowbits = mantissa&0x7; /* lowest 3 bits */
   exponent=(st.u>>FLT_M_BITS)&(((uint32_t)1<<FLT_E_BITS)-1);
   sign=st.u & ((uint32_t)1<<(FLT_E_BITS+FLT_M_BITS));
-  DBG(dbgfloat,"s=%d e=0x%x m=0x%x",sign, exponent, mantissa);
+  DBG(DBGFLOAT,"s=%d e=0x%x m=0x%x",sign, exponent, mantissa);
   switch (lowbits) /* round to even */
   { @+case 0: break; /* no change */
     case 1: mantissa = mantissa -1; @+break;/* round down */
@@ -1830,15 +1838,15 @@ void hput_stretch(stretch_t *s)
             } 
             break;
   }
-  DBG(dbgfloat," round s=%d e=0x%x m=0x%x",sign, exponent, mantissa);
+  DBG(DBGFLOAT," round s=%d e=0x%x m=0x%x",sign, exponent, mantissa);
   st.u=sign| (exponent<<FLT_M_BITS) | mantissa | s->o;
-  DBG(dbgfloat,"float %f hex 0x%x\n",st.f, st.u);
+  DBG(DBGFLOAT,"float %f hex 0x%x\n",st.f, st.u);
   HPUT32(st.u);
 }
 @
 
 \getcode
-@<GET macros@>=
+@<get macros@>=
 #define @[HGET_STRETCH(S)@] { stch_t st; @+ HGET32(st.u);@+ S.o=st.u&3;  st.u&=~3; S.f=st.f; @+}
 @
 
@@ -1932,9 +1940,9 @@ case TAG(penalty_kind,1):  @+{int32_t p;@+ HGET_PENALTY(1,p);@+} @+break;
 case TAG(penalty_kind,2):  @+{int32_t p;@+ HGET_PENALTY(2,p);@+} @+break;
 @
 
-@<GET macros@>=
+@<get macros@>=
 #define @[HGET_PENALTY(I,P)@] \
-if (I==1) {int8_t n; @+HGET8(n);  @+P=n;@+ } \
+if (I==1) {int8_t n=HGET8;  @+P=n;@+ } \
 else {int16_t n;@+ HGET16(n);@+RNG("Penalty",n,-20000,+20000); @+ P=n; @+}\
 hwrite_signed(P);
 @
@@ -2017,7 +2025,7 @@ case TAG(math_kind,b010):  { math_t m; @+ HGET_MATH(b010,m);@+ hwrite_math(&m);@
 case TAG(math_kind,b101):  { math_t m; @+ HGET_MATH(b101,m);@+ hwrite_math(&m);@+}@+break;
 case TAG(math_kind,b011):  { math_t m; @+ HGET_MATH(b011,m);@+ hwrite_math(&m);@+}@+break;
 @
-@<GET macros@>=
+@<get macros@>=
 #define @[HGET_MATH(I,M)@]  \
 if ((I)&b001) HGET32(M.w); @+else M.w=0; \
 if ((I)&b100) M.on=true; \
@@ -2140,7 +2148,7 @@ case TAG(rule_kind,b110): @+ {rule_t r;@+ HGET_RULE(b110,r); @+hwrite_rule(&(r))
 case TAG(rule_kind,b111): @+ {rule_t r;@+ HGET_RULE(b111,r); @+hwrite_rule(&(r));@+ } break;
 @
 
-@<GET macros@>=
+@<get macros@>=
 #define @[HGET_RULE(I,R)@]@/\
 if ((I)&b100) HGET32((R).h); @+else (R).h=RUNNING_DIMEN;\
 if ((I)&b010) HGET32((R).d); @+else (R).d=RUNNING_DIMEN;\
@@ -2276,7 +2284,7 @@ Here is a summary of the info bits and the implied layout of glue nodes in the s
 \enditemize
 
 
-@<hint types@>=
+@<hint basic types@>=
 typedef struct {@+
 xdimen_t w; @+
 stretch_t p, m;@+  
@@ -2365,7 +2373,7 @@ case TAG(glue_kind,b110): { glue_t g;@+ HGET_GLUE(b110,g);@+ hwrite_glue(&g);@+}
 case TAG(glue_kind,b111): { glue_t g;@+ HGET_GLUE(b111,g);@+ hwrite_glue(&g);@+}@+break;
 @
 
-@<GET macros@>=
+@<get macros@>=
 #define @[HGET_GLUE(I,G)@] {\
   if(I==b111) hget_xdimen_node(&((G).w)); \
   else @/{@+(G).w.h=0.0;@+(G).w.v=0.0;\
@@ -2379,7 +2387,7 @@ void hget_glue_node(void)
 { @<read the start byte |a|@>@;
   if (KIND(a)!=glue_kind)@+ {@+ hpos--;@+ return; @+}
   if (INFO(a)==b000)
-  { @+uint8_t n; @+HGET8(n); @+hwrite_ref_node(glue_kind,n); @+}
+  { @+hwrite_ref_node(glue_kind,HGET8); @+}
   else
   { @+glue_t g; @+HGET_GLUE(INFO(a),g);@+ hwrite_glue_node(&g);@+}
   @<read and check the end byte |z|@>@;
@@ -2628,7 +2636,7 @@ void hwrite_list(list_t *l)
 @<write a list@>=
 {@+if (l->s==0) hwritef(" <>");@/
    else@/
-   {@+DBG(dbgnode,"Write list at 0x%x size=%u\n", l->p, l->s); 
+   {@+DBG(DBGNODE,"Write list at 0x%x size=%u\n", l->p, l->s); 
     @+hwrite_start();@+
      if (l->s>0xFF) hwritef("%d",l->s); 
      while(hpos<hend)
@@ -2642,7 +2650,7 @@ void hwrite_list(list_t *l)
 void hget_size_boundary(info_t info)
 { uint32_t n;
   if (info<2) return;
-  HGET8(n);
+  n=HGET8;
   if (n-1!=0x100-info) QUIT(@["Size boundary byte 0x%x with info value %d at " SIZE_F@],
                             n, info,hpos-hstart-1);
 }
@@ -2650,7 +2658,7 @@ void hget_size_boundary(info_t info)
 uint32_t hget_list_size(info_t info)
 { uint32_t n;  
   if (info==1) return 0;
-  else if (info==2) HGET8(n);
+  else if (info==2) n=HGET8;
   else if (info==3) HGET16(n);
   else if (info==4) HGET24(n);
   else if (info==5) HGET32(n);
@@ -2668,12 +2676,12 @@ void hget_list(list_t *l)
     l->k=KIND(a);
     HGET_LIST(INFO(a),*l);
     @<read and check the end byte |z|@>@;
-    DBG(dbgnode,"Get list at 0x%x size=%u\n", l->p, l->s);
+    DBG(DBGNODE,"Get list at 0x%x size=%u\n", l->p, l->s);
   }
 }
 @
 
-@<GET macros@>=
+@<get macros@>=
 #define @[HGET_LIST(I,L)@] \
     (L).s=hget_list_size(I); hget_size_boundary(I);\
     (L).p=hpos-hstart; \
@@ -2709,11 +2717,11 @@ uint8_t hput_list(uint32_t start_pos, list_t *l)
   { uint32_t list_end=hpos-hstart;
     info_t i=l->p -start_pos-1; /* number of byte allocated for size */
     info_t j=hsize_bytes(l->s); /* number of byte needed for size */
-    DBG(dbgnode,"Put list at 0x%x size=%u\n", l->p, l->s);
+    DBG(DBGNODE,"Put list at 0x%x size=%u\n", l->p, l->s);
     if (i>j && l->s> 0x100) j=i; /* avoid moving large lists */
     if (i!=j)@/
     { int d= j-i;
-      DBG(dbgnode,"Moving %u byte by %d\n", l->s,d);
+      DBG(DBGNODE,"Moving %u byte by %d\n", l->s,d);
       memmove(hstart+l->p+d,hstart+l->p,l->s);
       l->p=l->p+d;@+
       list_end=list_end+d;
@@ -2837,9 +2845,6 @@ can be written as
 
 To break long lines when writing a long format file, we use the variable |txt_length|
 to keep track of the approximate length of the current line.
-@<common variables@>=
-int txt_length;
-@
 
 \item The control codes  $|txt_font|=|0x00|$, |0x01|, |0x02|, \dots, and |0x07| are used to 
 change the current font to 
@@ -3000,96 +3005,122 @@ txt: TXT_CC { hput_txt_cc($1); }
    | { HPUTX(1); HPUT8(txt_node);} content_node;
 @
 
+The following function keeps track of the position in the current line.
+It the line gets too long it will break the text at the next space
+character. If no suitable space character comes along,
+the line will be broken after any regular character.
+
 \writecode
 @<write a text@>=
-{ @+txt_length=nesting+20;
-  if (l->s==0) hwritef(" \"\"");@/
+{@+if (l->s==0) hwritef(" \"\"");
    else@/
-   { @+@+ hwritef(" \"");
-    while(hpos<hend)
-      hget_txt();
+   { int pos=nesting+20; /* estimate */
+     hwritef(" \"");
+    while(hpos<hend)@/
+    { int i=hget_txt();
+      if (i<0)
+      { if (pos++<70) hwritec(' '); 
+        else hwrite_nesting(), pos=nesting;
+      } 
+      else if (i==1 && pos>=100)@/
+      { hwritec('\\'); @+hwrite_nesting(); @+pos=nesting; @+}
+      else
+        pos+=i;
+    }
     hwritec('"');
    }
 }
 @
+
+
+The function returns the number of characters written 
+because this information is needed in |hget_txt| below.
+
 @<write functions@>=
-void hwrite_txt_cc(uint32_t c)
+int hwrite_txt_cc(uint32_t c)
 {@+ if (c<0x20)
-    hwritef("\\C%d\\",c);
+    return hwritef("\\C%d\\",c);
   else@+
   switch(c)
-  { case '"': hwritef("\\\""); @+break;
-    case '<': hwritef("\\<"); @+break;
-    case '>': hwritef("\\>"); @+break;
-    case ' ': hwritef("\\ "); @+break;
-    case '-': hwritef("\\-"); @+break;
-    default: if (option_utf8) hwrite_utf8(c); @+else hwritef("\\C%d\\",c);@+ break;
+  { case '"': return hwritef("\\\"");
+    case '<': return hwritef("\\<");
+    case '>': return hwritef("\\>");
+    case ' ': return hwritef("\\ ");
+    case '-': return hwritef("\\-");
+    default: if (option_utf8) return hwrite_utf8(c); else return hwritef("\\C%d\\",c);
   }
 }
 @
 
 \getcode
-@<GET macros@>=
-#define @[HGET_GREF(K,S)@] {uint8_t n; @+ HGET8(n);@+ REF(K,n); @+hwritef("\\" S "%d\\",n);@+} 
+@<get macros@>=
+#define @[HGET_GREF(K,S)@] {uint8_t n=HGET8;@+ REF(K,n); @+ return hwritef("\\" S "%d\\",n);@+} 
 
 @
+
+The function |hget_txt| reads a text element and writes it immediately.
+To enable the insertion of line breaks when writing a text, we need to keep track
+of the number of characters in the current line. For this purpose
+the function |hget_txt| returns the number of characters written.
+It returns $-1$ if a space character needs to be written
+providing a good opportunity for a break.
+
 @<get functions@>=
-void hget_txt(void)
+int hget_txt(void)
 {@+ if (*hpos>=0x80 && *hpos<=0xF7)
   { if (option_utf8) 
-      hwrite_utf8(hget_utf8()),txt_length++;
+     return hwrite_utf8(hget_utf8());
     else
-      hwritef("\\C%d\\",hget_utf8()),txt_length+=6;
+     return hwritef("\\C%d\\",hget_utf8());
   }
   else @/
   { uint8_t a;
-    HGET8(a); 
+    a=HGET8; 
     switch (a)
-    { case txt_font+0: hwritef("\\0"); @+ txt_length+=2;@+ break;
-      case txt_font+1: hwritef("\\1"); @+ txt_length+=2;@+ break;
-      case txt_font+2: hwritef("\\2"); @+ txt_length+=2;@+ break;
-      case txt_font+3: hwritef("\\3"); @+ txt_length+=2;@+ break;
-      case txt_font+4: hwritef("\\4"); @+ txt_length+=2;@+ break;
-      case txt_font+5: hwritef("\\5"); @+ txt_length+=2;@+ break;
-      case txt_font+6: hwritef("\\6"); @+ txt_length+=2;@+ break;
-      case txt_font+7: hwritef("\\7"); @+ txt_length+=2;@+ break;
-      case txt_global+0: @+ HGET_GREF(font_kind,"F");@+ txt_length+=5;@+  break; 
-      case txt_global+1:  @+ HGET_GREF(penalty_kind,"P");@+ txt_length+=5;@+   break; 
-      case txt_global+2: @+ HGET_GREF(kern_kind,"K");@+  txt_length+=5;@+ break; 
-      case txt_global+3: @+ HGET_GREF(ligature_kind,"L");@+  txt_length+=5;@+ break; 
-      case txt_global+4: @+ HGET_GREF(hyphen_kind,"H");@+  txt_length+=5;@+ break; 
-      case txt_global+5:  @+ HGET_GREF(glue_kind,"G");@+  txt_length+=5;@+ break; 
-      case txt_global+6:  @+ HGET_GREF(math_kind,"M");@+  txt_length+=5;@+ break; 
-      case txt_global+7:  @+ HGET_GREF(rule_kind,"R");@+  txt_length+=5;@+ break; 
-      case txt_global+8: @+ HGET_GREF(image_kind,"I");@+  txt_length+=5;@+ break; 
-      case txt_local+0:  @+ hwritef("\\a");@+ txt_length+=2;@+  break; 
-      case txt_local+1:  @+ hwritef("\\b");@+ txt_length+=2;@+  break; 
-      case txt_local+2:  @+ hwritef("\\c");@+ txt_length+=2;@+  break; 
-      case txt_local+3:  @+ hwritef("\\d");@+ txt_length+=2;@+  break;
-      case txt_local+4:  @+ hwritef("\\e");@+ txt_length+=2;@+  break;
-      case txt_local+5:  @+ hwritef("\\f");@+ txt_length+=2;@+  break;
-      case txt_local+6:  @+ hwritef("\\g");@+ txt_length+=2;@+  break;
-      case txt_local+7:  @+ hwritef("\\h");@+ txt_length+=2;@+  break;
-      case txt_local+8:  @+ hwritef("\\i");@+ txt_length+=2;@+  break;
-      case txt_local+9:  @+ hwritef("\\j");@+ txt_length+=2;@+  break;
-      case txt_local+10: @+ hwritef("\\k");@+ txt_length+=2;@+  break;
-      case txt_local+11: @+ hwritef("\\l");@+ txt_length+=2;@+  break;
-      case txt_cc: @+{ uint32_t c=hget_utf8(); @+hwrite_txt_cc(c); @+}@+ txt_length+=2; @+break;
-      case txt_node: { @<read the start byte |a|@>@;
-                        hwritef("<%s",content_name[KIND(a)]);@+ hget_content(a);
+    { case txt_font+0: return hwritef("\\0");
+      case txt_font+1: return hwritef("\\1");
+      case txt_font+2: return hwritef("\\2");
+      case txt_font+3: return hwritef("\\3");
+      case txt_font+4: return hwritef("\\4");
+      case txt_font+5: return hwritef("\\5");
+      case txt_font+6: return hwritef("\\6");
+      case txt_font+7: return hwritef("\\7");
+      case txt_global+0: HGET_GREF(font_kind,"F");
+      case txt_global+1: HGET_GREF(penalty_kind,"P");
+      case txt_global+2: HGET_GREF(kern_kind,"K");
+      case txt_global+3: HGET_GREF(ligature_kind,"L");
+      case txt_global+4: HGET_GREF(hyphen_kind,"H");
+      case txt_global+5: HGET_GREF(glue_kind,"G");
+      case txt_global+6: HGET_GREF(math_kind,"M");
+      case txt_global+7: HGET_GREF(rule_kind,"R");
+      case txt_global+8: HGET_GREF(image_kind,"I");
+      case txt_local+0: return hwritef("\\a");
+      case txt_local+1: return hwritef("\\b");
+      case txt_local+2: return hwritef("\\c");
+      case txt_local+3: return hwritef("\\d");
+      case txt_local+4: return hwritef("\\e");
+      case txt_local+5: return hwritef("\\f");
+      case txt_local+6: return hwritef("\\g");
+      case txt_local+7: return hwritef("\\h");
+      case txt_local+8: return hwritef("\\i");
+      case txt_local+9: return hwritef("\\j");
+      case txt_local+10: return hwritef("\\k");
+      case txt_local+11: return hwritef("\\l");
+      case txt_cc: return hwrite_txt_cc(hget_utf8()); 
+      case txt_node: { int i;
+                        @<read the start byte |a|@>@;
+                        i=hwritef("<%s",content_name[KIND(a)]);@+ hget_content(a);
                         @<read and check the end byte |z|@>@;
-                        hwritec('>');@+ txt_length+=10;
-                     } @+ break;
-      case txt_hyphen: hwritec('-'); @+ txt_length++;@+break;
-      case txt_glue: if (txt_length++<70) hwritec(' '); else hwrite_nesting(), txt_length=nesting; @+break;
-      case '<': hwritef("\\<"); @+ txt_length+=2;@+break;
-      case '>': hwritef("\\>"); @+ txt_length+=2;@+break;
-      case '"': hwritef("\\\"");@+ txt_length+=2; @+break;
-      case '-': hwritef("\\-"); @+ txt_length+=2;@+break;
-      case txt_ignore: hwritef("\\@@"); @+ txt_length+=2;@+break;
-      default: hwritec(a); @+ txt_length++;
-               if (txt_length>100) @/{ @+hwritec('\\'); @+hwrite_nesting(); @+txt_length=nesting;@+}
-break;
+                        hwritec('>');@+ return i+10; /* just an estimate */
+                     }
+      case txt_hyphen: hwritec('-'); @+return 1;
+      case txt_glue: return -1;
+      case '<': return hwritef("\\<");
+      case '>': return hwritef("\\>");
+      case '"': return hwritef("\\\"");
+      case '-': return hwritef("\\-");
+      case txt_ignore: return hwritef("\\@@");
+      default: hwritec(a); @+return 1;
     }
   }
 }
@@ -3273,13 +3304,13 @@ case TAG(vbox_kind,b110): @+{box_t b; @+HGET_BOX(b110,b); @+hwrite_box(&b);@+} @
 case TAG(vbox_kind,b111): @+{box_t b; @+HGET_BOX(b111,b); @+hwrite_box(&b);@+} @+ break;
 @
 
-@<GET macros@>=
+@<get macros@>=
 #define @[HGET_BOX(I,B)@] \
 HGET32(B.h);\
 if ((I)&b001) HGET32(B.d); @+ else B.d=0;\ 
 HGET32(B.w);\
 if ((I)&b010) HGET32(B.a); @+else B.a=0;\ 
-if ((I)&b100) @/{ B.r=hget_float32();@+ HGET8(B.s); @+ B.o=B.s&0xF; @+B.s=B.s>>4;@+ }\
+if ((I)&b100) @/{ B.r=hget_float32();@+ B.s=HGET8; @+ B.o=B.s&0xF; @+B.s=B.s>>4;@+ }\
 else {  B.r=0.0;@+ B.o=B.s=0;@+ }\
 hget_list(&(B.l));
 @
@@ -3467,7 +3498,7 @@ case TAG(vpack_kind,b111): HGET_PACK(b111); @+ break;
 @
 
 
-@<GET macros@>=
+@<get macros@>=
 #define @[HGET_SET(I)@] @/\
  if ((I)&b100) {xdimen_t x; hget_xdimen_node(&x); @+hwrite_xdimen_node(&x);@+} else HGET_REF(xdimen_kind)@;\
  { dimen_t h; @+HGET32(h); @+hwrite_dimension(h);@+} \
@@ -3561,7 +3592,7 @@ case TAG(kern_kind,b110): @+  {@+kern_t k; @+HGET_KERN(b110,k);@+ } @+break;
 case TAG(kern_kind,b111): @+  {@+kern_t k; @+HGET_KERN(b111,k);@+ } @+break;
 @
 
-@<GET macros@>=
+@<get macros@>=
 #define @[HGET_KERN(I,K)@] \
 K.x=(I)&b100;\
 if (((I)&b011)==2) {HGET32(K.d.w);@+ K.d.h=K.d.v=0.0;@+}\
@@ -3648,7 +3679,7 @@ case TAG(leaders_kind,1):        @+ HGET_LEADERS(1); @+break;
 case TAG(leaders_kind,2):        @+ HGET_LEADERS(2); @+break;
 case TAG(leaders_kind,3):        @+ HGET_LEADERS(3); @+break;
 @
-@<GET macros@>=
+@<get macros@>=
 #define @[HGET_LEADERS(I)@]@/ \
 hget_glue_node();\
 hwrite_leaders_type((I)&b011);\
@@ -3705,7 +3736,7 @@ info bits to mark them: |b100| implies $|bs|\ne0$,
 If the baseline has only zero components, we put a reference to baseline number 0
 in the output.
 
-@<hint types@>=
+@<hint basic types@>=
 typedef struct {@+
 glue_t bs, ls;@+
 dimen_t lsl;@+
@@ -3746,7 +3777,7 @@ case TAG(baseline_kind,b110): @+{ baseline_t b;@+ HGET_BASELINE(b110,b);@+ }@+br
 case TAG(baseline_kind,b111): @+{ baseline_t b;@+ HGET_BASELINE(b111,b);@+ }@+break;
 @
 
-@<GET macros@>=
+@<get macros@>=
 #define @[HGET_BASELINE(I,B)@] \
   if((I)&b100) hget_glue_node(); \
   else {B.bs.p.o=B.bs.m.o=B.bs.w.w=0; @+B.bs.w.h=B.bs.w.v=B.bs.p.f=B.bs.m.f=0.0; @+hwrite_glue_node(&(B.bs));@+}\
@@ -3848,13 +3879,13 @@ case TAG(ligature_kind,5):@+ {lig_t l; @+HGET_LIG(5,l);@+} @+break;
 case TAG(ligature_kind,6):@+ {lig_t l; @+HGET_LIG(6,l);@+} @+break;
 case TAG(ligature_kind,7):@+ {lig_t l; @+HGET_LIG(7,l);@+} @+break;
 @
-@<GET macros@>=
+@<get macros@>=
 #define @[HGET_LIG(I,L)@] @/\
-HGET8((L).f);\
-if ((I)==7) HGET8((L).l.s);@+else (L).l.s=(I);\
+(L).f=HGET8;\
+if ((I)==7) (L).l.s=HGET8;@+else (L).l.s=(I);\
 (L).l.p=hpos-hstart; @+ hpos+=(L).l.s; \
 if ((I)==7)@/\
-{ uint8_t n;@+ HGET8(n); \
+{ uint8_t n=HGET8; \
   if(n!=(L).l.s) @/\
   QUIT("Sizes in ligature don't match %d!=%d",(L).l.s,n);}\
 hwrite_ligature(&(L));
@@ -3952,11 +3983,11 @@ case TAG(hyphen_kind,b110): {hyphen_t h; @+HGET_HYPHEN(b110,h);@+ hwrite_hyphen(
 case TAG(hyphen_kind,b111): {hyphen_t h; @+HGET_HYPHEN(b111,h);@+ hwrite_hyphen(&h); @+} @+break;
 @
 
-@<GET macros@>=
+@<get macros@>=
 #define @[HGET_HYPHEN(I,Y)@]\
 if ((I)&b100) hget_list(&((Y).p)); else { (Y).p.p=hpos-hstart; @+(Y).p.s=0; @+(Y).p.k=list_kind; @+}\
 if ((I)&b010) hget_list(&((Y).q)); else { (Y).q.p=hpos-hstart; @+(Y).q.s=0; @+(Y).q.k=list_kind; @+}\
-if ((I)&b001) {uint8_t r; @+HGET8(r); (Y).r=r&0x7F; @+ RNG("Replace count",(Y).r,0,31); @+(Y).x=(r&0x80)!=0; @+}\
+if ((I)&b001) {uint8_t r=HGET8; (Y).r=r&0x7F; @+ RNG("Replace count",(Y).r,0,31); @+(Y).x=(r&0x80)!=0; @+}\
 @+else { (Y).r=0; @+ (Y).x=false;@+}
 @
 
@@ -4073,7 +4104,7 @@ case TAG(par_kind,b100): @+HGET_PAR(b100);@+break;
 case TAG(par_kind,b110): @+HGET_PAR(b110);@+break;
 @
 
-@<GET macros@>=
+@<get macros@>=
 #define @[HGET_PAR(I)@] @/\
  if ((I)&b100)  {xdimen_t x; hget_xdimen_node(&x); @+hwrite_xdimen_node(&x);@+}  else HGET_REF(xdimen_kind);\
  if ((I)&b010) { list_t l; @+hget_param_list_node(&l); @+hwrite_param_list_node(&l); @+} \
@@ -4137,7 +4168,7 @@ case TAG(display_kind,b101): HGET_DISPLAY(b101); @+ break;
 case TAG(display_kind,b110): HGET_DISPLAY(b110); @+ break;
 @
 
-@<GET macros@>=
+@<get macros@>=
 #define @[HGET_DISPLAY(I)@] \
 if ((I)&b100) { list_t l; @+hget_param_list_node(&l); @+hwrite_param_list_node(&l); @+} \
 else HGET_REF(param_kind);\
@@ -4309,10 +4340,10 @@ case TAG(item_kind,b011):  hget_content_node(); @+hwritef(" 3");@+ break;
 case TAG(item_kind,b100):  hget_content_node(); @+hwritef(" 4");@+ break;
 case TAG(item_kind,b101):  hget_content_node(); @+hwritef(" 5");@+ break;
 case TAG(item_kind,b110):  hget_content_node(); @+hwritef(" 6");@+ break;
-case TAG(item_kind,b111):  hget_content_node(); {uint8_t n; @+HGET8(n); @+hwritef(" %u",n);@+}@+ break;
+case TAG(item_kind,b111):  hget_content_node(); @+hwritef(" %u",HGET8);@+ break;
 @
 
-@<GET macros@>=
+@<get macros@>=
 #define @[HGET_TABLE(I)@] \
 if(I&b001) hwritef(" v"); @+else hwritef(" h"); \
 if ((I)&b010) hwritef(" add");@+ else hwritef(" to");\
@@ -4399,7 +4430,7 @@ case TAG(image_kind,b110): @+ { image_t x;@+HGET_IMAGE(b110,x);@+}@+break;
 case TAG(image_kind,b111): @+ { image_t x;@+HGET_IMAGE(b111,x);@+}@+break;
 @
 
-@<GET macros@>=
+@<get macros@>=
 #define @[HGET_IMAGE(I,X)@] @/\
 HGET16((X).n);RNG("Section number",(X).n,3,max_section_no);  \
 if (I&b010) {HGET32((X).w);HGET32((X).h);@+} \
@@ -4905,8 +4936,8 @@ stream_def: start STREAM  stream_ref  stream_type  @/
 @<get functions@>=
 static void hget_stream_split(void)
 { uint8_t n; int r;
-  HGET8(n); if (n==255) hwritef(" *"); else { REF(stream_kind,n);@+hwritef(" *%d",n);@+}
-  HGET8(n); if (n==255) hwritef(" *"); else { REF(stream_kind,n);@+hwritef(" *%d",n);@+}
+  n=HGET8; if (n==255) hwritef(" *"); else { REF(stream_kind,n);@+hwritef(" *%d",n);@+}
+  n=HGET8; if (n==255) hwritef(" *"); else { REF(stream_kind,n);@+hwritef(" *%d",n);@+}
   HGET16(r); RNG("split ratio",r,0,1000); hwritef(" %d",r);
 } 
 void hget_stream_def(void)
@@ -4996,7 +5027,7 @@ case TAG(stream_kind,b110): HGET_STREAM(b110); @+ break;
 case TAG(stream_kind,b111): HGET_STREAM(b111); @+ break;
 @
 
-@<GET macros@>=
+@<get macros@>=
 #define @[HGET_STREAM(I)@] @/\
 HGET_REF(stream_kind);\
 if ((I)&b100) { scaled_t h; @+HGET32(h); @+hwritef(" to"); @+hwrite_dimension(h);@+}\
@@ -5094,7 +5125,7 @@ page: string { hput_string($1);} page_priority @/ VBOX xdimen_node HBOX xdimen_n
 void hget_page(void)
 { char *n; uint8_t p;  list_t l; xdimen_t x;
   HGET_STRING(n);@+ hwrite_string(n);
-  HGET8(p); @+ if (p!=1) hwritef(" %d",p);
+  p=HGET8; @+ if (p!=1) hwritef(" %d",p);
   hwritef(" vbox ");@+  {@+hget_xdimen_node(&x); @+hwrite_xdimen_node(&x);@+} 
   hwritef(" hbox ");@+  {@+hget_xdimen_node(&x); @+hwrite_xdimen_node(&x);@+} 
   hget_list(&l);@+ hwrite_list(&l);
@@ -5165,12 +5196,10 @@ struct {@+uint8_t pg; @+uint32_t pos; @+ bool on; @+int link;@+} range_pos_t;
 @
 
 @<common variables@>=
-int *page_on; 
 range_pos_t *range_pos;
 int next_range=1, max_range;
+int *page_on; 
 @
-
-
 
 @<allocate data@>=
 ALLOCATE(page_on,max_ref[page_kind]+1,int);
@@ -5204,7 +5233,7 @@ content_node: START RANGE REFERENCE ON  END @/{  REF(page_kind,$3);hput_range($3
 @<write functions@>=
 void hwrite_range(void) /* called in |hwrite_end| */
 { uint32_t p=hpos-hstart;
-  DBG(dbgrange,"Range check at pos 0x%x next at 0x%x\n",p,range_pos[next_range].pos);
+  DBG(DBGRANGE,"Range check at pos 0x%x next at 0x%x\n",p,range_pos[next_range].pos);
   while (next_range<max_range && range_pos[next_range].pos <= p)
   { hwrite_start();
     hwritef("range *%d ",range_pos[next_range].pg);
@@ -5230,8 +5259,8 @@ void hget_range(info_t info, uint8_t pg)
   range_pos[next_range].pg=pg;
   range_pos[next_range].on=true;
   range_pos[next_range].pos=from;
-  DBG(dbgrange,"Range *%d from 0x%x\n",pg,from);
-  DBG(dbgrange,"Range *%d to 0x%x\n",pg,to);
+  DBG(DBGRANGE,"Range *%d from 0x%x\n",pg,from);
+  DBG(DBGRANGE,"Range *%d to 0x%x\n",pg,to);
   next_range++;
   if (to!=0xFFFFFFFF) @/
   { range_pos[next_range].pg=pg;
@@ -5243,7 +5272,7 @@ void hget_range(info_t info, uint8_t pg)
 
 void hsort_ranges(void) /* simple insert sort by position */
 { int i;
-  DBG(dbgrange,"Range sorting %d positions\n",next_range-1);
+  DBG(DBGRANGE,"Range sorting %d positions\n",next_range-1);
   for(i=3; i<next_range; i++)@/
   { int j = i-1;
     if (range_pos[i].pos < range_pos[j].pos) @/
@@ -5270,7 +5299,7 @@ void hput_range(uint8_t pg, bool on)
   else if (!on && page_on[pg]==0)
     QUIT(@["Template %d is switched off at " SIZE_F " but was not on"@],@|
            pg, hpos-hstart);
-  DBG(dbgrange,@["Range *%d %s at " SIZE_F "\n"@],pg,on?"on":"off",hpos-hstart);
+  DBG(DBGRANGE,@["Range *%d %s at " SIZE_F "\n"@],pg,on?"on":"off",hpos-hstart);
   range_pos[next_range].pg=pg;
   range_pos[next_range].pos=hpos-hstart;
   range_pos[next_range].on=on;
@@ -5280,7 +5309,7 @@ void hput_range(uint8_t pg, bool on)
          page_on[pg]=0; }
   next_range++;
 }
-
+extern void hput_definitions_end(void);
 void hput_range_defs(void)
 { int i;
   section_no=1;
@@ -5304,7 +5333,7 @@ void hput_range_defs(void)
       { @+if (info & b001) HPUT32(from); @+else HPUT16(from); @+}
       if (info & b010) @/
       { @+if (info & b001) HPUT32(to); @+else HPUT16(to); @+}
-      DBG(dbgrange,"Range *%d from 0x%x to 0x%x\n",@|range_pos[i].pg,from, to);
+      DBG(DBGRANGE,"Range *%d from 0x%x to 0x%x\n",@|range_pos[i].pg,from, to);
       hput_tags(p,TAG(range_kind,info));
     }
   hput_definitions_end();
@@ -5313,94 +5342,119 @@ void hput_range_defs(void)
 
 
 \section{File Structure}\hascode
-All \HINT/ files\index{file} start with a banner\index{banner} as described below.  After that,
-they contain three mandatory sections\index{section}: the directory\index{directory section} section, the
-definition\index{definition section} section, and the content\index{content section} section. 
-Usually, further optional\index{optional section} sections follow.
-In short format files these contain auxiliary\index{auxiliary file} files
-(fonts\index{font}, images\index{image}, \dots) necessary for rendering the content. In long
-format files, the directory section will simply list the file names of the
-auxiliary files.
+All \HINT/ files\index{file} start with a banner\index{banner} as
+described below.  After that, they contain three mandatory
+sections\index{section}: the directory\index{directory section}
+section, the definition\index{definition section} section, and the
+content\index{content section} section.  Usually, further
+optional\index{optional section} sections follow.  In short format
+files, these contain auxiliary\index{auxiliary file} files
+(fonts\index{font}, images\index{image}, \dots) necessary for
+rendering the content. In long format files, the directory section
+will simply list the file names of the auxiliary files.
+@<put functions@>=
+static size_t hput_root(void);
+static size_t hput_section(uint16_t n);
+static void hput_optional_sections(void);
 
-After reading and checking the banner, reading a long format file is
-simply done by calling |yyparse| with the following rule:
-
-\readcode
-@s hint symbol
-@s content_section symbol
-
-@<parsing rules@>=
-hint: directory_section definition_section content_section ;
+void hput_hint(char * str)
+{ size_t s;
+  DBG(DBGBASIC,"Writing hint output %s\n",str); 
+  s=hput_banner("hint",str);
+  DBG(DBGDIR,@["Root Entry at " SIZE_F "\n"@],s);
+  s+=hput_root();
+  DBG(DBGDIR,@["Directory section at " SIZE_F "\n"@],s);
+  s+=hput_section(0);
+  DBG(DBGDIR,@["Definition section at " SIZE_F "\n"@],s);
+  s+=hput_section(1);
+  DBG(DBGDIR,@["Content section at " SIZE_F "\n"@],s);
+  s+=hput_section(2);
+  DBG(DBGDIR,@["Auxiliary sections at " SIZE_F "\n"@],s);
+  hput_optional_sections();
+}
 @
 
-Reading and writing a short format file is accomplished using a set of
-primitive functions as described at the end of this chapter.
-
-
 \subsection{Banner}
-A \HINT/ file starts with a file banner\index{banner}. The banner contains only
-printable ASCII characters, spaces, and a trailing newline.  The first
-four byte are the ``magic'' number by which you recognize a \HINT/
+All \HINT/ files start with a banner\index{banner}. The banner contains only
+printable ASCII characters and spaces; 
+its end is marked with a newline character\index{newline character}.  
+The first four byte are the ``magic'' number by which you recognize a \HINT/
 file. It consists of the four ASCII codes `{\tt H}', `{\tt I}', `{\tt N}',
 and `{\tt T}' in the long format and `{\tt h}', `{\tt i}', `{\tt n}',
 and `{\tt t}' in the short format.  Then follows a space, then
 the version number, a dot, the sub-version number, and another
 space. Both numbers are encoded as decimal ASCII strings.  The
 remainder of the banner is simply ignored but may be used to contain
-other useful information about the file.  The banner must have at most
-256 byte; its end is marked with a newline character\index{newline character}.
-
-To read the banner, we have the function |hread_banner|; it returns |true| if successful.
+other useful information about the file.  The maximum size of the
+banner is 256 byte.
 @<hint macros@>=
 #define MAX_BANNER 256
 @
-@<common variables@>=
+
+\goodbreak
+To check the banner, we have the function |hcheck_banner|; 
+it returns |true| if successful.
+
+
+@<function to check the banner@>=
 int version=1, subversion=0;
 char hbanner[MAX_BANNER+1];
-int hbanner_size=0;
-@
-\goodbreak
-\readcode\penalty+1000
-\vskip-\belowsubsecskip\vskip-\abovesubsecskip\penalty+1000
-\getcode
-%\codesection{\redsymbol}\redindex{1}{6}{Banner}
-@<common functions@>=
-bool hread_banner(char *magic)
-{ char *tail;
-  int i,c;
-  i=0;
-  do {
-    c =fgetc(hin);
-    if (c!=EOF)
-      hbanner[i++]=(char)c;
-  } while (c!='\n' && c!=EOF && i<MAX_BANNER);
-  hbanner[i]=0;
-  tail=hbanner;
+bool hcheck_banner(char *magic)
+{ int hbanner_size=0;
+  char *t;
+  t=hbanner;
   if (strncmp(magic,hbanner,4)!=0) QUIT("This is not a %s file",magic);
-  else tail+=4;
-  hbanner_size=(int)strlen(hbanner);
+  else t+=4;
+  hbanner_size=(int)strnlen(hbanner,MAX_BANNER);
   if(hbanner[hbanner_size-1]!='\n') QUIT("Banner exceeds maximum size=0x%x",MAX_BANNER);
-  if (*tail!=' ') QUIT("Space expected after %s",magic);
-  else tail++;
-  version=strtol(tail,&tail,10);
-  if (*tail!='.') QUIT("Dot expected after version number %d",version);
-  else tail++;
-  subversion=strtol(tail,&tail,10);
-  if (*tail!=' ' && *tail!='\n') QUIT("Space expected after subversion number %d",subversion);
-  MESSAGE("%s file version %d.%d:%s",magic,version, subversion, tail);
-  DBG(dbgdir,"banner size=0x%x\n",hbanner_size);
+  if (*t!=' ') QUIT("Space expected after %s",magic);
+  else t++;
+  version=strtol(t,&t,10);
+  if (*t!='.') QUIT("Dot expected after version number %d",version);
+  else t++;
+  subversion=strtol(t,&t,10);
+  if (*t!=' ' && *t!='\n') QUIT("Space expected after subversion number %d",subversion);
+  MESSAGE("%s file version %d.%d:%s",magic,version, subversion, t);
+  DBG(DBGDIR,"banner size=0x%x\n",hbanner_size);
   return true;
 }
 @
-\writecode
-\vskip-\belowsubsecskip\vskip-\abovesubsecskip\penalty+1000
-\putcode
-%\codesection{\redsymbol}\redindex{1}{6}{Banner}
-@<common functions@>=
-size_t hwrite_banner(char *magic)
-{ return fprintf(hout,"%s %d.%d %s\n",@|magic,version,subversion,"stretch&shrink");
+\subsection{Long Format Files}\gdef\subcodetitle{Banner}%
+
+Before we can check the banner, we have to read it knowing 
+that it ends with a newline character and is at most |MAX_BANNER|
+byte long.
+\readcode
+@<read the banner@>=
+{ int i=0,c;
+  do {
+    c =fgetc(hin);
+    if (c!=EOF) hbanner[i++]=(char)c; else break;
+  } while (c!='\n' && i<MAX_BANNER);
+  hbanner[i]=0;
 }
 @
+ After checking the banner, reading a long format file is
+simply done by calling |yyparse| with the following rule:
+
+@s hint symbol
+@s content_section symbol
+
+@<parsing rules@>=
+hint: directory_section definition_section content_section ;
+@
+\vskip 0pt plus 20pt
+\goodbreak
+\vskip 0pt plus -20pt
+\writecode\penalty +1000\vskip -\baselineskip
+\putcode
+@<function to write the banner@>=
+extern int version, subversion;
+static size_t hput_banner(char *magic, char *s)
+{ return fprintf(hout,"%s %d.%d %s\n",magic,version,subversion,s);
+}
+@
+
 
 \subsection{Short Format Files}\gdef\subcodetitle{Primitives}%
 A short format\index{short format} file starts with the banner, as explained above, and continues
@@ -5410,67 +5464,71 @@ inside a section can be stored as 32 bit integers, a feature that
 we will need only for the so called ``content'' section, but it
 is also nice for implementers to know in advance what sizes to expect.
 
-When we work on a section, we will load the entire section into
+When we work on a section, we will have the entire section in
 memory and use three variables to access it:  |hstart|
 points to the first byte of the section, |hend| points
 to the byte after the last byte of the section, and |hpos| points to the 
 current position inside the section.\label{hpos}
 
 @<common variables@>=
-uint8_t *hpos, *hstart, *hend;
+uint8_t *hpos=NULL, *hstart=NULL, *hend=NULL;
 @
 
 There are two sets of macros that read or write binary data at the current position
 and advance the stream position accordingly.\label{HPUT}\label{HGET}
 
 \getcode
-@<get functions@>=
-void hget_error(void)
-{if (hpos<=hend) return;
- fprintf(stderr,@["HGET overrun section %d at " SIZE_F "\n"@],section_no,hpos-hstart);
- exit(1);
+
+@<get file macros@>=
+#define HGET_ERROR QUIT(@["HGET overrun in section %d at " SIZE_F "\n"@],section_no,hpos-hstart)
+#define @[HEND@]   @[((hpos<=hend)?0:(HGET_ERROR,0))@]
+
+#define @[HGET8@]      ((hpos<hend)?*(hpos++):(HGET_ERROR,0))
+#define @[HGET16(X)@] ((X)=(hpos[0]<<8)+hpos[1],hpos+=2,HEND)
+#define @[HGET24(X)@] ((X)=(hpos[0]<<16)+(hpos[1]<<8)+hpos[2],hpos+=3,HEND)
+#define @[HGET32(X)@] ((X)=(hpos[0]<<24)+(hpos[1]<<16)+(hpos[2]<<8)+hpos[3],hpos+=4,HEND)
+#define @[HGETTAG(A)@] @[A=HGET8,DBGTAG(A,hpos-1)@]
+@
+
+Using |HGET8| reading the banner simply becomes
+%\getcode
+\codesection{\getsymbol}{Reading the short format}\getindex{1}{6}{Banner}
+@<get file functions@>=
+void hget_banner(void)
+{ int i;
+  for (i=0;i<MAX_BANNER;i++)
+  { hbanner[i]=HGET8;
+    if (hbanner[i]=='\n') break;
+  } 
+  hbanner[++i]=0;
 }
 @
 
-
-@<GET macros@>=
-#define @[HGET8(X)@] ((X)=hpos[0],hpos+=1,hget_error())
-#define @[HGET16(X)@] ((X)=(hpos[0]<<8)+hpos[1],hpos+=2,hget_error())
-#define @[HGET24(X)@] ((X)=(hpos[0]<<16)+(hpos[1]<<8)+hpos[2],hpos+=3,hget_error())
-#define @[HGET32(X)@] ((X)=(hpos[0]<<24)+(hpos[1]<<16)+(hpos[2]<<8)+hpos[3],hpos+=4,hget_error())
-#define @[HGETTAG(A)@] @[HGET8(A),DBGTAG(A,hpos-1)@]
-@
 
 \putcode
 @<put functions@>=
 void hput_error(void)
 {if (hpos<hend) return;
- fprintf(stderr,@["HPUT overrun section %d pos=" SIZE_F "\n"@],section_no,hpos-hstart);
- exit(1);
+ QUIT("HPUT overrun section %d pos=" SIZE_F "\n"@],section_no,hpos-hstart);
 }
 @
 
 @<put macros@>=
+extern void hput_error(void);
 #define @[HPUT8(X)@]       (*(hpos++)=(X),hput_error())
 #define @[HPUT16(X)@]      (HPUT8(((X)>>8)&0xFF),HPUT8((X)&0xFF))
 #define @[HPUT24(X)@]      (HPUT8(((X)>>16)&0xFF),HPUT8(((X)>>8)&0xFF),HPUT8((X)&0xFF))
 #define @[HPUT32(X)@]      (HPUT8(((X)>>24)&0xFF),HPUT8(((X)>>16)&0xFF),HPUT8(((X)>>8)&0xFF),HPUT8((X)&0xFF))
 @
 
-The above macros test for buffer overruns\index{buffer overrun}, but allocating sufficient
-buffer space is done separately.
-Before reading a node, we will check whether the current position is
-still inside the stream. In the worst case, when the stream data is
-corrupted and there is a partial node at the end of the stream, we
-will read the remainder of a single node past the end of the
-stream. We will avoid the possible segmentation fault in this case by
-adding a small safety margin at the end of the buffer.  Probably
-already the missing end tag will then trigger an error.
+The above macros test for buffer overruns\index{buffer overrun};
+allocating sufficient buffer space is done separately.
 
 Before writing a node, we will insert a test and increase the buffer if necessary.
 @<put macros@>=
+void  hput_increase_buffer(uint32_t n);
 #define @[HPUTX(N)@] @[(((hend-hpos) < (N))? hput_increase_buffer(N):(void)0)@]
-#define HPUTNODE  @[HPUTX(SAFETY_MARGIN)@]
+#define HPUTNODE  @[HPUTX(MAX_TAG_DISTANCE)@]
 #define @[HPUTTAG(K,I)@] @[(HPUTNODE,@+DBGTAG(TAG(K,I),hpos),@+HPUT8(TAG(K,I)))@]
 @ 
 
@@ -5480,44 +5538,119 @@ small upper bound on the maximum distance between two tags can be determined.
 
 % My guess from grep "subq" skip.s | grep hpos | sort -n is 25
 @<hint macros@>=
-#define SAFETY_MARGIN 32 /* This is a guess; I need a tight upper bound. */
+#define MAX_TAG_DISTANCE 32 /* This is a guess; I need a tight upper bound. */
+@
+
+\subsection{Mapping a Short Format File}
+Since modern computers with 64bit hardware have a huge address space,
+mapping the entire file into virtual memory is the most efficient way
+to read a large file.  ``Mapping'' is not the same as ``reading'' and it is
+not the same as allocating precious memory, all that is done by the
+operating system when needed. Mapping just reserves adresses.
+
+The following functions map and unmap a short format input 
+file at address |hbase|.
+
+
+@<map functions@>=
+@<|mmap| and |munmap| declarations@>@;
+static size_t hbase_size;
+uint8_t *hbase=NULL;
+extern char in_name[];
+void hget_map(void)
+{ struct stat st;
+  int fd;
+  fd = open(in_name, O_RDONLY, 0);
+  if (fd<0) QUIT("Unable to open file %s", in_name);
+  if (fstat(fd, &st)<0) QUIT("Unable to get file size");
+  hbase_size=st.st_size;
+  hbase= mmap(NULL,hbase_size,PROT_READ,MAP_PRIVATE,fd, 0);
+  if (hbase==MAP_FAILED) 
+  { hbase=NULL;hbase_size=0;
+    QUIT("Unable to map file into memory");
+  }
+  close(fd);
+  hpos=hstart=hbase;
+  hend=hstart+hbase_size;
+}
+
+
+void hget_unmap(void)
+{ munmap(hbase,hbase_size);
+  hbase=NULL;
+  hbase_size=0;
+  hpos=hstart=hend=NULL;
+}
+@
+A small complication arrises from the fact that the |mmap| and
+|munmap| functions and the associated header files are not available
+under the Windows operating system and not even under MinGW.
+
+So we need to implement our own version of these functions.  We do not
+implement general purpose replacements but only a replacement for the
+calls with the parameters used above.  We start with the function
+|_get_osfhandle| to obtain a Windows |HANDLE| for the given file
+descriptor, then use |GetFileSize|, |CreateFileMapping|, and finally
+|MapViewOfFile|.  The file is closed with |CloseHandle|.
+
+
+@<|mmap| and |munmap| declarations@>=
+#ifdef WIN32
+#include <windows.h>
+#include <io.h>
+#define PROT_READ   0x1
+#define MAP_PRIVATE 0x02
+#define MAP_FAILED   ((void *) -1)
+static HANDLE hMap;
+void *mmap(void *addr, size_t length, int prot, int flags,
+                  int fd, off_t offset)
+{ HANDLE hFile=(HANDLE)_get_osfhandle(fd);
+  if (hFile==INVALID_HANDLE_VALUE) QUIT("Unable to get file handle");
+  hMap = CreateFileMapping(hFile, NULL, PAGE_READONLY, 0, 0, NULL);
+  if (hMap == NULL) QUIT("Unable to map file into memory");
+  addr = MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);
+  if (addr==NULL) QUIT("Unable to obtain address of file mapping");
+  CloseHandle(hFile);
+  return addr;
+}
+
+int munmap(void *addr, size_t length)
+{ UnmapViewOfFile(addr);
+  CloseHandle(hMap);
+  hMap=NULL;
+  return 0;
+}
+#else
+#include <sys/mman.h>
+#endif
 @
 
 
+After mapping the file at address |hbase|, access to sections of the
+file is provided by setting the three pointers |hpos|, |hstart|, and
+|hend|. The value |hbase==NULL| indicates, that no file is open.
+
+
 \gdef\subcodetitle{Sections}%
-To read a short format input file, we use the function |hget_file|. 
+To read sections of a short format input file, we use the function |hget_section|. 
+
 \getcode
 %\codesection{\getsymbol}\getindex{1}{3}{Files}
-@<get functions@>=
-void hget_file(size_t pos, size_t size)
-{ size_t i;
-  static uint8_t *buffer=NULL;
-  static size_t bsize=0;
-  DBG(dbgbasic,@["Reading " SIZE_F " byte at " SIZE_F "\n"@], size,pos);
-  size =size+SAFETY_MARGIN;
-  if (bsize<size)
-  { DBG(dbgbuffer,@["Reallocating input buffer "@|"for section %d from " SIZE_F " to " SIZE_F " byte\n"@],
-       section_no,bsize,size);
-    REALLOCATE(buffer,size,uint8_t);
-    bsize=size;
-  }
-  i=fseek(hin,(long)pos,SEEK_SET);
-  if (i!=0)  QUIT(@["Unable to position input file %s at " SIZE_F@],in_name,pos);
-  size =size-SAFETY_MARGIN;
-  i=fread(buffer,1,size,hin);
-  if (i<size)
-    QUIT(@["Input file is " SIZE_F " bytes short"@],size-i);
-  if (ferror(hin))
-    QUIT("Unable to read input file %s",in_name);
-  hpos=hstart=buffer;
-  hend=hstart+size;
-}
+@<get file functions@>=
+@<|hdecompress| function@>@;
 
 void hget_section(uint16_t n)
-{ DBG(dbgbasic,"Reading section %d\n",n);
+{ DBG(DBGDIR,"Reading section %d\n",n);
   RNG("Section number",n,0,max_section_no);
-  hget_file(dir[n].pos, dir[n].size);
-  if (dir[n].xsize>0) hdecompress(n);
+  if (dir[n].buffer!=NULL && dir[n].xsize>0)
+  { hpos=hstart=dir[n].buffer;
+    hend=hstart+dir[n].xsize;
+  }
+  else
+  { hpos=hstart=hbase+dir[n].pos; 
+    hend=hstart+dir[n].size;
+    if (dir[n].xsize>0) hdecompress(n);
+  }
 }
 @
 
@@ -5525,30 +5658,26 @@ To write a short format file, we allocate for each of the first three sections a
 suitable buffer\index{buffer}, then fill these buffers, and finally write them
 out in sequential order.
 
-@<common functions@>=
+@<put functions@>=
 #define BUFFER_SIZE 1024
 void new_output_buffers(void)
 { dir[0].bsize=dir[1].bsize=dir[2].bsize=BUFFER_SIZE;
-  DBG(dbgbuffer,"Allocating output buffer size=0x%x, margin=0x%x\n",BUFFER_SIZE,SAFETY_MARGIN);
-  ALLOCATE(dir[0].buffer,dir[0].bsize+SAFETY_MARGIN,uint8_t);
-  ALLOCATE(dir[1].buffer,dir[1].bsize+SAFETY_MARGIN,uint8_t);
-  ALLOCATE(dir[2].buffer,dir[2].bsize+SAFETY_MARGIN,uint8_t);
+  DBG(DBGBUFFER,"Allocating output buffer size=0x%x, margin=0x%x\n",BUFFER_SIZE,MAX_TAG_DISTANCE);
+  ALLOCATE(dir[0].buffer,dir[0].bsize+MAX_TAG_DISTANCE,uint8_t);
+  ALLOCATE(dir[1].buffer,dir[1].bsize+MAX_TAG_DISTANCE,uint8_t);
+  ALLOCATE(dir[2].buffer,dir[2].bsize+MAX_TAG_DISTANCE,uint8_t);
 }
-@
-\gdef\subcodetitle{Mandatory Sections}%
-\putcode
-@<put functions@>=
 
-#define BUFFER_FACTOR 1.4142136 /* $\sqrt 2$ */
 void  hput_increase_buffer(uint32_t n)
 {  size_t bsize;
    uint32_t pos;
+   const double buffer_factor=1.4142136; /* $\sqrt 2$ */
    pos=hpos-hstart;
-   bsize=dir[section_no].bsize*BUFFER_FACTOR+0.5;
+   bsize=dir[section_no].bsize*buffer_factor+0.5;
    if (bsize<pos+n) bsize=pos+n;
    if (bsize>=0xFFFFFFFF) bsize=0xFFFFFFFF;
    if (bsize<pos+n)  QUIT(@["Unable to increase buffer size " SIZE_F " by 0x%x byte"@],@|hpos-hstart,n);
-   DBG(dbgbuffer,@["Reallocating output buffer "@|" for section %d from 0x%x to " SIZE_F " byte\n"@],
+   DBG(DBGBUFFER,@["Reallocating output buffer "@|" for section %d from 0x%x to " SIZE_F " byte\n"@],
        section_no,dir[section_no].bsize,bsize);
    REALLOCATE(dir[section_no].buffer,bsize,uint8_t);
    dir[section_no].bsize=(uint32_t)bsize;
@@ -5558,7 +5687,7 @@ void  hput_increase_buffer(uint32_t n)
 }
 
 
-size_t hput_data(uint16_t n, uint8_t *buffer, uint32_t size)
+static size_t hput_data(uint16_t n, uint8_t *buffer, uint32_t size)
 { size_t s;
   s=fwrite(buffer,1,size,hout);
   if (s!=size)
@@ -5566,7 +5695,7 @@ size_t hput_data(uint16_t n, uint8_t *buffer, uint32_t size)
   return s;
 }
 
-size_t hput_section(uint16_t n)
+static size_t hput_section(uint16_t n)
 { return hput_data(n, dir[n].buffer,dir[n].size);
 }
 @
@@ -5583,13 +5712,15 @@ needs to be inflated, its size after decompression is found in the
 compression will be known after deflating it.
 
 @s z_stream int
-@<get functions@>=
-void hdecompress(uint16_t n)
+
+@<|hdecompress| function@>=
+
+static void hdecompress(uint16_t n)
 { z_stream z; /* decompression stream */
   uint8_t *buffer;
   int i;
 
-  DBG(dbgcompress,"Decompressing section %d from 0x%x to 0x%x byte\n",@|n, dir[n].size, dir[n].xsize);
+  DBG(DBGCOMPRESS,"Decompressing section %d from 0x%x to 0x%x byte\n",@|n, dir[n].size, dir[n].xsize);
   z.zalloc = (alloc_func)0;@+
   z.zfree = (free_func)0;@+
   z.opaque = (voidpf)0;
@@ -5597,19 +5728,19 @@ void hdecompress(uint16_t n)
   z.avail_in = hend-hstart;
   if (inflateInit(&z)!=Z_OK)
     QUIT("Unable to initialize decompression: %s",z.msg);
-  ALLOCATE(buffer,dir[n].xsize+SAFETY_MARGIN,uint8_t);
-  DBG(dbgbuffer,"Allocating output buffer size=0x%x, margin=0x%x\n",dir[n].xsize,SAFETY_MARGIN);
+  ALLOCATE(buffer,dir[n].xsize+MAX_TAG_DISTANCE,uint8_t);
+  DBG(DBGBUFFER,"Allocating output buffer size=0x%x, margin=0x%x\n",dir[n].xsize,MAX_TAG_DISTANCE);
   z.next_out = buffer;           
-  z.avail_out =dir[n].xsize+SAFETY_MARGIN;
+  z.avail_out =dir[n].xsize+MAX_TAG_DISTANCE;
   i= inflate(&z, Z_FINISH);
-  DBG(dbgcompress,"in: avail/total=0x%x/0x%lx "@|"out: avail/total=0x%x/0x%lx, return %d;\n",@|
+  DBG(DBGCOMPRESS,"in: avail/total=0x%x/0x%lx "@|"out: avail/total=0x%x/0x%lx, return %d;\n",@|
     z.avail_in,z.total_in, z.avail_out, z.total_out,i);
   if (i!=Z_STREAM_END)
     QUIT("Unable to complete decompression: %s",z.msg);
   if (z.avail_in != 0) 
     QUIT("Decompression missed input data");
   if (z.total_out != dir[n].xsize)
-    QUIT("Decompression output size mismatch 0x%lx != 0x%x",z.total_out, dir[n].xsize );
+    QUIT("Decompression output size missmatch 0x%lx != 0x%x",z.total_out, dir[n].xsize );
   if (inflateEnd(&z)!=Z_OK)
     QUIT("Unable to finalize decompression: %s",z.msg);
   dir[n].buffer=buffer;
@@ -5619,25 +5750,25 @@ void hdecompress(uint16_t n)
 }
 @
 
-@<put functions@>=
-void hcompress(uint16_t n)
+@<|hcompress| function@>=
+static void hcompress(uint16_t n)
 { z_stream z; /* compression stream */
   uint8_t *buffer;
   int i;
   if (dir[n].size==0)   { dir[n].xsize=0; return; }
-  DBG(dbgcompress,"Compressing section %d of size 0x%x\n",n, dir[n].size);
+  DBG(DBGCOMPRESS,"Compressing section %d of size 0x%x\n",n, dir[n].size);
   z.zalloc = (alloc_func)0;@+
   z.zfree = (free_func)0;@+
   z.opaque = (voidpf)0;
   if (deflateInit(&z,Z_DEFAULT_COMPRESSION)!=Z_OK)
     QUIT("Unable to initialize compression: %s",z.msg);
-  ALLOCATE(buffer,dir[n].size+SAFETY_MARGIN,uint8_t);
+  ALLOCATE(buffer,dir[n].size+MAX_TAG_DISTANCE,uint8_t);
   z.next_out = buffer;
-  z.avail_out = dir[n].size+SAFETY_MARGIN;
+  z.avail_out = dir[n].size+MAX_TAG_DISTANCE;
   z.next_in = dir[n].buffer;
   z.avail_in = dir[n].size;
   i=deflate(&z, Z_FINISH);
-  DBG(dbgcompress,"deflate in: avail/total=0x%x/0x%lx out: avail/total=0x%x/0x%lx, return %d;\n",@|
+  DBG(DBGCOMPRESS,"deflate in: avail/total=0x%x/0x%lx out: avail/total=0x%x/0x%lx, return %d;\n",@|
     z.avail_in,z.total_in, z.avail_out, z.total_out,i);
   if (z.avail_in != 0) 
     QUIT("Compression missed input data");
@@ -5645,10 +5776,10 @@ void hcompress(uint16_t n)
     QUIT("Compression incomplete: %s",z.msg);
   if (deflateEnd(&z)!=Z_OK)
     QUIT("Unable to finalize compression: %s",z.msg);
-  DBG(dbgcompress,"Compressed 0x%lx byte to 0x%lx byte\n",@|z.total_in,z.total_out);
+  DBG(DBGCOMPRESS,"Compressed 0x%lx byte to 0x%lx byte\n",@|z.total_in,z.total_out);
   free(dir[n].buffer);
   dir[n].buffer=buffer;
-  dir[n].bsize=dir[n].size+SAFETY_MARGIN;
+  dir[n].bsize=dir[n].size+MAX_TAG_DISTANCE;
   dir[n].xsize=dir[n].size;
   dir[n].size=z.total_out;
 }
@@ -5716,7 +5847,7 @@ entry: START SECTION UNSIGNED string END @/
 We use a dynamically allocated array
 of directory entries to store the directory.
 
-@<hint types@>=
+@<directory entry type@>=
 typedef struct {
 uint64_t pos;
 uint32_t size, xsize;
@@ -5727,16 +5858,14 @@ uint32_t bsize;
 } entry_t;
 @
 
-@<common variables@>=
-entry_t *dir=NULL;
-uint16_t section_no,  max_section_no;
-@
 
 The function |new_directory| allocates the directory.
 
-@<common functions@>=
+@<directory functions@>=
+entry_t *dir=NULL;
+uint16_t section_no,  max_section_no;
 void new_directory(uint32_t entries)
-{ DBG(dbgbasic,"Creating directory with %d entries\n", entries);
+{ DBG(DBGDIR,"Creating directory with %d entries\n", entries);
   RNG("Directory entries",entries,3,0x10000);
   max_section_no=entries-1;
   ALLOCATE(dir,entries,entry_t);
@@ -5745,7 +5874,7 @@ void new_directory(uint32_t entries)
 @
 
 The function |hset_entry| fills in the appropriate entry.
-@<common functions@>=
+@<directory functions@>=
 void hset_entry(entry_t *e, uint16_t i, uint32_t size, uint32_t xsize, @|char *file_name)
 { e->section_no=i;
   e->size=size; @+e->xsize=xsize;
@@ -5753,7 +5882,7 @@ void hset_entry(entry_t *e, uint16_t i, uint32_t size, uint32_t xsize, @|char *f
     e->file_name=NULL;
   else
     e->file_name=strdup(file_name);
-  DBG(dbgdir,"Creating entry %d: \"%s\" size=0x%x xsize=0x%x\n",@|i,file_name,size,xsize);
+  DBG(DBGDIR,"Creating entry %d: \"%s\" size=0x%x xsize=0x%x\n",@|i,file_name,size,xsize);
 }
 @
 
@@ -5764,12 +5893,15 @@ in long format using the following functions.
 @<write functions@>=
 #ifdef WIN32
 #include <io.h>
+#define @[access(N,M)@] @[_access(N, M )@] 
 #define F_OK 0
+#else
+#include <unistd.h>
 #endif
 
 void hwrite_aux_files(void)
 { int i;
-  DBG(dbgbasic,"Writing %d aux files\n",max_section_no-2);
+  DBG(DBGDIR,"Writing %d aux files\n",max_section_no-2);
   for (i=3;i<=max_section_no;i++)
   { FILE *f;
     if (access(dir[i].file_name,F_OK)==0 && !option_force)
@@ -5782,7 +5914,7 @@ void hwrite_aux_files(void)
     else
     { size_t s;
       hget_section(i);
-      DBG(dbgbasic,"Writing file %s\n",dir[i].file_name);
+      DBG(DBGDIR,"Writing file %s\n",dir[i].file_name);
       s=fwrite(hstart,1,dir[i].size,f);
       if (s!=dir[i].size) QUIT("writing file %s",dir[i].file_name);
       fclose(f);
@@ -5829,16 +5961,16 @@ Here is the macro and function to read a directory\index{directory entry} entry:
 \gdef\subcodetitle{Directory Entries}%
 \getcode
 
-@<GET macros@>=
-#define @[HGET_SIZE(S,X,I)@] \
+@<get file macros@>=
+#define @[HGET_SIZE(I)@] \
   if ((I)&b100) { \
-    if (((I)&b011)==0) HGET8(s),HGET8(xs); \
+    if (((I)&b011)==0) s=HGET8,xs=HGET8; \
     else if (((I)&b011)==1) HGET16(s),HGET16(xs); \
     else if (((I)&b011)==2) HGET24(s),HGET24(xs); \
     else if (((I)&b011)==3) HGET32(s),HGET32(xs); \
    } \
   else { \
-    if (((I)&b011)==0) HGET8(s); \
+    if (((I)&b011)==0) s=HGET8; \
     else if (((I)&b011)==1) HGET16(s); \
     else if (((I)&b011)==2) HGET24(s); \
     else if (((I)&b011)==3) HGET32(s); \
@@ -5848,15 +5980,15 @@ Here is the macro and function to read a directory\index{directory entry} entry:
 { uint16_t i; \
   uint32_t s=0,xs=0; \
   char *file_name; \
-  HGET16(i); HGET_SIZE(s,xs,I); HGET_STRING(file_name); @/\
+  HGET16(i); HGET_SIZE(I); HGET_STRING(file_name); @/\
   hset_entry(&(E),i,s,xs,file_name); \
 }
 @
 
-@<get functions@>=
+@<get file functions@>=
 void hget_entry(entry_t *e)
 { @<read the start byte |a|@>@;
-  DBG(dbgbasic,"Reading directory entry\n");
+  DBG(DBGDIR,"Reading directory entry\n");
   switch(a)
   { case TAG(0,b000+0): HGET_ENTRY(b000+0,*e);@+ break;
     case TAG(0,b000+1): HGET_ENTRY(b000+1,*e);@+ break;
@@ -5869,7 +6001,7 @@ void hget_entry(entry_t *e)
     default:  TAGERR(a); @+ break; 
   }
   @<read and check the end byte |z|@>@;
-  DBG(dbgdir,"entry %d: size=0x%x xsize=0x%x\n",@|e->section_no,e->size,e->xsize);
+  DBG(DBGDIR,"entry %d: size=0x%x xsize=0x%x\n",@|e->section_no,e->size,e->xsize);
 }
 @
 
@@ -5886,12 +6018,11 @@ entry for section 1 (which might already be compressed).
 The name of the directory section must be the empty string.
 \gdef\subcodetitle{Directory Section}%
 \getcode
-@<get functions@>=
-void hget_root(entry_t *root)
-{ DBG(dbgbasic,"Get Root\n");
-  hget_file(hbanner_size,13); /* Big enough for the root entry*/
+@<get file functions@>=
+static void hget_root(entry_t *root)
+{ DBG(DBGDIR,"Get Root\n");
   hget_entry(root); 
-  root->pos=hbanner_size+(hpos-hstart);
+  root->pos=hpos-hstart;
   max_section_no=root->section_no;
   root->section_no=0;
   if (max_section_no<2) QUIT("Sections 0, 1, and 2 are mandatory");
@@ -5901,7 +6032,7 @@ void hget_directory(void)
 { int i;
   entry_t root={0};
   hget_root(&root);
-  DBG(dbgbasic,"Get Directory\n");
+  DBG(DBGDIR,"Get Directory\n");
   new_directory(max_section_no+1);
   dir[0]=root;
   hget_section(0);
@@ -5909,6 +6040,14 @@ void hget_directory(void)
   { hget_entry(&(dir[i]));@+
     dir[i].pos=dir[i-1].pos +dir[i-1].size;@+
   }
+}
+
+void hclear_dir(void)
+{ int i;
+  if (dir==NULL) return;
+  for (i=0;i<3;i++) /* currently the only compressed sections */
+  if (dir[i].xsize>0 && dir[i].buffer!=NULL) free(dir[i].buffer);
+  free(dir); dir=NULL;
 }
 
 @
@@ -5937,14 +6076,14 @@ Armed with these preparations, we can put the directory into the \HINT/ file.
 \gdef\subcodetitle{Directory Section}%
 \putcode
 @<put functions@>=
-void hput_entry(entry_t *e)
+static void hput_entry(entry_t *e)
 { uint8_t b;
   if (e->size<0x100 && e->xsize<0x100) b=0;
   else if (e->size<0x10000 &&e->xsize<0x10000) b=1;
   else if (e->size<0x1000000 &&e->xsize<0x1000000) b=2;
   else b=3;
   if (e->xsize!=0) b =b|b100;
-  DBG(dbgtags,"Directory entry no=%d size=0x%x xsize=0x%x\n",e->section_no, e->size, e->xsize);
+  DBG(DBGTAGS,"Directory entry no=%d size=0x%x xsize=0x%x\n",e->section_no, e->size, e->xsize);
   HPUTTAG(0,b);@/
   HPUT16(e->section_no);
   switch (b) {
@@ -5961,29 +6100,31 @@ void hput_entry(entry_t *e)
   hput_string(e->file_name);@/
   DBGTAG(TAG(0,b),hpos);@+HPUT8(TAG(0,b));
 }
-void hput_directory_start(void)
-{ DBG(dbgbasic,"Directory Section\n");
+
+static void hput_directory_start(void)
+{ DBG(DBGDIR,"Directory Section\n");
   section_no=0;
   hpos=hstart=dir[0].buffer;
   hend=hstart+dir[0].bsize;
 }
-void hput_directory_end(void)
+static void hput_directory_end(void)
 { dir[0].size=hpos-hstart;
-  DBG(dbgbasic,"End Directory Section size=0x%x\n",dir[0].size);
+  DBG(DBGDIR,"End Directory Section size=0x%x\n",dir[0].size);
 }
 
-size_t hput_root(void)
-{ uint8_t buffer[SAFETY_MARGIN];
+static size_t hput_root(void)
+{ uint8_t buffer[MAX_TAG_DISTANCE];
   size_t s;
   hpos=hstart=buffer;
-  hend=hstart+SAFETY_MARGIN;
+  hend=hstart+MAX_TAG_DISTANCE;
   dir[0].section_no=max_section_no;
   hput_entry(&dir[0]);
   s=hput_data(0, hstart,hpos-hstart);
-  DBG(dbgbasic,@["Writing Root size=" SIZE_F "\n"@],s);
+  DBG(DBGDIR,@["Writing Root size=" SIZE_F "\n"@],s);
   return s;
 }
-
+@<|hcompress| function@>@;
+extern bool option_compress;
 void hput_directory(void)
 { int i;
   @<set the file sizes for optional sections@>@;
@@ -5991,7 +6132,7 @@ void hput_directory(void)
   hput_directory_start();
   for (i=1; i<=max_section_no; i++)
   { dir[i].pos=dir[i-1].pos+dir[i-1].size;
-    DBG(dbgdir,"writing entry %u at 0x%" PRIx64 "\n",i,  dir[i].pos);
+    DBG(DBGDIR,"writing entry %u at 0x%" PRIx64 "\n",i,  dir[i].pos);
     hput_entry(&dir[i]);
   }
   hput_directory_end();
@@ -6007,23 +6148,24 @@ are described in the directory entries 3 and above to a \HINT/ file in short for
 \gdef\subcodetitle{Optional Sections}%
 \putcode
 @<put functions@>=
-void hput_optional_sections(void)
+static void hput_optional_sections(void)
 { int i;
-  DBG(dbgbasic,"Optional Sections\n");
+  DBG(DBGDIR,"Optional Sections\n");
   for (i=3; i<=max_section_no; i++)@/
    { FILE *f;
      size_t fsize;
-     DBG(dbgbasic,"file %d: %s\n",dir[i].section_no,dir[i].file_name);
+     DBG(DBGDIR,"file %d: %s\n",dir[i].section_no,dir[i].file_name);
      if (dir[i].xsize!=0) @/
-       DBG(dbgbasic,"Compressing of auxiliary files currently not supported");
+       DBG(DBGDIR,"Compressing of auxiliary files currently not supported");
      f=fopen(dir[i].file_name,"rb");
      if (f==NULL) QUIT("Unable to read section %d, file %s",
        dir[i].section_no,dir[i].file_name);
      fsize=0;
      while (!feof(f))@/
-     { size_t s,t;       
-       s=fread(scratch_buffer,1,MAX_SCRATCH,f);@t\label{scratch}@>@/
-       t=fwrite(scratch_buffer,1,s,hout);
+     { size_t s,t;
+       char buffer[1<<13]; /* 8kByte */       
+       s=fread(buffer,1,1<<13,f);@/
+       t=fwrite(buffer,1,s,hout);
        if (s!=t) QUIT("writing file %s",dir[i].file_name);
        fsize=fsize+t;
      }
@@ -6096,16 +6238,17 @@ void hwrite_definitions_end(void)
 
 
 @s def_t int
-\getcode
+
 @<get functions@>=
 void hget_definition_section(void)
-{ DBG(dbgbasic,"Definitions\n");
+{ DBG(DBGDEF,"Definitions\n");
   hget_section(1);
   hwrite_definitions_start();
-  DBG(dbgbasic,"Reading list of maximum values\n");
+  DBG(DBGDEF,"Reading list of maximum values\n");
   hget_max_definitions();
+  @<allocate data@>@;
   hwrite_max_definitions();
-  DBG(dbgbasic,"Reading list of definitions\n");
+  DBG(DBGDEF,"Reading list of definitions\n");
   while (hpos<hend) @/
   { def_t df; @+ hget_def_node(&df);
     if (max_fixed[df.k]>max_default[df.k]) 
@@ -6121,14 +6264,14 @@ void hget_definition_section(void)
 \putcode
 @<put functions@>=
 void hput_definitions_start(void)
-{ DBG(dbgbasic,"Definition Section\n");
+{ DBG(DBGDEF,"Definition Section\n");
   section_no=1;
   hpos=hstart=dir[1].buffer;
   hend=hstart+dir[1].bsize;
 }
 void hput_definitions_end(void)
 { dir[1].size=hpos-hstart;
-  DBG(dbgbasic,"End Definition Section size=0x%x\n",dir[1].size);
+  DBG(DBGDEF,"End Definition Section size=0x%x\n",dir[1].size);
 }
 @
 \gdef\codetitle{Definitions}
@@ -6136,40 +6279,33 @@ void hput_definitions_end(void)
 \subsection{Maximum Values}\index{maximum values}
 To help implementations allocating the right amount of memory for the
 definitions, the definition section starts with a list of maximum
-values.  For each kind of node, we store the maximum  valid reference number
-in the array |max_ref| which is indexed by the kind values.
-For a reference number |n| and kind value $k$ we have $0\le n\le |max_ref[k]|$. 
-To make sure that a hint file without any definitions will work,
-some definitions have default values. The initialization of default
-values is described in section~\secref{defaults}. The maximum reference number
-that has a default value is stored in the array |max_default|.
-We have $-1 \le |max_default[k]| \le |max_ref[k]| \le 255$. 
-Specifying maximum values that are lower than the 
-default\index{default value} values is not allowed in the
-short format; in the long format, lower values are silently ignored.
-Some default values are permanently fixed; for example the zero glue
-with reference number |zero_skip_no| must never change. The array  |max_fixed|
-stores the maximum reference number that is fixed for a given kind. 
-Definitions with reference numbers lower than the corresponding |max_fixed[k]| number
-are disallowed. Usually we have $-1 \le |max_fixed[k]| \le |max_default[k]| $, but
-if for a kind value $k$ no definitions, and hence no maximum values are allowed,
-we set  $|max_fixed[k]|=|0x100|>|max_default[k]| $.
+values.  For each kind of node, we store the maximum valid reference
+number in the array |max_ref| which is indexed by the kind values.
+For a reference number |n| and kind value $k$ we have 
+$0\le n\le |max_ref[k]|$.  
+To make sure that a hint file without any definitions
+will work, some definitions have default values. 
+The initialization of default and maximum values is described 
+in section~\secref{defaults}. The maximum
+reference number that has a default value is stored in the array
+|max_default|.  We have $-1 \le |max_default[k]| \le |max_ref[k]| \le
+255$.  Specifying maximum values that are lower than the
+default\index{default value} values is not allowed in the short
+format; in the long format, lower values are silently ignored.  Some
+default values are permanently fixed; for example the zero glue with
+reference number |zero_skip_no| must never change. The array
+|max_fixed| stores the maximum reference number that is fixed for a
+given kind.  Definitions with reference numbers lower than the
+corresponding |max_fixed[k]| number are disallowed. Usually we have
+$-1 \le |max_fixed[k]| \le |max_default[k]| $, but if for a kind value
+$k$ no definitions, and hence no maximum values are allowed, we set
+$|max_fixed[k]|=|0x100|>|max_default[k]| $.
 
-@<common variables@>=
-int max_ref[32];
-@
-
-@<common functions@>=
-void hset_max(void)
-{ kind_t k;
-  for (k=0; k<32; k++) max_ref[k]=max_default[k];
-}
-@
 
 We use the |max_ref| array whenever we find a
 reference number in the input to check if it is within the proper range.
 
-@<hint macros@>=
+@<debug macros@>=
 #define @[REF(K,N)@] if ((int)(N)>max_ref[K]) QUIT("Reference %d to %s out of range [0 - %d]",\
   (N),definition_name[K],max_ref[K])
 @
@@ -6183,16 +6319,9 @@ In the long format file, the list of maximum values starts with
  because at present, reference numbers---and therefore maximum
  values---are restricted to the range 0 to 255 in order to fit into a
  single byte. Other info values are reserved for future extensions.
-After reading the maximum values, we call |hallocate_data| to
-do any required allocations.
+After reading the maximum values, we allocate data for the defininitions
+that come next.
 
-
-
-@<common functions@>=
-void hallocate_data(void)
-{ @<allocate data@>@;
-}
-@
 
 \readcode 
 @s max_list symbol
@@ -6207,31 +6336,36 @@ void hallocate_data(void)
 ::@=max@>          :< return MAX; >:
 @
 @<parsing rules@>=
-max_definitions: START MAX { hset_max();} max_list END @|
- { hallocate_data(); hput_max_definitions(); };
+max_definitions: START MAX max_list END @|
+ { @<allocate data@>@; hput_max_definitions(); };
 max_list:@+ | max_list START max_value END;
 
-max_value: FONT UNSIGNED      { HSET_MAX(font_kind,$2); }
-         | INTEGER UNSIGNED       { HSET_MAX(int_kind,$2); }
-         | DIMEN UNSIGNED     { HSET_MAX(dimen_kind,$2); }
-         | LIGATURE UNSIGNED  { HSET_MAX(ligature_kind,$2); }
-         | HYPHEN UNSIGNED    { HSET_MAX(hyphen_kind,$2); }
-         | GLUE UNSIGNED      { HSET_MAX(glue_kind,$2); }
-         | MATH UNSIGNED      { HSET_MAX(math_kind,$2); }
-         | RULE UNSIGNED      { HSET_MAX(rule_kind,$2); }
-         | IMAGE UNSIGNED     { HSET_MAX(image_kind,$2); }
-         | LEADERS UNSIGNED   { HSET_MAX(leaders_kind,$2); }
-         | BASELINE UNSIGNED  { HSET_MAX(baseline_kind,$2); }
-         | XDIMEN UNSIGNED    { HSET_MAX(xdimen_kind,$2); }
-         | PARAM UNSIGNED     { HSET_MAX(param_kind,$2); }
-         | STREAM UNSIGNED    { HSET_MAX(stream_kind,$2); }
-         | PAGE UNSIGNED      { HSET_MAX(page_kind,$2); }
-         | RANGE UNSIGNED     { HSET_MAX(range_kind,$2); };
+max_value: FONT UNSIGNED      { hset_max(font_kind,$2); }
+         | INTEGER UNSIGNED       { hset_max(int_kind,$2); }
+         | DIMEN UNSIGNED     { hset_max(dimen_kind,$2); }
+         | LIGATURE UNSIGNED  { hset_max(ligature_kind,$2); }
+         | HYPHEN UNSIGNED    { hset_max(hyphen_kind,$2); }
+         | GLUE UNSIGNED      { hset_max(glue_kind,$2); }
+         | MATH UNSIGNED      { hset_max(math_kind,$2); }
+         | RULE UNSIGNED      { hset_max(rule_kind,$2); }
+         | IMAGE UNSIGNED     { hset_max(image_kind,$2); }
+         | LEADERS UNSIGNED   { hset_max(leaders_kind,$2); }
+         | BASELINE UNSIGNED  { hset_max(baseline_kind,$2); }
+         | XDIMEN UNSIGNED    { hset_max(xdimen_kind,$2); }
+         | PARAM UNSIGNED     { hset_max(param_kind,$2); }
+         | STREAM UNSIGNED    { hset_max(stream_kind,$2); }
+         | PAGE UNSIGNED      { hset_max(page_kind,$2); }
+         | RANGE UNSIGNED     { hset_max(range_kind,$2); };
 @
 
-@<hint macros@>=
-#define @[HSET_MAX(K,M)@] @[RNG("Maximum",(signed)M,max_fixed[K]+1,0xFF)@]; \
-if ((signed)M>max_ref[K]) {max_ref[K]=M; DBG(dbgdef,"Setting max %s to %d\n",definition_name[K],M);}
+@<parsing functions@>=
+void hset_max(kind_t k, int n)
+{ RNG("Maximum",n,max_fixed[k]+1,0xFF); 
+  if (n>max_ref[k]) 
+  { max_ref[k]=n; 
+    DBG(DBGDEF,"Setting max %s to %d\n",definition_name[k],n);
+  }
+}
 @
 
 \writecode
@@ -6251,29 +6385,30 @@ void hwrite_max_definitions(void)
 @
 
 \getcode
-@<get functions@>=
+@<get file functions@>=
 void hget_max_definitions(void)
-{ @<read the start byte |a|@>@;
+{ kind_t k;
+  @<read the start byte |a|@>@;
   if (a!=TAG(list_kind,0)) QUIT("Start of maximum list expected");
-  hset_max();
+  for(k= 0;k<32;k++)max_ref[k]= max_default[k];
   while (true) @/
   { uint8_t n;
-    kind_t k;
     if (hpos>=hend) QUIT("Unexpected end of maximum list");
     node_pos=hpos-hstart;
     HGETTAG(a);
     if  (KIND(a)==list_kind) break;
     if (INFO(a)!=1) QUIT("Maximum info %d not supported",INFO(a));
     k=KIND(a);
-   if (max_fixed[k]>max_default[k]) QUIT("Maximum value for kind %s not supported",definition_name[k]);
-    HGET8(n);
+    if (max_fixed[k]>max_default[k]) 
+      QUIT("Maximum value for kind %s not supported",definition_name[k]);
+    n=HGET8;
     RNG("Maximum number",n,max_ref[k],0xFF);
     max_ref[k]=n;
-    DBG(dbgdef,"max(%s) = %d\n",definition_name[k],max_ref[k]);
+    DBG(DBGDEF,"max(%s) = %d\n",definition_name[k],max_ref[k]);
    @<read and check the end byte |z|@>@;
   }
   if (INFO(a)!=0) QUIT("End of maximum list with info %d", INFO(a));
-  hallocate_data();
+
 }
 @
 
@@ -6282,17 +6417,17 @@ void hget_max_definitions(void)
 @<put functions@>=
 void hput_max_definitions(void)
 { kind_t k;
-  DBG(dbgbasic,"Max Definitions Begin\n");
+  DBG(DBGDEF,"Max Definitions Begin\n");
   HPUTTAG(list_kind,0);
   for (k=0; k<32; k++)
     if (max_ref[k]>max_default[k])
-    { DBG(dbgdef,"max(%s) = %d\n",definition_name[k],max_ref[k]);
+    { DBG(DBGDEF,"max(%s) = %d\n",definition_name[k],max_ref[k]);
       HPUTTAG(k,1); 
       HPUT8(max_ref[k]);
       HPUTTAG(k,1); 
     }
   HPUTTAG(list_kind,0);
-  DBG(dbgbasic,"Max Definitions End\n");
+  DBG(DBGDEF,"Max Definitions End\n");
 }
 @
 
@@ -6320,7 +6455,10 @@ typedef struct{@+kind_t k; @+ int n;@+} def_t;
 @
 
 
-
+\vskip 0pt plus 20pt
+\goodbreak
+\vskip 0pt plus -20pt
+\putcode\penalty +1000\vskip -\baselineskip
 \readcode
 @s ref symbol
 @s font symbol
@@ -6351,14 +6489,17 @@ def_node:
 @<parsing functions@>=
 #define @[DEF(D,K,N)@] (D).k=K;@+ (D).n=(N);@+RNG("Reference",N,max_fixed[K]+1,max_ref[K]);
 @
-
+\vskip 0pt plus 20pt
+\goodbreak
+\vskip 0pt plus -20pt
+\writecode\penalty +1000\vskip -\baselineskip
 \getcode
 @<get functions@>=
 void hget_def_node(def_t *df)
 { @<read the start byte |a|@>@;
   df->k=KIND(a);
-  HGET8(df->n);
-  DBG(dbgtags,"Defining %s %d\n", definition_name[df->k],df->n);
+  df->n=HGET8;
+  DBG(DBGTAGS,"Defining %s %d\n", definition_name[df->k],df->n);
   if (df->k==range_kind)
     hget_range(INFO(a),df->n);
   else @/
@@ -6394,23 +6535,30 @@ The parameters of \TeX's routines are quite basic: integers\index{integer},
 dimensions\index{dimension}, and glues\index{glue}.
 Therefore we restrict the definitions in parameter lists to such basic definitions.
 
-@<hint macros@>=
-#define @[PARAM_REF(D)@] \
-  if((D).k!=int_kind && (D).k!=dimen_kind &&  @| (D).k!=glue_kind)\
-    QUIT("Kind %s not allowed in parameter list", definition_name[D.k]);\
-  REF((D).k,(D).n); 
+@<parsing functions@>=
+void check_param_def(def_t *df)
+{ if(df->k!=int_kind && df->k!=dimen_kind &&  @| df->k!=glue_kind)
+    QUIT("Kind %s not allowed in parameter list", definition_name[df->k]);
+  REF(df->k,df->n);
+}
 @
 
 The definitions below repeat the definitions we have seen for lists in section~\secref{plainlists} 
 with small modifications. For example we use the kind value |param_kind|. An empty parameter list
 is omitted in the long format as well as in the short format.
 
+
+\vskip 0pt plus 20pt
+\goodbreak
+\vskip 0pt plus -20pt
+\putcode\penalty +1000\vskip -\baselineskip
 \readcode
 
 @s PARAM symbol
 @s def_list symbol
 @s param_list_node symbol
 @s def_node symbol
+@s param_list symbol
 @<symbols@>=
 %token PARAM "param"
 %type <u> def_list
@@ -6422,7 +6570,7 @@ is omitted in the long format as well as in the short format.
 @
 @<parsing rules@>=
 def_list:  position @+
-          | def_list def_node {PARAM_REF($2);};
+          | def_list def_node {check_param_def(&($2));};
 param_list: estimate def_list { $$.p=$2; $$.k=param_kind; $$.s=(hpos-hstart)-$2;};
 param_list_node: start PARAM param_list END @/
            { @+if ($3.s>0) hput_tags($1,hput_list($1+1,&($3)));@+};
@@ -6482,16 +6630,17 @@ The optional font size specifies the desired font\index{font size} size. If omit
 the design\index{design size} size of the font as stored in the \.{.tfm} file.
 
 In the short format, the font specification is given in the same order as in the long format.
-The info value will be |b001| if a font size is present, otherwise it is |b000|.
+The info value will be |b001| if a font size is present, otherwise it is~|b000|.
 
 Our internal representation of a font just stores the font name because in the long format we add the font name
 as a comment to glyph nodes.
+
 
 @<common variables@>=
 char **hfont_name; /* dynamically allocated array of font names */
 @
 
-@<hint macros@>=
+@<hint basic types@>=
 #define MAX_FONT_PARAMS 11
 @
 
@@ -6541,21 +6690,23 @@ font_param: @/
 fref: REFERENCE @/{ RNG("Font parameter",$1,0,MAX_FONT_PARAMS); HPUT8($1); };
 @
 
-
-
-\getcode
+\vskip 0pt plus 20pt
+\goodbreak
+\vskip 0pt plus -20pt
+\getcode\penalty +1000\vskip -\baselineskip
+\writecode
 @<get functions@>=
 static void hget_font_params(void)
 { hyphen_t h;
   hget_glue_node(); 
   hget_hyphen_node(&(h));@+ hwrite_hyphen_node(&h); 
-  DBG(dbgdef,"Start font parameters\n");
+  DBG(DBGDEF,"Start font parameters\n");
   while (KIND(*hpos)!=font_kind)@/  
   { def_t df;
     @<read the start byte |a|@>@;
     df.k=KIND(a);
-    HGET8(df.n);
-    DBG(dbgdef,"Reading font parameter %d: %s\n",df.n, definition_name[df.k]);
+    df.n=HGET8;
+    DBG(DBGDEF,"Reading font parameter %d: %s\n",df.n, definition_name[df.k]);
     if (df.k!=penalty_kind && df.k!=kern_kind && df.k!=ligature_kind && @|
         df.k!=hyphen_kind && df.k!=glue_kind && df.k!=math_kind && @| df.k!=rule_kind && df.k!=image_kind)
       QUIT("Font parameter %d has invalid type %s",df.n, content_name[df.n]);
@@ -6565,7 +6716,7 @@ static void hget_font_params(void)
     hwrite_end();
     @<read and check the end byte |z|@>@;
   }
-  DBG(dbgdef,"End font parameters\n");
+  DBG(DBGDEF,"End font parameters\n");
 }
 
 
@@ -6573,12 +6724,12 @@ void hget_font_def(info_t i, uint8_t f)
 { char *n; @+dimen_t s=0;@+uint16_t m,y; 
   HGET_STRING(n);@+ hwrite_string(n);@+  hfont_name[f]=strdup(n);
   if (i&b001) @+{ HGET32(s); @+if (s!=0) hwrite_dimension(s);@+}
-  DBG(dbgdef,"Font %s size 0x%x\n", n, s); 
+  DBG(DBGDEF,"Font %s size 0x%x\n", n, s); 
   HGET16(m); @+RNG("Font metrics",m,3,max_section_no);
   HGET16(y); @+RNG("Font glyphs",y,3,max_section_no);
   hwritef(" %d %d",m,y);
   hget_font_params();
-  DBG(dbgdef,"End font definition\n");
+  DBG(DBGDEF,"End font definition\n");
 }
 @
 
@@ -6586,7 +6737,7 @@ void hget_font_def(info_t i, uint8_t f)
 @<put functions@>=
 uint8_t hput_font_head(uint8_t f,  char *n, dimen_t s, @| uint16_t m, uint16_t y)
 { info_t i=b000;
-  DBG(dbgdef,"Defining font %d\nFont %s size 0x%x\n", f, n, s); 
+  DBG(DBGDEF,"Defining font %d\nFont %s size 0x%x\n", f, n, s); 
   hput_string(n);
   if (s!=0) {HPUT32(s);@+ i=b001;@+} 
   HPUT16(m); @+HPUT16(y); 
@@ -6604,7 +6755,10 @@ The asterisk\index{asterisk} is necessary to keep apart, for example, a
 penalty with value 50, written  ``{\tt \.{<}penalty 50\.{>}}'', from
 a penalty referencing the integer definition number 50, written ``{\tt \.{<}penalty *50\.{>}}''.
 
-
+\vskip 0pt plus 20pt
+\goodbreak
+\vskip 0pt plus -20pt
+\putcode\penalty +1000\vskip -\baselineskip
 \readcode
 
 @<parsing rules@>=
@@ -6649,8 +6803,8 @@ case TAG(leaders_kind,0):  HGET_REF(leaders_kind); @+break;
 case TAG(baseline_kind,0):  HGET_REF(baseline_kind); @+break;
 @
 
-@<GET macros@>=
-#define @[HGET_REF(K)@] {uint8_t n; @+ HGET8(n);@+ REF(K,n); @+hwritef(" *%d",n);@+} 
+@<get macros@>=
+#define @[HGET_REF(K)@] {uint8_t n; @+ n=HGET8;@+ REF(K,n); @+hwritef(" *%d",n);@+} 
 @
 \writecode
 @<write functions@>=
@@ -6686,33 +6840,43 @@ It is, however, possible to suppress definitions if the defined value
 is the same as the default.
 
 For maximum flexibility and efficiency, this chapter defines a 
-header file {\tt hdefaults.h} and a \CEE/ program {\tt mkhdefaults}
-that generates the corresponding {\tt hdefaults.c} file.
+header file {\tt hformat.h} and a \CEE/ program {\tt mkhformat}
+that generates the corresponding {\tt hformat.c} file.
 The latter contains constant arrays containing the respective default information.
 
 \noindent
 Here is the header file:
-@(hdefaults.h@>=
+@(hformat.h@>=
+#ifndef _HFORMAT_H_
+#define _HFORMAT_H_
+@<debug macros@>@;
+@<debug constants@>@;
+@<hint macros@>@;
+@<hint basic types@>@;
+@<default names@>@;
 
-@<define default names@>@;
 
-extern int max_fixed[32], max_default[32];
-
+extern const char *content_name[32];
+extern const char *definition_name[32];
+extern unsigned int debugflags;
+extern FILE *hlog;
+extern int max_fixed[32], max_default[32], max_ref[32];
 extern int32_t int_defaults[MAX_INT_DEFAULT+1];
 extern dimen_t dimen_defaults[MAX_DIMEN_DEFAULT+1];
 extern xdimen_t xdimen_defaults[MAX_XDIMEN_DEFAULT+1];
 extern glue_t glue_defaults[MAX_GLUE_DEFAULT+1];
 extern baseline_t baseline_defaults[MAX_BASELINE_DEFAULT+1];
+#endif
 @
 
 \noindent
-And here is the |main| program of {\tt mkhdefaults}:
+And here is the |main| program of {\tt mkhformat}:
 
-@(mkhdefaults.c@>=
-#include "basetypes.h"
+@(mkhformat.c@>=
 #include <stdio.h>
+#include "basetypes.h"
 #include "hformat.h"
-#include "hdefaults.h"
+
 
 int max_fixed[32], max_default[32];
 
@@ -6726,13 +6890,13 @@ baseline_t baseline_defaults[MAX_BASELINE_DEFAULT+1]={{{{0}}}};
 int main(void)
 { kind_t k;
   int i;
+  
   printf("#include \"basetypes.h\"\n"@/
-         "#include <stdio.h>\n"@/
-         "#include \"hformat.h\"\n"@/
-         "#include \"hdefaults.h\"\n\n");
+         "#include \"hformat.h\"\n\n");
+  @<define debug variables@>@;       
+  @<define |content_name| and |definition_name|@>@;
 
   for (k=0; k<32; k++) max_default[k]=-1,max_fixed[k]=0x100;
-
   @<define |int_defaults|@>@;
   @<define |dimen_defaults|@>@;
   @<define |xdimen_defaults|@>@;
@@ -6740,8 +6904,8 @@ int main(void)
   @<define |page_defaults|@>@;
   @<define |range_defaults|@>@;
 
-  @<define |max_fixed| and |max_default|@>@;
-
+  @<define |max_ref|, |max_fixed| and |max_default|@>@;
+ 
   return 0;
 }
 @
@@ -6750,9 +6914,10 @@ Above, we have set |max_default| to $-1$, meaning no defaults, and |max_fixed| t
 The following subsections will overwrite these values for all kinds of definitions that have defaults.
 It remains to reset |max_fixed| to $-1$ for all those kinds that have no defaults but allow definitions.
 Then we can print out both arrays.
-@<define |max_fixed| and |max_default|@>=
-  max_fixed[font_kind]= max_fixed[ligature_kind]= max_fixed[hyphen_kind]= max_fixed[math_kind]=max_fixed[rule_kind]=
-  max_fixed[image_kind]= max_fixed[leaders_kind]= max_fixed[param_kind]= max_fixed[stream_kind]=-1;@#
+@<define |max_ref|, |max_fixed| and |max_default|@>=
+  max_fixed[font_kind]= max_fixed[ligature_kind]= max_fixed[hyphen_kind]
+  = max_fixed[math_kind]=max_fixed[rule_kind]= max_fixed[image_kind]
+  = max_fixed[leaders_kind]= max_fixed[param_kind]= max_fixed[stream_kind]=-1;@#
   printf("int max_fixed[32]= {");
   for (k=0; k<32; k++)@/
   { printf("%d",max_fixed[k]);@+
@@ -6760,6 +6925,12 @@ Then we can print out both arrays.
   }
   printf("};\n\n");@#
   printf("int max_default[32]= {");
+  for (k=0; k<32; k++)@/
+  { printf("%d",max_default[k]);@+
+    if (k<31) printf(", ");@+
+  }
+  printf("};\n\n");
+  printf("int max_ref[32]= {");
   for (k=0; k<32; k++)@/
   { printf("%d",max_default[k]);@+
     if (k<31) printf(", ");@+
@@ -6782,7 +6953,7 @@ The following integer numbers are predefined.
 The zero integer is fixed with integer number zero. It is never redefined.
 The default values are taken from {\tt plain.tex}.
 
-@<define default names@>=
+@<default names@>=
 typedef enum {
         zero_int_no=0,
         pretolerance_no=1,
@@ -6853,7 +7024,7 @@ to display the \HINT/ file using these values of \.{hsize} and \.{vsize},
 these are the authors recommendation for the best ``viewing experience''.
 
 \noindent
-@<define default names@>=
+@<default names@>=
 typedef enum {
 zero_dimen_no=0,
 hsize_dimen_no=1,
@@ -6897,7 +7068,7 @@ In contrast to the \.{hsize} and \.{vsize} dimensions defined in the previous
 section, the extended dimensions defined here are linear functions that always evaluate
 to the current horizontal and vertical size in the viewer.
 
-@<define default names@>=
+@<default names@>=
 typedef enum {
 zero_xdimen_no=0,
 hsize_xdimen_no=1,
@@ -6921,7 +7092,7 @@ printf("xdimen_t xdimen_defaults[MAX_XDIMEN_DEFAULT+1]={"@/
 There are predefined glue\index{glue} numbers that correspond to the skip parameters of \TeX.
 The default values are taken from {\tt plain.tex}.
 
-@<define default names@>=
+@<default names@>=
 typedef enum {
 zero_skip_no=0,
 fil_skip_no=1,
@@ -7007,7 +7178,7 @@ represent a zero glue is as a predefined glue.
 
 The zero baseline\index{baseline skip} which inserts no baseline skip is predefined.
 
-@<define default names@>=
+@<default names@>=
 typedef enum {
 zero_baseline_no=0
 } baseline_no_t;
@@ -7026,7 +7197,7 @@ max_fixed[baseline_kind]=zero_baseline_no;@#
 \subsection{Page Templates}
 
 The zero page template\index{template} is predefined, as well as stream 0 for the main content.
-@<define default names@>=
+@<default names@>=
 typedef enum {
 zero_page_no=0
 } page_no_t;
@@ -7045,7 +7216,7 @@ max_fixed[stream_kind]=0;
 The page\index{page range} range for the zero page template is
 the entire content section. It is predefined.
 
-@<define default names@>=
+@<default names@>=
 typedef enum {
 zero_range_no=0
 } range_no_t;
@@ -7102,7 +7273,7 @@ void hwrite_content_section(void)
 \codesection{\getsymbol}{Reading the Short Format}\getindex{1}{6}{Content Section}
 @<get functions@>=
 void hget_content_section()
-{ DBG(dbgbasic,"Content\n");
+{ DBG(DBGDIR,"Content\n");
   hget_section(2);
   hwrite_range();
   while(hpos<hend)
@@ -7114,7 +7285,7 @@ void hget_content_section()
 \codesection{\putsymbol}{Writing the Short Format}\putindex{1}{6}{Content Section}
 @<put functions@>=
 void hput_content_start(void)
-{ DBG(dbgbasic,"Content Section\n");
+{ DBG(DBGDIR,"Content Section\n");
   section_no=2;
   hpos=hstart=dir[2].buffer;
   hend=hstart+dir[2].bsize;
@@ -7123,7 +7294,7 @@ void hput_content_start(void)
 void hput_content_end(void)
 {
   dir[2].size=hpos-hstart; /* Updating the directory entry */
-  DBG(dbgbasic,"End Content Section, size=0x%x\n", dir[2].size);
+  DBG(DBGDIR,"End Content Section, size=0x%x\n", dir[2].size);
 }
 @
 
@@ -7132,8 +7303,7 @@ void hput_content_end(void)
 The |usage| function explains command line\index{command line} 
 parameters and options\index{option}\index{debugging}.
 @<explain usage@>=
-void usage(void)
-{ fprintf(stderr,
+  fprintf(stderr,
   "Usage: %s [options] filename%s\n",prog_name, in_ext);@/
   fprintf(stderr,
   "Options:\n"@/
@@ -7144,72 +7314,84 @@ void usage(void)
   "\t -c     \t enable compression of section 1 and 2\n");@/
 #ifdef DEBUG
 fprintf(stderr,"\t -d XXX \t hexadecimal value. OR together these values:\n");@/
-fprintf(stderr,"\t\t\t XX=%03X   basic debugging\n", dbgbasic);@/
-fprintf(stderr,"\t\t\t XX=%03X   tag debugging\n", dbgtags);@/
-fprintf(stderr,"\t\t\t XX=%03X   node debugging\n",dbgnode);@/
-fprintf(stderr,"\t\t\t XX=%03X   definition debugging\n", dbgdef);@/
-fprintf(stderr,"\t\t\t XX=%03X   directory debugging\n", dbgdir);@/
-fprintf(stderr,"\t\t\t XX=%03X   range debugging\n",dbgrange);@/
-fprintf(stderr,"\t\t\t XX=%03X   float debugging\n", dbgfloat);@/
-fprintf(stderr,"\t\t\t XX=%03X   compression debugging\n", dbgcompress);@/
-fprintf(stderr,"\t\t\t XX=%03X   buffer debugging\n", dbgbuffer);@/
-fprintf(stderr,"\t\t\t XX=%03X   flex debugging\n", dbgflex);@/
-fprintf(stderr,"\t\t\t XX=%03X   bison debugging\n", dbgbison);@/
+fprintf(stderr,"\t\t\t XX=%03X   basic debugging\n", DBGBASIC);@/
+fprintf(stderr,"\t\t\t XX=%03X   tag debugging\n", DBGTAGS);@/
+fprintf(stderr,"\t\t\t XX=%03X   node debugging\n",DBGNODE);@/
+fprintf(stderr,"\t\t\t XX=%03X   definition debugging\n", DBGDEF);@/
+fprintf(stderr,"\t\t\t XX=%03X   directory debugging\n", DBGDIR);@/
+fprintf(stderr,"\t\t\t XX=%03X   range debugging\n",DBGRANGE);@/
+fprintf(stderr,"\t\t\t XX=%03X   float debugging\n", DBGFLOAT);@/
+fprintf(stderr,"\t\t\t XX=%03X   compression debugging\n", DBGCOMPRESS);@/
+fprintf(stderr,"\t\t\t XX=%03X   buffer debugging\n", DBGBUFFER);@/
+fprintf(stderr,"\t\t\t XX=%03X   flex debugging\n", DBGFLEX);@/
+fprintf(stderr,"\t\t\t XX=%03X   bison debugging\n", DBGBISON);@/
+fprintf(stderr,"\t\t\t XX=%03X   TeX debugging\n", DBGTEX);@/
+fprintf(stderr,"\t\t\t XX=%03X   Page debugging\n", DBGPAGE);@/
+fprintf(stderr,"\t\t\t XX=%03X   Font debugging\n", DBGFONT);@/
+fprintf(stderr,"\t\t\t XX=%03X   Render debugging\n", DBGRENDER);@/
 #endif
-exit(1);
-}
 @
-The different debug values are taken from an enumeration type.
-@<hint types@>=
-typedef enum {dbgnone= 0x0, 
-              dbgbasic=0x1, 
-              dbgtags= 0x2,
-              dbgnode= 0x4,
-              dbgdef=  0x8,
-              dbgdir=  0x10,
-              dbgrange=0x20,
-              dbgfloat=0x40,
-	      dbgcompress=0x80,
-              dbgbuffer=0x100,
-              dbgflex= 0x200,
-              dbgbison=0x400
-           } debugmode;
+We define constants for different debug flags.
+@<debug constants@>=
+#define DBGNONE     0x0 
+#define DBGBASIC    0x1 
+#define DBGTAGS     0x2
+#define DBGNODE     0x4
+#define DBGDEF      0x8
+#define DBGDIR      0x10
+#define DBGRANGE    0x20
+#define DBGFLOAT    0x40
+#define DBGCOMPRESS 0x80
+#define DBGBUFFER   0X100
+#define DBGFLEX     0x200
+#define DBGBISON    0x400
+#define DBGTEX      0x800
+#define DBGPAGE     0x1000
+#define DBGFONT     0x2000
+#define DBGRENDER   0x4000
 @
 
 Processing the command line looks for options and then sets the
 input file name\index{file name}.
 
+@<define debug variables@>=
+printf("unsigned int debugflags=DBGNONE;\n");
+@
+
 @<common variables@>=
-debugmode debugflags=dbgnone;
-#define MAX_NAME 1024
-char prog_name[MAX_NAME];
-char in_name[MAX_NAME];
-char *in_ext;
-char *out_ext;
 bool option_utf8=false;
 bool option_hex=false;
 bool option_force=false;
 bool option_compress=false;
+
+char in_name[MAX_NAME];
+
+@
+@<hint macros@>=
+#define MAX_NAME 1024
 @
 
-
-
 @<local variables in |main|@>=
+char prog_name[MAX_NAME];
+char *in_ext;
+char *out_ext;
+
+
 char stem_name[MAX_NAME], *out_name=NULL;
 int stem_length=0, path_length=0;
 bool option_log=false;
 @ 
 
 @<process the command line@>=
-  debugflags=dbgbasic;
+  debugflags=DBGBASIC;
   strncpy(prog_name,argv[0],MAX_NAME);
-  if (argc < 2) usage();
+  if (argc < 2) goto explain_usage;
   argv++; /* skip the program name */
   while (*argv!=NULL)
   { if ((*argv)[0]=='-')
     { char option=(*argv)[1];
       switch(option)
-      { default: usage();
+      { default: goto explain_usage;
         case 'o': argv++;@+ out_name=*argv;@+ break; 
         case 'l': option_log=true; @+break;
         case 'u': option_utf8=true;@+break;
@@ -7217,7 +7399,7 @@ bool option_log=false;
         case 'f': option_force=true; @+break;
         case 'c': option_compress=true; @+break;
         case 'd': @/
-          argv++; if (*argv==NULL) usage();
+          argv++; if (*argv==NULL) goto explain_usage;
           debugflags=strtol(*argv,NULL,16);
           break;
       }
@@ -7232,7 +7414,7 @@ bool option_log=false;
       stem_length=(int)strlen(in_name)-ext_length;
       strncpy(stem_name,in_name,stem_length);
       stem_name[stem_length]=0;
-      if (*(argv+1)!=NULL) usage();
+      if (*(argv+1)!=NULL) goto explain_usage;
     }
     argv++;
   }
@@ -7246,18 +7428,15 @@ an input file |yyin|\index{input file} which is set to |hin|
 and an output file |yyout| (which is not used).
 
 @<common variables@>=
-FILE *hin=NULL, *hout=NULL, *hlog=NULL;
+FILE *hin=NULL, *hout=NULL;
+@
+@<define debug variables@>=
+printf("FILE *hlog=NULL;\n");
 @
 
 The log file is opened first because
 this is the place where error messages\index{error message} 
 should go while the other files are opened.
-
-@<open files@>=
-@<open the log file@>@;
-@<open the input file@>@;
-@<open the output file@>@;
-@
 
 @<open the log file@> =
 #ifdef DEBUG
@@ -7294,11 +7473,15 @@ Once we have established logging, we can try to open the other files.
   stem_name[stem_length]=0;
 @
 
-At the very end, we will close all files again.
-@<close files@>=
-fclose(hin);
+At the very end, we will close the files again.
+@<close the input file@>=
+if (hin!=NULL) fclose(hin);
+@
+@<close the output file@>=
 if (hout!=NULL) fclose(hout);
-fclose(hlog);
+@
+@<close the log file@>=
+if (hlog!=NULL) fclose(hlog);
 @
 
 
@@ -7307,29 +7490,18 @@ fclose(hlog);
 There is no good program without good error handling\index{error message}\index{debugging}. 
 To print messages\index{message} or indicate errors, I define the following macros:
 \index{MESSAGE+\.{MESSAGE}}\index{QUIT+\.{QUIT}}
-\index{RNG+\.{RNG}}\index{TAGERR+\.{TAGERR}}\index{TAGSERR+\.{TAGSERR}}
+
 @(error.h@>=
 #ifndef _ERROR_H
 #define _ERROR_H
-#ifdef _MSC_VER /* MS Visual Studio C */
-#include "error32vc.h"
-#else
-#ifdef __ANDROID__ /* Android Studio C */
-#include "erroras.h"
-#else /*UNIX*/
 #include <stdlib.h>
 #include <stdio.h>
 extern FILE *hlog;
-#define @[MESSAGE(...)@] @[(fprintf(hlog,__VA_ARGS__),fflush(hlog))@]
-#define @[QUIT(...)@]   (fprintf(hlog,"ERROR: "),\
-              MESSAGE(__VA_ARGS__),fprintf(hlog,"\n"),exit(1))
-#endif
-#endif
-#define @[RNG(S,N,A,Z)@] @/\
-  if ((int)(N)<(int)(A)||(int)(N)>(int)(Z)) QUIT(S@, " %d out of range [%d - %d]",N,A,Z)
+extern uint8_t *hpos, *hstart;
+#define @[LOG(...)@] @[(fprintf(hlog,__VA_ARGS__),fflush(hlog))@]
+#define @[MESSAGE(...)@] @[(fprintf(stderr,__VA_ARGS__),fflush(hlog))@]
+#define @[QUIT(...)@]   (MESSAGE("ERROR: " __VA_ARGS__),fprintf(hlog,"\n"),exit(1))
 
-#define @[TAGERR(A)@] @[QUIT(@["Unknown tag [%s,%d] at " SIZE_F "\n"@],NAME(A),INFO(A),hpos-hstart)@]
-#define @[TAGSERR(A,Z)@] @[QUIT(@["Tag mismatch [%s,%d]!=[%s,%d] at 0x%x to " SIZE_F "\n"@],@|NAME(A),INFO(A),NAME(Z),INFO(Z),@|node_pos, hpos-hstart-1)@]
 #endif
 @
 
@@ -7337,19 +7509,24 @@ extern FILE *hlog;
 The amount of debugging\index{debugging} depends on the debugging flags.
 For portability, we first define the output specifier for expressions of type |size_t|.
 \index{DBG+\.{DBG}}\index{SIZE F+\.{SIZE\_F}}\index{DBGTAG+\.{DBGTAG}}
-@<hint macros@>=
+\index{RNG+\.{RNG}}\index{TAGERR+\.{TAGERR}}
+@<debug macros@>=
 #ifdef WIN32
 #define SIZE_F "0x%x"
 #else
 #define SIZE_F "0x%zx"
 #endif
 #ifdef DEBUG
-#define @[DBG(flags,...)@] ((debugflags & flags)?MESSAGE(__VA_ARGS__):0)
+#define @[DBG(FLAGS,...)@] ((debugflags & (FLAGS))?LOG(__VA_ARGS__):0)
 #else
-#define @[DBG(flags,...)@] (void)0
+#define @[DBG(FLAGS,...)@] 0
 #endif
-#define @[DBGTAG(A,P)@] @[DBG(dbgtags,@["tag [%s,%d] at " SIZE_F "\n"@],@|NAME(A),INFO(A),(P)-hstart)@]
+#define @[DBGTAG(A,P)@] @[DBG(DBGTAGS,@["tag [%s,%d] at " SIZE_F "\n"@],@|NAME(A),INFO(A),(P)-hstart)@]
 
+#define @[RNG(S,N,A,Z)@] @/\
+  if ((int)(N)<(int)(A)||(int)(N)>(int)(Z)) QUIT(S@, " %d out of range [%d - %d]",N,A,Z)
+
+#define @[TAGERR(A)@] @[QUIT(@["Unknown tag [%s,%d] at " SIZE_F "\n"@],NAME(A),INFO(A),hpos-hstart)@]
 @
 
 The \.{bison} generated parser will need a function |yyerror| for
@@ -7388,8 +7565,8 @@ The only difference is the removal of an output file and the replacement of the 
 |hwrite_content_section| by |hskip_content_section|.
 
 @<skip functions@>=
-void hskip_content_section(void)
-{ DBG(dbgbasic,"Skipping Content\n");
+static void hskip_content_section(void)
+{ DBG(DBGBASIC,"Skipping Content Section\n");
   hget_section(2);
   hpos=hend;
   while(hpos>hstart)
@@ -7406,13 +7583,13 @@ any output and it does not do much input checking. It will just extract enough i
 from a content node to skip a node and ``advance'' or better ``retreat'' to the previous node.
 
 @<skip functions@>=
-void hteg_content_node(void)
+static void hteg_content_node(void)
 { @<skip the end byte |z|@>@;
   hteg_content(z);
   @<skip and check the start byte |a|@>@;
 }
 
-void hteg_content(uint8_t z)
+static void hteg_content(uint8_t z)
 {@+ switch (z)@/
   { 
     @<cases to skip content@>@;@t\1@>@/
@@ -7452,7 +7629,7 @@ Now we review step by step the different kinds of nodes.
 \subsection{Floating Point Numbers}\index{floating point number}
 \noindent
 @<skip functions@>=
-float32_t hteg_float32(void)
+static float32_t hteg_float32(void)
 {  union {@+float32_t d; @+ uint32_t bits; @+} u;
    HTEG32(u.bits);
    return u.d;
@@ -7470,7 +7647,7 @@ float32_t hteg_float32(void)
 @
 
 @<skip functions@>=
-void hteg_xdimen_node(xdimen_t *x)
+static void hteg_xdimen_node(xdimen_t *x)
 { @<skip the end byte |z|@>@;
   switch(z)
   { 
@@ -7579,7 +7756,7 @@ case TAG(rule_kind,b111): @+ {rule_t r;@+ HTEG_RULE(b111,r);@+ }@+ break;
 @
 
 @<skip functions@>=
-void hteg_rule_node(void)
+static void hteg_rule_node(void)
 { @<skip the end byte |z|@>@;
   if (KIND(z)==rule_kind)   { @+rule_t r; @+HTEG_RULE(INFO(z),r); @+}
   else
@@ -7609,7 +7786,7 @@ case TAG(glue_kind,b111): @+{ glue_t g;@+ HTEG_GLUE(b111,g);@+}@+break;
 @
 
 @<skip functions@>=
-void hteg_glue_node(void)
+static void hteg_glue_node(void)
 { @<skip the end byte |z|@>@;
   if (INFO(z)==b000) HTEG_REF(glue_kind);
   else
@@ -7651,7 +7828,7 @@ case TAG(vbox_kind,b111): @+{box_t b; @+HTEG_BOX(b111,b);@+} @+ break;
 @
 
 @<skip functions@>=
-void hteg_hbox_node(void)
+static void hteg_hbox_node(void)
 { box_t b;
   @<skip the end byte |z|@>@;
   if (KIND(z)!=hbox_kind) QUIT("Hbox expected at 0x%x got %s",node_pos,NAME(z));
@@ -7659,7 +7836,7 @@ void hteg_hbox_node(void)
  @<skip and check the start byte |a|@>@;
 }
 
-void hteg_vbox_node(void)
+static void hteg_vbox_node(void)
 { box_t b;
   @<skip the end byte |z|@>@;
   if (KIND(z)!=vbox_kind) QUIT("Vbox expected at 0x%x got %s",node_pos,NAME(z));
@@ -7859,7 +8036,7 @@ case TAG(image_kind,b111): @+ { image_t x;@+HTEG_IMAGE(b111,x);@+}@+break;
 \subsection{Plain Lists, Texts, and Parameter Lists}\index{list}
 \noindent
 @<skip functions@>=
-void hteg_size_boundary(info_t info)
+static void hteg_size_boundary(info_t info)
 { uint32_t n;
   if (info<2) return;
   HTEG8(n);
@@ -7867,7 +8044,7 @@ void hteg_size_boundary(info_t info)
                             n, info,hpos-hstart);
 }
 
-uint32_t hteg_list_size(info_t info)
+static uint32_t hteg_list_size(info_t info)
 { uint32_t n;  
   if (info==1) return 0;
   else if (info==2) HTEG8(n);
@@ -7878,7 +8055,7 @@ uint32_t hteg_list_size(info_t info)
   return n;
 } 
 
-void hteg_list(list_t *l)
+static void hteg_list(list_t *l)
 { @<skip the end byte |z|@>@,
   @+if (KIND(z)!=list_kind && KIND(z)!=text_kind  &&@| KIND(z)!=param_kind) @/
   {@+ hpos++; l->p=hpos-hstart;@+ l->s=0;@+ l->k=list_kind;@+ } 
@@ -7897,7 +8074,7 @@ void hteg_list(list_t *l)
   }
 }
 
-void hteg_param_list_node(list_t *l)
+static void hteg_param_list_node(list_t *l)
 { @+if (KIND(*(hpos-1))!=param_kind) return;
   hteg_list(l);
 }
@@ -8017,6 +8194,7 @@ using the respective compiler.\index{false+\\{false}}\index{true+\\{true}}\index
 #define __SIZEOF_FLOAT__ 4
 #define __SIZEOF_DOUBLE__ 8
 typedef float float32_t;
+typedef double float64_t;
 #define INT32_MAX              (2147483647)
 #define PRIx64 "I64x"
 #pragma  @[warning( disable : @[4244@]@t @> @[4996@]@t @> @[4127@])@]
@@ -8025,15 +8203,16 @@ typedef float float32_t;
 #include <stdbool.h>
 #include <inttypes.h>
 typedef float float32_t;
+typedef double float64_t;
 #ifdef WIN32
 #include <io.h>
-#define @[access(N,M)@] @[_access(N, 0 )@] 
-#else
-  #include <unistd.h>
 #endif
 #endif
 #if __SIZEOF_FLOAT__!=4
 #error  @=float32 type must have size 4@>
+#endif
+#if __SIZEOF_DOUBLE__!=8
+#error  @=float64 type must have size 8@>
 #endif
 #endif
 @
@@ -8046,158 +8225,66 @@ in other compilation units. Together with the required type and macro
 definitions, the necessary information is contained in the \.{hformat.h}
 header file.
 
-@(hformat.h@>=
-@<hint macros@>@;
-@<hint types@>@;
-extern char in_name[];
-extern int version, subversion;
-extern char scratch_buffer[];
-extern int max_ref[];
-extern const char *content_name[],*definition_name[];
-extern int32_t int_defaults[];
-extern dimen_t dimen_defaults[];
-extern xdimen_t xdimen_defaults[];
-extern char **hfont_name;
-extern entry_t *dir;
-extern int next_range, max_range;
-extern int *page_on; 
-extern range_pos_t *range_pos;
-extern uint16_t max_section_no, section_no;
-extern size_t dir_size,def_size,content_size;
-extern uint8_t *hpos, *hend, *hstart;
-extern debugmode debugflags;
-extern int hbanner_size;
-extern FILE *hin, *hout, *hlog;
-extern bool option_utf8, option_hex, option_force, option_compress;
-extern char hbanner[MAX_BANNER+1];
-extern void hallocate_data(void);
-extern bool xdimen_eq(xdimen_t *x, xdimen_t *y);
-extern void new_directory(uint32_t size);
-extern void new_output_buffers(void);
-extern void new_section(uint32_t i, char *file_name);
-extern void hset_entry(entry_t *e, uint16_t i, uint32_t size, @| uint32_t xsize, char *file_name);
-extern void hset_max(void);
-extern void new_max_list(void);
-extern void new_content(void);
-extern size_t hwrite_banner(char *magic);
-extern bool hread_banner(char *magic);
-extern void hcompress(uint16_t n);
-extern void hdecompress(uint16_t n);
-extern int txt_length;
-@
 
-\subsection{{\tt hwrite.h}}\index{hwrite.h+{\tt hwrite.h}}
-The \.{hwrite.h} file contains function prototypes for all the functions
-that write the long format.
-
-
-@(hwrite.h@>=
+@<write function declarations@>=
 #define @[hwritec(c)@] @[putc(c,hout)@]
 #define @[hwritef(...)@] @[fprintf(hout,__VA_ARGS__)@]
-
-extern int nesting;
-extern void hwrite_dimension(dimen_t x);
-extern void hwrite_nesting(void);
-extern void hwrite_start(void);
-extern void hwrite_end(void);
-extern void hwrite_char(uint8_t f, uint32_t c);
-extern void hwrite_charcode(uint32_t c);
-extern void hwrite_signed(int i);
-extern void hwrite_stretch(stretch_t *s);
-extern void hwrite_kern_no(uint8_t n);
-extern void hwrite_penalty_no(uint8_t n);
-extern void hwrite_plus(stretch_t *p);
-extern void hwrite_minus(stretch_t *m);
-extern void  hwrite_glue(glue_t *g);
-extern void  hwrite_glue_node(glue_t *g);
-extern void  hwrite_image_no(uint16_t n, uint8_t g);
-extern void hwrite_image(image_t *x);
-extern void hwrite_directory(void);
-extern void hwrite_aux_files(void);
-extern void hwrite_definitions_start(void);
-extern void hwrite_definitions_end(void);
-extern void hwrite_max_definitions(void);
-extern void hwrite_content_section(void);
-extern void  hwrite_rule_no(uint8_t n);
-extern void  hwrite_rule(rule_t *r);
-extern void  hwrite_leaders_no(uint8_t n);
-extern void  hwrite_leaders_type(int t);
-extern void  hwrite_math_no(uint8_t n);
-extern void  hwrite_math(math_t *m);
-extern void hwrite_glyph(glyph_t *g);
-extern void hwrite_xdimen(xdimen_t *e);
-extern void hwrite_xdimen_node(xdimen_t *e);
-extern void hwrite_kern(kern_t *k);
-extern void hwrite_baseline(baseline_t *b);
-extern void hwrite_list(list_t *l);
-extern void hwrite_param_list(list_t *l);
-extern void hwrite_param_list_node(list_t *l);
-extern void hwrite_adjustments(list_t *l);
-extern void  hwrite_hyphen(hyphen_t *h);
-extern void  hwrite_hyphen_node(hyphen_t *h);
-extern void hwrite_order(order_t o);
-extern void hwrite_box(box_t *b);
-extern void hwrite_utf8(uint32_t c);
-extern void hwrite_ligature(lig_t *l);
-extern void hwrite_txt_cc(uint32_t c);
-extern void hwrite_string(char *str);
-extern void hwrite_ref(uint8_t n);
-extern void hwrite_ref_node(uint8_t k, uint8_t n);
 extern void hwrite_range(void);
+extern void hwrite_charcode(uint32_t c);
+extern void hwrite_ref_node(uint8_t k, uint8_t n);
+extern void hwrite_ref(uint8_t n);
 extern void hsort_ranges(void); 
 @
-
-
-
-\subsection{{\tt hwrite.c}}\index{hwrite.c+{\tt hwrite.c}}
-\noindent
-@(hwrite.c@>=
-#include "basetypes.h"
-#include <stdio.h>
-#include <math.h>
-#include "error.h"
-#include "hformat.h"
-#include "hdefaults.h"
-#include "hwrite.h"
-#include "hget.h"
-
-@<write functions@>@;
-@
-
-
 
 
 \subsection{{\tt hget.h}}\index{hget.h+{\tt hget.h}}
 The \.{hget.h} file contains function prototypes for all the functions
 that read the short format.
-@(hget.h@>=
-extern void hget_error(void);
-extern void hget_directory(void);
-extern void hget_definition_section(void);
-extern void hget_max_definitions(void);
+
+@<get function declarations@>=
+extern void hget_content_node(void);
+extern int txt_length;
+extern int hget_txt(void);
+extern uint32_t hget_utf8(void);
 extern void hget_def_node(def_t *df);
 extern void hget_content_section(void);
-extern void hget_node(void);
-extern void hget_section(uint16_t n);
 extern void hget_content(uint8_t a);
-extern void hget_content_node(void);
-extern void hget_size_boundary(info_t info);
-extern uint32_t hget_list_size(info_t info);
-extern void hget_list(list_t *l);
-extern void hget_param_list_node(list_t *l);
-extern void hget_glue_node(void);
+extern void hget_xdimen_node(xdimen_t *x);
 extern float32_t hget_float32(void);
+extern void hget_list(list_t *l);
+extern void hget_glue_node(void);
 extern void hget_rule_node(void);
 extern void hget_hbox_node(void);
 extern void hget_vbox_node(void);
-extern void hget_hyphen_node(hyphen_t *h);
+extern void hget_param_list_node(list_t *l);
+extern uint32_t hget_list_size(info_t info);
+extern void hget_size_boundary(info_t info);
+extern void hget_max_definitions(void);
 extern void hget_font_def(info_t i, uint8_t f);
-extern void hget_txt(void);
-extern uint32_t hget_utf8(void);
-extern void hget_xdimen_node(xdimen_t *x);
-extern void hget_range(info_t info, uint8_t pg);
-extern void hget_page(void);
-extern void hget_file(size_t pos, size_t size);
+@
+
+@(hget.h@>=
+
+@<get file macros@>@;
+@<directory entry type@>@;
+extern entry_t *dir;
+extern uint16_t section_no,  max_section_no;
+extern uint8_t *hpos, *hstart, *hend;
+
+extern void hget_map(void);
+extern void hget_unmap(void);
+
+extern void new_directory(uint32_t entries);
+extern void hset_entry(entry_t *e, uint16_t i, uint32_t size, uint32_t xsize, @|char *file_name);
+
+extern void hget_banner(void);
+extern void hget_section(uint16_t n);
+extern void hget_entry(entry_t *e);
+extern void hget_directory(void);
+extern void hclear_dir(void);
+extern bool hcheck_banner(char *magic);
+
+extern void hget_max_definitions(void);
 @
 
 
@@ -8208,17 +8295,26 @@ extern void hget_file(size_t pos, size_t size);
 #include <string.h>
 #include <math.h>
 #include <zlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #include "error.h"
 #include "hformat.h"
-#include "hdefaults.h"
 #include "hget.h"
-#include "hwrite.h"
 
-@<GET macros@>@;
-/*get variables*/
-@<get functions@>@;
+
+uint8_t *hpos=NULL, *hstart=NULL, *hend=NULL;
+
+
+@<map functions@>@;
+@<function to check the banner@>@;
+@<directory functions@>@;
+@<get file macros@>@;
+@<get file functions@>@;
+
+
 @
-
 
 \subsection{{\tt hput.h}}\index{hput.h+{\tt hput.h}}
 The \.{hput.h} file contains function prototypes for all the functions
@@ -8227,57 +8323,60 @@ that write the short format.
 
 @(hput.h@>=
 @<put macros@>@;
-extern void hput_error(void);
-extern void hput_increase_buffer(uint32_t n);
-extern size_t hput_root(void);
-extern void hput_directory(void);
-extern size_t hput_section(uint16_t n);
-extern void hput_optional_sections(void);
+@<hint macros@>@;
+@<hint types@>@;
+@<directory entry type@>@;
+extern entry_t *dir;
+extern uint16_t section_no,  max_section_no;
+extern uint8_t *hpos, *hstart, *hend;
+extern int next_range;
+extern range_pos_t *range_pos;
+extern int *page_on; 
+
+extern FILE *hout;
+extern void new_directory(uint32_t entries);
+extern void new_output_buffers(void);
+
+/* declarations for the parser */
 extern void hput_definitions_start(void);
 extern void hput_definitions_end(void);
-extern void hput_max_definitions(void);
-extern void hput_range_defs(void);
-extern uint8_t hput_page(void);
-extern void hput_range(uint8_t pg, bool on);
-extern uint8_t hput_hyphen(hyphen_t *h);
-extern uint8_t hput_int(int32_t p);
-extern void hput_stretch(stretch_t *s);
-extern void hput_string(char *str);
-extern void hput_image_no(uint16_t n, uint8_t m);
-extern void hput_kern_no(uint8_t n);
-extern uint8_t hput_dimen(dimen_t d);
-extern uint8_t hput_kern(kern_t *k);
-extern void hput_char(uint32_t c, uint8_t f);
-extern void hput_leaders_no(uint8_t n);
-extern uint8_t hput_rule(rule_t *r);
-extern void hput_rule_no(uint8_t n);
-extern void hput_rule_def(uint8_t n, rule_t *r);
-extern uint8_t hput_math(math_t *m);
-extern void hput_math_no(uint8_t n);
-extern void hput_math_def(uint8_t n, math_t *r);
-extern uint8_t hput_ligature(lig_t *l);
-extern uint8_t hput_glue(glue_t *g);
-extern uint8_t hput_xdimen(xdimen_t *x);
-extern void hput_xdimen_node(xdimen_t *x);
-extern uint8_t hput_baseline(baseline_t *b);
-extern uint8_t hput_image(image_t *x);
-extern uint8_t hput_font_head(uint8_t f,  char *n, dimen_t s, uint16_t m, uint16_t y);
 extern void hput_content_start(void);
 extern void hput_content_end(void);
-extern uint8_t hput_glyph(glyph_t *g);
-extern void hput_list_size(uint32_t n, int i);
-extern uint8_t hput_list(uint32_t size_pos, list_t *y);
+
 extern void hput_tags(uint32_t pos, uint8_t tag);
+extern uint8_t hput_glyph(glyph_t *g);
+extern uint8_t hput_xdimen(xdimen_t *x);
+extern uint8_t hput_int(int32_t p);
+extern uint8_t hput_math(math_t *m);
+extern uint8_t hput_rule(rule_t *r);
+extern uint8_t hput_glue(glue_t *g);
+extern uint8_t hput_list(uint32_t size_pos, list_t *y);
 extern uint8_t hsize_bytes(uint32_t n);
-extern info_t hput_box_dimen(dimen_t h, dimen_t d, dimen_t w);
-extern info_t hput_box_shift(dimen_t a);
-extern info_t hput_box_glue_set(int8_t s, float32_t r, order_t o);
 extern void hput_txt_cc(uint32_t c);
 extern void hput_txt_font(uint8_t f);
 extern void hput_txt_global(ref_t *d);
 extern void hput_txt_local(uint8_t n);
+extern info_t hput_box_dimen(dimen_t h, dimen_t d, dimen_t w);
+extern info_t hput_box_shift(dimen_t a);
+extern info_t hput_box_glue_set(int8_t s, float32_t r, order_t o);
+extern void hput_stretch(stretch_t *s);
+extern uint8_t hput_kern(kern_t *k);
 extern void hput_utf8(uint32_t c);
+extern uint8_t hput_ligature(lig_t *l);
+extern uint8_t hput_hyphen(hyphen_t *h);
 extern uint8_t hput_item(uint32_t n);
+extern uint8_t hput_image(image_t *x);
+extern void hput_string(char *str);
+extern void hput_range(uint8_t pg, bool on);
+extern void hput_max_definitions(void);
+extern uint8_t hput_dimen(dimen_t d);
+extern uint8_t hput_font_head(uint8_t f,  char *n, dimen_t s, uint16_t m, uint16_t y);
+extern void hput_range_defs(void);
+/* declarations for HiTeX */
+extern void hput_xdimen_node(xdimen_t *x);
+extern void hput_directory(void);
+extern void hput_hint(char * str);
+extern void hput_list_size(uint32_t n, int i);
 @
 
 
@@ -8285,21 +8384,26 @@ extern uint8_t hput_item(uint32_t n);
 \noindent
 @(hput.c@>=
 #include "basetypes.h"
-#include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <zlib.h>
 #include "error.h"
 #include "hformat.h"
-#include "hdefaults.h"
 #include "hput.h"
 
+uint8_t *hpos=NULL, *hstart=NULL, *hend=NULL;
+FILE *hout;
+int version=1, subversion=0;
+bool option_compress;
+int next_range;
+range_pos_t *range_pos;
+int *page_on; 
 
-/* put variables */
+
+@<directory functions@>@;
+@<function to write the banner@>@;
 @<put functions@>@;
 @
-
-
 
 \subsection{{\tt shrink.l}}\index{shrink.l+{\tt shrink.l}}\index{scanning}
 The definitions for lex are collected in the file {\tt shrink.l}
@@ -8307,10 +8411,13 @@ The definitions for lex are collected in the file {\tt shrink.l}
 @(shrink.l@>=
 %{
 #include "basetypes.h"
+#include <unistd.h>
 #include "error.h"
 #include "hformat.h"
+@<hint types@>@;
 @<enable bison debugging@>@;
 #include "shrink.tab.h"
+
 @<scanning macros@>@;
 @<scanning functions@>@;
 int yywrap (void ){ return 1;}
@@ -8351,8 +8458,11 @@ The grammar rules for bison are collected in the file  {\tt shrink.y}.
 #include <math.h>
 #include "error.h"
 #include "hformat.h"
-#include "hdefaults.h"
 #include "hput.h"
+char **hfont_name;
+
+extern void hset_entry(entry_t *e, uint16_t i, uint32_t size, uint32_t xsize, @|char *file_name);
+
 @<enable bison debugging@>@;
 extern int yylex(void);
 
@@ -8391,13 +8501,12 @@ extern int yylex(void);
 
 @(shrink.c@>=
 #include "basetypes.h"
-#include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <zlib.h>
 #include "error.h"
 #include "hformat.h"
-#include "hdefaults.h"
-#include "hput.h"
-@<enable bison debugging@>@;
+@<hint types@>@;
 #include "shrink.tab.h"
 
 extern void yyset_debug(int lex_debug);
@@ -8405,69 +8514,89 @@ extern int yylineno;
 extern FILE *yyin, *yyout;
 extern int yyparse(void);
 
+@<put macros@>@;
+
 @<common variables@>@;
-@<common functions@>@;
-@<explain usage@>@;
+
+@<function to check the banner@>@;
+@<directory entry type@>@;
+@<directory functions@>@;
+@<function to write the banner@>@;
+@<put functions@>@;
+
 int main(int argc, char *argv[])
 { @<local variables in |main|@>@;
    in_ext=".HINT";
    out_ext=".hnt";
-
   @<process the command line@>@;
 
-  if (debugflags&dbgflex) yyset_debug(1); else  yyset_debug(0);  
+  if (debugflags&DBGFLEX) yyset_debug(1); else  yyset_debug(0);  
 #if YYDEBUG
-  if (debugflags&dbgbison) yydebug=1; 
+  if (debugflags&DBGBISON) yydebug=1; 
   else yydebug=0;
 #endif
+  @<open the log file@>@;
+  @<open the input file@>@;
+  @<open the output file@>@;
 
-  @<open files@>@;
   yyin=hin;
   yyout=hlog;
-  hread_banner("HINT");
+  @<read the banner@>@;
+  hcheck_banner("HINT");
   yylineno++;
-  DBG(dbgbasic,"Parsing Input\n");
+  DBG(DBGBISON|DBGFLEX,"Parsing Input\n");
   yyparse();
-  DBG(dbgbasic,"Writing Output\n");
-  { size_t s;
-  s=hwrite_banner("hint");
+
   hput_directory();
-  DBG(dbgdir,@["Root Entry at " SIZE_F "\n"@],s);
-  s+=hput_root();
-  DBG(dbgdir,@["Directory section at " SIZE_F "\n"@],s);
-  s+=hput_section(0);
-  DBG(dbgdir,@["Definition section at " SIZE_F "\n"@],s);
-  s+=hput_section(1);
-  DBG(dbgdir,@["Content section at " SIZE_F "\n"@],s);
-  s+=hput_section(2);
-  DBG(dbgdir,@["Auxiliary sections at " SIZE_F "\n"@],s);
-  hput_optional_sections();
-}
-  @<close files@>@;
+
+  hput_hint("shrink");
+  
+  @<close the output file@>@;
+  @<close the input file@>@;
+  @<close the log file@>@;
   return 0;
+explain_usage:
+  @<explain usage@>@;
+  return 1;
 }
 @
 
 
 
 \subsection{{\tt stretch.c}}\index{stretch.y+{\tt stretch.y}}
-\.{stretch} is a \CEE/ program translating a \HINT/ file in short format into a \HINT/ file in long format.
+\.{stretch} is a \CEE/ program translating a \HINT/ file in short 
+format into a \HINT/ file in long format.
 
 @(stretch.c@>=
 #include "basetypes.h"
-#include <stdio.h>
+#include <math.h>
 #include <string.h>
+#include <zlib.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include "error.h"
 #include "hformat.h"
-#include "hdefaults.h"
-#include "hwrite.h"
-#include "hget.h"
-
+@<hint types@>@;
 
 @<common variables@>@;
 
-@<common functions@>@;
-@<explain usage@>@;
+@<map functions@>@;
+@<function to check the banner@>@;
+@<function to write the banner@>@;
+@<directory entry type@>@;
+@<directory functions@>@;
+@<get file macros@>@;
+@<get file functions@>@;
+@<write function declarations@>@>
+@<get function declarations@>@;
+
+@<write functions@>@;
+
+@<get macros@>@;
+
+@<get functions@>@;
+
+
 
 int main(int argc, char *argv[])
 { @<local variables in |main|@>@;
@@ -8475,33 +8604,40 @@ int main(int argc, char *argv[])
    out_ext=".HINT";
 
   @<process the command line@>@;
-  @<open files@>@;
-
-  hread_banner("hint");
-  hwrite_banner("HINT");
+  @<open the log file@>@;
+  @<open the output file@>@;
+  hget_map();
+  hget_banner();
+  hcheck_banner("hint");
+  hput_banner("HINT","stretch");
   hget_directory();
   hwrite_directory();
   hget_definition_section();
   hwrite_content_section();
   hwrite_aux_files();
-  @<close files@>@;
+  hget_unmap();
+  @<close the output file@>@;
+  @<close the log file@>@;
+
   return 0;
-}
+explain_usage:
+  @<explain usage@>@;
+  return 1;}
 @
 
 \subsection{{\tt hteg.h}}\index{hteg.h+{\tt hteg.h}}
 \noindent
-@(hteg.h@>=
-extern void hteg_content_node(void);
-extern void hteg_content(uint8_t z);
-extern void hteg_xdimen_node(xdimen_t *x);
-extern void hteg_list(list_t *l);
-extern void hteg_param_list_node(list_t *l);
-extern float32_t hteg_float32(void);
-extern void hteg_rule_node(void);
-extern void hteg_hbox_node(void);
-extern void hteg_vbox_node(void);
-extern void hteg_glue_node(void);
+@<skip function declarations@>=
+static void hteg_content_node(void);
+static void hteg_content(uint8_t z);
+static void hteg_xdimen_node(xdimen_t *x);
+static void hteg_list(list_t *l);
+static void hteg_param_list_node(list_t *l);
+static float32_t hteg_float32(void);
+static void hteg_rule_node(void);
+static void hteg_hbox_node(void);
+static void hteg_vbox_node(void);
+static void hteg_glue_node(void);
 @
 
 \subsection{{\tt skip.c}}\label{skip}\index{skip.c+{\tt skip.c}}
@@ -8510,57 +8646,46 @@ backwards.
 
 @(skip.c@>=
 #include "basetypes.h"
-#include <stdio.h>
 #include <string.h>
+#include <zlib.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include "error.h"
 #include "hformat.h"
-#include "hdefaults.h"
-#include "hwrite.h"
-#include "hget.h"
-#include "hteg.h"
-
+@<hint types@>@;
 
 @<common variables@>@;
 
-@<common functions@>@;
+@<map functions@>@;
+@<function to check the banner@>@;
+@<directory entry type@>@;
+@<directory functions@>@;
+@<get file macros@>@;
+@<get file functions@>@;
 
 @<skip macros@>@;
-
+@<skip function declarations@>@;
 @<skip functions@>@;
-@<explain usage@>@;
 
 int main(int argc, char *argv[])
 { @<local variables in |main|@>@;
    in_ext=".hnt";
+   out_ext=NULL;
 
   @<process the command line@>@;
   @<open the log file@>@;
-  @<open the input file@>@;
-  hread_banner("hint");
+  hget_map();
+  hget_banner();
+  hcheck_banner("hint");
   hget_directory();
   hskip_content_section();
-  @<close files@>@;
+  hget_unmap();
+  @<close the log file@>@;
   return 0;
+explain_usage:
+  @<explain usage@>@;
+  return 1;
 }
-@
-
-\subsection{{\tt hformat.c}}\label{common}\index{hformat.c+{\tt hformat.c}}
-\.{hformat.c} is a \CEE/ file containing common variables and functions.
-Currently its use is for other programs than the ones described here.
-
-@(hformat.c@>=
-#include "basetypes.h"
-#include <stdio.h>
-#include <string.h>
-#include "error.h"
-#include "hformat.h"
-#include "hdefaults.h"
-
-
-@<common variables@>@;
-
-@<common functions@>@;
-
 @
 
 \thecodeindex

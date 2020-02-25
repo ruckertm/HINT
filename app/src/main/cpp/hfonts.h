@@ -1,17 +1,17 @@
-/*304:*/
-#line 5719 ".\\hint.w"
+/*295:*/
+#line 5540 ".\\hint.w"
 
 #ifndef _HFONTS_H
 #define _HFONTS_H
-/*245:*/
-#line 4251 ".\\hint.w"
+/*233:*/
+#line 3955 ".\\hint.w"
 
 typedef enum{no_format,pk_format,t1_format,ot_format,tt_format}font_format_t;
-/*:245*//*246:*/
-#line 4262 ".\\hint.w"
+/*:233*//*234:*/
+#line 3966 ".\\hint.w"
 
-/*278:*/
-#line 5152 ".\\hint.w"
+/*266:*/
+#line 4856 ".\\hint.w"
 
 
 typedef struct
@@ -19,27 +19,27 @@ typedef struct
 unsigned int cs;
 unsigned char id;
 }pk_t;
-/*:278*//*282:*/
-#line 5321 ".\\hint.w"
+/*:266*//*270:*/
+#line 5025 ".\\hint.w"
 
 typedef stbtt_fontinfo tt_t;
 typedef struct
 {int dummy;
 }ttg_t;
-/*:282*//*286:*/
-#line 5374 ".\\hint.w"
+/*:270*//*274:*/
+#line 5078 ".\\hint.w"
 
 typedef struct
 {int dummy;
 }t1_t;
-/*:286*//*288:*/
-#line 5387 ".\\hint.w"
+/*:274*//*276:*/
+#line 5091 ".\\hint.w"
 
 typedef struct
 {int dummy;
 }ot_t;
-/*:288*/
-#line 4263 ".\\hint.w"
+/*:276*/
+#line 3967 ".\\hint.w"
 
 
 typedef struct font_s{
@@ -48,16 +48,16 @@ unsigned char*font_data;
 int size;
 double ds;
 double hppp,vppp;
-/*251:*/
-#line 4348 ".\\hint.w"
+/*239:*/
+#line 4052 ".\\hint.w"
 
 struct gcache_s**g0;
 struct gcache_s***g1;
 struct gcache_s****g2;
 struct gcache_s*****g3;
 
-/*:251*/
-#line 4271 ".\\hint.w"
+/*:239*/
+#line 3975 ".\\hint.w"
 
 font_format_t ff;
 union{
@@ -67,34 +67,34 @@ t1_t t1;
 ot_t ot;
 };
 }font_t;
-/*:246*//*252:*/
-#line 4360 ".\\hint.w"
+/*:234*//*240:*/
+#line 4064 ".\\hint.w"
 
 typedef struct gcache_s gcache_t;
-/*:252*//*257:*/
-#line 4553 ".\\hint.w"
+/*:240*//*245:*/
+#line 4257 ".\\hint.w"
 
-/*279:*/
-#line 5164 ".\\hint.w"
+/*267:*/
+#line 4868 ".\\hint.w"
 
 typedef struct
 {unsigned char flag;
 unsigned char*encoding;
 }pkg_t;
-/*:279*//*287:*/
-#line 5379 ".\\hint.w"
+/*:267*//*275:*/
+#line 5083 ".\\hint.w"
 
 typedef struct
 {int dummy;
 }t1g_t;
-/*:287*//*289:*/
-#line 5392 ".\\hint.w"
+/*:275*//*277:*/
+#line 5096 ".\\hint.w"
 
 typedef struct
 {int dummy;
 }otg_t;
-/*:289*/
-#line 4554 ".\\hint.w"
+/*:277*/
+#line 4258 ".\\hint.w"
 
 
 struct gcache_s{
@@ -112,10 +112,10 @@ t1g_t t1;
 otg_t ot;
 };
 };
-/*:257*/
-#line 5722 ".\\hint.w"
+/*:245*/
+#line 5543 ".\\hint.w"
 
 
 
 #endif
-/*:304*/
+/*:295*/

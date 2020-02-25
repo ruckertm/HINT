@@ -27,8 +27,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 1827 ${}$}
-\def\lastdate{${}$Date: 2020-02-18 12:37:39 +0100 (Tue, 18 Feb 2020) ${}$}
+\def\lastrevision{${}$Revision: 1850 ${}$}
+\def\lastdate{${}$Date: 2020-02-25 11:05:17 +0100 (Tue, 25 Feb 2020) ${}$}
 
 \input titlepage.tex
 
@@ -77,275 +77,33 @@ and different API's of the graphics subsystem. The present implementation
 is based on the Windows\raise.5ex\hbox{\registered} operating system and its 32 Bit API\cite{ECMA-234}.
 
 
-\section{Reading the Directory}
-This chapter is a reimplementation of the parser for
-short format \HINT/ files as described in ``\HINT/: The File Format''\cite{MR:format}
+\section{Reading Definitions}
+This chapter starts with the reimplementation of the parser for
+short format \HINT/ files as described in {\it HINT: The File Format}\cite{MR:format}
 which constitutes the definitive specification of this format.
 Where as the latter uses an internal represenation that is
 completely independent of \TeX\ and therefore does not need any knowlegde of
 \TeX's implementation, the implementation that follows here depends heavily on
 the implementation of \TeX. To make the presentation short, 
 it is assumed that the reader is familiar with the specification just mentioned and with
-``\TeX: The Program''\cite{Knuth:tex}.
+{\it \TeX: The Program}\cite{Knuth:tex}.
 
-The primitive operations to read data from a \HINT/ file are defined by the following macros:
-@<GET macros@>=
-#define @[HQUIT@] @[QUIT("HGET overrun at " SIZE_F "\n",@+hpos-hstart)@]
-#define @[HEND@]   @[((hpos<=hend)?0:HQUIT)@]
+Definitions occur in the definition section and in parameter lists,
+where parameter lists can be parts of content nodes or part of a font
+description.
 
-#define @[HGET8@]      ((hpos<hend)?hpos+=1,*(hpos-1):(HQUIT,0))
-#define @[HGET16(X)@] ((X)=(hpos[0]<<8)+hpos[1],hpos+=2,HEND)
-#define @[HGET24(X)@] ((X)=(hpos[0]<<16)+(hpos[1]<<8)+hpos[2],hpos+=3,HEND)
-#define @[HGET32(X)@] ((X)=(hpos[0]<<24)+(hpos[1]<<16)+(hpos[2]<<8)+hpos[3],hpos+=4,HEND)
-#define @[HGETTAG(A)@] @[A=HGET8,DBGTAG(A,hpos-1)@]
-@
+A parameter has three parts: a parameter number, a parameter value,
+and a parameter kind.  The parameter number and parameter kind have
+different restrictions depending on the parameters occurence.
 
-
-\subsection{Directory Entries}
-This is taken directly from~\cite{MR:format}
-
-@<GET macros@>=
-#define @[HGET_SIZE(S,X,I)@] \
-  if ((I)&b100) { \
-    if (((I)&b011)==0) s=HGET8,xs=HGET8; \
-    else if (((I)&b011)==1) HGET16(s),HGET16(xs); \
-    else if (((I)&b011)==2) HGET24(s),HGET24(xs); \
-    else if (((I)&b011)==3) HGET32(s),HGET32(xs); \
-   } \
-  else { \
-    if (((I)&b011)==0) s=HGET8; \
-    else if (((I)&b011)==1) HGET16(s); \
-    else if (((I)&b011)==2) HGET24(s); \
-    else if (((I)&b011)==3) HGET32(s); \
-   } 
-
-#define @[HGET_ENTRY(I,E)@] \
-{ uint16_t i; \
-  uint32_t s=0,xs=0; \
-  char *file_name; \
-  HGET16(i); HGET_SIZE(s,xs,I); HGET_STRING(file_name); @/\
-  hset_entry(&(E),i,s,xs,file_name); \
-}
-@
-
-@<get functions@>=
-void hget_entry(entry_t *e)
-{ @<read the start byte |a|@>@;
-  DBG(dbgdir,"Reading directory entry\n");
-  switch(a)
-  { case TAG(0,b000+0): HGET_ENTRY(b000+0,*e);@+ break;
-    case TAG(0,b000+1): HGET_ENTRY(b000+1,*e);@+ break;
-    case TAG(0,b000+2): HGET_ENTRY(b000+2,*e);@+ break;
-    case TAG(0,b000+3): HGET_ENTRY(b000+3,*e);@+ break;
-    case TAG(0,b100+0): HGET_ENTRY(b100+0,*e);@+ break;
-    case TAG(0,b100+1): HGET_ENTRY(b100+1,*e);@+ break;
-    case TAG(0,b100+2): HGET_ENTRY(b100+2,*e);@+ break;
-    case TAG(0,b100+3): HGET_ENTRY(b100+3,*e);@+ break;
-    default:  TAGERR(a); @+ break; 
-  }
-  @<read and check the end byte |z|@>@;
-  DBG(dbgdir,"entry %d: size=0x%x xsize=0x%x\n",@|e->section_no,e->size,e->xsize);
-}
-@
+In parameter lists only integers, dimensions, extended dimensions, and
+glues are allowed.  In font descriptions, we have penalties, kerns,
+ligatures, hyphens, glue, math, rule, and image nodes.  In the
+definition section, pretty much everything is allowed, we just test if
+the parameter number is less or equal to |max_ref| and set |max_ref|
+accordingly in |hget_max_definitions|.
 
 
-\subsection{Files and Sections}
-Since modern computers with 64bit hardware have a huge address space,
-mapping the entire file into virtual memory is the most efficient way to read a large file.
-Mapping is not the same as reading and it is not the same as allocating precious memory,
-all that is done by the operating system when needed. Mapping just reserves adresses.
-
-After mapping the file at address |hbase|, access to sections of the file is provided by setting the
-three pointers |hpos|, |hstart|, and |hend|. The value |hbase==NULL| indicates, that
-no file is open.
-
-@<\HINT/ variables@>=
-uint8_t *hbase=NULL, *hpos, *hstart, *hend;
-@
-
-A \HINT/ file starts with a file banner\index{banner}. 
-To read the banner, we have the function |hread_banner|; it returns |true| if successful.
-
-@<get functions@>=
-bool hget_banner(void)
-{ char *t;
-  int i;
-  if (hbase==NULL) 
-  return false;
-  for (i=0;i<MAX_BANNER;i++)
-  { hbanner[i]=HGET8;
-    if (hbanner[i]=='\n') break;
-  } 
-  hbanner[++i]=0;
-  t=hbanner;
-  if (strncmp("hint",hbanner,4)!=0) QUIT("This is not a hint file");
-  else t+=4;
-  hbanner_size=(int)strlen(hbanner);
-  if(hbanner[hbanner_size-1]!='\n') QUIT("Banner exceeds maximum size=0x%x",MAX_BANNER);
-  if (*t!=' ') QUIT("Space expected after hint");
-  else t++;
-  version=strtol(t,&t,10);
-  if (*t!='.') QUIT("Dot expected after version number %d",version);
-  else t++;
-  subversion=strtol(t,&t,10);
-  if (*t!=' ' && *t!='\n') QUIT("Space expected after subversion number %d",subversion);
-  MESSAGE("hint file version %d.%d:%s",version, subversion, t);
-  DBG(dbgdir,"banner size=0x%x\n",hbanner_size);
-  return true;
-}
-
-@
-To read a short format input file, we use the function |hget_section|. 
-Unlike the version of that routine in~\cite{MR:format}, we use |mmap|
-to map the entire file into memory and then just need to adjust the |hpos| pointer.
-Further buffer management is needed only for compressed sections.
-
-@<get functions@>=
-void hget_section(uint16_t n)
-{ DBG(dbgbasic,"Reading section %d\n",n);
-  RNG("Section number",n,0,max_section_no);
-  if (dir[n].buffer!=NULL && dir[n].xsize>0)
-  { hpos=hstart=dir[n].buffer;
-    hend=hstart+dir[n].xsize;
-  }
-  else
-  { hpos=hstart=hbase+dir[n].pos; 
-    hend=hstart+dir[n].size;
-    if (dir[n].xsize>0) hdecompress(n);
-  }
-}
-@
-
-
-\subsection{Compression}
-The short file format offers the possibility to store sections in
-compressed\index{compression} form. We use the {\tt zlib}\index{zlib+{\tt zlib}} compression library\cite{zlib}\cite{RFC1950}
-to deflate\index{deflate} and inflate\index{inflate} individual sections.  When one of the following
-functions is called, we can get the section buffer, the buffer size
-and the size actually used from the directory entry.  If a section
-needs to be inflated, its size after decompression is found in the
-|xsize| field; if a section needs to be deflated, its size after
-compression will be known after deflating it.
-
-@s z_stream int
-@<get functions@>=
-void hdecompress(uint16_t n)
-{ z_stream z; /* decompression stream */
-  uint8_t *buffer;
-  int i;
-
-  DBG(dbgcompress,"Decompressing section %d from 0x%x to 0x%x byte\n",@|n, dir[n].size, dir[n].xsize);
-  z.zalloc = (alloc_func)0;@+
-  z.zfree = (free_func)0;@+
-  z.opaque = (voidpf)0;
-  z.next_in  = hstart;
-  z.avail_in = hend-hstart;
-  if (inflateInit(&z)!=Z_OK)
-    QUIT("Unable to initialize decompression: %s",z.msg);
-  ALLOCATE(buffer,dir[n].xsize+SAFETY_MARGIN,uint8_t);
-  DBG(dbgbuffer,"Allocating output buffer size=0x%x, margin=0x%x\n",dir[n].xsize,SAFETY_MARGIN);
-  z.next_out = buffer;           
-  z.avail_out =dir[n].xsize+SAFETY_MARGIN;
-  i= inflate(&z, Z_FINISH);
-  DBG(dbgcompress,"in: avail/total=0x%x/0x%lx "@|"out: avail/total=0x%x/0x%lx, return %d;\n",@|
-    z.avail_in,z.total_in, z.avail_out, z.total_out,i);
-  if (i!=Z_STREAM_END)
-    QUIT("Unable to complete decompression: %s",z.msg);
-  if (z.avail_in != 0) 
-    QUIT("Decompression missed input data");
-  if (z.total_out != dir[n].xsize)
-    QUIT("Decompression output size missmatch 0x%lx != 0x%x",z.total_out, dir[n].xsize );
-  if (inflateEnd(&z)!=Z_OK)
-    QUIT("Unable to finalize decompression: %s",z.msg);
-  dir[n].buffer=buffer;
-  dir[n].bsize=dir[n].xsize;
-  hpos=hstart=buffer;
-  hend=hstart+dir[n].xsize;
-}
-@
-
-
-\subsection{Directory Section}
-Except for the computation of the position, this is taken directly from~\cite{MR:format}.
-@<get functions@>=
-void hget_root(entry_t *root)
-{ DBG(dbgbasic,"Get Root\n");
-  hget_entry(root); 
-  root->pos=hpos-hstart;
-  max_section_no=root->section_no;
-  root->section_no=0;
-  if (max_section_no<2) QUIT("Sections 0, 1, and 2 are mandatory");
-}
-
-void hget_directory_section(void)
-{ int i;
-  entry_t root={0};
-  hget_root(&root);
-  DBG(dbgbasic,"Get Directory\n");
-  new_directory(max_section_no+1);
-  dir[0]=root;
-  hget_section(0);
-  for (i=1;i<=max_section_no;i++)@/
-  { hget_entry(&(dir[i]));@+
-    dir[i].pos=dir[i-1].pos +dir[i-1].size;@+
-  }
-}
-
-void hclear_dir(void)
-{ int i;
-  if (dir==NULL) return;
-  for (i=0;i<3;i++) /* currently the only compressed sections */
-  if (dir[i].xsize>0) 
-	  free(dir[i].buffer);
-  free(dir); dir=NULL;
-}
-
-@
-
-\section{Reading Definitions}
-Definitions occur in the definition section and in parameter lists, where parameter lists
-can be parts of content nodes or part of a font description.
-
-A parameter has three parts: a parameter number, a parameter value, and a parameter kind.
-The parameter number and  parameter kind have different restrictions depending on the parameters occurence.
-
-In parameter lists only integers, dimensions, extended dimensions, and glues are allowed.
-In font descriptions, we have penalties, kerns, ligatures, hyphens, glue, math, rule, and image nodes.
-In the definition section, pretty much everything is allowed, we just test if the parameter number is
-less or equal to |max_ref| and set |max_ref| accordingly in |hget_max_definitions|.
-
-\subsection{Maximum Values}
-@<get functions@>=
-void hallocate_definitions(void)
-{ kind_t k;
-  @<allocate definitions@>@;
-}
-
-void hget_max_definitions(void)
-{ kind_t k;
-  @<read the start byte |a|@>@;
-  if (a!=TAG(list_kind,0)) QUIT("Start of maximum list expected");
-  @<free definitions@>@;
-  hset_max();
-  while (true) @/
-  { uint8_t n;
-    if (hpos>=hend) QUIT("Unexpected end of maximum list");
-    node_pos=hpos-hstart;
-    HGETTAG(a);
-    if  (KIND(a)==list_kind) break;
-    if (INFO(a)!=1) QUIT("Maximum info %d not supported",INFO(a));
-    k=KIND(a);
-   if (max_fixed[k]>max_default[k]) QUIT("Maximum value for kind %s not supported",definition_name[k]);
-    n=HGET8;
-    RNG("Maximum number",n,max_ref[k],0xFF);
-    max_ref[k]=n;
-    DBG(dbgdef,"max(%s) = %d\n",definition_name[k],max_ref[k]);
-   @<read and check the end byte |z|@>@;
-  }
-  if (INFO(a)!=0) QUIT("End of maximum list with info %d", INFO(a));
-  hallocate_definitions(); 
-}
-@
 \subsection{Definitions}
 The following function reads a single definition and stores it.
 By default, we store definitions as pointers to \TeX's data structures.
@@ -362,7 +120,7 @@ void hget_def_node(void)
         n, definition_name[KIND(a)],max_fixed[KIND(a)]+1,max_ref[KIND(a)]);
 
   if (KIND(a)!=range_kind) REF(KIND(a),n);
-  DBG(dbgtags,"Defining %s %d\n", definition_name[KIND(a)],n);
+  DBG(DBGTAGS,"Defining %s %d\n", definition_name[KIND(a)],n);
   if (KIND(a)==font_kind) hget_font_def(a,n);
   else if (KIND(a)==int_kind) integer_def[n]=hget_integer_def(a);
   else if (KIND(a)==dimen_kind) dimen_def[n]=hget_dimen_def();
@@ -403,12 +161,14 @@ void hset_default_definitions(void)
 
 
 void hget_definition_section(void)
-{ DBG(dbgbasic,"Definitions\n");
+{ DBG(DBGDEF,"Definitions\n");
   hget_section(1);
-  DBG(dbgdef,"Reading list of maximum values\n");
+  DBG(DBGDEF,"Reading list of maximum values\n");
+  @<free definitions@>@;
   hget_max_definitions();
+  @<allocate definitions@>@;
   hset_default_definitions();
-  DBG(dbgdef,"Reading list of definitions\n");
+  DBG(DBGDEF,"Reading list of definitions\n");
   while (hpos<hend) @/
     hget_def_node();
   hget_font_metrics();
@@ -438,18 +198,25 @@ static pointer hget_definition(uint8_t a);
 
 
 @<allocate definitions@>=
-for (k=0;k<32;k++)
-{ if (k==font_kind || k==int_kind|| k==dimen_kind||k==xdimen_kind||k==glue_kind||k==baseline_kind|| k==range_kind||k==page_kind||k==param_kind) continue;
-  if (max_ref[k]>=0 && max_ref[k]<=256)
-  { DBG(dbgdef,"Allocating Definitions for %s=%d: %d entries of " SIZE_F " byte each\n",definition_name[k],k,max_ref[k]+1,sizeof(pointer));
-    ALLOCATE(pointer_def[k],max_ref[k]+1,pointer);
+{ kind_t k;
+  for (k=0;k<32;k++)
+  { if (k==font_kind || k==int_kind|| k==dimen_kind||k==xdimen_kind||
+        k==glue_kind||k==baseline_kind|| k==range_kind||k==page_kind||k==param_kind)
+       continue;
+    if (max_ref[k]>=0 && max_ref[k]<=256)
+    { DBG(DBGDEF,"Definitions for %s=%d: %d entries of " SIZE_F " byte each\n",
+          definition_name[k],k,max_ref[k]+1,sizeof(pointer));
+      ALLOCATE(pointer_def[k],max_ref[k]+1,pointer);
+    }
   }
 }
 @
 
 @<free definitions@>=
+{ int k;
 for (k=0;k<32;k++)
 { free(pointer_def[k]); pointer_def[k]=NULL; }
+}
 @
 
 
@@ -692,14 +459,14 @@ static void hget_font_params(uint8_t n, font_def_t *f)
   HGET16(f->q); @+RNG("Font glyphs",f->q,3,max_section_no);
   f->g=hget_glue_node(); 
   f->h=hget_hyphen_node();
-  DBG(dbgdef,"Start font parameters\n");
+  DBG(DBGDEF,"Start font parameters\n");
   while (KIND(*hpos)!=font_kind)@/  
   { kind_t k;
     uint8_t n;
     @<read the start byte |a|@>@;
     k=KIND(a);
     n=HGET8;
-    DBG(dbgdef,"Reading font parameter %d: %s\n",n, definition_name[k]);
+    DBG(DBGDEF,"Reading font parameter %d: %s\n",n, definition_name[k]);
     if (k!=penalty_kind && k!=kern_kind && k!=ligature_kind && @|
         k!=hyphen_kind && k!=glue_kind && k!=math_kind && @| k!=rule_kind && k!=image_kind)
       QUIT("Font parameter %d has invalid type %s",n, content_name[n]);
@@ -707,12 +474,12 @@ static void hget_font_params(uint8_t n, font_def_t *f)
     f->p[n]=hget_definition(a);
     @<read and check the end byte |z|@>@;
   }
-  DBG(dbgdef,"End font definition\n");
+  DBG(DBGDEF,"End font definition\n");
 }
 static void hget_font_def(uint8_t a, uint8_t n)
 { char *t;
   HGET_STRING(t);font_def[n].n=strdup(t); 
-  DBG(dbgdef,"Font %d: %s\n", n, t); 
+  DBG(DBGDEF,"Font %d: %s\n", n, t); 
   if (INFO(a)&b001)  HGET32(font_def[n].s); else font_def[n].s=0;
   hget_font_params(n,&(font_def[n]));
 }
@@ -818,7 +585,7 @@ static param_def_t *hget_param_list(uint8_t a)
     q=&(r->p);
     q->n=HGET8;
     q->k=KIND(a);
-    DBG(dbgtags,"Defining %s %d\n", definition_name[KIND(a)],q->n);
+    DBG(DBGTAGS,"Defining %s %d\n", definition_name[KIND(a)],q->n);
     if (KIND(a)==int_kind) q->i=hget_integer_def(a);
     else if (KIND(a)==dimen_kind) q->d=hget_dimen_def();
     else if (KIND(a)==glue_kind) q->g=hget_glue_def(a);
@@ -930,8 +697,8 @@ static void hget_range_def(uint8_t a, uint8_t pg)
   range_def[n].pg=pg;
   range_def[n].f=f;
   range_def[n].t=t;
-  DBG(dbgrange,"Range *%d from 0x%x\n",pg,f);
-  DBG(dbgrange,"Range *%d to 0x%x\n",pg,t);
+  DBG(DBGRANGE,"Range *%d from 0x%x\n",pg,f);
+  DBG(DBGRANGE,"Range *%d to 0x%x\n",pg,t);
   n++;
 }
 #if 0
@@ -1032,7 +799,7 @@ name.
 To position the input stream on the content section we use the following function:
 @<get functions@>=
 void hget_content_section()
-{ @+DBG(dbgbasic,"Get Content\n");
+{ @+DBG(DBGDIR,"Reading Content Section\n");
   hget_section(2);@+
 }
 @
@@ -1051,8 +818,14 @@ HGETTAG(a);
 
 @<read and check the end byte |z|@>=
 HGETTAG(z);@+
-if (a!=z) TAGSERR(a,z);@/@t~@>
+if (a!=z)
+  QUIT(@["Tag mismatch [%s,%d]!=[%s,%d] at 0x%x to " SIZE_F "\n"@],@|
+    NAME(a),INFO(a),NAME(z),INFO(z),@|node_pos, hpos-hstart-1);
 @
+The identifier |node_pos| is defined as a macro; it denotes a field on
+the current list record containig the position of the tag of the node
+currently processed.
+
 
 The |hget_node| function gets the next node from the input based on the tag byte |a|
 and adds it to the current list. The function is used in |hget_content| to read a content node
@@ -1763,7 +1536,7 @@ static param_def_t *hteg_param_list(uint8_t z)
     else if (KIND(a)==glue_kind) { pointer p;  HTEG_GLUE(INFO(z)); q->g=p;}
     else TAGERR(a);
     q->n=HTEG8;
-    DBG(dbgtags,"Defining %s %d\n", definition_name[KIND(z)],q->n);
+    DBG(DBGTAGS,"Defining %s %d\n", definition_name[KIND(z)],q->n);
     @<read and check the start byte |a|@>@;
     r->next=p;
     p=r;
@@ -2907,9 +2680,9 @@ A third file, {\tt texextern.h}, is included in the code extracted from \TeX.
 #define _TEXEXTERN_H_
 #include "basetypes.h"
 #include "textypes.h"
-#include "hformat.h"
-#include "hdefaults.h"
 #include "error.h"
+#include "hformat.h"
+
 @<\TeX\ |extern|@>@;
 #endif
 @
@@ -2920,12 +2693,14 @@ compiler will check the decalarations against the implementation.
 Further the file will include declarations of a few items that are not
 implemented but rather needed by the \TeX\ library.
 
-The additional include files {\tt hformat.h} and{\tt hdefaults.h} 
-are necessary because the latter provides a replacement for
-\TeX's table of equivalents and depnds on the first. 
+The additional include file {\tt hformat.h} 
+is necessary because it provides a replacement for
+\TeX's table of equivalents. 
 \TeX's table of equivalents is no longer needed because \HINT/ does not define
-new values. The file {\tt error.h} defines common macros to implement error handling
-and debugging output.
+new values.
+The include file {\tt hformat.h} depends on {\tt error.h}
+and provides the usual \HINT/ debugging output macros.  
+The file {\tt error.h} defines macros to implement error handling.
 
 For complex types like |memory_word| or |list_state_record|, \TeX\ uses
 macros to access the various fields in a readable way. Including
@@ -2966,6 +2741,7 @@ extern int32_t*integer_def;
 These are the |extern| declarations:
 @<\TeX\ |extern|@>=
 extern void print_str(char *s);
+extern void print_int(int n);
 extern void print_char(ASCII_code @!s);
 extern void overflow(char *@!s, int @!n); /*stop due to finiteness*/ 
 extern void show_box(pointer p);
@@ -3332,7 +3108,7 @@ case kern_node: @<Prepend a kern node to the current page@>@; break;
 case penalty_node: if (page_contents == empty) goto done1;@+else pi=penalty(p);@+break;
 case mark_node: goto contribute;
 case ins_node: @<Prepend an insertion to the current page and |goto contribute|@>@;
-default: MESSAGE("Unexpected node type %d in build_page_up ignored\n",type(p));
+default: DBG(DBGTEX,"Unexpected node type %d in build_page_up ignored\n",type(p));
 } 
 if (pi < inf_penalty) 
   @<Check if node |p| is a new champion breakpoint@>@;
@@ -3380,7 +3156,7 @@ pi=0;
   top_so_far[2+stretch_order(q)]+=stretch(q);
   top_shrink+=shrink(q);
   if((shrink_order(q)!=normal)&&(shrink(q)!=0))
-    MESSAGE("Infinite glue shrinkage found on current page");
+    DBG(DBGTEX,"Infinite glue shrinkage found on current page");
   top_total+=width(q);
 }
 @
@@ -3668,7 +3444,7 @@ void hloc_init(void)
 { cur_loc=0;
   hloc_clear();
   page_loc[cur_loc]=0;
-  MESSAGE("loc_init: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
+  DBG(DBGPAGE,"loc_init: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
 }  
 @ 
 
@@ -3693,7 +3469,7 @@ void hloc_set(uint64_t h)
    { cur_loc=i; return;}
   page_loc[cur_loc]=h;
   hloc_clear();
-  MESSAGE("loc_set: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
+  DBG(DBGPAGE,"loc_set: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
  }
  @
  
@@ -3725,7 +3501,7 @@ void hloc_set_next(pointer p)
     NEXT_PAGE(i);
     hi_loc=i;
   }
-  MESSAGE("loc_set_next: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
+  DBG(DBGPAGE,"loc_set_next: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
 }
 @
 
@@ -3762,7 +3538,7 @@ void hloc_set_prev(pointer p)
   hi_loc=cur_loc;
   NEXT_PAGE(hi_loc);
   cur_loc=i;
-  MESSAGE("loc_set_prev: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
+  DBG(DBGPAGE,"loc_set_prev: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
 }
 @
 
@@ -3782,17 +3558,20 @@ it presents a top-level functional interface which strives to be easy to use and
 the necessary functionality to allow different viewers on different systems.
 
 \subsection{Opening and Closing a \HINT/ File}
-The first function an application needs to call is |hint_begin| and the last function is |hint_end|.
-The former initialized \TeX's memory, maps the file, and prepares the system to be ready for all 
-the functions that follow;
-the latter will release all resources obtained when calling one of the top level \HINT/ functions
-returning the system to the state it had before calling |hint_begin|.
-Since mapping (and unmapping) the \HINT/ file to memory is system depended,
-the functions |hint_begin| and |hint_end| delegate the work to two functions, |hint_map| and |hint_unmap|,
-that must be implemented by the framework using the \HINT/ backend. 
-If mapping the file fails, the function |hint_map| should
-not return  and it should leave the variables |hpos|, |hstart|, and |hend| untouched;
-otherwise, it should set these variables to the appropriate values.
+The first function an application needs to call is |hint_begin| and
+the last function is |hint_end|.  The former initialized \TeX's
+memory, maps the file, and prepares the system to be ready for all the
+functions that follow; the latter will release all resources obtained
+when calling one of the top level \HINT/ functions returning the
+system to the state it had before calling |hint_begin|.  Since mapping
+(and unmapping) the \HINT/ file to memory is system depended, the
+functions |hint_begin| and |hint_end| delegate the work to two
+functions, |hint_map| and |hint_unmap|, that must be implemented by
+the framework using the \HINT/ backend.  If mapping the file fails,
+the function |hint_map| should not return; it should leave the
+variables |hpos|, |hstart|, and |hend| untouched; and should set
+|hbase| to |NULL| and |hbase_size| to zero; otherwise, it should set
+these variables to the appropriate values.
 
 @<\HINT/ functions@>=
 static bool hint_is_open=false;
@@ -3805,7 +3584,7 @@ void hint_begin(void)
   hclear_fonts();
   hint_map();
   hget_banner();
-  hget_directory_section();
+  hget_directory();
   hget_definition_section();
   hget_content_section();
   leak_clear();
@@ -3833,81 +3612,6 @@ extern uint8_t *hbase;
 extern void hint_unmap(void);
 @
 
-As an example for the mapping and unmapping functions,
-here are the functions used in the test programs
-of section~\secref{testing}.
-@<test variables@>=
-static size_t hbase_size;
-@
-
-@<test functions@>=
-
-@<|mmap| and |munmap| declarations@>@;
-
-void hint_map(void)
-{ struct stat st;
-  int fd;
-  fd = open(in_name, O_RDONLY, 0);
-  if (fd<0) QUIT("Unable to open file %s", in_name);
-  if (fstat(fd, &st)<0) QUIT("Unable to get file size");
-  hbase_size=st.st_size;
-  hbase= mmap(NULL,hbase_size,PROT_READ,MAP_PRIVATE,fd, 0);
-  if (hbase==MAP_FAILED) 
-    QUIT("Unable to map file into memory");
-  close(fd);
-  hpos=hstart=hbase;
-  hend=hstart+hbase_size;
-}
-
-void hint_unmap(void)
-{ munmap(hbase,hbase_size);
-  hbase=NULL;
-  hbase_size=0;
-  hpos=hstart=hend=NULL;
-}
-@
-
-A small complication arrises from the fact that the |mmap| and |munmap| functions and the associated header files
-are not available under the Windows operating system and not even under MinGW.
-
-So we need to implement our own version of these functions.
-We do not implement general purpose replacements but only a replacement for the
-calls with the parameters used above.
-We start with the function |_get_osfhandle| to obtain a Windows |HANDLE| for the given
-file descriptor, then use |GetFileSize|, |CreateFileMapping|, and finally |MapViewOfFile|.
-The file is closed with |CloseHandle|.
-
-
-@<|mmap| and |munmap| declarations@>=
-#ifdef WIN32
-#include <windows.h>
-#include <io.h>
-#define PROT_READ   0x1
-#define MAP_PRIVATE 0x02
-#define MAP_FAILED   ((void *) -1)
-static HANDLE hMap;
-void *mmap(void *addr, size_t length, int prot, int flags,
-                  int fd, off_t offset)
-{ HANDLE hFile=(HANDLE)_get_osfhandle(fd);
-  if (hFile==INVALID_HANDLE_VALUE) QUIT("Unable to get file handle");
-  hMap = CreateFileMapping(hFile, NULL, PAGE_READONLY, 0, 0, NULL);
-  if (hMap == NULL) QUIT("Unable to map file into memory");
-  hbase = MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);
-  if (hbase==NULL) QUIT("Unable to obtain address of file mapping");
-  CloseHandle(hFile);
-  return hbase;
-}
-
-int munmap(void *addr, size_t length)
-{ UnmapViewOfFile(hbase);
-  CloseHandle(hMap);
-  hMap=NULL;
-  return 0;
-}
-#else
-#include <sys/mman.h>
-#endif
-@
 
 \subsection{Building Pages Forward and Backward}
 After opening the \HINT/ file, \HINT/ viewers need a to be able to move forward to
@@ -4112,7 +3816,7 @@ All we need to so is a function to obtain its top position: |hint_page_get|.
 @<render functions@>=
 uint64_t hint_page_get(void)
 {@+
- MESSAGE("page_get: %d : 0x%" PRIx64 "\n",cur_loc,page_loc[cur_loc]);
+ DBG(DBGPAGE,"page_get: %d : 0x%" PRIx64 "\n",cur_loc,page_loc[cur_loc]);
 @/ 
 return page_loc[cur_loc];
  }
@@ -4878,7 +4582,7 @@ g_sign= glue_sign(this_box);p= list_ptr(this_box);
 left_edge= cur_h;cur_v= cur_v-height(this_box);
 top_edge= cur_v;
 while(p!=null)
-{ if(is_char_node(p)) MESSAGE("Glyph in vertical list ignored");
+{ if(is_char_node(p)) DBG(DBGTEX,"Glyph in vertical list ignored");
   else
   { switch(type(p))
     { case hlist_node:
@@ -5188,7 +4892,7 @@ static void pkunpack_glyph(gcache_t *g)
   g->ff=pk_format;
   if (g->bits!=NULL) return; /* already unpacked */
 #if 0  
-  MESSAGE("Unpacking glyph %c (0x%x)",g->cc,g->cc);
+  DBG(DBGRENDER,"Unpacking glyph %c (0x%x)",g->cc,g->cc);
 #endif 
   data=g->pk.encoding;
   i=0;
@@ -5219,7 +4923,7 @@ static void pkunpack_glyph(gcache_t *g)
   if ((g->pk.flag>>4)==14) nativeSetBitmaped(g,data+i);
   else nativeSetRunlength(g,data+i);
 #if 0
-  MESSAGE("Unpacked glyph %c (0x%x) w=%d h=%d hoff=%d voff=%d",g->cc,g->cc, g->w, g->h, g-> hoff, g->voff);
+  DBG(DBGRENDER,"Unpacked glyph %c (0x%x) w=%d h=%d hoff=%d voff=%d",g->cc,g->cc, g->w, g->h, g-> hoff, g->voff);
 #endif
 }
 
@@ -5395,7 +5099,99 @@ typedef struct
 } otg_t;
 @
 
+
+
+\section{Error Handling}\label{error_section}
+There is no good program without good error handling
+\index{error message}\index{debugging}.
+The file {\tt error.h} is responsible for defining these macros:
+\item |LOG| to write out messages on a log file or a log window.
+The primary use of this macro is for debugging purposes.
+\item |MESSAGE| to give information to the user during regular use.
+It might for example pop up a window and ask the user to confirm the message.
+\item |ERROR| this is used in the |QUIT| macro to notify the user. It is only a local macro. 
+\item |QUIT| to inform the user about a problen that can not be fixed.
+Unlike the programs Hi\TeX\ or the \.{stretch} and \.{shrink}
+programs, the code defined here is normaly only the backend of a much
+larger program with a graphical user interface.  These programs should
+not terminate unexpectedly with an error message but recover gracefully.
+The |QUIT| macro will therefore write the error message into a character array
+and invoke a |longjmp| to take an error exit.
+\item |HINT_TRY| might be used in the front-end to define a point of recovery;
+an |else| clause can then be used to catch and process errors.
+
+The implementation of these macros is highly implementation dependent.
+So the following provides some useful defaults and special solutions
+for the Windows and the Android system.
+
+\index{LOG+\.{LOG}}
+\index{MESSAGE+\.{MESSAGE}}\index{QUIT+\.{QUIT}}
+\index{HINT_TRY+\.{HINT_TRY}}
+@(error.h@>=
+#ifndef _ERROR_H
+#define _ERROR_H
+#include <stdlib.h>
+#include <stdio.h>
+#include <setjmp.h>
+#define MAX_HERROR 1024
+extern char herror_string[MAX_HERROR];
+extern FILE *hlog;
+extern void hint_end(void);
+extern jmp_buf error_exit;
+
+#ifdef _MSC_VER /* MS Visual Studio C */
+#pragma warning(disable : 4996)
+extern void hmessage(char *title, char *format, ...);
+#define MESSAGE(...)  hmessage("HINT",__VA_ARGS__)
+
+extern void herror(char *title, char *msg);
+#define ERROR_MESSAGE  herror("HINT ERROR",herror_string)
+#define snprintf(S,N,F,...) _snprintf(S,N,F,__VA_ARGS__)
+
+#endif
+
+#ifdef __ANDROID__ /* Android Studio C */
+#include <android/log.h>
+#define LOG(...)      __android_log_print(ANDROID_LOG_DEBUG,__FILE__,__VA_ARGS__)
+#define MESSAGE(...)  __android_log_print(ANDROID_LOG_INFO,__FILE__, __VA_ARGS__)
+#define ERROR_MESSAGE __android_log_print(ANDROID_LOG_ERROR,__FILE__,"ERROR: %s\n", herror_string)
+
+#endif
+
+#ifndef LOG
+#define @[LOG(...)@] @[(fprintf(hlog,__VA_ARGS__),fflush(hlog))@]
+#endif
+
+#ifndef MESSAGE
+#define MESSAGE(...)  (fprintf(stderr,__VA_ARGS__),fflush(stderr))
+#endif
+
+#ifndef ERROR_MESSAGE
+#define ERROR_MESSAGE        fprintf(stderr,"ERROR: %s",herror_string)   
+#endif
+
+#ifndef QUIT
+#define QUIT(...)    (snprintf(herror_string,MAX_HERROR-1,__VA_ARGS__),\
+                     ERROR_MESSAGE,hint_end(),longjmp(error_exit,1))
+#endif
+
+
+#ifndef HINT_TRY
+#define HINT_TRY if ((herror_string[0]=0,setjmp(error_exit)==0))
+#endif
+
+#endif
+@
+
+
+The following variables are required for the error handling: 
+@<\HINT/ variables@>=
+jmp_buf error_exit;
+char herror_string[MAX_HERROR];
+@
+
 \section{Testing \HINT/}\label{testing}
+\subsection{Comparing \HINT/ Output to \TeX\ Output}
 One objective of \HINT/ is to make the following diagram is commutative:
 $$\epsfbox{images/diagram.eps}$$
 In order to test this property of \TeX, Hi\TeX, and \HINT/, we write a command line
@@ -5410,12 +5206,18 @@ The testfile also illustrates nicely how to use the different functions of
 the \TeX\ library and the \HINT/ library. Here is the main program:
 
 @(main.c@>=
-#include <stdio.h>
+#include "basetypes.h"
 #include <string.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include "error.h"
+#include "hformat.h"
+#include "hget.h"
+
 #include "texextern.h"
 #include "hint.h"
+
+
 
 @<test variables@>@;
 
@@ -5441,7 +5243,7 @@ int main(int argc, char *argv[])
 Processing of the command line is straight forward:
 
 @<process the command line@>=
-  debugflags=dbgbasic;
+  debugflags=DBGBASIC;
   strncpy(prog_name,argv[0],MAX_NAME);
   if (argc < 2) usage();
   argv++; /* skip the program name */
@@ -5484,13 +5286,13 @@ void usage(void)
   "\t -l     \t redirect stdout to a log file\n");@/
 #ifdef DEBUG
 fprintf(stderr,"\t -d XXX \t hexadecimal value. OR together these values:\n");@/
-fprintf(stderr,"\t\t\t XX=%03X   basic debugging\n", dbgbasic);@/
-fprintf(stderr,"\t\t\t XX=%03X   tag debugging\n", dbgtags);@/
-fprintf(stderr,"\t\t\t XX=%03X   definition debugging\n", dbgdef);@/
-fprintf(stderr,"\t\t\t XX=%03X   directory debugging\n", dbgdir);@/
-fprintf(stderr,"\t\t\t XX=%03X   range debugging\n",dbgrange);@/
-fprintf(stderr,"\t\t\t XX=%03X   compression debugging\n", dbgcompress);@/
-fprintf(stderr,"\t\t\t XX=%03X   buffer debugging\n", dbgbuffer);@/
+fprintf(stderr,"\t\t\t XX=%03X   basic debugging\n", DBGBASIC);@/
+fprintf(stderr,"\t\t\t XX=%03X   tag debugging\n", DBGTAGS);@/
+fprintf(stderr,"\t\t\t XX=%03X   definition debugging\n", DBGDEF);@/
+fprintf(stderr,"\t\t\t XX=%03X   directory debugging\n", DBGDIR);@/
+fprintf(stderr,"\t\t\t XX=%03X   range debugging\n",DBGRANGE);@/
+fprintf(stderr,"\t\t\t XX=%03X   compression debugging\n", DBGCOMPRESS);@/
+fprintf(stderr,"\t\t\t XX=%03X   buffer debugging\n", DBGBUFFER);@/
 #endif
 exit(1);
 }
@@ -5522,21 +5324,34 @@ The log file gets the extension {\tt .hlg}, short for \HINT/ log file.
 if (hlog!=NULL) fclose(hlog);
 @
 
+To map and unmap the input file, the function |hint_map| and
+|hint_unmap| are needed. Here we use the default implementations.
+
+@<test functions@>=
+void hint_map(void)
+{ hget_map(); }
+
+void hint_unmap(void)
+{ hget_unmap(); }
+@
+
+
 @<test variables@>=
 
 #define MAX_NAME 1024
 char prog_name[MAX_NAME];
 char in_name[MAX_NAME];
 int page_count=0;
-FILE *hlog;
 @
 
 
 @<show the page@>=
 { page_count++;
-  DBG(dbgbasic,"\nCompleted box being shipped out [%d]",page_count);
+  print_str("\nCompleted box being shipped out [");
+  print_int(page_count);
+  print_str("]");
   show_box(stream[0].p);
-  DBG(dbgbasic,"\n");
+  print_str("\n");
 }
 
 
@@ -5545,11 +5360,15 @@ FILE *hlog;
 The following code  is similar to the code for the {\tt skip} program described in \cite{MR:format}. It test reading the \HINT/ file from end to start.
 
 @(back.c@>=
-#include <stdio.h>
+#include "basetypes.h"
+#include <string.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <string.h>
 #include "texextern.h"
+#include "error.h"
+#include "hformat.h"
+#include "hget.h"
+
 #include "hint.h"
 
 @<test variables@>@;
@@ -5631,14 +5450,9 @@ extern void leak_out(pointer p, int s);
 #ifndef _HINT_H_
 #define _HINT_H_
 
-extern bool hget_banner(void);
-extern void hget_section(uint16_t n);
-extern void hget_directory_section(void);
-extern void hclear_dir(void);
 extern void hget_definition_section(void);
 extern void hget_content_section(void);
 extern void hget_content(void);
-extern void hteg_content(void);
 
 extern void clear_map(void); /*clear the location table*/
 extern void hpage_init(void);
@@ -5652,18 +5466,23 @@ extern bool hbuild_page_up(void); /*append contributions to the current page*/
 
 \subsection{{\tt hint.c}}
 @(hint.c@>=
+#include "basetypes.h"
 #include <string.h>
 #include <math.h>
 #include <zlib.h>@#
+#include "error.h"
+#include "hformat.h"
 
 #include "texextern.h"
 #include "hint.h"
 #include "hrender.h"
 
 #include "texdefs.h"
+#include "hget.h"
 
 @<GET macros@>@;
 @<TEG macros@>@;
+
 
 @<\HINT/ types@>@;
 
@@ -5673,6 +5492,7 @@ extern bool hbuild_page_up(void); /*append contributions to the current page*/
 @<\HINT/ auxiliar functions@>@;
 @<get functions@>@;
 @<teg functions@>@;
+
 @<\HINT/ functions@>@;
 
 @
@@ -5703,6 +5523,7 @@ extern void hint_clear_fonts(bool rm);
 @(hrender.c@>=
 #include <math.h>
 #include "texextern.h"
+#include "hget.h"
 #include "hint.h"
 #include "hrender.h"
 #include "rendernative.h"
@@ -5731,6 +5552,7 @@ extern void hint_clear_fonts(bool rm);
 #include "error.h"
 #include "hformat.h"
 #include "hint.h"
+#include "hget.h"
 @<include the STB TrueType Implementation@>@;
 #include "hfonts.h"
 #include "hrender.h"

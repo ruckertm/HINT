@@ -351,7 +351,6 @@ Arithmetic overflow will be detected in all cases.
 
 @<Compiler directives@>=
 #include "basetypes.h"
-#include "error.h"
 #include <string.h>
 #include <math.h>
 
@@ -1488,9 +1487,11 @@ by changing |wterm|, |wterm_ln|, and |wterm_cr| in this section.
 @ To end a line of text output, we call |print_ln|.
 
 @(htex.c@>=
+#include "texextern.h"
 #include "texdefs.h"
 #include "textypes.h"
-#include "texextern.h"
+
+extern uint8_t *hpos, *hstart, *hend;
 
 static int @!file_offset=0;/*the number of characters on the current file line*/
 static int @!tally=0; /*the number of characters recently printed*/
@@ -11381,7 +11382,7 @@ pointer new_character(internal_font_number @!f, eight_bits @!c)
 {@+ pointer p; /*newly allocated node*/
 #ifdef DEBUG
 if (font_bc[f] > c || font_ec[f] < c || ! char_exists(char_info(f)(c)))
-  MESSAGE("Warning: Character 0x%0X in font %d does not exist\n",c,f);
+  DBG(DBGFONT,"Warning: Character 0x%0X in font %d does not exist\n",c,f);
 #endif
 p=get_avail();font(p)=f;character(p)=c;
 return p;
@@ -19086,7 +19087,7 @@ else{@+q=glue_ptr(p);
   active_height[6]=active_height[6]+shrink(q);
   if ((shrink_order(q)!=normal)&&(shrink(q)!=0))
     {@+@t@>@;@/
-    MESSAGE("Infinite glue shrinkage found in box being split");
+    DBG(DBGTEX,"Infinite glue shrinkage found in box being split");
     r=new_spec(q);shrink_order(r)=normal;delete_glue_ref(q);
     glue_ptr(p)=r;q=r;
     }
@@ -19589,7 +19590,7 @@ else{@+q=glue_ptr(p);
   page_shrink=page_shrink+shrink(q);
   if ((shrink_order(q)!=normal)&&(shrink(q)!=0))
     {@+@t@>@;@/
-     MESSAGE("Infinite glue shrinkage found on current page");
+     DBG(DBGTEX,"Infinite glue shrinkage found on current page");
     r=new_spec(q);shrink_order(r)=normal;fast_delete_glue_ref(q);
     glue_ptr(p)=r;q=r;
     }
@@ -19687,7 +19688,7 @@ page_goal=page_goal-h-width(q);@/
 page_so_far[2+stretch_order(q)]=@|page_so_far[2+stretch_order(q)]+stretch(q);@/
 page_shrink=page_shrink+shrink(q);
 if ((shrink_order(q)!=normal)&&(shrink(q)!=0))
-  MESSAGE("Infinite glue shrinkage inserted from stream %d",n);
+  DBG(DBGTEX,"Infinite glue shrinkage inserted from stream %d",n);
 }
 
 @ Here is the code that will split a long footnote between pages, in an
