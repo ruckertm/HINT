@@ -1,5 +1,5 @@
 /*278:*/
-#line 5130 ".\\hint.w"
+#line 5135 "hint.w"
 
 #ifndef _ERROR_H
 #define _ERROR_H
@@ -25,6 +25,7 @@ extern void herror(char*title,char*msg);
 
 #ifdef __ANDROID__ 
 #include <android/log.h> 
+
 #define LOG(...)      __android_log_print(ANDROID_LOG_DEBUG,__FILE__,__VA_ARGS__)
 #define MESSAGE(...)  __android_log_print(ANDROID_LOG_INFO,__FILE__, __VA_ARGS__)
 #define ERROR_MESSAGE __android_log_print(ANDROID_LOG_ERROR,__FILE__,"ERROR: %s\n", herror_string)

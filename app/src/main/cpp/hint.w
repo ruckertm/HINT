@@ -27,8 +27,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 1850 ${}$}
-\def\lastdate{${}$Date: 2020-02-25 11:05:17 +0100 (Tue, 25 Feb 2020) ${}$}
+\def\lastrevision{${}$Revision: 1851 ${}$}
+\def\lastdate{${}$Date: 2020-02-25 15:16:08 +0100 (Tue, 25 Feb 2020) ${}$}
 
 \input titlepage.tex
 
@@ -4019,14 +4019,19 @@ typedef struct font_s *font_s_ptr;
 extern struct font_s *hget_font(unsigned char f);
 @
 
-To initialize the |fonts| table and remove all fonts form memory, the |hint_clear_fonts| function is used
-with the |rm| parameter set to |true|.
+To initialize the |fonts| table and remove all fonts form memory, the
+|hint_clear_fonts| function is used with the |rm| parameter set to
+|true|. If set to |false| the action is less drastic: only the
+function |nativeFreeGlyph| is called for all glyphs. The bitmaps, for
+example, are retained.
+
 
 @<font functions@>=
 static void hfree_glyph_cache(font_t *f, bool rm);
 
 void hint_clear_fonts(bool rm)
 { int f;
+  DBG(DBGFONT,rm?"Clear font data":"Clear native glyph data");
   for (f=0;f<=max_ref[font_kind];f++)
     if (fonts[f]!=NULL)
     { hfree_glyph_cache(fonts[f],rm);
@@ -5152,6 +5157,7 @@ extern void herror(char *title, char *msg);
 
 #ifdef __ANDROID__ /* Android Studio C */
 #include <android/log.h>
+
 #define LOG(...)      __android_log_print(ANDROID_LOG_DEBUG,__FILE__,__VA_ARGS__)
 #define MESSAGE(...)  __android_log_print(ANDROID_LOG_INFO,__FILE__, __VA_ARGS__)
 #define ERROR_MESSAGE __android_log_print(ANDROID_LOG_ERROR,__FILE__,"ERROR: %s\n", herror_string)

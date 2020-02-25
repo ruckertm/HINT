@@ -1,5 +1,5 @@
 /*296:*/
-#line 5550 ".\\hint.w"
+#line 5556 "hint.w"
 
 #include "basetypes.h"
 #include "error.h"
@@ -7,32 +7,32 @@
 #include "hint.h"
 #include "hget.h"
 /*269:*/
-#line 5016 ".\\hint.w"
+#line 5021 "hint.w"
 
 #define STB_TRUETYPE_IMPLEMENTATION
 #define STBTT_STATIC
 #include "stb_truetype.h"
 /*:269*/
-#line 5556 ".\\hint.w"
+#line 5562 "hint.w"
 
 #include "hfonts.h"
 #include "hrender.h"
 #include "rendernative.h"
 
 /*235:*/
-#line 3987 ".\\hint.w"
+#line 3987 "hint.w"
 
 static font_t*fonts[0x100]= {NULL};
 /*:235*//*242:*/
-#line 4113 ".\\hint.w"
+#line 4118 "hint.w"
 
 static gcache_t g_undefined= {0};
 /*:242*/
-#line 5561 ".\\hint.w"
+#line 5567 "hint.w"
 
 
 /*271:*/
-#line 5040 ".\\hint.w"
+#line 5045 "hint.w"
 
 int unpack_ttfile(font_t*f)
 {
@@ -55,11 +55,11 @@ nativeSetTrueType(g);
 }
 
 /*:271*/
-#line 5563 ".\\hint.w"
+#line 5569 "hint.w"
 
 
 /*268:*/
-#line 4878 ".\\hint.w"
+#line 4883 "hint.w"
 
 
 #define PK_READ_1_BYTE() (data[i++])
@@ -190,11 +190,11 @@ return 1;
 }
 
 /*:268*/
-#line 5565 ".\\hint.w"
+#line 5571 "hint.w"
 
 
 /*236:*/
-#line 3994 ".\\hint.w"
+#line 3994 "hint.w"
 
 struct font_s*hget_font(unsigned char f)
 {font_t*fp;
@@ -212,14 +212,14 @@ fp->font_data= hstart;
 hpos= spos;hstart= sstart;hend= send;
 }
 /*265:*/
-#line 4848 ".\\hint.w"
+#line 4853 "hint.w"
 
 if(fp->font_data[0]==0xF7&&fp->font_data[1]==0x59)
 {fp->ff= pk_format;
 if(!unpack_pkfile(fp)){free(fp);fp= NULL;}
 }
 /*:265*//*272:*/
-#line 5065 ".\\hint.w"
+#line 5070 "hint.w"
 
 else if(unpack_ttfile(fp))
 fp->ff= tt_format;
@@ -228,18 +228,19 @@ else
 free(fp);fp= NULL;
 }
 /*:272*/
-#line 4010 ".\\hint.w"
+#line 4010 "hint.w"
 
 fonts[f]= fp;
 return fonts[f];
 }
 /*:236*//*238:*/
-#line 4025 ".\\hint.w"
+#line 4029 "hint.w"
 
 static void hfree_glyph_cache(font_t*f,bool rm);
 
 void hint_clear_fonts(bool rm)
 {int f;
+DBG(DBGFONT,rm?"Clear font data":"Clear native glyph data");
 for(f= 0;f<=max_ref[font_kind];f++)
 if(fonts[f]!=NULL)
 {hfree_glyph_cache(fonts[f],rm);
@@ -247,7 +248,7 @@ if(rm){free(fonts[f]);fonts[f]= NULL;}
 }
 }
 /*:238*//*241:*/
-#line 4070 ".\\hint.w"
+#line 4075 "hint.w"
 
 #define G0_BITS 7
 #define G0_SIZE (1<<G0_BITS)
@@ -282,7 +283,7 @@ return f->g0[cc];
 return NULL;
 }
 /*:241*//*243:*/
-#line 4117 ".\\hint.w"
+#line 4122 "hint.w"
 
 static gcache_t*hnew_g(gcache_t**g)
 {if(*g==NULL)
@@ -337,7 +338,7 @@ else if(cc<G123_SIZE*G123_SIZE*G123_SIZE*G0_SIZE)return hnew_g3(&(pk->g3),cc);
 else return&g_undefined;
 }
 /*:243*//*244:*/
-#line 4176 ".\\hint.w"
+#line 4181 "hint.w"
 
 static void hfree_g0(struct gcache_s**g,bool rm)
 {int i;
@@ -402,7 +403,7 @@ if(rm){free(f->g3);f->g3= NULL;}
 }
 }
 /*:244*//*246:*/
-#line 4294 ".\\hint.w"
+#line 4299 "hint.w"
 
 gcache_t*hget_glyph(font_t*fp,unsigned int cc)
 {
@@ -423,7 +424,7 @@ QUIT("tt t1 and ot formats not yet supported");
 return g;
 }
 /*:246*//*247:*/
-#line 4318 ".\\hint.w"
+#line 4323 "hint.w"
 
 void render_char(int x,int y,struct font_s*f,int32_t s,uint32_t cc)
 
@@ -442,7 +443,7 @@ nativeGlyph(SP2PT(x)-dx,SP2PT(y)-dy,w,h,g);
 }
 
 /*:247*/
-#line 5567 ".\\hint.w"
+#line 5573 "hint.w"
 
 
 /*:296*/

@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.4.1)
 
 # now build app's shared lib
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11  -Wno-dangling-else -Wno-format")
-set(CFLAGS "${CFLAGS} -Wno-dangling-else -Wno-format")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11  -Wno-dangling-else -Wno-format -DDEBUG")
+set(CFLAGS "${CFLAGS} -Wno-dangling-else -Wno-format -DDEBUG")
 
 # Import the CMakeLists.txt for the glm library
 #add_subdirectory(glm) # if your CMakeLists is at '../cpp'

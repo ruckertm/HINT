@@ -92,8 +92,9 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_error(JNIEnv *env, jclass obj) {
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_init(JNIEnv *env, jclass obj) {
+    debugflags=DBGBASIC;
     nativeInit();
-}
+ }
 
 
 int fd=-1;
@@ -180,7 +181,6 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_getPos(JNIEnv *env, jclass obj) {
     pos = hpos;
     LOGI("getPos(0x%x %x)-> (0x%x %x)\n", (int) (hpos >> 32), (int) (hpos & 0xffffffff),
          (int) (pos >> 32), (int) (pos & 0xffffffff));
-    hint_clear_fonts(false);
     return pos;
 }
 

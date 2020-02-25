@@ -18,21 +18,15 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 extern "C" {
+#include "error.h"
 #include "stb_truetype.h"
 #include "hint.h"
 #include "hfonts.h"
 #include "hrender.h"
 #include "rendernative.h"
 #include "stb_image.h"
-#include <setjmp.h>
-extern jmp_buf error_exit;
-extern char herror_string[];
-#
 };
 
-
-#define HINT_TRY if ((herror_string[0]=0,setjmp(error_exit)==0))
-#define HINT_CATCH else
 
 #define min(X, Y) ((X)<(Y)?(X):(Y))
 #define DARK_MODE 1
@@ -200,6 +194,7 @@ extern "C" void nativeInit(void) {
     glUseProgram(gProgram);
 
     mkRuleTexture();
+    hint_clear_fonts(false);
 #if 0
     GLfloat mv[4];
     glGetFloatv(GL_MAX_VIEWPORT_DIMS,mv);
