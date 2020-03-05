@@ -90,7 +90,7 @@ extern pointer copy_node_list(pointer p);
 extern void list_init(void);
 extern list_state_record cur_list;
 extern list_state_record nest[];
-extern uint8_t nest_ptr;
+extern uint16_t nest_ptr;
 extern void push_nest(void);
 extern void pop_nest(void);
 /*:173*//*174:*/
@@ -159,7 +159,7 @@ extern void hloc_set_next(pointer p);
 
 extern scaled hvsize,hhsize;
 /*:221*//*290:*/
-#line 5445 "hint.w"
+#line 5458 "hint.w"
 
 extern void leak_in(pointer p,int s);
 extern void leak_out(pointer p,int s);

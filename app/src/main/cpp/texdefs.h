@@ -34,7 +34,7 @@ typedef float float32_t;
 #define hash_size 15000 \
 
 #define hash_prime 12721
-#define hyph_size 307 \
+#define hyph_size 607 \
  \
 
 #define done6 36
@@ -2116,7 +2116,7 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 
 
 /*:12*//*61:*/
-#line 1462 ".\\dummy.w"
+#line 1489 ".\\dummy.w"
 
 #define put(file)    fwrite(&((file).d),sizeof((file).d),1,(file).f)
 #define get(file)    fread(&((file).d),sizeof((file).d),1,(file).f)
@@ -2143,7 +2143,7 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define wlog_cr         pascal_write(log_file,"\n")
 
 /*:61*//*130:*/
-#line 2639 ".\\dummy.w"
+#line 2666 ".\\dummy.w"
 
 #ifdef DEBUG
 #define incr_dyn_used incr(dyn_used)
@@ -2159,7 +2159,7 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #endif
 
 /*:5*//*692:*/
-#line 13209 ".\\dummy.w"
+#line 13223 ".\\dummy.w"
 
 #define vpack(...) vpackage(__VA_ARGS__, max_dimen)
 

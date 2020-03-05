@@ -37,7 +37,7 @@ extern "C" {
 #include "hint.h"
 #include "hrender.h"
 #include "rendernative.h"
-char in_name[1]; /* to keep hget happy */
+char *in_name=NULL; /* to keep hget happy */
 
 //DEPRECATED
 //extern void nativeSetColors(double fr, double fg, double fb, double br, double bg, double bb);

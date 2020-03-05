@@ -40,9 +40,9 @@
 \titletrue
 
 \def\setrevision$#1: #2 ${\gdef\lastrevision{#2}}
-\setrevision$Revision: 1850 $
+\setrevision$Revision: 1873 $
 \def\setdate$#1(#2) ${\gdef\lastdate{#2}}
-\setdate$Date: 2020-02-25 11:05:17 +0100 (Tue, 25 Feb 2020) $
+\setdate$Date: 2020-03-05 19:29:50 +0100 (Thu, 05 Mar 2020) $
 
 \null
 
@@ -980,17 +980,21 @@ void hwrite_string(char *str)
 
 In the short format, a string is just a byte sequence terminated by a zero byte.
 This makes the function |hput_string|, to write a string, and the macro |HGET_STRING|,
-to read a string in short format, very simple.
+to read a string in short format, very simple. Note that after writing an unbounded
+string to the output buffer, the macro |HPUTNODE| will make sure that there is enough
+space left to write the remainder of the node.
 
 \putcode
 @<put functions@>=
 void hput_string(char *str)
 { char *s=str;
-  if (s!=NULL)  
-    do {
+  if (s!=NULL)
+  { do {
       HPUTX(1);
       HPUT8(*s);
     } while (*s++!=0);
+    HPUTNODE;
+  }
   else HPUT8(0);
 }
 @ 
@@ -5352,27 +5356,8 @@ files, these contain auxiliary\index{auxiliary file} files
 (fonts\index{font}, images\index{image}, \dots) necessary for
 rendering the content. In long format files, the directory section
 will simply list the file names of the auxiliary files.
-@<put functions@>=
-static size_t hput_root(void);
-static size_t hput_section(uint16_t n);
-static void hput_optional_sections(void);
 
-void hput_hint(char * str)
-{ size_t s;
-  DBG(DBGBASIC,"Writing hint output %s\n",str); 
-  s=hput_banner("hint",str);
-  DBG(DBGDIR,@["Root Entry at " SIZE_F "\n"@],s);
-  s+=hput_root();
-  DBG(DBGDIR,@["Directory section at " SIZE_F "\n"@],s);
-  s+=hput_section(0);
-  DBG(DBGDIR,@["Definition section at " SIZE_F "\n"@],s);
-  s+=hput_section(1);
-  DBG(DBGDIR,@["Content section at " SIZE_F "\n"@],s);
-  s+=hput_section(2);
-  DBG(DBGDIR,@["Auxiliary sections at " SIZE_F "\n"@],s);
-  hput_optional_sections();
-}
-@
+
 
 \subsection{Banner}
 All \HINT/ files start with a banner\index{banner}. The banner contains only
@@ -5419,11 +5404,24 @@ bool hcheck_banner(char *magic)
   return true;
 }
 @
-\subsection{Long Format Files}\gdef\subcodetitle{Banner}%
 
-Before we can check the banner, we have to read it knowing 
-that it ends with a newline character and is at most |MAX_BANNER|
-byte long.
+To read a short format file, we use the macro |HGET8|. It returns a single byte.
+We read the banner knowing that it ends with a newline character
+and is at most |MAX_BANNER| byte long.
+
+\getcode
+@<get file functions@>=
+void hget_banner(void)
+{ int i;
+  for (i=0;i<MAX_BANNER;i++)
+  { hbanner[i]=HGET8;
+    if (hbanner[i]=='\n') break;
+  } 
+  hbanner[++i]=0;
+}
+@
+
+To read a long format file, we use the function |fgetc|.
 \readcode
 @<read the banner@>=
 { int i=0,c;
@@ -5434,19 +5432,10 @@ byte long.
   hbanner[i]=0;
 }
 @
- After checking the banner, reading a long format file is
-simply done by calling |yyparse| with the following rule:
 
-@s hint symbol
-@s content_section symbol
-
-@<parsing rules@>=
-hint: directory_section definition_section content_section ;
-@
-\vskip 0pt plus 20pt
-\goodbreak
-\vskip 0pt plus -20pt
-\writecode\penalty +1000\vskip -\baselineskip
+Writing the banner to a short format file is accomplished by calling
+|hput_banner| with the ``magic'' string |"hint"| as a first argument
+and a (short) comment as the second argument.
 \putcode
 @<function to write the banner@>=
 extern int version, subversion;
@@ -5456,13 +5445,54 @@ static size_t hput_banner(char *magic, char *s)
 @
 
 
+\writecode
+Writing the banner of a long format file is essentialy the same as for short
+format file calling |hput_banner| with |"HINT"| as a first argument.
+
+\subsection{Long Format Files}\gdef\subcodetitle{Banner}%
+
+After reading and checking the banner, reading a long format file is
+simply done by calling |yyparse|. The following rule gives the big picture:
+\readcode
+@s hint symbol
+@s content_section symbol
+
+@<parsing rules@>=
+hint: directory_section definition_section content_section ;
+@
+
+
 \subsection{Short Format Files}\gdef\subcodetitle{Primitives}%
-A short format\index{short format} file starts with the banner, as explained above, and continues
+A short format\index{short format} file starts with the banner and continues
 with a list of sections. Each section has a maximum size
 of $2^{32}$ byte or 4GByte. This restriction ensures that positions\index{position}
 inside a section can be stored as 32 bit integers, a feature that
 we will need only for the so called ``content'' section, but it
 is also nice for implementers to know in advance what sizes to expect.
+The big picture is captured by the |put_hint| function:
+
+@<put functions@>=
+static size_t hput_root(void);
+static size_t hput_section(uint16_t n);
+static void hput_optional_sections(void);
+
+void hput_hint(char * str)
+{ size_t s;
+  DBG(DBGBASIC,"Writing hint output %s\n",str); 
+  s=hput_banner("hint",str);
+  DBG(DBGDIR,@["Root Entry at " SIZE_F "\n"@],s);
+  s+=hput_root();
+  DBG(DBGDIR,@["Directory section at " SIZE_F "\n"@],s);
+  s+=hput_section(0);
+  DBG(DBGDIR,@["Definition section at " SIZE_F "\n"@],s);
+  s+=hput_section(1);
+  DBG(DBGDIR,@["Content section at " SIZE_F "\n"@],s);
+  s+=hput_section(2);
+  DBG(DBGDIR,@["Auxiliary sections at " SIZE_F "\n"@],s);
+  hput_optional_sections();
+}
+@
+
 
 When we work on a section, we will have the entire section in
 memory and use three variables to access it:  |hstart|
@@ -5490,21 +5520,6 @@ and advance the stream position accordingly.\label{HPUT}\label{HGET}
 #define @[HGETTAG(A)@] @[A=HGET8,DBGTAG(A,hpos-1)@]
 @
 
-Using |HGET8| reading the banner simply becomes
-%\getcode
-\codesection{\getsymbol}{Reading the short format}\getindex{1}{6}{Banner}
-@<get file functions@>=
-void hget_banner(void)
-{ int i;
-  for (i=0;i<MAX_BANNER;i++)
-  { hbanner[i]=HGET8;
-    if (hbanner[i]=='\n') break;
-  } 
-  hbanner[++i]=0;
-}
-@
-
-
 \putcode
 @<put functions@>=
 void hput_error(void)
@@ -5515,7 +5530,7 @@ void hput_error(void)
 
 @<put macros@>=
 extern void hput_error(void);
-#define @[HPUT8(X)@]       (*(hpos++)=(X),hput_error())
+#define @[HPUT8(X)@]       (hput_error(),*(hpos++)=(X))
 #define @[HPUT16(X)@]      (HPUT8(((X)>>8)&0xFF),HPUT8((X)&0xFF))
 #define @[HPUT24(X)@]      (HPUT8(((X)>>16)&0xFF),HPUT8(((X)>>8)&0xFF),HPUT8((X)&0xFF))
 #define @[HPUT32(X)@]      (HPUT8(((X)>>24)&0xFF),HPUT8(((X)>>16)&0xFF),HPUT8(((X)>>8)&0xFF),HPUT8((X)&0xFF))
@@ -5549,17 +5564,17 @@ not the same as allocating precious memory, all that is done by the
 operating system when needed. Mapping just reserves adresses.
 
 The following functions map and unmap a short format input 
-file at address |hbase|.
+file at address |hbase|.\label{map}
 
 
 @<map functions@>=
 @<|mmap| and |munmap| declarations@>@;
 static size_t hbase_size;
 uint8_t *hbase=NULL;
-extern char in_name[];
+extern char *in_name;
 void hget_map(void)
 { struct stat st;
-  int fd;
+  int fd;
   fd = open(in_name, O_RDONLY, 0);
   if (fd<0) QUIT("Unable to open file %s", in_name);
   if (fstat(fd, &st)<0) QUIT("Unable to get file size");
@@ -5659,7 +5674,7 @@ suitable buffer\index{buffer}, then fill these buffers, and finally write them
 out in sequential order.
 
 @<put functions@>=
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 0x400
 void new_output_buffers(void)
 { dir[0].bsize=dir[1].bsize=dir[2].bsize=BUFFER_SIZE;
   DBG(DBGBUFFER,"Allocating output buffer size=0x%x, margin=0x%x\n",BUFFER_SIZE,MAX_TAG_DISTANCE);
@@ -5887,10 +5902,19 @@ void hset_entry(entry_t *e, uint16_t i, uint32_t size, uint32_t xsize, @|char *f
 @
 
 
-We write the auxiliary files, the directory, and the directory entries
-in long format using the following functions.
-\writecode
-@<write functions@>=
+Writing the auxiliary files depends on the {\tt -f} and the {\tt -g}
+option.
+
+@<without {\tt -f} skip writing an existing file@>=
+    if ( !option_force && access(file_name,F_OK)==0)
+    { MESSAGE("File '%s' exists.\n"@| "To rewrite the file use the -f option.\n",
+              file_name);
+      continue;
+    }
+@
+
+The above code uses the |access| function, and we need to make sure it is defined:
+@<make sure |access| is defined@>=
 #ifdef WIN32
 #include <io.h>
 #define @[access(N,M)@] @[_access(N, M )@] 
@@ -5898,31 +5922,119 @@ in long format using the following functions.
 #else
 #include <unistd.h>
 #endif
+@
+
+With the {\tt -g} option, filenames are considered global, and files
+are written to the filesystem possibly overwriting the existing files.
+For example a font embedded in a \HINT/ file might replace a font of
+the same name in some operating systems font folder.
+If the \HINT/ file is {\tt shrink}ed on one system and
+{\tt stretch}ed on another system, this is usually not the desired behaviour.
+Without the {\tt -g} option,\label{absrel} the files will be written in two local directories.
+The names of these directories are derived from the output file name,
+replacing the extension ``{\tt .HINT}'' with ``{\tt .abs}'' if the original
+filename contained an absolute path, and  replacing it with ``{\tt .rel}''
+if the original filename contained a relative path. Inside these directories,
+the path as given in the filename is retained.
+When {\tt shrink}ing a \HINT/ file without the {\tt -g} option,
+the original filenames can be reconstructed.
+
+@<without {\tt -g} compute a local |file_name|@>=
+if (!option_global)
+{ int path_length=(int)strlen(file_name);
+  @<determine whether |file_name| is absolute or relative@>@;
+  if (file_name_length<stem_length+ext_length+path_length)
+  { file_name_length=stem_length+ext_length+path_length;
+    REALLOCATE(stem_name, file_name_length+1,char);
+  }
+  strcpy(stem_name+stem_length,aux_ext[name_type]);
+  strcpy(stem_name+stem_length+ext_length,file_name);
+  DBG(DBGDIR,"Replacing auxiliar file name:\n\t%s\n->\t%s\n",file_name,stem_name);
+  file_name=stem_name;
+}
+@
+
+@<determine whether |file_name| is absolute or relative@>=
+  enum {absolute=0, relative=1} name_type;
+  char *aux_ext[2]={".abs/",".rel/"};
+  int ext_length=5;
+  if (file_name[0]=='/')
+  {  name_type=absolute;
+    file_name++; path_length--;
+  }
+  else if (path_length>3 && isalpha(file_name[0]) &&
+           file_name[1]==':' && file_name[2]=='/')
+  { name_type=absolute;
+    file_name[1]='_';
+  }      
+  else
+    name_type=relative;
+@
+It remains to create the direcories along the path we might have constructed.
+@<make sure the path in |file_name| exists@>=
+{ char *path_end;
+  path_end=file_name+1;
+  while (*path_end!=0)
+  { if(*path_end=='/')
+    { struct stat s;
+     *path_end=0;   
+      if (stat(file_name,&s)==-1)
+      {
+#ifdef WIN32
+      if (mkdir(file_name)!=0)
+#else
+      if (mkdir(file_name,0777)!=0)
+#endif
+           QUIT("Unable to create directory %s",file_name);
+         DBG(DBGDIR,"Creating directory %s\n",file_name);
+      } else if (!S_ISDIR(s.st_mode))
+        QUIT("Unable to create directory %s, file exists",file_name);
+      *path_end='/';
+    }
+    path_end++;
+  }
+}
+  
+  
+@
+
+\writecode
+@<write functions@>=
+@<make sure |access| is defined@>@;
+extern char *stem_name;
+extern int stem_length;
 
 void hwrite_aux_files(void)
 { int i;
   DBG(DBGDIR,"Writing %d aux files\n",max_section_no-2);
   for (i=3;i<=max_section_no;i++)
   { FILE *f;
-    if (access(dir[i].file_name,F_OK)==0 && !option_force)
-    { MESSAGE("File '%s' exists. "@| "To rewrite the file use the -f option.\n",dir[i].file_name);
-      continue;
-    }
-    f=fopen(dir[i].file_name,"wb");
+    char * file_name=dir[i].file_name;
+    int file_name_length=0;
+
+    
+    @<without {\tt -g} compute a local |file_name|@>@;
+    @<without {\tt -f} skip writing an existing file@>@;
+    @<make sure the path in |file_name| exists@>@;
+
+    f=fopen(file_name,"wb");
     if (f==NULL) 
-      QUIT("Unable to open file '%s' for writing",dir[i].file_name);
+      QUIT("Unable to open file '%s' for writing",file_name);
     else
     { size_t s;
       hget_section(i);
-      DBG(DBGDIR,"Writing file %s\n",dir[i].file_name);
+      DBG(DBGDIR,"Writing file %s\n",file_name);
       s=fwrite(hstart,1,dir[i].size,f);
-      if (s!=dir[i].size) QUIT("writing file %s",dir[i].file_name);
+      if (s!=dir[i].size) QUIT("writing file %s",file_name);
       fclose(f);
     }
   }
 }
+@
 
-
+We write the directory, and the directory entries
+in long format using the following functions.
+@<write functions@>=
 static void hwrite_entry(int i)
 { hwrite_start();
   hwritef("section %u",dir[i].section_no);@+  hwrite_string(dir[i].file_name);
@@ -6144,6 +6256,10 @@ void hput_directory(void)
 
 To conclude this section, here is the function that  adds the files that
 are described in the directory entries 3 and above to a \HINT/ file in short format.
+Where these files are found depends on the {\tt -g} option.
+With that option given, the file names of the directory entrys are used unchanged.
+Without that option, the files are found in the {|in_name|\tt .abs} and  {|in_name|\tt .rel}
+directories, as described in section~\secref{absrel}.
 
 \gdef\subcodetitle{Optional Sections}%
 \putcode
@@ -6154,19 +6270,22 @@ static void hput_optional_sections(void)
   for (i=3; i<=max_section_no; i++)@/
    { FILE *f;
      size_t fsize;
-     DBG(DBGDIR,"file %d: %s\n",dir[i].section_no,dir[i].file_name);
+     char *file_name=dir[i].file_name;
+     int file_name_length=0;
+     DBG(DBGDIR,"file %d: %s\n",dir[i].section_no,file_name);
      if (dir[i].xsize!=0) @/
        DBG(DBGDIR,"Compressing of auxiliary files currently not supported");
-     f=fopen(dir[i].file_name,"rb");
+     @<without {\tt -g} compute a local |file_name|@>
+     f=fopen(file_name,"rb");
      if (f==NULL) QUIT("Unable to read section %d, file %s",
-       dir[i].section_no,dir[i].file_name);
+       dir[i].section_no,file_name);
      fsize=0;
      while (!feof(f))@/
      { size_t s,t;
        char buffer[1<<13]; /* 8kByte */       
        s=fread(buffer,1,1<<13,f);@/
        t=fwrite(buffer,1,s,hout);
-       if (s!=t) QUIT("writing file %s",dir[i].file_name);
+       if (s!=t) QUIT("writing file %s",file_name);
        fsize=fsize+t;
      }
      fclose(f);
@@ -6892,8 +7011,9 @@ int main(void)
   int i;
   
   printf("#include \"basetypes.h\"\n"@/
-         "#include \"hformat.h\"\n\n");
-  @<define debug variables@>@;       
+         "#include \"hformat.h\"\n\n"@/
+         @[@<variables in {\tt hformat.c}@>@]);
+         
   @<define |content_name| and |definition_name|@>@;
 
   for (k=0; k<32; k++) max_default[k]=-1,max_fixed[k]=0x100;
@@ -7300,14 +7420,16 @@ void hput_content_end(void)
 
 
 \section{Processing the Command Line}
-The |usage| function explains command line\index{command line} 
+The following code explains the command line\index{command line} 
 parameters and options\index{option}\index{debugging}.
+It tells us what to expect in the rest of this section.
 @<explain usage@>=
   fprintf(stderr,
   "Usage: %s [options] filename%s\n",prog_name, in_ext);@/
   fprintf(stderr,
   "Options:\n"@/
   "\t -o file\t specify an output file name\n"@/
+  "\t -g     \t assume global names for auxiliar files\n"@/
   "\t -l     \t redirect stderr to a log file\n"@/
   "\t -u     \t enable writing utf8 character codes\n"@/
   "\t -x     \t enable writing hexadecimal character codes\n"@/
@@ -7351,40 +7473,58 @@ We define constants for different debug flags.
 #define DBGRENDER   0x4000
 @
 
-Processing the command line looks for options and then sets the
-input file name\index{file name}.
+Next we define variables.
+Some of these variables go into {\tt hformat.c} because
+it enables us to reuse them in other programs.
+Some are common variables that are
+needed in all three programs defined here.
+And some variables are just local variables in the |main| program.
 
-@<define debug variables@>=
-printf("unsigned int debugflags=DBGNONE;\n");
+The variable |in_name| is not local to |main| because it is
+used in the function |hget_map| (see page\pageref{map}).
+The variable |stem_name| contains the name of the input file
+not including the extension. The space allocated for it
+is large enough to append an extension with up to five characters.
+It can be used with the extension {\tt .log} for the log file,
+with {\tt .HINT} or {\tt .hnt} for the output file,
+and with {\tt .abs} or {\tt .rel} when writing or reading the auxiliar sections.
+
+The {\tt stretch} program will overwrite the |stem_name|
+using the name of the output file if it is set with the {\tt -o}
+option.
+
+@<variables in {\tt hformat.c}@>=
+"unsigned int debugflags=DBGNONE;\n"
 @
 
 @<common variables@>=
 bool option_utf8=false;
 bool option_hex=false;
 bool option_force=false;
+bool option_global=false;
 bool option_compress=false;
 
-char in_name[MAX_NAME];
-
-@
-@<hint macros@>=
-#define MAX_NAME 1024
+char *in_name;
+char *stem_name;
+int stem_length=0;
 @
 
 @<local variables in |main|@>=
-char prog_name[MAX_NAME];
+char *prog_name;
 char *in_ext;
 char *out_ext;
 
-
-char stem_name[MAX_NAME], *out_name=NULL;
-int stem_length=0, path_length=0;
+char *file_name=NULL;
+int file_name_length=0;
 bool option_log=false;
 @ 
 
+Processing the command line looks for options and then sets the
+input file name\index{file name}.
+
 @<process the command line@>=
   debugflags=DBGBASIC;
-  strncpy(prog_name,argv[0],MAX_NAME);
+  prog_name=argv[0];
   if (argc < 2) goto explain_usage;
   argv++; /* skip the program name */
   while (*argv!=NULL)
@@ -7392,11 +7532,15 @@ bool option_log=false;
     { char option=(*argv)[1];
       switch(option)
       { default: goto explain_usage;
-        case 'o': argv++;@+ out_name=*argv;@+ break; 
+        case 'o': argv++;
+          file_name_length=(int)strlen(*argv);
+          ALLOCATE(file_name,file_name_length+6,char); /* extra space for extension */
+          strcpy(file_name,*argv);@+  break; 
         case 'l': option_log=true; @+break;
         case 'u': option_utf8=true;@+break;
         case 'x': option_hex=true;@+break;
         case 'f': option_force=true; @+break;
+        case 'g': option_global=true; @+break;
         case 'c': option_compress=true; @+break;
         case 'd': @/
           argv++; if (*argv==NULL) goto explain_usage;
@@ -7405,13 +7549,17 @@ bool option_log=false;
       }
     }
     else /* the input file name */
-    { int ext_length=(int)strlen(in_ext);
-      strncpy(in_name,*argv,MAX_NAME);
-      path_length=(int)strlen(in_name);
+    { int path_length=(int)strlen(*argv);
+      int ext_length=(int)strlen(in_ext);
+      ALLOCATE(in_name,path_length+ext_length+1,char);
+      strcpy(in_name,*argv);
       if (path_length<ext_length 
           || strncmp(in_name+path_length-ext_length,in_ext,ext_length)!=0)
-        strncat(in_name,in_ext,MAX_NAME-1);
-      stem_length=(int)strlen(in_name)-ext_length;
+      { strcat(in_name,in_ext);
+        path_length+=ext_length;
+      }
+      stem_length=path_length-ext_length;
+      ALLOCATE(stem_name,stem_length+6,char);
       strncpy(stem_name,in_name,stem_length);
       stem_name[stem_length]=0;
       if (*(argv+1)!=NULL) goto explain_usage;
@@ -7430,19 +7578,20 @@ and an output file |yyout| (which is not used).
 @<common variables@>=
 FILE *hin=NULL, *hout=NULL;
 @
-@<define debug variables@>=
-printf("FILE *hlog=NULL;\n");
+@<variables in {\tt hformat.c}@>=
+"FILE *hlog=NULL;\n"
 @
 
 The log file is opened first because
 this is the place where error messages\index{error message} 
 should go while the other files are opened.
+It inherits its name from the input file name.
 
 @<open the log file@> =
 #ifdef DEBUG
   if (option_log)
   { 
-    strncat(stem_name,".log",MAX_NAME);
+    strcat(stem_name,".log");
     hlog=freopen(stem_name,"w",stderr);
     if (hlog==NULL)
     { fprintf(stderr,"Unable to open logfile %s",stem_name);
@@ -7464,24 +7613,44 @@ Once we have established logging, we can try to open the other files.
 @
 
 @<open the output file@>=
-  if (out_name==NULL && out_ext!=NULL)
-  {  strncat(stem_name,out_ext,MAX_NAME);
-     out_name=stem_name;
+  if (file_name!=NULL)
+  { int ext_length=(int)strlen(out_ext);
+    if (file_name_length<=ext_length 
+          || strncmp(file_name+file_name_length-ext_length,out_ext,ext_length)!=0)
+    { strcat(file_name,out_ext); file_name_length+=ext_length; }
   }
-  hout=fopen(out_name,"wb");
-  if (hout==NULL) QUIT("Unable to open output file %s",out_name);
-  stem_name[stem_length]=0;
+  else
+  { file_name_length=stem_length+(int)strlen(out_ext);
+    ALLOCATE(file_name,file_name_length+1,char);
+    strcpy(file_name,stem_name);@+
+    strcpy(file_name+stem_length,out_ext);
+  }
+  @<make sure the path in |file_name| exists@>@;
+  hout=fopen(file_name,"wb");
+  if (hout==NULL) QUIT("Unable to open output file %s",file_name);
+@
+
+The {\tt stretch} program will replace the |stem_name| using the stem of the
+output file.
+@<determine the |stem_name| from the output |file_name|@>=
+stem_length=file_name_length-(int)strlen(out_ext);
+ALLOCATE(stem_name,stem_length+6,char);
+strncpy(stem_name,file_name,stem_length);
+stem_name[stem_length]=0;
 @
 
 At the very end, we will close the files again.
 @<close the input file@>=
+if (in_name!=NULL) free(in_name);
 if (hin!=NULL) fclose(hin);
 @
 @<close the output file@>=
+if (file_name!=NULL) free(file_name);
 if (hout!=NULL) fclose(hout);
 @
 @<close the log file@>=
 if (hlog!=NULL) fclose(hlog);
+if (stem_name!=NULL) free(stem_name);
 @
 
 
@@ -7499,7 +7668,7 @@ To print messages\index{message} or indicate errors, I define the following macr
 extern FILE *hlog;
 extern uint8_t *hpos, *hstart;
 #define @[LOG(...)@] @[(fprintf(hlog,__VA_ARGS__),fflush(hlog))@]
-#define @[MESSAGE(...)@] @[(fprintf(stderr,__VA_ARGS__),fflush(hlog))@]
+#define @[MESSAGE(...)@] @[(fprintf(hlog,__VA_ARGS__),fflush(hlog))@]
 #define @[QUIT(...)@]   (MESSAGE("ERROR: " __VA_ARGS__),fprintf(hlog,"\n"),exit(1))
 
 #endif
@@ -8385,6 +8554,7 @@ extern void hput_list_size(uint32_t n, int i);
 @(hput.c@>=
 #include "basetypes.h"
 #include <string.h>
+#include <ctype.h>
 #include <sys/stat.h>
 #include <zlib.h>
 #include "error.h"
@@ -8394,10 +8564,13 @@ extern void hput_list_size(uint32_t n, int i);
 uint8_t *hpos=NULL, *hstart=NULL, *hend=NULL;
 FILE *hout;
 int version=1, subversion=0;
-bool option_compress;
+bool option_compress=false;
+bool option_global=false;
 int next_range;
 range_pos_t *range_pos;
 int *page_on; 
+char *stem_name=NULL;
+int stem_length=0;
 
 
 @<directory functions@>@;
@@ -8502,6 +8675,7 @@ extern int yylex(void);
 @(shrink.c@>=
 #include "basetypes.h"
 #include <string.h>
+#include <ctype.h>
 #include <sys/stat.h>
 #include <zlib.h>
 #include "error.h"
@@ -8571,6 +8745,7 @@ format into a \HINT/ file in long format.
 #include "basetypes.h"
 #include <math.h>
 #include <string.h>
+#include <ctype.h>
 #include <zlib.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -8606,6 +8781,7 @@ int main(int argc, char *argv[])
   @<process the command line@>@;
   @<open the log file@>@;
   @<open the output file@>@;
+  @<determine the |stem_name| from the output |file_name|@>@;
   hget_map();
   hget_banner();
   hcheck_banner("hint");
@@ -8618,7 +8794,6 @@ int main(int argc, char *argv[])
   hget_unmap();
   @<close the output file@>@;
   @<close the log file@>@;
-
   return 0;
 explain_usage:
   @<explain usage@>@;
@@ -8670,7 +8845,7 @@ backwards.
 int main(int argc, char *argv[])
 { @<local variables in |main|@>@;
    in_ext=".hnt";
-   out_ext=NULL;
+   out_ext=".bak";
 
   @<process the command line@>@;
   @<open the log file@>@;

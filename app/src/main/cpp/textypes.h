@@ -12,7 +12,7 @@ enum{mem_max= 65534};
 enum{mem_min= 0};
 
 
-enum{buf_size= 1024};
+enum{buf_size= 2048};
 
 
 enum{error_line= 72};
@@ -22,26 +22,26 @@ enum{max_print_line= 79};
 enum{stack_size= 200};
 enum{max_in_open= 6};
 
-enum{font_max= 75};
+enum{font_max= 250};
 
-enum{font_mem_size= 20000};
+enum{font_mem_size= 65535};
 enum{param_size= 60};
-enum{nest_size= 40};
-enum{max_strings= 15000};
+enum{nest_size= 400};
+enum{max_strings= 30000};
 enum{string_vacancies= 75000};
 
 
-enum{pool_size= 200000};
+enum{pool_size= 400000};
 
 
 
 enum{save_size= 600};
 
-enum{trie_size= 20000};
+enum{trie_size= 65534};
 
-enum{trie_op_size= 500};
-enum{dvi_buf_size= 16384};
-enum{file_name_size= 255};
+enum{trie_op_size= 65534};
+enum{dvi_buf_size= 8};
+enum{file_name_size= 1024};
 /*:14*/
 #line 270 ".\\dummy.w"
 
@@ -63,26 +63,26 @@ typedef struct{FILE*f;text_char d;}alpha_file;
 typedef struct{FILE*f;eight_bits d;}byte_file;
 
 /*:30*//*43:*/
-#line 1147 ".\\dummy.w"
+#line 1174 ".\\dummy.w"
 
 typedef uint32_t pool_pointer;
 typedef uint16_t str_number;
 typedef uint8_t packed_ASCII_code;
 
 /*:43*//*109:*/
-#line 2226 ".\\dummy.w"
+#line 2253 ".\\dummy.w"
 
 typedef int scaled;
 typedef uint32_t nonnegative_integer;
 typedef uint8_t small_number;
 
 /*:109*//*119:*/
-#line 2421 ".\\dummy.w"
+#line 2448 ".\\dummy.w"
 
 typedef float32_t glue_ratio;
 
 /*:119*//*123:*/
-#line 2525 ".\\dummy.w"
+#line 2552 ".\\dummy.w"
 
 typedef uint8_t quarterword;
 typedef uint16_t halfword;
@@ -110,17 +110,17 @@ four_quarters qqqq;
 typedef struct{FILE*f;memory_word d;}word_file;
 
 /*:123*//*125:*/
-#line 2584 ".\\dummy.w"
+#line 2611 ".\\dummy.w"
 
 typedef halfword pointer;
 
 /*:125*//*163:*/
-#line 3255 ".\\dummy.w"
+#line 3282 ".\\dummy.w"
 
 typedef uint8_t glue_ord;
 
 /*:163*//*230:*/
-#line 4390 ".\\dummy.w"
+#line 4417 ".\\dummy.w"
 
 typedef struct{int16_t mode_field;
 pointer head_field,tail_field;
@@ -134,12 +134,12 @@ memory_word aux_field;
 }list_state_record;
 
 /*:230*//*288:*/
-#line 5970 ".\\dummy.w"
+#line 5997 ".\\dummy.w"
 
 typedef uint8_t group_code;
 
 /*:288*//*319:*/
-#line 6550 ".\\dummy.w"
+#line 6577 ".\\dummy.w"
 
 typedef struct{
 quarterword state_field,index_field;
@@ -147,28 +147,28 @@ halfword start_field,loc_field,limit_field,name_field;
 }in_state_record;
 
 /*:319*//*567:*/
-#line 10779 ".\\dummy.w"
+#line 10793 ".\\dummy.w"
 
 typedef uint8_t internal_font_number;
 typedef uint16_t font_index;
 
 /*:567*//*614:*/
-#line 11955 ".\\dummy.w"
+#line 11969 ".\\dummy.w"
 
-typedef uint16_t dvi_index;
+typedef uint8_t dvi_index;
 
 /*:614*//*956:*/
-#line 18166 ".\\dummy.w"
+#line 18180 ".\\dummy.w"
 
 typedef uint16_t trie_pointer;
 
 /*:956*//*961:*/
-#line 18232 ".\\dummy.w"
+#line 18246 ".\\dummy.w"
 
 typedef uint16_t hyph_pointer;
 
 /*:961*//*1004:*/
-#line 18913 ".\\dummy.w"
+#line 18927 ".\\dummy.w"
 
 
 typedef struct{

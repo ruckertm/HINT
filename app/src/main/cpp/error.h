@@ -41,7 +41,7 @@ extern void herror(char*title,char*msg);
 #endif
 
 #ifndef ERROR_MESSAGE
-#define ERROR_MESSAGE        fprintf(stderr,"ERROR: %s",herror_string)
+#define ERROR_MESSAGE        fprintf(stderr,"ERROR: %s\n",herror_string)
 #endif
 
 #ifndef QUIT

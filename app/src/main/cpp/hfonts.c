@@ -1,5 +1,5 @@
 /*296:*/
-#line 5556 "hint.w"
+#line 5569 "hint.w"
 
 #include "basetypes.h"
 #include "error.h"
@@ -13,7 +13,7 @@
 #define STBTT_STATIC
 #include "stb_truetype.h"
 /*:269*/
-#line 5562 "hint.w"
+#line 5575 "hint.w"
 
 #include "hfonts.h"
 #include "hrender.h"
@@ -28,7 +28,7 @@ static font_t*fonts[0x100]= {NULL};
 
 static gcache_t g_undefined= {0};
 /*:242*/
-#line 5567 "hint.w"
+#line 5580 "hint.w"
 
 
 /*271:*/
@@ -55,7 +55,7 @@ nativeSetTrueType(g);
 }
 
 /*:271*/
-#line 5569 "hint.w"
+#line 5582 "hint.w"
 
 
 /*268:*/
@@ -190,7 +190,7 @@ return 1;
 }
 
 /*:268*/
-#line 5571 "hint.w"
+#line 5584 "hint.w"
 
 
 /*236:*/
@@ -443,7 +443,7 @@ nativeGlyph(SP2PT(x)-dx,SP2PT(y)-dy,w,h,g);
 }
 
 /*:247*/
-#line 5573 "hint.w"
+#line 5586 "hint.w"
 
 
 /*:296*/

@@ -411,7 +411,7 @@ enum {@+@!mem_max=65534@+}; /*greatest index in \TeX's internal |mem| array;
 enum {@+@!mem_min=0@+}; /*smallest index in \TeX's internal |mem| array;
   must be |min_halfword| or more;
   must be equal to |mem_bot| in \.{INITEX}, otherwise | <= mem_bot|*/
-enum {@+@!buf_size=1024@+}; /*maximum number of characters simultaneously present in
+enum {@+@!buf_size=2048@+}; /*maximum number of characters simultaneously present in
   current lines of open files and in control sequences between
   \.{\\csname} and \.{\\endcsname}; must not exceed |max_halfword|*/
 enum {@+@!error_line=72@+}; /*width of context lines on terminal error messages*/
@@ -421,26 +421,26 @@ enum {@+@!max_print_line=79@+}; /*width of longest text lines output; should be 
 enum {@+@!stack_size=200@+}; /*maximum number of simultaneous input sources*/
 enum {@+@!max_in_open=6@+}; /*maximum number of input files and error insertions that
   can be going on simultaneously*/
-enum {@+@!font_max=75@+}; /*maximum internal font number; must not exceed |max_quarterword|
+enum {@+@!font_max=250@+}; /*maximum internal font number; must not exceed |max_quarterword|
   and must be at most |font_base+256|*/
-enum {@+@!font_mem_size=20000@+}; /*number of words of |font_info| for all fonts*/
+enum {@+@!font_mem_size=65535@+}; /*number of words of |font_info| for all fonts*/
 enum {@+@!param_size=60@+}; /*maximum number of simultaneous macro parameters*/
-enum {@+@!nest_size=40@+}; /*maximum number of semantic levels simultaneously active*/
-enum {@+@!max_strings=15000@+}; /*maximum number of strings; must not exceed |max_halfword|*/
+enum {@+@!nest_size=400@+}; /*maximum number of semantic levels simultaneously active*/
+enum {@+@!max_strings=30000@+}; /*maximum number of strings; must not exceed |max_halfword|*/
 enum {@+@!string_vacancies=75000@+}; /*the minimum number of characters that should be
   available for the user's control sequences and font names,
   after \TeX's own error messages are stored*/
-enum {@+@!pool_size=200000@+}; /*maximum number of characters in strings, including all
+enum {@+@!pool_size=400000@+}; /*maximum number of characters in strings, including all
   error messages and help texts, and the names of all fonts and
   control sequences; must exceed |string_vacancies| by the total
   length of \TeX's own strings, which is currently about 23000*/
 enum {@+@!save_size=600@+}; /*space for saving values outside of current group; must be
   at most |max_halfword|*/
-enum {@+@!trie_size=20000@+}; /*space for hyphenation patterns; should be larger for
+enum {@+@!trie_size=65534@+}; /*space for hyphenation patterns; should be larger for
   \.{INITEX} than it is in production versions of \TeX*/
-enum {@+@!trie_op_size=500@+}; /*space for ``opcodes'' in the hyphenation patterns*/
-enum {@+@!dvi_buf_size=16384@+}; /*size of the output buffer; must be a multiple of 8*/
-enum {@+@!file_name_size=255@+}; /*file names shouldn't be longer than this*/
+enum {@+@!trie_op_size=65534@+}; /*space for ``opcodes'' in the hyphenation patterns*/
+enum {@+@!dvi_buf_size=8@+}; /*size of the output buffer; must be a multiple of 8*/
+enum {@+@!file_name_size=1024@+}; /*file names shouldn't be longer than this*/
 @ @<Global variables@>=
 const char *@!pool_name="TeXformats:TEX.POOL                     ";
    /*string of length |file_name_size|; tells where the string pool appears*/
@@ -467,7 +467,7 @@ emphasize this distinction.
 @d hash_size	15000 /*maximum number of control sequences; it should be at most
   about |(mem_max-mem_min)/(double)10|*/
 @d hash_prime	12721 /*a prime number equal to about 85\pct! of |hash_size|*/
-@d hyph_size	307 /*another prime; the number of \.{\\hyphenation} exceptions*/
+@d hyph_size	607 /*another prime; the number of \.{\\hyphenation} exceptions*/
 @^system dependencies@>
 
 @ In case somebody has inadvertently made bad settings of the ``constants,''
@@ -806,7 +806,7 @@ implement \TeX\ can open a file whose external name is specified by
 @<Glob...@>=
 uint8_t @!name_of_file0[file_name_size+1]={0}, *const @!name_of_file = @!name_of_file0-1;@;@/
    /*on some systems this may be a \&{record} variable*/
-uint8_t @!name_length;@/ /*this many characters are actually
+uint16_t @!name_length;@/ /*this many characters are actually
   relevant in |name_of_file| (the rest are blank)*/
 
 @ The \ph\ compiler with which the present version of \TeX\ was prepared has
@@ -835,19 +835,24 @@ cannot be found, or if such a file cannot be opened for some other reason
 @d reset_OK(X)	erstat(X)==0
 @d rewrite_OK(X)	erstat(X)==0
 
-@p bool a_open_in(alpha_file *f)
-   /*open a text file for input*/
-{@+reset((*f), name_of_file,"r");return reset_OK((*f));
-}
+@p extern FILE *ktex_open_txt(uint8_t *str);
+
+bool a_open_in(alpha_file *f) /*open a text file for input*/
+{@+f->f= ktex_open_txt(name_of_file+1);
+   if (f->f!=NULL) get(*f);
+   return reset_OK((*f));}
 @#
 bool a_open_out(alpha_file *f)
    /*open a text file for output*/
 {@+rewrite((*f), name_of_file,"w");return rewrite_OK((*f));
 }
 @#
-bool b_open_in(byte_file *f)
-   /*open a binary file for input*/
-{@+reset((*f), name_of_file,"rb");return reset_OK((*f));
+extern FILE *ktex_open_tfm(uint8_t *str);
+
+bool b_open_in(byte_file *f)   /*open a binary file for input*/
+{@+f->f= ktex_open_tfm(name_of_file+1);
+   if (f->f!=NULL) get(*f);
+   return reset_OK((*f));
 }
 @#
 bool b_open_out(byte_file *f)
@@ -855,9 +860,12 @@ bool b_open_out(byte_file *f)
 {@+rewrite((*f), name_of_file,"wb");return rewrite_OK((*f));
 }
 @#
-bool w_open_in(word_file *f)
-   /*open a word file for input*/
-{@+reset((*f), name_of_file,"rb");return reset_OK((*f));
+extern FILE *ktex_open_fmt(uint8_t *str);
+
+bool w_open_in(word_file *f)   /*open a word file for input*/
+{@+f->f= ktex_open_fmt(name_of_file+1);
+   if (f->f!=NULL) get(*f);
+   return reset_OK((*f));
 }
 @#
 bool w_open_out(word_file *f)
@@ -949,7 +957,26 @@ code uses standard \PASCAL\ to illustrate what needs to be done, but
 finer tuning is often possible at well-developed \PASCAL\ sites.
 @^inner loop@>
 
-@p bool input_ln(alpha_file *f, bool @!bypass_eoln)
+@p
+extern void ktex_program_name(char *p);
+extern bool ktex_init(int argc,char *argv[]);
+
+static void input_add_char(unsigned int c)
+{ if (last >= max_buf_stack)
+  {@+max_buf_stack=last+1;
+     if (max_buf_stack==buf_size)
+       @<Report overflow of the input buffer, and abort@>;
+  }
+  buffer[last]=xord[c];incr(last);
+}
+
+void input_add_arg(char *str)
+{ if (last>first && buffer[last-1]!=' ')
+    input_add_char(' ');
+  while (*str!=0) input_add_char(*str++);
+}
+
+bool input_ln(alpha_file *f, bool @!bypass_eoln)
    /*inputs the next line or returns |false|*/
 {@+uint16_t last_nonblank; /*|last| with trailing blanks removed*/
 if (bypass_eoln) if (!eof((*f))) get((*f));
@@ -4417,8 +4444,8 @@ typedef struct { int16_t @!mode_field;@+
 
 @<List variables@>=
 list_state_record @!nest[nest_size+1];
-uint8_t @!nest_ptr; /*first unused location of |nest|*/
-uint8_t @!max_nest_stack; /*maximum of |nest_ptr| when pushing*/
+uint16_t @!nest_ptr; /*first unused location of |nest|*/
+uint16_t @!max_nest_stack; /*maximum of |nest_ptr| when pushing*/
 list_state_record @!cur_list; /*the ``top'' semantic state*/
 int16_t @!shown_mode; /*most recent mode shown by \.{\\tracingcommands}*/
 
@@ -7195,7 +7222,10 @@ scanner_status=normal;warning_index=null;first=1;
 state=new_line;start=1;index=0;line=0;name=0;
 force_eof=false;
 align_state=1000000;@/
-if (!init_terminal()) exit(0);
+loc=last=first;
+ktex_program_name(argv[0]);
+argv++; argc--;
+if (!ktex_init(argc, argv) && !init_terminal()) exit(0);
 limit=last;first=last+1; /*|init_terminal| has set |loc| and |last|*/
 }
 
@@ -8439,7 +8469,7 @@ the internal quantity to be scanned; an error will be signalled if
 @p void scan_something_internal(small_number @!level, bool @!negative)
    /*fetch an internal parameter*/
 {@+halfword m; /*|chr_code| part of the operand token*/
-uint8_t @!p; /*index into |nest|*/
+uint16_t @!p; /*index into |nest|*/
 m=cur_chr;
 switch (cur_cmd) {
 case def_code: @<Fetch a character code from some table@>@;@+break;
@@ -10223,21 +10253,10 @@ if (buffer[loc]=='&')
   while (buffer[j]!=' ') incr(j);
   pack_buffered_name(0, loc, j-1); /*try first without the system file area*/
   if (w_open_in(&fmt_file)) goto found;
-  pack_buffered_name(format_area_length, loc, j-1);
-     /*now try the system format file area*/
-  if (w_open_in(&fmt_file)) goto found;
   wake_up_terminal;
-  wterm_ln("Sorry, I can't find that format; will try PLAIN.");
+  wterm_ln("Sorry, I can't find that format.");
 @.Sorry, I can't find...@>
   update_terminal;
-  }
-   /*now pull out all the stops: try for the system \.{plain} file*/
-pack_buffered_name(format_default_length-format_ext_length, 1, 0);
-if (!w_open_in(&fmt_file))
-  {@+wake_up_terminal;
-  wterm_ln("I can't find the PLAIN format file!");
-@.I can't find PLAIN...@>
-@.plain@>
   return false;
   }
 found: loc=j;return true;
@@ -10442,14 +10461,9 @@ when an `\.{\\input}' command is being processed.
 @p void start_input(void) /*\TeX\ will \.{\\input} something*/
 {@+
 scan_file_name(); /*set |cur_name| to desired file name*/
-if (cur_ext==empty_string) cur_ext=@[@<|".tex"|@>@];
 pack_cur_name;
 loop@+{@+begin_file_reading(); /*set up |cur_file| and new level of input*/
   if (a_open_in(&cur_file)) goto done;
-  if (cur_area==empty_string)
-    {@+pack_file_name(cur_name, TEX_area, cur_ext);
-    if (a_open_in(&cur_file)) goto done;
-    }
   end_file_reading(); /*remove the level that didn't work*/
   prompt_file_name("input file name",@[@<|".tex"|@>@]);
   }
@@ -11953,7 +11967,7 @@ the next byte to be generated will be number |dvi_offset+dvi_ptr|.
 A byte is present in the buffer only if its number is | >= dvi_gone|.
 
 @<Types...@>=
-typedef uint16_t dvi_index; /*an index into the output buffer*/
+typedef uint8_t dvi_index; /*an index into the output buffer*/
 
 @ Some systems may find it more efficient to make |dvi_buf| a ||
 array, since output of four bytes at once may be facilitated.
@@ -18463,7 +18477,7 @@ of patterns.
 @<Declare procedures for preprocessing hyph...@>=
 quarterword new_trie_op(small_number @!d, small_number @!n, quarterword @!v)
 {@+
-int16_t h; /*trial hash location*/
+int32_t h; /*trial hash location*/
 quarterword @!u; /*trial op code*/
 uint16_t @!l; /*pointer to stored data*/
 h=abs(n+313*d+361*v+1009*cur_lang)%(trie_op_size+trie_op_size)
@@ -23248,7 +23262,7 @@ else{@+c=cur_chr;scan_optional_equals();
 
 @ @<Declare subprocedures for |prefixed_command|@>=
 void alter_prev_graf(void)
-{@+uint8_t p; /*index into |nest|*/
+{@+uint16_t p; /*index into |nest|*/
 nest[nest_ptr]=cur_list;p=nest_ptr;
 while (abs(nest[p].mode_field)!=vmode) decr(p);
 scan_optional_equals();scan_int();
@@ -24312,7 +24326,7 @@ The initial test involving |ready_already| should be deleted if the
 \PASCAL\ runtime system is smart enough to detect such a ``mistake.''
 @^system dependencies@>
 
-@p int main(void) {@! /*|start_here|*/
+@p int main(int argc, char *argv[]) {@!@t\2\2@>@/ /*|start_here|*/
 history=fatal_error_stop; /*in case we quit during initialization*/
 t_open_out; /*open the terminal for output*/
 if (ready_already==314159) goto start_of_TEX;

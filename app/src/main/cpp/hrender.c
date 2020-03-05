@@ -1,5 +1,5 @@
 /*294:*/
-#line 5529 "hint.w"
+#line 5542 "hint.w"
 
 #include <math.h> 
 #include "texextern.h"
@@ -19,7 +19,7 @@ extern struct font_s*hget_font(unsigned char f);
 
 extern void render_char(int x,int y,struct font_s*f,int32_t s,uint32_t cc);
 /*:248*/
-#line 5538 "hint.w"
+#line 5551 "hint.w"
 
 
 /*222:*/
@@ -31,7 +31,7 @@ int page_v,page_h,offset_v,offset_h;
 
 static bool forward_mode= false,backward_mode= false;
 /*:227*/
-#line 5540 "hint.w"
+#line 5553 "hint.w"
 
 /*223:*/
 #line 3740 "hint.w"
@@ -549,6 +549,6 @@ else
 hlist_render(stream[0].p);
 }
 /*:254*/
-#line 5541 "hint.w"
+#line 5554 "hint.w"
 
 /*:294*/

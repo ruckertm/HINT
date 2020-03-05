@@ -27,8 +27,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 1851 ${}$}
-\def\lastdate{${}$Date: 2020-02-25 15:16:08 +0100 (Tue, 25 Feb 2020) ${}$}
+\def\lastrevision{${}$Revision: 1872 ${}$}
+\def\lastdate{${}$Date: 2020-03-05 17:15:08 +0100 (Thu, 05 Mar 2020) ${}$}
 
 \input titlepage.tex
 
@@ -2818,7 +2818,7 @@ We conclude the section with the external declarations and necessary macros.
 extern void list_init(void);
 extern list_state_record cur_list;
 extern list_state_record nest[];
-extern uint8_t nest_ptr;
+extern uint16_t nest_ptr;
 extern void push_nest(void);
 extern void pop_nest(void);
 @
@@ -5173,7 +5173,7 @@ extern void herror(char *title, char *msg);
 #endif
 
 #ifndef ERROR_MESSAGE
-#define ERROR_MESSAGE        fprintf(stderr,"ERROR: %s",herror_string)   
+#define ERROR_MESSAGE        fprintf(stderr,"ERROR: %s\n",herror_string)   
 #endif
 
 #ifndef QUIT
@@ -5230,18 +5230,24 @@ the \TeX\ library and the \HINT/ library. Here is the main program:
 @<test functions@>@;
 
 int main(int argc, char *argv[])
-{ char stem_name[MAX_NAME];
-  int stem_length=0, path_length=0;
+{ char *stem_name=NULL;
+  int stem_length=0;
   bool option_log=false;
-
-  @<process the command line@>@;
-  @<open the log file@>@;
-  hint_begin();
-  while (hint_forward())
-    @<show the page@>@;
-  hint_end();
-  @<close the log file@>@;
-  return 0;
+  HINT_TRY {
+    @<process the command line@>@;
+    @<open the log file@>@;
+    hint_begin();
+    while (hint_forward())
+      @<show the page@>@;
+    hint_end();
+    @<close the log file@>@;
+    return 0;
+explain_usage:
+    @<explain usage@>@;
+    return 1;
+  }
+  else
+    return 1;
 }
 @
 \goodbreak
@@ -5250,32 +5256,34 @@ Processing of the command line is straight forward:
 
 @<process the command line@>=
   debugflags=DBGBASIC;
-  strncpy(prog_name,argv[0],MAX_NAME);
-  if (argc < 2) usage();
+  if (argc < 2) goto explain_usage;
   argv++; /* skip the program name */
   while (*argv!=NULL)
   { if ((*argv)[0]=='-')
     { char option=(*argv)[1];
       switch(option)
-      {
-        case 'l': option_log=true; @+break;
+      { case 'l': option_log=true; @+break;
         case 'd': @/
-          argv++; if (*argv==NULL) usage();
+          argv++; if (*argv==NULL) goto explain_usage;
           debugflags=strtol(*argv,NULL,16);
           break;
-        default: usage();
+        default: goto explain_usage;
       }
     }
     else /* the input file name */
-    { strncpy(in_name,*argv,MAX_NAME);
-      path_length=(int)strlen(in_name);
-      if (path_length<4 
+    { int path_length=(int)strlen(*argv);
+      ALLOCATE(in_name,path_length+6,char);
+      strcpy(in_name,*argv);
+       if (path_length<4 
           || strncmp(in_name+path_length-4,".hnt",4)!=0)
-        strncat(in_name,".hnt",MAX_NAME-1);
-      stem_length=(int)strlen(in_name)-4;
+      { strcat(in_name,".hnt");
+        path_length+=4;
+      }
+      stem_length=path_length-4;
+      ALLOCATE(stem_name,stem_length+6,char);
       strncpy(stem_name,in_name,stem_length);
       stem_name[stem_length]=0;
-      if (*(argv+1)!=NULL) usage();
+      if (*(argv+1)!=NULL) goto explain_usage;
     }
     argv++;
   }
@@ -5283,10 +5291,9 @@ Processing of the command line is straight forward:
 
 The |usage| function explains command line\index{command line} 
 parameters and options\index{option}\index{debugging}.
-@<test functions@>=
-void usage(void)
- { fprintf(stderr,
-  "Usage: %s [options] filename.hnt\n",prog_name);@/
+@<explain usage@>=
+  fprintf(stderr,
+  "Usage: %s [options] filename.hnt\n",argv[0]);@/
   fprintf(stderr,
   "Options:\n"@/
   "\t -l     \t redirect stdout to a log file\n");@/
@@ -5300,8 +5307,6 @@ fprintf(stderr,"\t\t\t XX=%03X   range debugging\n",DBGRANGE);@/
 fprintf(stderr,"\t\t\t XX=%03X   compression debugging\n", DBGCOMPRESS);@/
 fprintf(stderr,"\t\t\t XX=%03X   buffer debugging\n", DBGBUFFER);@/
 #endif
-exit(1);
-}
 @
 
 Processing the command line looks for options and then sets the
@@ -5310,18 +5315,22 @@ input file name\index{file name}.
 The log file gets the extension {\tt .hlg}, short for \HINT/ log file.
 
 @<open the log file@> =
+#ifdef DEBUG
   if (option_log)
   { 
-    strncat(stem_name,".hlg",MAX_NAME);
+    strcat(stem_name,".hlg");
     hlog=freopen(stem_name,"w",stdout);
     if (hlog==NULL)
-    { fprintf(stderr,"Unable to open logfile %s",stem_name);
-      hlog=stdout;
+    { fprintf(stderr,"Unable to open logfile %s\n",stem_name);
+      hlog=stderr;
     }
     stem_name[stem_length]=0;
   }
   else
-    hlog=stdout;
+    hlog=stderr;
+#else
+  hlog=stderr;
+#endif
 @
 
 
@@ -5344,9 +5353,7 @@ void hint_unmap(void)
 
 @<test variables@>=
 
-#define MAX_NAME 1024
-char prog_name[MAX_NAME];
-char in_name[MAX_NAME];
+char *in_name=NULL;
 int page_count=0;
 @
 
@@ -5382,18 +5389,24 @@ The following code  is similar to the code for the {\tt skip} program described 
 @<test functions@>@;
 
 int main(int argc, char *argv[])
-{ char stem_name[MAX_NAME];
-  int stem_length=0, path_length=0;
+{ char *stem_name=NULL;
+  int stem_length=0;
   bool option_log=false;
-
-  @<process the command line@>@;
-  @<open the log file@>@;
-  hint_begin();
-  hpos=hend;
-  while (hint_backward()) continue;
-  hint_end();
-  @<close the log file@>@;
-  return 0;
+  HINT_TRY {
+    @<process the command line@>@;
+    @<open the log file@>@;
+    hint_begin();
+    hpos=hend;
+    while (hint_backward()) continue;
+    hint_end();
+    @<close the log file@>@;
+    return 0;
+explain_usage:
+    @<explain usage@>@;
+    return 1;
+  }
+  else
+    return 1;
 }
 
 @
