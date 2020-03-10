@@ -16,5 +16,4 @@
         android:layout_height="wrap_content"
         android:background="@color/toolbar_color"/>
 
-
 </FrameLayout>

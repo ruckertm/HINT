@@ -136,6 +136,8 @@ public class HINTVIEWActivity extends AppCompatActivity {
 
     public static void hideToolbar(View view, boolean toolbarVisible) {
         toolbar.setTranslationY(toolbarVisible ? 0 : -toolbar.getHeight());
+        Log.w("HINTVIEWActivity", "toolbar translation " + toolbar.getTranslationY());
+        toolbar.requestTransparentRegion(toolbar);
         // hide Nav- & Status-bar
         view.setSystemUiVisibility(toolbarVisible ?
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -197,6 +199,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
                 final boolean toolbarVisible = savedInstanceState.getBoolean("toolbarVisible");
                 darkMode = savedInstanceState.getBoolean("darkMode");
                 TeXzoom = savedInstanceState.getBoolean("TeXzoom");
+                mView.setZoom(TeXzoom);
                 hideToolbar(mView, toolbarVisible);
             }
         }, 80);
