@@ -99,23 +99,25 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_init(JNIEnv *env, jclass obj) {
 
 int fd=-1;
 static size_t hbase_size;
-extern "C" void hint_map(void)
-{ struct stat st;
-    if (fd<0) QUIT("Unable to open file");
-    if (fstat(fd, &st)<0) QUIT("Unable to get file size");
-    hbase_size=st.st_size;
-    hbase=(uint8_t *) mmap(NULL,hbase_size,PROT_READ,MAP_PRIVATE,fd, 0);
-    if (hbase==MAP_FAILED) QUIT("Unable to map file into memory");
+extern "C" void hint_map(void) {
+    struct stat st;
+    HINT_TRY {
+    if (fd < 0) QUIT("Unable to open file");
+    if (fstat(fd, &st) < 0) QUIT("Unable to get file size");
+    hbase_size = st.st_size;
+    hbase = (uint8_t *) mmap(NULL, hbase_size, PROT_READ, MAP_PRIVATE, fd, 0);
+    if (hbase == MAP_FAILED) QUIT("Unable to map file into memory");
     close(fd);
-    hpos=hstart=hbase;
-    hend=hstart+hbase_size;
+    hpos = hstart = hbase;
+    hend = hstart + hbase_size;
+  }
 }
 
-extern "C" void hint_unmap(void)
-{  munmap(hbase,hbase_size);
-    hbase=NULL;
-    hpos=hstart=hend=NULL;
-
+extern "C" void hint_unmap(void) {
+    if (hbase != NULL)
+        munmap(hbase, hbase_size);
+    hbase = NULL;
+    hpos = hstart = hend = NULL;
 }
 
 
@@ -156,9 +158,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jclass obj) {
     LOGI("draw\n");
-    HINT_TRY {
-        hint_render();
-    }
+    HINT_TRY hint_render();
 }
 
 extern "C" JNIEXPORT void JNICALL
