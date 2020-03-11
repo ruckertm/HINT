@@ -59,24 +59,12 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
     private boolean darkMode = false;
     private boolean TeXzoom = false;
 
-
-    private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 2;
     private static final int FILE_CHOOSER_REQUEST_CODE = 0x01;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        //check if storage permissions are there
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 2;
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                    MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
-        }
 
         setContentView(R.layout.activity_hintview);
 
@@ -173,8 +161,6 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
         toolbar.setBackgroundColor(toolbar_color);
         toolbar.setTitleTextColor(text_color);
         setOverflowButtonColor(text_color);
-
-        //toolbar.bringToFront();
     }
 
     private void setOverflowButtonColor(final int color) {
@@ -347,26 +333,7 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE) {
-            // If request is cancelled, the result arrays are empty.
-            if (grantResults.length < 1
-                    || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                //continue asking for permissions until granted
-                Toast.makeText(this, "Permission required to access files!", Toast.LENGTH_LONG).show();
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                        MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
-            }
-        }
-    }
-
+    
     @Override
     public void onRenderErrorCallback(String errMsg) {
         Toast.makeText(this, errMsg, Toast.LENGTH_LONG).show();
