@@ -379,6 +379,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         private final Context context;
         private String fileUriStr;
         private long pos;
+        private RenderErrorCallback renderErrorCallback;
 
         Renderer(Context context) {
             this.context = context;
@@ -389,7 +390,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
             String msg = HINTVIEWLib.error();
             if (msg != null) {
                 Log.w(TAG, "Error in renderer: " + msg + "!");
-                Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
+                //Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
                 this.fileUriStr = null;
                 this.pos = 0;
                 return false;
@@ -398,7 +399,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         }
 
 
-        public void setFile(String fileUriStr, long pos) {
+        public void setFile(String fileUriStr, long pos) throws java.lang.SecurityException{
             if (fileUriStr != null)
                 try {   //Gets called every time, after app gets maximized. So passing just the fileDescriptor to the renderer will result in an error
                     //bc it got already closed in the cpp code
@@ -411,10 +412,8 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
                     HINTVIEWLib.begin(fd);
                     if (render_OK()) {
                         HINTVIEWLib.setPos(pos);
-                        if (render_OK()) {
-                            this.fileUriStr = fileUriStr;
-                            this.pos = pos;
-                        }
+                        this.fileUriStr = fileUriStr;
+                        this.pos = pos;
                     }
                     pfd.close();
                 } catch (FileNotFoundException e) {
@@ -433,6 +432,13 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
 
         public String getFileUriStr() {
             return fileUriStr;
+        }
+
+        public void setRenderErrorCallback(RenderErrorCallback renderErrorCallback){
+            this.renderErrorCallback = renderErrorCallback;
+        }
+        public RenderErrorCallback getRenderErrorCallback (){
+            return renderErrorCallback;
         }
 
         public void onDrawFrame(GL10 gl) {
@@ -470,6 +476,10 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
             HINTVIEWLib.init();
             render_OK();
+        }
+
+        interface RenderErrorCallback{
+            public void renderErrorCallbackOccurred(String errMsg);
         }
 
     }

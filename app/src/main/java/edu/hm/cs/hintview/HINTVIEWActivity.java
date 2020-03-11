@@ -27,6 +27,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Messenger;
 import android.print.PrintManager;
 import android.util.Log;
 import android.view.Menu;
@@ -46,7 +47,10 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-public class HINTVIEWActivity extends AppCompatActivity {
+import static edu.hm.cs.hintview.HINTVIEWView.*;
+import static java.security.AccessController.getContext;
+
+public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.Renderer.RenderErrorCallback {
 
     private HINTVIEWView mView;
     private static Toolbar toolbar;
@@ -86,7 +90,6 @@ public class HINTVIEWActivity extends AppCompatActivity {
             filePos = sharedPref.getLong("curPos", 0);
         double scale = sharedPref.getFloat("textSize", (float) 1.0);
         darkMode = sharedPref.getBoolean("darkMode", false);
-        TeXzoom = sharedPref.getBoolean("TeXzoom", false);
 
         mView = findViewById(R.id.hintview);
         mView.setOnClickListener(new View.OnClickListener() {
@@ -100,7 +103,11 @@ public class HINTVIEWActivity extends AppCompatActivity {
 
 
         mView.init();
-        mView.setFile(fileUriStr, filePos);
+        try {
+            mView.setFile(fileUriStr, filePos);
+        } catch (java.lang.SecurityException e) {
+            openFileChooser();
+        }
         mView.setScale(scale);
         mView.setMode(darkMode);
         mView.setZoom(TeXzoom);
@@ -319,6 +326,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
         printManager.print(jobName, adapter, null); //
     }
 
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -329,6 +337,9 @@ public class HINTVIEWActivity extends AppCompatActivity {
                 mView.setFile(data.getData().toString(), 0);
             } catch (FileNotFoundException e) {
                 Log.e("", "", e);
+                openFileChooser();
+            } catch (java.lang.SecurityException e) {
+                //no permissions after restart of the device
                 openFileChooser();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -354,5 +365,10 @@ public class HINTVIEWActivity extends AppCompatActivity {
                         MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
             }
         }
+    }
+
+    @Override
+    public void renderErrorCallbackOccurred(String errMsg) {
+        Toast.makeText(this, errMsg, Toast.LENGTH_LONG).show();
     }
 }
