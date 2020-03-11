@@ -368,7 +368,7 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
     }
 
     @Override
-    public void renderErrorCallbackOccurred(String errMsg) {
+    public void onRenderErrorCallback(String errMsg) {
         Toast.makeText(this, errMsg, Toast.LENGTH_LONG).show();
     }
 }

@@ -390,6 +390,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
             String msg = HINTVIEWLib.error();
             if (msg != null) {
                 Log.w(TAG, "Error in renderer: " + msg + "!");
+                renderErrorCallback.onRenderErrorCallback(msg);
                 //Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
                 this.fileUriStr = null;
                 this.pos = 0;
@@ -434,13 +435,6 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
             return fileUriStr;
         }
 
-        public void setRenderErrorCallback(RenderErrorCallback renderErrorCallback){
-            this.renderErrorCallback = renderErrorCallback;
-        }
-        public RenderErrorCallback getRenderErrorCallback (){
-            return renderErrorCallback;
-        }
-
         public void onDrawFrame(GL10 gl) {
             HINTVIEWLib.setMode(darkMode);
             HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi); /* needed for zooming */
@@ -478,8 +472,8 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
             render_OK();
         }
 
-        interface RenderErrorCallback{
-            public void renderErrorCallbackOccurred(String errMsg);
+        public interface RenderErrorCallback{
+            public void onRenderErrorCallback(String errMsg);
         }
 
     }
