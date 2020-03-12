@@ -382,7 +382,9 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         private RenderErrorCallback renderErrorCallback;
 
         Renderer(Context context) {
+
             this.context = context;
+            renderErrorCallback = (RenderErrorCallback) context;
         }
 
 

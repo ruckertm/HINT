@@ -16,18 +16,15 @@
 
 package edu.hm.cs.hintview;
 
-import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Messenger;
 import android.print.PrintManager;
 import android.util.Log;
 import android.view.Menu;
@@ -40,15 +37,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import static edu.hm.cs.hintview.HINTVIEWView.*;
-import static java.security.AccessController.getContext;
 
 public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.Renderer.RenderErrorCallback {
 
@@ -333,7 +326,7 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
         }
     }
 
-    
+
     @Override
     public void onRenderErrorCallback(String errMsg) {
         Toast.makeText(this, errMsg, Toast.LENGTH_LONG).show();
