@@ -390,7 +390,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
             if (msg != null) {
                 Log.w(TAG, "Error in renderer: " + msg + "!");
                 //Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
-                this.fileUriStr = null;
+II                this.fileUriStr = null;
                 this.pos = 0;
                 return false;
             } else

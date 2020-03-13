@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package edu.hm.cs.hintview;
+package edu.hm.cs.hintview;t
 
-import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -39,14 +37,13 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-public class HINTVIEWActivity extends AppCompatActivity {
+
+public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.Renderer.RenderErrorCallback {
 
     private HINTVIEWView mView;
     private static Toolbar toolbar;
@@ -55,24 +52,12 @@ public class HINTVIEWActivity extends AppCompatActivity {
     private boolean darkMode = false;
     private boolean TeXzoom = false;
 
-
-    private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 2;
     private static final int FILE_CHOOSER_REQUEST_CODE = 0x01;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        //check if storage permissions are there
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 2;
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                    MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
-        }
 
         setContentView(R.layout.activity_hintview);
 
@@ -86,7 +71,6 @@ public class HINTVIEWActivity extends AppCompatActivity {
             filePos = sharedPref.getLong("curPos", 0);
         double scale = sharedPref.getFloat("textSize", (float) 1.0);
         darkMode = sharedPref.getBoolean("darkMode", false);
-        TeXzoom = sharedPref.getBoolean("TeXzoom", false);
 
         mView = findViewById(R.id.hintview);
         mView.setOnClickListener(new View.OnClickListener() {
@@ -100,7 +84,11 @@ public class HINTVIEWActivity extends AppCompatActivity {
 
 
         mView.init();
-        mView.setFile(fileUriStr, filePos);
+        try {
+            mView.setFile(fileUriStr, filePos);
+        } catch (java.lang.SecurityException e) {
+            openFileChooser();
+        }
         mView.setScale(scale);
         mView.setMode(darkMode);
         mView.setZoom(TeXzoom);
@@ -166,8 +154,6 @@ public class HINTVIEWActivity extends AppCompatActivity {
         toolbar.setBackgroundColor(toolbar_color);
         toolbar.setTitleTextColor(text_color);
         setOverflowButtonColor(text_color);
-
-        //toolbar.bringToFront();
     }
 
     private void setOverflowButtonColor(final int color) {
@@ -319,6 +305,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
         printManager.print(jobName, adapter, null); //
     }
 
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -330,29 +317,18 @@ public class HINTVIEWActivity extends AppCompatActivity {
             } catch (FileNotFoundException e) {
                 Log.e("", "", e);
                 openFileChooser();
+            } catch (java.lang.SecurityException e) {
+                //no permissions after restart of the device
+                openFileChooser();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
+
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE) {
-            // If request is cancelled, the result arrays are empty.
-            if (grantResults.length < 1
-                    || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                //continue asking for permissions until granted
-                Toast.makeText(this, "Permission required to access files!", Toast.LENGTH_LONG).show();
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                        MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
-            }
-        }
+    public void onRenderErrorCallback(String errMsg) {
+        Toast.makeText(this, errMsg, Toast.LENGTH_LONG).show();
     }
 }
