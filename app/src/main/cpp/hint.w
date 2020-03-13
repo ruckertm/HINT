@@ -27,8 +27,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 1872 ${}$}
-\def\lastdate{${}$Date: 2020-03-05 17:15:08 +0100 (Thu, 05 Mar 2020) ${}$}
+\def\lastrevision{${}$Revision: 1877 ${}$}
+\def\lastdate{${}$Date: 2020-03-13 16:18:20 +0100 (Fri, 13 Mar 2020) ${}$}
 
 \input titlepage.tex
 
@@ -136,7 +136,9 @@ void hget_def_node(void)
 
 pointer hset_glue(glue_t *g)
 { if (ZERO_GLUE(*g)) 
-     return zero_glue;
+  { add_glue_ref(zero_glue); 
+    return zero_glue;
+  }
   else
   { pointer p=get_node(glue_spec_size);
     width(p)=g->w.w; /* we ignore the horizontal and vertical factor */
@@ -368,8 +370,8 @@ free(baseline_def); baseline_def=NULL;
 @<get functions@>=
 static void hget_baseline_def(uint8_t a, uint8_t n)
 { HGET_BASELINE(INFO(a));
-  baseline_def[n].bs=cur_bs;
-  baseline_def[n].ls=cur_ls;
+  baseline_def[n].bs=cur_bs;add_glue_ref(cur_bs);
+  baseline_def[n].ls=cur_ls;add_glue_ref(cur_ls);
   baseline_def[n].lsl=cur_lsl;
 }
 
@@ -406,8 +408,51 @@ extern void print_baseline_skip(int i);
 extern pointer happend_to_vlist(pointer b);
 @
 
+When we build pages from the bottom up, we need a routine similar to
+|happend_to_vlist| which is called |hprepend_to_vlist|.
+The name is actually a misnomer, because nodes are still added at the tail end of the
+vertical list. When we use this function, however, the first node in the vertical list
+is at the bottom of the page and the tail node is closer to the to the top of the page,
+so in a sense it is a previous node in reading-order.
+
+For |happend_to_vlist| we kee track of the depth of the last box and the latest baselineskip
+parameters on the current list. When we encounter a new box |b|, we insert a baselineskip
+that accounts for the height of box |b| and the depth of the previous box according to
+the lateste baselineskip information.
+For |hprepend_to_vlist| we kee track of the height of the last box and the latest baselineskip
+parameters on the current list. When we encounter a new box |b|, we insert a baselineskip
+that accounts for the depth of box |b| and the height of the previous box according to
+the lateste baselineskip information.
+
+
+
+@<get functions@>=
+static pointer hprepend_to_vlist(pointer @!b)
+{@+scaled d; /*deficiency of space between baselines*/ 
+pointer @!p=null; /*a new glue node*/ 
+
+if (needs_bs && prev_height > ignore_depth) 
+{@+d=width(cur_bs)-prev_height-depth(b);
+  if (d < cur_lsl) p=new_glue(cur_ls);
+  else{@+pointer q=new_spec(cur_bs);
+    width(q)=d; p=new_glue(q);glue_ref_count(q)=null;
+    } 
+  link(tail)=p;tail=p;
+  if (nest_ptr==0)
+    store_map(p,cur_list.bs_pos-hstart,0);
+  } 
+link(tail)=b;tail=b;prev_height=height(b);
+cur_list.bs_pos=NULL;
+return p;
+} 
+@
+
+@<\HINT/ declarations@>=
+static pointer hprepend_to_vlist(pointer b);
+@
+
 The printing routine for whatsit nodes requires a function to print baseline skips. Since
-\HINT/ never allocates a baseline skip node. the following function will suffice:
+\HINT/ never allocates a baseline skip node, the following function will suffice:
 @<\HINT/ functions@>=
 void print_baseline_skip(int i)
 {}
@@ -1215,12 +1260,12 @@ case TAG(rule_kind,b111): @+ HGET_RULE(b111);	prev_depth=ignore_depth; break;
 @
 
 @<cases to teg content@>=
-case TAG(rule_kind,b000): @+ tail_append(hget_rule_ref(HTEG8));	prev_depth=ignore_depth; @+break;
-case TAG(rule_kind,b011): @+ HTEG_RULE(b011); 	prev_depth=ignore_depth; break;
-case TAG(rule_kind,b101): @+ HTEG_RULE(b101);	prev_depth=ignore_depth; break;
-case TAG(rule_kind,b001): @+ HTEG_RULE(b001);	prev_depth=ignore_depth; break;
-case TAG(rule_kind,b110): @+ HTEG_RULE(b110);	prev_depth=ignore_depth; break;
-case TAG(rule_kind,b111): @+ HTEG_RULE(b111);	prev_depth=ignore_depth; break;
+case TAG(rule_kind,b000): @+ tail_append(hget_rule_ref(HTEG8));	prev_height=ignore_depth; @+break;
+case TAG(rule_kind,b011): @+ HTEG_RULE(b011); 	prev_height=ignore_depth; break;
+case TAG(rule_kind,b101): @+ HTEG_RULE(b101);	prev_height=ignore_depth; break;
+case TAG(rule_kind,b001): @+ HTEG_RULE(b001);	prev_height=ignore_depth; break;
+case TAG(rule_kind,b110): @+ HTEG_RULE(b110);	prev_height=ignore_depth; break;
+case TAG(rule_kind,b111): @+ HTEG_RULE(b111);	prev_height=ignore_depth; break;
 @
 
 
@@ -1620,22 +1665,22 @@ case TAG(vbox_kind,b111): @+{HGET_BOX(b111);@+type(p)=vlist_node;@+happend_to_vl
 @
 
 @<cases to teg content@>=
-case TAG(hbox_kind,b000): @+{@+HTEG_BOX(b000);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hbox_kind,b001): @+{@+HTEG_BOX(b001);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hbox_kind,b010): @+{@+HTEG_BOX(b010);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hbox_kind,b011): @+{@+HTEG_BOX(b011);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hbox_kind,b100): @+{@+HTEG_BOX(b100);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hbox_kind,b101): @+{@+HTEG_BOX(b101);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hbox_kind,b110): @+{@+HTEG_BOX(b110);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hbox_kind,b111): @+{@+HTEG_BOX(b111);@+happend_to_vlist(p);@+}@+ break;
-case TAG(vbox_kind,b000): @+{HTEG_BOX(b000);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
-case TAG(vbox_kind,b001): @+{HTEG_BOX(b001);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
-case TAG(vbox_kind,b010): @+{HTEG_BOX(b010);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
-case TAG(vbox_kind,b011): @+{HTEG_BOX(b011);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
-case TAG(vbox_kind,b100): @+{HTEG_BOX(b100);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
-case TAG(vbox_kind,b101): @+{HTEG_BOX(b101);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
-case TAG(vbox_kind,b110): @+{HTEG_BOX(b110);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
-case TAG(vbox_kind,b111): @+{HTEG_BOX(b111);@+type(p)=vlist_node;@+happend_to_vlist(p);@+} @+ break;
+case TAG(hbox_kind,b000): @+{@+HTEG_BOX(b000);@+hprepend_to_vlist(p);@+}@+ break;
+case TAG(hbox_kind,b001): @+{@+HTEG_BOX(b001);@+hprepend_to_vlist(p);@+}@+ break;
+case TAG(hbox_kind,b010): @+{@+HTEG_BOX(b010);@+hprepend_to_vlist(p);@+}@+ break;
+case TAG(hbox_kind,b011): @+{@+HTEG_BOX(b011);@+hprepend_to_vlist(p);@+}@+ break;
+case TAG(hbox_kind,b100): @+{@+HTEG_BOX(b100);@+hprepend_to_vlist(p);@+}@+ break;
+case TAG(hbox_kind,b101): @+{@+HTEG_BOX(b101);@+hprepend_to_vlist(p);@+}@+ break;
+case TAG(hbox_kind,b110): @+{@+HTEG_BOX(b110);@+hprepend_to_vlist(p);@+}@+ break;
+case TAG(hbox_kind,b111): @+{@+HTEG_BOX(b111);@+hprepend_to_vlist(p);@+}@+ break;
+case TAG(vbox_kind,b000): @+{HTEG_BOX(b000);@+type(p)=vlist_node;@+hprepend_to_vlist(p);@+} @+ break;
+case TAG(vbox_kind,b001): @+{HTEG_BOX(b001);@+type(p)=vlist_node;@+hprepend_to_vlist(p);@+} @+ break;
+case TAG(vbox_kind,b010): @+{HTEG_BOX(b010);@+type(p)=vlist_node;@+hprepend_to_vlist(p);@+} @+ break;
+case TAG(vbox_kind,b011): @+{HTEG_BOX(b011);@+type(p)=vlist_node;@+hprepend_to_vlist(p);@+} @+ break;
+case TAG(vbox_kind,b100): @+{HTEG_BOX(b100);@+type(p)=vlist_node;@+hprepend_to_vlist(p);@+} @+ break;
+case TAG(vbox_kind,b101): @+{HTEG_BOX(b101);@+type(p)=vlist_node;@+hprepend_to_vlist(p);@+} @+ break;
+case TAG(vbox_kind,b110): @+{HTEG_BOX(b110);@+type(p)=vlist_node;@+hprepend_to_vlist(p);@+} @+ break;
+case TAG(vbox_kind,b111): @+{HTEG_BOX(b111);@+type(p)=vlist_node;@+hprepend_to_vlist(p);@+} @+ break;
 @
 
 @<get functions@>=
@@ -1738,23 +1783,23 @@ case TAG(vset_kind,b111): @+{@+pointer p;HGET_SET(b111); @+vset(p,sto,st,sho,sh,
 
 
 @<cases to teg content@>=
-case TAG(hset_kind,b000): @+{@+pointer p;HTEG_SET(b000); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+break;
-case TAG(hset_kind,b001): @+{@+pointer p;HTEG_SET(b001); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hset_kind,b010): @+{@+pointer p;HTEG_SET(b010); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hset_kind,b011): @+{@+pointer p;HTEG_SET(b011); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hset_kind,b100): @+{@+pointer p;HTEG_SET(b100); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hset_kind,b101): @+{@+pointer p;HTEG_SET(b101); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hset_kind,b110): @+{@+pointer p;HTEG_SET(b110); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(hset_kind,b111): @+{@+pointer p;HTEG_SET(b111); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;@#
+case TAG(hset_kind,b000): @+{@+pointer p;HTEG_SET(b000); @+hset(p,sto,st,sho,sh,x);@+hprepend_to_vlist(p);@+}@+break;
+case TAG(hset_kind,b001): @+{@+pointer p;HTEG_SET(b001); @+hset(p,sto,st,sho,sh,x);@+hprepend_to_vlist(p);@+}@+ break;
+case TAG(hset_kind,b010): @+{@+pointer p;HTEG_SET(b010); @+hset(p,sto,st,sho,sh,x);@+hprepend_to_vlist(p);@+}@+ break;
+case TAG(hset_kind,b011): @+{@+pointer p;HTEG_SET(b011); @+hset(p,sto,st,sho,sh,x);@+hprepend_to_vlist(p);@+}@+ break;
+case TAG(hset_kind,b100): @+{@+pointer p;HTEG_SET(b100); @+hset(p,sto,st,sho,sh,x);@+hprepend_to_vlist(p);@+}@+ break;
+case TAG(hset_kind,b101): @+{@+pointer p;HTEG_SET(b101); @+hset(p,sto,st,sho,sh,x);@+hprepend_to_vlist(p);@+}@+ break;
+case TAG(hset_kind,b110): @+{@+pointer p;HTEG_SET(b110); @+hset(p,sto,st,sho,sh,x);@+hprepend_to_vlist(p);@+}@+ break;
+case TAG(hset_kind,b111): @+{@+pointer p;HTEG_SET(b111); @+hset(p,sto,st,sho,sh,x);@+hprepend_to_vlist(p);@+}@+ break;@#
 
-case TAG(vset_kind,b000): @+{@+pointer p;HTEG_SET(b000); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(vset_kind,b001): @+{@+pointer p;HTEG_SET(b001); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(vset_kind,b010): @+{@+pointer p;HTEG_SET(b010); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(vset_kind,b011): @+{@+pointer p;HTEG_SET(b011); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(vset_kind,b100): @+{@+pointer p;HTEG_SET(b100); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(vset_kind,b101): @+{@+pointer p;HTEG_SET(b101); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(vset_kind,b110): @+{@+pointer p;HTEG_SET(b110); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
-case TAG(vset_kind,b111): @+{@+pointer p;HTEG_SET(b111); @+vset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+ break;
+case TAG(vset_kind,b000): @+{@+pointer p;HTEG_SET(b000); @+vset(p,sto,st,sho,sh,x);@+hprepend_to_vlist(p);@+}@+ break;
+case TAG(vset_kind,b001): @+{@+pointer p;HTEG_SET(b001); @+vset(p,sto,st,sho,sh,x);@+hprepend_to_vlist(p);@+}@+ break;
+case TAG(vset_kind,b010): @+{@+pointer p;HTEG_SET(b010); @+vset(p,sto,st,sho,sh,x);@+hprepend_to_vlist(p);@+}@+ break;
+case TAG(vset_kind,b011): @+{@+pointer p;HTEG_SET(b011); @+vset(p,sto,st,sho,sh,x);@+hprepend_to_vlist(p);@+}@+ break;
+case TAG(vset_kind,b100): @+{@+pointer p;HTEG_SET(b100); @+vset(p,sto,st,sho,sh,x);@+hprepend_to_vlist(p);@+}@+ break;
+case TAG(vset_kind,b101): @+{@+pointer p;HTEG_SET(b101); @+vset(p,sto,st,sho,sh,x);@+hprepend_to_vlist(p);@+}@+ break;
+case TAG(vset_kind,b110): @+{@+pointer p;HTEG_SET(b110); @+vset(p,sto,st,sho,sh,x);@+hprepend_to_vlist(p);@+}@+ break;
+case TAG(vset_kind,b111): @+{@+pointer p;HTEG_SET(b111); @+vset(p,sto,st,sho,sh,x);@+hprepend_to_vlist(p);@+}@+ break;
 @
 
 The function |hset| computes |glue_set(p)| of a hlist node
@@ -1867,19 +1912,19 @@ case TAG(vpack_kind,b101): @+{@+HGET_PACK(b101);@+ p=vpackage(p,x,m,d);@+happend
 case TAG(vpack_kind,b111): @+{@+HGET_PACK(b111);@+ p=vpackage(p,x,m,d);@+happend_to_vlist(p); @+} @+ break;
 @
 @<cases to teg content@>=
-case TAG(hpack_kind,b000): @+{@+HTEG_PACK(b000);@+ p=hpack(p,x,m);@+happend_to_vlist(p);@+} @+ break;
-case TAG(hpack_kind,b010): @+{@+HTEG_PACK(b010);@+ p=hpack(p,x,m);@+happend_to_vlist(p);@+} @+ break;
-case TAG(hpack_kind,b100): @+{@+HTEG_PACK(b100);@+ p=hpack(p,x,m);@+happend_to_vlist(p);@+} @+ break;
-case TAG(hpack_kind,b110): @+{@+HTEG_PACK(b110);@+ p=hpack(p,x,m);@+happend_to_vlist(p);@+} @+ break;@#
+case TAG(hpack_kind,b000): @+{@+HTEG_PACK(b000);@+ p=hpack(p,x,m);@+hprepend_to_vlist(p);@+} @+ break;
+case TAG(hpack_kind,b010): @+{@+HTEG_PACK(b010);@+ p=hpack(p,x,m);@+hprepend_to_vlist(p);@+} @+ break;
+case TAG(hpack_kind,b100): @+{@+HTEG_PACK(b100);@+ p=hpack(p,x,m);@+hprepend_to_vlist(p);@+} @+ break;
+case TAG(hpack_kind,b110): @+{@+HTEG_PACK(b110);@+ p=hpack(p,x,m);@+hprepend_to_vlist(p);@+} @+ break;@#
 
-case TAG(vpack_kind,b000): @+{@+HTEG_PACK(b000);@+ p=vpackage(p,x,m,d);@+happend_to_vlist(p); @+} @+ break;
-case TAG(vpack_kind,b010): @+{@+HTEG_PACK(b010);@+ p=vpackage(p,x,m,d);@+happend_to_vlist(p); @+} @+ break;
-case TAG(vpack_kind,b100): @+{@+HTEG_PACK(b100);@+ p=vpackage(p,x,m,d);@+happend_to_vlist(p); @+} @+ break;
-case TAG(vpack_kind,b110): @+{@+HTEG_PACK(b110);@+ p=vpackage(p,x,m,d);@+happend_to_vlist(p); @+} @+ break;
-case TAG(vpack_kind,b001): @+{@+HTEG_PACK(b001);@+ p=vpackage(p,x,m,d);@+happend_to_vlist(p); @+} @+ break;
-case TAG(vpack_kind,b011): @+{@+HTEG_PACK(b011);@+ p=vpackage(p,x,m,d);@+happend_to_vlist(p); @+} @+ break;
-case TAG(vpack_kind,b101): @+{@+HTEG_PACK(b101);@+ p=vpackage(p,x,m,d);@+happend_to_vlist(p); @+} @+ break;
-case TAG(vpack_kind,b111): @+{@+HTEG_PACK(b111);@+ p=vpackage(p,x,m,d);@+happend_to_vlist(p); @+} @+ break;
+case TAG(vpack_kind,b000): @+{@+HTEG_PACK(b000);@+ p=vpackage(p,x,m,d);@+hprepend_to_vlist(p); @+} @+ break;
+case TAG(vpack_kind,b010): @+{@+HTEG_PACK(b010);@+ p=vpackage(p,x,m,d);@+hprepend_to_vlist(p); @+} @+ break;
+case TAG(vpack_kind,b100): @+{@+HTEG_PACK(b100);@+ p=vpackage(p,x,m,d);@+hprepend_to_vlist(p); @+} @+ break;
+case TAG(vpack_kind,b110): @+{@+HTEG_PACK(b110);@+ p=vpackage(p,x,m,d);@+hprepend_to_vlist(p); @+} @+ break;
+case TAG(vpack_kind,b001): @+{@+HTEG_PACK(b001);@+ p=vpackage(p,x,m,d);@+hprepend_to_vlist(p); @+} @+ break;
+case TAG(vpack_kind,b011): @+{@+HTEG_PACK(b011);@+ p=vpackage(p,x,m,d);@+hprepend_to_vlist(p); @+} @+ break;
+case TAG(vpack_kind,b101): @+{@+HTEG_PACK(b101);@+ p=vpackage(p,x,m,d);@+hprepend_to_vlist(p); @+} @+ break;
+case TAG(vpack_kind,b111): @+{@+HTEG_PACK(b111);@+ p=vpackage(p,x,m,d);@+hprepend_to_vlist(p); @+} @+ break;
 @
 
 \subsection{Kerns}
@@ -2373,10 +2418,10 @@ pointer hget_paragraph_initial(scaled x, uint8_t *to)
   s=hget_list_size(INFO(a));
   hget_size_boundary(INFO(a)); 
   if (KIND(a)==list_kind)
-  { uint8_t *list_end=hpos+s;;
+  { uint8_t *list_end=hpos+s;  if (to>list_end) { LOG("Value of to greater than list_end"); to=list_end; }
     cur_list.hs_field=x;
     push_nest();
-    cur_list.bs_pos=NULL;
+    cur_list.bs_pos=NULL;   
     while (hpos<to)
     { hget_content();
       if (nest_ptr==1) 
@@ -2405,6 +2450,7 @@ pointer hget_paragraph_initial(scaled x, uint8_t *to)
     }
     else
     { pointer par_ptr=link(head);
+      @<add the node that terminates an incomplete paragraph@>@;
       pop_nest();      
       store_map(par_ptr,node_pos,0); 
       return par_ptr;
@@ -2416,6 +2462,22 @@ pointer hget_paragraph_initial(scaled x, uint8_t *to)
 }
 @
 
+\TeX\ normaly ends a paragraph  with a glue node by calling |add_par_fill_skip|,
+and it relies on this paragraph ending bceause it does not check for the end
+of the list while processing character nodes. 
+we generate the initial part of a paragraph because we need a page that ends
+after that initial part of the paragraph. How to do that nicely is an 
+open question. Here, we just add a penalty and a zero glue.
+
+@<add the node that terminates an incomplete paragraph@>=
+  if (is_char_node(tail)) tail_append(new_penalty(inf_penalty))@;
+  else if (type(tail)!=glue_node) tail_append(new_penalty(inf_penalty))@;
+  else
+  {@+type(tail)=penalty_node;delete_glue_ref(glue_ptr(tail));
+     flush_node_list(leader_ptr(tail));penalty(tail)=inf_penalty;
+  }
+  tail_append(new_glue(zero_glue));
+@
 
 
 @<\HINT/ auxiliar functions@>=
@@ -2453,9 +2515,6 @@ void hget_par_node(uint32_t offset)
 extern void hget_par_node(uint32_t offset);
 @
 
-When we need to read a paragraph node backwards, we simply skip to the beginning and read the node
-in forward direction. The function |hteg_paragraph| therefore simply returns a ponter to the
-start of the paragraph node.
 
 
 @<cases to teg content@>=
@@ -2465,11 +2524,19 @@ case TAG(par_kind,b100): @+hteg_paragraph(b100);@+break;
 case TAG(par_kind,b110): @+hteg_paragraph(b110);@+break;
 @
 
+When we need to read a paragraph node backwards, we simply skip to the beginning and read the node
+in forward direction. To prevent the line breaking routine to insert a baseline skip
+before the first line---this has to wait until we know the box that preceeds the
+paragraph---the |bs_pos| is set to |NULL|. Further we store the value of |prev_height|
+to be able to restore it after line breaking.
+
 @<\HINT/ auxiliar functions@>=
 void hteg_paragraph(info_t i)
 {@+scaled x=0;
   param_def_t *q;
   pointer par_head;
+  uint8_t *bs_pos=cur_list.bs_pos; /* the possible baseline skip */ 
+  scaled ph=prev_height; 
   uint8_t *list_start, *par_start;
   hskip_list();
   list_start=hpos;
@@ -2478,11 +2545,44 @@ void hteg_paragraph(info_t i)
   par_start=hpos;
   node_pos=par_start-hstart-1;
   hpos=list_start;
+  cur_list.bs_pos=NULL;
   par_head=hget_paragraph(x,q,0);
   @<Turn the paragraph upside down@>@;
   hpos=par_start;
 }
 @
+The |hget_paragraph| function adds the individual lines in top to
+bottom order to the current list. Running the page builder in bottom
+up direction requires, however, that the lines come in bottom to top
+oder. The following code, removes the lines of the paragraph from the
+current list, reverses the links, and attaches the list again in the new order.
+Before callling |hprepend_to_vlist|, we restore the position of the
+baseline skip and the previous height.
+At the end, we update the |tail| pointer and the |prev_height|.
+
+@<Turn the paragraph upside down@>=
+{ pointer p,r, par_tail;
+  scaled h=0;
+  p=null;
+  r=par_tail=link(par_head);
+ 
+  tail=par_head;
+  link(tail)=null;
+  while (r!=null)
+  { pointer q=link(r);
+    link(r)=p;
+    p=r;
+    r=q;
+  }
+  cur_list.bs_pos=bs_pos;
+  prev_height=ph; 
+  hprepend_to_vlist(p);
+  tail=par_tail;
+  if (type(tail)==hlist_node || type(tail)==vlist_node)
+     prev_height=height(tail);
+}
+@
+
 
 
 @<get functions@>=
@@ -2491,6 +2591,9 @@ void hteg_par_node(uint32_t offset)
 { @+ scaled x=0;
   param_def_t *q;
   pointer p;
+  pointer par_head=tail; /* here the paragraph gets added */
+  uint8_t *bs_pos=cur_list.bs_pos; /* the possible baseline skip */
+  scaled ph=prev_height; /* the height of the preceeding box */
   @<read the start byte |a|@>@;
   node_pos=(hpos-hstart)-1;
   if (INFO(a)&b100) x=hget_xdimen_node(); else x=hget_xdimen_ref(HGET8);
@@ -2499,11 +2602,11 @@ void hteg_par_node(uint32_t offset)
   prev_graf=0;
   p=hget_paragraph_initial(x,hstart+node_pos+offset);
   @<read and check the end byte |z|@>@;
+  cur_list.bs_pos=NULL; 
   if (p!=null) 
-  { pointer par_head=tail; /* here the paragraph gets added */
-    line_break(hget_integer_ref(widow_penalty_no), p);
-    @<Turn the paragraph upside down@>@;
-  }    
+    line_break(hget_integer_ref(widow_penalty_no), p);   
+  if (par_head!=tail)
+    @<Turn the paragraph upside down@>@;    
   hrestore_param_list();
   hpos=hstart+node_pos;
 }
@@ -2511,27 +2614,6 @@ void hteg_par_node(uint32_t offset)
 @
 @<\HINT/ |extern|@>=
 extern void hteg_par_node(uint32_t offset);
-@
-
-The |hget_paragraph| function adds the individual lines in top to
-bottom oder to the current list. Running the page builder in bottom
-up direction requires, however, that the lines come in bottom to top
-oder. The following code, removes the lines of the paragraph from the
-current list, reverses the links, and attaches the list again in the new order.
-
-@<Turn the paragraph upside down@>=
-{ pointer p,r, par_tail;
-  p=null;
-  r=par_tail=link(par_head);
-  while (r!=null)
-  { pointer q=link(r);
-    link(r)=p;
-    p=r;
-    r=q;
-  }
-  link(par_head)=p;
-  tail=par_tail;
-}
 @
 
 
@@ -3244,7 +3326,7 @@ if (p!=best_page_break)
   }
 }
 @
-The following code may start with recording the newly found top of the page in the page location cache.
+The following code starts with recording the newly found top of the page in the page location cache.
 For a dission of why this location should or should not be recorded see section~\secref{locsetprev}.
 @<Replace leading white-space by the topskip glue@>= 
 hloc_set_prev(link(page_head));

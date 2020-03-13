@@ -4418,11 +4418,13 @@ be pushed onto |nest| if necessary.
 typedef struct { int16_t @!mode_field;@+
   pointer @!head_field, @!tail_field;
  int pg_field;
- pointer bs_field,ls_field;
- scaled lsl_field;
- uint8_t *bs_pos;
- scaled ds_field, dw_field, di_field,hs_field;
- uint32_t np_field;
+ pointer bs_field,ls_field; /* baseline skip and line skip */
+ scaled lsl_field; /* line skip limit */
+ uint8_t *bs_pos; /* position of baseline skip node */
+ scaled hs_field; /* horizontal size */
+ scaled ds_field, dw_field, di_field; /*display size, width, and indent */
+ scaled ht_field; /* height of last box added to the list */
+ uint32_t np_field; /* position of current node */
   memory_word @!aux_field;
   } list_state_record;
 
@@ -4439,7 +4441,8 @@ typedef struct { int16_t @!mode_field;@+
 @d cur_ls      cur_list.ls_field /*line skip glue specification*/
 @d cur_lsl     cur_list.lsl_field /*line skip limit*/
 @d needs_bs    (cur_list.bs_pos!=NULL) /*is a baseline skip needed?*/
-@d node_pos     cur_list.np_field /*baseline position in the \HINT/ file or |NULL|*/
+@d prev_height  cur_list.ht_field /* height of previous box */
+@d node_pos     cur_list.np_field /*node position in the \HINT/ file or |NULL|*/
 @d node_pos1   (nest_ptr==0?0:nest[nest_ptr-1].np_field) /*position of enclosing node*/
 
 @<List variables@>=
@@ -4471,7 +4474,7 @@ void list_init(void)
 nest_ptr=0;max_nest_stack=0;@/
 memset(&cur_list,0,sizeof(cur_list));
 mode=vmode;head=contrib_head;tail=contrib_head;
-prev_depth=ignore_depth;
+prev_height=prev_depth=ignore_depth;
 }
 @ @<Set init...@>=
 list_init();

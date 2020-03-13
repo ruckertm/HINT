@@ -491,6 +491,7 @@ else decr(glue_ref_count(X) ) ; \
 #define cur_ls cur_list.ls_field
 #define cur_lsl cur_list.lsl_field
 #define needs_bs (cur_list.bs_pos!=NULL) 
+#define prev_height cur_list.ht_field
 #define node_pos cur_list.np_field
 #define node_pos1 (nest_ptr==0?0:nest[nest_ptr-1].np_field)  \
 
@@ -2159,7 +2160,7 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #endif
 
 /*:5*//*692:*/
-#line 13223 ".\\dummy.w"
+#line 13226 ".\\dummy.w"
 
 #define vpack(...) vpackage(__VA_ARGS__, max_dimen)
 

@@ -101,8 +101,7 @@ int fd=-1;
 static size_t hbase_size;
 extern "C" void hint_map(void) {
     struct stat st;
-    HINT_TRY {
-    if (fd < 0) QUIT("Unable to open file");
+     if (fd < 0) QUIT("Unable to open file");
     if (fstat(fd, &st) < 0) QUIT("Unable to get file size");
     hbase_size = st.st_size;
     hbase = (uint8_t *) mmap(NULL, hbase_size, PROT_READ, MAP_PRIVATE, fd, 0);
@@ -110,7 +109,6 @@ extern "C" void hint_map(void) {
     close(fd);
     hpos = hstart = hbase;
     hend = hstart + hbase_size;
-  }
 }
 
 extern "C" void hint_unmap(void) {

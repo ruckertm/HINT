@@ -128,18 +128,20 @@ int pg_field;
 pointer bs_field,ls_field;
 scaled lsl_field;
 uint8_t*bs_pos;
-scaled ds_field,dw_field,di_field,hs_field;
+scaled hs_field;
+scaled ds_field,dw_field,di_field;
+scaled ht_field;
 uint32_t np_field;
 memory_word aux_field;
 }list_state_record;
 
 /*:230*//*288:*/
-#line 5997 ".\\dummy.w"
+#line 6000 ".\\dummy.w"
 
 typedef uint8_t group_code;
 
 /*:288*//*319:*/
-#line 6577 ".\\dummy.w"
+#line 6580 ".\\dummy.w"
 
 typedef struct{
 quarterword state_field,index_field;
@@ -147,28 +149,28 @@ halfword start_field,loc_field,limit_field,name_field;
 }in_state_record;
 
 /*:319*//*567:*/
-#line 10793 ".\\dummy.w"
+#line 10796 ".\\dummy.w"
 
 typedef uint8_t internal_font_number;
 typedef uint16_t font_index;
 
 /*:567*//*614:*/
-#line 11969 ".\\dummy.w"
+#line 11972 ".\\dummy.w"
 
 typedef uint8_t dvi_index;
 
 /*:614*//*956:*/
-#line 18180 ".\\dummy.w"
+#line 18183 ".\\dummy.w"
 
 typedef uint16_t trie_pointer;
 
 /*:956*//*961:*/
-#line 18246 ".\\dummy.w"
+#line 18249 ".\\dummy.w"
 
 typedef uint16_t hyph_pointer;
 
 /*:961*//*1004:*/
-#line 18927 ".\\dummy.w"
+#line 18930 ".\\dummy.w"
 
 
 typedef struct{
