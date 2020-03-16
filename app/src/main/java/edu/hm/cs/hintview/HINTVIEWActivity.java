@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package edu.hm.cs.hintview;t
+package edu.hm.cs.hintview;
 
 import android.content.ActivityNotFoundException;
 import android.content.Context;

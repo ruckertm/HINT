@@ -40,9 +40,9 @@
 \titletrue
 
 \def\setrevision$#1: #2 ${\gdef\lastrevision{#2}}
-\setrevision$Revision: 1873 $
+\setrevision$Revision: 1879 $
 \def\setdate$#1(#2) ${\gdef\lastdate{#2}}
-\setdate$Date: 2020-03-05 19:29:50 +0100 (Thu, 05 Mar 2020) $
+\setdate$Date: 2020-03-16 16:31:21 +0100 (Mon, 16 Mar 2020) $
 
 \null
 
@@ -5399,7 +5399,7 @@ bool hcheck_banner(char *magic)
   else t++;
   subversion=strtol(t,&t,10);
   if (*t!=' ' && *t!='\n') QUIT("Space expected after subversion number %d",subversion);
-  MESSAGE("%s file version %d.%d:%s",magic,version, subversion, t);
+  LOG("%s file version %d.%d:%s",magic,version, subversion, t);
   DBG(DBGDIR,"banner size=0x%x\n",hbanner_size);
   return true;
 }
@@ -6152,6 +6152,9 @@ void hget_directory(void)
   { hget_entry(&(dir[i]));@+
     dir[i].pos=dir[i-1].pos +dir[i-1].size;@+
   }
+  DBG(DBGDIR,"Directory at 0x%"PRIx64"\n",dir[0].pos);
+  DBG(DBGDIR,"Definitions at 0x%"PRIx64"\n",dir[1].pos);
+  DBG(DBGDIR,"Content at 0x%"PRIx64"\n",dir[2].pos);
 }
 
 void hclear_dir(void)

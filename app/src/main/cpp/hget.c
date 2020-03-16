@@ -1,5 +1,5 @@
 	/*429:*/
-	#line 8462 "format.w"
+	#line 8465 "format.w"
 
 #include "basetypes.h"
 #include <string.h>
@@ -82,7 +82,7 @@ hbase_size= 0;
 hpos= hstart= hend= NULL;
 }
 	/*:271*/
-	#line 8479 "format.w"
+	#line 8482 "format.w"
 
 	/*259:*/
 	#line 5384 "format.w"
@@ -104,12 +104,12 @@ if(*t!='.')QUIT("Dot expected after version number %d",version);
 else t++;
 subversion= strtol(t,&t,10);
 if(*t!=' '&&*t!='\n')QUIT("Space expected after subversion number %d",subversion);
-MESSAGE("%s file version %d.%d:%s",magic,version,subversion,t);
+LOG("%s file version %d.%d:%s",magic,version,subversion,t);
 DBG(DBGDIR,"banner size=0x%x\n",hbanner_size);
 return true;
 }
 	/*:259*/
-	#line 8480 "format.w"
+	#line 8483 "format.w"
 
 	/*281:*/
 	#line 5879 "format.w"
@@ -136,7 +136,7 @@ e->file_name= strdup(file_name);
 DBG(DBGDIR,"Creating entry %d: \"%s\" size=0x%x xsize=0x%x\n",i,file_name,size,xsize);
 }
 	/*:282*/
-	#line 8481 "format.w"
+	#line 8484 "format.w"
 
 	/*35:*/
 	#line 1003 "format.w"
@@ -180,7 +180,7 @@ DBG(DBGDIR,"Creating entry %d: \"%s\" size=0x%x xsize=0x%x\n",i,file_name,size,x
   hset_entry(&(E),i,s,xs,file_name); \
 }
 	/*:290*/
-	#line 8482 "format.w"
+	#line 8485 "format.w"
 
 	/*260:*/
 	#line 5413 "format.w"
@@ -312,6 +312,9 @@ for(i= 1;i<=max_section_no;i++)
 {hget_entry(&(dir[i]));
 dir[i].pos= dir[i-1].pos+dir[i-1].size;
 }
+DBG(DBGDIR,"Directory at 0x%"PRIx64"\n",dir[0].pos);
+DBG(DBGDIR,"Definitions at 0x%"PRIx64"\n",dir[1].pos);
+DBG(DBGDIR,"Content at 0x%"PRIx64"\n",dir[2].pos);
 }
 
 void hclear_dir(void)
@@ -323,7 +326,7 @@ free(dir);dir= NULL;
 }
 
 	/*:292*/	/*308:*/
-	#line 6507 "format.w"
+	#line 6510 "format.w"
 
 void hget_max_definitions(void)
 {kind_t k;
@@ -335,7 +338,7 @@ uint32_t node_pos= hpos-hstart;
 if(hpos>=hend)QUIT("Attempt to read a start byte at the end of the section");
 HGETTAG(a);
 	/*:14*/
-	#line 6510 "format.w"
+	#line 6513 "format.w"
 
 if(a!=TAG(list_kind,0))QUIT("Start of maximum list expected");
 for(k= 0;k<32;k++)max_ref[k]= max_default[k];
@@ -361,14 +364,14 @@ if(a!=z)
 QUIT("Tag mismatch [%s,%d]!=[%s,%d] at 0x%x to "SIZE_F"\n",
 NAME(a),INFO(a),NAME(z),INFO(z),node_pos,hpos-hstart-1);
 	/*:15*/
-	#line 6527 "format.w"
+	#line 6530 "format.w"
 
 }
 if(INFO(a)!=0)QUIT("End of maximum list with info %d",INFO(a));
 
 }
 	/*:308*/
-	#line 8483 "format.w"
+	#line 8486 "format.w"
 
 
 

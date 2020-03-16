@@ -92,7 +92,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_error(JNIEnv *env, jclass obj) {
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_init(JNIEnv *env, jclass obj) {
-    debugflags=DBGBASIC;
+    debugflags=3;
     nativeInit();
  }
 
@@ -162,6 +162,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jclass obj) {
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_next(JNIEnv *env, jclass obj) {
     LOGI("next()\n");
+    debugflags=1;
     HINT_TRY hint_next_page();
 }
 

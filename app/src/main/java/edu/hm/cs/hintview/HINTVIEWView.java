@@ -379,9 +379,12 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         private final Context context;
         private String fileUriStr;
         private long pos;
+        private RenderErrorCallback renderErrorCallback;
 
         Renderer(Context context) {
+
             this.context = context;
+            renderErrorCallback = (RenderErrorCallback) context;
         }
 
 
@@ -389,8 +392,8 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
             String msg = HINTVIEWLib.error();
             if (msg != null) {
                 Log.w(TAG, "Error in renderer: " + msg + "!");
-                //Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
-II                this.fileUriStr = null;
+                renderErrorCallback.onRenderErrorCallback(msg);
+                this.fileUriStr = null;
                 this.pos = 0;
                 return false;
             } else
@@ -398,7 +401,7 @@ II                this.fileUriStr = null;
         }
 
 
-        public void setFile(String fileUriStr, long pos) {
+        public void setFile(String fileUriStr, long pos) throws java.lang.SecurityException{
             if (fileUriStr != null)
                 try {   //Gets called every time, after app gets maximized. So passing just the fileDescriptor to the renderer will result in an error
                     //bc it got already closed in the cpp code
@@ -411,10 +414,8 @@ II                this.fileUriStr = null;
                     HINTVIEWLib.begin(fd);
                     if (render_OK()) {
                         HINTVIEWLib.setPos(pos);
-                        if (render_OK()) {
-                            this.fileUriStr = fileUriStr;
-                            this.pos = pos;
-                        }
+                        this.fileUriStr = fileUriStr;
+                        this.pos = pos;
                     }
                     pfd.close();
                 } catch (FileNotFoundException e) {
@@ -470,6 +471,10 @@ II                this.fileUriStr = null;
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
             HINTVIEWLib.init();
             render_OK();
+        }
+
+        public interface RenderErrorCallback{
+            public void onRenderErrorCallback(String errMsg);
         }
 
     }

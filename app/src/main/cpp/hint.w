@@ -27,8 +27,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 1877 ${}$}
-\def\lastdate{${}$Date: 2020-03-13 16:18:20 +0100 (Fri, 13 Mar 2020) ${}$}
+\def\lastrevision{${}$Revision: 1879 ${}$}
+\def\lastdate{${}$Date: 2020-03-16 16:31:21 +0100 (Mon, 16 Mar 2020) ${}$}
 
 \input titlepage.tex
 
@@ -2562,7 +2562,6 @@ At the end, we update the |tail| pointer and the |prev_height|.
 
 @<Turn the paragraph upside down@>=
 { pointer p,r, par_tail;
-  scaled h=0;
   p=null;
   r=par_tail=link(par_head);
  
@@ -3311,7 +3310,7 @@ else b=badness(page_total-page_goal, page_shrink)
 } 
 @
 
-When we have finaly found the best page break. It the best break is not the current node |p|,
+When we have finaly found the best page break. If the best break is not the current node |p|,
 we might have moved some material
 preceeding this break already to the current page. Now we move it back to
 the contribution list.
@@ -3322,7 +3321,8 @@ if (p!=best_page_break)
   { q=link(page_head);
     link(page_head)=link(q);
     link(q)=null;
-    tail_append(q);
+    link(q)=link(head);
+    link(head)=q;
   }
 }
 @
@@ -3666,6 +3666,7 @@ void hint_begin(void)
   hclear_fonts();
   hint_map();
   hget_banner();
+  hcheck_banner("hint");
   hget_directory();
   hget_definition_section();
   hget_content_section();
