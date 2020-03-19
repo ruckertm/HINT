@@ -27,8 +27,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 1879 ${}$}
-\def\lastdate{${}$Date: 2020-03-16 16:31:21 +0100 (Mon, 16 Mar 2020) ${}$}
+\def\lastrevision{${}$Revision: 1880 ${}$}
+\def\lastdate{${}$Date: 2020-03-18 12:27:49 +0100 (Wed, 18 Mar 2020) ${}$}
 
 \input titlepage.tex
 
@@ -4078,6 +4078,9 @@ file if necessary.
 struct font_s *hget_font(unsigned char f)
 { font_t *fp;
   if (fonts[f]!=NULL) return fonts[f];
+  DBG(DBGFONT,"Decoding new font %d\n",f);
+  if (f>max_ref[font_kind])
+    QUIT("Undefined font %d\n",f);
   fp = calloc(1,sizeof(*fp));
   if (fp==NULL) 
     QUIT("Out of memory for font %d",f);
@@ -4500,29 +4503,55 @@ cur_glue= 0.0;
 g_order= glue_order(this_box);
 g_sign= glue_sign(this_box);
 p= list_ptr(this_box);
+#ifdef DEBUG
+if(p==0xffff)
+  QUIT("Undefined list pointer in hbox 0x%x-> mem[0x%x] -> 0x%x\n",
+        this_box,mem[this_box].i,p);
+#endif
 base_line= cur_v;
 left_edge= cur_h;
 
 while(p!=null)
 { reswitch:
+#ifdef DEBUG
+if(p==0xffff)
+        QUIT("Undefined pointer in hlist 0x%x\n",p);
+if(link(p)==0xffff)
+        QUIT("Undefined link in hlist mem[0x%x]=0x%x\n",p,mem[p].i);
+#endif
   if(is_char_node(p))
-  { do 
-	{ uint8_t f= font(p);
-	  uint32_t c= character(p);
+  { do {
+      uint8_t f= font(p);
+      uint32_t c= character(p);
       if(f!=cur_f)
-      { cur_fp=hget_font(f);
-	    cur_f= f;
-	    cur_at_size=font_at_size(f);
+      {
+#ifdef DEBUG
+      if(f> max_ref[font_kind])
+           QUIT("Undefined Font %d mem[0x%x]=0x%x\n",
+                f,p,mem[p].i);
+#endif
+     cur_fp=hget_font(f);
+	 cur_f= f;
+	 cur_at_size=font_at_size(f);
       }
-	  render_char(cur_h, cur_v, cur_fp, cur_at_size,c);
+      render_char(cur_h, cur_v, cur_fp, cur_at_size,c);
       cur_h= cur_h+char_width(f)(char_info(f)(c));
-      p= link(p);
+#ifdef DEBUG
+    if(link(p)==0xffff)
+        QUIT("Undefined link in charlist mem[0x%x]=0x%x\n",p,mem[p].i);
+#endif
+p= link(p);
     } while(!(!is_char_node(p)));
   }
   else
   { switch(type(p)) 
     { case hlist_node:
      case vlist_node:
+#ifdef DEBUG     
+        if(list_ptr(p)==0xffff)
+          QUIT("Undefined list pointer in hlist mem[0x%x] = 0x%x -> 0x%x\n",
+                p,mem[p].i,list_ptr(p));
+#endif
        if(list_ptr(p)==null) cur_h= cur_h+width(p);
        else
 	   { cur_v= base_line+shift_amount(p);
@@ -4643,7 +4672,12 @@ fin_rule:
      cur_v= base_line;
    }
    move_past:cur_h= cur_h+rule_wd;
-   next_p:p= link(p);
+   next_p:
+#ifdef DEBUG
+    if(link(p)==0xffff)
+        QUIT("Undefined link in hlist mem[0x%x]=0x%x\n",p,mem[p].i);
+#endif        
+    p= link(p);
  }
 } /* end |while| */
 } /* end |hlist_render| */
@@ -4667,6 +4701,11 @@ scaled cur_g;
 cur_g= 0;cur_glue= float_constant(0);
 g_order= glue_order(this_box);
 g_sign= glue_sign(this_box);p= list_ptr(this_box);
+#ifdef DEBUG
+if(p==0xffff)
+  QUIT("Undefined list pointer in vbox 0x%x-> mem[0x%x] -> 0x%x\n",
+        this_box,mem[this_box].i,p);
+#endif
 left_edge= cur_h;cur_v= cur_v-height(this_box);
 top_edge= cur_v;
 while(p!=null)
@@ -4675,6 +4714,11 @@ while(p!=null)
   { switch(type(p))
     { case hlist_node:
       case vlist_node:
+#ifdef DEBUG
+        if(list_ptr(p)==0xffff)
+          QUIT("Undefined list pointer in vlist mem[0x%x] = 0x%x -> 0x%x\n",
+                p,mem[p].i,list_ptr(p));
+#endif                
         if(list_ptr(p)==null) cur_v= cur_v+height(p)+depth(p);
 	    else
 	    { cur_v= cur_v+height(p);save_v= cur_v;
@@ -4788,8 +4832,16 @@ fin_rule:
 move_past:
     cur_v= cur_v+rule_ht;
   } /* end |if| */
-  next_p:p= link(p);
-} /* end |while| */
+  next_p:
+#ifdef DEBUG
+      if (link(p)==1 || link(p)==0xffff) {
+        show_box(stream[0].p);
+        QUIT("vertical node mem[0x%x] =0x%x ->linking to node 0x%x\n",
+          p, mem[p].i, link(p));
+    }
+#endif    
+    p= link(p);
+  } /* end |while| */
 } /* end |vlist_render| */
 
 @

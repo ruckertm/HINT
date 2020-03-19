@@ -21,11 +21,11 @@ public class TouchGestureHandler extends GestureDetector.SimpleOnGestureListener
         if (Math.abs(deltaX) > SWIPE_THRESHOLD) {
             if (deltaX > 0) {
                 // Swipe to right
-                HINTVIEWLib.next();
+                HINTVIEWView.Page_next=true;
                 view.requestRender();
             } else {
                 // Swipe to left
-                HINTVIEWLib.prev();
+                HINTVIEWView.Page_prev=true;
                 view.requestRender();
             }
             return true;

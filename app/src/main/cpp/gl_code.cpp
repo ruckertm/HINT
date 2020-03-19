@@ -46,8 +46,10 @@ char *in_name=NULL; /* to keep hget happy */
 
 #define  LOG_TAG    "libhintview"
 #define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
+#define  LOGW(...)  __android_log_print(ANDROID_LOG_WARN,LOG_TAG,__VA_ARGS__)
 #define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
 
+#define HINT_CATCH(X) else LOGE("HINT_TRY Error exit " X "\n")
 
 extern "C" {
 JNIEXPORT void JNICALL
@@ -92,7 +94,8 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_error(JNIEnv *env, jclass obj) {
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_init(JNIEnv *env, jclass obj) {
-    debugflags=3;
+    LOGI("Native init\n");
+    debugflags=0x1;
     nativeInit();
  }
 
@@ -101,6 +104,7 @@ int fd=-1;
 static size_t hbase_size;
 extern "C" void hint_map(void) {
     struct stat st;
+    LOGI("hint_map\n");
      if (fd < 0) QUIT("Unable to open file");
     if (fstat(fd, &st) < 0) QUIT("Unable to get file size");
     hbase_size = st.st_size;
@@ -109,9 +113,10 @@ extern "C" void hint_map(void) {
     close(fd);
     hpos = hstart = hbase;
     hend = hstart + hbase_size;
-}
+ }
 
 extern "C" void hint_unmap(void) {
+    LOGI("hint_unmap\n");
     if (hbase != NULL)
         munmap(hbase, hbase_size);
     hbase = NULL;
@@ -121,55 +126,42 @@ extern "C" void hint_unmap(void) {
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_begin(JNIEnv *env, jclass obj, jint fileDescriptor) {
-    LOGI("begin\n");
+    LOGI("hint_end;hint_clear_fonts(true);hint_begin\n");
      fd=fileDescriptor;
      HINT_TRY {
-        //nativeSetColors(0.0f, 0.0f, 0.5f, 1.0f, 1.0f, 0.8f);
-        //hint_open("/storage/emulated/0/Download/paging.hnt");
-        //hint_open("/storage/emulated/0/Download/math.hnt");
-        //hint_open("/storage/emulated/0/Download/mfpreface.hnt");
-        //hint_open("/storage/emulated/0/Download/bmp.hnt");
-        //hint_open("/storage/emulated/0/Download/png.hnt");
-        //hint_open("/storage/emulated/0/Download/display.hnt");
-        //hint_open("/storage/emulated/0/Download/opentype.hnt");
-        //hint_open("/storage/emulated/0/Download/truetype.hnt");
-        //hint_open("/storage/emulated/0/Download/ligature.hnt");
-        //hint_open("/storage/emulated/0/Download/jpg.hnt");
         hint_end();
         hint_clear_fonts(true);
         hint_begin();
-        LOGI("done begin");
-    }
+    }HINT_CATCH("begin");
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, jint height,
                                            jdouble xdpi, jdouble ydpi) {
-    //LOGI("change(width=%d height=%d xdpi=%f ydpi=%f))\n", width, height, xdpi, ydpi);
+    LOGI("hint_resize(width=%d height=%d xdpi=%f ydpi=%f))\n", width, height, xdpi, ydpi);
     HINT_TRY {
     hint_resize(width, height, xdpi);
     hint_page();
-    }
+    }HINT_CATCH("resize");
 }
 
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jclass obj) {
-    LOGI("draw\n");
-    HINT_TRY hint_render();
+    LOGI("hint_render\n");
+    HINT_TRY hint_render();HINT_CATCH("render");
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_next(JNIEnv *env, jclass obj) {
-    LOGI("next()\n");
-    debugflags=1;
-    HINT_TRY hint_next_page();
+    LOGI("hint_next_page\n");
+    HINT_TRY hint_next_page();HINT_CATCH("next");
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_prev(JNIEnv *env, jclass obj) {
-    LOGI("prev()\n");
-    HINT_TRY hint_prev_page();
+    LOGI("hint_prev_page\n");
+    HINT_TRY hint_prev_page();HINT_CATCH("prev");
 }
 
 extern "C" JNIEXPORT jlong JNICALL
@@ -178,15 +170,15 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_getPos(JNIEnv *env, jclass obj) {
     jlong pos;
     hpos = hint_page_get();
     pos = hpos;
-    LOGI("getPos(0x%x %x)-> (0x%x %x)\n", (int) (hpos >> 32), (int) (hpos & 0xffffffff),
+    LOGI("hint_page_get: (0x%x %x)-> (0x%x %x)\n", (int) (hpos >> 32), (int) (hpos & 0xffffffff),
          (int) (pos >> 32), (int) (pos & 0xffffffff));
     return pos;
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_setPos(JNIEnv *env, jclass obj, jlong pos) {
-    LOGI("setPos(0x%x %x)\n", (int)(pos>>32), (int)(pos&0xffffffff));
-    HINT_TRY hint_page_top(pos);
+    LOGI("hint_page_top(0x%x %x)\n", (int)(pos>>32), (int)(pos&0xffffffff));
+    HINT_TRY hint_page_top(pos);HINT_CATCH("top");
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -198,7 +190,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_setMode(JNIEnv *env, jclass obj, jboolean mo
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_home(JNIEnv *env, jclass obj) {
     // go to first page
-    LOGI("hpos_home()\n");
-    HINT_TRY hint_page_top(0);
+    LOGI("hint_page_top(0)\n");
+    HINT_TRY hint_page_top(0);HINT_CATCH("top 0");
 }
 

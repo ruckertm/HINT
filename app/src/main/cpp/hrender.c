@@ -1,5 +1,5 @@
 /*297:*/
-#line 5625 "hint.w"
+#line 5677 ".\\hint.w"
 
 #include <math.h> 
 #include "texextern.h"
@@ -10,31 +10,31 @@
 #include "texdefs.h"
 
 /*240:*/
-#line 4100 "hint.w"
+#line 4103 ".\\hint.w"
 
 typedef struct font_s*font_s_ptr;
 extern struct font_s*hget_font(unsigned char f);
 /*:240*//*251:*/
-#line 4424 "hint.w"
+#line 4427 ".\\hint.w"
 
 extern void render_char(int x,int y,struct font_s*f,int32_t s,uint32_t cc);
 /*:251*/
-#line 5634 "hint.w"
+#line 5686 ".\\hint.w"
 
 
 /*225:*/
-#line 3813 "hint.w"
+#line 3813 ".\\hint.w"
 
 int page_v,page_h,offset_v,offset_h;
 /*:225*//*230:*/
-#line 3921 "hint.w"
+#line 3921 ".\\hint.w"
 
 static bool forward_mode= false,backward_mode= false;
 /*:230*/
-#line 5636 "hint.w"
+#line 5688 ".\\hint.w"
 
 /*226:*/
-#line 3823 "hint.w"
+#line 3823 ".\\hint.w"
 
 static void hset_margins(void)
 {offset_h= page_h/8-0x48000;
@@ -49,7 +49,7 @@ if(hhsize<=0)hhsize= page_h,offset_h= 0;
 if(hvsize<=0)hvsize= page_v,offset_v= 0;
 }
 /*:226*//*227:*/
-#line 3841 "hint.w"
+#line 3841 ".\\hint.w"
 
 static void houtput_template0(void)
 {pointer p,q,t,b,l,r;
@@ -72,7 +72,7 @@ p= vpackage(t,page_v,exactly,0);
 stream[0].p= p;
 }
 /*:227*//*228:*/
-#line 3875 "hint.w"
+#line 3875 ".\\hint.w"
 
 
 uint64_t hint_page_top(uint64_t h)
@@ -92,7 +92,7 @@ houtput_template0();
 return h;
 }
 /*:228*//*229:*/
-#line 3899 "hint.w"
+#line 3899 ".\\hint.w"
 
 uint64_t hint_page_get(void)
 {
@@ -109,7 +109,7 @@ else
 return hint_page_top(i);
 }
 /*:229*//*231:*/
-#line 3926 "hint.w"
+#line 3926 ".\\hint.w"
 
 uint64_t hint_next_page(void)
 {if(hbase==NULL)return 0;
@@ -128,7 +128,7 @@ return hint_page();
 }
 }
 /*:231*//*232:*/
-#line 3953 "hint.w"
+#line 3953 ".\\hint.w"
 
 uint64_t hint_prev_page(void)
 {if(hbase==NULL)return 0;
@@ -148,7 +148,7 @@ else
 return hint_page_bottom(hint_page_get());
 }
 /*:232*//*233:*/
-#line 3980 "hint.w"
+#line 3980 ".\\hint.w"
 
 uint64_t hint_page_bottom(uint64_t h)
 {hclear_page();
@@ -164,14 +164,14 @@ houtput_template0();
 return hint_page_get();
 }
 /*:233*//*234:*/
-#line 3997 "hint.w"
+#line 3997 ".\\hint.w"
 
 uint64_t hint_page_center(uint64_t h)
 {if(hbase==NULL)return hint_blank();
 QUIT("hint_page_center not yet implemented");
 }
 /*:234*//*235:*/
-#line 4008 "hint.w"
+#line 4008 ".\\hint.w"
 
 void hint_resize(int px_h,int px_v,double dpi)
 {static int old_px_h= 0,old_px_v= 0;
@@ -185,7 +185,7 @@ forward_mode= false;
 backward_mode= false;
 }
 /*:235*//*253:*/
-#line 4438 "hint.w"
+#line 4441 ".\\hint.w"
 
 static void render_rule(int x,int y,int w,int h)
 {if(w<=0)return;
@@ -193,7 +193,7 @@ if(h<=0)return;
 nativeRule(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h));
 }
 /*:253*//*254:*/
-#line 4450 "hint.w"
+#line 4453 ".\\hint.w"
 
 void render_image(int x,int y,int w,int h,uint32_t n)
 {
@@ -204,7 +204,7 @@ nativeImage(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),hstart,hend);
 hpos= spos;hstart= sstart;hend= send;
 }
 /*:254*//*255:*/
-#line 4474 "hint.w"
+#line 4477 ".\\hint.w"
 
 static scaled cur_h,cur_v;
 static scaled rule_ht,rule_dp,rule_wd;
@@ -234,22 +234,43 @@ cur_glue= 0.0;
 g_order= glue_order(this_box);
 g_sign= glue_sign(this_box);
 p= list_ptr(this_box);
+#ifdef DEBUG
+if(p==0xffff)
+QUIT("Undefined list pointer in hbox 0x%x-> mem[0x%x] -> 0x%x\n",
+this_box,mem[this_box].i,p);
+#endif
 base_line= cur_v;
 left_edge= cur_h;
 
 while(p!=null)
 {reswitch:
+#ifdef DEBUG
+if(p==0xffff)
+QUIT("Undefined pointer in hlist 0x%x\n",p);
+if(link(p)==0xffff)
+QUIT("Undefined link in hlist mem[0x%x]=0x%x\n",p,mem[p].i);
+#endif
 if(is_char_node(p))
-{do
-{uint8_t f= font(p);
+{do{
+uint8_t f= font(p);
 uint32_t c= character(p);
 if(f!=cur_f)
-{cur_fp= hget_font(f);
+{
+#ifdef DEBUG
+if(f> max_ref[font_kind])
+QUIT("Undefined Font %d mem[0x%x]=0x%x\n",
+f,p,mem[p].i);
+#endif
+cur_fp= hget_font(f);
 cur_f= f;
 cur_at_size= font_at_size(f);
 }
 render_char(cur_h,cur_v,cur_fp,cur_at_size,c);
 cur_h= cur_h+char_width(f)(char_info(f)(c));
+#ifdef DEBUG
+if(link(p)==0xffff)
+QUIT("Undefined link in charlist mem[0x%x]=0x%x\n",p,mem[p].i);
+#endif
 p= link(p);
 }while(!(!is_char_node(p)));
 }
@@ -257,6 +278,11 @@ else
 {switch(type(p))
 {case hlist_node:
 case vlist_node:
+#ifdef DEBUG
+if(list_ptr(p)==0xffff)
+QUIT("Undefined list pointer in hlist mem[0x%x] = 0x%x -> 0x%x\n",
+p,mem[p].i,list_ptr(p));
+#endif
 if(list_ptr(p)==null)cur_h= cur_h+width(p);
 else
 {cur_v= base_line+shift_amount(p);
@@ -377,7 +403,12 @@ render_rule(cur_h,cur_v,rule_wd,rule_ht);
 cur_v= base_line;
 }
 move_past:cur_h= cur_h+rule_wd;
-next_p:p= link(p);
+next_p:
+#ifdef DEBUG
+if(link(p)==0xffff)
+QUIT("Undefined link in hlist mem[0x%x]=0x%x\n",p,mem[p].i);
+#endif
+p= link(p);
 }
 }
 }
@@ -401,6 +432,11 @@ scaled cur_g;
 cur_g= 0;cur_glue= float_constant(0);
 g_order= glue_order(this_box);
 g_sign= glue_sign(this_box);p= list_ptr(this_box);
+#ifdef DEBUG
+if(p==0xffff)
+QUIT("Undefined list pointer in vbox 0x%x-> mem[0x%x] -> 0x%x\n",
+this_box,mem[this_box].i,p);
+#endif
 left_edge= cur_h;cur_v= cur_v-height(this_box);
 top_edge= cur_v;
 while(p!=null)
@@ -409,6 +445,11 @@ else
 {switch(type(p))
 {case hlist_node:
 case vlist_node:
+#ifdef DEBUG
+if(list_ptr(p)==0xffff)
+QUIT("Undefined list pointer in vlist mem[0x%x] = 0x%x -> 0x%x\n",
+p,mem[p].i,list_ptr(p));
+#endif
 if(list_ptr(p)==null)cur_v= cur_v+height(p)+depth(p);
 else
 {cur_v= cur_v+height(p);save_v= cur_v;
@@ -522,19 +563,27 @@ goto next_p;
 move_past:
 cur_v= cur_v+rule_ht;
 }
-next_p:p= link(p);
+next_p:
+#ifdef DEBUG
+if(link(p)==1||link(p)==0xffff){
+show_box(stream[0].p);
+QUIT("vertical node mem[0x%x] =0x%x ->linking to node 0x%x\n",
+p,mem[p].i,link(p));
+}
+#endif
+p= link(p);
 }
 }
 
 /*:255*//*256:*/
-#line 4802 "hint.w"
+#line 4854 ".\\hint.w"
 
 uint64_t hint_blank(void)
 {nativeBlank();
 return 0;
 }
 /*:256*//*257:*/
-#line 4811 "hint.w"
+#line 4863 ".\\hint.w"
 
 
 void hint_render(void)
@@ -549,6 +598,6 @@ else
 hlist_render(stream[0].p);
 }
 /*:257*/
-#line 5637 "hint.w"
+#line 5689 ".\\hint.w"
 
 /*:297*/

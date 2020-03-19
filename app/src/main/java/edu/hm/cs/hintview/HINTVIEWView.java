@@ -81,6 +81,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
     protected Renderer fileRenderer;
     private static boolean darkMode = false;
     protected static boolean TeXzoom = false, ZoomOn = false, ZoomOff = false, Zooming = false;
+    protected static boolean Page_next = false, Page_prev = false;
     private GestureDetector touchGestureDetector;
     private ScaleGestureDetector scaleGestureDetector;
 
@@ -439,6 +440,14 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         public void onDrawFrame(GL10 gl) {
             HINTVIEWLib.setMode(darkMode);
             HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi); /* needed for zooming */
+            if (HINTVIEWView.Page_prev) {
+                HINTVIEWLib.prev();
+                HINTVIEWView.Page_prev = false;
+            }
+            if (HINTVIEWView.Page_next) {
+                HINTVIEWLib.next();
+                HINTVIEWView.Page_next = false;
+            }
             if (!render_OK()) return;
             if (HINTVIEWView.TeXzoom)
                 HINTVIEWLib.draw();

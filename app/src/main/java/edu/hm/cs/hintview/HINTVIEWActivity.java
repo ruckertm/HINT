@@ -71,6 +71,7 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
             filePos = sharedPref.getLong("curPos", 0);
         double scale = sharedPref.getFloat("textSize", (float) 1.0);
         darkMode = sharedPref.getBoolean("darkMode", false);
+        TeXzoom = sharedPref.getBoolean("TeXzoom", false);
 
         mView = findViewById(R.id.hintview);
         mView.setOnClickListener(new View.OnClickListener() {
@@ -218,6 +219,7 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
         editor.putLong("curPos", filePos);
         editor.putFloat("textSize", (float) mView.getScale());
         editor.putBoolean("darkMode", mView.getMode());
+        editor.putBoolean("TeXzoom", TeXzoom);
         editor.apply();
         Log.d("HINTVIEWActivity", "onStop pos = " + Long.toHexString(filePos));
     }

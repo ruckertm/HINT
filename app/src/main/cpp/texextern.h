@@ -1,5 +1,5 @@
 /*170:*/
-#line 2759 "hint.w"
+#line 2759 ".\\hint.w"
 
 #ifndef _TEXEXTERN_H_
 #define _TEXEXTERN_H_
@@ -9,42 +9,42 @@
 #include "hformat.h"
 
 /*17:*/
-#line 296 "hint.w"
+#line 296 ".\\hint.w"
 
 extern void print_xdimen(int i);
 /*:17*//*21:*/
-#line 339 "hint.w"
+#line 339 ".\\hint.w"
 
 extern pointer hget_param_glue(uint8_t n);
 /*:21*//*28:*/
-#line 406 "hint.w"
+#line 406 ".\\hint.w"
 
 extern void print_baseline_skip(int i);
 extern pointer happend_to_vlist(pointer b);
 /*:28*//*79:*/
-#line 1161 "hint.w"
+#line 1161 ".\\hint.w"
 
 extern pointer new_character(uint8_t f,uint8_t c);
 /*:79*//*82:*/
-#line 1180 "hint.w"
+#line 1180 ".\\hint.w"
 
 extern pointer new_penalty(int m);
 /*:82*//*87:*/
-#line 1227 "hint.w"
+#line 1227 ".\\hint.w"
 
 extern pointer new_math(scaled w,small_number s);
 /*:87*//*101:*/
-#line 1393 "hint.w"
+#line 1393 ".\\hint.w"
 
 extern pointer new_glue(pointer q);
 /*:101*//*171:*/
-#line 2812 "hint.w"
+#line 2812 ".\\hint.w"
 
 extern pointer*pointer_def[32];
 extern scaled*dimen_def;
 extern int32_t*integer_def;
 /*:171*//*172:*/
-#line 2823 "hint.w"
+#line 2823 ".\\hint.w"
 
 extern void print_str(char*s);
 extern void print_int(int n);
@@ -53,13 +53,13 @@ extern void overflow(char*s,int n);
 extern void show_box(pointer p);
 extern void confusion(str_number s);
 /*:172*//*173:*/
-#line 2838 "hint.w"
+#line 2838 ".\\hint.w"
 
 extern int half(int x);
 extern scaled x_over_n(scaled x,int n);
 extern scaled xn_over_d(scaled x,int n,int d);
 /*:173*//*174:*/
-#line 2853 "hint.w"
+#line 2853 ".\\hint.w"
 
 extern memory_word*const mem;
 extern pointer temp_ptr;
@@ -73,7 +73,7 @@ extern void free_node(pointer p,halfword s);
 extern void flush_node_list(pointer p);
 extern void mem_init(void);
 /*:174*//*175:*/
-#line 2876 "hint.w"
+#line 2876 ".\\hint.w"
 
 extern pointer new_null_box(void);
 extern pointer new_rule(void);
@@ -85,7 +85,7 @@ extern void delete_glue_ref(pointer p);
 extern pointer copy_node_list(pointer p);
 
 /*:175*//*176:*/
-#line 2898 "hint.w"
+#line 2898 ".\\hint.w"
 
 extern void list_init(void);
 extern list_state_record cur_list;
@@ -94,7 +94,7 @@ extern uint16_t nest_ptr;
 extern void push_nest(void);
 extern void pop_nest(void);
 /*:176*//*177:*/
-#line 2913 "hint.w"
+#line 2913 ".\\hint.w"
 
 extern scaled*const active_width;
 extern void line_break(int final_widow_penalty,pointer par_ptr);
@@ -104,17 +104,17 @@ extern pointer adjust_tail;
 extern void append_to_vlist(pointer b,uint32_t offset);
 
 /*:177*//*178:*/
-#line 2927 "hint.w"
+#line 2927 ".\\hint.w"
 
 extern void hdisplay(pointer p,pointer a,bool l);
 /*:178*//*179:*/
-#line 2934 "hint.w"
+#line 2934 ".\\hint.w"
 
 extern pointer hpack(pointer p,scaled w,small_number m);
 extern pointer vpackage(pointer p,scaled h,small_number m,scaled l);
 scaled*const total_stretch,*const total_shrink;
 /*:179*//*180:*/
-#line 2945 "hint.w"
+#line 2945 ".\\hint.w"
 
 extern stream_t stream[256];
 extern bool hbuild_page(void);
@@ -131,7 +131,7 @@ extern pointer best_page_break;
 extern scaled best_size;
 
 /*:180*//*184:*/
-#line 3019 "hint.w"
+#line 3019 ".\\hint.w"
 
 extern char**const font_name;
 extern int*const width_base;
@@ -147,7 +147,7 @@ extern scaled*const font_dsize;
 
 extern void hclear_fonts(void);
 /*:184*//*216:*/
-#line 3629 "hint.w"
+#line 3629 ".\\hint.w"
 
 extern void hloc_init(void);
 extern void store_map(pointer p,uint32_t pos,uint32_t offset);
@@ -155,16 +155,16 @@ extern uint32_t hposition(pointer p);
 extern void hloc_set(uint64_t h);
 extern void hloc_set_next(pointer p);
 /*:216*//*224:*/
-#line 3791 "hint.w"
+#line 3791 ".\\hint.w"
 
 extern scaled hvsize,hhsize;
 /*:224*//*293:*/
-#line 5541 "hint.w"
+#line 5593 ".\\hint.w"
 
 extern void leak_in(pointer p,int s);
 extern void leak_out(pointer p,int s);
 /*:293*/
-#line 2767 "hint.w"
+#line 2767 ".\\hint.w"
 
 #endif
 /*:170*/
