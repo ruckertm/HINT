@@ -300,7 +300,7 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
         // Set job name, which will be displayed in the print queue
         String jobName = getString(R.string.hintview_activity) + "_" + mView.getFileUriStr();
 
-        PrintHintDocumentAdapter adapter = new PrintHintDocumentAdapter(mView.getFileUriStr());
+        PrintHintDocumentAdapter adapter = new PrintHintDocumentAdapter(mView.getContext(), mView.getFileUriStr());
 
         // Start a print job, passing in a PrintDocumentAdapter implementation
         // to handle the generation of a print document
