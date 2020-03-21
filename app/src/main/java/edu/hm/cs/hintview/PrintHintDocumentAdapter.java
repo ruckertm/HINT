@@ -39,7 +39,7 @@ public class PrintHintDocumentAdapter extends PrintDocumentAdapter {
         name = fileUriString;
         if (name.endsWith(".hnt"))
             name = name.substring(0, name.length() - 4);
-        name = name+".pdf";
+        name = "HINT_print.pdf"; // name+".pdf";
         info = new PrintDocumentInfo
                 .Builder(name)
                 .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
@@ -61,14 +61,14 @@ public class PrintHintDocumentAdapter extends PrintDocumentAdapter {
 
     @Override
     public void onLayout(PrintAttributes oldAttributes, PrintAttributes newAttributes, CancellationSignal cancellationSignal, LayoutResultCallback callback, Bundle extras) {
-        int widthMils = newAttributes.getMediaSize().getWidthMils(); // width in 1/1000 inch
-        int heightMils = newAttributes.getMediaSize().getHeightMils(); // height in 1/1000 inch
+        width_Mils = newAttributes.getMediaSize().getWidthMils(); // width in 1/1000 inch
+        height_Mils = newAttributes.getMediaSize().getHeightMils(); // height in 1/1000 inch
         double x = newAttributes.getResolution().getHorizontalDpi();
         double y = newAttributes.getResolution().getVerticalDpi();
 
         cancellationSignal.setOnCancelListener(doCancel);
-        int w = (int)Math.round(widthMils*x/1000.0);
-        int h = (int)Math.round(heightMils*y/1000.0);
+        int w = (int)Math.round(width_Mils*x/1000.0);
+        int h = (int)Math.round(height_Mils*y/1000.0);
         hintDocument = new PrintedPdfDocument(context, newAttributes);
         if (cancellationSignal.isCanceled())
             callback.onLayoutCancelled();
@@ -89,7 +89,7 @@ public class PrintHintDocumentAdapter extends PrintDocumentAdapter {
     public void onWrite(PageRange[] pages, ParcelFileDescriptor destination, CancellationSignal cancellationSignal, WriteResultCallback callback) {
         cancellationSignal.setOnCancelListener(doCancel);
 
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 4; i++) {
             if (pageInRange(pages, i))
             {
                 PdfDocument.PageInfo newPage = new PdfDocument.PageInfo.Builder((int)Math.round(width_Mils*72.27),(int)Math.round(height_Mils*72.27), i).create();
@@ -136,34 +136,35 @@ public class PrintHintDocumentAdapter extends PrintDocumentAdapter {
         Canvas canvas = page.getCanvas();
 
         pagenumber++; // Make sure page numbers start at 1
+        int w = canvas.getWidth();
+        int h = canvas.getHeight();
+        int r = canvas.getDensity();
 
-        int titleBaseLine = 72;
-        int leftMargin = 54;
+        int titleBaseLine = h/5;
+        int leftMargin = w/10;
 
         Paint paint = new Paint();
-        paint.setColor(Color.BLACK);
-        paint.setTextSize(40);
-        canvas.drawText(
-                "Test Print Document Page " + pagenumber,
-                leftMargin,
-                titleBaseLine,
-                paint);
 
-        paint.setTextSize(14);
-        canvas.drawText("This is some test content to verify that custom document printing works", leftMargin, titleBaseLine + 35, paint);
 
         if (pagenumber % 2 == 0)
             paint.setColor(Color.RED);
         else
             paint.setColor(Color.GREEN);
 
-        PdfDocument.PageInfo pageInfo = page.getInfo();
-
-
-        canvas.drawCircle(pageInfo.getPageWidth()/2,
-                pageInfo.getPageHeight()/2,
-                150,
+        canvas.drawCircle(w/2,
+                h/2,
+                w/2,
                 paint);
+
+        paint.setColor(Color.BLUE);
+        paint.setTextSize(42*1000); // 42 pt
+
+        canvas.drawText(
+                "Test Page " + pagenumber,
+                (float)leftMargin,
+                (float)titleBaseLine,
+                paint);
+
     }
 
 
