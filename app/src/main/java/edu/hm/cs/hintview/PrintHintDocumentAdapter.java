@@ -92,7 +92,7 @@ public class PrintHintDocumentAdapter extends PrintDocumentAdapter {
         for (int i = 0; i < 4; i++) {
             if (pageInRange(pages, i))
             {
-                PdfDocument.PageInfo newPage = new PdfDocument.PageInfo.Builder((int)Math.round(width_Mils*72.27),(int)Math.round(height_Mils*72.27), i).create();
+                PdfDocument.PageInfo newPage = new PdfDocument.PageInfo.Builder((int)Math.round(width_Mils*72.27/1000.0),(int)Math.round(height_Mils*72.27/1000.0), i).create();
 
                 PdfDocument.Page page = hintDocument.startPage(newPage);
 
@@ -102,7 +102,7 @@ public class PrintHintDocumentAdapter extends PrintDocumentAdapter {
                     hintDocument = null;
                     return;
                 }
-                drawPage(page, i);
+                drawPage(page, i+1); // page numbers start at 1
                 hintDocument.finishPage(page);
             }
         }
@@ -135,13 +135,15 @@ public class PrintHintDocumentAdapter extends PrintDocumentAdapter {
                           int pagenumber) {
         Canvas canvas = page.getCanvas();
 
-        pagenumber++; // Make sure page numbers start at 1
-        int w = canvas.getWidth();
-        int h = canvas.getHeight();
-        int r = canvas.getDensity();
+        int w = canvas.getWidth(); // width in pixel. Einheit scheinbar  pt
+        int h = canvas.getHeight(); // height in pixel.
+        int r = canvas.getDensity(); // Einheit unklar.
 
         int titleBaseLine = h/5;
         int leftMargin = w/10;
+        int w_pt = page.getInfo().getPageWidth(); // width in pt
+        int h_pt = page.getInfo().getPageHeight(); // Heigth in pt
+
 
         Paint paint = new Paint();
 
@@ -157,7 +159,7 @@ public class PrintHintDocumentAdapter extends PrintDocumentAdapter {
                 paint);
 
         paint.setColor(Color.BLUE);
-        paint.setTextSize(42*1000); // 42 pt
+        paint.setTextSize(42); // 42 pt
 
         canvas.drawText(
                 "Test Page " + pagenumber,
