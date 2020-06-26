@@ -1,0 +1,2351 @@
+\I\X447:Accumulate the constant until \\{cur\_tok} is not a suitable digit\X
+\U446.
+\I\X873:Add the width of node \|s to \\{act\_width}\X
+\U871.
+\I\X844:Add the width of node \|s to \\{break\_width}\X
+\U842.
+\I\X872:Add the width of node \|s to \\{disc\_width}\X
+\U871.
+\I\X459:Adjust \(f)for the magnification ratio\X
+\U455.
+\I\X1216:Adjust \(f)for the setting of \.{\\globaldefs}\X
+\U1213.
+\I\X748:Adjust \(s)\\{shift\_up} and \\{shift\_down} for the case of a fraction line\X
+\U745.
+\I\X747:Adjust \(s)\\{shift\_up} and \\{shift\_down} for the case of no fraction line\X
+\U745.
+\I\X869:Advance \(c)\\{cur\_p} to the node following the present string of characters\X
+\U868.
+\I\X1364:Advance \(p)past a whatsit node in the \(l)\\{line\_break} loop\X
+\U868.
+\I\X1365:Advance \(p)past a whatsit node in the \(p)pre-hyphenation loop\X
+\U898.
+\I\X396:Advance \(r)\|r; \&{goto} \\{found} if the parameter delimiter has been fully matched, otherwise \&{goto} \&{continue}\X
+\U394.
+\I\X131:Allocate entire node \|p and \&{goto} \\{found}\X
+\U129.
+\I\X130:Allocate from the top of node \|p and \&{goto} \\{found}\X
+\U129.
+\I\X1108:Apologize for inability to do the operation now, unless \.{\\unskip} follows non-glue\X
+\U1107.
+\I\X569:Apologize for not loading the font, \&{goto} \\{done}\X
+\U568.
+\I\X912:Append a ligature and/or kern to the translation; \&{goto} \&{continue} if the stack of inserted ligatures is nonempty\X
+\U908.
+\I\X1080:Append a new leader node that uses \\{cur\_box}\X
+\U1077.
+\I\X964:Append a new letter or a hyphen level\X
+\U963.
+\I\X939:Append a new letter or hyphen\X
+\U937.
+\I\X1043:Append a normal inter-word space to the current list, then \&{goto} \\{big\_switch}\X
+\U1032.
+\I\X892:Append a penalty node, if a nonzero penalty is appropriate\X
+\U882.
+\I\X1010:Append an insertion to the current page and \&{goto} \\{contribute}\X
+\U1002.
+\I\X769:Append any \\{new\_hlist} entries for \|q, and any appropriate penalties\X
+\U762.
+\I\X1078:Append box \\{cur\_box} to the current list, shifted by \\{box\_context}\X
+\U1077.
+\I\X1036:Append character \\{cur\_chr} and the following characters (if~any) to the current hlist in the current font; \&{goto} \\{reswitch} when a non-character has been fetched\X
+\U1032.
+\I\X919:Append characters of \\{hu} [ \|j $\MRL{{.}{.}}$ ] to \\{major\_tail}, advancing~\|j\X
+\U918.
+\I\X768:Append inter-element spacing based on \\{r\_type} and \|t\X
+\U762.
+\I\X811:Append tabskip glue and an empty box to list \|u, and update \|s and \|t as the prototype nodes are passed\X
+\U810.
+\I\X1127:Append the accent with appropriate kerns, then set \|p: $\K$ \|q\X
+\U1125.
+\I\X780:Append the current tabskip glue to the preamble list\X
+\U779.
+\I\X1206:Append the display and perhaps also the equation number\X
+\U1201.
+\I\X1207:Append the glue or equation number following the display\X
+\U1201.
+\I\X1205:Append the glue or equation number preceding the display\X
+\U1201.
+\I\X890:Append the new box to the current vertical list, followed by the list of special nodes taken out of the box by the packager\X
+\U882.
+\I\X940:Append the value \|n to list \|p\X
+\U939.
+\I\X238:Assign the values \\{depth\_threshold}: $\K$ \\{show\_box\_depth} and \\{breadth\_max}: $\K$ \\{show\_box\_breadth}\X
+\U200.
+\I\X1219, 1220, 1223, 1226, 1227, 1228, 1230, 1234, 1236, 1237, 1243, 1244, 1250, 1254, 1255, 1258, 1266:Assignments\X
+\U1213.
+\I\X1122:Attach list \|p to the current list, and record its length; then finish up and \&{return}\X
+\U1121.
+\I\X753:Attach the limits to \|y and adjust \\{height}(\|v), \\{depth}(\|v) to account for their presence\X
+\U752.
+\I\X339:Back up an outer control sequence so that it can be reread\X
+\U338.
+\I\X59, 60, 61, 62, 64, 65, 66, 67, 264, 265, 520, 701, 1357, 1508:Basic printing procedures\X
+\U4.
+\I\X1019:Break the current page at node \|p, put it in box~255, and put the remaining nodes on the contribution list\X
+\U1016.
+\I\X878:Break the paragraph at the chosen breakpoints, justify the resulting lines to the correct widths, and append them to the current vertical list\X
+\U817.
+\I\X1151:Calculate the length, \|l, and the shift amount, \|s, of the display lines\X
+\U1147.
+\I\X1148:Calculate the natural width, \|w, by which the characters of the final line extend to the right of the reference point, plus two ems; or set \|w: $\K$ \\{max\_dimen} if the non-blank information on that line is affected by stretching or
+shrinking\X
+\U1147.
+\I\X891:Call the packaging subroutine, setting \\{just\_box} to the justified box\X
+\U882.
+\I\X868:Call \\{try\_break} if \\{cur\_p} is a legal breakpoint; on the second pass, also try to hyphenate the next word, if \\{cur\_p} is a glue node; then advance \\{cur\_p} to the next node of the paragraph that could possibly be a legal breakpoint\X
+\U865.
+\I\X913:Carry out a ligature replacement, updating the cursor structure and possibly advancing~\|j; \&{goto} \&{continue} if the cursor doesn't advance, otherwise \&{goto} \\{done}\X
+\U911.
+\I\X208:Case statement to copy different types and set \\{words} to the number of initial words not yet copied\X
+\U207.
+\I\X1427:Cases for `Fetch the \\{dead\_cycles} or the \\{insert\_penalties}'\X
+\U421.
+\I\X1477, 1481, 1482, 1484:Cases for evaluation of the current term\X
+\U1469.
+\I\X1404, 1407, 1490:Cases for fetching a dimension value\X
+\U426.
+\I\X1493:Cases for fetching a glue value\X
+\U1466.
+\I\X1494:Cases for fetching a mu value\X
+\U1466.
+\I\X1384, 1398, 1401, 1489:Cases for fetching an integer value\X
+\U426.
+\I\X735:Cases for noads that can follow a \\{bin\_noad}\X
+\U730.
+\I\X732:Cases for nodes that can appear in an mlist, after which we \&{goto} \\{done\_with\_node}\X
+\U730.
+\I\X1429:Cases for \\{alter\_integer}\X
+\U1248.
+\I\X1452, 1453, 1455:Cases for \\{conditional}\X
+\U503.
+\I\X1512:Cases for \\{eq\_destroy}\X
+\U277.
+\I\X1435:Cases for \\{input}\X
+\U380.
+\I\X1392:Cases for \\{print\_param}\X
+\U239.
+\I\X1410, 1424:Cases for \\{show\_whatever}\X
+\U1295.
+\I\X1391:Cases of \\{assign\_toks} for \\{print\_cmd\_chr}\X
+\U233.
+\I\X1449:Cases of \\{expandafter} for \\{print\_cmd\_chr}\X
+\U268.
+\I\X700:Cases of \\{flush\_node\_list} that arise in mlists only\X
+\U204.
+\I\X1087, 1102, 1120, 1134, 1135, 1170, 1175, 1188:Cases of \\{handle\_right\_brace} where a \\{right\_brace} triggers a delayed action\X
+\U1070.
+\I\X1450:Cases of \\{if\_test} for \\{print\_cmd\_chr}\X
+\U490.
+\I\X1434:Cases of \\{input} for \\{print\_cmd\_chr}\X
+\U379.
+\I\X1383, 1397, 1400, 1403, 1406, 1465, 1488, 1492:Cases of \\{last\_item} for \\{print\_cmd\_chr}\X
+\U419.
+\I\X1431:Cases of \\{left\_right} for \\{print\_cmd\_chr}\X
+\U1191.
+\I\X1349:Cases of \\{main\_control} that are for extensions to \TeX\X
+\U1047.
+\I\X1047:Cases of \\{main\_control} that are not part of the inner loop\X
+\U1032.
+\I\X1058, 1059, 1065, 1069, 1075, 1092, 1094, 1096, 1099, 1104, 1106, 1111, 1114, 1118, 1124, 1128, 1132, 1136, 1139, 1142, 1152, 1156, 1160, 1164, 1166, 1169, 1173, 1177, 1182, 1192, 1195:Cases of \\{main\_control} that build boxes and lists\X
+\U1047.
+\I\X1212, 1270, 1273, 1276, 1278, 1287, 1292:Cases of \\{main\_control} that don't depend on \\{mode}\X
+\U1047.
+\I\X1457:Cases of \\{prefix} for \\{print\_cmd\_chr}\X
+\U1211.
+\I\X229, 233, 241, 251, 268, 337, 379, 387, 414, 419, 471, 490, 494, 783, 986, 1055, 1061, 1074, 1091, 1110, 1117, 1145, 1159, 1172, 1181, 1191, 1211, 1222, 1225, 1233, 1253, 1257, 1263, 1265, 1275, 1280, 1289, 1294, 1297, 1348:Cases of \\{print\_cmd%
+\_chr} for symbolic printing of primitives\X
+\U300.
+\I\X1446:Cases of \\{read} for \\{print\_cmd\_chr}\X
+\U268.
+\I\X1510:Cases of \&{register} for \\{print\_cmd\_chr}\X
+\U414.
+\I\X1426:Cases of \\{set\_page\_int} for \\{print\_cmd\_chr}\X
+\U419.
+\I\X1521:Cases of \\{set\_shape} for \\{print\_cmd\_chr}\X
+\U268.
+\I\X692:Cases of \\{show\_node\_list} that arise in mlists only\X
+\U185.
+\I\X1420:Cases of \\{the} for \\{print\_cmd\_chr}\X
+\U268.
+\I\X1511:Cases of \\{toks\_register} for \\{print\_cmd\_chr}\X
+\U268.
+\I\X1409, 1418, 1423:Cases of \\{xray} for \\{print\_cmd\_chr}\X
+\U1294.
+\I\X347:Cases where character is ignored\X
+\U346.
+\I\X615:Change buffered instruction to \|y or \|w and \&{goto} \\{found}\X
+\U614.
+\I\X616:Change buffered instruction to \|z or \|x and \&{goto} \\{found}\X
+\U614.
+\I\X777:Change current mode to ${-}\\{vmode}$ for \.{\\halign}, ${-}\\{hmode}$ for \.{\\valign}\X
+\U776.
+\I\X884:Change discretionary to compulsory and set \\{disc\_break}: $\K$ \\{true}\X
+\U883.
+\I\X623:Change font \\{dvi\_f} to \|f\X
+\U622.
+\I\X346:Change state if necessary, and \&{goto} \&{switch} if the current character should be ignored, or \&{goto} \\{reswitch} if the current character changes to another\X
+\U345.
+\I\X1291:Change the case of the token in \|p, if a change is appropriate\X
+\U1290.
+\I\X765:Change the current style and \&{goto} \\{delete\_q}\X
+\U763.
+\I\X88:Change the interaction level and \&{return}\X
+\U86.
+\I\X733:Change this node to a style node followed by the correct choice, then \&{goto} \\{done\_with\_node}\X
+\U732.
+\I\X51:Character \|k cannot be printed\X
+\U50.
+\I\X246:Character \|s is the current new-line character\X
+\Us60\ET61.
+\I\X172:Check flags of unavailable nodes\X
+\U169.
+\I\X572:Check for charlist cycle\X
+\U571.
+\I\X778:Check for improper alignment in displayed math\X
+\U776.
+\I\X976:Check if node \|p is a new champion breakpoint; then \(go)\&{goto} \\{done} if \|p is a forced break or if the page-so-far is already too full\X
+\U974.
+\I\X1007:Check if node \|p is a new champion breakpoint; then \(if)if it is time for a page break, prepare for output, and either fire up the user's output routine and \&{return} or ship out the page and \&{goto} \\{done}\X
+\U999.
+\I\X170:Check single-word \\{avail} list\X
+\U169.
+\I\X1199:Check that another \.\$ follows\X
+\Us1196\ET1208.
+\I\X1197:Check that the necessary fonts for math symbols are present; if not, flush the current math lists and set \\{danger}: $\K$ \\{true}\X
+\U1196.
+\I\X901:Check that the nodes following \\{hb} permit hyphenation and that at least $\\{l\_hyf}+\\{r\_hyf}$ letters have been found, otherwise \&{goto} \\{done1}\X
+\U896.
+\I\X15, 113, 292, 523, 1251:Check the ``constant'' values for consistency\X
+\U1334.
+\I\X55:Check the pool check sum\X
+\U54.
+\I\X171:Check variable-size \\{avail} list\X
+\U169.
+\I\X867:Clean up the memory by removing the break nodes\X
+\Us817\ET865.
+\I\X652:Clear dimensions to zero\X
+\Us651\ET670.
+\I\X284:Clear off top level from \\{save\_stack}\X
+\U283.
+\I\X1331:Close the format file\X
+\U1304.
+\I\X453:Coerce glue to a dimension\X
+\Us451\ET457.
+\I\X9, 58:Compiler directives\X
+\U4.
+\I\X725:Complain about an undefined family and set \\{cur\_i} null\X
+\U724.
+\I\X372:Complain about an undefined macro\X
+\U369.
+\I\X375:Complain about missing \.{\\endcsname}\X
+\Us374\ET1453.
+\I\X461:Complain about unknown unit and \&{goto} \\{done2}\X
+\U460.
+\I\X430:Complain that \.{\\the} can't do this; give zero result\X
+\U415.
+\I\X1168:Complain that the user should have said \.{\\mathaccent}\X
+\U1167.
+\I\X1187:Compleat the incompleat noad\X
+\U1186.
+\I\X1300:Complete a potentially long \.{\\show} command\X
+\U1295.
+\I\X1486:Compute \(f)$f=\lfloor xn/d+{1\over2}\rfloor$\X
+\U1485.
+\I\X1242:Compute result of \\{multiply} or \\{divide}, put it in \\{cur\_val}\X
+\U1238.
+\I\X1240:Compute result of \&{register} or \\{advance}, put it in \\{cur\_val}\X
+\U1238.
+\I\X743:Compute the amount of skew\X
+\U740.
+\I\X1009:Compute the badness, \|b, of the current page, using \\{awful\_bad} if the box is too full\X
+\U1007.
+\I\X977:Compute the badness, \|b, using \\{awful\_bad} if the box is too full\X
+\U976.
+\I\X861:Compute the demerits, \|d, from \|r to \\{cur\_p}\X
+\U857.
+\I\X842:Compute the discretionary \\{break\_width} values\X
+\U839.
+\I\X263:Compute the hash code \|h\X
+\U261.
+\I\X767:Compute the magic offset\X
+\U1339.
+\I\X716:Compute the minimum suitable height, \|w, and the corresponding number of extension steps, \|n; also set \\{width}(\|b)\X
+\U715.
+\I\X852:Compute the new line width\X
+\U837.
+\I\X1239:Compute the register location \|l and its type \|p; but \&{return} if invalid\X
+\U1238.
+\I\X1241:Compute the sum of two glue specs\X
+\U1240.
+\I\X1480:Compute the sum or difference of two glue specs\X
+\U1478.
+\I\X967:Compute the trie op code, \|v, and set \|l: $\K$ \T{0}\X
+\U965.
+\I\X839:Compute the values of \\{break\_width}\X
+\U838.
+\I\X614:Consider a node with matching width; \&{goto} \\{found} if it's a hit\X
+\U613.
+\I\X853:Consider the demerits for a line from \|r to \\{cur\_p}; deactivate node \|r if it should no longer be active; then \&{goto} \&{continue} if a line from \|r to \\{cur\_p} is infeasible, otherwise record a new feasible break\X
+\U831.
+\I\X11:Constants in the outer block\X
+\U4.
+\I\X752:Construct a box with limits above and below it, skewed by \\{delta}\X
+\U751.
+\I\X761:Construct a sub/superscript combination box \|x, with the superscript offset by \\{delta}\X
+\U758.
+\I\X759:Construct a subscript box \|x when there is no superscript\X
+\U758.
+\I\X760:Construct a superscript box \|x\X
+\U758.
+\I\X749:Construct a vlist box for the fraction, according to \\{shift\_up} and \\{shift\_down}\X
+\U745.
+\I\X715:Construct an extensible character in a new box \|b, using recipe \\{rem\_byte}(\|q) and font \|f\X
+\U712.
+\I\X401:Contribute an entire group to the current parameter\X
+\U394.
+\I\X399:Contribute the recently matched tokens to the current parameter, and \&{goto} \&{continue} if a partial match is still in effect; but abort if $\|s\K\\{null}$\X
+\U394.
+\I\X731:Convert \(a)a final \\{bin\_noad} to an \\{ord\_noad}\X
+\Us728\ET730.
+\I\X431:Convert \(c)\\{cur\_val} to a lower level\X
+\U415.
+\I\X734:Convert \(m)math glue to ordinary glue\X
+\U732.
+\I\X756:Convert \(n)\\{nucleus}(\|q) to an hlist and attach the sub/superscripts\X
+\U730.
+\I\X1440:Convert string \|s into a new pseudo file\X
+\U1439.
+\I\X797:Copy the tabskip glue between columns\X
+\U793.
+\I\X796:Copy the templates from node \\{cur\_loop} into node \|p\X
+\U795.
+\I\X468:Copy the token list\X
+\U467.
+\I\X757:Create a character node \|p for \\{nucleus}(\|q), possibly followed by a kern node for the italic correction, and set \\{delta} to the italic correction if a subscript is present\X
+\U756.
+\I\X1126:Create a character node \|q for the next character, but set \|q: $\K$ \\{null} if problems arise\X
+\U1125.
+\I\X1506:Create a new array element of type \|t with index \|i\X
+\U1505.
+\I\X464:Create a new glue specification whose width is \\{cur\_val}; scan for its stretch and shrink components\X
+\U463.
+\I\X1011:Create a page insertion node with $\\{subtype}(\|r)\K\\{qi}(\|n)$, and include the glue correction for box \|n in the current page state\X
+\U1010.
+\I\X866:Create an active breakpoint representing the beginning of the paragraph\X
+\U865.
+\I\X916:Create and append a discretionary node as an alternative to the unhyphenated word, and continue to develop both branches until they become equivalent\X
+\U915.
+\I\X746:Create equal-width boxes \|x and \|z for the numerator and denominator, and compute the default amounts \\{shift\_up} and \\{shift\_down} by which they are displaced from the baseline\X
+\U745.
+\I\X838:Create new active nodes for the best feasible breaks just found\X
+\U837.
+\I\X1330:Create the \\{format\_ident}, open the format file, and inform the user that dumping has begun\X
+\U1304.
+\I\X226:Current \\{mem} equivalent of glue parameter number \|n\X
+\Us154\ET156.
+\I\X862:Deactivate node \|r\X
+\U853.
+\I\X1438, 1496, 1501, 1505:Declare \eTeX\ procedures for expanding\X
+\U368.
+\I\X1415, 1458, 1467, 1472:Declare \eTeX\ procedures for scanning\X
+\U411.
+\I\X1416, 1439:Declare \eTeX\ procedures for token lists\X
+\U466.
+\I\X286, 1394, 1395, 1442, 1443, 1460, 1462, 1463, 1507, 1509, 1515, 1516, 1517, 1518, 1519:Declare \eTeX\ procedures for tracing and input\X
+\U270.
+\I\X1389, 1412, 1428:Declare \eTeX\ procedures for use by \\{main\_control}\X
+\U817.
+\I\X1045, 1049, 1051, 1052, 1053, 1056, 1062, 1063, 1066, 1071, 1072, 1077, 1081, 1086, 1088, 1093, 1095, 1097, 1098, 1101, 1103, 1105, 1107, 1112, 1115, 1119, 1121, 1125, 1129, 1131, 1133, 1137, 1138, 1140, 1144, 1153, 1157, 1161, 1162, 1165, 1167,
+1174, 1176, 1178, 1183, 1193, 1196, 1202, 1213, 1272, 1277, 1281, 1290, 1295, 1304, 1350, 1378:Declare action procedures for use by \\{main\_control}\X
+\U1032.
+\I\X736, 737, 738, 739, 740, 745, 751, 754, 758, 764:Declare math construction procedures\X
+\U728.
+\I\X946, 950, 951, 955, 959, 961, 962, 968:Declare procedures for preprocessing hyphenation patterns\X
+\U944.
+\I\X693, 694, 696:Declare procedures needed for displaying the elements of mlists\X
+\U181.
+\I\X1468, 1473:Declare procedures needed for expressions\X
+\U463.
+\I\X1351, 1352:Declare procedures needed in \\{do\_extension}\X
+\U1350.
+\I\X1370, 1372, 1375:Declare procedures needed in \\{hlist\_out}, \\{vlist\_out}\X
+\U621.
+\I\X579, 580:Declare procedures that scan font-related stuff\X
+\U411.
+\I\X435, 436, 437, 438, 439, 1497:Declare procedures that scan restricted classes of integers\X
+\U411.
+\I\X828, 831, 879, 897, 944:Declare subprocedures for \\{line\_break}\X
+\U817.
+\I\X1217, 1231, 1238, 1245, 1246, 1247, 1248, 1249, 1259, 1267:Declare subprocedures for \\{prefixed\_command}\X
+\U1213.
+\I\X1479, 1483, 1485:Declare subprocedures for \\{scan\_expr}\X
+\U1468.
+\I\X711, 713, 714:Declare subprocedures for \\{var\_delimiter}\X
+\U708.
+\I\X1186:Declare the function called \\{fin\_mlist}\X
+\U1176.
+\I\X525:Declare the function called \\{open\_fmt\_file}\X
+\U1305.
+\I\X908:Declare the function called \\{reconstitute}\X
+\U897.
+\I\X787:Declare the procedure called \\{align\_peek}\X
+\U802.
+\I\X1014:Declare the procedure called \\{fire\_up}\X
+\U996.
+\I\X784:Declare the procedure called \\{get\_preamble\_token}\X
+\U776.
+\I\X1070:Declare the procedure called \\{handle\_right\_brace}\X
+\U1032.
+\I\X789:Declare the procedure called \\{init\_span}\X
+\U788.
+\I\X381:Declare the procedure called \\{insert\_relax}\X
+\U368.
+\I\X391:Declare the procedure called \\{macro\_call}\X
+\U368.
+\I\X300:Declare the procedure called \\{print\_cmd\_chr}\X
+\U254.
+\I\X227:Declare the procedure called \\{print\_skip\_param}\X
+\U181.
+\I\X308:Declare the procedure called \\{runaway}\X
+\U121.
+\I\X294:Declare the procedure called \\{show\_token\_list}\X
+\U121.
+\I\X348:Decry the invalid character and \&{goto} \\{restart}\X
+\U346.
+\I\X90:Delete \(c)$\|c-\.{"0"}$ tokens and \&{goto} \&{continue}\X
+\U86.
+\I\X1021:Delete \(t)the page-insertion nodes\X
+\U1016.
+\I\X885:Destroy the \|t nodes following \|q, and make \|r point to the following node\X
+\U884.
+\I\X666:Determine horizontal glue shrink setting, then \&{return} or \hbox{\&{goto} \\{common\_ending}}\X
+\U659.
+\I\X660:Determine horizontal glue stretch setting, then \&{return} or \hbox{\&{goto} \\{common\_ending}}\X
+\U659.
+\I\X1204:Determine the displacement, \|d, of the left edge of the equation, with respect to the line size \|z, assuming that $\|l\K\\{false}$\X
+\U1201.
+\I\X667:Determine the shrink order\X
+\Us666, 678\ETs798.
+\I\X661:Determine the stretch order\X
+\Us660, 675\ETs798.
+\I\X674:Determine the value of \\{height}(\|r) and the appropriate glue setting; then \&{return} or \&{goto} \\{common\_ending}\X
+\U670.
+\I\X659:Determine the value of \\{width}(\|r) and the appropriate glue setting; then \&{return} or \&{goto} \\{common\_ending}\X
+\U651.
+\I\X678:Determine vertical glue shrink setting, then \&{return} or \hbox{\&{goto} \\{common\_ending}}\X
+\U674.
+\I\X675:Determine vertical glue stretch setting, then \&{return} or \hbox{\&{goto} \\{common\_ending}}\X
+\U674.
+\I\X1214:Discard erroneous prefixes and \&{return}\X
+\U1213.
+\I\X1215:Discard the prefixes \.{\\long} and \.{\\outer} if they are irrelevant\X
+\U1213.
+\I\X980:Dispense with trivial cases of void or bad boxes\X
+\U979.
+\I\X199:Display adjustment \|p\X
+\U185.
+\I\X186:Display box \|p\X
+\U185.
+\I\X697:Display choice node \|p\X
+\U692.
+\I\X197:Display discretionary \|p\X
+\U185.
+\I\X699:Display fraction noad \|p\X
+\U692.
+\I\X191:Display glue \|p\X
+\U185.
+\I\X190:Display insertion \|p\X
+\U185.
+\I\X193:Display kern \|p\X
+\U185.
+\I\X192:Display leaders \|p\X
+\U191.
+\I\X195:Display ligature \|p\X
+\U185.
+\I\X198:Display mark \|p\X
+\U185.
+\I\X194:Display math node \|p\X
+\U185.
+\I\X185:Display node \|p\X
+\U184.
+\I\X698:Display normal noad \|p\X
+\U692.
+\I\X196:Display penalty \|p\X
+\U185.
+\I\X189:Display rule \|p\X
+\U185.
+\I\X187:Display special fields of the unset node \|p\X
+\U186.
+\I\X314:Display the current context\X
+\U313.
+\I\X1013:Display the insertion split cost\X
+\U1012.
+\I\X1008:Display the page break cost\X
+\U1007.
+\I\X296:Display the token $(\|m,\|c)$\X
+\U295.
+\I\X504:Display the value of \|b\X
+\U500.
+\I\X188:Display the value of \\{glue\_set}(\|p)\X
+\U186.
+\I\X1358:Display the whatsit node \|p\X
+\U185.
+\I\X295:Display token \|p, and \&{return} if there are problems\X
+\U294.
+\I\X730:Do first-pass processing based on \\{type}(\|q); \&{goto} \\{done\_with\_noad} if a noad has been fully processed, \&{goto} \\{check\_dimensions} if it has been translated into \\{new\_hlist}(\|q), or \&{goto} \\{done\_with\_node} if a node has
+been fully processed\X
+\U729.
+\I\X1042:Do ligature or kern command, returning to \\{main\_lig\_loop} or \\{main\_loop\_wrapup} or \\{main\_loop\_move}\X
+\U1041.
+\I\X322:Do magic computation\X
+\U294.
+\I\X1376:Do some work that has been queued up for \.{\\write}\X
+\U1375.
+\I\X1068:Drop current token and complain that it was unmatched\X
+\U1066.
+\I\X1328:Dump a couple more things and the closing check word\X
+\U1304.
+\I\X1309:Dump constants for consistency check\X
+\U1304.
+\I\X1317:Dump regions 1 to 4 of \\{eqtb}\X
+\U1315.
+\I\X1318:Dump regions 5 and 6 of \\{eqtb}\X
+\U1315.
+\I\X1387, 1444:Dump the \eTeX\ state\X
+\U1309.
+\I\X1324:Dump the array info for internal font number \|k\X
+\U1322.
+\I\X1313:Dump the dynamic memory\X
+\U1304.
+\I\X1322:Dump the font information\X
+\U1304.
+\I\X1320:Dump the hash table\X
+\U1315.
+\I\X1326:Dump the hyphenation tables\X
+\U1304.
+\I\X1311:Dump the string pool\X
+\U1304.
+\I\X1315:Dump the table of equivalents\X
+\U1304.
+\I\X1024:Either append the insertion node \|p after node \|q, and remove it from the current page, or delete \\{node}(\|p)\X
+\U1022.
+\I\X1022:Either insert the material specified by node \|p into the appropriate box, or hold it for the next page; also delete node \|p from the current page\X
+\U1016.
+\I\X503:Either process \.{\\ifcase} or set \|b to the value of a boolean condition\X
+\U500.
+\I\X601:Empty the last bytes out of \\{dvi\_buf}\X
+\U644.
+\I\X1381:Enable \eTeX, if requested\X
+\U1339.
+\I\X1030:Ensure that box 255 is empty after output\X
+\U1028.
+\I\X1017:Ensure that box 255 is empty before output\X
+\U1016.
+\I\X956:Ensure that $\\{trie\_max}\G\|h+\T{256}$\X
+\U955.
+\I\X941:Enter a hyphenation exception\X
+\U937.
+\I\X963:Enter all of the patterns into a linked trie, until coming to a right brace\X
+\U962.
+\I\X937:Enter as many hyphenation exceptions as are listed, until coming to a right brace; then \&{return}\X
+\U936.
+\I\X351:Enter \\{skip\_blanks} state, emit a space\X
+\U349.
+\I\X80, 83, 84, 95, 96, 97:Error handling procedures\X
+\U4.
+\I\X1478:Evaluate the current expression\X
+\U1469.
+\I\X653:Examine node \|p in the hlist, taking account of its effect on the dimensions of the new box, or moving it to the adjustment list; then advance \|p to the next node\X
+\U651.
+\I\X671:Examine node \|p in the vlist, taking account of its effect on the dimensions of the new box; then advance \|p to the next node\X
+\U670.
+\I\X369:Expand a nonmacro\X
+\U368.
+\I\X1373:Expand macros in the token list and make \\{link}(\\{def\_ref}) point to the result\X
+\U1372.
+\I\X480:Expand the next part of the input\X
+\U479.
+\I\X370:Expand the token after the next token\X
+\U369.
+\I\X1026:Explain that too many dead cycles have occurred in a row\X
+\U1014.
+\I\X448:Express astonishment that no number was here\X
+\U446.
+\I\X1130:Express consternation over the fact that no alignment is in progress\X
+\U1129.
+\I\X477:Express shock at the missing left brace; \&{goto} \\{found}\X
+\U476.
+\I\X392:Feed the macro body and its parameters to the scanner\X
+\U391.
+\I\X422:Fetch a box dimension\X
+\U415.
+\I\X416:Fetch a character code from some table\X
+\U415.
+\I\X427:Fetch a font dimension\X
+\U415.
+\I\X428:Fetch a font integer\X
+\U415.
+\I\X1522:Fetch a penalties array element\X
+\U425.
+\I\X429:Fetch a register\X
+\U415.
+\I\X417:Fetch a token list or font identifier, provided that $\\{level}\K\\{tok\_val}$\X
+\U415.
+\I\X451:Fetch an internal dimension and \&{goto} \\{attach\_sign}, or fetch an internal integer\X
+\U450.
+\I\X426:Fetch an item in the current node, if appropriate\X
+\U415.
+\I\X423:Fetch something on the \\{page\_so\_far}\X
+\U415.
+\I\X421:Fetch the \\{dead\_cycles} or the \\{insert\_penalties}\X
+\U415.
+\I\X425:Fetch the \\{par\_shape} size\X
+\U415.
+\I\X424:Fetch the \\{prev\_graf}\X
+\U415.
+\I\X420:Fetch the \\{space\_factor} or the \\{prev\_depth}\X
+\U415.
+\I\X876:Find an active node with fewest demerits\X
+\U875.
+\I\X925:Find hyphen locations for the word in \\{hc}, or \&{return}\X
+\U897.
+\I\X865:Find optimal breakpoints\X
+\U817.
+\I\X877:Find the best active node for the desired looseness\X
+\U875.
+\I\X1012:Find the best way to split the insertion, and change \\{type}(\|r) to \\{split\_up}\X
+\U1010.
+\I\X1044:Find the glue specification, \\{main\_p}, for text spaces in the current font\X
+\Us1043\ET1045.
+\I\X1208:Finish an alignment in a display\X
+\U814.
+\I\X1201:Finish displayed math\X
+\U1196.
+\I\X665:Finish issuing a diagnostic message for an overfull or underfull hbox\X
+\U651.
+\I\X677:Finish issuing a diagnostic message for an overfull or underfull vbox\X
+\U670.
+\I\X353:Finish line, emit a \.{\\par}\X
+\U349.
+\I\X350:Finish line, emit a space\X
+\U349.
+\I\X352:Finish line, \&{goto} \&{switch}\X
+\U349.
+\I\X1198:Finish math in text\X
+\U1196.
+\I\X644:Finish the \.{DVI} file\X
+\U1335.
+\I\X1380:Finish the extensions\X
+\U1335.
+\I\X1027:Fire up the user's output routine and \&{return}\X
+\U1014.
+\I\X432:Fix the reference count, if any, and negate \\{cur\_val} if \\{negative}\X
+\U415.
+\I\X641:Flush the box from memory, showing statistics if requested\X
+\U640.
+\I\X1050, 1100, 1113, 1146:Forbidden cases detected in \\{main\_control}\X
+\U1047.
+\I\X612:Generate a \\{down} or \\{right} command for \|w and \&{return}\X
+\U609.
+\I\X611:Generate a \\{y0} or \\{z0} command in order to reuse a previous appearance of~\|w\X
+\U609.
+\I\X1382, 1390, 1396, 1399, 1402, 1405, 1408, 1417, 1419, 1422, 1425, 1430, 1433, 1445, 1448, 1456, 1464, 1487, 1491, 1520:Generate all \eTeX\ primitives\X
+\U1381.
+\I\X954:Get ready to compress the trie\X
+\U968.
+\I\X818, 829, 836, 850:Get ready to start line breaking\X
+\U817.
+\I\X1339:Get the first line of input and prepare to start\X
+\U1334.
+\I\X408:Get the next non-blank non-call token\X
+\Us407, 443, 457, 505, 527, 579, 1047, 1470\ETs1471.
+\I\X406:Get the next non-blank non-relax non-call token\X
+\Us405, 1080, 1086, 1153, 1162, 1213, 1228\ETs1272.
+\I\X443:Get the next non-blank non-sign token; set \\{negative} appropriately\X
+\Us442, 450\ETs463.
+\I\X360:Get the next token, suppressing expansion\X
+\U359.
+\I\X85:Get user's advice and \&{return}\X
+\U84.
+\I\X1033:Give diagnostic information, if requested\X
+\U1032.
+\I\X938:Give improper \.{\\hyphenation} error\X
+\U937.
+\I\X12, 14, 21, 28, 32, 34, 41, 52, 56, 75, 78, 81, 98, 106, 117, 118, 119, 120, 126, 167, 175, 183, 215, 248, 255, 258, 273, 288, 299, 303, 306, 307, 310, 311, 312, 335, 363, 384, 389, 390, 412, 440, 449, 482, 491, 495, 514, 515, 522, 528, 534, 541,
+551, 552, 557, 594, 597, 607, 618, 648, 649, 663, 686, 721, 726, 766, 772, 816, 823, 825, 827, 830, 835, 841, 849, 874, 894, 902, 907, 909, 923, 928, 945, 949, 952, 973, 982, 984, 991, 1034, 1076, 1268, 1283, 1301, 1307, 1333, 1344, 1347, 1385, 1393,
+1436, 1459, 1500, 1502, 1513:Global variables\X
+\U4.
+\I\X1147:Go into display math mode\X
+\U1140.
+\I\X1141:Go into ordinary math mode\X
+\Us1140\ET1144.
+\I\X803:Go through the preamble list, determining the column widths and changing the alignrecords to dummy unset boxes\X
+\U802.
+\I\X128:Grow more variable-size memory and \&{goto} \\{restart}\X
+\U127.
+\I\X1447:Handle \.{\\readline} and \&{goto} \\{done}\X
+\U485.
+\I\X1421:Handle \.{\\unexpanded} or \.{\\detokenize} and \&{return}\X
+\U467.
+\I\X1432:Handle a glue node for mixed\X
+\I\X349:Handle situations involving spaces, braces, changes of state\X
+\U346.
+\I\X837:If a line number class has ended, create new active nodes for the best feasible breaks in that class; then \&{return} if $\|r\K\\{last\_active}$, otherwise compute the new \\{line\_width}\X
+\U831.
+\I\X957:If all characters of the family fit relative to \|h, then \&{goto} \\{found},\30\ otherwise \&{goto} \\{not\_found}\X
+\U955.
+\I\X344:If an alignment entry has just ended, take appropriate action\X
+\U343.
+\I\X357:If an expanded code is present, reduce it and \&{goto} \\{start\_cs}\X
+\Us356\ET358.
+\I\X1306:If dumping is not allowed, abort\X
+\U1304.
+\I\X755:If instruction \\{cur\_i} is a kern with \\{cur\_c}, attach the kern after~\|q; or if it is a ligature with \\{cur\_c}, combine noads \|q and~\|p appropriately; then \&{return} if the cursor has moved past a noad, or \&{goto} \\{restart}\X
+\U754.
+\I\X904:If no hyphens were found, \&{return}\X
+\U897.
+\I\X870:If node \\{cur\_p} is a legal breakpoint, call \\{try\_break}; then update the active widths by including the glue in \\{glue\_ptr}(\\{cur\_p})\X
+\U868.
+\I\X974:If node \|p is a legal breakpoint, check if this break is the best known, and \&{goto} \\{done} if \|p is null or if the page-so-far is already too full to accept more stuff\X
+\U972.
+\I\X763:If node \|q is a style node, change the style and \&{goto} \\{delete\_q}; otherwise if it is not a noad, put it into the hlist, advance \|q, and \&{goto} \\{done}; otherwise set \|s to the size of noad \|q, set \|t to the associated type ($\\{ord%
+\_noad}\MRL{{.}{.}}\\{inner\_noad}$), and set \\{pen} to the associated penalty\X
+\U762.
+\I\X834:If node \|r is of type \\{delta\_node}, update \\{cur\_active\_width}, set \\{prev\_r} and \\{prev\_prev\_r}, then \&{goto} \&{continue}\X
+\U831.
+\I\X1082:If the current list ends with a box node, delete it from the list and make \\{cur\_box} point to it; otherwise set \\{cur\_box}: $\K$ \\{null}\X
+\U1081.
+\I\X1002:If the current page is empty and node \|p is to be deleted, \&{goto} \\{done1}; otherwise use node \|p to update the state of the current page; if this node is an insertion, \&{goto} \\{contribute}; otherwise if this node is not a legal
+breakpoint, \&{goto} \\{contribute} or \\{update\_heights}; otherwise set \\{pi} to the penalty associated with this breakpoint\X
+\U999.
+\I\X1038:If the cursor is immediately followed by the right boundary, \&{goto} \\{reswitch}; if it's followed by an invalid character, \&{goto} \\{big\_switch}; otherwise move the cursor one step to the right and \&{goto} \\{main\_lig\_loop}\X
+\U1036.
+\I\X478:If the next character is a parameter number, make \\{cur\_tok} a \\{match} token; but if it is a left brace, store `\\{left\_brace}, \\{end\_match}', set \\{hash\_brace}, and \&{goto} \\{done}\X
+\U476.
+\I\X794:If the preamble list has been traversed, check that the row has ended\X
+\U793.
+\I\X1229:If the right-hand side is a token parameter or token register, finish the assignment and \&{goto} \\{done}\X
+\U1228.
+\I\X933:If the string \\{hyph\_word}[\|h] is less than \(hc)\\{hc}[\T{1..}\\{hn}], \&{goto} \\{not\_found}; but if the two strings are equal, set \\{hyf} to the hyphen positions and \&{goto} \\{found}\X
+\U932.
+\I\X943:If the string \\{hyph\_word}[\|h] is less than \(or)or equal to \|s, interchange $(\\{hyph\_word}[\|h],\\{hyph\_list}[\|h])$ with $(\|s,\|p)$\X
+\U942.
+\I\X911:If there's a ligature or kern at the cursor position, update the data structures, possibly advancing~\|j; continue until the cursor moves\X
+\U908.
+\I\X1041:If there's a ligature/kern command relevant to \\{cur\_l} and \\{cur\_r}, adjust the text appropriately; exit to \\{main\_loop\_wrapup}\X
+\U1036.
+\I\X1262:If this font has already been loaded, set \|f to the internal font number and \&{goto} \\{common\_ending}\X
+\U1259.
+\I\X354:If this \\{sup\_mark} starts an expanded character like~\.{\^\^A} or~\.{\^\^df}, then \&{goto} \\{reswitch}, otherwise set \\{state}: $\K$ \\{mid\_line}\X
+\U346.
+\I\X1185:Ignore the fraction operation and complain about this ambiguous case\X
+\U1183.
+\I\X1355:Implement \.{\\closeout}\X
+\U1350.
+\I\X1377:Implement \.{\\immediate}\X
+\U1350.
+\I\X1353:Implement \.{\\openout}\X
+\U1350.
+\I\X1379:Implement \.{\\setlanguage}\X
+\U1350.
+\I\X1356:Implement \.{\\special}\X
+\U1350.
+\I\X1354:Implement \.{\\write}\X
+\U1350.
+\I\X1361:Incorporate a whatsit node into a vbox\X
+\U671.
+\I\X1362:Incorporate a whatsit node into an hbox\X
+\U653.
+\I\X655:Incorporate box dimensions into the dimensions of the hbox that will contain~it\X
+\U653.
+\I\X672:Incorporate box dimensions into the dimensions of the vbox that will contain~it\X
+\U671.
+\I\X656:Incorporate character dimensions into the dimensions of the hbox that will contain~it, then move to the next node\X
+\U653.
+\I\X658:Incorporate glue into the horizontal totals\X
+\U653.
+\I\X673:Incorporate glue into the vertical totals\X
+\U671.
+\I\X582:Increase the number of parameters in the last font\X
+\U580.
+\I\X893:Initialize for hyphenating a paragraph\X
+\U865.
+\I\X166, 224, 230, 234, 242, 252, 260, 554, 948, 953, 1218, 1303, 1371, 1386, 1504:Initialize table entries (done by \.{INITEX} only)\X
+\U8.
+\I\X1003:Initialize the current page, insert the \.{\\topskip} glue ahead of \|p, and \&{goto} \&{continue}\X
+\U1002.
+\I\X333:Initialize the input routines\X
+\U1339.
+\I\X57, 63, 529, 535:Initialize the output routines\X
+\U1334.
+\I\X77:Initialize the print \\{selector} based on \\{interaction}\X
+\Us1267\ET1339.
+\I\X792, 799, 822, 983, 990:Initialize the special list heads and constant nodes\X
+\U166.
+\I\X619:Initialize variables as \\{ship\_out} begins\X
+\U642.
+\I\X1498:Initialize variables for \eTeX\ compatibility mode\X
+\Us1386\ET1388.
+\I\X1499:Initialize variables for \eTeX\ extended mode\X
+\Us1381\ET1388.
+\I\X8:Initialize whatever \TeX\ might access\X
+\U4.
+\I\X1441:Initiate input from new pseudo file\X
+\U1439.
+\I\X380:Initiate or terminate input from a file\X
+\U369.
+\I\X1085:Initiate the construction of an hbox or vbox, then \&{return}\X
+\U1081.
+\I\X485:Input and store tokens from the next line of the file\X
+\U484.
+\I\X486:Input for \.{\\read} from the terminal\X
+\U485.
+\I\X345:Input from external file, \&{goto} \\{restart} if no input found\X
+\U343.
+\I\X359:Input from token list, \&{goto} \\{restart} if end of list or if a parameter needs to be expanded\X
+\U343.
+\I\X487:Input the first line of \\{read\_file}[\|m]\X
+\U485.
+\I\X488:Input the next line of \\{read\_file}[\|m]\X
+\U485.
+\I\X845:Insert a delta node to prepare for breaks at \\{cur\_p}\X
+\U838.
+\I\X846:Insert a delta node to prepare for the next active node\X
+\U838.
+\I\X1179:Insert a dummy noad to be sub/superscripted\X
+\U1178.
+\I\X847:Insert a new active node from \\{best\_place}[\\{fit\_class}] to \\{cur\_p}\X
+\U838.
+\I\X262:Insert a new control sequence after \|p, then make \|p point to it\X
+\U261.
+\I\X965:Insert a new pattern into the linked trie\X
+\U963.
+\I\X966:Insert a new trie node between \|q and \|p, and make \|p point to it\X
+\U965.
+\I\X377:Insert a token containing \\{frozen\_endv}\X
+\U368.
+\I\X1271:Insert a token saved by \.{\\afterassignment}, if any\X
+\U1213.
+\I\X971:Insert glue for \\{split\_top\_skip} and set~\|p: $\K$ \\{null}\X
+\U970.
+\I\X934:Insert hyphens as specified in \\{hyph\_list}[\|h]\X
+\U933.
+\I\X361:Insert macro parameter and \&{goto} \\{restart}\X
+\U359.
+\I\X388:Insert the \(a)appropriate mark text into the scanner\X
+\U369.
+\I\X814:Insert the \(c)current list into its environment\X
+\U802.
+\I\X942:Insert the \(p)pair $(\|s,\|p)$ into the exception table\X
+\U941.
+\I\X791:Insert the \(v)\<v_j> template and \&{goto} \\{restart}\X
+\U344.
+\I\X328:Insert token \|p into \TeX's input\X
+\U284.
+\I\X86:Interpret code \|c and \&{return} if done\X
+\U85.
+\I\X89:Introduce new material from the terminal and \&{return}\X
+\U86.
+\I\X581:Issue an error message if $\\{cur\_val}\K\\{fmem\_ptr}$\X
+\U580.
+\I\X882:Justify the line ending at breakpoint \\{cur\_p}, and append it to the current vertical list, together with associated penalties and other insertions\X
+\U879.
+\I\X6:Labels in the outer block\X
+\U4.
+\I\X1335, 1337, 1338, 1340:Last-minute procedures\X
+\U1332.
+\I\X795:Lengthen the preamble periodically\X
+\U794.
+\I\X629:Let \\{cur\_h} be the position of the first box, and set $\\{leader\_wd}+\\{lx}$ to the spacing between corresponding parts of boxes\X
+\U628.
+\I\X638:Let \\{cur\_v} be the position of the first box, and set $\\{leader\_ht}+\\{lx}$ to the spacing between corresponding parts of boxes\X
+\U637.
+\I\X1149:Let \|d be the natural width of node \|p; if the node is ``visible,'' \&{goto} \\{found}; if the node is glue that stretches or shrinks, set \|v: $\K$ \\{max\_dimen}\X
+\U1148.
+\I\X1150:Let \|d be the natural width of this glue; if stretching or shrinking, set \|v: $\K$ \\{max\_dimen}; \&{goto} \\{found} in the case of leaders\X
+\U1149.
+\I\X1363:Let \|d be the width of the whatsit \|p\X
+\U1149.
+\I\X1235:Let \|n be the largest legal code value, based on \\{cur\_chr}\X
+\U1234.
+\I\X1000:Link node \|p into the current page and \&{goto} \\{done}\X
+\U999.
+\I\X452:Local variables for dimension calculations\X
+\U450.
+\I\X1200:Local variables for finishing a displayed formula\X
+\U1196.
+\I\X317:Local variables for formatting calculations\X
+\U313.
+\I\X903, 914, 924, 931:Local variables for hyphenation\X
+\U897.
+\I\X20, 165, 929:Local variables for initialization\X
+\U4.
+\I\X864, 895:Local variables for line breaking\X
+\U817.
+\I\X1040:Look ahead for another character, or leave \\{lig\_stack} empty if there's none there\X
+\U1036.
+\I\X981:Look at all the marks in nodes before the break, and set the final link to \\{null} at the break\X
+\U979.
+\I\X710:Look at the list of characters starting with \|x in font \|g; set \|f and \|c whenever a better character is found; \&{goto} \\{found} as soon as a large enough variant is encountered\X
+\U709.
+\I\X613:Look at the other stack entries until deciding what sort of \.{DVI} command to generate; \&{goto} \\{found} if node \|p is a ``hit''\X
+\U609.
+\I\X709:Look at the variants of $(\|z,\|x)$; set \|f and \|c whenever a better character is found; \&{goto} \\{found} as soon as a large enough variant is encountered\X
+\U708.
+\I\X481:Look for parameter number or \.{\#\#}\X
+\U479.
+\I\X932:Look for the word \\{hc}[\T{1..}\\{hn}] in the exception table, and \&{goto} \\{found} (with \\{hyf} containing the hyphens) if an entry is found\X
+\U925.
+\I\X1454:Look up the characters of list \|n in the hash table, and set \\{cur\_cs}\X
+\U1453.
+\I\X376:Look up the characters of list \|r in the hash table, and set \\{cur\_cs}\X
+\U374.
+\I\X207:Make a copy of node \|p in node \|r\X
+\U206.
+\I\X1037:Make a ligature node, if \\{ligature\_present}; insert a null discretionary, if appropriate\X
+\U1036.
+\I\X1359:Make a partial copy of the whatsit node \|p and make \|r point to it; set \\{words} to the number of initial words not yet copied\X
+\U208.
+\I\X762:Make a second pass over the mlist, removing all noads and inserting the proper spacing and penalties\X
+\U728.
+\I\X578:Make final adjustments and \&{goto} \\{done}\X
+\U564.
+\I\X654:Make node \|p look like a \\{char\_node} and \&{goto} \\{reswitch}\X
+\Us624, 653\ETs1149.
+\I\X1476:Make sure that \|f is in the proper range\X
+\U1469.
+\I\X1005:Make sure that \\{page\_max\_depth} is not exceeded\X
+\U999.
+\I\X833:Make sure that \\{pi} is in the proper range\X
+\U831.
+\I\X997:Make the contribution list empty by setting its tail to \\{contrib\_head}\X
+\U996.
+\I\X50:Make the first 256 strings\X
+\U49.
+\I\X741:Make the height of box \|y equal to \|h\X
+\U740.
+\I\X808:Make the running dimensions in rule \|q extend to the boundaries of the alignment\X
+\U807.
+\I\X813:Make the unset node \|r into a \\{vlist\_node} of height \|w, setting the glue as if the height were \|t\X
+\U810.
+\I\X812:Make the unset node \|r into an \\{hlist\_node} of width \|w, setting the glue as if the width were \|t\X
+\U810.
+\I\X712:Make variable \|b point to a box for $(\|f,\|c)$\X
+\U708.
+\I\X374:Manufacture a control sequence name\X
+\U369.
+\I\X1048:Math-only cases in non-math modes, or vice versa\X
+\U1047.
+\I\X805:Merge the widths in the span nodes of \|q with those of \|p, destroying the span nodes of \|q\X
+\U803.
+\I\X883:Modify the end of the line to reflect the nature of the break and to include \.{\\rightskip}; also set the proper value of \\{disc\_break}\X
+\U882.
+\I\X1046:Modify the glue specification in \\{main\_p} according to the space factor\X
+\U1045.
+\I\X636:Move down or output leaders\X
+\U633.
+\I\X999:Move node \|p to the current page; if it is time for a page break, put the nodes following the break back onto the contribution list, and \&{return} to the user's output routine if there is one\X
+\U996.
+\I\X920:Move pointer \|s to the end of the current list, and set \\{replace\_count}(\|r) appropriately\X
+\U916.
+\I\X627:Move right or output leaders\X
+\U624.
+\I\X900:Move the characters of a ligature node to \\{hu} and \\{hc}; but \&{goto} \\{done3} if they are not all letters\X
+\U899.
+\I\X1039:Move the cursor past a pseudo-ligature, then \&{goto} \\{main\_loop\_lookahead} or \\{main\_lig\_loop}\X
+\U1036.
+\I\X960:Move the data into \\{trie}\X
+\U968.
+\I\X362:Move to next line of file, or \&{goto} \\{restart} if there is no next line, or \&{return} if a \.{\\read} line has finished\X
+\U345.
+\I\X1451:Negate a boolean conditional and \&{goto} \\{reswitch}\X
+\U369.
+\I\X433:Negate all three glue components of \\{cur\_val}\X
+\Us432\ET1466.
+\I\X804:Nullify \\{width}(\|q) and the tabskip glue following this column\X
+\U803.
+\I\X1341:Numbered cases for \\{debug\_help}\X
+\U1340.
+\I\X565:Open \\{tfm\_file} for input\X
+\U564.
+\I\X832:Other local variables for \\{try\_break}\X
+\U831.
+\I\X634:Output a box in a vlist\X
+\U633.
+\I\X625:Output a box in an hlist\X
+\U624.
+\I\X630:Output a leader box at \\{cur\_h}, then advance \\{cur\_h} by $\\{leader\_wd}+\\{lx}$\X
+\U628.
+\I\X639:Output a leader box at \\{cur\_v}, then advance \\{cur\_v} by $\\{leader\_ht}+\\{lx}$\X
+\U637.
+\I\X635:Output a rule in a vlist, \&{goto} \\{next\_p}\X
+\U633.
+\I\X626:Output a rule in an hlist\X
+\U624.
+\I\X637:Output leaders in a vlist, \&{goto} \\{fin\_rule} if a rule or to \\{next\_p} if done\X
+\U636.
+\I\X628:Output leaders in an hlist, \&{goto} \\{fin\_rule} if a rule or to \\{next\_p} if done\X
+\U627.
+\I\X622:Output node \|p for \\{hlist\_out} and move to the next node, maintaining the condition $\\{cur\_v}\K\\{base\_line}$\X
+\U621.
+\I\X632:Output node \|p for \\{vlist\_out} and move to the next node, maintaining the condition $\\{cur\_h}\K\\{left\_edge}$\X
+\U631.
+\I\X1336:Output statistics about this job\X
+\U1335.
+\I\X645:Output the font definitions for all fonts that were used\X
+\U644.
+\I\X605:Output the font name whose internal number is \|f\X
+\U604.
+\I\X624:Output the non-\\{char\_node} \|p for \\{hlist\_out} and move to the next node\X
+\U622.
+\I\X633:Output the non-\\{char\_node} \|p for \\{vlist\_out}\X
+\U632.
+\I\X1368:Output the whatsit node \|p in a vlist\X
+\U633.
+\I\X1369:Output the whatsit node \|p in an hlist\X
+\U624.
+\I\X958:Pack the family into \\{trie} relative to \|h\X
+\U955.
+\I\X798:Package an unset box for the current column and record its width\X
+\U793.
+\I\X806:Package the preamble list, to determine the actual tabskip glue amounts, and let \|p point to this prototype box\X
+\U802.
+\I\X1025:Perform the default output routine\X
+\U1014.
+\I\X1209:Pontificate about improper alignment in display\X
+\U1208.
+\I\X498:Pop the condition stack\X
+\Us500, 502, 511\ETs512.
+\I\X1475:Pop the expression stack and \&{goto} \\{found}\X
+\U1469.
+\I\X1020:Prepare all the boxes involved in insertions to act as queues\X
+\U1016.
+\I\X856:Prepare to deactivate node~\|r, and \&{goto} \\{deactivate} unless there is a reason to consider lines of text from \|r to \\{cur\_p}\X
+\U853.
+\I\X1067:Prepare to insert a token that matches \\{cur\_group}, and print what it is\X
+\U1066.
+\I\X1004:Prepare to move a box or rule node to the current page, then \&{goto} \\{contribute}\X
+\U1002.
+\I\X1366:Prepare to move whatsit \|p to the current page, then \&{goto} \\{contribute}\X
+\U1002.
+\I\X177:Print a short indication of the contents of node \|p\X
+\U176.
+\I\X848:Print a symbolic description of the new break node\X
+\U847.
+\I\X858:Print a symbolic description of this feasible break\X
+\U857.
+\I\X341:Print either `\.{definition}' or `\.{use}' or `\.{preamble}' or `\.{text}', and insert tokens that should lead to recovery\X
+\U340.
+\I\X315:Print location of current line\X
+\U314.
+\I\X173:Print newly busy locations\X
+\U169.
+\I\X1285:Print string \|s as an error message\X
+\U1281.
+\I\X1282:Print string \|s on the terminal\X
+\U1281.
+\I\X538:Print the banner line, including the date and time\X
+\U536.
+\I\X269:Print the font identifier for \\{font}(\|p)\X
+\Us176\ET178.
+\I\X91:Print the help information and \&{goto} \&{continue}\X
+\U86.
+\I\X859:Print the list between \\{printed\_node} and \\{cur\_p}, then set \\{printed\_node}: $\K$ \\{cur\_p}\X
+\U858.
+\I\X87:Print the menu of available options\X
+\U86.
+\I\X474:Print the result of command \|c\X
+\U472.
+\I\X319:Print two lines using the tricky pseudoprinted information\X
+\U314.
+\I\X316:Print type of token list\X
+\U314.
+\I\X355:Process an active-character control sequence and set \\{state}: $\K$ \\{mid\_line}\X
+\U346.
+\I\X1466:Process an expression and \&{return}\X
+\U426.
+\I\X729:Process node-or-noad \|q as much as possible in preparation for the second pass of \\{mlist\_to\_hlist}, then move to the next item in the mlist\X
+\U728.
+\I\X1367:Process whatsit \|p in \\{vert\_break} loop, \&{goto} \\{not\_found}\X
+\U975.
+\I\X1123:Prune the current list, if necessary, until it contains only \\{char\_node}, \\{kern\_node}, \\{hlist\_node}, \\{vlist\_node}, \\{rule\_node}, and \\{ligature\_node} items; set \|n to the length of the list, and set \|q to the list's tail\X
+\U1121.
+\I\X881:Prune unwanted nodes at the beginning of the next line\X
+\U879.
+\I\X320:Pseudoprint the line\X
+\U314.
+\I\X321:Pseudoprint the token list\X
+\U314.
+\I\X497:Push the condition stack\X
+\U500.
+\I\X1474:Push the expression stack and \&{goto} \\{restart}\X
+\U1471.
+\I\X228, 232, 240, 250, 267, 336, 378, 386, 413, 418, 470, 489, 493, 555, 782, 985, 1054, 1060, 1073, 1090, 1109, 1116, 1143, 1158, 1171, 1180, 1190, 1210, 1221, 1224, 1232, 1252, 1256, 1264, 1274, 1279, 1288, 1293, 1346:Put each of \TeX's primitives
+into the hash table\X
+\U1338.
+\I\X92:Put help message on the transcript file\X
+\U84.
+\I\X918:Put the \(c)characters $\\{hu}[\|i+\T{1..}]$ into \\{post\_break}(\|r), appending to this list and to \\{major\_tail} until synchronization has been achieved\X
+\U916.
+\I\X917:Put the \(c)characters $\\{hu}[\|l\MRL{{.}{.}}\|i]$ and a hyphen into \\{pre\_break}(\|r)\X
+\U916.
+\I\X750:Put the \(f)fraction into a box with its delimiters, and make \\{new\_hlist}(\|q) point to it\X
+\U745.
+\I\X889:Put the \(l)\.{\\leftskip} glue at the left and detach this line\X
+\U882.
+\I\X1016:Put the \(o)optimal current page into box 255, update \\{first\_mark} and \\{bot\_mark}, append insertions to their boxes, and put the remaining nodes back on the contribution list\X
+\U1014.
+\I\X1261:Put the \(p)(positive) `at' size into \|s\X
+\U1260.
+\I\X888:Put the \(r)\.{\\rightskip} glue after node \|q\X
+\U883.
+\I\X564:Read and check the font data; \\{abort} if the \.{TFM} file is malformed; if there's no room for this font, say so and \&{goto} \\{done}; otherwise \\{incr}(\\{font\_ptr}) and \&{goto} \\{done}\X
+\U562.
+\I\X573:Read box dimensions\X
+\U564.
+\I\X571:Read character data\X
+\U564.
+\I\X576:Read extensible character recipes\X
+\U564.
+\I\X577:Read font parameters\X
+\U564.
+\I\X575:Read ligature/kern program\X
+\U564.
+\I\X364:Read next line of file into \\{buffer}, or \&{goto} \\{restart} if the file has ended\X
+\U362.
+\I\X54:Read one string, but return \\{false} if the string memory space is getting too tight for comfort\X
+\U53.
+\I\X540:Read the first line of the new file\X
+\U539.
+\I\X53:Read the other strings from the \.{TEX.POOL} file and return \\{true}, or give an error message and return \\{false}\X
+\U49.
+\I\X570:Read the {\.{TFM}} header\X
+\U564.
+\I\X567:Read the {\.{TFM}} size fields\X
+\U564.
+\I\X1089:Readjust the height and depth of \\{cur\_box}, for \.{\\vtop}\X
+\U1088.
+\I\X915:Reconstitute nodes for the hyphenated word, inserting discretionary hyphens\X
+\U905.
+\I\X857:Record a new feasible break\X
+\U853.
+\I\X1029:Recover from an unbalanced output routine\X
+\U1028.
+\I\X1374:Recover from an unbalanced write command\X
+\U1373.
+\I\X1001:Recycle node \|p\X
+\U999.
+\I\X1083:Remove the last box, unless it's part of a discretionary\X
+\U1082.
+\I\X905:Replace nodes $\\{ha}\MRL{{.}{.}}\\{hb}$ by a sequence of nodes that includes the discretionary hyphens\X
+\U897.
+\I\X1189:Replace the tail of the list by \|p\X
+\U1188.
+\I\X574:Replace \|z by $\|z^\prime$ and compute $\alpha,\beta$\X
+\U573.
+\I\X398:Report a runaway argument and abort\X
+\Us394\ET401.
+\I\X669:Report a tight hbox and \&{goto} \\{common\_ending}, if this box is sufficiently bad\X
+\U666.
+\I\X680:Report a tight vbox and \&{goto} \\{common\_ending}, if this box is sufficiently bad\X
+\U678.
+\I\X397:Report an extra right brace and \&{goto} \&{continue}\X
+\U394.
+\I\X400:Report an improper use of the macro and abort\X
+\U399.
+\I\X668:Report an overfull hbox and \&{goto} \\{common\_ending}, if this box is sufficiently bad\X
+\U666.
+\I\X679:Report an overfull vbox and \&{goto} \\{common\_ending}, if this box is sufficiently bad\X
+\U678.
+\I\X662:Report an underfull hbox and \&{goto} \\{common\_ending}, if this box is sufficiently bad\X
+\U660.
+\I\X676:Report an underfull vbox and \&{goto} \\{common\_ending}, if this box is sufficiently bad\X
+\U675.
+\I\X37:Report overflow of the input buffer, and abort\X
+\Us33\ET1442.
+\I\X1163:Report that an invalid delimiter code is being changed to null; set~\\{cur\_val}: $\K$ \T{0}\X
+\U1162.
+\I\X563:Report that the font won't be loaded\X
+\U562.
+\I\X462:Report that this dimension is out of range\X
+\U450.
+\I\X1028:Resume the page builder after an output routine has come to an end\X
+\U1102.
+\I\X880:Reverse the links of the relevant passive nodes, setting \\{cur\_p} to the first breakpoint\X
+\U879.
+\I\X356:Scan a control sequence and set \\{state}: $\K$ \\{skip\_blanks} or \\{mid\_line}\X
+\U346.
+\I\X1471:Scan a factor \|f of type \|o or start a subexpression\X
+\U1469.
+\I\X446:Scan a numeric constant\X
+\U442.
+\I\X394:Scan a parameter until its delimiter string has been found; or, if $\|s\K\\{null}$, simply scan the delimiter string\X
+\U393.
+\I\X1155:Scan a subformula enclosed in braces and \&{return}\X
+\U1153.
+\I\X358:Scan ahead in the buffer until finding a nonletter; if an expanded code is encountered, reduce it and \&{goto} \\{start\_cs}; otherwise if a multiletter control sequence is found, adjust \\{cur\_cs} and \\{loc}, and \&{goto} \\{found}\X
+\U356.
+\I\X444:Scan an alphabetic character code into \\{cur\_val}\X
+\U442.
+\I\X445:Scan an optional space\X
+\Us444, 450, 457\ETs1202.
+\I\X479:Scan and build the body of the token list; \&{goto} \\{found} when finished\X
+\U475.
+\I\X476:Scan and build the parameter part of the macro definition\X
+\U475.
+\I\X1469:Scan and evaluate an expression \|e of type \|l\X
+\U1468.
+\I\X454:Scan decimal fraction\X
+\U450.
+\I\X532:Scan file name in the buffer\X
+\U531.
+\I\X460:Scan for \(a)all other units and adjust \\{cur\_val} and \|f accordingly; \&{goto} \\{done} in the case of scaled points\X
+\U455.
+\I\X456:Scan for \(f)\.{fil} units; \&{goto} \\{attach\_fraction} if found\X
+\U455.
+\I\X458:Scan for \(m)\.{mu} units and \&{goto} \\{attach\_fraction}\X
+\U455.
+\I\X457:Scan for \(u)units that are internal dimensions; \&{goto} \\{attach\_sign} with \\{cur\_val} set if found\X
+\U455.
+\I\X781:Scan preamble text until \\{cur\_cmd} is \\{tab\_mark} or \\{car\_ret}, looking for changes in the tabskip glue; append an alignrecord to the preamble list\X
+\U779.
+\I\X473:Scan the argument for command \|c\X
+\U472.
+\I\X1260:Scan the font size specification\X
+\U1259.
+\I\X1470:Scan the next operator and set \|o\X
+\U1469.
+\I\X393:Scan the parameters and make \\{link}(\|r) point to the macro body; but \&{return} if an illegal \.{\\par} is detected\X
+\U391.
+\I\X779:Scan the preamble and record it in the \\{preamble} list\X
+\U776.
+\I\X785:Scan the template \<u_j>, putting the resulting token list in \\{hold\_head}\X
+\U781.
+\I\X786:Scan the template \<v_j>, putting the resulting token list in \\{hold\_head}\X
+\U781.
+\I\X455:Scan units and set \\{cur\_val} to $x\cdot(\\{cur\_val}+f/2^{16})$, where there are \|x sp per unit; \&{goto} \\{attach\_sign} if the units are internal\X
+\U450.
+\I\X257:Search \\{eqtb} for equivalents equal to \|p\X
+\U174.
+\I\X935:Search \\{hyph\_list} for pointers to \|p\X
+\U174.
+\I\X287:Search \\{save\_stack} for equivalents that point to \|p\X
+\U174.
+\I\X511:Select the appropriate case and \&{return} or \&{goto} \\{common\_ending}\X
+\U503.
+\I\X22, 24, 26, 76, 79, 82, 99, 168, 217, 256, 259, 274, 289, 385, 441, 483, 492, 553, 558, 595, 598, 608, 650, 664, 687, 773, 930, 992, 1035, 1269, 1284, 1302, 1345, 1437, 1503, 1514:Set initial values of key variables\X
+\U8.
+\I\X851:Set line length parameters in preparation for hanging indentation\X
+\U850.
+\I\X807:Set the glue in all the unset boxes of the current list\X
+\U802.
+\I\X810:Set the glue in node \|r and change it from an unset node\X
+\U809.
+\I\X809:Set the unset box \|q and the unset boxes in it\X
+\U807.
+\I\X855:Set the value of \|b to the badness for shrinking the line, and compute the corresponding \\{fit\_class}\X
+\U853.
+\I\X854:Set the value of \|b to the badness for stretching the line, and compute the corresponding \\{fit\_class}\X
+\U853.
+\I\X1015:Set the value of \\{output\_penalty}\X
+\U1014.
+\I\X910:Set up data structures with the cursor following position \|j\X
+\U908.
+\I\X705:Set up the values of \\{cur\_size} and \\{cur\_mu}, based on \\{cur\_style}\X
+\Us722, 728, 729, 732, 756, 762, 764\ETs765.
+\I\X245:Set variable \|c to the current escape character\X
+\U65.
+\I\X1461:Set variable \|w to indicate if this case should be reported\X
+\Us1460\ET1462.
+\I\X642:Ship box \|p out\X
+\U640.
+\I\X225:Show equivalent \|n, in region 1 or 2\X
+\U254.
+\I\X231:Show equivalent \|n, in region 3\X
+\U254.
+\I\X235:Show equivalent \|n, in region 4\X
+\U254.
+\I\X244:Show equivalent \|n, in region 5\X
+\U254.
+\I\X253:Show equivalent \|n, in region 6\X
+\U254.
+\I\X221:Show the auxiliary field, \|a\X
+\U220.
+\I\X1414:Show the box context\X
+\U1412.
+\I\X1413:Show the box packaging info\X
+\U1412.
+\I\X1298:Show the current contents of a box\X
+\U1295.
+\I\X1296:Show the current meaning of a token, then \&{goto} \\{common\_ending}\X
+\U1295.
+\I\X1299:Show the current value of some parameter or register, then \&{goto} \\{common\_ending}\X
+\U1295.
+\I\X236:Show the font identifier in \\{eqtb}[\|n]\X
+\U235.
+\I\X237:Show the halfword code in \\{eqtb}[\|n]\X
+\U235.
+\I\X988:Show the status of the current page\X
+\U220.
+\I\X403:Show the text of the macro being expanded\X
+\U391.
+\I\X723:Simplify a trivial box\X
+\U722.
+\I\X502:Skip to \.{\\else} or \.{\\fi}, then \&{goto} \\{common\_ending}\X
+\U500.
+\I\X898:Skip to node \\{ha}, or \&{goto} \\{done1} if no hyphenation should be attempted\X
+\U896.
+\I\X899:Skip to node \\{hb}, putting letters into \\{hu} and \\{hc}\X
+\U896.
+\I\X134:Sort \(p)\|p into the list starting at \\{rover} and advance \|p to \\{rlink}(\|p)\X
+\U133.
+\I\X947:Sort \(t)the hyphenation op tables into proper order\X
+\U954.
+\I\X1084:Split off part of a vertical box, make \\{cur\_box} point to it\X
+\U1081.
+\I\X1203:Squeeze the equation as much as possible; if there is an equation number that should go on a separate line by itself, set~\|e: $\K$ \T{0}\X
+\U1201.
+\I\X993:Start a new current page\X
+\Us217\ET1019.
+\I\X1079:Store \(c)\\{cur\_box} in a box register\X
+\U1077.
+\I\X926:Store \(m)maximum values in the \\{hyf} table\X
+\U925.
+\I\X285:Store \(s)\\{save\_stack}[\\{save\_ptr}] in \\{eqtb}[\|p], unless \\{eqtb}[\|p] holds a global value\X
+\U284.
+\I\X395:Store the current token, but \&{goto} \&{continue} if it is a blank space that would become an undelimited parameter\X
+\U394.
+\I\X840:Subtract glue from \\{break\_width}\X
+\U839.
+\I\X843:Subtract the width of node \|v from \\{break\_width}\X
+\U842.
+\I\X371:Suppress expansion of the next token\X
+\U369.
+\I\X744:Swap the subscript and superscript into box \|x\X
+\U740.
+\I\X742:Switch to a larger accent if available and appropriate\X
+\U740.
+\I\X340:Tell the user what has run away and try to recover\X
+\U338.
+\I\X512:Terminate the current conditional and skip to \.{\\fi}\X
+\U369.
+\I\X507:Test box register status\X
+\U503.
+\I\X506:Test if an integer is odd\X
+\U503.
+\I\X508:Test if two characters match\X
+\U503.
+\I\X510:Test if two macro texts match\X
+\U509.
+\I\X509:Test if two tokens match\X
+\U503.
+\I\X505:Test relation between integers or dimensions\X
+\U503.
+\I\X560:The em width for \\{cur\_font}\X
+\U457.
+\I\X561:The x-height for \\{cur\_font}\X
+\U457.
+\I\X402:Tidy up the parameter just scanned, and tuck it away\X
+\U394.
+\I\X657:Transfer node \|p to the adjustment list\X
+\U653.
+\I\X886:Transplant the post-break list\X
+\U884.
+\I\X887:Transplant the pre-break list\X
+\U884.
+\I\X1154:Treat \\{cur\_chr} as an active character\X
+\Us1153\ET1157.
+\I\X875:Try the final line break at the end of the paragraph, and \&{goto} \\{done} if the desired breakpoints have been found\X
+\U865.
+\I\X129:Try to allocate within node \|p and its physical successors, and \&{goto} \\{found} if allocation was possible\X
+\U127.
+\I\X871:Try to break after a discretionary fragment, then \&{goto} \\{done5}\X
+\U868.
+\I\X537:Try to get a different log file name\X
+\U536.
+\I\X896:Try to hyphenate the following word\X
+\U868.
+\I\X1194:Try to recover from mismatched \.{\\right}\X
+\U1193.
+\I\X19, 27, 40, 103, 111, 115, 152, 214, 271, 302, 550, 596, 922, 927, 1411:Types in the outer block\X
+\U4.
+\I\X1329:Undump a couple more things and the closing check word\X
+\U1305.
+\I\X1310:Undump constants for consistency check\X
+\U1305.
+\I\X1319:Undump regions 1 to 6 of \\{eqtb}\X
+\U1316.
+\I\X1388:Undump the \eTeX\ state\X
+\U1310.
+\I\X1325:Undump the array info for internal font number \|k\X
+\U1323.
+\I\X1314:Undump the dynamic memory\X
+\U1305.
+\I\X1323:Undump the font information\X
+\U1305.
+\I\X1321:Undump the hash table\X
+\U1316.
+\I\X1327:Undump the hyphenation tables\X
+\U1305.
+\I\X1312:Undump the string pool\X
+\U1305.
+\I\X1316:Undump the table of equivalents\X
+\U1305.
+\I\X863:Update the active widths, since the first active node has been deleted\X
+\U862.
+\I\X978:Update the current height and depth measurements with respect to a glue or kern node~\|p\X
+\U974.
+\I\X1006:Update the current page measurements with respect to the glue or kern specified by node~\|p\X
+\U999.
+\I\X860:Update the value of \\{printed\_node} for symbolic displays\X
+\U831.
+\I\X1018:Update the values of \\{first\_mark} and \\{bot\_mark}\X
+\U1016.
+\I\X998:Update the values of \\{last\_glue}, \\{last\_penalty}, and \\{last\_kern}\X
+\U996.
+\I\X643:Update the values of \\{max\_h} and \\{max\_v}; but if the page is too large, \&{goto} \\{done}\X
+\U642.
+\I\X800:Update width entry for spanned columns\X
+\U798.
+\I\X1184:Use code \|c to distinguish between generalized fractions\X
+\U1183.
+\I\X975:Use node \|p to update the current height and depth measurements; if this node is not a legal breakpoint, \&{goto} \\{not\_found} or \\{update\_heights}, otherwise set \\{pi} to the associated penalty at the break\X
+\U974.
+\I\X568:Use size fields to allocate font information\X
+\U564.
+\I\X1360:Wipe out the whatsit node \|p and \&{goto} \\{done}\X
+\U204.
+\I\X1023:Wrap up the box specified by node \|r, splitting node \|p if called for; set \\{wait}: $\K$ \\{true} if node \|p holds a remainder after splitting\X
+\U1022.
+\I\X533:ensure dvi open\X
+\Q533.
+\U619.
+\I\X1991:prepare for string pool initialization\X
+\U41.
+\I\X1932:\.{"\ (INITEX)"}\X
+\Us1303\ET1381.
+\I\X1786:\.{".dvi"}\X
+\Q530.
+\U533.
+\I\X1785:\.{".log"}\X
+\Q530.
+\Us536\ET537.
+\I\X1788:\.{".tex"}\X
+\Us531, 539, 1277\ETs1376.
+\I\X1791:\.{".tfm"}\X
+\U565.
+\I\X1826:\.{"256\ spans"}\X
+\U800.
+\I\X1526:\.{"???"}\X
+\U61.
+\I\X1716:\.{"BAD."}\X
+\Us295\ET296.
+\I\X1531:\.{"CLOBBERED."}\X
+\Us178\ET295.
+\I\X1581:\.{"ETC."}\X
+\Us235\ET294.
+\I\X1917:\.{"FONT"}\X
+\U1259.
+\I\X1673:\.{"IMPOSSIBLE."}\X
+\U264.
+\I\X1674:\.{"NONEXISTENT."}\X
+\U264.
+\I\X1888:\.{"above"}\X
+\Us1180\ET1181.
+\I\X1555:\.{"abovedisplayshortsk}\)\.{ip"}\X
+\Us227\ET228.
+\I\X1553:\.{"abovedisplayskip"}\X
+\Us227\ET228.
+\I\X1891:\.{"abovewithdelims"}\X
+\Us1180\ET1181.
+\I\X1675:\.{"accent"}\X
+\Us267, 268\ETs698.
+\I\X1607:\.{"adjdemerits"}\X
+\Us239\ET240.
+\I\X1676:\.{"advance"}\X
+\Us267\ET268.
+\I\X1677:\.{"afterassignment"}\X
+\Us267\ET268.
+\I\X1678:\.{"aftergroup"}\X
+\Us267\ET268.
+\I\X1828:\.{"align0"}\X
+\U802.
+\I\X1827:\.{"align1"}\X
+\U802.
+\I\X1918:\.{"at"}\X
+\U1260.
+\I\X1890:\.{"atop"}\X
+\Us1180\ET1181.
+\I\X1893:\.{"atopwithdelims"}\X
+\Us1180\ET1181.
+\I\X1737:\.{"badness"}\X
+\Us418\ET419.
+\I\X1551:\.{"baselineskip"}\X
+\Us227\ET228.
+\I\X1528:\.{"batchmode"}\X
+\Us88, 1264\ETs1265.
+\I\X1679:\.{"begingroup"}\X
+\Us267, 268\ETs1412.
+\I\X1556:\.{"belowdisplayshortsk}\)\.{ip"}\X
+\Us227\ET228.
+\I\X1554:\.{"belowdisplayskip"}\X
+\Us227\ET228.
+\I\X1600:\.{"binoppenalty"}\X
+\Us239\ET240.
+\I\X1723:\.{"botmark"}\X
+\Us386\ET387.
+\I\X1582:\.{"box"}\X
+\Us235, 1017, 1030, 1073, 1074\ETs1509.
+\I\X1655:\.{"boxmaxdepth"}\X
+\Us249\ET250.
+\I\X1745:\.{"bp"}\X
+\U460.
+\I\X1599:\.{"brokenpenalty"}\X
+\Us239\ET240.
+\I\X1914:\.{"by"}\X
+\U1238.
+\I\X1586:\.{"catcode"}\X
+\Us237, 1232\ETs1233.
+\I\X1747:\.{"cc"}\X
+\U460.
+\I\X1710:\.{"changing"}\X
+\Us279\ET1517.
+\I\X1680:\.{"char"}\X
+\Us267, 268\ETs1225.
+\I\X1907:\.{"chardef"}\X
+\Us1224\ET1225.
+\I\X1874:\.{"cleaders"}\X
+\Us1073\ET1074.
+\I\X1922:\.{"closein"}\X
+\Us1274\ET1275.
+\I\X1935:\.{"closeout"}\X
+\Us1346, 1348\ETs1358.
+\I\X1986:\.{"clubpenalties"}\X
+\Us1520\ET1521.
+\I\X1596:\.{"clubpenalty"}\X
+\Us239\ET240.
+\I\X1743:\.{"cm"}\X
+\U460.
+\I\X1868:\.{"copy"}\X
+\Us1073\ET1074.
+\I\X1549:\.{"copying"}\X
+\U208.
+\I\X1646:\.{"count"}\X
+\Us241, 244, 413\ETs1510.
+\I\X1909:\.{"countdef"}\X
+\Us1224\ET1225.
+\I\X1822:\.{"cr"}\X
+\Us782, 783, 794, 1134\ETs1412.
+\I\X1823:\.{"crcr"}\X
+\Us782\ET783.
+\I\X1671:\.{"csname"}\X
+\Us264, 265, 267\ETs268.
+\I\X1713:\.{"curlevel"}\X
+\U283.
+\I\X1952:\.{"currentgrouplevel"}\X
+\Us1396\ET1397.
+\I\X1953:\.{"currentgrouptype"}\X
+\Us1396\ET1397.
+\I\X1956:\.{"currentifbranch"}\X
+\Us1399\ET1400.
+\I\X1954:\.{"currentiflevel"}\X
+\Us1399\ET1400.
+\I\X1955:\.{"currentiftype"}\X
+\Us1399\ET1400.
+\I\X1612:\.{"day"}\X
+\Us239\ET240.
+\I\X1746:\.{"dd"}\X
+\U460.
+\I\X1728:\.{"deadcycles"}\X
+\Us418\ET419.
+\I\X1898:\.{"def"}\X
+\Us1210\ET1211.
+\I\X1637:\.{"defaulthyphenchar"}\X
+\Us239\ET240.
+\I\X1638:\.{"defaultskewchar"}\X
+\Us239\ET240.
+\I\X1647:\.{"delcode"}\X
+\Us244, 1232\ETs1233.
+\I\X1681:\.{"delimiter"}\X
+\Us267\ET268.
+\I\X1609:\.{"delimiterfactor"}\X
+\Us239\ET240.
+\I\X1658:\.{"delimitershortfall"}\X
+\Us249\ET250.
+\I\X1753:\.{"depth"}\X
+\U465.
+\I\X1967:\.{"detokenize"}\X
+\Us1419\ET1420.
+\I\X1669:\.{"dimen"}\X
+\Us251, 253, 413\ETs1510.
+\I\X1910:\.{"dimendef"}\X
+\Us1224\ET1225.
+\I\X1976:\.{"dimexpr"}\X
+\Us1464\ET1465.
+\I\X1829:\.{"disc1"}\X
+\U843.
+\I\X1830:\.{"disc2"}\X
+\U844.
+\I\X1832:\.{"disc3"}\X
+\U872.
+\I\X1833:\.{"disc4"}\X
+\U873.
+\I\X1545:\.{"discretionary"}\X
+\Us197, 858, 1116, 1117, 1122\ETs1412.
+\I\X1894:\.{"display"}\X
+\U1202.
+\I\X1663:\.{"displayindent"}\X
+\Us249\ET250.
+\I\X1887:\.{"displaylimits"}\X
+\Us1158\ET1159.
+\I\X1796:\.{"displaystyle"}\X
+\Us696\ET1171.
+\I\X1988:\.{"displaywidowpenalti}\)\.{es"}\X
+\Us1520\ET1521.
+\I\X1598:\.{"displaywidowpenalty}\)\.{"}\X
+\Us239\ET240.
+\I\X1662:\.{"displaywidth"}\X
+\Us249\ET250.
+\I\X1682:\.{"divide"}\X
+\Us267\ET268.
+\I\X1605:\.{"doublehyphendemerit}\)\.{s"}\X
+\Us239\ET240.
+\I\X1732:\.{"dp"}\X
+\Us418\ET419.
+\I\X1851:\.{"dump"}\X
+\Us1054\ET1055.
+\I\X1760:\.{"eTeXrevision"}\X
+\Us471\ET1382.
+\I\X1945:\.{"eTeXversion"}\X
+\Us1382\ET1383.
+\I\X1900:\.{"edef"}\X
+\Us1210\ET1211.
+\I\X1781:\.{"else"}\X
+\Us493, 494, 1424\ETs1463.
+\I\X1739:\.{"em"}\X
+\U457.
+\I\X1668:\.{"emergencystretch"}\X
+\Us249\ET250.
+\I\X1933:\.{"end\ occurred\ "}\X
+\U1337.
+\I\X1850:\.{"end"}\X
+\Us1054\ET1055.
+\I\X1672:\.{"endcsname"}\X
+\Us264, 265, 267, 268, 375\ETs1137.
+\I\X1683:\.{"endgroup"}\X
+\Us267, 268, 1067\ETs1071.
+\I\X1720:\.{"endinput"}\X
+\Us378\ET379.
+\I\X1639:\.{"endlinechar"}\X
+\Us239\ET240.
+\I\X1824:\.{"endtemplate"}\X
+\U782.
+\I\X1825:\.{"endv"}\X
+\U793.
+\I\X1942:\.{"endwrite"}\X
+\U1371.
+\I\X1885:\.{"eqno"}\X
+\Us1143\ET1145.
+\I\X1579:\.{"errhelp"}\X
+\Us232\ET233.
+\I\X1924:\.{"errmessage"}\X
+\Us1279\ET1280.
+\I\X1645:\.{"errorcontextlines"}\X
+\Us239\ET240.
+\I\X1920:\.{"errorstopmode"}\X
+\Us1264\ET1265.
+\I\X1636:\.{"escapechar"}\X
+\Us239\ET240.
+\I\X1578:\.{"everycr"}\X
+\Us232\ET233.
+\I\X1574:\.{"everydisplay"}\X
+\Us232\ET233.
+\I\X1946:\.{"everyeof"}\X
+\Us1390\ET1391.
+\I\X1575:\.{"everyhbox"}\X
+\Us232\ET233.
+\I\X1577:\.{"everyjob"}\X
+\Us232\ET233.
+\I\X1573:\.{"everymath"}\X
+\Us232\ET233.
+\I\X1572:\.{"everypar"}\X
+\Us232\ET233.
+\I\X1576:\.{"everyvbox"}\X
+\Us232\ET233.
+\I\X1740:\.{"ex"}\X
+\U457.
+\I\X1595:\.{"exhyphenpenalty"}\X
+\Us239\ET240.
+\I\X1684:\.{"expandafter"}\X
+\Us267\ET268.
+\I\X1939:\.{"ext1"}\X
+\U1350.
+\I\X1940:\.{"ext2"}\X
+\U1359.
+\I\X1941:\.{"ext3"}\X
+\U1360.
+\I\X1943:\.{"ext4"}\X
+\U1375.
+\I\X1635:\.{"fam"}\X
+\Us239, 240\ETs693.
+\I\X1779:\.{"fi"}\X
+\Us493\ET494.
+\I\X1532:\.{"fil"}\X
+\U456.
+\I\X1606:\.{"finalhyphendemerits}\)\.{"}\X
+\Us239\ET240.
+\I\X1722:\.{"firstmark"}\X
+\Us386\ET387.
+\I\X1633:\.{"floatingpenalty"}\X
+\Us239\ET240.
+\I\X1548:\.{"flushing"}\X
+\U204.
+\I\X1685:\.{"font"}\X
+\Us267\ET268.
+\I\X1959:\.{"fontchardp"}\X
+\Us1402\ET1403.
+\I\X1958:\.{"fontcharht"}\X
+\Us1402\ET1403.
+\I\X1960:\.{"fontcharic"}\X
+\Us1402\ET1403.
+\I\X1957:\.{"fontcharwd"}\X
+\Us1402\ET1403.
+\I\X1686:\.{"fontdimen"}\X
+\Us267\ET268.
+\I\X1758:\.{"fontname"}\X
+\Us470\ET471.
+\I\X1815:\.{"fraction,\ thickness}\)\.{\ "}\X
+\U699.
+\I\X1906:\.{"futurelet"}\X
+\Us1221\ET1222.
+\I\X1899:\.{"gdef"}\X
+\Us1210\ET1211.
+\I\X1897:\.{"global"}\X
+\Us1210, 1211\ETs1414.
+\I\X1634:\.{"globaldefs"}\X
+\Us239\ET240.
+\I\X1712:\.{"globally\ changing"}\X
+\Us281\ET1518.
+\I\X1536:\.{"glue"}\X
+\U191.
+\I\X1977:\.{"glueexpr"}\X
+\Us1464\ET1465.
+\I\X1982:\.{"glueshrink"}\X
+\Us1487\ET1488.
+\I\X1980:\.{"glueshrinkorder"}\X
+\Us1487\ET1488.
+\I\X1981:\.{"gluestretch"}\X
+\Us1487\ET1488.
+\I\X1979:\.{"gluestretchorder"}\X
+\Us1487\ET1488.
+\I\X1984:\.{"gluetomu"}\X
+\Us1491\ET1492.
+\I\X1687:\.{"halign"}\X
+\Us267, 268, 778\ETs1412.
+\I\X1632:\.{"hangafter"}\X
+\Us239\ET240.
+\I\X1665:\.{"hangindent"}\X
+\Us249\ET250.
+\I\X1617:\.{"hbadness"}\X
+\Us239\ET240.
+\I\X1871:\.{"hbox"}\X
+\Us1073, 1074\ETs1412.
+\I\X1752:\.{"height"}\X
+\U465.
+\I\X1853:\.{"hfil"}\X
+\Us1060\ET1061.
+\I\X1854:\.{"hfill"}\X
+\Us1060\ET1061.
+\I\X1856:\.{"hfilneg"}\X
+\Us1060\ET1061.
+\I\X1656:\.{"hfuzz"}\X
+\Us249\ET250.
+\I\X1666:\.{"hoffset"}\X
+\Us249\ET250.
+\I\X1644:\.{"holdinginserts"}\X
+\Us239\ET240.
+\I\X1688:\.{"hrule"}\X
+\Us267, 268\ETs1097.
+\I\X1651:\.{"hsize"}\X
+\Us249\ET250.
+\I\X1852:\.{"hskip"}\X
+\Us1060\ET1061.
+\I\X1855:\.{"hss"}\X
+\Us1060\ET1061.
+\I\X1731:\.{"ht"}\X
+\Us418\ET419.
+\I\X1835:\.{"hyphenation"}\X
+\Us938, 1252\ETs1253.
+\I\X1915:\.{"hyphenchar"}\X
+\Us1256\ET1257.
+\I\X1594:\.{"hyphenpenalty"}\X
+\Us239\ET240.
+\I\X1761:\.{"if"}\X
+\Us489, 490\ETs499.
+\I\X1777:\.{"ifcase"}\X
+\Us489\ET490.
+\I\X1762:\.{"ifcat"}\X
+\Us489\ET490.
+\I\X1973:\.{"ifcsname"}\X
+\Us1448\ET1450.
+\I\X1972:\.{"ifdefined"}\X
+\Us1448\ET1450.
+\I\X1764:\.{"ifdim"}\X
+\Us489\ET490.
+\I\X1774:\.{"ifeof"}\X
+\Us489\ET490.
+\I\X1776:\.{"iffalse"}\X
+\Us489\ET490.
+\I\X1974:\.{"iffontchar"}\X
+\Us1448\ET1450.
+\I\X1771:\.{"ifhbox"}\X
+\Us489\ET490.
+\I\X1767:\.{"ifhmode"}\X
+\Us489\ET490.
+\I\X1769:\.{"ifinner"}\X
+\Us489\ET490.
+\I\X1768:\.{"ifmmode"}\X
+\Us489\ET490.
+\I\X1763:\.{"ifnum"}\X
+\Us489\ET490.
+\I\X1765:\.{"ifodd"}\X
+\Us489\ET490.
+\I\X1775:\.{"iftrue"}\X
+\Us489\ET490.
+\I\X1772:\.{"ifvbox"}\X
+\Us489\ET490.
+\I\X1766:\.{"ifvmode"}\X
+\Us489\ET490.
+\I\X1770:\.{"ifvoid"}\X
+\Us489\ET490.
+\I\X1773:\.{"ifx"}\X
+\Us489\ET490.
+\I\X1689:\.{"ignorespaces"}\X
+\Us267\ET268.
+\I\X1937:\.{"immediate"}\X
+\Us1346\ET1348.
+\I\X1741:\.{"in"}\X
+\U460.
+\I\X1904:\.{"inaccessible"}\X
+\U1218.
+\I\X1876:\.{"indent"}\X
+\Us1090\ET1091.
+\I\X1787:\.{"input\ file\ name"}\X
+\I\X1719:\.{"input"}\X
+\Us378\ET379.
+\I\X1736:\.{"inputlineno"}\X
+\Us418\ET419.
+\I\X1535:\.{"insert"}\X
+\Us190, 267, 268, 988, 1101\ETs1412.
+\I\X1729:\.{"insertpenalties"}\X
+\Us418\ET419.
+\I\X1969:\.{"interactionmode"}\X
+\Us1425\ET1426.
+\I\X1985:\.{"interlinepenalties"}\X
+\Us1520\ET1521.
+\I\X1604:\.{"interlinepenalty"}\X
+\Us239\ET240.
+\I\X1711:\.{"into"}\X
+\Us279, 280, 281, 1517\ETs1518.
+\I\X1759:\.{"jobname"}\X
+\Us470\ET471.
+\I\X1541:\.{"kern"}\X
+\Us193, 858, 1060\ETs1061.
+\I\X1641:\.{"language"}\X
+\Us239\ET240.
+\I\X1869:\.{"lastbox"}\X
+\Us1073\ET1074.
+\I\X1734:\.{"lastkern"}\X
+\Us418\ET419.
+\I\X1944:\.{"lastnodetype"}\X
+\Us1382\ET1383.
+\I\X1733:\.{"lastpenalty"}\X
+\Us418\ET419.
+\I\X1735:\.{"lastskip"}\X
+\Us418\ET419.
+\I\X1587:\.{"lccode"}\X
+\Us237, 1232\ETs1233.
+\I\X1873:\.{"leaders"}\X
+\Us1073\ET1074.
+\I\X1810:\.{"left"}\X
+\Us698, 1190, 1191\ETs1412.
+\I\X1642:\.{"lefthyphenmin"}\X
+\Us239\ET240.
+\I\X1557:\.{"leftskip"}\X
+\Us227\ET228.
+\I\X1886:\.{"leqno"}\X
+\Us1143\ET1145.
+\I\X1905:\.{"let"}\X
+\Us1221\ET1222.
+\I\X1813:\.{"limits"}\X
+\Us698, 1158\ETs1159.
+\I\X1834:\.{"line\ breaking"}\X
+\U879.
+\I\X1593:\.{"linepenalty"}\X
+\Us239\ET240.
+\I\X1550:\.{"lineskip"}\X
+\Us227\ET228.
+\I\X1650:\.{"lineskiplimit"}\X
+\Us249\ET250.
+\I\X1895:\.{"long"}\X
+\Us1210, 1211, 1215\ETs1297.
+\I\X1610:\.{"looseness"}\X
+\Us239\ET240.
+\I\X1867:\.{"lower"}\X
+\Us1073\ET1074.
+\I\X1925:\.{"lowercase"}\X
+\Us1288\ET1289.
+\I\X1527:\.{"m2d5c2l5x2v5i"}\X
+\U71.
+\I\X1608:\.{"mag"}\X
+\Us239\ET240.
+\I\X1546:\.{"mark"}\X
+\Us198, 267, 268\ETs325.
+\I\X1543:\.{"math"}\X
+\Us194\ET858.
+\I\X1690:\.{"mathaccent"}\X
+\Us267, 268\ETs1168.
+\I\X1802:\.{"mathbin"}\X
+\Us698, 1158\ETs1159.
+\I\X1691:\.{"mathchar"}\X
+\Us267, 268\ETs1225.
+\I\X1908:\.{"mathchardef"}\X
+\Us1224\ET1225.
+\I\X1692:\.{"mathchoice"}\X
+\Us267, 268, 697\ETs1412.
+\I\X1805:\.{"mathclose"}\X
+\Us698, 1158\ETs1159.
+\I\X1590:\.{"mathcode"}\X
+\Us237, 1232\ETs1233.
+\I\X1807:\.{"mathinner"}\X
+\Us698, 1158\ETs1159.
+\I\X1801:\.{"mathop"}\X
+\Us698, 1158\ETs1159.
+\I\X1804:\.{"mathopen"}\X
+\Us698, 1158\ETs1159.
+\I\X1800:\.{"mathord"}\X
+\Us698, 1158\ETs1159.
+\I\X1806:\.{"mathpunct"}\X
+\Us698, 1158\ETs1159.
+\I\X1803:\.{"mathrel"}\X
+\Us698, 1158\ETs1159.
+\I\X1649:\.{"mathsurround"}\X
+\Us249\ET250.
+\I\X1631:\.{"maxdeadcycles"}\X
+\Us239\ET240.
+\I\X1653:\.{"maxdepth"}\X
+\Us249\ET250.
+\I\X1757:\.{"meaning"}\X
+\Us470\ET471.
+\I\X1566:\.{"medmuskip"}\X
+\Us227\ET228.
+\I\X1923:\.{"message"}\X
+\Us1279\ET1280.
+\I\X1812:\.{"middle"}\X
+\Us698, 1194, 1412, 1430\ETs1431.
+\I\X1750:\.{"minus"}\X
+\U464.
+\I\X1542:\.{"mkern"}\X
+\Us193, 1060\ETs1061.
+\I\X1816:\.{"mlist1"}\X
+\U730.
+\I\X1817:\.{"mlist2"}\X
+\U756.
+\I\X1818:\.{"mlist3"}\X
+\U763.
+\I\X1820:\.{"mlist4"}\X
+\U768.
+\I\X1744:\.{"mm"}\X
+\U460.
+\I\X1613:\.{"month"}\X
+\Us239\ET240.
+\I\X1864:\.{"moveleft"}\X
+\Us1073\ET1074.
+\I\X1865:\.{"moveright"}\X
+\Us1073\ET1074.
+\I\X1538:\.{"mskip"}\X
+\Us191, 1060\ETs1061.
+\I\X1539:\.{"mu"}\X
+\Us191, 231, 458, 467\ETs1509.
+\I\X1978:\.{"muexpr"}\X
+\Us1464\ET1465.
+\I\X1693:\.{"multiply"}\X
+\Us267\ET268.
+\I\X1569:\.{"muskip"}\X
+\Us229, 231, 413\ETs1510.
+\I\X1912:\.{"muskipdef"}\X
+\Us1224\ET1225.
+\I\X1983:\.{"mutoglue"}\X
+\Us1491\ET1492.
+\I\X1640:\.{"newlinechar"}\X
+\Us239\ET240.
+\I\X1694:\.{"noalign"}\X
+\Us267, 268, 1131\ETs1412.
+\I\X1695:\.{"noboundary"}\X
+\Us267\ET268.
+\I\X1696:\.{"noexpand"}\X
+\Us267\ET268.
+\I\X1877:\.{"noindent"}\X
+\Us1090\ET1091.
+\I\X1814:\.{"nolimits"}\X
+\Us698, 1158\ETs1159.
+\I\X1537:\.{"nonscript"}\X
+\Us191, 267\ETs268.
+\I\X1529:\.{"nonstopmode"}\X
+\Us88, 1264\ETs1265.
+\I\X1670:\.{"notexpanded:"}\X
+\U260.
+\I\X1659:\.{"nulldelimiterspace"}\X
+\Us249\ET250.
+\I\X1790:\.{"nullfont"}\X
+\Us554\ET555.
+\I\X1754:\.{"number"}\X
+\Us470\ET471.
+\I\X1975:\.{"numexpr"}\X
+\Us1464\ET1465.
+\I\X1697:\.{"omit"}\X
+\Us267, 268\ETs1131.
+\I\X1921:\.{"openin"}\X
+\Us1274\ET1275.
+\I\X1934:\.{"openout"}\X
+\Us1346, 1348\ETs1358.
+\I\X1780:\.{"or"}\X
+\Us493, 494\ETs502.
+\I\X1931:\.{"outer\ endtemplate"}\X
+\U1297.
+\I\X1896:\.{"outer"}\X
+\Us1210, 1211, 1215\ETs1297.
+\I\X1571:\.{"output"}\X
+\Us232, 233\ETs1412.
+\I\X1630:\.{"outputpenalty"}\X
+\Us239\ET240.
+\I\X1889:\.{"over"}\X
+\Us1180\ET1181.
+\I\X1664:\.{"overfullrule"}\X
+\Us249\ET250.
+\I\X1808:\.{"overline"}\X
+\Us698, 1158\ETs1159.
+\I\X1892:\.{"overwithdelims"}\X
+\Us1180\ET1181.
+\I\X1849:\.{"page"}\X
+\U1002.
+\I\X1848:\.{"pagedepth"}\X
+\Us985\ET986.
+\I\X1846:\.{"pagefilllstretch"}\X
+\Us985\ET986.
+\I\X1845:\.{"pagefillstretch"}\X
+\Us985\ET986.
+\I\X1844:\.{"pagefilstretch"}\X
+\Us985\ET986.
+\I\X1841:\.{"pagegoal"}\X
+\Us985\ET986.
+\I\X1847:\.{"pageshrink"}\X
+\Us985\ET986.
+\I\X1843:\.{"pagestretch"}\X
+\Us985\ET986.
+\I\X1842:\.{"pagetotal"}\X
+\Us985\ET986.
+\I\X1718:\.{"par"}\X
+\Us336, 337\ETs858.
+\I\X1831:\.{"paragraph"}\X
+\U868.
+\I\X1564:\.{"parfillskip"}\X
+\Us227\ET228.
+\I\X1648:\.{"parindent"}\X
+\Us249\ET250.
+\I\X1698:\.{"parshape"}\X
+\Us267\ET268.
+\I\X1963:\.{"parshapedimen"}\X
+\Us1405\ET1406.
+\I\X1962:\.{"parshapeindent"}\X
+\Us1405\ET1406.
+\I\X1961:\.{"parshapelength"}\X
+\Us1405\ET1406.
+\I\X1552:\.{"parskip"}\X
+\Us227\ET228.
+\I\X1836:\.{"patterns"}\X
+\Us962, 963, 1252\ETs1253.
+\I\X1619:\.{"pausing"}\X
+\Us239\ET240.
+\I\X1742:\.{"pc"}\X
+\U460.
+\I\X1544:\.{"penalty\ "}\X
+\U196.
+\I\X1699:\.{"penalty"}\X
+\Us267, 268\ETs858.
+\I\X1749:\.{"plus"}\X
+\U464.
+\I\X1603:\.{"postdisplaypenalty"}\X
+\Us239\ET240.
+\I\X1602:\.{"predisplaypenalty"}\X
+\Us239\ET240.
+\I\X1661:\.{"predisplaysize"}\X
+\Us249\ET250.
+\I\X1902:\.{"prefix"}\X
+\U1213.
+\I\X1591:\.{"pretolerance"}\X
+\Us239\ET240.
+\I\X1727:\.{"prevdepth"}\X
+\Us418\ET419.
+\I\X1700:\.{"prevgraf"}\X
+\Us267, 268\ETs1246.
+\I\X1903:\.{"protected"}\X
+\Us1215, 1297, 1456\ETs1457.
+\I\X1837:\.{"pruning"}\X
+\U970.
+\I\X1570:\.{"pt"}\X
+\Us231, 455, 467\ETs1509.
+\I\X1701:\.{"radical"}\X
+\Q269.
+\Us267, 268\ETs698.
+\I\X1866:\.{"raise"}\X
+\Us1073\ET1074.
+\I\X1702:\.{"read"}\X
+\Us267, 268\ETs488.
+\I\X1971:\.{"readline"}\X
+\Us1445\ET1446.
+\I\X1709:\.{"reassigning"}\X
+\Us279\ET1517.
+\I\X1703:\.{"relax"}\X
+\Us267\ET268.
+\I\X1601:\.{"relpenalty"}\X
+\Us239\ET240.
+\I\X1715:\.{"restoring"}\X
+\Us285\ET1519.
+\I\X1714:\.{"retaining"}\X
+\Us285\ET1519.
+\I\X1811:\.{"right"}\X
+\Us698, 1071, 1187, 1190, 1191\ETs1194.
+\I\X1862:\.{"right."}\X
+\U1067.
+\I\X1863:\.{"rightbrace"}\X
+\U1070.
+\I\X1643:\.{"righthyphenmin"}\X
+\Us239\ET240.
+\I\X1558:\.{"rightskip"}\X
+\Us227\ET228.
+\I\X1755:\.{"romannumeral"}\X
+\Us470\ET471.
+\I\X1534:\.{"rule("}\X
+\U189.
+\I\X1919:\.{"scaled"}\X
+\U1260.
+\I\X1970:\.{"scantokens"}\X
+\Us1433\ET1434.
+\I\X1584:\.{"scriptfont"}\X
+\Us236, 701\ETs1232.
+\I\X1585:\.{"scriptscriptfont"}\X
+\Us236, 701\ETs1232.
+\I\X1799:\.{"scriptscriptstyle"}\X
+\Us696\ET1171.
+\I\X1660:\.{"scriptspace"}\X
+\Us249\ET250.
+\I\X1798:\.{"scriptstyle"}\X
+\Us696\ET1171.
+\I\X1530:\.{"scrollmode"}\X
+\Us88, 1264\ETs1265.
+\I\X1704:\.{"setbox"}\X
+\Us267, 268, 1243\ETs1414.
+\I\X1938:\.{"setlanguage"}\X
+\Us1346, 1348\ETs1358.
+\I\X1589:\.{"sfcode"}\X
+\Us237, 1232\ETs1233.
+\I\X1872:\.{"shipout"}\X
+\Us1073\ET1074.
+\I\X1927:\.{"show"}\X
+\Us1293\ET1294.
+\I\X1928:\.{"showbox"}\X
+\Us1293\ET1294.
+\I\X1615:\.{"showboxbreadth"}\X
+\Us239\ET240.
+\I\X1616:\.{"showboxdepth"}\X
+\Us239\ET240.
+\I\X1964:\.{"showgroups"}\X
+\Us1408\ET1409.
+\I\X1968:\.{"showifs"}\X
+\Us1422\ET1423.
+\I\X1930:\.{"showlists"}\X
+\Us1293\ET1294.
+\I\X1929:\.{"showthe"}\X
+\Us1293\ET1294.
+\I\X1965:\.{"showtokens"}\X
+\Us1417\ET1418.
+\I\X1916:\.{"skewchar"}\X
+\Us1256\ET1257.
+\I\X1568:\.{"skip"}\X
+\Us229, 231, 413, 1011\ETs1510.
+\I\X1911:\.{"skipdef"}\X
+\Us1224\ET1225.
+\I\X1748:\.{"sp"}\X
+\U460.
+\I\X1726:\.{"spacefactor"}\X
+\Us418\ET419.
+\I\X1562:\.{"spaceskip"}\X
+\Us227\ET228.
+\I\X1821:\.{"span"}\X
+\Us782\ET783.
+\I\X1936:\.{"special"}\X
+\Us1346, 1348\ETs1358.
+\I\X1725:\.{"splitbotmark"}\X
+\Us386\ET387.
+\I\X1724:\.{"splitfirstmark"}\X
+\Us386\ET387.
+\I\X1654:\.{"splitmaxdepth"}\X
+\Us249\ET250.
+\I\X1560:\.{"splittopskip"}\X
+\Us227\ET228.
+\I\X1794:\.{"spread"}\X
+\U647.
+\I\X1756:\.{"string"}\X
+\Us470\ET471.
+\I\X1561:\.{"tabskip"}\X
+\Us227\ET228.
+\I\X1789:\.{"texput"}\X
+\U536.
+\I\X1583:\.{"textfont"}\X
+\Us236, 701\ETs1232.
+\I\X1797:\.{"textstyle"}\X
+\Us696\ET1171.
+\I\X1705:\.{"the"}\X
+\Us267, 268\ETs430.
+\I\X1567:\.{"thickmuskip"}\X
+\Us227\ET228.
+\I\X1565:\.{"thinmuskip"}\X
+\Us227\ET228.
+\I\X1611:\.{"time"}\X
+\Us239\ET240.
+\I\X1793:\.{"to"}\X
+\Us647, 1084\ETs1227.
+\I\X1580:\.{"toks"}\X
+\Us233, 235, 267\ETs1511.
+\I\X1913:\.{"toksdef"}\X
+\Us1224\ET1225.
+\I\X1592:\.{"tolerance"}\X
+\Us239\ET240.
+\I\X1721:\.{"topmark"}\X
+\Us386\ET387.
+\I\X1559:\.{"topskip"}\X
+\Us227\ET228.
+\I\X1947:\.{"tracingassigns"}\X
+\Us1390\ET1392.
+\I\X1627:\.{"tracingcommands"}\X
+\Us239\ET240.
+\I\X1948:\.{"tracinggroups"}\X
+\Us1390\ET1392.
+\I\X1949:\.{"tracingifs"}\X
+\Us1390\ET1392.
+\I\X1626:\.{"tracinglostchars"}\X
+\Us239\ET240.
+\I\X1621:\.{"tracingmacros"}\X
+\Us239\ET240.
+\I\X1951:\.{"tracingnesting"}\X
+\Us1390\ET1392.
+\I\X1620:\.{"tracingonline"}\X
+\Us239\ET240.
+\I\X1625:\.{"tracingoutput"}\X
+\Us239\ET240.
+\I\X1624:\.{"tracingpages"}\X
+\Us239\ET240.
+\I\X1623:\.{"tracingparagraphs"}\X
+\Us239\ET240.
+\I\X1628:\.{"tracingrestores"}\X
+\Us239\ET240.
+\I\X1950:\.{"tracingscantokens"}\X
+\Us1390\ET1392.
+\I\X1622:\.{"tracingstats"}\X
+\Us239\ET240.
+\I\X1738:\.{"true"}\X
+\U455.
+\I\X1588:\.{"uccode"}\X
+\Us237, 1232\ETs1233.
+\I\X1629:\.{"uchyph"}\X
+\Us239\ET240.
+\I\X1809:\.{"underline"}\X
+\Us698, 1158\ETs1159.
+\I\X1966:\.{"unexpanded"}\X
+\Us1419\ET1420.
+\I\X1881:\.{"unhbox"}\X
+\Us1109\ET1110.
+\I\X1882:\.{"unhcopy"}\X
+\Us1109\ET1110.
+\I\X1879:\.{"unkern"}\X
+\Us1109\ET1110.
+\I\X1778:\.{"unless"}\X
+\Us490, 1448, 1449\ETs1451.
+\I\X1878:\.{"unpenalty"}\X
+\Us1109\ET1110.
+\I\X1533:\.{"unset"}\X
+\U186.
+\I\X1880:\.{"unskip"}\X
+\Us1109\ET1110.
+\I\X1883:\.{"unvbox"}\X
+\Us1109\ET1110.
+\I\X1884:\.{"unvcopy"}\X
+\Us1109\ET1110.
+\I\X1926:\.{"uppercase"}\X
+\Us1288\ET1289.
+\I\X1547:\.{"vadjust"}\X
+\Us199, 267, 268\ETs1412.
+\I\X1706:\.{"valign"}\X
+\Us267, 268\ETs1412.
+\I\X1618:\.{"vbadness"}\X
+\Us239\ET240.
+\I\X1840:\.{"vbox"}\X
+\Us980, 1073, 1074\ETs1412.
+\I\X1707:\.{"vcenter"}\X
+\Us267, 268, 698, 738\ETs1412.
+\I\X1838:\.{"vertbreak"}\X
+\U975.
+\I\X1858:\.{"vfil"}\X
+\Us1060\ET1061.
+\I\X1859:\.{"vfill"}\X
+\Us1060\ET1061.
+\I\X1861:\.{"vfilneg"}\X
+\Us1060\ET1061.
+\I\X1657:\.{"vfuzz"}\X
+\Us249\ET250.
+\I\X1792:\.{"vlistout"}\X
+\U632.
+\I\X1667:\.{"voffset"}\X
+\Us249\ET250.
+\I\X1795:\.{"vpack"}\X
+\U671.
+\I\X1708:\.{"vrule"}\X
+\Us267\ET268.
+\I\X1652:\.{"vsize"}\X
+\Us249\ET250.
+\I\X1857:\.{"vskip"}\X
+\Us1060\ET1061.
+\I\X1839:\.{"vsplit"}\X
+\Us980, 1073\ETs1074.
+\I\X1860:\.{"vss"}\X
+\Us1060\ET1061.
+\I\X1870:\.{"vtop"}\X
+\Us1073, 1074\ETs1412.
+\I\X1730:\.{"wd"}\X
+\Us418\ET419.
+\I\X1987:\.{"widowpenalties"}\X
+\Us1520\ET1521.
+\I\X1597:\.{"widowpenalty"}\X
+\Us239\ET240.
+\I\X1751:\.{"width"}\X
+\U465.
+\I\X1717:\.{"write"}\X
+\Us325, 1346, 1348\ETs1358.
+\I\X1901:\.{"xdef"}\X
+\Us1210\ET1211.
+\I\X1875:\.{"xleaders"}\X
+\Us1073\ET1074.
+\I\X1563:\.{"xspaceskip"}\X
+\Us227\ET228.
+\I\X1614:\.{"year"}\X
+\Us239\ET240.
+\I\X1992:\\{pool\_ptr} initialization\X
+\U41.
+\I\X1989:\\{str\_pool} initialization\X
+\U41.
+\I\X1993:\\{str\_ptr} initialization\X
+\U41.
+\I\X1990:\\{str\_start} initialization\X
+\U41.

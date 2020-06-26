@@ -1,0 +1,10 @@
+\newif\ifhint
+{
+\catcode`@=11 % at signs are letters
+\ifx\@HINT\relax
+  \global\hinttrue
+\else
+  \global\hintfalse
+\fi
+\catcode`@=12 % at signs are no longer letters
+}

@@ -1,0 +1,35 @@
+\input size.tex
+
+\def\tocline#1#2#3#4{\ifnum#1=0 \smallskip\vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\fi
+\noindent
+\line{\ifnum#1=0\hbox to 2em{\bf#2\hfill}{\bf#3}\hfill\hbox to 2em{\hss\bf#4}%
+\else \kern 2em\hbox to 3em{#2\hfill}#3\rm\ \leaders\hbox to .5em{.\hfil}\hfil\hbox to 2em{\hss#4}\fi
+   }}
+\newbox\voidbox
+\newbox\tocbox
+\def\maketoc{%
+  \setbox\tocbox\vbox{%\startpdf
+  \vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf 3\hfill }{\fam \bffam \tenbf Reading the \unhbox \voidbox \hbox {\fam \ttfam \tentt WEB}}\hfill \hbox to 2em{\hss \fam \bffam \tenbf 5}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{3.1\hfill }Scanning the \unhbox \voidbox \hbox {\fam \ttfam \tentt WEB} \tenrm \ \leaders \hbox to .5em{.\hfil }\hfil \hbox to 2em{\hss 5}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{3.2\hfill }Tokens \tenrm \ \leaders \hbox to .5em{.\hfil }\hfil \hbox to 2em{\hss 6}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{3.3\hfill }Scanner Actions \tenrm \ \leaders \hbox to .5em{.\hfil }\hfil \hbox to 2em{\hss 8}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{3.4\hfill }Strings \tenrm \ \leaders \hbox to .5em{.\hfil }\hfil \hbox to 2em{\hss 9}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{3.5\hfill }Identifiers \tenrm \ \leaders \hbox to .5em{.\hfil }\hfil \hbox to 2em{\hss 10}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{3.6\hfill }Linking related tokens \tenrm \ \leaders \hbox to .5em{.\hfil }\hfil \hbox to 2em{\hss 13}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{3.7\hfill }Module Names \tenrm \ \leaders \hbox to .5em{.\hfil }\hfil \hbox to 2em{\hss 16}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{3.8\hfill }Definitions \tenrm \ \leaders \hbox to .5em{.\hfil }\hfil \hbox to 2em{\hss 19}}
+
+}}
+
+\maketoc
+
+\def\tableofcontent{%\plainsection{Contents}%
+\unvbox\tocbox
+}
+
+% how contentslines look
+
+\tableofcontent
+
+\vfil
+\end
