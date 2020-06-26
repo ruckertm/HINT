@@ -2,7 +2,9 @@
 TEX=  mfpreface.tex \
 	bmp.tex png.tex jpg.tex image.tex head.tex \
 	ctex.tex \
-	math.tex leaders.tex
+	math.tex
+
+#leaders.tex
 
 #	simple.tex fonts.tex paging.tex hset.tex vset.tex vpack.tex baseline.tex \
 #	paragraph.tex math.tex display.tex short.tex hyphen.tex hello.tex \

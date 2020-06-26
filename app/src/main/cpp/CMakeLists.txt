@@ -32,6 +32,7 @@ target_compile_options(hintview PRIVATE -Wno-dangling-else)
 # add lib dependencies
 target_link_libraries(hintview
         android
+        jnigraphics
         log
         EGL
         GLESv2

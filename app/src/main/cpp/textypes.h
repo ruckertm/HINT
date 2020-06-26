@@ -63,26 +63,26 @@ typedef struct{FILE*f;text_char d;}alpha_file;
 typedef struct{FILE*f;eight_bits d;}byte_file;
 
 /*:30*//*43:*/
-#line 1174 "dummy.w"
+#line 1147 "dummy.w"
 
 typedef uint32_t pool_pointer;
 typedef uint16_t str_number;
 typedef uint8_t packed_ASCII_code;
 
 /*:43*//*109:*/
-#line 2253 "dummy.w"
+#line 2227 "dummy.w"
 
 typedef int scaled;
 typedef uint32_t nonnegative_integer;
 typedef uint8_t small_number;
 
 /*:109*//*119:*/
-#line 2448 "dummy.w"
+#line 2424 "dummy.w"
 
 typedef float32_t glue_ratio;
 
 /*:119*//*123:*/
-#line 2552 "dummy.w"
+#line 2528 "dummy.w"
 
 typedef uint8_t quarterword;
 typedef uint16_t halfword;
@@ -110,17 +110,17 @@ four_quarters qqqq;
 typedef struct{FILE*f;memory_word d;}word_file;
 
 /*:123*//*125:*/
-#line 2611 "dummy.w"
+#line 2587 "dummy.w"
 
 typedef halfword pointer;
 
 /*:125*//*163:*/
-#line 3282 "dummy.w"
+#line 3258 "dummy.w"
 
 typedef uint8_t glue_ord;
 
-/*:163*//*230:*/
-#line 4417 "dummy.w"
+/*:163*//*232:*/
+#line 4400 "dummy.w"
 
 typedef struct{int16_t mode_field;
 pointer head_field,tail_field;
@@ -135,52 +135,49 @@ uint32_t np_field;
 memory_word aux_field;
 }list_state_record;
 
-/*:230*//*288:*/
-#line 6000 "dummy.w"
+/*:232*//*290:*/
+#line 5980 "dummy.w"
 
 typedef uint8_t group_code;
 
-/*:288*//*319:*/
-#line 6580 "dummy.w"
+/*:290*//*321:*/
+#line 6560 "dummy.w"
 
 typedef struct{
 quarterword state_field,index_field;
 halfword start_field,loc_field,limit_field,name_field;
 }in_state_record;
 
-/*:319*//*567:*/
-#line 10796 "dummy.w"
+/*:321*//*569:*/
+#line 10789 "dummy.w"
 
 typedef uint8_t internal_font_number;
 typedef uint16_t font_index;
 
-/*:567*//*614:*/
-#line 11972 "dummy.w"
+/*:569*//*616:*/
+#line 11965 "dummy.w"
 
 typedef uint8_t dvi_index;
 
-/*:614*//*956:*/
-#line 18183 "dummy.w"
+/*:616*//*958:*/
+#line 18187 "dummy.w"
 
 typedef uint16_t trie_pointer;
 
-/*:956*//*961:*/
-#line 18249 "dummy.w"
+/*:958*//*963:*/
+#line 18253 "dummy.w"
 
 typedef uint16_t hyph_pointer;
 
-/*:961*//*1004:*/
-#line 18930 "dummy.w"
-
+/*:963*//*1006:*/
+#line 18934 "dummy.w"
 
 typedef struct{
-pointer p;
-int i;
-pointer g;
-scaled s;
+pointer p,t;
 }stream_t;
 
-/*:1004*/
+
+/*:1006*/
 #line 271 "dummy.w"
 
 #endif

@@ -25,7 +25,10 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.print.PrintManager;
+import android.print.PrintDocumentAdapter;
+
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -44,10 +47,10 @@ import java.io.IOException;
 
 
 public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.Renderer.RenderErrorCallback {
-
+    private static String TAG = "HINTVIEWActivity";
     private HINTVIEWView mView;
     private static Toolbar toolbar;
-
+    public static PrintHintDocumentAdapter adapter;
     private SharedPreferences sharedPref;
     private boolean darkMode = false;
     private boolean TeXzoom = false;
@@ -119,13 +122,13 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
             }
         });
 
-        Log.w("HINTVIEWActivity", "onCreate URI= " + fileUriStr);
+        Log.w(TAG, "onCreate URI= " + fileUriStr);
         if (fileUriStr == null) openFileChooser();
     }
 
     public static void hideToolbar(View view, boolean toolbarVisible) {
         toolbar.setTranslationY(toolbarVisible ? 0 : -toolbar.getHeight());
-        Log.w("HINTVIEWActivity", "toolbar translation " + toolbar.getTranslationY());
+        Log.w(TAG, "toolbar translation " + toolbar.getTranslationY());
         toolbar.requestTransparentRegion(toolbar);
         // hide Nav- & Status-bar
         view.setSystemUiVisibility(toolbarVisible ?
@@ -173,7 +176,7 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
         outState.putBoolean("toolbarVisible", toolbar.getTranslationY() >= 0);
         outState.putBoolean("darkMode", darkMode);
         outState.putBoolean("TeXzoom", TeXzoom);
-        Log.d("HINTVIEWActivity", "toolbarVisible: " + (toolbar.getTranslationY() >= 0));
+        Log.d(TAG, "toolbarVisible: " + (toolbar.getTranslationY() >= 0));
     }
 
     @Override
@@ -221,7 +224,7 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
         editor.putBoolean("darkMode", mView.getMode());
         editor.putBoolean("TeXzoom", TeXzoom);
         editor.apply();
-        Log.d("HINTVIEWActivity", "onStop pos = " + Long.toHexString(filePos));
+        Log.d(TAG, "onStop pos = " + Long.toHexString(filePos));
     }
 
 
@@ -247,34 +250,34 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
         switch (item.getItemId()) {
             case R.id.zoom:
                 TeXzoom = !item.isChecked();
-                Log.d("HINTVIEWActivity", "onOptionsItemSelected: TeXzoom=" + TeXzoom);
+                Log.d(TAG, "onOptionsItemSelected: TeXzoom=" + TeXzoom);
                 mView.setZoom(TeXzoom);
                 item.setChecked(TeXzoom);
                 return true;
             case R.id.dark:
                 darkMode = !item.isChecked();
-                Log.d("HINTVIEWActivity", "onOptionsItemSelected: dark=" + darkMode);
+                Log.d(TAG, "onOptionsItemSelected: dark=" + darkMode);
                 mView.setMode(darkMode);
                 item.setChecked(darkMode);
                 setToolbar(darkMode);
                 mView.requestRender();
                 return true;
             case R.id.fileChooser:
-                Log.d("HINTVIEWActivity", "onOptionsItemSelected: File Chooser");
+                Log.d(TAG, "onOptionsItemSelected: File Chooser");
                 openFileChooser();
                 return true;
             case R.id.toHome:
-                Log.d("HINTVIEWActivity", "to first page");
+                Log.d(TAG, "to first page");
                 HINTVIEWLib.home();
                 mView.requestRender();
                 return true;
             case R.id.scaleOne:
-                Log.d("HINTVIEWActivity", "scale one");
+                Log.d(TAG, "scale one");
                 mView.setScale(1.0);
                 mView.requestRender();
                 return true;
             case R.id.print:
-                Log.d("HINTVIEWActivity", "print");
+                Log.d(TAG, "print");
                 doPrint();
                 return true;
             default:
@@ -289,26 +292,36 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
         try {
             startActivityForResult(intent, FILE_CHOOSER_REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
-            Log.e("", "", e);
+            Log.e(TAG, "", e);
         }
     }
 
     private void doPrint() {
+
+        Log.e(TAG,"doPrint Begin\n");
         // Get a PrintManager instance
-        PrintManager printManager = (PrintManager) this.getSystemService(Context.PRINT_SERVICE);
-
+        final PrintManager printManager = (PrintManager) this.getSystemService(Context.PRINT_SERVICE);
+        if (printManager==null) {
+            Log.e(TAG, "Unable to obtain a printManager");
+            return;
+        }
+        if (adapter==null)
+          adapter = new PrintHintDocumentAdapter(mView);
         // Set job name, which will be displayed in the print queue
-        String jobName = getString(R.string.hintview_activity) + "_" + mView.getFileUriStr();
-
-        PrintHintDocumentAdapter adapter = new PrintHintDocumentAdapter(this, mView.getFileUriStr());
-
+        final String jobName = mView.getFileUriStr();
         // Start a print job, passing in a PrintDocumentAdapter implementation
         // to handle the generation of a print document
-        printManager.print(jobName, adapter, null); //
+
+        Thread printThread = new Thread(new Runnable(){
+            public void run()
+            {
+                printManager.print(jobName, adapter, null);
+            }});
+        printThread.start();
+
     }
 
-
-    @Override
+         @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == FILE_CHOOSER_REQUEST_CODE && resultCode == RESULT_OK) {
@@ -317,13 +330,13 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
                 getContentResolver().openInputStream(data.getData()).close();
                 mView.setFile(data.getData().toString(), 0);
             } catch (FileNotFoundException e) {
-                Log.e("", "", e);
+                Log.e(TAG, "", e);
                 openFileChooser();
             } catch (java.lang.SecurityException e) {
                 //no permissions after restart of the device
                 openFileChooser();
             } catch (IOException e) {
-                e.printStackTrace();
+               Log.e(TAG,"Exception in openFileChoser");
             }
         }
     }
@@ -331,6 +344,9 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
 
     @Override
     public void onRenderErrorCallback(String errMsg) {
-        Toast.makeText(this, errMsg, Toast.LENGTH_LONG).show();
+        new Error(errMsg);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("fileURI", null);
+        //Toast.makeText(this, errMsg, Toast.LENGTH_LONG).show();
     }
 }

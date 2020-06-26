@@ -33,9 +33,11 @@ package edu.hm.cs.hintview;
 
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.ParcelFileDescriptor;
+import android.print.PrintManager;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -53,6 +55,8 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.opengles.GL10;
+
+import static java.lang.Thread.sleep;
 
 /**
  * A simple GLSurfaceView sub-class that demonstrate how to perform
@@ -81,24 +85,29 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
     protected Renderer fileRenderer;
     private static boolean darkMode = false;
     protected static boolean TeXzoom = false, ZoomOn = false, ZoomOff = false, Zooming = false;
+    protected static boolean doPrint = false;
+    protected static Bitmap printBitmap;
     protected static boolean Page_next = false, Page_prev = false;
     private GestureDetector touchGestureDetector;
     private ScaleGestureDetector scaleGestureDetector;
+    protected final Context context;
 
     public HINTVIEWView(Context context) {
         super(context);
+        this.context=context;
     }
 
     public HINTVIEWView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        this.context=context;
     }
 
     public HINTVIEWView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs);
+        this.context=context;
     }
 
     public void init() {
-        Context context = getContext();
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         Log.w(TAG, String.format("Resolution xdpi=%f ydpi=%f\n", metrics.xdpi, metrics.ydpi));
         xdpi = metrics.xdpi;
@@ -111,7 +120,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         touchGestureDetector = new GestureDetector(context, new TouchGestureHandler(this));
         scaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureHandler(this));
         setOnTouchListener(this);
-        fileRenderer = new Renderer(context);
+        fileRenderer = new Renderer(context, this);
         setRenderer(fileRenderer);
         setRenderMode(RENDERMODE_WHEN_DIRTY);
     }
@@ -168,13 +177,13 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
             checkEglError("Before eglCreateContext", egl);
             int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
             int[] attrib_list = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL10.EGL_NONE};
-            EGLContext context = egl.eglCreateContext(display, eglConfig, EGL10.EGL_NO_CONTEXT, attrib_list);
+            EGLContext egl_context = egl.eglCreateContext(display, eglConfig, EGL10.EGL_NO_CONTEXT, attrib_list);
             checkEglError("After eglCreateContext", egl);
-            return context;
+            return egl_context;
         }
 
-        public void destroyContext(EGL10 egl, EGLDisplay display, EGLContext context) {
-            egl.eglDestroyContext(display, context);
+        public void destroyContext(EGL10 egl, EGLDisplay display, EGLContext egl_context) {
+            egl.eglDestroyContext(display, egl_context);
         }
     }
 
@@ -375,19 +384,27 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         private int[] mValue = new int[1];
     }
 
-    protected static class Renderer implements GLSurfaceView.Renderer {
 
+
+
+    protected static class Renderer implements GLSurfaceView.Renderer {
+        private HINTVIEWView view;
         private final Context context;
         private String fileUriStr;
         private long pos;
         private RenderErrorCallback renderErrorCallback;
 
-        Renderer(Context context) {
-
+        Renderer(Context context,HINTVIEWView view) {
+            this.view = view;
             this.context = context;
             renderErrorCallback = (RenderErrorCallback) context;
         }
 
+        private void renderToBitmap(Bitmap bmp)
+        {   HINTVIEWLib.zoomBegin(); // renders to a texture
+            // here I need to copy the texture onto the bitmap
+            HINTVIEWLib.zoomEnd(); // release the texture
+        }
 
         private boolean render_OK() {
             String msg = HINTVIEWLib.error();
@@ -438,6 +455,16 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         }
 
         public void onDrawFrame(GL10 gl) {
+            if (HINTVIEWView.doPrint)
+            {    Log.e("onDrawFrame ","start doPrint");
+                HINTVIEWLib.zoomBegin();
+                HINTVIEWLib.drawBitmap(printBitmap);
+                HINTVIEWView.doPrint=false;
+                Log.e("onDrawFrame ","done doPrint");
+                if (HINTVIEWActivity.adapter!=null)
+                    HINTVIEWActivity.adapter.onBitmapReady();
+                return;
+            }
             HINTVIEWLib.setMode(darkMode);
             HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi); /* needed for zooming */
             if (HINTVIEWView.Page_prev) {
@@ -449,6 +476,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
                 HINTVIEWView.Page_next = false;
             }
             if (!render_OK()) return;
+
             if (HINTVIEWView.TeXzoom)
                 HINTVIEWLib.draw();
             else {
@@ -488,3 +516,4 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
 
     }
 }
+

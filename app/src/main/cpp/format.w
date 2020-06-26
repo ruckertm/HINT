@@ -19,7 +19,6 @@
 
 \input format.sty
 
-
 %% defining how to display certain C identifiers
 
 @s int8_t int
@@ -40,9 +39,9 @@
 \titletrue
 
 \def\setrevision$#1: #2 ${\gdef\lastrevision{#2}}
-\setrevision$Revision: 1879 $
+\setrevision$Revision: 1997 $
 \def\setdate$#1(#2) ${\gdef\lastdate{#2}}
-\setdate$Date: 2020-03-16 16:31:21 +0100 (Mon, 16 Mar 2020) $
+\setdate$Date: 2020-06-25 18:52:18 +0200 (Thu, 25 Jun 2020) $
 
 \null
 
@@ -53,13 +52,17 @@
 \font\smalltitlefont=cmssbx10 scaled\magstep3
 
 %halftitle
-\hbox{}
-\vskip 1in
-{  \baselineskip=60pt
-  \rightline{\hugetitlefont HINT:}
-  \rightline{\hugetitlefont The File Format}
+\def\raggedleft{\leftskip=0pt plus 0.5em\parfillskip=0pt
+\spaceskip=.3333em \xspaceskip=0.5em \emergencystretch=1em\relax
+\hyphenpenalty=1000\exhyphenpenalty=1000\pretolerance=10000\linepenalty=5000
 }
-\vfill
+\hbox{}
+\vskip 0pt plus 1fill
+{ \baselineskip=60pt
+  \hugetitlefont\raggedleft HINT:\par
+  \Largetitlefont\raggedleft The File Format\par
+}
+\vskip 0pt plus 5fill
 \eject
 % verso of half title
 \titletrue
@@ -70,23 +73,23 @@
 % title
 \titletrue
 \hbox{}
-\vskip 1in
+\vskip 0pt plus 1fill
 {
-  \baselineskip=1cm
-  \leftline{\largetitlefont HINT: The File Format}
-  \vskip 0.5in
+  \baselineskip=1cm\parindent=0pt
+  \largetitlefont\raggedright HINT: The File Format\par
+  \vskip 10pt plus 0.5fill
   \leftline{\smalltitlefont Reflowable} 
   \vskip-3pt
   \leftline{\smalltitlefont Output} 
   \vskip-3pt
   \leftline{\smalltitlefont for \TeX}
-  \vskip 0.5in
-  \rightline{\it F\"ur meine Mutter\hskip 2cm}
-  \vfill
+  \vskip 10pt plus 0.5fill
+  \hskip 0pt plus 2fill\it F\"ur meine Mutter\hskip 0pt plus 0.5fill\hbox{}
+  \vskip 10pt plus 3fill
   \leftline{\smalltitlefont Version 1.0}
   \bigskip
-  \leftline{\bf MARTIN RUCKERT \ \it Munich University of Applied Sciences}
-  \bigskip
+  \raggedright\baselineskip=12pt
+  \bf MARTIN RUCKERT \ \it Munich University of Applied Sciences\par
 %  \leftline{\bf Eigendruck im Selbstverlag}
 %  \bigskip
 }
@@ -115,8 +118,9 @@ Ruckert, Martin.
 }
 \bigskip
 
-{\raggedright\advance\rightskip 3.5pc 
-Internet page {\tt https://www.cs.hm.edu/\TL ruckert}
+{\raggedright\advance\rightskip 3.5pc
+\def\:{\discretionary{}{}{}}
+Internet page {\tt https:\://www.\:cs.\:hm.\:edu/\:\TL ruckert}
 may contain current information about this book, downloadable software,
 and news. 
 
@@ -137,11 +141,11 @@ Lothstrasse 64,
 80335 M\"unchen, 
 Germany.
 \medskip
-{\tt ruckert@@cs.hm.edu}
+{\tt ruckert\:@@cs.hm.edu}
 \medskip
 %ISBN-10: 0-000-00000-0
 
-ISBN-13: 978-1079481594
+ISBN-13: 978-\:1079481594
 \medskip
 First printing: August 2019\par
 \medskip
@@ -217,7 +221,7 @@ cweb} tools\cite{Knuth:cweb} to support the corresponding source files.
 About in mid May, after writing down about 100 pages, the first
 problems emerged that could not be resolved with my current
 approach. I had started to describe font definitions containing
-definitions of the inter-word glue and the default hyphen, and the
+definitions of the interword glue and the default hyphen, and the
 declarative style of my exposition started to conflict with the
 sequential demands of writing an output file. So it was time for a
 first complete redesign.  Two more passes over the whole book were
@@ -509,7 +513,7 @@ printf("};\n\n");
 \index{ligature kind+\\{ligature\_kind}}
 \index{hyphen kind+\\{hyphen\_kind}}
 \index{glue kind+\\{glue\_kind}}
-\index{math kind+\\{math\_kind}}
+\index{language kind+\\{language\_kind}}
 \index{rule kind+\\{rule\_kind}}
 \index{image kind+\\{image\_kind}}
 \index{baseline kind+\\{baseline\_kind}}
@@ -517,7 +521,7 @@ printf("};\n\n");
 \index{hbox kind+\\{hbox\_kind}}
 \index{vbox kind+\\{vbox\_kind}}
 \index{par kind+\\{par\_kind}}
-\index{display kind+\\{display\_kind}}
+\index{math kind+\\{math\_kind}}
 \index{table kind+\\{table\_kind}}
 \index{item kind+\\{item\_kind}}
 \index{hset kind+\\{hset\_kind}}
@@ -543,7 +547,7 @@ DEF_KIND(k@&ern,d@&imen,6),@/
 DEF_KIND(g@&lue,g@&lue,7),@/
 DEF_KIND(l@&igature,l@&igature,8),@/
 DEF_KIND(h@&yphen,h@&yphen,9),@/
-DEF_KIND(m@&ath,m@&ath,10),@/
+DEF_KIND(l@&anguage,l@&anguage,10),@/
 DEF_KIND(r@&ule,r@&ule,11),@/
 DEF_KIND(i@&mage,i@&mage,12),@/
 DEF_KIND(l@&eaders,l@&eaders,13),@/
@@ -551,7 +555,7 @@ DEF_KIND(b@&aseline,b@&aseline,14),@/
 DEF_KIND(h@&b@&ox,h@&b@&ox,15),@/
 DEF_KIND(v@&b@&ox,v@&b@&ox,16),@/
 DEF_KIND(p@&ar,p@&ar,17),@/
-DEF_KIND(d@&isplay,d@&isplay,18),@/
+DEF_KIND(m@&ath,m@&ath,18),@/
 DEF_KIND(t@&able,t@&able,19),@/
 DEF_KIND(i@&tem,i@&tem,20),@/
 DEF_KIND(h@&set,h@&set,21),@/
@@ -572,7 +576,7 @@ For a few kind values we have
 alternative names; we will use them in the definition section 
 to express different intentions when using them.
 @<alternative kind names@>=
-font_kind=glyph_kind,int_kind=penalty_kind, dimen_kind=kern_kind@/@t{}@>
+font_kind=glyph_kind,int_kind=penalty_kind, dimen_kind=kern_kind,@/@t{}@>
 @
 
 The info\index{info value} values can be used to represent numbers in the range 0 to 7; for an example
@@ -707,7 +711,8 @@ writes the nodes' keyword found in the |content_name| array.  Then it
 calls |hget_content| to read the nodes content and write it out.
 Finally it reads the end\index{end byte} byte, checks it against the start byte, and
 finishes up the content node by writing the |END| token using the
-|hwrite_end| function.
+|hwrite_end| function. The function returns the tag byte so that
+the calling function might check that the content node meets its requirements.
 
 |hget_content| uses the start byte |a|, passed as a parameter, to
 branch directly to the reading routine for the given combination of
@@ -721,11 +726,12 @@ reading routine (avoiding another switch statement).
 
 \codesection{\getsymbol}{Reading the Short Format}\getindex{1}{2}{Content Nodes}
 @<get functions@>=
-void hget_content_node(void)
+uint8_t hget_content_node(void)
 { @<read the start byte |a|@>@;@+ hwrite_start();
   hwritef("%s",content_name[KIND(a)]);
   hget_content(a);
   @<read and check the end byte |z|@>@;@+ hwrite_end();
+  return a;
 }
 
 void hget_content(uint8_t a)
@@ -756,9 +762,14 @@ node in long format.
   else if (I==2) HGET16((G).c);\
   else if (I==3) HGET24((G).c);\
   else if (I==4) HGET32((G).c);\
-  (G).f=HGET8; @+REF(font_kind,(G).f);@/\
+  (G).f=HGET8; @+REF_RNG(font_kind,(G).f);@/\
   hwrite_glyph(&(G));\
 @
+
+Note that we allow aglyph to reference a font even before that font is defined.
+This is necessary because fonts usually contain definitions---for example
+the fonts hyphen character---that reference this or other fonts.
+
 
 @<cases to get content@>=
 case TAG(glyph_kind,1): @+{@+glyph_t g;@+ HGET_GLYPH(1,g);@+}@+break;
@@ -825,7 +836,7 @@ void hwrite_comment(char *str)
 void hwrite_glyph(glyph_t *g)
 { char *n=hfont_name[g->f];
   hwrite_charcode(g->c);
-  hwritef(" *%d",g->f);
+  hwrite_ref(g->f);
   if (n!=NULL) hwrite_comment(n);
 }
 @
@@ -842,11 +853,11 @@ We have already seen the pattern/\kern -1pt action rule for unsigned decimal\ind
 to define the macro |SCAN_UDEC| which converts a string containing an unsigned\index{unsigned} decimal 
 number into an unsigned integer\index{integer}.
 We use the \CEE/ library function | strtoul|:
+
 \readcode
 @<scanning macros@>=
 #define @[SCAN_UDEC(S)@] @[yylval.u=strtoul(S,NULL,10)@]
 @
-
 Unsigned integers can be given in hexadecimal\index{hexadecimal} notation as well. 
 @<scanning definitions@>=
 ::@=HEX@>  :<  @=[0-9A-F]@>  >:
@@ -935,8 +946,8 @@ static int str_length;
 
 To scan a string, we switch the scanner to |STR| mode when we find a quote character,
 then we scan bytes in the range |0x20| to |0x7E|, which is the range of printable ASCII
-characters, until we find the closing single\index{single quote} quote. Quote characters inside the string
-are written as two consecutive single quote characters.
+characters, until we find the closing single\index{single quote} quote.
+Quote characters inside the string are written as two consecutive single quote characters.
 
 \readcode
 @s STRING symbol
@@ -959,8 +970,9 @@ are written as two consecutive single quote characters.
 ::@=[\x20-\x7E]@>   :< STR_ADD(yytext[0]); >:
 ::@=.|\n@>          :< RNG("String character",yytext[0],0x20,0x7E); >:
 }
-@
 
+
+@
 The function |hwrite_string| reverses this process; it must take care of the quote symbols.
 \writecode
 @<write functions@>=
@@ -976,8 +988,9 @@ void hwrite_string(char *str)
     hwritec('\''); 
   } 
 }
-@
 
+
+@
 In the short format, a string is just a byte sequence terminated by a zero byte.
 This makes the function |hput_string|, to write a string, and the macro |HGET_STRING|,
 to read a string in short format, very simple. Note that after writing an unbounded
@@ -1244,6 +1257,8 @@ We use the following definitions:
 
 @
 
+@s float32_t int
+@s float64_t int
 
 We expect a variable of type |float64_t| to have a binary representation using 64 bit.
 The most significant bit is the sign bit, then follow $|DBL_E_BITS|=11$ bits for
@@ -1730,12 +1745,7 @@ void hwrite_xdimen_node(xdimen_t *x)
 @<get functions@>=
 void hget_xdimen(uint8_t a, xdimen_t *x)
 { switch(a)
-  { 
-#if 0
-/* currently the info value 0 is not supported */
-case TAG(xdimen_kind,b000): /* see section~\secref{reference} */
-    {@+ REF(xdimen_kind,HGET8); @+}@+ break;
-#endif
+  {
     case TAG(xdimen_kind,b001): HGET_XDIMEN(b001,*x);@+break;
     case TAG(xdimen_kind,b010): HGET_XDIMEN(b010,*x);@+break;
     case TAG(xdimen_kind,b011): HGET_XDIMEN(b011,*x);@+break;
@@ -1747,7 +1757,15 @@ case TAG(xdimen_kind,b000): /* see section~\secref{reference} */
      QUIT("Extent expected got [%s,%d]",NAME(a),INFO(a));
   }
  }
+@
 
+Note that the info value |b000|, usually indicating a reference,
+is not supported for extended dimensions.
+Most nodes that need an extended dimension offer the opportunity to give
+a reference directly without the start and end byte. An exception is the glue node,
+but glue nodes that need an extended width are rare.
+
+@<get functions@>=
 void hget_xdimen_node(xdimen_t *x)
 { @<read the start byte |a|@>@;
   if (KIND(a)==xdimen_kind)
@@ -1764,7 +1782,7 @@ void hget_xdimen_node(xdimen_t *x)
 @<put functions@>=
 uint8_t hput_xdimen(xdimen_t *x)
 { info_t info=b000;
-  if (x->w==0 && x->h==0.0 && x->v==0.0) HPUT8(zero_xdimen_no);
+  if (x->w==0 && x->h==0.0 && x->v==0.0){ HPUT32(0); @+info|=b100; @+} 
   else
   { if (x->w!=0) { HPUT32(x->w); @+info|=b100; @+} 
     if (x->h!=0.0) { hput_float32(x->h); @+info|=b010; @+} 
@@ -1972,79 +1990,68 @@ uint8_t hput_int(int32_t n)
 
 
 
-\subsection{Mathematics}
-Being able to handle mathematics\index{mathematics} nicely is one of the primary features of \TeX\ and
-so you should expect the same from \HINT/.
-A math node occurs before ($|info|=|b100|$)
-and after  ($|info|=|b010|$) a mathematical formula in a horizontal list. 
-A math node also features a width which represents the amount of 
-surrounding space. A zero width can be omitted. In the short format,
-the |b001| bit is set if the width is present.
+\subsection{Languages}
+To render a \HINT/ file on screen, information about the language is not necessary.
+Knowing the language is, however, very important for language translation and
+text to speech conversion which makes texts accessible to the visually-impaired.
+For this reason, \HINT/ offers the opportunity to add this information
+and encourages authors to supply this information.
 
-@<hint types@>=
-typedef struct {@+
-bool on;@+
-dimen_t w;@+ 
-} math_t;
-@
+Language information by itself is not sufficient to decode text. It must be supplemented
+by information about the character encoding (see section~\secref{fonts}).
+
+To represent language information, the world wide web has set universaly
+accepted standards. The Internet Engineering Task Force IETF has defined tags for identifying
+languages\cite{ietf:language}: short strings like ``en'' for English
+or ``de'' for Deutsch, and longer ones like ``sl-IT-nedis'', for the specific variant of
+the Nadiza dialect of Slovenian that is spoken in Italy.
+We assume that any \HINT/ file
+will contain only a small number of different languages and all language nodes can be
+encoded using a reference to a predefined node from the
+definition section (see section~\secref{reference}).
+In the definition section, a language node will just
+contain the language tag as given in~\cite{iana:language} (see section~\secref{definitions}).
 
 \readcode
-@s MATH symbol
-@s math symbol
-@s ON symbol
-@s OFF symbol
+@s LANGUAGE symbol
+@s language symbol
+
 @<symbols@>=
-%token MATH "math"
-%token ON "on"
-%token OFF "off"
-%type <m> math
+%token LANGUAGE "language"
 @
 
 @<scanning rules@>=
-::@=math@>  :< return MATH; >:
-::@=on@>  :< return ON; >:
-::@=off@>  :< return OFF; >:
+::@=language@>  :< return LANGUAGE; >:
 @
 
-@<parsing rules@>=
-math: ON  dimension { $$.on=true; $$.w=$2; };
-math: OFF dimension { $$.on=false; $$.w=$2; };
-math: ON  { $$.on=true; $$.w=0; };
-math: OFF { $$.on=false; $$.w=0; };
-content_node: start MATH math END { hput_tags($1,hput_math(&($3)));};
-@
+When encoding language nodes in the short format, 
+We use the info value |b000| for language nodes in the definition section
+and for language nodes in the content section that contain just a one-byte
+reference (see section~\secref{reference}).
+We use the info value |1| to |7| as a shorthand for
+the references {\tt *0} and {\tt *6} to the predefined language nodes.
 
-\writecode
-@<write functions@>=
-void  hwrite_math(math_t *m)
-{ @+if (m->on) hwritef(" on"); @+else  hwritef(" off"); 
-  if (m->w!=0) hwrite_dimension(m->w);
-}
-@
-\getcode
 
+\goodbreak
+\vbox{\getcode\vskip -\baselineskip\writecode}
 @<cases to get content@>=
-case TAG(math_kind,b100):  { math_t m; @+ HGET_MATH(b100,m);@+ hwrite_math(&m);@+}@+break;
-case TAG(math_kind,b010):  { math_t m; @+ HGET_MATH(b010,m);@+ hwrite_math(&m);@+}@+break;
-case TAG(math_kind,b101):  { math_t m; @+ HGET_MATH(b101,m);@+ hwrite_math(&m);@+}@+break;
-case TAG(math_kind,b011):  { math_t m; @+ HGET_MATH(b011,m);@+ hwrite_math(&m);@+}@+break;
-@
-@<get macros@>=
-#define @[HGET_MATH(I,M)@]  \
-if ((I)&b001) HGET32(M.w); @+else M.w=0; \
-if ((I)&b100) M.on=true; \
-if ((I)&b010) M.on=false;
+case TAG(language_kind,1): REF(language_kind,0);  @+hwrite_ref(0); @+break;
+case TAG(language_kind,2): REF(language_kind,1);  @+hwrite_ref(1); @+break;
+case TAG(language_kind,3): REF(language_kind,2);  @+hwrite_ref(2); @+break;
+case TAG(language_kind,4): REF(language_kind,3);  @+hwrite_ref(3); @+break;
+case TAG(language_kind,5): REF(language_kind,4);  @+hwrite_ref(4); @+break;
+case TAG(language_kind,6): REF(language_kind,5);  @+hwrite_ref(5); @+break;
+case TAG(language_kind,7): REF(language_kind,6);  @+hwrite_ref(6); @+break;
 @
 
 \putcode
 @<put functions@>=
-uint8_t hput_math(math_t *m)
-{ info_t info;
-  if (m->on) info=b100; @+else info=b010;
-  if (m->w!=0) { @+HPUT32(m->w); @+ info|=b001; @+}
-  return TAG(math_kind,info);
+uint8_t hput_language(uint8_t n)
+{ if (n<7) return TAG(language_kind,n+1);
+  HPUT8(n); return TAG(language_kind,0);
 }
 @
+
 
 
 \subsection{Rules}
@@ -2237,45 +2244,54 @@ uint8_t hput_rule(rule_t *r)
 %56 hset specify an extent 2 and 1 fil stretch
 
 
-We have seen in section~\secref{stretch} how to deal with 
-stretchability\index{stretchability} and shrinkability\index{shrinkability} and we will need this now.
-Glue\index{glue}  has a natural width---which in general can be an extended dimension---and 
-in addition it can stretch and shrink. 
-It might have been possible to allow an extended dimension also for the stretch\-ability or shrink\-ability 
-of a glue, but this seems of little practical relevance and so simplicity won over generality.
-Even with that restriction, it is an understatement to regard glue nodes as "simple" nodes, 
-and we could equally well list them in section~\secref{composite} as composite nodes.
+We have seen in section~\secref{stretch} how to deal with
+stretchability\index{stretchability} and
+shrinkability\index{shrinkability} and we will need this now.
+Glue\index{glue} has a natural width---which in general can be an
+extended dimension---and in addition it can stretch and shrink.  It
+might have been possible to allow an extended dimension also for the
+stretch\-ability or shrink\-ability of a glue, but this seems of
+little practical relevance and so simplicity won over generality.
+Even with that restriction, it is an understatement to regard glue
+nodes as "simple" nodes, and we could equally well list them in
+section~\secref{composite} as composite nodes.
 
-To use the info bits in the short format wisely, I collected some statistical data using the
-\TeX book as an example. It turns out that about 99\% of all the 58937 glue nodes 
-(not counting the inter word glues used inside texts) could be covered with only 43
-predefined glues.
-So this is by far the most common case; we reserve the info value |b000| 
-to cover it and postpone the description of such glue nodes until we describe references in 
-section~\secref{reference}.
+To use the info bits in the short format wisely, I collected some
+statistical data using the \TeX book as an example. It turns out that
+about 99\% of all the 58937 glue nodes (not counting the interword
+glues used inside texts) could be covered with only 43 predefined
+glues.  So this is by far the most common case; we reserve the info
+value |b000| to cover it and postpone the description of such glue
+nodes until we describe references in section~\secref{reference}.
 
-We expect the remaining cases to contribute not too much to the file size,
-and hence, simplicity is a more important aspect than efficiency when allocating the remaining
-info values.
+We expect the remaining cases to contribute not too much to the file
+size, and hence, simplicity is a more important aspect than efficiency
+when allocating the remaining info values.
 
-Looking at the glues in more detail, we find that the most common cases are those where 
-either one, two, or all three glue components are zero. We use the two lowest bits to indicate
-the presence of a nonzero stretchability or shrinkability and reserve the info values 
-|b001|, |b010|, and |b011| for those cases where the width of the glue is zero.
-The zero glue, where all components are zero, is defined as a fixed, predefined glue instead 
-of reserving a special info value for it.  The cost of one extra byte when encoding it seems 
-not too high a price to pay. 
-After reserving the info value |b111| for the most general case of a glue, we have
-only three more info values left: |b100|, |b101|, and |b110|.
-Keeping things simple implies using the two lowest info bits---as before---to indicate
-a nonzero stretchability or shrinkability. For the width, three choices remain: using a reference
-to a dimension, using a reference to an extended dimension, or using an immediate value. 
-Since references to glues are already supported, an immediate width seems best for
-glues that are not frequently reused, avoiding the overhead of references. 
-% It also makes parsing simpler because we avoid the confusion between references to dimensions
+Looking at the glues in more detail, we find that the most common
+cases are those where either one, two, or all three glue components
+are zero. We use the two lowest bits to indicate the presence of a
+nonzero stretchability or shrinkability and reserve the info values
+|b001|, |b010|, and |b011| for those cases where the width of the glue
+is zero.  The zero glue, where all components are zero, is defined as
+a fixed, predefined glue instead of reserving a special info value for
+it.  The cost of one extra byte when encoding it seems not too high a
+price to pay.  After reserving the info value |b111| for the most
+general case of a glue, we have only three more info values left:
+|b100|, |b101|, and |b110|.  Keeping things simple implies using the
+two lowest info bits---as before---to indicate a nonzero
+stretchability or shrinkability. For the width, three choices remain:
+using a reference to a dimension, using a reference to an extended
+dimension, or using an immediate value.  Since references to glues are
+already supported, an immediate width seems best for glues that are
+not frequently reused, avoiding the overhead of references.
+
+% It also makes parsing simpler because we avoid the confusion
+% between references to dimensions
 % and references to glues and references to extended dimensions.
 
-Here is a summary of the info bits and the implied layout of glue nodes in the short format:
+Here is a summary of the info bits and the implied layout 
+of glue nodes in the short format:
 \itemize
 \item |b000|: reference to a predefined glue
 \item |b001|: zero width and nonzero shrinkability
@@ -2307,8 +2323,7 @@ contain glue nodes as parameters, we provide functions
 to read and write a complete glue node in the same way as we did
 for rule nodes.
 Further, such an internal {\sl glue\_node\/} has the special property that  
-a node for the zero glue might be omitted entirely.
-
+in the short format a node for the zero glue might be omitted entirely.
    
 \readcode
 @s GLUE symbol
@@ -2389,9 +2404,10 @@ case TAG(glue_kind,b111): { glue_t g;@+ HGET_GLUE(b111,g);@+ hwrite_glue(&g);@+}
 @<get functions@>=
 void hget_glue_node(void)
 { @<read the start byte |a|@>@;
-  if (KIND(a)!=glue_kind)@+ {@+ hpos--;@+ return; @+}
+  if (KIND(a)!=glue_kind)
+  {@+ hpos--; hwrite_ref_node(glue_kind,zero_skip_no);@+return; @+}
   if (INFO(a)==b000)
-  { @+hwrite_ref_node(glue_kind,HGET8); @+}
+  { uint8_t n=HGET8;@+ REF(glue_kind,n);@+hwrite_ref_node(glue_kind,n); @+}
   else
   { @+glue_t g; @+HGET_GLUE(INFO(a),g);@+ hwrite_glue_node(&g);@+}
   @<read and check the end byte |z|@>@;
@@ -2807,7 +2823,7 @@ include the popping and pushing the
 stack in the macros |SCAN_START| and |SCAN_END|.
 
 \item The space\index{space character} character ``\.{\ }'' with ASCII value |0x20| stands in both formats for the 
-font specific inter word glue node (control code |txt_glue|).
+font specific interword glue node (control code |txt_glue|).
 
 \item The hyphen\index{hyphen character} character ``\.{-}'' in the long format 
 and the control code $|txt_hyphen|=|0x1F|$ in the short format
@@ -2817,8 +2833,8 @@ stand for the font specific hyphen node.
 It is used to introduce notations for control codes, as described below, and to access
 the character codes of those ASCII characters that otherwise carry a special meaning.
 For example ``\.{\\"}'' denotes the character code of the double quote character ``\.{"}'';
-and similarly ``\.{\\<}'', ``\.{\\>}'', ``\.{\\\ }'', and ``\.{\\-}'' 
-denote the character codes of ``\.{<}'', ``\.{>}'', ``\.{\ }'',  and ``\.{-}'' respectively.
+and similarly ``\.{\\\\}'',  ``\.{\\<}'', ``\.{\\>}'', ``\.{\\\ }'', and ``\.{\\-}'' 
+denote the character codes of ``\.{\\}'', ``\.{<}'', ``\.{>}'', ``\.{\ }'',  and ``\.{-}'' respectively.
 
 
 \item In the long format, a TAB-character (ASCII code |0x09|)\index{tab character}
@@ -2863,7 +2879,7 @@ In the long format, the two byte sequence is written
 
 \item The control codes |0x09|, |0x0A|, |0x0B|, |0x0C|, |0x0E|, |0x0E|, |0x0F|, and |0x10| 
 are also followed by a second parameter byte. They are used to reference 
-the global definitions of penalty\index{penalty}, kern\index{kern}, ligature\index{ligature}, hyphen\index{hyphen}, glue\index{glue}, math\index{math}, rule\index{rule}, and image\index{image} nodes.
+the global definitions of penalty\index{penalty}, kern\index{kern}, ligature\index{ligature}, hyphen\index{hyphen}, glue\index{glue}, language\index{language}, rule\index{rule}, and image\index{image} nodes.
 The parameter byte contains the reference number. 
 For example, the byte sequence  |0x09| |0x03|  is equivalent to the node \.{<penalty *3>}.
 In the long format these two-byte sequences are written,
@@ -2872,7 +2888,7 @@ In the long format these two-byte sequences are written,
 ``\.{\\L}$n$\.{\\}'' (ligature),
 ``\.{\\H}$n$\.{\\}'' (hyphen),
 ``\.{\\G}$n$\.{\\}'' (glue),
-``\.{\\M}$n$\.{\\}'' (math),
+``\.{\\S}$n$\.{\\}'' (speak or german Sprache),
 ``\.{\\R}$n$\.{\\}'' (rule), and
 ``\.{\\I}$n$\.{\\}'' (image), where $n$ is the decimal representation of the parameter value.
 
@@ -2899,13 +2915,13 @@ in long format terminated by  ``\.{>}''.
 In the long format it is simply written as ``\.{-}''. 
 
 \item The control code $|txt_glue|=|0x20|$ is the space character, it is used to access the font specific
-inter-word\index{inter-word glue} glue. In the long format, we use the space character\index{space character} ``\.{\ }'' as well.
+interword\index{interword glue} glue. In the long format, we use the space character\index{space character} ``\.{\ }'' as well.
 
 \item The control code $|txt_ignore|=|0xFB|$ is ignored, its position can be used in a link to specify a position
 between two characters. In the long format it is written as ``\.{\\@@}''.
 
 \enditemize
-For the control codes, we define an enumeration type and for references a reference type.
+For the control codes, we define an enumeration type and for references, a reference type.
 @<hint types@>=
 typedef enum { @+txt_font=0x00, txt_global=0x08, txt_local=0x11, txt_cc=0x1D, txt_node=0x1E,
 txt_hyphen=0x1F, txt_glue=0x20, txt_ignore=0xFB} txt_t;
@@ -2945,6 +2961,7 @@ txt_hyphen=0x1F, txt_glue=0x20, txt_ignore=0xFB} txt_t;
 ::@="<"@>           :< SCAN_START; return START; >:
 ::@=">"@>           :< QUIT("> not allowed in text mode");>:
 
+::@=\\\\@>          :< yylval.u='\\'; return TXT_CC; >:
 ::@=\\\"@>          :< yylval.u='"'; return TXT_CC; >:
 ::@=\\"<"@>         :< yylval.u='<'; return TXT_CC; >:
 ::@=\\">"@>         :< yylval.u='>'; return TXT_CC; >:
@@ -2963,7 +2980,7 @@ txt_hyphen=0x1F, txt_glue=0x20, txt_ignore=0xFB} txt_t;
 ::@=\\L[0-9]+\\@>   :< SCAN_REF(ligature_kind); return TXT_GLOBAL; >:
 ::@=\\H[0-9]+\\@>   :< SCAN_REF(hyphen_kind); return TXT_GLOBAL; >:
 ::@=\\G[0-9]+\\@>   :< SCAN_REF(glue_kind); return TXT_GLOBAL; >:
-::@=\\M[0-9]+\\@>   :< SCAN_REF(math_kind); return TXT_GLOBAL; >:
+::@=\\S[0-9]+\\@>   :< SCAN_REF(language_kind); return TXT_GLOBAL; >: 
 ::@=\\R[0-9]+\\@>   :< SCAN_REF(rule_kind); return TXT_GLOBAL; >:
 ::@=\\I[0-9]+\\@>   :< SCAN_REF(image_kind); return TXT_GLOBAL; >:
 
@@ -3046,7 +3063,8 @@ int hwrite_txt_cc(uint32_t c)
     return hwritef("\\C%d\\",c);
   else@+
   switch(c)
-  { case '"': return hwritef("\\\"");
+  { case '\\': return hwritef("\\\\");
+    case '"': return hwritef("\\\"");
     case '<': return hwritef("\\<");
     case '>': return hwritef("\\>");
     case ' ': return hwritef("\\ ");
@@ -3095,7 +3113,7 @@ int hget_txt(void)
       case txt_global+3: HGET_GREF(ligature_kind,"L");
       case txt_global+4: HGET_GREF(hyphen_kind,"H");
       case txt_global+5: HGET_GREF(glue_kind,"G");
-      case txt_global+6: HGET_GREF(math_kind,"M");
+      case txt_global+6: HGET_GREF(language_kind,"S");
       case txt_global+7: HGET_GREF(rule_kind,"R");
       case txt_global+8: HGET_GREF(image_kind,"I");
       case txt_local+0: return hwritef("\\a");
@@ -3113,7 +3131,8 @@ int hget_txt(void)
       case txt_cc: return hwrite_txt_cc(hget_utf8()); 
       case txt_node: { int i;
                         @<read the start byte |a|@>@;
-                        i=hwritef("<%s",content_name[KIND(a)]);@+ hget_content(a);
+                        i=hwritef("<");
+                        i+= hwritef("%s",content_name[KIND(a)]);@+ hget_content(a);
                         @<read and check the end byte |z|@>@;
                         hwritec('>');@+ return i+10; /* just an estimate */
                      }
@@ -3154,7 +3173,7 @@ void hput_txt_global(ref_t *d)
     case ligature_kind:   HPUT8(txt_global+3);@+ break;
     case hyphen_kind:   HPUT8(txt_global+4);@+ break;
     case glue_kind:   HPUT8(txt_global+5);@+ break;
-    case math_kind:   HPUT8(txt_global+6);@+ break;
+    case language_kind:   HPUT8(txt_global+6);@+ break;
     case rule_kind:   HPUT8(txt_global+7);@+ break;
     case image_kind:   HPUT8(txt_global+8);@+ break;
     default: QUIT("Kind %s not allowed as a global reference in a text",NAME(d->k));
@@ -3166,9 +3185,8 @@ void hput_txt_local(uint8_t n)
 { HPUTX(1);
   HPUT8(txt_local+n);
 }
-
-
 @
+
 
 @<hint types@>=
 typedef struct { @+kind_t k; @+uint8_t n; @+} ref_t;
@@ -3245,12 +3263,14 @@ Glue sign and glue order can be packed as two nibbles in a single byte.
 @<symbols@>=
 %token HBOX     "hbox"
 %token VBOX     "vbox"
+%token SHIFTED  "shifted"
 %type <info> box box_dimen box_shift box_glue_set
 
 @
 @<scanning rules@>=
 ::@=hbox@>       :< return HBOX; >:
 ::@=vbox@>       :< return VBOX; >:
+::@=shifted@>    :< return SHIFTED; >:
 @
 
 @<parsing rules@>=@/
@@ -3258,7 +3278,7 @@ Glue sign and glue order can be packed as two nibbles in a single byte.
 box_dimen: dimension dimension dimension @/
            {$$= hput_box_dimen($1,$2,$3); };
 box_shift: {$$=b000;} @+ 
-   | dimension {$$=hput_box_shift($1);};
+   | SHIFTED dimension {$$=hput_box_shift($2);};
 
 box_glue_set:  {$$=b000;}
         | PLUS stretch { $$=hput_box_glue_set(+1,$2.f,$2.o); }
@@ -3278,7 +3298,7 @@ void hwrite_box(box_t *b)
 { hwrite_dimension(b->h); 
   hwrite_dimension(b->d); 
   hwrite_dimension(b->w);
-  if (b->a!=0)  { hwritef(" (shifted)"); @+hwrite_dimension(b->a); @+}
+  if (b->a!=0)  { hwritef(" shifted"); @+hwrite_dimension(b->a); @+}
   if (b->r!=0.0 && b->s!=0  )@/ 
   { @+if (b->s>0) @+hwritef(" plus"); @+else @+hwritef(" minus");
     @+hwrite_float64(b->r); @+hwrite_order(b->o);
@@ -3288,7 +3308,6 @@ void hwrite_box(box_t *b)
 @
 
 \getcode
-
 @<cases to get content@>=
 case TAG(hbox_kind,b000): @+{box_t b; @+HGET_BOX(b000,b); @+hwrite_box(&b);@+} @+ break;
 case TAG(hbox_kind,b001): @+{box_t b; @+HGET_BOX(b001,b); @+hwrite_box(&b);@+} @+ break;
@@ -3377,9 +3396,9 @@ boxes, |hpack_kind| and |hset_kind|, and the same for vertical boxes
 using |vpack_kind| and |vset_kind|.  Let us focus on horizontal boxes;
 the handling of vertical boxes is completely parallel.
 
-The \\{hpack} procedure of Hi\TeX\ produces an extended box if it is
-given an extended\index{extended dimension} dimension as its width or
-if it discovers that the width of its content is an extended
+The \\{hpack} procedure of Hi\TeX\ produces an extended box of |hset_kind|
+either if it is given an extended\index{extended dimension} dimension as its width 
+or if it discovers that the width of its content is an extended
 dimension.  After the final width of the box has been computed in the
 viewer, it just remains to set the glue; a very simple operation
 indeed.
@@ -3393,25 +3412,21 @@ dimensions. Even the amount of stretchability\index{stretchability}
 and shrinkability\index{shrinkability} has to be determined in the
 viewer. For example the final stretchability of a paragraph with some
 stretchability in the baseline\index{baseline skip} skip will depend
-on its number of lines which, in turn, depends on \.{hsize}.  It is
+on the number of lines which, in turn, depends on \.{hsize}.  It is
 not possible to merge this traversals of the box content with the
 traversal necessary when displaying the box. The latter needs to
 convert glue nodes into positioning instructions which requires a
 fixed glue\index{glue ratio} ratio. The computation of the glue ratio,
 however, requires a complete traversal of the content.
 
-In the short format of a box of type |hset_kind| or |vset_kind|, 
+In the short format of a box of type |hset_kind|, |vset_kind|, |hpack_kind| or |vpack_kind|, 
 info bit |b100| indicates if set, a complete extended dimension, and if unset, 
 a reference to a predefined extended dimension for the target size;
-info bit |b010| indicates a nonzero shift amount,
-and info bit |b001| indicates a nonzero depth.
-
-In the short format of a box of type |hpack_kind| or |vset_kind|, 
-info bit |b100| indicates if set, a complete extended dimension, and if unset, 
-a reference to a predefined extended dimension for the target size;
-info bit |b010| indicates if set, an additional target size, and if unset an exact target size; and
-info bit |b001| indicates a maximum depth less than |MAX_DIMEN| 
-(this is used only for vertical lists).
+info bit |b010| indicates a nonzero shift amount.
+For a box of type |hset_kind| or |vset_kind|,   the info bit |b001| indicates if set a nonzero depth.
+For a box of type |hpack_kind| or |vpack_kind|, the info bit |b001| indicates if set an additional
+target size and if unset an exact target size.
+For a box of type |vpack_kind| also the maximum depth is given.
 
 \readcode
 @s xbox symbol
@@ -3425,6 +3440,8 @@ info bit |b001| indicates a maximum depth less than |MAX_DIMEN|
 @s TO symbol
 @s ADD symbol
 @s box_flex symbol
+@s vxbox_node symbol
+@s hxbox_node symbol
 @<symbols@>=
 %token HPACK "hpack"
 %token HSET  "hset"
@@ -3451,20 +3468,22 @@ xbox: xdimen_ref  box_dimen box_shift box_flex list {$$=$2|$3;}
      | xdimen_node box_dimen box_shift box_flex list {$$=$2|$3|b100;};
 
 box_goal: TO xdimen_ref {$$=b000;} 
-      | ADD xdimen_ref  {$$=b010;} 
+      | ADD xdimen_ref  {$$=b001;} 
       | TO xdimen_node {$$=b100;} 
-      | ADD xdimen_node {$$=b110;}; 
+      | ADD xdimen_node {$$=b101;}; 
 
-hpack: box_goal list;
-vpack: box_goal list 
-     | box_goal dimension @+{@+ if ($2!=MAX_DIMEN) HPUT32($2);@+ } list @/
-       {@+if ($2!=MAX_DIMEN) $$=$1|b001; @+ else $$=$1;@+ }; 
+hpack: box_goal box_shift list;
+vpack: box_goal box_shift dimension {HPUT32($3);} list {$$= $1|$2;}
 
-content_node: start HSET xbox END   { hput_tags($1, TAG(hset_kind,$3)); }
-            | start HPACK hpack END  { hput_tags($1, TAG(hpack_kind,$3)); }
-            | start VSET xbox END   { hput_tags($1, TAG(vset_kind,$3)); }
+vxbox_node: start VSET xbox END   { hput_tags($1, TAG(vset_kind,$3)); }
             | start VPACK vpack END  { hput_tags($1, TAG(vpack_kind,$3)); };
-@
+
+
+hxbox_node: start HSET xbox END   { hput_tags($1, TAG(hset_kind,$3)); }
+              | start HPACK hpack END  { hput_tags($1, TAG(hpack_kind,$3)); }
+
+content_node: vxbox_node | hxbox_node;
+ @
 
 \getcode
 @<cases to get content@>=
@@ -3486,19 +3505,23 @@ case TAG(vset_kind,b101): HGET_SET(b101); @+ break;
 case TAG(vset_kind,b110): HGET_SET(b110); @+ break;
 case TAG(vset_kind,b111): HGET_SET(b111); @+ break;@#
 
-case TAG(hpack_kind,b000): HGET_PACK(b000); @+ break;
-case TAG(hpack_kind,b010): HGET_PACK(b010); @+ break;
-case TAG(hpack_kind,b100): HGET_PACK(b100); @+ break;
-case TAG(hpack_kind,b110): HGET_PACK(b110); @+ break;@#
+case TAG(hpack_kind,b000): HGET_PACK(hpack_kind,b000); @+ break;
+case TAG(hpack_kind,b001): HGET_PACK(hpack_kind,b001); @+ break;
+case TAG(hpack_kind,b010): HGET_PACK(hpack_kind,b010); @+ break;
+case TAG(hpack_kind,b011): HGET_PACK(hpack_kind,b011); @+ break;
+case TAG(hpack_kind,b100): HGET_PACK(hpack_kind,b100); @+ break;
+case TAG(hpack_kind,b101): HGET_PACK(hpack_kind,b101); @+ break;
+case TAG(hpack_kind,b110): HGET_PACK(hpack_kind,b110); @+ break;
+case TAG(hpack_kind,b111): HGET_PACK(hpack_kind,b111); @+ break;@#
 
-case TAG(vpack_kind,b000): HGET_PACK(b000); @+ break;
-case TAG(vpack_kind,b010): HGET_PACK(b010); @+ break;
-case TAG(vpack_kind,b100): HGET_PACK(b100); @+ break;
-case TAG(vpack_kind,b110): HGET_PACK(b110); @+ break;
-case TAG(vpack_kind,b001): HGET_PACK(b001); @+ break;
-case TAG(vpack_kind,b011): HGET_PACK(b011); @+ break;
-case TAG(vpack_kind,b101): HGET_PACK(b101); @+ break;
-case TAG(vpack_kind,b111): HGET_PACK(b111); @+ break;
+case TAG(vpack_kind,b000): HGET_PACK(vpack_kind,b000); @+ break;
+case TAG(vpack_kind,b001): HGET_PACK(vpack_kind,b001); @+ break;
+case TAG(vpack_kind,b010): HGET_PACK(vpack_kind,b010); @+ break;
+case TAG(vpack_kind,b011): HGET_PACK(vpack_kind,b011); @+ break;
+case TAG(vpack_kind,b100): HGET_PACK(vpack_kind,b100); @+ break;
+case TAG(vpack_kind,b101): HGET_PACK(vpack_kind,b101); @+ break;
+case TAG(vpack_kind,b110): HGET_PACK(vpack_kind,b110); @+ break;
+case TAG(vpack_kind,b111): HGET_PACK(vpack_kind,b111); @+ break;
 @
 
 
@@ -3508,18 +3531,20 @@ case TAG(vpack_kind,b111): HGET_PACK(b111); @+ break;
  { dimen_t h; @+HGET32(h); @+hwrite_dimension(h);@+} \
  { dimen_t d; @+if ((I)&b001) HGET32(d); @+ else d=0;@+hwrite_dimension(d); @+}\ 
  { dimen_t w; @+HGET32(w); @+hwrite_dimension(w);@+} \
-if ((I)&b010)  { dimen_t a; @+HGET32(a);@+hwrite_dimension(a);@+} \
+if ((I)&b010)  { dimen_t a; @+HGET32(a); hwritef(" shifted"); @+hwrite_dimension(a);@+} \
  { stretch_t p; @+HGET_STRETCH(p);@+hwrite_plus(&p);@+}\
  { stretch_t m; @+HGET_STRETCH(m);@+hwrite_minus(&m);@+}\
  { list_t l; @+hget_list(&l);@+ hwrite_list(&l); @+} 
 @#
 
-#define @[HGET_PACK(I)@] @/\
- if ((I)&b010) hwritef(" add");@+ else hwritef(" to");\
+#define @[HGET_PACK(K,I)@] @/\
+ if ((I)&b001) hwritef(" add");@+ else hwritef(" to");\
  if ((I)&b100) {xdimen_t x; hget_xdimen_node(&x); @+hwrite_xdimen_node(&x);@+} @+ else HGET_REF(xdimen_kind);\
- if ((I)&b001)  { dimen_t d; @+HGET32(d); @+hwrite_dimension(d);  @+ }\
+ if ((I)&b010)  { dimen_t d; @+HGET32(d); hwritef(" shifted");  @+hwrite_dimension(d);  @+ }\
+ if (K==vpack_kind) { dimen_t d; @+HGET32(d); @+hwrite_dimension(d);  @+ }\
  { list_t l; @+hget_list(&l);@+ hwrite_list(&l); @+} 
 @
+
 
 
 \subsection{Kerns}
@@ -3677,7 +3702,6 @@ void  hwrite_leaders_type(int t)
 @
 
 \getcode
-
 @<cases to get content@>=
 case TAG(leaders_kind,1):        @+ HGET_LEADERS(1); @+break;
 case TAG(leaders_kind,2):        @+ HGET_LEADERS(2); @+break;
@@ -3770,7 +3794,6 @@ content_node: start BASELINE baseline END @/
 @
 
 \getcode
-
 @<cases to get content@>=
 case TAG(baseline_kind,b001): @+{ baseline_t b;@+ HGET_BASELINE(b001,b);@+ }@+break;
 case TAG(baseline_kind,b010): @+{ baseline_t b;@+ HGET_BASELINE(b010,b);@+ }@+break;
@@ -3835,6 +3858,7 @@ typedef struct{@+uint8_t f; @+list_t l;@+} lig_t;
 @
 
 \readcode
+@s ref symbol
 @s LIGATURE  symbol
 @s ligature symbol
 @s replace_cc symbol
@@ -3843,6 +3867,7 @@ typedef struct{@+uint8_t f; @+list_t l;@+} lig_t;
 %token LIGATURE     "ligature"
 %type <u>  lig_cc 
 %type <lg> ligature
+%type <u> ref
 @
 @<scanning rules@>=
 ::@=ligature@>              :<     return LIGATURE;    >:
@@ -3852,7 +3877,8 @@ typedef struct{@+uint8_t f; @+list_t l;@+} lig_t;
 replace_cc:@+ | replace_cc TXT_CC { hput_utf8($2); };
 lig_cc:  UNSIGNED {$$=hpos-hstart; hput_utf8($1); };
 lig_cc:  CHARCODE {$$=hpos-hstart; hput_utf8($1); };
-ligature:  REFERENCE { REF(font_kind,$1); HPUT8($1);}   lig_cc TXT_START replace_cc TXT_END @/
+ref: REFERENCE {HPUT8($1); $$=$1; };
+ligature:  ref { REF(font_kind,$1);}   lig_cc TXT_START replace_cc TXT_END @/
           { $$.f=$1; $$.l.p=$3; $$.l.s=(hpos-hstart)-$3; 
             RNG("Ligature size",$$.l.s,0,255);};
 content_node: start LIGATURE ligature END {hput_tags($1,hput_ligature(&($3)));};
@@ -3862,7 +3888,7 @@ content_node: start LIGATURE ligature END {hput_tags($1,hput_ligature(&($3)));};
 @<write functions@>=
 void hwrite_ligature(lig_t *l)
 { uint32_t pos=hpos-hstart;
-  hwritef(" *%d",l->f);
+  hwrite_ref(l->f);
   hpos=l->l.p+hstart;
   hwrite_charcode(hget_utf8());
   hwritef(" \"");
@@ -3885,7 +3911,7 @@ case TAG(ligature_kind,7):@+ {lig_t l; @+HGET_LIG(7,l);@+} @+break;
 @
 @<get macros@>=
 #define @[HGET_LIG(I,L)@] @/\
-(L).f=HGET8;\
+(L).f=HGET8;REF(font_kind,(L).f);\
 if ((I)==7) (L).l.s=HGET8;@+else (L).l.s=(I);\
 (L).l.p=hpos-hstart; @+ hpos+=(L).l.s; \
 if ((I)==7)@/\
@@ -3909,17 +3935,23 @@ uint8_t hput_ligature(lig_t *l)
 
 
 \subsection{Hyphenation}\label{hyphen}\index{hyphen}
-\HINT/ is capable to break lines into paragraphs. It does this primarily at inter-word
-spaces but it might also break a line in the middle of a word if it finds a discretionary\index{discretionary break}
-line break there. These discretionary breaks are usually provided by an automatic hyphenation
-algorithm but they might be also explicitly\index{explicit hyphen} inserted by the author of a document.
+\HINT/ is capable to break lines into paragraphs. It does this
+primarily at interword spaces but it might also break a line in the
+middle of a word if it finds a discretionary\index{discretionary break}
+line break there. These discretionary breaks are usually
+provided by an automatic hyphenation algorithm but they might be also
+explicitly\index{explicit hyphen} inserted by the author of a
+document.
 
-When a line break occurs at such a discretionary break, the line before the break ends
-with a |pre_break| list of nodes, the line after the break starts with a |post_break|
-list of nodes, and the next |replace_count| nodes after the discretionary break will
-be ignored. Both lists must consist entirely of glyphs\index{glyph}, kerns\index{kern}, boxes\index{box}, rules\index{rule}, or ligatures\index{ligature}.
-For example, an ordinary discretionary hyphen will have a |pre_break| list 
-containing ``-'', an empty |post_break| list, and a |replace_count| of zero.
+When a line break occurs at such a discretionary break, the line
+before the break ends with a |pre_break| list of nodes, the line after
+the break starts with a |post_break| list of nodes, and the next
+|replace_count| nodes after the discretionary break will be
+ignored. Both lists must consist entirely of glyphs\index{glyph},
+kerns\index{kern}, boxes\index{box}, rules\index{rule}, or
+ligatures\index{ligature}.  For example, an ordinary discretionary
+hyphen will have a |pre_break| list containing ``-'', an empty
+|post_break| list, and a |replace_count| of zero.
 
 The long format starts with an optional ``{\tt !}'' indicating an explicit hyphen,
 followed by the  |pre_break| list, then comes the replace-count followed
@@ -4117,39 +4149,49 @@ case TAG(par_kind,b110): @+HGET_PAR(b110);@+break;
 @
 
 
-\subsection{Displays}\index{displayed formula}
-Displayed equations occur inside a paragraph\index{paragraph} node. They interrupt normal processing of the paragraph
-and the paragraph processing is resumed after the display. Positioning of the display depends on several
-parameters, the shape of the paragraph, and the length of the last line preceding the display.
-Displayed formulas often feature an equation number which can be placed either left or right of the formula.
-Also the size of the equation number will influence the placement of the formula.
+\subsection{Mathematics}\index{Mathematics}\index{displayed formula}
+Being able to handle mathematics\index{mathematics} nicely is one
+of the primary features of \TeX\ and
+so you should expect the same from \HINT/.
+We start here with the more complex case---displayed formulas---and finish with the
+simpler case of mathematical formulas that are part of the normal flow of text.
 
-In a \HINT/ file, the parameter list is followed by a list of content nodes, representing the formula, and 
-an optional horizontal box containing the equation number. 
+Displayed equations occur inside a paragraph\index{paragraph}
+node. They interrupt normal processing of the paragraph and the
+paragraph processing is resumed after the display. Positioning of the
+display depends on several parameters, the shape of the paragraph, and
+the length of the last line preceding the display.  Displayed formulas
+often feature an equation number which can be placed either left or
+right of the formula.  Also the size of the equation number will
+influence the placement of the formula.
+
+In a \HINT/ file, the parameter list is followed by a list of content
+nodes, representing the formula, and an optional horizontal box
+containing the equation number.
 
 In the sort format, we use the info bit |b100| to indicate the
 presence of a parameter list (which might be empty---so it's actually the absence of a 
 reference to a parameter list); the info bit |b010| to indicate the presence of 
-a left equation number; and the info bit |b001| for a right equation\index{equation number} number.
+a left equation number; and the info bit |b001| for a right
+equation\index{equation number} number.
 
-
-In the long format, we use ``{\tt eqno}'' or ``{\tt left eqno}'' to indicate presence and  placement of
-the equation number.
+In the long format, we use ``{\tt eqno}'' or ``{\tt left eqno}'' to indicate presence and
+placement of the equation number.
 
 \readcode
-@s DISPLAY symbol
-@s display symbol
+@s MATH symbol
+@s math symbol
 @<symbols@>=
-%token DISPLAY "display"
-%type <info> display 
+%token MATH "math"
+%type <info> math 
 @
 
 @<scanning rules@>=
-::@=display@>       :< return DISPLAY; >:
+::@=math@>       :< return MATH; >:
 @
 
 @<parsing rules@>=
-display: list {$$=b100;} 
+math: list {$$=b100;} 
        | list hbox_node {$$=b101;} 
        | hbox_node list {$$=b110;} 
        | param_ref  list {$$=b000;}
@@ -4159,27 +4201,65 @@ display: list {$$=b100;}
        | param_list_node list hbox_node {$$=b101;} 
        | param_list_node hbox_node list {$$=b110;};
 
-content_node: start DISPLAY display END @/{ hput_tags($1,TAG(display_kind,$3));};
+content_node: start MATH math END @/{ hput_tags($1,TAG(math_kind,$3));};
 @
 
 \getcode
 @<cases to get content@>=
-case TAG(display_kind,b000): HGET_DISPLAY(b000); @+ break;
-case TAG(display_kind,b001): HGET_DISPLAY(b001); @+ break;
-case TAG(display_kind,b010): HGET_DISPLAY(b010); @+ break;
-case TAG(display_kind,b100): HGET_DISPLAY(b100); @+ break;
-case TAG(display_kind,b101): HGET_DISPLAY(b101); @+ break;
-case TAG(display_kind,b110): HGET_DISPLAY(b110); @+ break;
+case TAG(math_kind,b000): HGET_MATH(b000); @+ break;
+case TAG(math_kind,b001): HGET_MATH(b001); @+ break;
+case TAG(math_kind,b010): HGET_MATH(b010); @+ break;
+case TAG(math_kind,b100): HGET_MATH(b100); @+ break;
+case TAG(math_kind,b101): HGET_MATH(b101); @+ break;
+case TAG(math_kind,b110): HGET_MATH(b110); @+ break;
 @
 
 @<get macros@>=
-#define @[HGET_DISPLAY(I)@] \
+#define @[HGET_MATH(I)@] \
 if ((I)&b100) { list_t l; @+hget_param_list_node(&l); @+hwrite_param_list_node(&l); @+} \
 else HGET_REF(param_kind);\
 if ((I)&b010) hget_hbox_node(); \
 { list_t l; @+hget_list(&l);@+ hwrite_list(&l); @+} \
 if ((I)&b001) hget_hbox_node();
 @
+
+Things are much simpler if mathematical formulas are embedded in regular text.
+Here it is just necessary to mark the beginning and the end of the formula
+because glue inside a formula is not a possible point for a line break.
+To break the line within a formula you can insert a penalty node.
+
+In the long format, such a simple math node just consists of the keyword ``on''
+or ``off''. In the short format, there are two info values still unassigned:
+we use |b011| for ``off'' and |b111| for ``on''.
+
+
+\readcode
+@s ON symbol
+@s OFF symbol
+@<symbols@>=
+%token ON "on"
+%token OFF "off"
+@
+
+@<scanning rules@>=
+::@=on@>  :< return ON; >:
+::@=off@>  :< return OFF; >:
+@
+
+@<parsing rules@>=
+math: ON  { $$=b111; };
+math: OFF { $$=b011; };
+@
+
+\getcode
+@<cases to get content@>=
+case TAG(math_kind,b111): hwritef(" on");@+break;
+case TAG(math_kind,b011): hwritef(" off");@+break;
+@
+
+Note that \TeX\ allows math nodes to specify a width (the current value of
+mathsouround). If this with is nonzero, it is equivalent to inserting a
+kern node before the math on node or after the math off node.
 
 \subsection{Adjustments}\label{adjust}
 An adjustment\index{adjustment} occurs only in paragraphs\index{paragraph}.
@@ -4286,7 +4366,7 @@ for the latter, the |DIMEN| token is optional. The scanner will recognize not on
 an |ITEM| token but also ``row'' and ''column''. This allows a more readable notation,
 for example by marking the outer items as rows and the inner items as columns.
 
-In the short format, the |b001| bit is used to mark a vertical table and the |b110| bits indicate
+In the short format, the |b010| bit is used to mark a vertical table and the |b101| bits indicate
 how the table size is specified;
 an outer item node has the info value |b000|, an inner item node with info value |b111|
 contains an extra byte for the span count, otherwise the info value is equal to the span count.
@@ -4321,7 +4401,7 @@ content_node: start ITEM content_node UNSIGNED END { hput_tags($1,hput_item($4))
 content_node: start ITEM list END { hput_tags($1,TAG(item_kind,b000));};
 
 table: H box_goal list list {$$=$2;}
-table: V box_goal list list {$$=$2|b001;}
+table: V box_goal list list {$$=$2|b010;}
 
 content_node: start TABLE table END { hput_tags($1,TAG(table_kind,$3));};
 @
@@ -4349,8 +4429,8 @@ case TAG(item_kind,b111):  hget_content_node(); @+hwritef(" %u",HGET8);@+ break;
 
 @<get macros@>=
 #define @[HGET_TABLE(I)@] \
-if(I&b001) hwritef(" v"); @+else hwritef(" h"); \
-if ((I)&b010) hwritef(" add");@+ else hwritef(" to");\
+if(I&b010) hwritef(" v"); @+else hwritef(" h"); \
+if ((I)&b001) hwritef(" add");@+ else hwritef(" to");\
 if ((I)&b100) {xdimen_t x; hget_xdimen_node(&x); @+hwrite_xdimen_node(&x);@+} else HGET_REF(xdimen_kind)@;\
 {@+ list_t l; @+hget_list(&l);@+ hwrite_list(&l);@+ } /* tabskip */ \
 {@+ list_t l; @+hget_list(&l);@+ hwrite_list(&l);@+ }  /* items */
@@ -4426,7 +4506,6 @@ void hwrite_image(image_t *x)
 @
 
 \getcode
-
 @<cases to get content@>=
 case TAG(image_kind,b100): @+ { image_t x;@+HGET_IMAGE(b100,x);@+}@+break;
 case TAG(image_kind,b101): @+ { image_t x;@+HGET_IMAGE(b101,x);@+}@+break;
@@ -4631,7 +4710,8 @@ predefined link. Predefined links can be completed with positions when
 we find the labels, all we need to know to encode the link itself is the
 reference number. If all 16 bit numbers are already in use, we reserve
 the maximum amount of memory ( 8 bit for the type information,
-32 bit for the primary position, 32 bit for the secondary position, and 8 bit for the font number) in the stream and keep a linked list of
+32 bit for the primary position, 32 bit for the secondary position,
+and 8 bit for the font number) in the stream and keep a linked list of
 positions for the given label (the reserved space in the link nodes
 can be used of that purpose) and fill in the information once we find
 the corresponding label.
@@ -4641,13 +4721,14 @@ Links and Labels are not yet implemented.
 \section{Replacing \TeX's Page Building Process}
 
 \TeX\ uses an output\index{output routine} routine to finalize the page. It uses the accumulated material
-from the page builder, found in box255, attaches headers, footers, and floating material
+from the page builder, found in {\tt box255}, attaches headers, footers, and floating material
 like figures, tables, and footnotes. The latter material is specified by insert nodes
 while headers and footers are often constructed using mark nodes.
 Running an output routine requires the full power of the \TeX\ engine and will not be
 part of the \HINT/ viewer. Therefore, \HINT/ replaces output routines by page templates\index{template}.
-As \TeX\ can use different output routines for different parts of a book--for example
-the index might use a different output routine than the main body of text---\HINT/ will allow multiple page templates. To support different output media, the page
+As \TeX\ can use different output routines for different parts of a book---for example
+the index might use a different output routine than the main body of text---\HINT/ 
+will allow multiple page templates. To support different output media, the page
 templates will be named and a suitable user interface may offer the user a selection
 of possible page layouts. In this way, the page layout remains in the hands of the
 book designer, and the user has still the opportunity to pick a layout that best fits
@@ -4689,19 +4770,19 @@ The top skip\index{top skip} adjustment is made
 when the first box or rule arrives---possibly after an insert.
 
 Now the page builder accumulates material: normal material goes into box255\index{box255},
-inserts specify an insert class $n$ and go into box$n$.
-Material that goes into box255 will change |page_total|, |page_shrink|, 
+inserts specify an insert class $n$ and go into {\tt box$n$}.
+Material that goes into {\tt box255} will change |page_total|, |page_shrink|, 
 |page_stretch|, and |page_depth|. The latter is adjusted so that 
 is does not exceed |page_max_depth|.
 
 The handling of inserts\index{insert node} is more complex.
 \TeX\ creates an insert class using \.{newinsert}. This reserves a number $n$
-and four registers: box$n$ for the inserted material, count$n$ for the
-magnification factor $f$, dimen$n$ for the maximum size per page $d$, and skip$n$ for the
+and four registers: {\tt box$n$} for the inserted material, {\tt count$n$} for the
+magnification factor $f$, {\tt dimen$n$} for the maximum size per page $d$, and {\tt skip$n$} for the
 extra space needed on a page if there are any insertions of class $n$.
 
 For example plain \TeX\ allocates $n=254$ for footnotes\index{footnote} and sets
-count254 to 1000, dimen254 to 8in, and skip254 to bigskipamount.
+{\tt count254} to~$1000$, {\tt dimen254} to 8in, and {\tt skip254} to {\tt \BS bigskipamount}.
 
 An insertion node will specify the insertion class $n$, some vertical material,
 its natural height plus depth $x$, a {\it split\-\_top\-\_skip}, a {\it split\-\_max\_depth},
@@ -4756,7 +4837,7 @@ on the current page, and if so, it creates a contribution to the main text body,
 creates a topinsert. Such a decision needs to be postponed to the \HINT/ viewer.
 
 \item
-There is no output routine that would specify something like the space and the rule preceding the footnote.
+\HINT/ has no output routines that would specify something like the space and the rule preceding the footnote.
 
 \item 
 \TeX's output routines have the ability to inspect the content of the boxes,
@@ -4768,7 +4849,7 @@ column and the bottom part in the right column. With this approach, the
 last page will show two partly filled columns of about equal size.
 
 \item
-There are no mark nodes that could be used to create page headers or footers.
+\HINT/ has no mark nodes that could be used to create page headers or footers.
 Marks, like output routines, contain token lists and need the full \TeX\ interpreter
 for processing them. Hence, \HINT/ does not support mark nodes.
 \endenumerate
@@ -4881,43 +4962,79 @@ this mechanism.
 \enditemize
 
 \subsection{Stream Definitions}
-Stream\index{stream} definitions occur only in page templates. 
-They start with stream number and stream type.
+\index{stream}
 There are four types of streams:  normal streams that work like \TeX's inserts;
 and first, last, and top streams that work like \TeX's marks.
 For the latter  types, the long format uses a matching keyword and the
-short format the two least significant info bits.
-For normal streams, a stream definition specifies
- the maximum insertion height,
- the magnification factor, 
- and optional information about splitting the stream.
- In the short format, the info bit |b100| indicates the presence of splitting information.
- It consists of: a preferred stream, a next stream, and a split ratio.
+short format the two least significant info bits. All stream definitions
+start with the stream number.
+In definitions of  normal streams after the number follows in this order
+\itemize
+\item the maximum insertion height,
+\item the magnification factor, and
+\item information about splitting the stream.
+  It consists of: a preferred stream, a next stream, and a split ratio.
  An asterisk indicates a missing stream reference, in the
- short format the stream number 255 serves the same purpose;
-All stream definitions finish with the material that goes before a nonempty stream, 
- an extended dimension node, specifying the width of the inserted material, 
-the top skip glue, and the material that goes after a nonempty stream.
+ short format the stream number 255 serves the same purpose.
+\item All stream definitions finish with the ``before'' list,
+\item an extended dimension node specifying the width of the inserted material, 
+\item the top skip glue,
+\item  the ``after'' list,
+\item and the total height, stretchability, and shrinkability of the material in
+      the ``before'' and ``after'' list. 
+\enditemize
 
-\readcode
+A special case is the stream definition for stream 0, the main content stream.
+None of the above information is necessary for it so it is ommited.
+Stream definitions, including the definition of stream 0,
+occur only inside page template definititions\index{template}
+where they occur twice in two different roles:
+In the stream definition list, they define properties of the stream 
+and in the template they mark the insertion point (see section~\secref{page}).
+In the latter case, stream nodes just contain the stream number.
+Because a template looks like ordinary vertical material,
+we like to use the same functions for parsing it.
+But stream definitions are very different from stream content
+nodes. To solve the problem for the long format,
+the scanner will return two different tokens
+when it sees the keyword ``{\tt stream}''. 
+In the definition section, it will return
+|STREAMDEF| and in the content section |STREAM|.
+The same problem is solved in the short format 
+by using the |b100| bit to mark a definition.
+
+\goodbreak
+\vbox{\readcode\vskip -\baselineskip\putcode}
+
+@s STREAM symbol
+@s STREAMDEF symbol
 @s TOP symbol
 @s FIRST symbol
 @s LAST symbol
 @s NOREFERENCE symbol
 @s stream_type symbol
+@s stream_info symbol
 @s stream_split symbol
-@s stream_def symbol
 @s stream_link symbol
+@s stream_def_node symbol
+@s stream_ins_node symbol
+@s stream_ref symbol
+
 
 @<symbols@>=
+%token STREAM "stream"
+%token STREAMDEF "stream definition"
 %token FIRST "first"
 %token LAST "last"
 %token TOP "top"
 %token NOREFERENCE "*"
-%type <info> stream_type stream_split stream_def 
+%type <info> stream_type
+%type <u> stream_ref
+%type <rf> stream_def_node
 @
 
 @<scanning rules@>=
+::@=stream@>  :< if (section_no==1) return STREAMDEF; else return STREAM;@+ >:
 ::@=first@>  :< return FIRST; >:
 ::@=last@>  :< return LAST; >:
 ::@=top@>  :< return TOP; >:
@@ -4925,125 +5042,142 @@ the top skip glue, and the material that goes after a nonempty stream.
 @
 
 @<parsing rules@>=
-stream_type: FIRST {$$=1;} @+ | LAST {$$=2;} @+ |TOP {$$=3;} 
-           | xdimen_node  integer {HPUT16($2);} stream_split {$$=$4+0;} ;
-stream_link: stream_ref @+| NOREFERENCE {HPUT8(255);};
-stream_split: {$$=b000;} 
-            | stream_link stream_link UNSIGNED @/{RNG("split ratio",$3,0,1000); HPUT16($3); $$=b100;};
-stream_def: start STREAM  stream_ref  stream_type  @/ 
-   list xdimen_node glue_node list END @/ 
-   {hput_tags($1,TAG(stream_kind,$4));};
+stream_link: ref { REF_RNG(stream_kind,$1); } | NOREFERENCE {HPUT8(255);};
+stream_split: stream_link stream_link UNSIGNED @/{RNG("split ratio",$3,0,1000); HPUT16($3);};
+stream_info: xdimen_node UNSIGNED @/{RNG("magnification factor",$2,0,1000); HPUT16($2);} stream_split;
+
+stream_type: stream_info {$$=0;} |FIRST {$$=1;} @+ | LAST {$$=2;} @+ |TOP {$$=3;} ;
+
+stream_def_node: start STREAMDEF  ref  stream_type  @/ 
+   list xdimen_node glue_node list glue_node END @/
+   {@+ DEF($$,stream_kind,$3); @+ hput_tags($1,TAG(stream_kind,$4|b100));};
+
+stream_ins_node: start STREAMDEF ref END@/
+   { RNG("Stream insertion",$3,0,max_ref[stream_kind]); hput_tags($1,TAG(stream_kind,b100));};
+
+content_node: stream_def_node @+ | stream_ins_node;
 @
 
-\getcode
 
-@<get functions@>=
-static void hget_stream_split(void)
-{ uint8_t n; int r;
-  n=HGET8; if (n==255) hwritef(" *"); else { REF(stream_kind,n);@+hwritef(" *%d",n);@+}
-  n=HGET8; if (n==255) hwritef(" *"); else { REF(stream_kind,n);@+hwritef(" *%d",n);@+}
+\goodbreak
+\vbox{\getcode\vskip -\baselineskip\writecode}
+
+
+
+@<get stream information for normal streams@>=
+{ xdimen_t x;
+  uint16_t f,r;
+  uint8_t n;
+  DBG(DBGDEF,"Defining normal stream %d at " SIZE_F "\n",*(hpos-1),hpos-hstart-2);
+  hget_xdimen_node(&x); @+hwrite_xdimen_node(&x); 
+  HGET16(f); @+RNG("magnification factor",f,0,1000);@+ hwritef(" %d",f);
+  n=HGET8; if (n==255) hwritef(" *"); else { REF_RNG(stream_kind,n);@+hwrite_ref(n);@+}
+  n=HGET8; if (n==255) hwritef(" *"); else { REF_RNG(stream_kind,n);@+hwrite_ref(n);@+}
   HGET16(r); RNG("split ratio",r,0,1000); hwritef(" %d",r);
-} 
-void hget_stream_def(void)
-{ if (KIND(*hpos)!=stream_kind) return;
-  else
-  { info_t i;
-    list_t l; 
-    xdimen_t x;
-    @<read the start byte |a|@>@;
-    i=INFO(a);
-    hwrite_start(); @+hwritef("stream");
-    HGET_REF(stream_kind);
-    if ((i&b011)==0) 
-    { uint16_t f;
-      hget_xdimen_node(&x); @+hwrite_xdimen_node(&x); 
-      HGET16(f); @+RNG("magnification factor",f,0,1000);@+ hwritef(" %d",f);
-      if (i&b100) hget_stream_split();
-    }
-    else if ((i&b011)==1) hwritef(" first");
-    else if((i&b011)==2) hwritef(" last");
-    else if ((i&b011)==3) hwritef(" top");
-    hget_list(&l);@+ hwrite_list(&l);  
-    hget_xdimen_node(&x); @+hwrite_xdimen_node(&x); 
-    hget_glue_node();
-    hget_list(&l);@+ hwrite_list(&l);
-    hwrite_end();
-    @<read and check the end byte |z|@>@;
-  }
 }
 @
 
+@<get functions@>=
+static bool hget_stream_def(void)
+{ if (KIND(*hpos)!=stream_kind || !(INFO(*hpos)&b100))
+    return false;
+  else
+  { ref_t df;
+    @<read the start byte |a|@>@;
+    DBG(DBGDEF,"Defining stream %d at " SIZE_F "\n",*hpos,hpos-hstart-1);
+    DEF(df,stream_kind,HGET8);
+    hwrite_start();@+hwritef("stream");@+@+hwrite_ref(df.n);
+    if (df.n>0) 
+    { xdimen_t x; list_t l;
+      if (INFO(a)==b100) @<get stream information for normal streams@>@;
+      else if (INFO(a)==b101) hwritef(" first");
+      else if(INFO(a)==b110) hwritef(" last");
+      else if (INFO(a)==b111) hwritef(" top");
+      hget_list(&l);@+ hwrite_list(&l); 
+      hget_xdimen_node(&x); @+hwrite_xdimen_node(&x); 
+      hget_glue_node();
+      hget_list(&l);@+ hwrite_list(&l);
+      hget_glue_node();      
+    }
+    @<read and check the end byte |z|@>@;
+    hwrite_end();
+    return true;
+  }
+}
 
-\subsection{Stream Nodes}
-Stream\index{stream} nodes occur in the content section where they must not be
-inside other nodes except toplevel paragraph\index{paragraph} nodes. 
-(As we will see in section~\secref{page}, they occur with a different meaning 
-also in page templates\index{template}.)
-A complete stream node contains in this order: the stream reference number, the |height|
-(|b100|), the |floating_penalty| (|b010|), the |split_max_depth| followed by the |split_top_skip| (|b010|), and the content list. 
-All these components, except the stream reference number and the content list, are optional. 
-In the short format, the presence of the optional parameters is indicated by the info bits shown above in
-parentheses.
-If the height is missing, it can be computed from the
-content list, and the global values of |floating_penalty|, |split_max_depth|, and |split_top_skip|
-serve as substitutes for other missing parameters.
-
-
-\putcode
-\readcode
-@s STREAM symbol
-@s stream symbol
-@s float_info symbol
-@s stream_ref symbol
-@s stream_height symbol
-@<symbols@>=
-%token STREAM "stream"
-%type <info> float_info stream_height stream 
 @
 
-@<scanning rules@>=
-::@=stream@>  :< return STREAM; >:
+When stream definitions are part of the page template, we call them
+stream insertion points. 
+They contain only the stream reference and
+are parsed by the usual content parsing functions.
+
+@<cases to get content@>=
+case TAG(stream_kind,b100): {uint8_t n=HGET8;@+ REF_RNG(stream_kind,n); @+hwrite_ref(n); @+ break; @+}
+@
+
+
+\subsection{Stream Content}
+Stream\index{stream} nodes occur in the content section where they
+must not be inside other nodes except toplevel
+paragraph\index{paragraph} nodes.  A normal stream node contains in this
+order: the stream reference number, the optional stream parameters,
+and the stream content.  The content is either a vertical box or an
+extended vertical box.  The stream parameters consists of the
+|floating_penalty|, the |split_max_depth|, and the
+|split_top_skip|. The parameterlist can be given
+explicitely or as a reference.
+In the short format, the info bits |b010| indicate
+a normal stream content node with an explicit parameter list
+and the info bits |b000| a normal stream with a parameter list reference.
+Note that an empty parameter list is simply represented as an omited
+explicit list.
+
+If the info bit |b001| is set, we have a content node of type top, first,
+or last. In this case, the short format has instead of the parameter list
+a single byte indicating the type.
+These types are currently not yet implemented.
+
+\goodbreak
+\vbox{\readcode\vskip -\baselineskip\putcode}
+
+@s stream symbol
+
+@<symbols@>=
+%type <info> stream
+@
+
+
 @
 @<parsing rules@>=
-
-float_info:  penalty dimension {HPUT16($1);@+HPUT32($2);} @/ glue_node {$$=b011;}
-   | penalty {HPUT16($1);$$=b010;}
-   | dimension {HPUT32($1);} glue_node {$$=b001;}
-   | {$$=b000;};
-
-stream_height: {$$=b000;} @+| TO dimension {HPUT32($2);$$=b100;};
-
-stream: stream_ref stream_height float_info list {$$=$2|$3;};
-
-content_node: start STREAM stream END @/{@+hput_tags($1,TAG(stream_kind,$3)); @+}; 
+stream: list {$$=b010;} | param_list_node  list {$$=b010;} | param_ref  list {$$=b000;};
+content_node: start STREAM stream_ref stream END
+              @/{@+hput_tags($1,TAG(stream_kind,$4)); @+}; 
 @
 
-\writecode
-\getcode
+\goodbreak
+\vbox{\getcode\vskip -\baselineskip\writecode}
+
 @<cases to get content@>=
 case TAG(stream_kind,b000): HGET_STREAM(b000); @+ break;
-case TAG(stream_kind,b001): HGET_STREAM(b001); @+ break;
 case TAG(stream_kind,b010): HGET_STREAM(b010); @+ break;
-case TAG(stream_kind,b011): HGET_STREAM(b011); @+ break;
-case TAG(stream_kind,b100): HGET_STREAM(b100); @+ break;
-case TAG(stream_kind,b101): HGET_STREAM(b101); @+ break;
-case TAG(stream_kind,b110): HGET_STREAM(b110); @+ break;
-case TAG(stream_kind,b111): HGET_STREAM(b111); @+ break;
 @
+
+When we read stream numbers, we relax the define before use policy.
+We just check, that the stream number is in the correct range.
 
 @<get macros@>=
 #define @[HGET_STREAM(I)@] @/\
-HGET_REF(stream_kind);\
-if ((I)&b100) { scaled_t h; @+HGET32(h); @+hwritef(" to"); @+hwrite_dimension(h);@+}\
-if ((I)&b010) @/{ int16_t p;@+ HGET16(p); @+RNG("Penalty",p,-10000,+10000); @+hwrite_signed(p);@+ }\
-if ((I)&b001) @/{ scaled_t d; @+HGET32(d); @+hwrite_dimension(d);@+hget_glue_node();@+}\
-{ list_t l; @+hget_list(&l);@+ hwrite_list(&l); @+} 
+ {uint8_t n=HGET8;@+ REF_RNG(stream_kind,n); @+hwrite_ref(n);@+}\
+if ((I)&b010) { list_t l; @+hget_param_list_node(&l); @+hwrite_param_list_node(&l); @+} \
+else HGET_REF(param_kind);\
+{ list_t l; @+hget_list(&l);@+ hwrite_list(&l); @+}
 @
 
 
 
 
-\subsection{Page Templates}\label{page}
+\subsection{Page Template Definitions}\label{page}
 A \HINT/ file can define multiple page templates\index{template}. Not only
 might an index demand a different page layout than the main body of text,
 also the front page or the chapter headings might use their own page templates.
@@ -5051,7 +5185,7 @@ Further, the author of a \HINT/ file might define a two column format as
 an alternative to a single column format to be used if the display area
 is wide enough.
 
-To help in selecting the right page template, page templates start with
+To help in selecting the right page template, page template definitions start with
 a name and an optional priority\index{priority}; the default priority is 1.
 The names might appear in a menu from which the user
 can select a page layout that best fits her taste.
@@ -5062,11 +5196,18 @@ versions might include sophisticated feature-vectors that
 identify templates that are good for large or small displays,
 landscape or portrait mode, etc \dots
 
-The main part of a page template is a list of vertical material.
-To construct the page, this list will just be placed
-into a vertical box, but of course before doing so, the viewer will
-scan the list, replace all stream nodes found
-inside by the appropriate content streams, and set the glue.
+After the priority follows a glue node to specify the topskip glue
+and the dimension of the maximum page depth,
+an extended dimension to specify the page height and 
+an extended dimension to specify the page width.
+
+Then follows the main part of a page template definition: the template.
+The template consists of a list of vertical material.
+To construct the page, this list will be placed
+into a vertical box and the glue will be set.
+But of course before doing so, the viewer will
+scan the list and replace all stream nsertion points
+by the appropriate content streams.
 
 Let's call the vertical box obtained this way ``the page''.
 The page will fill the entire display area top to bottom and left to right. 
@@ -5080,11 +5221,7 @@ of the page template. The viewer, knowing the actual dimensions
 of the display area, can derive from them the actual values of \.{hsize}
 and \.{vsize}.
 
-At the end of the page template, a list of stream definitions
-provides information about the streams that are
-mentioned in the page's list of vertical material. In addition
-it might define streams that merely distribute content to other streams
-or streams that just accumulate material to be used on later pages.
+Stream definitions are listed after the template. 
 
 The page template with number 0 is always defined and has priority 0.
 It will display just the main content stream. It puts a small margin 
@@ -5100,12 +5237,13 @@ than the width of the page and {\tt vsize} larger than its height.
 %72pt = 612/8-4.5pt
 %This would give a positive margin starting at 36pt or 1/2 inch
 
-\readcode
+\goodbreak
+\vbox{\readcode\vskip -\baselineskip\putcode}
 
 @s PAGE symbol
-@s page_streams symbol
 @s page_priority symbol
 @s page symbol
+@s stream_def_list symbol
 
 @<symbols@>=
 %token PAGE "page"
@@ -5118,22 +5256,27 @@ than the width of the page and {\tt vsize} larger than its height.
 @<parsing rules@>=
 page_priority: { HPUT8(1); } 
              | UNSIGNED { RNG("page priority",$1,0,255); HPUT8($1); };
-page_streams: @+ | page_streams stream_def;
-page: string { hput_string($1);} page_priority @/ VBOX xdimen_node HBOX xdimen_node list 
-      page_streams;
 
+stream_def_list: | stream_def_list stream_def_node;
+
+page: string { hput_string($1);} page_priority glue_node dimension {HPUT32($5);}
+ xdimen_node xdimen_node
+ list stream_def_list ;
 @
 
-\getcode
+\goodbreak
+\vbox{\getcode\vskip -\baselineskip\writecode}
 @<get functions@>=
 void hget_page(void)
-{ char *n; uint8_t p;  list_t l; xdimen_t x;
+{ char *n; uint8_t p; xdimen_t x; list_t l;
   HGET_STRING(n);@+ hwrite_string(n);
   p=HGET8; @+ if (p!=1) hwritef(" %d",p);
-  hwritef(" vbox ");@+  {@+hget_xdimen_node(&x); @+hwrite_xdimen_node(&x);@+} 
-  hwritef(" hbox ");@+  {@+hget_xdimen_node(&x); @+hwrite_xdimen_node(&x);@+} 
+  hget_glue_node();
+  hget_dimen();
+  hget_xdimen_node(&x); @+hwrite_xdimen_node(&x); /* page height */
+  hget_xdimen_node(&x); @+hwrite_xdimen_node(&x); /* page width */
   hget_list(&l);@+ hwrite_list(&l);
-  while (KIND(*hpos)==stream_kind) hget_stream_def();
+  while (hget_stream_def()) continue;
 } 
 @
 
@@ -5205,15 +5348,15 @@ int next_range=1, max_range;
 int *page_on; 
 @
 
-@<allocate data@>=
+@<initialize definitions@>=
 ALLOCATE(page_on,max_ref[page_kind]+1,int);
 ALLOCATE(range_pos,2*(max_ref[range_kind]+1),range_pos_t);
 @
 
 @<hint macros@>=
-#define @[ALLOCATE(R,S,T)@] @/((R)=@[calloc((S),sizeof(T)),\
+#define @[ALLOCATE(R,S,T)@] @/((R)=@[(T *)calloc((S),sizeof(T)),\
         (((R)==NULL)?QUIT("Out of memory for " #R):0))
-#define @[REALLOCATE(R,S,T)@] @/((R)=@[realloc((R),(S)*sizeof(T)),\
+#define @[REALLOCATE(R,S,T)@] @/((R)=@[(T *)realloc((R),(S)*sizeof(T)),\
         (((R)==NULL)?QUIT("Out of memory for " #R):0))
 @
 
@@ -5296,7 +5439,8 @@ void hsort_ranges(void) /* simple insert sort by position */
 \putcode
 @<put functions@>=
 void hput_range(uint8_t pg, bool on)
-{ REF(range_kind,(next_range-1)/2);
+{ if (((next_range-1)/2)>max_ref[range_kind])
+    QUIT("Page range %d > %d",(next_range-1)/2,max_ref[range_kind]);
   if (on && page_on[pg]!=0)
     QUIT(@["Template %d is switched on at 0x%x and " SIZE_F@],@|
            pg, range_pos[page_on[pg]].pos, hpos-hstart);
@@ -5508,7 +5652,6 @@ There are two sets of macros that read or write binary data at the current posit
 and advance the stream position accordingly.\label{HPUT}\label{HGET}
 
 \getcode
-
 @<get file macros@>=
 #define HGET_ERROR QUIT(@["HGET overrun in section %d at " SIZE_F "\n"@],section_no,hpos-hstart)
 #define @[HEND@]   @[((hpos<=hend)?0:(HGET_ERROR,0))@]
@@ -6176,7 +6319,10 @@ convenient to let the machine figure out the file sizes\index{file size}.
 { int i; 
   for (i=3;i<=max_section_no;i++)
     { struct stat s;
-      if (stat(dir[i].file_name,&s)!=0)
+      char *file_name=dir[i].file_name;
+      int file_name_length=0;
+      @<without {\tt -g} compute a local |file_name|@>@;     
+      if (stat(file_name,&s)!=0)
         QUIT("Unable to obtain file size for '%s'",dir[i].file_name);
       dir[i].size=s.st_size;
       dir[i].xsize=0;
@@ -6278,7 +6424,7 @@ static void hput_optional_sections(void)
      DBG(DBGDIR,"file %d: %s\n",dir[i].section_no,file_name);
      if (dir[i].xsize!=0) @/
        DBG(DBGDIR,"Compressing of auxiliary files currently not supported");
-     @<without {\tt -g} compute a local |file_name|@>
+     @<without {\tt -g} compute a local |file_name|@>@;
      f=fopen(file_name,"rb");
      if (f==NULL) QUIT("Unable to read section %d, file %s",
        dir[i].section_no,file_name);
@@ -6301,9 +6447,9 @@ static void hput_optional_sections(void)
 
 
 \section{Definition Section}\index{definition section}
-\label{definitions}
+\label{defsection}
 In a typical \HINT/ file, there are many things that are used over and over again.
-For example the inter word glue of a specific font or the indentation of
+For example the interword glue of a specific font or the indentation of
 the first line of a paragraph. The definition section contains this information so that 
 it can be referenced in the content section by a simple reference number.
 In addition there are a few parameters that guide the routines of \TeX.
@@ -6359,7 +6505,6 @@ void hwrite_definitions_end(void)
 @
 
 
-@s def_t int
 
 @<get functions@>=
 void hget_definition_section(void)
@@ -6368,11 +6513,11 @@ void hget_definition_section(void)
   hwrite_definitions_start();
   DBG(DBGDEF,"Reading list of maximum values\n");
   hget_max_definitions();
-  @<allocate data@>@;
+  @<initialize definitions@>@;
   hwrite_max_definitions();
   DBG(DBGDEF,"Reading list of definitions\n");
   while (hpos<hend) @/
-  { def_t df; @+ hget_def_node(&df);
+  { ref_t df; @+ hget_def_node(&df);
     if (max_fixed[df.k]>max_default[df.k]) 
       QUIT("Definitions for kind %s not supported", definition_name[df.k]);
     if(df.n>max_ref[df.k] || df.n <= max_fixed[df.k]) 
@@ -6416,7 +6561,7 @@ default\index{default value} values is not allowed in the short
 format; in the long format, lower values are silently ignored.  Some
 default values are permanently fixed; for example the zero glue with
 reference number |zero_skip_no| must never change. The array
-|max_fixed| stores the maximum reference number that is fixed for a
+|max_fixed| stores the maximum reference number that has a fixed value for a
 given kind.  Definitions with reference numbers lower than the
 corresponding |max_fixed[k]| number are disallowed. Usually we have
 $-1 \le |max_fixed[k]| \le |max_default[k]| $, but if for a kind value
@@ -6428,7 +6573,7 @@ We use the |max_ref| array whenever we find a
 reference number in the input to check if it is within the proper range.
 
 @<debug macros@>=
-#define @[REF(K,N)@] if ((int)(N)>max_ref[K]) QUIT("Reference %d to %s out of range [0 - %d]",\
+#define @[REF_RNG(K,N)@] if ((int)(N)>max_ref[K]) QUIT("Reference %d to %s out of range [0 - %d]",\
   (N),definition_name[K],max_ref[K])
 @
 
@@ -6441,8 +6586,8 @@ In the long format file, the list of maximum values starts with
  because at present, reference numbers---and therefore maximum
  values---are restricted to the range 0 to 255 in order to fit into a
  single byte. Other info values are reserved for future extensions.
-After reading the maximum values, we allocate data for the defininitions
-that come next.
+After reading the maximum values, we initialize the data structures for
+the defininitions.
 
 
 \readcode 
@@ -6459,7 +6604,7 @@ that come next.
 @
 @<parsing rules@>=
 max_definitions: START MAX max_list END @|
- { @<allocate data@>@; hput_max_definitions(); };
+ { @<initialize definitions@>@; hput_max_definitions(); };
 max_list:@+ | max_list START max_value END;
 
 max_value: FONT UNSIGNED      { hset_max(font_kind,$2); }
@@ -6468,24 +6613,24 @@ max_value: FONT UNSIGNED      { hset_max(font_kind,$2); }
          | LIGATURE UNSIGNED  { hset_max(ligature_kind,$2); }
          | HYPHEN UNSIGNED    { hset_max(hyphen_kind,$2); }
          | GLUE UNSIGNED      { hset_max(glue_kind,$2); }
-         | MATH UNSIGNED      { hset_max(math_kind,$2); }
+         | LANGUAGE UNSIGNED  { hset_max(language_kind,$2); }
          | RULE UNSIGNED      { hset_max(rule_kind,$2); }
          | IMAGE UNSIGNED     { hset_max(image_kind,$2); }
          | LEADERS UNSIGNED   { hset_max(leaders_kind,$2); }
          | BASELINE UNSIGNED  { hset_max(baseline_kind,$2); }
          | XDIMEN UNSIGNED    { hset_max(xdimen_kind,$2); }
          | PARAM UNSIGNED     { hset_max(param_kind,$2); }
-         | STREAM UNSIGNED    { hset_max(stream_kind,$2); }
+         | STREAMDEF UNSIGNED    { hset_max(stream_kind,$2); }
          | PAGE UNSIGNED      { hset_max(page_kind,$2); }
          | RANGE UNSIGNED     { hset_max(range_kind,$2); };
 @
 
 @<parsing functions@>=
 void hset_max(kind_t k, int n)
-{ RNG("Maximum",n,max_fixed[k]+1,0xFF); 
+{ DBG(DBGDEF,"Setting max %s to %d\n",definition_name[k],n);
+  RNG("Maximum",n,max_fixed[k]+1,0xFF); 
   if (n>max_ref[k]) 
   { max_ref[k]=n; 
-    DBG(DBGDEF,"Setting max %s to %d\n",definition_name[k],n);
   }
 }
 @
@@ -6554,48 +6699,121 @@ void hput_max_definitions(void)
 @
 
 
-\subsection{Definitions}
-A definition\index{definition section} associates a reference number with a content node.
-Here is an example: A glue definition associates a glue number, for example 71,
-with a glue specification. In the long format this might look like  
-``{\tt \.{<}glue *71 4pt plus 5pt minus 0.5pt\.{>}}'' which makes glue number 71
-refer to a 4pt glue with a stretchability of 5pt and a shrinkability of 0.5pt.
-Whenever we need this glue in the content section, we can say ``{\tt \.{<}glue *71\.{>}}''.
-Because we restrict the number of definitions for every node type to at most 256,
-a single byte is sufficient to store the reference number.
-The \.{shrink} and \.{stretch} programs will, however, not bother to 
-store the definitions. Instead they will write them  in the new format immediately to the output.
+\subsection{Definitions}\label{definitions}
+A definition\index{definition section} associates a reference number
+with a content node.  Here is an example: A glue definition associates
+a glue number, for example 71, with a glue specification. In the long
+format this might look like ``{\tt \.{<}glue *71 4pt plus 5pt minus
+0.5pt\.{>}}'' which makes glue number 71 refer to a 4pt glue with a
+stretchability of 5pt and a shrinkability of 0.5pt. 
+Such a definition differs from a normal content node just by an extra 
+byte value immediately following the keyword respectively  start byte.
 
+Whenever we need this glue in the content section, we can say 
+``{\tt \.{<}glue *71\.{>}}''.  Because we restrict the number of definitions
+for every node type to at most 256, a single byte is sufficient to
+store the reference number.  The \.{shrink} and \.{stretch} programs
+will, however, not bother to store the definitions. Instead they will
+write them in the new format immediately to the output.
 
-Such a definition differs from a normal content node just by an extra byte value 
-immediately following the keyword respectively  start byte. The parser will handle 
-definitions in any order, but of course, it does not harm to present them 
-in a systematic way. 
+The parser will handle definitions in any order, but the order is relevant
+if a definiton references another definition, and of course, 
+it never does any harm to present definitions in a systematic way.
 
-@<hint types@>=
-typedef struct{@+kind_t k; @+ int n;@+} def_t;
+As a rule, the definition of a reference must always preceed the
+use of that reference. While this is allways the case for
+references in the content section, it restricts the use of
+references inside the definition section.
+
+The definitions for integers, dimensions, extended dimensions,
+ languages, rules, ligatures, and images are ``simple''.
+They never contain references and so it is always possible to list them first.
+The definition of glues may contain extended definitions,
+the definitions of baselines may reference glue nodes, and 
+the definitions of parameter lists contain definitions of integers, dimensions,
+and glues. So these definitions should follow in this order.
+
+The definitions of leaders and hyphens allow boxes.
+While these boxes are usually
+quite simple, they may contain arbitrary references---including again
+references to leaders and hyphens.  So, at least in principle,
+they might impose complex (or even unsatisfiable) restrictions 
+on the order of those definitions.
+
+The definitions of fonts contain not only ``simple'' definitions 
+but also the definitions of interword glues and hyphens 
+introducing additional ordering restrictions.
+The definition of hyphens regularly contain glyphs which in turn reference
+a font---typically the font that gets just defined.
+Therefore we relax the define before use policy for glyphs:
+Glyphs may reference a font before the font is defined.
+
+The definitions of page templates contain lists of arbitrary content 
+nodes, and while the boxes inside leaders or hyphens tend to be simple,
+the content of page templates is often quite complex. 
+Page templates are propably the source of most ordering restrictions. 
+Placing page templates towards the end of the list of definitions 
+might be a good idea.
+
+A special case are stream definitions. These occur only as part of
+the corresponding page template definition and are listed at its end.
+So references to them will occur in the page template always before their
+definition.
+
+Finally, the definitions of page ranges always reference a page template
+and they should come last.
+
+To avoid complex dependencies, an application can allways choose not to
+use references in the definition section. There are only two types of
+nodes where references can not be avoided: glyphs nodes which refere to fonts
+and language nodes which might occur in boxes and page templates.
+Possible ordering restrictions can be satisfied if languages are defined first
+and fonts second.
+
+To check the define before use policy, we use an array of bitvectors.
+Where we have for every reference number |N| and every kind |K| a single
+bit which is set if and only if the corresponding reference is defined.
+
+@<definition checks@>=
+uint32_t definition_bits[0x100/32][32]={{0}};
+
+#define @[SET_DBIT(N,K)@] (definition_bits[N/32][K]|=(1<<((N)&(32-1))))
+#define @[GET_DBIT(N,K)@] ((definition_bits[N/32][K]>>((N)&(32-1)))&1)
+#define @[DEF(D,K,N)@] (D).k=K;@+ (D).n=(N);@+SET_DBIT((D).n,(D).k);\
+	DBG(DBGDEF,"Defining %s %d\n",definition_name[(D).k],(D).n);\
+	RNG("Definition",(D).n,max_fixed[(D).k]+1,max_ref[(D).k]);
+#define @[REF(K,N)@] REF_RNG(K,N);if(!GET_DBIT(N,K)) \
+	QUIT("Reference %d to %s before definition",(N),definition_name[K])
 @
 
+@<initialize definitions@>=
+definition_bits[0][int_kind]=(1<<(MAX_INT_DEFAULT+1))-1;
+definition_bits[0][dimen_kind]=(1<<(MAX_DIMEN_DEFAULT+1))-1;
+definition_bits[0][xdimen_kind]=(1<<(MAX_XDIMEN_DEFAULT+1))-1;
+definition_bits[0][glue_kind]=(1<<(MAX_GLUE_DEFAULT+1))-1;
+definition_bits[0][baseline_kind]=(1<<(MAX_BASELINE_DEFAULT+1))-1;
+definition_bits[0][page_kind]=(1<<(MAX_PAGE_DEFAULT+1))-1;
+definition_bits[0][stream_kind]=(1<<(MAX_STREAM_DEFAULT+1))-1;
+definition_bits[0][range_kind]=(1<<(MAX_RANGE_DEFAULT+1))-1;
+@
 
-\vskip 0pt plus 20pt
 \goodbreak
-\vskip 0pt plus -20pt
-\putcode\penalty +1000\vskip -\baselineskip
-\readcode
-@s ref symbol
+\vbox{\readcode\vskip -\baselineskip\putcode}
+
+
 @s font symbol
 @<symbols@>=
-%type <u> ref
-%type <df> def_node
+
+%type <rf> def_node
 @
 
 @<parsing rules@>=
-ref: REFERENCE {RNG("Reference",$1,0,255); HPUT8($1);};
+
 def_node: 
   start FONT    ref font END  @| { DEF($$,font_kind,$3);@+   hput_tags($1,$4);@+} 
 | start INTEGER     ref integer END   @| { DEF($$,int_kind,$3);@+   hput_tags($1,hput_int($4));@+} 
 | start DIMEN   ref dimension END @| { DEF($$,dimen_kind,$3);@+   hput_tags($1,hput_dimen($4));} 
-| start MATH ref math END         @| { DEF($$,math_kind,$3);@+    hput_tags($1,hput_math(&($4)));}
+| start LANGUAGE ref string END @| { DEF($$,language_kind,$3);@+hput_string($4); hput_tags($1,TAG(language_kind,0));}
 | start GLUE    ref glue END      @| { DEF($$,glue_kind,$3);@+    hput_tags($1,hput_glue(&($4)));} 
 | start XDIMEN  ref xdimen END    @| { DEF($$,xdimen_kind,$3);@+  hput_tags($1,hput_xdimen(&($4)));} 
 | start RULE    ref rule END      @| { DEF($$,rule_kind,$3);@+    hput_tags($1,hput_rule(&($4)));} 
@@ -6608,60 +6826,72 @@ def_node:
 | start PAGE   ref page END       @| { DEF($$,page_kind,$3);@+    hput_tags($1,TAG(page_kind,0));}; 
 @
 
-@<parsing functions@>=
-#define @[DEF(D,K,N)@] (D).k=K;@+ (D).n=(N);@+RNG("Reference",N,max_fixed[K]+1,max_ref[K]);
-@
-\vskip 0pt plus 20pt
 \goodbreak
-\vskip 0pt plus -20pt
-\writecode\penalty +1000\vskip -\baselineskip
-\getcode
+\vbox{\getcode\vskip -\baselineskip\writecode}
+
 @<get functions@>=
-void hget_def_node(def_t *df)
+void hget_definition(int n, uint8_t a, uint32_t node_pos)
+{   switch(KIND(a))
+    { case font_kind: hget_font_def(INFO(a),n);@+ break;
+      case param_kind:
+        {@+ list_t l; @+HGET_LIST(INFO(a),l); @+hwrite_param_list(&l); @+ break;@+} 
+      case page_kind: hget_page(); @+break;
+      case dimen_kind:  hget_dimen(); @+break;
+      case xdimen_kind:
+        {@+ xdimen_t x;  @+hget_xdimen(a,&x); @+hwrite_xdimen(&x); @+break;@+ }
+      case language_kind:
+        if (INFO(a)!=b000)
+          QUIT("Info value of language definition must be zero");
+        else
+        { char *n; HGET_STRING(n);@+ hwrite_string(n); }
+        break;
+      default:
+        if (INFO(a)==0)
+          QUIT("References not allowed as definitions");
+        hget_content(a); @+break;
+    }
+}
+
+
+void hget_def_node(ref_t *df)
 { @<read the start byte |a|@>@;
-  df->k=KIND(a);
-  df->n=HGET8;
-  DBG(DBGTAGS,"Defining %s %d\n", definition_name[df->k],df->n);
+  DEF(*df,KIND(a),HGET8);
   if (df->k==range_kind)
     hget_range(INFO(a),df->n);
-  else @/
-  { hwrite_start(); @+hwritef("%s *%d", definition_name[df->k],df->n);
-    if (df->k==font_kind) hget_font_def(INFO(a),df->n);
-    else if (df->k==param_kind) @/
-    {@+ list_t l; l.k=param_kind; @+HGET_LIST(INFO(a),l); @+hwrite_param_list(&l); @+} 
-    else if (df->k==page_kind)
-      hget_page();
-    else if (df->k==dimen_kind)
-      hget_dimen();
-    else if (df->k==xdimen_kind)
-    {@+ xdimen_t x;  hget_xdimen(a,&x); hwrite_xdimen(&x); }
-    else hget_content(a);
+  else 
+  { hwrite_start(); @+hwritef("%s *%d",definition_name[df->k],df->n);
+    hget_definition(df->n,a,node_pos);
     hwrite_end();
   }
-
   @<read and check the end byte |z|@>@;
 }
 @
 
+
+
 \subsection{Parameter Lists}\label{paramlist}\index{parameter list}
-Because the content section is a ``stateless'' list of nodes, the definitions we see in the
-definition section can never change. It is however necessary to make occasionally local
-modifications of some of these definitions, because some definitions are parameters of the 
-algorithms borrowed from \TeX. Nodes that need such modifications, for example
-the paragraph nodes that are passed to \TeX's line breaking algorithm, 
-contain a list of local definitions called parameters.
-Typically sets of related parameters are needed. 
-To facilitate a simple reference to such a set of parameters, we allow
-predefined parameter lists that can be referenced by a single number.
-The parameters of \TeX's routines are quite basic: integers\index{integer}, 
-dimensions\index{dimension}, and glues\index{glue}.
-Therefore we restrict the definitions in parameter lists to such basic definitions.
+Because the content section is a ``stateless'' list of nodes, the
+definitions we see in the definition section can never change. It is
+however necessary to make occasionally local modifications of some of
+these definitions, because some definitions are parameters of the
+algorithms borrowed from \TeX. Nodes that need such modifications, for
+example the paragraph nodes that are passed to \TeX's line breaking
+algorithm, contain a list of local definitions called parameters.
+Typically sets of related parameters are needed.  To facilitate a
+simple reference to such a set of parameters, we allow predefined
+parameter lists that can be referenced by a single number.  The
+parameters of \TeX's routines are quite basic---integers\index{integer}, 
+dimensions\index{dimension}, and glues\index{glue}---and all
+of them have default values.  
+Therefore we restrict the definitions in parameter lists to such 
+basic definitions.
 
 @<parsing functions@>=
-void check_param_def(def_t *df)
+void check_param_def(ref_t *df)
 { if(df->k!=int_kind && df->k!=dimen_kind &&  @| df->k!=glue_kind)
     QUIT("Kind %s not allowed in parameter list", definition_name[df->k]);
-  REF(df->k,df->n);
+  if(df->n<=max_fixed[df->k] || max_default[df->k]<df->n)
+    QUIT("Parameter %d for %s not allowed in parameter list", df->n, definition_name[df->k]);
 }
 @
 
@@ -6669,12 +6899,8 @@ The definitions below repeat the definitions we have seen for lists in section~\
 with small modifications. For example we use the kind value |param_kind|. An empty parameter list
 is omitted in the long format as well as in the short format.
 
-
-\vskip 0pt plus 20pt
 \goodbreak
-\vskip 0pt plus -20pt
-\putcode\penalty +1000\vskip -\baselineskip
-\readcode
+\vbox{\readcode\vskip -\baselineskip\putcode}
 
 @s PARAM symbol
 @s def_list symbol
@@ -6705,7 +6931,7 @@ void hwrite_param_list(list_t *l)
   hpos=l->p+hstart;@+ hend=hpos+l->s;
   if (l->s>0xFF) hwritef(" %d",l->s); 
   while(hpos<hend)@/
-    { def_t df;@+
+    { ref_t df;@+
       hget_def_node(&df);
     } 
   hpos=hstart+h;@+  hend=hstart+e; /* restore  |hpos| and |hend| */ 
@@ -6732,30 +6958,76 @@ void hget_param_list_node(list_t *l)
 
 
 \subsection{Fonts}\label{fonts}
-Another definition that has no corresponding content node is the font\index{font} definition.
-Fonts by themselves do not constitute content, instead they are used in glyph\index{glyph} nodes.
-Fonts are also the only data, that never occur directly in a content node;
-a font is always specified by its font number. This limits the number of fonts that
-can be used in a \HINT/ file to at most 256.
+Another definition that has no corresponding content node is the
+font\index{font} definition.  Fonts by themselves do not constitute
+content, instead they are used in glyph\index{glyph} nodes.  Fonts are
+also a data type, that never occur directly in a content node; a
+font is always specified by its font number. This limits the number of
+fonts that can be used in a \HINT/ file to at most 256.
 
-A long format font definition starts with the keyword ``\.{font}'' and is followed
-by the font number, as usual prefixed by an asterisk. Then comes the font specification with the optional font size, 
-the font name,  the section number of the \TeX\ font metric file,
-and the section number of the file containing the glyphs for the font.
-Currently only \.{.pk} files are supported but the extension to \.{.ttf}
-and \.{.otf} files is imminent. 
-Further, a font must specify an inter word glue
-and a default discretionary break. After that comes a list of up to 12 font specific 
-parameters.
+A long format font definition starts with the keyword ``\.{font}'' and
+is followed by the font number, as usual prefixed by an asterisk. Then
+comes the font specification with the optional font size, the font
+name, the section number of the \TeX\ font metric file, and the
+section number of the file containing the glyphs for the font.
+The \HINT/ format supports \.{.pk} files, the traditional font format
+for \TeX, and the more modern PostScript Type 1 fonts,
+TrueType fonts, and OpenType fonts.
 
-The optional font size specifies the desired font\index{font size} size. If omitted, we assign the value zero which implies
-the design\index{design size} size of the font as stored in the \.{.tfm} file.
+The format of font definitions will probably change in future
+versions of the \HINT/ file format. 
+For example,  \.{.pk} files might be replaced entirely by PostScript Type 1 fonts.
+Also \HINT/ needs the \TeX\ font metric files only to obtain the sizes
+of characters when running \TeX's line breaking algorithm.
+But for many TrueType fonts there are no \TeX\ font metric files,
+while the necessary information about character sizes should be easy
+to obtain.
+Another information, that is currently missing from font definitions,
+is the fonts character encoding.
 
-In the short format, the font specification is given in the same order as in the long format.
-The info value will be |b001| if a font size is present, otherwise it is~|b000|.
+In a \HINT/ file, text is represented as a sequence of numbers called
+character codes. \HINT/ files use the UTF-8 character encoding
+scheme (CES) to map these numbers to their representation as byte
+sequences.  For example the number ``|0xE4|'' is encoded as the byte
+sequence ``|0xC3| |0xA4|''.  The same number |0xE4| now can represent
+different characters depending on the coded character set (CCS). For
+example in the common ISO-8859-1 (Latin 1) encoding the number |0xE4|
+is the umlaut ``\"a'' where as in the ISO-8859-7 (Latin/Greek) it is
+the greek letter ``$\delta$'' and in the EBCDIC encoding, used on IBM
+mainframes, it is the upper case letter ``U''.
 
-Our internal representation of a font just stores the font name because in the long format we add the font name
-as a comment to glyph nodes.
+The character encoding is
+irrelevant for rendering a \HINT/ file as long as the character codes
+in the glyph nodes are consistent with the character codes used in the font
+file, but the character encoding is necessary for all programs that
+need to ``understand'' the content of the \HINT/ file. For example
+programs that want to translate a \HINT/ document to a different language,
+or for text-to-speech conversion.
+
+The Internet Engineering Task Force IETF has established a character set
+registry\cite{ietf:charset-mib} that defines an enumeration of all
+registered coded character sets\cite{iana:charset-mib}.  The coded
+character set numbers are in the range 1--2999.
+This encoding number, as given in~\cite{iana:charset},
+might be one possibility for specifying the font encoding as
+part of a font definition.
+
+Currently, it is only required that a font specifies
+an interword glue and a default discretionary break. After that comes
+a list of up to 12 font specific parameters.
+
+The optional font size specifies the desired font\index{font size}
+size. If omitted, we assign the value zero which implies the
+design\index{design size} size of the font as stored in the \.{.tfm}
+file.
+
+In the short format, the font specification is given in the same order
+as in the long format.  The info value will be |b001| if a font size
+is present, otherwise it is~|b000|.
+
+Our internal representation of a font just stores the font name
+because in the long format we add the font name as a comment to glyph
+nodes.
 
 
 @<common variables@>=
@@ -6766,7 +7038,7 @@ char **hfont_name; /* dynamically allocated array of font names */
 #define MAX_FONT_PARAMS 11
 @
 
-@<allocate data@>=
+@<initialize definitions@>=
 ALLOCATE(hfont_name,max_ref[font_kind]+1,char *);
 @
 
@@ -6788,14 +7060,17 @@ ALLOCATE(hfont_name,max_ref[font_kind]+1,char *);
 ::@=font@>  :< return FONT; >:
 @
 
+Note that we set the definition bit early because the definition of font |f|
+might involve glyphs that reference font |f| (or other fonts).
+
 @<parsing rules@>=@/
 
 font: font_head font_param_list;
 
-font_head:string UNSIGNED UNSIGNED   @/
-		 {uint8_t f=$<u>@&0; @+hfont_name[f]=strdup($1); $$=hput_font_head(f,hfont_name[f],0,$2,$3);}
+font_head: string UNSIGNED UNSIGNED   @/
+		 {uint8_t f=$<u>@&0; SET_DBIT(f,font_kind); @+hfont_name[f]=strdup($1); $$=hput_font_head(f,hfont_name[f],0,$2,$3);}
 | string dimension UNSIGNED UNSIGNED @/
-  	 	 {uint8_t f=$<u>@&0; @+hfont_name[f]=strdup($1); $$=hput_font_head(f,hfont_name[f],$2,$3,$4);};
+  	 	 {uint8_t f=$<u>@&0;  SET_DBIT(f,font_kind); @+hfont_name[f]=strdup($1); $$=hput_font_head(f,hfont_name[f],$2,$3,$4);};
 
 font_param_list: glue_node hyphen_node @+ | font_param_list font_param ;
 
@@ -6805,18 +7080,16 @@ font_param: @/
 | start LIGATURE fref ligature END  { hput_tags($1,hput_ligature(&($4)));} 
 | start HYPHEN fref hyphen END      { hput_tags($1,hput_hyphen(&($4)));} 
 | start GLUE    fref glue END       { hput_tags($1,hput_glue(&($4)));} 
-| start MATH    fref math END       { hput_tags($1,hput_math(&($4)));} 
+| start LANGUAGE fref string END    { hput_string($4);hput_tags($1,TAG(language_kind,0));}
 | start RULE    fref rule END       { hput_tags($1,hput_rule(&($4)));}
 | start IMAGE   fref image END      { hput_tags($1,hput_image(&($4)));};
 
-fref: REFERENCE @/{ RNG("Font parameter",$1,0,MAX_FONT_PARAMS); HPUT8($1); };
+fref: ref @/{ RNG("Font parameter",$1,0,MAX_FONT_PARAMS); };
 @
 
-\vskip 0pt plus 20pt
 \goodbreak
-\vskip 0pt plus -20pt
-\getcode\penalty +1000\vskip -\baselineskip
-\writecode
+\vbox{\getcode\vskip -\baselineskip\writecode}
+
 @<get functions@>=
 static void hget_font_params(void)
 { hyphen_t h;
@@ -6824,17 +7097,17 @@ static void hget_font_params(void)
   hget_hyphen_node(&(h));@+ hwrite_hyphen_node(&h); 
   DBG(DBGDEF,"Start font parameters\n");
   while (KIND(*hpos)!=font_kind)@/  
-  { def_t df;
+  { ref_t df;
     @<read the start byte |a|@>@;
     df.k=KIND(a);
     df.n=HGET8;
     DBG(DBGDEF,"Reading font parameter %d: %s\n",df.n, definition_name[df.k]);
     if (df.k!=penalty_kind && df.k!=kern_kind && df.k!=ligature_kind && @|
-        df.k!=hyphen_kind && df.k!=glue_kind && df.k!=math_kind && @| df.k!=rule_kind && df.k!=image_kind)
+        df.k!=hyphen_kind && df.k!=glue_kind && df.k!=language_kind && @| df.k!=rule_kind && df.k!=image_kind)
       QUIT("Font parameter %d has invalid type %s",df.n, content_name[df.n]);
     RNG("Font parameter",df.n,0,MAX_FONT_PARAMS);
-    hwrite_start(); @+hwritef("%s *%d", content_name[df.k],df.n);
-    hget_content(a);
+    hwrite_start(); @+ hwritef("%s *%d",content_name[KIND(a)],df.n);
+    hget_definition(df.n,a,node_pos);
     hwrite_end();
     @<read and check the end byte |z|@>@;
   }
@@ -6859,7 +7132,7 @@ void hget_font_def(info_t i, uint8_t f)
 @<put functions@>=
 uint8_t hput_font_head(uint8_t f,  char *n, dimen_t s, @| uint16_t m, uint16_t y)
 { info_t i=b000;
-  DBG(DBGDEF,"Defining font %d\nFont %s size 0x%x\n", f, n, s); 
+  DBG(DBGDEF,"Defining font %d (%s) size 0x%x\n", f, n, s); 
   hput_string(n);
   if (s!=0) {HPUT32(s);@+ i=b001;@+} 
   HPUT16(m); @+HPUT16(y); 
@@ -6870,41 +7143,41 @@ uint8_t hput_font_head(uint8_t f,  char *n, dimen_t s, @| uint16_t m, uint16_t y
 
 
 \subsection{References}\label{reference}
-We have seen how to make definitions, now let's see how to reference\index{reference} them.
-In the long form, we can simply write the reference number, after the keyword 
-like this:  ``{\tt \.{<}glue *17\.{>}}''.
-The asterisk\index{asterisk} is necessary to keep apart, for example, a
-penalty with value 50, written  ``{\tt \.{<}penalty 50\.{>}}'', from
-a penalty referencing the integer definition number 50, written ``{\tt \.{<}penalty *50\.{>}}''.
+We have seen how to make definitions, now let's see how to
+reference\index{reference} them.  In the long form, we can simply
+write the reference number, after the keyword like this: 
+``{\tt \.{<}glue *17\.{>}}''.  
+The asterisk\index{asterisk} is necessary to keep apart, 
+for example, a penalty with value 50, 
+written ``{\tt \.{<}penalty 50\.{>}}'', 
+from a penalty referencing the integer
+definition number 50, written ``{\tt \.{<}penalty *50\.{>}}''.
 
-\vskip 0pt plus 20pt
 \goodbreak
-\vskip 0pt plus -20pt
-\putcode\penalty +1000\vskip -\baselineskip
-\readcode
+\vbox{\readcode\vskip -\baselineskip\putcode}
 
 @<parsing rules@>=
-xdimen_ref: REFERENCE { REF(xdimen_kind,$1); @+HPUT8($1);};
-param_ref: REFERENCE { REF(param_kind,$1);@+HPUT8($1); };
-stream_ref: REFERENCE { REF(stream_kind,$1);@+HPUT8($1); };
+xdimen_ref: ref { REF(xdimen_kind,$1);};
+param_ref: ref { REF(param_kind,$1); };
+stream_ref: ref { REF_RNG(stream_kind,$1); };
 
 
 content_node: 
- start PENALTY  REFERENCE END @/{ REF(penalty_kind,$3); @+HPUT8($3); @+ hput_tags($1,TAG(penalty_kind,0)); }
-|start KERN  explicit REFERENCE END @/
-      { REF(dimen_kind,$4); @+HPUT8($4);@+ hput_tags($1,TAG(kern_kind,($3)?b100:b000)); }
-|start KERN  explicit XDIMEN   REFERENCE END @/
-      { REF(xdimen_kind,$5); @+HPUT8($5);@+ hput_tags($1,TAG(kern_kind,($3)?b101:b001)); }
-|start GLUE     REFERENCE END @/{ REF(glue_kind,$3); @+HPUT8($3);@+ hput_tags($1,TAG(glue_kind,0)); }
-|start LIGATURE REFERENCE END @/{ REF(ligature_kind,$3); @+HPUT8($3);@+ hput_tags($1,TAG(ligature_kind,0)); }
-|start HYPHEN   REFERENCE END @/{ REF(hyphen_kind,$3); @+HPUT8($3);@+ hput_tags($1,TAG(hyphen_kind,0)); }
-|start MATH     REFERENCE END @/{ REF(math_kind,$3); @+HPUT8($3);@+ hput_tags($1,TAG(math_kind,0)); }
-|start RULE     REFERENCE END @/{ REF(rule_kind,$3); @+HPUT8($3);@+ hput_tags($1,TAG(rule_kind,0)); }
-|start IMAGE    REFERENCE END @/{ REF(image_kind,$3); @+HPUT8($3);@+ hput_tags($1,TAG(image_kind,0)); }
-|start LEADERS  REFERENCE END @/{ REF(leaders_kind,$3); @+HPUT8($3);@+ hput_tags($1,TAG(leaders_kind,0)); }
-|start BASELINE REFERENCE END @/{ REF(baseline_kind,$3); @+HPUT8($3);@+ hput_tags($1,TAG(baseline_kind,0)); };
+ start PENALTY ref END @/{ REF(penalty_kind,$3); @+ hput_tags($1,TAG(penalty_kind,0)); }
+|start KERN  explicit ref END @/
+      { REF(dimen_kind,$4); @+ hput_tags($1,TAG(kern_kind,($3)?b100:b000)); }
+|start KERN  explicit XDIMEN   ref END @/
+      { REF(xdimen_kind,$5); @+hput_tags($1,TAG(kern_kind,($3)?b101:b001)); }
+|start GLUE     ref END @/{ REF(glue_kind,$3); @+ hput_tags($1,TAG(glue_kind,0)); }
+|start LIGATURE ref END @/{ REF(ligature_kind,$3); @+ hput_tags($1,TAG(ligature_kind,0)); }
+|start HYPHEN   ref END @/{ REF(hyphen_kind,$3); @+ hput_tags($1,TAG(hyphen_kind,0)); }
+|start RULE     ref END @/{ REF(rule_kind,$3); @+ hput_tags($1,TAG(rule_kind,0)); }
+|start IMAGE    ref END @/{ REF(image_kind,$3);@+ hput_tags($1,TAG(image_kind,0)); }
+|start LEADERS  ref END @/{ REF(leaders_kind,$3); @+ hput_tags($1,TAG(leaders_kind,0)); }
+|start BASELINE ref END @/{ REF(baseline_kind,$3);@+ hput_tags($1,TAG(baseline_kind,0)); };
+|start LANGUAGE REFERENCE END @/{ REF(language_kind,$3);@+ hput_tags($1,hput_language($3)); };
 
-glue_node: start GLUE REFERENCE END @/{ REF(glue_kind,$3); @+HPUT8($3);@+ hput_tags($1,TAG(glue_kind,0)); };
+glue_node: start GLUE ref END @/{ REF(glue_kind,$3); @+ hput_tags($1,TAG(glue_kind,0)); };
 
 @
 
@@ -6918,7 +7191,7 @@ case TAG(kern_kind,b101):  hwritef(" ! xdimen");@+ HGET_REF(xdimen_kind); @+brea
 case TAG(ligature_kind,0):  HGET_REF(ligature_kind); @+break;
 case TAG(hyphen_kind,0):  HGET_REF(hyphen_kind); @+break;
 case TAG(glue_kind,0):  HGET_REF(glue_kind); @+break;
-case TAG(math_kind,0):  HGET_REF(math_kind); @+break;
+case TAG(language_kind,b000):  HGET_REF(language_kind); @+break;
 case TAG(rule_kind,0): HGET_REF(rule_kind); @+break;
 case TAG(image_kind,0):   HGET_REF(image_kind); @+break;
 case TAG(leaders_kind,0):  HGET_REF(leaders_kind); @+break;
@@ -6926,12 +7199,13 @@ case TAG(baseline_kind,0):  HGET_REF(baseline_kind); @+break;
 @
 
 @<get macros@>=
-#define @[HGET_REF(K)@] {uint8_t n; @+ n=HGET8;@+ REF(K,n); @+hwritef(" *%d",n);@+} 
+#define @[HGET_REF(K)@] {uint8_t n=HGET8;@+ REF(K,n); @+hwrite_ref(n);@+} 
 @
 \writecode
 @<write functions@>=
 void hwrite_ref(uint8_t n)
 {hwritef(" *%d",n);}
+
 void hwrite_ref_node(uint8_t k, uint8_t n)
 { hwrite_start(); @+hwritef("%s",content_name[k]);@+ hwrite_ref(n); @+hwrite_end();}
 @
@@ -6948,7 +7222,7 @@ As a consequence, even a \HINT/ file without any definitions should
 produce sensible results when displayed.
 
 The definitions that have default values are integers, dimensions, 
-extended dimensions, glues, baselines, page templates, and page ranges. 
+extended dimensions, glues, baselines, page templates, streams, and page ranges. 
 Each of these defaults has its own subsection below.
 Actually the defaults for extended dimensions and baselines are not needed by \TeX's
 routines, but it is nice to have default values for the extended dimensions that represent
@@ -7025,6 +7299,7 @@ int main(void)
   @<define |xdimen_defaults|@>@;
   @<define |baseline_defaults|@>@;
   @<define |page_defaults|@>@;
+  @<define |stream_defaults|@>@;
   @<define |range_defaults|@>@;
 
   @<define |max_ref|, |max_fixed| and |max_default|@>@;
@@ -7033,14 +7308,17 @@ int main(void)
 }
 @
 
-Above, we have set |max_default| to $-1$, meaning no defaults, and |max_fixed| to |0x100|, meaning no definitions.
-The following subsections will overwrite these values for all kinds of definitions that have defaults.
-It remains to reset |max_fixed| to $-1$ for all those kinds that have no defaults but allow definitions.
+Above, we have set |max_default| to $-1$, meaning no defaults, 
+and |max_fixed| to |0x100|, meaning no definitions.
+The following subsections will overwrite these values for 
+all kinds of definitions that have defaults.
+It remains to reset |max_fixed| to $-1$ for all those kinds 
+that have no defaults but allow definitions.
 Then we can print out both arrays.
 @<define |max_ref|, |max_fixed| and |max_default|@>=
   max_fixed[font_kind]= max_fixed[ligature_kind]= max_fixed[hyphen_kind]
-  = max_fixed[math_kind]=max_fixed[rule_kind]= max_fixed[image_kind]
-  = max_fixed[leaders_kind]= max_fixed[param_kind]= max_fixed[stream_kind]=-1;@#
+  =max_fixed[language_kind]=max_fixed[rule_kind]= max_fixed[image_kind]
+  = max_fixed[leaders_kind]= max_fixed[param_kind]= -1;@#
   printf("int max_fixed[32]= {");
   for (k=0; k<32; k++)@/
   { printf("%d",max_fixed[k]);@+
@@ -7100,8 +7378,9 @@ typedef enum {
         month_no=19,
         year_no=20,
         hang_after_no=21,
+        floating_penalty_no=22
 } int_no_t;
-#define MAX_INT_DEFAULT hang_after_no
+#define MAX_INT_DEFAULT floating_penalty_no
 @
 
 @<define |int_defaults|@>=
@@ -7129,7 +7408,9 @@ int_defaults[time_no]=720;
 int_defaults[day_no]=4;
 int_defaults[month_no]=7;
 int_defaults[year_no]=1776;
-int_defaults[hang_after_no]=1;@#
+int_defaults[hang_after_no]=1;
+int_defaults[floating_penalty_no]=20000;
+@#
 
 printf("int32_t int_defaults[MAX_INT_DEFAULT+1]={");
 for (i=0; i<= max_default[int_kind];i++)
@@ -7154,10 +7435,11 @@ hsize_dimen_no=1,
 vsize_dimen_no=2,
 line_skip_limit_no=3,
 max_depth_no=4,
-hang_indent_no=5,
-emergency_stretch_no=6,
-quad_no=7,
-math_quad_no=8
+split_max_depth_no=5,
+hang_indent_no=6,
+emergency_stretch_no=7,
+quad_no=8,
+math_quad_no=9
 } dimen_no_t;
 #define MAX_DIMEN_DEFAULT math_quad_no
 @
@@ -7169,7 +7451,7 @@ dimen_defaults[zero_dimen_no]=0;
 dimen_defaults[hsize_dimen_no]=6.5*72*ONE;
 dimen_defaults[vsize_dimen_no]=8.9*72*ONE;
 dimen_defaults[line_skip_limit_no]=0;
-dimen_defaults[max_depth_no]=4*ONE;
+dimen_defaults[split_max_depth_no]=3.5*ONE;
 dimen_defaults[hang_indent_no]=0;
 dimen_defaults[emergency_stretch_no]=0;
 dimen_defaults[quad_no]=10*ONE;
@@ -7228,7 +7510,7 @@ above_display_short_skip_no=7,
 below_display_short_skip_no=8,
 left_skip_no=9,
 right_skip_no=10,
-top_skip_no=11,
+top_skip_no=11, /* used for page template 0 */
 split_top_skip_no=12,
 tab_skip_no=13,
 par_fill_skip_no=14
@@ -7271,7 +7553,7 @@ glue_defaults[below_display_short_skip_no].m.f=4.0;
 glue_defaults[below_display_short_skip_no].m.o=normal_o;
 
 glue_defaults[top_skip_no].w.w=10*ONE;
-glue_defaults[split_top_skip_no].w.w=10*ONE;
+glue_defaults[split_top_skip_no].w.w=8.5*ONE;
 
 glue_defaults[par_fill_skip_no].p.f=1.0;
 glue_defaults[par_fill_skip_no].p.o=fil_o;
@@ -7316,10 +7598,24 @@ max_fixed[baseline_kind]=zero_baseline_no;@#
 }
 @
 
+\subsection{Streams}
+The zero stream\index{stream} is predefined for the main content.
+@<default names@>=
+typedef enum {
+zero_stream_no=0
+} stream_no_t;
+#define MAX_STREAM_DEFAULT zero_stream_no
+@
+
+@<define |stream_defaults|@>=
+max_default[stream_kind]=MAX_STREAM_DEFAULT;
+max_fixed[stream_kind]=zero_stream_no;
+@
+
 
 \subsection{Page Templates}
 
-The zero page template\index{template} is predefined, as well as stream 0 for the main content.
+The zero page template\index{template} is a predefined, built-in page template.
 @<default names@>=
 typedef enum {
 zero_page_no=0
@@ -7329,9 +7625,7 @@ zero_page_no=0
 
 @<define |page_defaults|@>=
 max_default[page_kind]=MAX_PAGE_DEFAULT;
-max_fixed[page_kind]=zero_page_no;@#
-max_default[stream_kind]=0;
-max_fixed[stream_kind]=0;
+max_fixed[page_kind]=zero_page_no;
 @
 
 \subsection{Page Ranges}
@@ -7348,7 +7642,7 @@ zero_range_no=0
 
 @<define |range_defaults|@>=
 max_default[range_kind]=MAX_RANGE_DEFAULT;
-max_fixed[range_kind]=zero_range_no;@#
+max_fixed[range_kind]=zero_range_no;
 @
 
 
@@ -7895,19 +8189,16 @@ case TAG(kern_kind,b110): @+  {@+xdimen_t x; @+HTEG_KERN(b110,x);@+ } @+break;
 case TAG(kern_kind,b111): @+  {@+xdimen_t x; @+HTEG_KERN(b111,x);@+ } @+break;
 @
 
-\subsection{Mathematics}\index{mathematics}
-\noindent
-@<skip macros@>=
-#define @[HTEG_MATH(I,M)@]  \
-if ((I)&b100) M.on=true; @+else  M.on=false;\
-if ((I)&b001) HTEG32(M.w); @+else M.w=0; 
-@
+\subsection{Language}\index{language}
 
 @<cases to skip content@>=
-case TAG(math_kind,b100):@+  { math_t m; @+ HTEG_MATH(b100,m);@+}@+break;
-case TAG(math_kind,b010):@+  { math_t m; @+ HTEG_MATH(b010,m);@+}@+break;
-case TAG(math_kind,b101):@+  { math_t m; @+ HTEG_MATH(b101,m);@+}@+break;
-case TAG(math_kind,b011):@+  { math_t m; @+ HTEG_MATH(b011,m);@+}@+break;
+case TAG(language_kind,1):
+case TAG(language_kind,2):
+case TAG(language_kind,3):
+case TAG(language_kind,4):
+case TAG(language_kind,5):
+case TAG(language_kind,6):
+case TAG(language_kind,7):@+break;
 @
 
 \subsection{Rules}\index{rule}
@@ -8033,9 +8324,10 @@ if ((I)&b010)  { dimen_t a; @+HTEG32(a);@+} \
  else HTEG_REF(xdimen_kind);
 @#
 
-#define @[HTEG_PACK(I)@] @/\
+#define @[HTEG_PACK(K,I)@] @/\
  { list_t l; @+hteg_list(&l); @+} \
- if ((I)&b001)  { dimen_t d; @+HTEG32(d); @+ }\
+ if (K==vpack_kind) { dimen_t d; @+HTEG32(d); @+ }\
+ if ((I)&b010)  { dimen_t d; @+HTEG32(d); @+ }\
  if ((I)&b100) {xdimen_t x; hteg_xdimen_node(&x);@+} @+ else HTEG_REF(xdimen_kind);
 @
 
@@ -8058,19 +8350,23 @@ case TAG(vset_kind,b101): HTEG_SET(b101); @+ break;
 case TAG(vset_kind,b110): HTEG_SET(b110); @+ break;
 case TAG(vset_kind,b111): HTEG_SET(b111); @+ break;@#
 
-case TAG(hpack_kind,b000): HTEG_PACK(b000); @+ break;
-case TAG(hpack_kind,b010): HTEG_PACK(b010); @+ break;
-case TAG(hpack_kind,b100): HTEG_PACK(b100); @+ break;
-case TAG(hpack_kind,b110): HTEG_PACK(b110); @+ break;@#
+case TAG(hpack_kind,b000): HTEG_PACK(hpack_kind,b000); @+ break;
+case TAG(hpack_kind,b001): HTEG_PACK(hpack_kind,b001); @+ break;
+case TAG(hpack_kind,b010): HTEG_PACK(hpack_kind,b010); @+ break;
+case TAG(hpack_kind,b011): HTEG_PACK(hpack_kind,b011); @+ break;
+case TAG(hpack_kind,b100): HTEG_PACK(hpack_kind,b100); @+ break;
+case TAG(hpack_kind,b101): HTEG_PACK(hpack_kind,b101); @+ break;
+case TAG(hpack_kind,b110): HTEG_PACK(hpack_kind,b110); @+ break;
+case TAG(hpack_kind,b111): HTEG_PACK(hpack_kind,b111); @+ break;@#
 
-case TAG(vpack_kind,b000): HTEG_PACK(b000); @+ break;
-case TAG(vpack_kind,b010): HTEG_PACK(b010); @+ break;
-case TAG(vpack_kind,b100): HTEG_PACK(b100); @+ break;
-case TAG(vpack_kind,b110): HTEG_PACK(b110); @+ break;
-case TAG(vpack_kind,b001): HTEG_PACK(b001); @+ break;
-case TAG(vpack_kind,b011): HTEG_PACK(b011); @+ break;
-case TAG(vpack_kind,b101): HTEG_PACK(b101); @+ break;
-case TAG(vpack_kind,b111): HTEG_PACK(b111); @+ break;
+case TAG(vpack_kind,b000): HTEG_PACK(vpack_kind,b000); @+ break;
+case TAG(vpack_kind,b001): HTEG_PACK(vpack_kind,b001); @+ break;
+case TAG(vpack_kind,b010): HTEG_PACK(vpack_kind,b010); @+ break;
+case TAG(vpack_kind,b011): HTEG_PACK(vpack_kind,b011); @+ break;
+case TAG(vpack_kind,b100): HTEG_PACK(vpack_kind,b100); @+ break;
+case TAG(vpack_kind,b101): HTEG_PACK(vpack_kind,b101); @+ break;
+case TAG(vpack_kind,b110): HTEG_PACK(vpack_kind,b110); @+ break;
+case TAG(vpack_kind,b111): HTEG_PACK(vpack_kind,b111); @+ break;
 @
 
 
@@ -8168,10 +8464,10 @@ case TAG(par_kind,b110): @+HTEG_PAR(b110);@+break;
 @
 
 
-\subsection{Displays}\index{displayed formula}
+\subsection{Mathematics}\index{mathematics}\index{displayed formula}
 \noindent
 @<skip macros@>=
-#define @[HTEG_DISPLAY(I)@] \
+#define @[HTEG_MATH(I)@] \
 if ((I)&b001) hteg_hbox_node();\
 { list_t l; @+hteg_list(&l); @+} \
 if ((I)&b010) hteg_hbox_node(); \
@@ -8179,12 +8475,14 @@ if ((I)&b100) { list_t l; @+hteg_param_list_node(&l); @+} @+ else HTEG_REF(param
 @
 
 @<cases to skip content@>=
-case TAG(display_kind,b000): HTEG_DISPLAY(b000); @+ break;
-case TAG(display_kind,b001): HTEG_DISPLAY(b001); @+ break;
-case TAG(display_kind,b010): HTEG_DISPLAY(b010); @+ break;
-case TAG(display_kind,b100): HTEG_DISPLAY(b100); @+ break;
-case TAG(display_kind,b101): HTEG_DISPLAY(b101); @+ break;
-case TAG(display_kind,b110): HTEG_DISPLAY(b110); @+ break;
+case TAG(math_kind,b000): HTEG_MATH(b000); @+ break;
+case TAG(math_kind,b001): HTEG_MATH(b001); @+ break;
+case TAG(math_kind,b010): HTEG_MATH(b010); @+ break;
+case TAG(math_kind,b100): HTEG_MATH(b100); @+ break;
+case TAG(math_kind,b101): HTEG_MATH(b101); @+ break;
+case TAG(math_kind,b110): HTEG_MATH(b110); @+ break;
+case TAG(math_kind,b011): 
+case TAG(math_kind,b111): @+ break;
 @
 
 \subsection{Images}\index{image}
@@ -8286,7 +8584,7 @@ case TAG(item_kind,b011):  hteg_content_node(); @+ break;
 case TAG(item_kind,b100):  hteg_content_node(); @+ break;
 case TAG(item_kind,b101):  hteg_content_node(); @+ break;
 case TAG(item_kind,b110):  hteg_content_node(); @+ break;
-case TAG(item_kind,b111):  hteg_content_node(); @+{uint8_t n;@+ HTEG8(n);@+}@+ break;
+case TAG(item_kind,b111):  {uint8_t n;@+ HTEG8(n);@+}@+hteg_content_node();@+ break;
 @
 
 
@@ -8294,22 +8592,14 @@ case TAG(item_kind,b111):  hteg_content_node(); @+{uint8_t n;@+ HTEG8(n);@+}@+ b
 \subsection{Stream Nodes}\index{stream}
 @<skip macros@>=
 #define @[HTEG_STREAM(I)@] @/\
-{ list_t l; @+hteg_list(&l); @+} \
-if ((I)&b001) { scaled_t d; @+ hteg_glue_node();@+HTEG32(d);@+}\
-if ((I)&b010) { int16_t p;@+ HTEG16(p);@+ }\
-if ((I)&b100) { scaled_t h; @+HTEG32(h);@+}\
-HTEG_REF(stream_kind);\
+{ list_t l; @+hteg_list(&l); @+}\
+if ((I)&b010) { list_t l; @+hteg_param_list_node(&l); @+} @+ else HTEG_REF(param_kind);\
+HTEG_REF(stream_kind);
 @
 
 @<cases to skip content@>=
 case TAG(stream_kind,b000): HTEG_STREAM(b000); @+ break;
-case TAG(stream_kind,b001): HTEG_STREAM(b001); @+ break;
-case TAG(stream_kind,b010): HTEG_STREAM(b010); @+ break;
-case TAG(stream_kind,b011): HTEG_STREAM(b011); @+ break;
-case TAG(stream_kind,b100): HTEG_STREAM(b100); @+ break;
-case TAG(stream_kind,b101): HTEG_STREAM(b101); @+ break;
-case TAG(stream_kind,b110): HTEG_STREAM(b110); @+ break;
-case TAG(stream_kind,b111): HTEG_STREAM(b111); @+ break;
+case TAG(stream_kind,b010):  HTEG_STREAM(b010); @+ break;
 @
 
 
@@ -8329,7 +8619,7 @@ case TAG(kern_kind,b101):  HTEG_REF(xdimen_kind); @+break;
 case TAG(ligature_kind,0):  HTEG_REF(ligature_kind); @+break;
 case TAG(hyphen_kind,0):  HTEG_REF(hyphen_kind); @+break;
 case TAG(glue_kind,0):  HTEG_REF(glue_kind); @+break;
-case TAG(math_kind,0):  HTEG_REF(math_kind); @+break;
+case TAG(language_kind,0):  HTEG_REF(language_kind); @+break;
 case TAG(rule_kind,0): HTEG_REF(rule_kind); @+break;
 case TAG(image_kind,0):   HTEG_REF(image_kind); @+break;
 case TAG(leaders_kind,0):  HTEG_REF(leaders_kind); @+break;
@@ -8414,11 +8704,11 @@ The \.{hget.h} file contains function prototypes for all the functions
 that read the short format.
 
 @<get function declarations@>=
-extern void hget_content_node(void);
+extern uint8_t hget_content_node(void);
 extern int txt_length;
 extern int hget_txt(void);
 extern uint32_t hget_utf8(void);
-extern void hget_def_node(def_t *df);
+extern void hget_def_node(ref_t *df);
 extern void hget_content_section(void);
 extern void hget_content(uint8_t a);
 extern void hget_xdimen_node(xdimen_t *x);
@@ -8519,7 +8809,7 @@ extern void hput_tags(uint32_t pos, uint8_t tag);
 extern uint8_t hput_glyph(glyph_t *g);
 extern uint8_t hput_xdimen(xdimen_t *x);
 extern uint8_t hput_int(int32_t p);
-extern uint8_t hput_math(math_t *m);
+extern uint8_t hput_language(uint8_t n);
 extern uint8_t hput_rule(rule_t *r);
 extern uint8_t hput_glue(glue_t *g);
 extern uint8_t hput_list(uint32_t size_pos, list_t *y);
@@ -8590,7 +8880,8 @@ The definitions for lex are collected in the file {\tt shrink.l}
 #include <unistd.h>
 #include "error.h"
 #include "hformat.h"
-@<hint types@>@;
+#include "hput.h"
+
 @<enable bison debugging@>@;
 #include "shrink.tab.h"
 
@@ -8637,6 +8928,8 @@ The grammar rules for bison are collected in the file  {\tt shrink.y}.
 #include "hput.h"
 char **hfont_name;
 
+@<definition checks@>@;
+
 extern void hset_entry(entry_t *e, uint16_t i, uint32_t size, uint32_t xsize, @|char *file_name);
 
 @<enable bison debugging@>@;
@@ -8652,9 +8945,9 @@ extern int yylex(void);
 
 %union {uint32_t u; @+ int32_t i; @+ char *s; @+ float64_t f; @+ glyph_t c; 
         @+  dimen_t d; @+ stretch_t st; @+ xdimen_t xd; @+ kern_t kt;
-        @+ rule_t r; @+ glue_t g; @+ math_t m; @+ @+ image_t x; 
+        @+ rule_t r; @+ glue_t g; @+ @+ image_t x; 
         @+ list_t l; @+ box_t h;  @+ hyphen_t hy; @+ lig_t lg;
-        @+ ref_t rf; @+ info_t info; @+ order_t o;@+bool b;@+ def_t df; @+ 
+        @+ ref_t rf; @+ info_t info; @+ order_t o;@+bool b; @+ 
    }
 
 @t{}@>
@@ -8740,7 +9033,7 @@ explain_usage:
 
 
 
-\subsection{{\tt stretch.c}}\index{stretch.y+{\tt stretch.y}}
+\subsection{{\tt stretch.c}}\index{stretch.c+{\tt stretch.c}}
 \.{stretch} is a \CEE/ program translating a \HINT/ file in short 
 format into a \HINT/ file in long format.
 
@@ -8769,7 +9062,7 @@ format into a \HINT/ file in long format.
 @<get function declarations@>@;
 
 @<write functions@>@;
-
+@<definition checks@>@;
 @<get macros@>@;
 
 @<get functions@>@;

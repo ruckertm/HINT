@@ -28,6 +28,8 @@
 
 
 extern "C" {
+#include <android/bitmap.h>
+
 //include "stb_truetype.h"
 //include "hfonts.h"
 #include "basetypes.h"
@@ -38,6 +40,13 @@ extern "C" {
 #include "hrender.h"
 #include "rendernative.h"
 char *in_name=NULL; /* to keep hget happy */
+
+// Functions from rendergl.c
+
+extern void glZoomBegin(void);
+extern void glZoom(void);
+extern void glZoomEnd(void);
+extern void glDrawBitmap(uint32_t width, uint32_t height, uint32_t stride, void *pixel);
 
 //DEPRECATED
 //extern void nativeSetColors(double fr, double fg, double fb, double br, double bg, double bb);
@@ -76,7 +85,7 @@ JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_zoomBegin(JNIEnv *env, jclass obj);
 JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_zoomEnd(JNIEnv *env, jclass obj);
-JNIEXPORT jdouble JNICALL
+JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_zoom(JNIEnv *env, jclass obj);
 };
 
@@ -152,7 +161,57 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jclass obj) {
     HINT_TRY hint_render();HINT_CATCH("render");
 }
 
+
 extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_drawBitmap(JNIEnv *env, jclass obj, jobject bitmap) {
+
+    AndroidBitmapInfo  info;
+    void*              pixels;
+    int                ret;
+    LOGI("drawBitmap\n");
+
+    if ((ret = AndroidBitmap_getInfo(env, bitmap, &info)) < 0) {
+        LOGE("AndroidBitmap_getInfo() failed ! error=%d", ret);
+        return;
+    }
+
+    if (info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        LOGE("Bitmap format is not RGBA_8888 !");
+        return;
+    }
+
+    if ((ret = AndroidBitmap_lockPixels(env, bitmap, &pixels)) < 0) {
+        LOGE("AndroidBitmap_lockPixels() failed ! error=%d", ret);
+    }
+
+
+    glDrawBitmap(info.width, info.height, info.stride, pixels);
+
+
+    if ((ret = AndroidBitmap_unlockPixels(env, bitmap))< 0) {
+        LOGE("AndroidBitmap_unlockPixels() failed ! error=%d", ret);
+    }
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_zoomBegin(JNIEnv *env, jclass obj) {
+    LOGI("Zoom Begin\n");
+    glZoomBegin();
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_zoomEnd(JNIEnv *env, jclass obj) {
+    LOGI("Zoom End\n");
+    glZoomEnd();
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_zoom(JNIEnv *env, jclass obj) {
+    LOGI("Zoom\n");
+    glZoom();
+}
+
+    extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_next(JNIEnv *env, jclass obj) {
     LOGI("hint_next_page\n");
     HINT_TRY hint_next_page();HINT_CATCH("next");

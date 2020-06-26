@@ -17,6 +17,10 @@
 
 // Wrapper for native library
 
+import android.graphics.Bitmap;
+
+import java.util.BitSet;
+
 public class HINTVIEWLib {
 
     static {
@@ -33,6 +37,8 @@ public class HINTVIEWLib {
 
     public static native void draw();
 
+    public static native void drawBitmap(Bitmap bmp);
+
     public static native void next();
 
     public static native void prev();
@@ -47,7 +53,7 @@ public class HINTVIEWLib {
 
     public static native void zoomBegin();
 
-    public static native double zoomEnd();
+    public static native void zoomEnd();
 
     public static native void zoom();
 

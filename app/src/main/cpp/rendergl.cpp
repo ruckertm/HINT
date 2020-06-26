@@ -515,7 +515,7 @@ void nativeFreeGlyph(gcache_t *g)
 /* Free resources associated with g. */
 {
     if (g->GLtexture != 0) {
-        glDeleteTextures(1, &(g->GLtexture));
+        glDeleteTextures(1, &(g->GLtexture)); // probably not needed
         g->GLtexture = 0;
     }
 }
@@ -549,28 +549,14 @@ extern "C" void nativeSetTrueType(struct gcache_s *g) {
 
 static GLuint GLzoom=0;
 static GLfloat zoom_w, zoom_h;
+static unsigned int fbo;
 
-extern "C" JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_zoomBegin(JNIEnv *env, jclass obj) {
-    //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    //glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    //if (GLzoom!=0) return;
-    LOGI("GL Zoom Begin\n");
-    unsigned int fbo;
+extern "C" void glZoomFB(void)
+{
     glGenFramebuffers(1, &fbo); // create framebuffer object
     checkGlError("glGenFramebuffers");
     glBindFramebuffer(GL_FRAMEBUFFER, fbo); // bind it
     checkGlError("glBindFramebuffer");
-
-    // creating the texture attachment
-    glGenTextures(1, &GLzoom);
-    glBindTexture(GL_TEXTURE_2D, GLzoom);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, cur_h, cur_v, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
 
     // attach to framebuffer
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, GLzoom, 0);
@@ -587,6 +573,31 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_zoomBegin(JNIEnv *env, jclass obj) {
     // check for completeness
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         LOGE("ERROR::FRAMEBUFFER:: Framebuffer is not complete!\n");
+}
+
+extern "C" void glSetZoomTexture(void)
+{   LOGI("GL Set Zoom Texture\n");
+    glGenTextures(1, &GLzoom);
+    glBindTexture(GL_TEXTURE_2D, GLzoom);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, cur_h, cur_v, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    LOGI("GL Set Zoom Texture done\n");
+}
+
+
+extern "C" void glZoomBegin(void) {
+
+    LOGI("GL Zoom Begin\n");
+
+    // creating the texture attachment
+    glSetZoomTexture();
+    LOGI("GL Zoom Begin after Zoom Texture\n");
+    glZoomFB();
+
     nativeSetDark(mode);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, cur_h, cur_v);
@@ -599,21 +610,17 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_zoomBegin(JNIEnv *env, jclass obj) {
     glDeleteFramebuffers(1, &fbo); // delete
     checkGlError("glDeleteFramebuffers");
 
-
-
     LOGI("GL Zoom Begin done\n");
 
 }
 
-extern "C" JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_zoomEnd(JNIEnv *env, jclass obj) {
+extern "C" void glZoomEnd(void) {
     LOGI("GL Zoom End\n");
     glDeleteTextures(1, &GLzoom);
     GLzoom=0;
 }
 
-extern "C" JNIEXPORT jdouble JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_zoom(JNIEnv *env, jclass obj) {
+extern "C" void glZoom(void) {
     int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
     LOGI("GL Zooming scale=%f \n",1.0);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT); // blank the canvas
@@ -643,5 +650,43 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_zoom(JNIEnv *env, jclass obj) {
         //set back to dark mode
         glUniform1i(ourModeLocation, DARK_MODE);
     }
-    return 1.0;
+}
+extern "C" void glDrawBitmap(uint32_t width, uint32_t height, uint32_t stride, void* pixels)
+{ int x,y;
+    LOGI("GL Draw Bitmap\n");
+    /* Now fill the bitmap */
+    for (y=0; y < height; y++)
+    { uint8_t *line = (uint8_t *)pixels+y*stride;
+        for (x=y;x<width; x++) {
+            line[x * 4 + 3] = 0x80; // Alpha
+            line[4 * x + 1] = 0xff;
+        }
+    }
+
+    // creating the texture attachment
+    glSetZoomTexture();
+    glZoomFB();
+
+    nativeSetDark(false);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    glViewport(0, 0, width, height);
+
+    HINT_TRY {
+        hint_resize(width,height,300.0);
+        hint_render();
+    }
+
+    glReadPixels(0,0,width,height,GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    checkGlError("glReadPixels");
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); // unbind
+    checkGlError("glBindFramebuffer");
+    glDeleteFramebuffers(1, &fbo); // delete
+    checkGlError("glDeleteFramebuffers");
+    glDeleteTextures(1, &GLzoom);
+    GLzoom=0;
+    LOGI("GL Draw Bitmap done\n");
+
 }

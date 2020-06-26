@@ -1,5 +1,5 @@
-/*281:*/
-#line 5270 ".\\hint.w"
+/*306:*/
+#line 5714 "hint.w"
 
 #ifndef _ERROR_H
 #define _ERROR_H
@@ -13,14 +13,15 @@ extern void hint_end(void);
 extern jmp_buf error_exit;
 
 #ifdef _MSC_VER 
+#define snprintf(S,N,F,...) _snprintf(S,N,F,__VA_ARGS__)
+#ifndef _CONSOLE
 #pragma warning(disable : 4996)
 extern void hmessage(char*title,char*format,...);
 #define MESSAGE(...)  hmessage("HINT",__VA_ARGS__)
 
 extern void herror(char*title,char*msg);
 #define ERROR_MESSAGE  herror("HINT ERROR",herror_string)
-#define snprintf(S,N,F,...) _snprintf(S,N,F,__VA_ARGS__)
-
+#endif
 #endif
 
 #ifdef __ANDROID__ 
@@ -55,4 +56,4 @@ extern void herror(char*title,char*msg);
 #endif
 
 #endif
-/*:281*/
+/*:306*/

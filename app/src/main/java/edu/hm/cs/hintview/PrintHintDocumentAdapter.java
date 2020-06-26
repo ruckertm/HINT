@@ -1,6 +1,7 @@
 package edu.hm.cs.hintview;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -17,10 +18,13 @@ import android.print.pdf.PrintedPdfDocument;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import static java.lang.Thread.*;
+
 // following https://www.techotopia.com/index.php/An_Android_Custom_Document_Printing_Tutorial
 
 public class PrintHintDocumentAdapter extends PrintDocumentAdapter {
-    Context context;
+    private HINTVIEWView view;
+    private Context context;
     private int width, height; // page dimension in pixel
     private int width_Mils, height_Mils; // page dimension in 1/1000 inch
     private double xdpi,ydpi;
@@ -29,14 +33,16 @@ public class PrintHintDocumentAdapter extends PrintDocumentAdapter {
     public PdfDocument hintDocument;
     private CancellationSignal.OnCancelListener doCancel;
     private boolean canceled;
+    private Bitmap pageBitmap;
 
-    public PrintHintDocumentAdapter(Context context, String fileUriString) {
-        this.context=context;
+    public PrintHintDocumentAdapter(HINTVIEWView view) {
+        this.context=view.getContext();
+        this.view=view;
         width=-1;
         height=-1;
         xdpi=-1.0;
         xdpi=-1.0;
-        name = fileUriString;
+        name = view.getFileUriStr();
         if (name.endsWith(".hnt"))
             name = name.substring(0, name.length() - 4);
         name = "HINT_print.pdf"; // name+".pdf";
@@ -53,6 +59,10 @@ public class PrintHintDocumentAdapter extends PrintDocumentAdapter {
         };
     }
 
+
+    public synchronized void onBitmapReady()
+    { this.notifyAll();
+    }
     @Override
     public void onStart() {
         super.onStart();
@@ -79,7 +89,7 @@ public class PrintHintDocumentAdapter extends PrintDocumentAdapter {
             height = h;
             xdpi = x;
             ydpi = y;
-            HINTVIEWLib.change(width, height, xdpi, ydpi);
+            pageBitmap= Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888);
             callback.onLayoutFinished(info, true);
         }
     }
@@ -89,7 +99,7 @@ public class PrintHintDocumentAdapter extends PrintDocumentAdapter {
     public void onWrite(PageRange[] pages, ParcelFileDescriptor destination, CancellationSignal cancellationSignal, WriteResultCallback callback) {
         cancellationSignal.setOnCancelListener(doCancel);
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 2; i++) {
             if (pageInRange(pages, i))
             {
                 PdfDocument.PageInfo newPage = new PdfDocument.PageInfo.Builder((int)Math.round(width_Mils*72.27/1000.0),(int)Math.round(height_Mils*72.27/1000.0), i).create();
@@ -131,7 +141,7 @@ public class PrintHintDocumentAdapter extends PrintDocumentAdapter {
         return false;
     }
 
-    private void drawPage(PdfDocument.Page page,
+    private synchronized void drawPage(PdfDocument.Page page,
                           int pagenumber) {
         Canvas canvas = page.getCanvas();
 
@@ -144,7 +154,6 @@ public class PrintHintDocumentAdapter extends PrintDocumentAdapter {
         int w_pt = page.getInfo().getPageWidth(); // width in pt
         int h_pt = page.getInfo().getPageHeight(); // Heigth in pt
 
-
         Paint paint = new Paint();
 
 
@@ -152,20 +161,17 @@ public class PrintHintDocumentAdapter extends PrintDocumentAdapter {
             paint.setColor(Color.RED);
         else
             paint.setColor(Color.GREEN);
+        canvas.drawCircle(w/2,h/2,w/2, paint);
+         HINTVIEWView.doPrint = true;
+        HINTVIEWView.printBitmap=pageBitmap;
+        view.requestRender();
+        try {
+            this.wait(); // here we must wait until the render thread has completed its job.
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-        canvas.drawCircle(w/2,
-                h/2,
-                w/2,
-                paint);
-
-        paint.setColor(Color.BLUE);
-        paint.setTextSize(42); // 42 pt
-
-        canvas.drawText(
-                "Test Page " + pagenumber,
-                (float)leftMargin,
-                (float)titleBaseLine,
-                paint);
+        canvas.drawBitmap(pageBitmap,0,0,null);
 
     }
 

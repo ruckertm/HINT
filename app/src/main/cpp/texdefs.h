@@ -327,7 +327,8 @@ else decr(glue_ref_count(X) ) ; \
 } \
 
 #define add_token_ref(X) incr(token_ref_count(X) ) 
-#define add_glue_ref(X) incr(glue_ref_count(X) )  \
+#define add_glue_ref(X) incr(glue_ref_count(X) ) 
+#define add_xdimen_ref(X) incr(xdimen_ref_count(X) )  \
 
 #define escape 0 \
 
@@ -555,7 +556,6 @@ else decr(glue_ref_count(X) ) ; \
 #define mu_skip_base (skip_base+256) 
 #define local_base (mu_skip_base+256)  \
 
-#define skip(X) stream[X].g
 #define mu_skip(X) equiv(mu_skip_base+X) 
 #define glue_par(X) equiv(glue_base+X) 
 #define line_skip pointer_def[glue_kind][line_skip_no]
@@ -607,7 +607,7 @@ else decr(glue_ref_count(X) ) ; \
 #define every_cr equiv(every_cr_loc) 
 #define err_help equiv(err_help_loc) 
 #define toks(X) equiv(toks_base+X) 
-#define box(X) stream[X].p
+#define box(X) (*box_ptr(X) ) 
 #define cur_font equiv(cur_font_loc) 
 #define fam_fnt(X) equiv(math_font_base+X) 
 #define cat_code(X) equiv(cat_code_base+X) 
@@ -683,7 +683,6 @@ else decr(glue_ref_count(X) ) ; \
 #define dimen_base (del_code_base+256)  \
 
 #define del_code(X) eqtb[del_code_base+X].i
-#define count(X) stream[X].i
 #define int_par(X) eqtb[int_base+X].i
 #define pretolerance integer_def[pretolerance_no]
 #define tolerance integer_def[tolerance_no]
@@ -713,7 +712,7 @@ else decr(glue_ref_count(X) ) ; \
 #define tracing_online int_par(tracing_online_code) 
 #define tracing_macros int_par(tracing_macros_code) 
 #define tracing_stats int_par(tracing_stats_code) 
-#define tracing_paragraphs int_par(tracing_paragraphs_code) 
+#define tracing_paragraphs (debugflags&DBGTEX) 
 #define tracing_pages int_par(tracing_pages_code) 
 #define tracing_output int_par(tracing_output_code) 
 #define tracing_lost_chars int_par(tracing_lost_chars_code) 
@@ -762,7 +761,6 @@ else decr(glue_ref_count(X) ) ; \
 
 #define eqtb_size (scaled_base+255)  \
 
-#define dimen(X) stream[X].s
 #define dimen_par(X) eqtb[dimen_base+X].sc
 #define par_indent dimen_par(par_indent_code) 
 #define math_surround dimen_par(math_surround_code) 
@@ -1597,14 +1595,13 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define par_value(X) mem[X+2] \
 
 #define graf_node 7
-#define graf_node_size 6
+#define graf_node_size 5
 #define graf_penalty(X) mem[X+1].i
 #define graf_continue(X) type(X+2) 
 #define graf_first_line(X) link(X+2) 
-#define graf_params(X) link(X+3) 
-#define graf_list_offset 4
-#define graf_list(X) link(X+graf_list_offset) 
-#define graf_extent(X) mem[X+5].i \
+#define graf_extent(X) link(X+3) 
+#define graf_params(X) info(X+4) 
+#define graf_list(X) link(X+4)  \
 
 #define disp_node 8
 #define disp_node_size 3
@@ -1636,25 +1633,67 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define vpack_node 13
 #define pack_node_size box_node_size
 #define pack_m(X) type(X+list_offset) 
-#define pack_limit(X) mem[(X) +glue_offset].sc
-#define pack_extent(X) mem[(X) +1+glue_offset].i \
+#define pack_limit(X) mem[(X) +1+list_offset].sc
+#define pack_extent(X) link(X+2+list_offset)  \
 
 #define hset_node 14
 #define vset_node 15
 #define set_node_size box_node_size
 #define set_stretch_order glue_sign
 #define set_shrink_order glue_order
-#define set_stretch(X) mem[(X) +glue_offset].sc
+#define set_stretch(X) mem[(X) +1+list_offset].sc
 #define set_extent(X) pack_extent(X) 
-#define set_shrink(X) mem[(X) +2+glue_offset].sc \
+#define set_shrink(X) mem[(X) +3+list_offset].sc \
 
 #define align_node 16
 #define align_node_size 4
-#define align_preamble(X) info(X+1) 
-#define align_list(X) link(X+1) 
-#define align_extent(X) mem[X+2].i
-#define align_m(X) type(X+3) 
-#define align_v(X) subtype(X+3)  \
+#define align_extent(X) link(X+2) 
+#define align_m(X) type(X+2) 
+#define align_v(X) subtype(X+2) 
+#define align_preamble(X) info(X+3) 
+#define align_list(X) link(X+3)  \
+
+#define setpage_node 17
+#define setpage_node_size 6
+#define setpage_name(X) link(X+1) 
+#define setpage_number(X) type(X+1) 
+#define setpage_priority(X) subtype(X+1) 
+#define setpage_topskip(X) link(X+2) 
+#define setpage_depth(X) mem[X+3].sc
+#define setpage_height(X) info(X+4) 
+#define setpage_width(X) link(X+4) 
+#define setpage_list(X) info(X+5) 
+#define setpage_streams(X) link(X+5)  \
+
+#define setstream_node 18
+#define setstream_node_size 6
+#define setstream_number(X) type(X+1) 
+#define setstream_insertion(X) subtype(X+1) 
+#define setstream_mag(X) link(X+1) 
+#define setstream_prefered(X) type(X+2) 
+#define setstream_next(X) subtype(X+2) 
+#define setstream_ratio(X) link(X+2) 
+#define setstream_max(X) info(X+3) 
+#define setstream_width(X) link(X+3) 
+#define setstream_topskip(X) info(X+4) 
+#define setstream_height(X) link(X+4) 
+#define setstream_before(X) info(X+5) 
+#define setstream_after(X) link(X+5)  \
+
+#define stream_node 19
+#define stream_node_size 2
+#define stream_number(X) type(X+1) 
+#define stream_insertion(X) subtype(X+1)  \
+
+#define stream_after_node 20
+#define stream_before_node 21 \
+
+#define xdimen_node 22
+#define xdimen_node_size 4
+#define xdimen_ref_count(X) link(X) 
+#define xdimen_width(X) mem[X+1].sc
+#define xdimen_hfactor(X) mem[X+2].sc
+#define xdimen_vfactor(X) mem[X+3].sc \
 
 #define immediate_code 4
 #define set_language_code 5 \
@@ -1946,9 +1985,9 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define str_503 "fi"
 #define str_504 "or"
 #define str_505 "else"
-#define str_506 "TeXinputs/"
+#define str_506 "TeXinputs:"
 #define TEX_area 506
-#define str_507 "TeXfonts/"
+#define str_507 "TeXfonts:"
 #define TEX_font_area 507
 #define str_508 ".fmt"
 #define format_extension 508
@@ -2117,7 +2156,7 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 
 
 /*:12*//*61:*/
-#line 1489 "dummy.w"
+#line 1462 "dummy.w"
 
 #define put(file)    fwrite(&((file).d),sizeof((file).d),1,(file).f)
 #define get(file)    fread(&((file).d),sizeof((file).d),1,(file).f)
@@ -2144,7 +2183,7 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define wlog_cr         pascal_write(log_file,"\n")
 
 /*:61*//*130:*/
-#line 2666 "dummy.w"
+#line 2642 "dummy.w"
 
 #ifdef DEBUG
 #define incr_dyn_used incr(dyn_used)
@@ -2159,10 +2198,10 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 
 #endif
 
-/*:5*//*692:*/
-#line 13226 "dummy.w"
+/*:5*//*694:*/
+#line 13219 "dummy.w"
 
 #define vpack(...) vpackage(__VA_ARGS__, max_dimen)
 
 
-/*:692*/
+/*:694*/
