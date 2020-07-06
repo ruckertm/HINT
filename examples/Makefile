@@ -1,8 +1,8 @@
 
-TEX=  mfpreface.tex \
+TEX=	mfpreface.tex \
 	bmp.tex png.tex jpg.tex image.tex head.tex \
 	ctex.tex \
-	math.tex
+	math.tex leaders.tex
 
 #leaders.tex
 
@@ -16,15 +16,19 @@ LATEX= ueb2.tex sample2e.tex
 all:  $(LATEX:.tex=.hnt)  $(TEX:.tex=.hnt)
 
 $(TEX:.tex=.hnt): %.hnt: %.tex 
-	hitex $<
+	hitex -m mobile $<
 
 $(LATEX:.tex=.hnt): %.hnt: %.tex 
-	hilatex $<
+	hilatex -m mobile $<
 
 %.HINT: %.hnt
 	../../hint/format/stretch $<
 
+mf.base: modes.mf
+	echo mf.ini | inimf
 
+cmmf.base: modes.mf
+	echo cmmf.ini | inimf
 
 clean:
 	rm -f *.dvi *.hnt *.aux *.log
