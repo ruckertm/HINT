@@ -159,25 +159,25 @@ typedef uint16_t font_index;
 
 typedef uint8_t dvi_index;
 
-/*:616*//*958:*/
-#line 18187 "dummy.w"
+/*:616*//*957:*/
+#line 18178 "dummy.w"
 
 typedef uint16_t trie_pointer;
 
-/*:958*//*963:*/
-#line 18253 "dummy.w"
+/*:957*//*962:*/
+#line 18244 "dummy.w"
 
 typedef uint16_t hyph_pointer;
 
-/*:963*//*1006:*/
-#line 18934 "dummy.w"
+/*:962*//*1005:*/
+#line 18925 "dummy.w"
 
 typedef struct{
 pointer p,t;
 }stream_t;
 
 
-/*:1006*/
+/*:1005*/
 #line 271 "dummy.w"
 
 #endif

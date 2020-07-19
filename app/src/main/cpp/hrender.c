@@ -1,5 +1,5 @@
-/*322:*/
-#line 6127 "hint.w"
+/*326:*/
+#line 6197 "hint.w"
 
 #include <math.h> 
 #include "texextern.h"
@@ -9,37 +9,37 @@
 #include "rendernative.h"
 #include "texdefs.h"
 
-/*265:*/
-#line 4547 "hint.w"
+/*269:*/
+#line 4614 "hint.w"
 
 typedef struct font_s*font_s_ptr;
 extern struct font_s*hget_font(unsigned char f);
-/*:265*//*276:*/
-#line 4871 "hint.w"
+/*:269*//*280:*/
+#line 4938 "hint.w"
 
 extern void render_char(int x,int y,struct font_s*f,int32_t s,uint32_t cc);
-/*:276*/
-#line 6136 "hint.w"
+/*:280*/
+#line 6206 "hint.w"
 
 
-/*255:*/
-#line 4371 "hint.w"
+/*259:*/
+#line 4438 "hint.w"
 
 static bool forward_mode= false,backward_mode= false;
-/*:255*/
-#line 6138 "hint.w"
+/*:259*/
+#line 6208 "hint.w"
 
-/*253:*/
-#line 4322 "hint.w"
+/*257:*/
+#line 4388 "hint.w"
 
 
 uint64_t hint_page_top(uint64_t h)
-{hclear_page();
-if(hbase==NULL)return 0;
-hloc_set(h);
+{if(hbase==NULL)return 0;
 hpos= hstart+(h&0xffffffff);
 if(hpos>=hend)
 return hint_page_bottom(hend-hstart);
+hflush_contribution_list();
+hloc_set(h);
 if(h> 0xffffffff)
 hget_par_node(h>>32);
 hint_forward();
@@ -50,8 +50,8 @@ forward_mode= true;
 backward_mode= false;
 return h;
 }
-/*:253*//*254:*/
-#line 4347 "hint.w"
+/*:257*//*258:*/
+#line 4414 "hint.w"
 
 uint64_t hint_page_get(void)
 {
@@ -69,8 +69,8 @@ return i;
 else
 return hint_page_top(i);
 }
-/*:254*//*256:*/
-#line 4376 "hint.w"
+/*:258*//*260:*/
+#line 4443 "hint.w"
 
 uint64_t hint_next_page(void)
 {if(hbase==NULL)return 0;
@@ -82,17 +82,17 @@ backward_mode= false;
 return hint_page_get();
 }
 else
-{hclear_page();
+{hflush_contribution_list();hpage_init();
 return hint_page();
 }
 }
-/*:256*//*257:*/
-#line 4401 "hint.w"
+/*:260*//*261:*/
+#line 4468 "hint.w"
 
 uint64_t hint_prev_page(void)
 {if(hbase==NULL)return 0;
 if(hloc_prev())
-{hclear_page();
+{hflush_contribution_list();hpage_init();
 return hint_page();
 }
 else if(backward_mode)
@@ -104,12 +104,12 @@ return hint_page_get();
 else
 return hint_page_bottom(hint_page_get());
 }
-/*:257*//*258:*/
-#line 4426 "hint.w"
+/*:261*//*262:*/
+#line 4493 "hint.w"
 
 uint64_t hint_page_bottom(uint64_t h)
-{hclear_page();
-if(hbase==NULL)return 0;
+{if(hbase==NULL)return 0;
+hflush_contribution_list();
 hpos= hstart+(h&0xffffffff);
 if(h> 0xffffffff)
 hteg_par_node(h>>32);
@@ -118,15 +118,15 @@ backward_mode= true;
 forward_mode= false;
 return hint_page_get();
 }
-/*:258*//*259:*/
-#line 4441 "hint.w"
+/*:262*//*263:*/
+#line 4508 "hint.w"
 
 uint64_t hint_page_center(uint64_t h)
 {if(hbase==NULL)return hint_blank();
 QUIT("hint_page_center not yet implemented");
 }
-/*:259*//*260:*/
-#line 4452 "hint.w"
+/*:263*//*264:*/
+#line 4519 "hint.w"
 
 void hint_resize(int px_h,int px_v,double dpi)
 {static int old_px_h= 0,old_px_v= 0;
@@ -135,20 +135,20 @@ nativeSetSize(px_h,px_v,dpi);
 if(old_px_h==px_h&&old_px_v==px_v&&old_dpi==dpi)return;
 old_px_h= px_h;old_px_v= px_v;old_dpi= dpi;
 hloc_clear();
-hclear_page();
+hflush_contribution_list();hpage_init();
 forward_mode= false;
 backward_mode= false;
 }
-/*:260*//*278:*/
-#line 4885 "hint.w"
+/*:264*//*282:*/
+#line 4952 "hint.w"
 
 static void render_rule(int x,int y,int w,int h)
 {if(w<=0)return;
 if(h<=0)return;
 nativeRule(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h));
 }
-/*:278*//*279:*/
-#line 4897 "hint.w"
+/*:282*//*283:*/
+#line 4964 "hint.w"
 
 void render_image(int x,int y,int w,int h,uint32_t n)
 {
@@ -158,8 +158,8 @@ hget_section(n);
 nativeImage(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),hstart,hend);
 hpos= spos;hstart= sstart;hend= send;
 }
-/*:279*//*280:*/
-#line 4921 "hint.w"
+/*:283*//*284:*/
+#line 4988 "hint.w"
 
 static scaled cur_h,cur_v;
 static scaled rule_ht,rule_dp,rule_wd;
@@ -530,15 +530,15 @@ p= link(p);
 }
 }
 
-/*:280*//*281:*/
-#line 5298 "hint.w"
+/*:284*//*285:*/
+#line 5365 "hint.w"
 
 uint64_t hint_blank(void)
 {nativeBlank();
 return 0;
 }
-/*:281*//*282:*/
-#line 5307 "hint.w"
+/*:285*//*286:*/
+#line 5374 "hint.w"
 
 
 void hint_render(void)
@@ -552,7 +552,7 @@ vlist_render(streams[0].p);
 else
 hlist_render(streams[0].p);
 }
-/*:282*/
-#line 6139 "hint.w"
+/*:286*/
+#line 6209 "hint.w"
 
-/*:322*/
+/*:326*/

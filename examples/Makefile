@@ -4,6 +4,7 @@ TEX=	mfpreface.tex \
 	ctex.tex \
 	math.tex leaders.tex
 
+TEXFLAGS = -m mobile -e -f
 #leaders.tex
 
 #	simple.tex fonts.tex paging.tex hset.tex vset.tex vpack.tex baseline.tex \
@@ -16,10 +17,10 @@ LATEX= ueb2.tex sample2e.tex
 all:  $(LATEX:.tex=.hnt)  $(TEX:.tex=.hnt)
 
 $(TEX:.tex=.hnt): %.hnt: %.tex 
-	hitex -m mobile $<
+	hitex $(TEXFLAGS) $<
 
 $(LATEX:.tex=.hnt): %.hnt: %.tex 
-	hilatex -m mobile $<
+	hilatex $(TEXFLAGS) $<
 
 %.HINT: %.hnt
 	../../hint/format/stretch $<

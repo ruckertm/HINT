@@ -27,8 +27,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 1997 ${}$}
-\def\lastdate{${}$Date: 2020-06-25 18:52:18 +0200 (Thu, 25 Jun 2020) ${}$}
+\def\lastrevision{${}$Revision: 2020 ${}$}
+\def\lastdate{${}$Date: 2020-07-19 19:34:43 +0200 (Sun, 19 Jul 2020) ${}$}
 
 \input titlepage.tex
 
@@ -126,7 +126,7 @@ void hget_def_node(void)
     case font_kind: hget_font_def(a,n); break;
     case int_kind: integer_def[n]=hget_integer_def(a); break;
     case dimen_kind: dimen_def[n]=hget_dimen_def(); break;
-    case xdimen_kind: hget_xdimen_def(a,&(xdimen_def[n])); break;
+    case xdimen_kind: hget_xdimen_def(INFO(a),&(xdimen_def[n])); break;
     case baseline_kind: hget_baseline_def(a,n); break;
     case glue_kind: pointer_def[glue_kind][n]=hget_glue_def(a); break;
     case param_kind:  param_def[n]=hget_param_list(a); break;
@@ -177,8 +177,6 @@ void hget_definition_section(void)
   while (hpos<hend) @/
     hget_def_node();
   hget_font_metrics();
-  page_v=hvsize=dimen_def[vsize_dimen_no];
-  page_h=hhsize=dimen_def[hsize_dimen_no];
   @<initialize the default page template@>@;
 }
 @
@@ -323,15 +321,21 @@ void print_xdimen(int i)
 \subsubsection{Glues}
 
 @<\HINT/ auxiliar functions@>=
-static pointer hget_glue_def(uint8_t a)
-{ pointer p;
-  HGET_GLUE(INFO(a));
-  return p;
-}
 
 static pointer hget_glue_ref(uint8_t n)
 { @+REF_RNG(glue_kind,n);
   return  pointer_def[glue_kind][n];
+}
+
+static pointer hget_glue_def(uint8_t a)
+{ pointer p;
+  if (INFO(a)==b000)
+  { p= hget_glue_ref(HGET8);
+    add_glue_ref(p);
+  }
+  else
+  { HGET_GLUE(INFO(a)); }
+  return p;
 }
 
 pointer hget_param_glue(uint8_t n)
@@ -570,16 +574,16 @@ extern int32_t font_at_size(uint8_t f);
 
 \subsection{Parameter Lists}\label{getparamlist}
 There are three types of data that we allow in parameter lists: integers, dimensions,
-and glue. Hence, for each parameter, we store the parameter number |n|, its kind |k|, and its value |i|, |d|, or |g|.
+and glue. Hence, for each parameter, we store the parameter number |n|, its kind |k|, and its value |v|.
+Since all values are integer types, a single integer type, large enough for |int32_t|, |scaled| and |pointer| values
+is sufficient. 
 To form linked lists of parameter definitions, we add a |next| pointer. The variable |param_def| contains the dynamically allocated 
 array of lists of parameter definitions.
 @<\HINT/ types@>=
 typedef struct param_t {
-uint8_t n,k;
-union {@+ int32_t i;@+
-        scaled  d;@+
-        pointer g;@+};
-     } param_t;@#
+uint8_t n,k;@+
+int32_t v;@+
+      } param_t;@#
 
 typedef struct param_def_t {
 struct param_def_t *next;@+
@@ -635,9 +639,9 @@ static param_def_t *hget_param_list(uint8_t a)
     q->n=HGET8;
     q->k=KIND(a);
     DBG(DBGTAGS,"Defining %s %d\n", definition_name[KIND(a)],q->n);
-    if (KIND(a)==int_kind) q->i=hget_integer_def(a);
-    else if (KIND(a)==dimen_kind) q->d=hget_dimen_def();
-    else if (KIND(a)==glue_kind) q->g=hget_glue_def(a);
+    if (KIND(a)==int_kind) q->v=hget_integer_def(a);
+    else if (KIND(a)==dimen_kind) q->v=hget_dimen_def();
+    else if (KIND(a)==glue_kind) q->v=hget_glue_def(a);
     else TAGERR(a);
     @<read and check the end byte |z|@>@;
     r->next=p;
@@ -674,27 +678,40 @@ static void hget_size_boundary(info_t info);
 @
 
 Finaly, here are two functions that set and restore global parameters
-based on  a parameter list.
+based on a parameter list.
+Parameter lists are actually not nested, because every parameter list records
+the differences of the parameter settings compared to the settings in the
+definition section. Still there are situations where we want to combine two
+parameter settings. The parameters for displayed equations and for line breaking
+of a paragraph are disjoint sets. Since displayed equations are embedded in paragraphs,
+we want to set and restore the parameter settings for the displayed equation
+without affecting the settings for line breaking. To do so, we use the special kind value |0xFF|
+to record the boundary between two sets of parameters on the |par_save| stack.
 
 @<\HINT/ auxiliar functions@>=
 #define MAX_SAVE 100
+#define SAVE_BOUNDARY 0xFF
 static param_t par_save[MAX_SAVE];
-static int par_save_ptr;
+static int par_save_ptr=0;
+
+static void hset_param(uint8_t k, uint8_t n, int32_t v)
+{ param_t *q;
+  if (par_save_ptr>= MAX_SAVE) QUIT("Parameter save stack overflow");
+  q=&(par_save[par_save_ptr++]);
+  q->k=k;
+  q->n=n;
+  if (q->k==int_kind)
+  { q->v= integer_def[q->n];@+ integer_def[q->n] =v; }
+  else if (q->k==dimen_kind)
+  { q->v=  dimen_def[q->n];@+ dimen_def[q->n]=(scaled)v; }
+  else if (q->k==glue_kind)
+  { q->v=  pointer_def[glue_kind][q->n];@+ pointer_def[glue_kind][q->n]=(pointer)v; }
+}
 
 void hset_param_list(param_def_t *p)
-{ par_save_ptr=0;
+{ hset_param(SAVE_BOUNDARY,0,0);
   while (p!=NULL)
-  { param_t *q;
-    if (par_save_ptr>= MAX_SAVE) QUIT("Parameter save stack overflow");
-    q=&(par_save[par_save_ptr++]);
-    q->k=p->p.k;
-    q->n=p->p.n;
-    if (q->k==int_kind)
-    { q->i= integer_def[q->n];@+ integer_def[q->n] =p->p.i; }
-    else if (q->k==dimen_kind)
-    { q->d=  dimen_def[q->n];@+ dimen_def[q->n]=p->p.d; }
-    else if (q->k==glue_kind)
-    { q->g=  pointer_def[glue_kind][q->n];@+ pointer_def[glue_kind][q->n]=p->p.g; }
+  { hset_param(p->p.k,p->p.n,p->p.v);
     p=p->next;
   }
 }
@@ -704,15 +721,19 @@ void hrestore_param_list(void)
   while (par_save_ptr>0)
   { param_t *q;
     q=&(par_save[--par_save_ptr]);
+    if (q->k==SAVE_BOUNDARY) return;
     if (q->k==int_kind)
-    { integer_def[q->n] =q->i; }
+    { integer_def[q->n] =q->v; }
     else if (q->k==dimen_kind)
-    { dimen_def[q->n]=q->d; }
+    { dimen_def[q->n]=(scaled)q->v; }
     else if (q->k==glue_kind)
-    { pointer_def[glue_kind][q->n]=q->g; }
-  }
-  par_save_ptr=0;
+    { pointer_def[glue_kind][q->n]=(pointer)q->v; }
+  } 
+  QUIT("Parameter save stack flow");
 }
+@
+@<\TeX\ |extern|@>=
+extern void hrestore_param_list(void);
 @
 
 \subsection{Page Ranges}
@@ -1242,10 +1263,10 @@ because |hsize| and |vsize| are known.
 
 @<\HINT/ auxiliar functions@>=
 
-static void hget_xdimen_def(uint8_t a, xdimen_t *x)
-{ switch(a)
+static void hget_xdimen_def(info_t i, xdimen_t *x)
+{ switch(i)
   { 
-    case TAG(xdimen_kind,b000): 
+    case b000: 
     { int n=HGET8;
      @+REF_RNG(xdimen_kind,n);
      x->w=xdimen_def[n].w;
@@ -1253,21 +1274,20 @@ static void hget_xdimen_def(uint8_t a, xdimen_t *x)
      x->v=xdimen_def[n].v;
      break;
     }  
-    case TAG(xdimen_kind,b001): HGET_XDIMEN(b001,*x);@+break;
-    case TAG(xdimen_kind,b010): HGET_XDIMEN(b010,*x);@+break;
-    case TAG(xdimen_kind,b011): HGET_XDIMEN(b011,*x);@+break;
-    case TAG(xdimen_kind,b100): HGET_XDIMEN(b100,*x);@+break;
-    case TAG(xdimen_kind,b101): HGET_XDIMEN(b101,*x);@+break;
-    case TAG(xdimen_kind,b110): HGET_XDIMEN(b110,*x);@+break;
-    case TAG(xdimen_kind,b111): HGET_XDIMEN(b111,*x);@+break;
+    case b001: HGET_XDIMEN(b001,*x);@+break;
+    case b010: HGET_XDIMEN(b010,*x);@+break;
+    case b011: HGET_XDIMEN(b011,*x);@+break;
+    case b100: HGET_XDIMEN(b100,*x);@+break;
+    case b101: HGET_XDIMEN(b101,*x);@+break;
+    case b110: HGET_XDIMEN(b110,*x);@+break;
+    case b111: HGET_XDIMEN(b111,*x);@+break;
     default:
      x->w=0;x->h=x->v=0.0;
-     QUIT("Extent expected got [%s,%d]",NAME(a),INFO(a));
   }
 }
-static scaled hget_xdimen(uint8_t a)
+static scaled hget_xdimen(info_t i)
 { @+xdimen_t x;
-  hget_xdimen_def(a, &x);
+  hget_xdimen_def(i, &x);
   return  xdimen(&x);
  }
  
@@ -1275,7 +1295,7 @@ static scaled hget_xdimen_node(void)
 { @+scaled x=0;
   @<read the start byte |a|@>@;
   if (KIND(a)==xdimen_kind)
-    x=hget_xdimen(a);
+    x=hget_xdimen(INFO(a));
   else
      QUIT("Extent expected at 0x%x got %s",node_pos,NAME(a));
   @<read and check the end byte |z|@>@;
@@ -1285,7 +1305,7 @@ static scaled hget_xdimen_node(void)
 static void hget_xdimen_def_node(xdimen_t *x)
 { @<read the start byte |a|@>@;
   if (KIND(a)==xdimen_kind)
-    hget_xdimen_def(a,x);
+    hget_xdimen_def(INFO(a),x);
   else
      QUIT("Extent expected at 0x%x got %s",node_pos,NAME(a));
   @<read and check the end byte |z|@>@;
@@ -1433,61 +1453,59 @@ case TAG(language_kind,7): @+break;
 
 @<GET macros@>=
 #define @[HGET_RULE(I)@]@/\
-{ pointer p=new_rule();\
+pointer p=new_rule();\
 if ((I)&b100) HGET32(height(p)); @+else height(p)=null_flag;\
 if ((I)&b010) HGET32(depth(p)); @+else depth(p)=null_flag;\
-if ((I)&b001) HGET32(width(p)); @+else width(p)=null_flag;\
-tail_append(p);}
+if ((I)&b001) HGET32(width(p)); @+else width(p)=null_flag;
 @
 
 
 @<TEG macros@>=
 #define @[HTEG_RULE(I)@]@/\
-{ pointer p=new_rule();\
+pointer p=new_rule();\
 if ((I)&b001) HTEG32(width(p)); @+else width(p)=null_flag;\
 if ((I)&b010) HTEG32(depth(p)); @+else depth(p)=null_flag;\
-if ((I)&b100) HTEG32(height(p)); @+else height(p)=null_flag;\
-tail_append(p);}
+if ((I)&b100) HTEG32(height(p)); @+else height(p)=null_flag;
 @
 
 @<cases to get content@>=
 case TAG(rule_kind,b000): @+ tail_append(hget_rule_ref(HGET8));	prev_depth=ignore_depth; @+break;
-case TAG(rule_kind,b011): @+ HGET_RULE(b011); 	prev_depth=ignore_depth; break;
-case TAG(rule_kind,b101): @+ HGET_RULE(b101);	prev_depth=ignore_depth; break;
-case TAG(rule_kind,b001): @+ HGET_RULE(b001);	prev_depth=ignore_depth; break;
-case TAG(rule_kind,b110): @+ HGET_RULE(b110);	prev_depth=ignore_depth; break;
-case TAG(rule_kind,b111): @+ HGET_RULE(b111);	prev_depth=ignore_depth; break;
+case TAG(rule_kind,b011): @+{@+ HGET_RULE(b011); tail_append(p); prev_depth=ignore_depth;@+} break;
+case TAG(rule_kind,b101): @+{@+ HGET_RULE(b101); tail_append(p); prev_depth=ignore_depth;@+} break;
+case TAG(rule_kind,b001): @+{@+ HGET_RULE(b001); tail_append(p); prev_depth=ignore_depth;@+} break;
+case TAG(rule_kind,b110): @+{@+ HGET_RULE(b110); tail_append(p); prev_depth=ignore_depth;@+} break;
+case TAG(rule_kind,b111): @+{@+ HGET_RULE(b111); tail_append(p); prev_depth=ignore_depth;@+} break;
 @
 
 @<cases to teg content@>=
 case TAG(rule_kind,b000): @+ tail_append(hget_rule_ref(HTEG8));	prev_height=ignore_depth; @+break;
-case TAG(rule_kind,b011): @+ HTEG_RULE(b011); 	prev_height=ignore_depth; break;
-case TAG(rule_kind,b101): @+ HTEG_RULE(b101);	prev_height=ignore_depth; break;
-case TAG(rule_kind,b001): @+ HTEG_RULE(b001);	prev_height=ignore_depth; break;
-case TAG(rule_kind,b110): @+ HTEG_RULE(b110);	prev_height=ignore_depth; break;
-case TAG(rule_kind,b111): @+ HTEG_RULE(b111);	prev_height=ignore_depth; break;
+case TAG(rule_kind,b011): @+{@+ HTEG_RULE(b011); tail_append(p); prev_height=ignore_depth;@+} break;
+case TAG(rule_kind,b101): @+{@+ HTEG_RULE(b101); tail_append(p); prev_height=ignore_depth;@+} break;
+case TAG(rule_kind,b001): @+{@+ HTEG_RULE(b001); tail_append(p); prev_height=ignore_depth;@+} break;
+case TAG(rule_kind,b110): @+{@+ HTEG_RULE(b110); tail_append(p); prev_height=ignore_depth;@+} break;
+case TAG(rule_kind,b111): @+{@+ HTEG_RULE(b111); tail_append(p); prev_height=ignore_depth;@+} break;
 @
 
 
 @<get functions@>=
 pointer hget_rule_node(void)
-{ @+ pointer p=null;
+{ @+ pointer q=null;
   @<read the start byte |a|@>@;
-  if (KIND(a)==rule_kind) { HGET_RULE(INFO(a));}
+  if (KIND(a)==rule_kind) { HGET_RULE(INFO(a));q=p;}
   else  QUIT("Rule expected at 0x%x got %s",node_pos,NAME(a));
   @<read and check the end byte |z|@>@;
-  return p;
+  return q;
 }
 @
 
 @<\HINT/ auxiliar functions@>=
 static pointer hteg_rule_node(void)
-{ @+ pointer p=null;
+{ @+ pointer q=null;
   @<read the end byte |z|@>@;
-  if (KIND(z)==rule_kind) { HTEG_RULE(INFO(z));}
+  if (KIND(z)==rule_kind) { HTEG_RULE(INFO(z));q=p;}
   else  QUIT("Rule expected at 0x%x got %s",node_pos,NAME(z));
   @<read and check the start byte |a|@>@;
-  return p;
+  return q;
 }
 @
 
@@ -1541,19 +1559,29 @@ case TAG(glue_kind,b110): {@+pointer p;@+HTEG_GLUE(b110);@+  tail_append(spec2gl
 case TAG(glue_kind,b111): {@+pointer p;@+HTEG_GLUE(b111);@+  tail_append(spec2glue(p));@+}@+break;
 @
 
+The function |hget_glue_spec| returns a new pointer to a glue specification.
+\TeX\ shares glue specification between different glue nodes and uses a reference count
+to know when to deallocate it. So it is important to manage the reference counts correctly.
+If no glue specification is found, a reference to the |zero_glue| is returned. Even in this
+case, it is important to maintain a correct reference count.
+Once the reference count is correct, the function |spec2glue| can be used to create a
+glue node using the new pointer.
 
 @<\HINT/ auxiliar functions@>=
 static pointer hget_glue_spec(void)
 { @+pointer p=null;
   uint8_t a,z; /* the start and the end byte*/
-  if (hpos>=hend) return null;
-  if (KIND(*hpos)!=glue_kind) return null;
-  node_pos=hpos-hstart;
-  HGETTAG(a);
-  if (INFO(a)==b000) p=hget_glue_ref(HGET8);
+  if (hpos>=hend || KIND(*hpos)!=glue_kind) 
+  { p=zero_glue; incr(glue_ref_count(p)); }
   else
-  { @+HGET_GLUE(INFO(a));@+}
-  @<read and check the end byte |z|@>@;
+  { node_pos=hpos-hstart;
+    HGETTAG(a);
+    if (INFO(a)==b000) 
+    { p=hget_glue_ref(HGET8); incr(glue_ref_count(p)); }    
+    else
+    { @+HGET_GLUE(INFO(a));@+}
+    @<read and check the end byte |z|@>@;
+  }
   return p;
 }
 
@@ -1565,9 +1593,7 @@ return p;
 }
 
 static pointer hget_glue_node(void)
-{ @+pointer p=hget_glue_spec();
-  if (p!=null) return spec2glue(p);
-  else return new_glue(zero_glue);
+{ return spec2glue(hget_glue_spec());
 }
 @
 
@@ -2428,7 +2454,7 @@ pointer hteg_hyphen_node(void)
   param_def_t *q;\
   if ((I)&b100) x=hget_xdimen_node(); else x=hget_xdimen_ref(HGET8);\
   if ((I)&b010) q=hget_param_list_node(); else q=hget_param_list_ref(HGET8);\
-  hget_paragraph(x,q,0);\
+  hget_paragraph(x,0,q);\
 }
 @
 
@@ -2584,7 +2610,6 @@ pointer hget_paragraph_all(scaled x)
     }
     else
     { pointer par_ptr=link(head);
-      add_par_fill_skip();
       pop_nest();      
       store_map(par_ptr,node_pos,0); 
       return par_ptr;
@@ -2642,7 +2667,6 @@ pointer hget_paragraph_final(scaled x, uint8_t *from)
     }
     else
     { pointer par_ptr=link(head);
-      add_par_fill_skip();
       pop_nest();      
       store_map(par_ptr,node_pos,0); 
       return par_ptr;
@@ -2712,10 +2736,10 @@ pointer hget_paragraph_initial(scaled x, uint8_t *to)
 }
 @
 
-\TeX\ normaly ends a paragraph  with a glue node by calling |add_par_fill_skip|,
-and it relies on this paragraph ending bceause it does not check for the end
+\TeX\ normaly ends a paragraph  with a glue node by adding a parfill glue,
+and it relies on this paragraph ending because it does not check for the end
 of the list while processing character nodes. 
-we generate the initial part of a paragraph because we need a page that ends
+We generate the initial part of a paragraph because we need a page that ends
 after that initial part of the paragraph. How to do that nicely is an 
 open question. Here, we just add a penalty and a zero glue.
 
@@ -2730,11 +2754,50 @@ open question. Here, we just add a penalty and a zero glue.
 @
 
 
+With every paragraph the \HINT/ file specifies a parameter list containing
+those parameters of the line breaking algorithm that differ from the
+parameter values in the definition section. These changes are relevant for line
+breaking only, not for parsing the paragraphs content. On the contrary,
+any glue value that might occur in the paragraph can refere to one of the
+predefined glues in the definition section and the changes needed for line breaking
+should not influnce these glues.
+One difficulty arrises from displayed equations that are embedded inside
+a paragraph: they interrupt the paragraph and call the line breaking routine
+for the paragraph-so-far before placing the formula and continuing with the
+remainder of the paragraph. Currently there is only one parameter list
+for the entire paragraph with possibley multiple calls to |line_break|.
+And while the |line_break| routine is never nested, paragraphs can be nested.
+This makes it necessary to have access to the innermost paragraphs parameter list
+while parsing the paragraphs content just in case there are one ore more
+displayed equations inside.
+When we parse a paragraph we put the current paragraph parameters in a global
+variable, and save a possible outer parameter list in a local variable to restore
+the global varaiable once the paragraph is finished.
+
+@<\HINT/ variables@>=
+static param_def_t *line_break_params=NULL;
+@
+
+We provide a functions to set the parameters from this special variable,
+thus avoiding the export of the |param_def_t| type.
+
+@<\HINT/ functions@>=
+void set_line_break_params(void)
+{ hset_param_list(line_break_params);
+}
+@
+@<\TeX\ |extern|@>=
+extern void set_line_break_params(void);
+@
+
+
 @<\HINT/ auxiliar functions@>=
-pointer hget_paragraph(scaled x, param_def_t *q, uint32_t offset)
+pointer hget_paragraph(scaled x, uint32_t offset, param_def_t *q)
 { @+
   pointer p, par_head;
+  param_def_t *save_lbp = line_break_params;
   par_head=tail; /* here the paragraph gets added */
+  line_break_params=q;
   if (offset==0)
   { prev_graf=0;
     p=hget_paragraph_all(x);
@@ -2743,10 +2806,9 @@ pointer hget_paragraph(scaled x, param_def_t *q, uint32_t offset)
   { prev_graf=3; /* wild guess */
     p=hget_paragraph_final(x,hstart+node_pos+offset);
   }
-  hset_param_list(q); 
-  if (p!=null) 
-      line_break(hget_integer_ref(widow_penalty_no), p);
-  hrestore_param_list();
+  if (p!=null)
+    line_break(hget_integer_ref(widow_penalty_no), p);
+  line_break_params=save_lbp;  
   return par_head;
 }
 
@@ -2757,7 +2819,7 @@ void hget_par_node(uint32_t offset)
   node_pos=(hpos-hstart)-1;
   if (INFO(a)&b100) x=hget_xdimen_node(); else x=hget_xdimen_ref(HGET8);
   if (INFO(a)&b010) q=hget_param_list_node(); else q=hget_param_list_ref(HGET8);
-  hget_paragraph(x,q,offset);
+  hget_paragraph(x,offset,q);
   @<read and check the end byte |z|@>@;
 }
 @
@@ -2796,7 +2858,7 @@ void hteg_paragraph(info_t i)
   node_pos=par_start-hstart-1;
   hpos=list_start;
   cur_list.bs_pos=NULL;
-  par_head=hget_paragraph(x,q,0);
+  par_head=hget_paragraph(x,0,q);
   @<Turn the paragraph upside down@>@;
   hpos=par_start;
 }
@@ -2834,11 +2896,10 @@ At the end, we update the |tail| pointer and the |prev_height|.
 
 
 
-@<get functions@>=
-
+@<teg functions@>=
 void hteg_par_node(uint32_t offset)
 { @+ scaled x=0;
-  param_def_t *q;
+  param_def_t *save_lbp = line_break_params;
   pointer p;
   pointer par_head=tail; /* here the paragraph gets added */
   uint8_t *bs_pos=cur_list.bs_pos; /* the possible baseline skip */
@@ -2846,18 +2907,17 @@ void hteg_par_node(uint32_t offset)
   @<read the start byte |a|@>@;
   node_pos=(hpos-hstart)-1;
   if (INFO(a)&b100) x=hget_xdimen_node(); else x=hget_xdimen_ref(HGET8);
-  if (INFO(a)&b010) q=hget_param_list_node(); else q=hget_param_list_ref(HGET8);  
+  if (INFO(a)&b010) line_break_params=hget_param_list_node(); else line_break_params=hget_param_list_ref(HGET8);
   prev_graf=0;
   p=hget_paragraph_initial(x,hstart+node_pos+offset);
   @<read and check the end byte |z|@>@;
   cur_list.bs_pos=NULL; 
-  hset_param_list(q); 
   if (p!=null) 
     line_break(hget_integer_ref(widow_penalty_no), p);   
   if (par_head!=tail)
     @<Turn the paragraph upside down@>@;    
-  hrestore_param_list();
   hpos=hstart+node_pos;
+  line_break_params=save_lbp;  
 }
 
 @
@@ -3033,18 +3093,23 @@ down, \HINT/ assigns stream numbers in the order of appearance starting at 1
 and counting up. We partly reverse this process here by mapping the
 stream number $n$ to the insertion number $255-n$.
 
-We start with a function to obtain the vertical list that contains
-the inserted material.
+We start with a function to set fields of the insertion node from a
+parameter list. There are two cases to distinguish: If the parameter list is
+given by a reference to the definition section, we have to increase
+the reference counts for glues. If the parameter list is given explicitely,
+the newly created glue nodes already have the correct reference count.
+The function parameter  |f| is set to |true| in the latter case.
+
 @<\HINT/ auxiliar functions@>=
-void hset_stream_params(pointer p,bool f, param_def_t *q)
+static void hset_stream_params(pointer p,bool f, param_def_t *q)
 { param_def_t *r;
   pointer s;
   while (q!=null)
   { r=q;
-    if (q->p.k==int_kind && q->p.n==floating_penalty_no) float_cost(p)=q->p.i;
-    else if (q->p.k==dimen_kind && q->p.n==split_max_depth_no) depth(p)=q->p.d;
+    if (q->p.k==int_kind && q->p.n==floating_penalty_no) float_cost(p)=q->p.v;
+    else if (q->p.k==dimen_kind && q->p.n==split_max_depth_no) depth(p)=(scaled)q->p.v;
     else if (q->p.k==glue_kind && q->p.n==split_top_skip_no)  
-    { split_top_ptr(p)=q->p.g; if (!f) add_glue_ref(q->p.g); }
+    { split_top_ptr(p)=(pointer)q->p.v; if (!f) add_glue_ref(split_top_ptr(p)); }
     else QUIT("Unexpected parameter in stream");
     q=q->next;
     if (f) free(r);
@@ -3303,7 +3368,6 @@ Here are the declarations we need to be extern:
 @<\TeX\ |extern|@>=
 extern scaled *const active_width;   /*distance from first active node to~|cur_p|*/ 
 extern void line_break(int final_widow_penalty, pointer par_ptr);
-extern void add_par_fill_skip(void);
 extern pointer @!just_box; /*the |hlist_node| for the last line of the new paragraph*/ 
 extern pointer @!adjust_tail; /*tail of adjustment list*/ 
 extern void append_to_vlist(pointer @!b, uint32_t offset);
@@ -3387,8 +3451,7 @@ a new page.
 @<\HINT/ functions@>=
 void hpage_init(void)
 { int i;
-  /* should I clear the streams greater 0 ? */
- if (streams==NULL||cur_page==NULL) return;
+  if (streams==NULL||cur_page==NULL) return;
    for (i=0; i<=max_ref[stream_kind]; i++)
     if (streams[i].p!=null) 
     { flush_node_list(streams[i].p);
@@ -3409,21 +3472,20 @@ void hpage_init(void)
 @
 
 When the viewer does not follow the natural sequence of pages but wants to
-move to an arbitrary location in the \HINT/ file, the contribution list needs to be cleared. 
+move to an arbitrary location in the \HINT/ file, the contribution list needs to be flushed. 
 The rest is done by |hpage_init|.
 
 @<\HINT/ functions@>=
-void hclear_page(void)
+void hflush_contribution_list(void)
 { if (link(contrib_head)!=null)
   { flush_node_list(link(contrib_head));
     link(contrib_head)=null; tail=contrib_head; 
   }
-  hpage_init();
 }
 @
 
 @<\HINT/ |extern|@>=
-extern void hclear_page(void);
+extern void hflush_contribution_list(void);
 @
 
 \subsection{Insertions}\label{texinsertions}
@@ -3493,16 +3555,11 @@ int @!b, @!c; /*badness and cost of current page*/
 int @!pi; /*penalty to be added to the badness*/ 
 if (link(contrib_head)==null) return false;
 @/do@+{ p=link(contrib_head);@/
-@<Prepend node |p| to the current page; if it is time for a page break, |fire_up| the renderer@>;
-}@+ while (!(link(contrib_head)==null));
+@<Prepend node |p| to the current page; if it is time for a page break, fill the page template and return |true|@>;
+}@+ while (link(contrib_head)!=null);@/
 tail=contrib_head;
 return false;
 } 
-@
-
-@<\HINT/ variables@>=
-static scaled page_height;
-static scaled top_so_far[8];
 @
 
 We deleted references to |output_active| and output routines as well as the code to update
@@ -3543,6 +3600,11 @@ that is supposed to fill the page. But \TeX\ discards penalties, glues and kerns
 page. So we do not incorporate these nodes immediately into the |page_so_far| variables
 but keep track of them in the |top_so_far| variables. Whenever we add a node that makes the
 accumulated nodes at the top non-discardable, we add them to the |page_so_far| variables.
+
+@<\HINT/ variables@>=
+static scaled page_height;
+static scaled top_so_far[8];
+@
 
 Now we consider how to prepend the different types of nodes.
 We start with nodes that have height and depth.
@@ -4114,7 +4176,7 @@ void hint_begin(void)
 
 void hint_end(void)
 { if (!hint_is_open) return;
-  hclear_page();
+  hflush_contribution_list(); hpage_init();
   flush_node_list(link(page_head));
   list_leaks();
   hint_unmap();
@@ -4150,9 +4212,10 @@ bool hint_forward(void)
 return false;
 }
 @
-The function sets the |forward_mode| variable to |true| to indicate that the current page
-was produced in forward mode.
-Then the function |hpage_init| returns the ``old'' current page, stored in |streams[0].p|, to
+This function attempts to produce a page in forward mode. If successful it returns |true|
+and the caller can set the |forward_mode| variable to |true| to indicate that the current page
+was produced in forward mode. If unsuccessfull, it returns false.
+First the function |hpage_init| returns the ``old'' current page, stored in |streams[0].p|, to
 free storage and initializes the variables that control the page building process.
 It is then assumed that any material still on the contribution list should fill the
 new page top to bottom. The call to |hbuild_page| will move any such material 
@@ -4190,10 +4253,10 @@ bool hint_backward(void)
   return false;
 }
 @
-Here the |backward_mode| variable is set to |true|. It imples that the material in the contribution list
+Here it is assumed that the material in the contribution list
 belongs to the bottom of the preceeding page and |hpos| will
 indicate where parsing should contine when producing the previous page.
-Again in the location cache are at least two enties: the top of the current page and the top of the next page.
+In the location cache there are at least two enties: the top of the current page and the top of the next page.
 
 @<\HINT/ |extern|@>=
 extern bool hint_forward(void);
@@ -4201,7 +4264,7 @@ extern bool hint_backward(void);
 @
 
 When the page builder has reached the end of the \HINT/ file, it must make sure that
-the material that might still be in the contribution list gets flushed out.
+the material that still is in the contribution list gets flushed out.
 To do so the function |flush_pages| adds some space and a large negative penalty.
 Calling one of the previous functions will then deliver the remaining pages.
 
@@ -4245,7 +4308,7 @@ the page: the main body of text and floating material like footnotes
 or illustrations.  To make a nice looking page, we need to combine the
 material properly and put margins around all that.
 
-The next function is the default function to compute the margins.
+The next function computes the margins.
 Given the horizontal and vertical dimensions of the page as |page_h|
 and |page_v|, it computes the horizontal and vertical dimensions of
 the main body of text as well as the offset of its top/left
@@ -4255,7 +4318,7 @@ position. The dimensions are given in scaled points.
 int page_v, page_h, offset_v, offset_h;
 @
 
-
+If no page template is defined, a default algorithm is used.
 The formula use here will result in a 1 inch margin for a 
 letter size page---that's the old default of plain \TeX---and decreases the magins for smaller pages
 until the margin becomes zero for a page that is merely 1 inch wide.
@@ -4287,9 +4350,9 @@ until the margin becomes zero for a page that is merely 1 inch wide.
 
 
 @
-A more sophisticated page composition can be achived with page templates (which are not yet
-implemented). Here is the build-in page template number 0 which attaches the margins to
-the box contructed by the page builder.
+A more sophisticated page composition can be achived with page templates.
+Here is the build-in page template number 0 which attaches the margins just computed
+to the box constructed by the page builder.
 
 @<\HINT/ auxiliar functions@>=
 static void houtput_template0(void)
@@ -4312,22 +4375,25 @@ static void houtput_template0(void)
 The basic capability of \HINT/ is producing a page that starts at a given position in the
 \HINT/ file. The function |hint_page_top| provides this capability.
 If successful, it stores a pointer to the page it created in the variable |streams[0].p|.
-It starts by clearing the memory from all traces left from building previous pages
-and computes |hhsize| and |hvsize|.
+As long as this pointer is not |null| it can be used to render the page or search
+the page for content.
+
+After a few checks, |hint_page_top| starts by clearing the contributions list 
+from all traces left from building previous pages and computes |hhsize| and |hvsize|.
 Then it parses a partial paragraph---if necessary---and calls |hint_forward| to build the page.
-It attaches the margins and renders it.
+
 As all functions in this section, it returns the location of the new current page.
 The viewer might store this location to be able to return to this page at a later time.
 
 @<render functions@>=
 
 uint64_t hint_page_top(uint64_t h)
-{ hclear_page();
-  if (hbase==NULL) return 0;
-  hloc_set(h);
+{ if (hbase==NULL) return 0;
   hpos=hstart+(h&0xffffffff);
   if (hpos>=hend)
     return hint_page_bottom(hend-hstart);
+  hflush_contribution_list();
+  hloc_set(h);
   if (h>0xffffffff)
     hget_par_node(h>>32);
   hint_forward();
@@ -4340,9 +4406,10 @@ uint64_t hint_page_top(uint64_t h)
 }
 @
 
-Using the previous function, we implement |hint_page| which rerenders the current page
-possibly in a different format.
-All we need to so is a function to obtain its top position: |hint_page_get|.
+Using the previous function, we implement |hint_page| which rerenders the current page.
+If |streams[0].p!=null| a valid current page still exists and nothing needs to be done.
+If |streams[0].p==null|, we obtain the current pages top position using |hint_page_get|
+and pass the position to |hint_page_top|.
 
 @<render functions@>=
 uint64_t hint_page_get(void)
@@ -4371,8 +4438,8 @@ to keep track of the direction.
 @<render variables@>=
 static bool forward_mode=false, backward_mode=false;
 @
-If we are neither in forward nor backward mode, there is no current page and hence no next page.
-In this case, we just render the first page.
+If simply moving forward does not work---we might not know the position of the next page,
+or are not in forward mode, or we might be at the end of the file---we just rerender the current page.
 @<render functions@>=
 uint64_t hint_next_page(void)
 { if (hbase==NULL) return 0;
@@ -4384,7 +4451,7 @@ uint64_t hint_next_page(void)
     return hint_page_get();
   }
   else
-  { hclear_page();
+  { hflush_contribution_list(); hpage_init();
     return hint_page();
   }
 }
@@ -4402,7 +4469,7 @@ throw away the information in the contribution list and we call |hint_backward|.
 uint64_t hint_prev_page(void)
 { if (hbase==NULL) return 0;
   if (hloc_prev())
-  { hclear_page();
+  { hflush_contribution_list(); hpage_init();
     return hint_page();
   }
   else if (backward_mode)
@@ -4425,8 +4492,8 @@ If successfull, it will set |cur_loc| to the current page. Finally, we attach th
 and return the new location.
 @<render functions@>=
 uint64_t  hint_page_bottom(uint64_t h)
-{ hclear_page();
-  if (hbase==NULL) return 0;
+{ if (hbase==NULL) return 0;
+  hflush_contribution_list(); 
   hpos=hstart+(h&0xffffffff);
   if (h>0xffffffff)
     hteg_par_node(h>>32);
@@ -4457,7 +4524,7 @@ void hint_resize(int px_h, int px_v, double dpi)
   if (old_px_h==px_h && old_px_v==px_v && old_dpi==dpi) return;
   old_px_h=px_h; old_px_v=px_v; old_dpi=dpi;
   hloc_clear();
-  hclear_page();
+  hflush_contribution_list(); hpage_init();
   forward_mode=false;
   backward_mode=false;
 }
@@ -5802,6 +5869,7 @@ the \TeX\ library and the \HINT/ library. Here is the main program:
 
 #include "texextern.h"
 #include "hint.h"
+extern int page_h, page_v;
 
 
 
@@ -5817,6 +5885,8 @@ int main(int argc, char *argv[])
     @<process the command line@>@;
     @<open the log file@>@;
     hint_begin();
+    page_v=hvsize=dimen_def[vsize_dimen_no];
+    page_h=hhsize=dimen_def[hsize_dimen_no];
     while (hint_forward())
       @<show the page@>@;
     hint_end();

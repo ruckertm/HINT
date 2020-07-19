@@ -1,5 +1,5 @@
 	/*336:*/
-	#line 7245 "format.w"
+	#line 7247 "format.w"
 
 #ifndef _HFORMAT_H_
 #define _HFORMAT_H_
@@ -9,7 +9,7 @@
 #define REF_RNG(K,N) if ((int)(N)>max_ref[K]) QUIT("Reference %d to %s out of range [0 - %d]",\
   (N),definition_name[K],max_ref[K])
 	/*:305*/	/*377:*/
-	#line 7979 "format.w"
+	#line 7981 "format.w"
 
 #ifdef WIN32
 #define SIZE_F "0x%x"
@@ -28,10 +28,10 @@
 
 #define TAGERR(A) QUIT("Unknown tag [%s,%d] at " SIZE_F "\n",NAME(A),INFO(A),hpos-hstart)
 	/*:377*/
-	#line 7248 "format.w"
+	#line 7250 "format.w"
 
 	/*362:*/
-	#line 7754 "format.w"
+	#line 7756 "format.w"
 
 #define DBGNONE     0x0
 #define DBGBASIC    0x1
@@ -50,7 +50,7 @@
 #define DBGFONT     0x2000
 #define DBGRENDER   0x4000
 	/*:362*/
-	#line 7249 "format.w"
+	#line 7251 "format.w"
 
 	/*11:*/
 	#line 618 "format.w"
@@ -87,7 +87,7 @@
 
 #define MAX_TAG_DISTANCE 32 
 	/*:273*/
-	#line 7250 "format.w"
+	#line 7252 "format.w"
 
 	/*6:*/
 	#line 477 "format.w"
@@ -192,14 +192,14 @@ glue_t bs,ls;
 dimen_t lsl;
 }baseline_t;
 	/*:178*/	/*325:*/
-	#line 7037 "format.w"
+	#line 7039 "format.w"
 
 #define MAX_FONT_PARAMS 11
 	/*:325*/
-	#line 7251 "format.w"
+	#line 7253 "format.w"
 
 	/*339:*/
-	#line 7357 "format.w"
+	#line 7359 "format.w"
 
 typedef enum{
 zero_int_no= 0,
@@ -228,7 +228,7 @@ floating_penalty_no= 22
 }int_no_t;
 #define MAX_INT_DEFAULT floating_penalty_no
 	/*:339*/	/*341:*/
-	#line 7431 "format.w"
+	#line 7433 "format.w"
 
 typedef enum{
 zero_dimen_no= 0,
@@ -244,7 +244,7 @@ math_quad_no= 9
 }dimen_no_t;
 #define MAX_DIMEN_DEFAULT math_quad_no
 	/*:341*/	/*343:*/
-	#line 7476 "format.w"
+	#line 7478 "format.w"
 
 typedef enum{
 zero_xdimen_no= 0,
@@ -253,7 +253,7 @@ vsize_xdimen_no= 2
 }xdimen_no_t;
 #define MAX_XDIMEN_DEFAULT vsize_xdimen_no
 	/*:343*/	/*345:*/
-	#line 7500 "format.w"
+	#line 7502 "format.w"
 
 typedef enum{
 zero_skip_no= 0,
@@ -274,35 +274,35 @@ par_fill_skip_no= 14
 }glue_no_t;
 #define MAX_GLUE_DEFAULT par_fill_skip_no
 	/*:345*/	/*347:*/
-	#line 7586 "format.w"
+	#line 7588 "format.w"
 
 typedef enum{
 zero_baseline_no= 0
 }baseline_no_t;
 #define MAX_BASELINE_DEFAULT zero_baseline_no
 	/*:347*/	/*349:*/
-	#line 7603 "format.w"
+	#line 7605 "format.w"
 
 typedef enum{
 zero_stream_no= 0
 }stream_no_t;
 #define MAX_STREAM_DEFAULT zero_stream_no
 	/*:349*/	/*351:*/
-	#line 7619 "format.w"
+	#line 7621 "format.w"
 
 typedef enum{
 zero_page_no= 0
 }page_no_t;
 #define MAX_PAGE_DEFAULT zero_page_no
 	/*:351*/	/*353:*/
-	#line 7636 "format.w"
+	#line 7638 "format.w"
 
 typedef enum{
 zero_range_no= 0
 }range_no_t;
 #define MAX_RANGE_DEFAULT zero_range_no
 	/*:353*/
-	#line 7252 "format.w"
+	#line 7254 "format.w"
 
 
 

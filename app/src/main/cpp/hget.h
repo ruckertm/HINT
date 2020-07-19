@@ -1,5 +1,5 @@
 	/*432:*/
-	#line 8728 "format.w"
+	#line 8730 "format.w"
 
 
 	/*35:*/
@@ -44,7 +44,7 @@
   hset_entry(&(E),i,s,xs,file_name); \
 }
 	/*:293*/
-	#line 8730 "format.w"
+	#line 8732 "format.w"
 
 	/*283:*/
 	#line 6008 "format.w"
@@ -58,7 +58,7 @@ uint8_t*buffer;
 uint32_t bsize;
 }entry_t;
 	/*:283*/
-	#line 8731 "format.w"
+	#line 8733 "format.w"
 
 extern entry_t*dir;
 extern uint16_t section_no,max_section_no;

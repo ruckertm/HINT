@@ -1597,8 +1597,6 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define graf_node 7
 #define graf_node_size 5
 #define graf_penalty(X) mem[X+1].i
-#define graf_continue(X) type(X+2) 
-#define graf_first_line(X) link(X+2) 
 #define graf_extent(X) link(X+3) 
 #define graf_params(X) info(X+4) 
 #define graf_list(X) link(X+4)  \
@@ -1657,7 +1655,8 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define setpage_node_size 6
 #define setpage_name(X) link(X+1) 
 #define setpage_number(X) type(X+1) 
-#define setpage_priority(X) subtype(X+1) 
+#define setpage_id(X) subtype(X+1) 
+#define setpage_priority(X) info(X+2) 
 #define setpage_topskip(X) link(X+2) 
 #define setpage_depth(X) mem[X+3].sc
 #define setpage_height(X) info(X+4) 

@@ -16094,11 +16094,13 @@ general outline.
 void line_break(int final_widow_penalty, pointer par_ptr)
 {@+ scaled x=cur_list.hs_field; /* the |hsize| for this paragraph */
 @<Local variables for line breaking@>@;
+set_line_break_params();
 @<Get ready to start line breaking@>;
 @<Find optimal breakpoints@>;
 @<Break the paragraph at the chosen breakpoints, justify the resulting lines to the
 correct widths, and append them to the current vertical list@>;
 @<Clean up the memory by removing the break nodes@>;
+hrestore_param_list();
 }
 
 @ The first task is to move the list from |head| to |temp_head| and go
@@ -16114,17 +16116,6 @@ same number of |mem|~words.
 
 @<Get ready to start...@>=
 link(temp_head)=par_ptr;
-
-@ @<Declare subprocedures for |line_break|@>=
-void add_par_fill_skip(void)
-{ if (is_char_node(tail)) tail_append(new_penalty(inf_penalty))@;
-  else if (type(tail)!=glue_node) tail_append(new_penalty(inf_penalty))@;
-  else
-  {@+type(tail)=penalty_node;delete_glue_ref(glue_ptr(tail));
-     flush_node_list(leader_ptr(tail));penalty(tail)=inf_penalty;
-  }
-  link(tail)=new_glue(par_fill_skip);
-}
 
 @ When looking for optimal line breaks, \TeX\ creates a ``break node'' for
 each break that is {\sl feasible}, in the sense that there is a way to end
@@ -21828,12 +21819,13 @@ internal_font_number @!f; /*font in current |char_node|*/
 int @!n; /*scope of paragraph shape specification*/
 scaled @!v; /*|w| plus possible glue amount*/
 scaled @!d; /*increment to |v|*/
+
 if (head==tail)  /*`\.{\\noindent\$\$}' or `\.{\$\${ }\$\$}'*/
   {@+pop_nest();w=-max_dimen; x=cur_list.hs_field; offset=0;
   }
 else{@+ pointer par_ptr=link(head);
-     add_par_fill_skip();
      pop_nest();
+     store_map(par_ptr,node_pos,0);
      line_break(display_widow_penalty,par_ptr);@/
      x=cur_list.hs_field;
   @<Calculate the natural width, |w|, by which the characters of the final line extend
@@ -24694,8 +24686,6 @@ to hold the string numbers for name, area, and extension.
 @d graf_node        7 /*|subtype|  that records a paragraph*/
 @d graf_node_size	5 /* number of memory words in a |graf_node| */
 @d graf_penalty(X)  mem[X+1].i /* the final penalty */
-@d graf_continue(X) type(X+2)    /* keep |prev_graf| */
-@d graf_first_line(X) link(X+2)   /* line number of first line */
 @d graf_extent(X)   link(X+3) /* the extent */@#
 @d graf_params(X)   info(X+4) /* list of parameter nodes */
 @d graf_list(X)     link(X+4) /* list of content nodes */
@@ -24751,10 +24741,11 @@ to hold the string numbers for name, area, and extension.
 @d align_list(X)       link(X+3) /* the unset rows/columns */
 
 @d setpage_node       17 /* represents a page template */
-@d setpage_node_size       6
+@d setpage_node_size  6
 @d setpage_name(X)    link(X+1)
-@d setpage_number(X)  type(X+1)
-@d setpage_priority(X) subtype(X+1)
+@d setpage_number(X)  type(X+1) /* the \HINT/ number */
+@d setpage_id(X)      subtype(X+1)  /* the \TeX\ number */
+@d setpage_priority(X) info(X+2)
 @d setpage_topskip(X) link(X+2)
 @d setpage_depth(X)   mem[X+3].sc /* maximum depth */
 @d setpage_height(X)  info(X+4) /* extended dimension number */
@@ -24980,8 +24971,6 @@ case par_node: print_str("\\parameter ");
   break;
 case graf_node: print_str("\\paragraf(");
   print_int(graf_penalty(p));
-  print_char(' ');print_int(graf_continue(p));
-  print_char(' ');print_int(graf_first_line(p));
   print_char(')');
   node_list_display(graf_params(p));
   node_list_display(graf_list(p));

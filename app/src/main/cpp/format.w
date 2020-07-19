@@ -39,9 +39,9 @@
 \titletrue
 
 \def\setrevision$#1: #2 ${\gdef\lastrevision{#2}}
-\setrevision$Revision: 1997 $
+\setrevision$Revision: 2020 $
 \def\setdate$#1(#2) ${\gdef\lastdate{#2}}
-\setdate$Date: 2020-06-25 18:52:18 +0200 (Thu, 25 Jun 2020) $
+\setdate$Date: 2020-07-19 19:34:43 +0200 (Sun, 19 Jul 2020) $
 
 \null
 
@@ -2419,7 +2419,7 @@ void hget_glue_node(void)
 @<put functions@>=
 uint8_t hput_glue(glue_t *g)
 { info_t info=b000;
-  if (ZERO_GLUE(*g)) { HPUT32(g->w.w); @+ info=b100; } /* this is not a reference */
+  if (ZERO_GLUE(*g)) { HPUT8(zero_skip_no); @+ info=b000; }
   else if ( (g->w.w==0 && g->w.h==0.0 && g->w.v==0.0)) 
   { if (g->p.f!=0.0) { hput_stretch(&g->p); @+info|=b010; @+} 
     if (g->m.f!=0.0) { hput_stretch(&g->m); @+info|=b001; @+} 
@@ -6846,8 +6846,10 @@ void hget_definition(int n, uint8_t a, uint32_t node_pos)
         { char *n; HGET_STRING(n);@+ hwrite_string(n); }
         break;
       default:
-        if (INFO(a)==0)
-          QUIT("References not allowed as definitions");
+#if 0
+        if (INFO(a)==0 && n> max_fixed[KIND(a)])
+          QUIT("References not allowed in definition %d",n);
+#endif          
         hget_content(a); @+break;
     }
 }

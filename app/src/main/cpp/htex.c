@@ -41,8 +41,8 @@ if(file_offset==max_print_line)print_ln();
 #line 1585 "dummy.w"
 
 
-/*1842:*/
-#line 26914 "dummy.w"
+/*1841:*/
+#line 26903 "dummy.w"
 
 typedef enum{
 str_start_256= sizeof(str_0_255)-1,
@@ -460,11 +460,11 @@ str_start_667= str_start_666+sizeof(str_666)-1,
 str_start_668= str_start_667+sizeof(str_667)-1,
 str_start_end}str_starts;
 
-/*:1842*/
+/*:1841*/
 #line 1587 "dummy.w"
 
-packed_ASCII_code str_pool[]= /*1840:*/
-#line 26751 "dummy.w"
+packed_ASCII_code str_pool[]= /*1839:*/
+#line 26740 "dummy.w"
 
 str_0_255
 str_256 str_257 str_258 str_259 str_260 str_261 str_262 str_263
@@ -520,11 +520,11 @@ str_648 str_649 str_650 str_651 str_652 str_653 str_654 str_655
 str_656 str_657 str_658 str_659 str_660 str_661 str_662 str_663
 str_664 str_665 str_666 str_667
 
-/*:1840*/
+/*:1839*/
 #line 1588 "dummy.w"
 ;
-pool_pointer str_start[]= {/*1841:*/
-#line 26806 "dummy.w"
+pool_pointer str_start[]= {/*1840:*/
+#line 26795 "dummy.w"
 
 str_start_0_255
 str_start_256,str_start_257,str_start_258,str_start_259,
@@ -632,21 +632,21 @@ str_start_660,str_start_661,str_start_662,str_start_663,
 str_start_664,str_start_665,str_start_666,str_start_667,
 str_start_668
 
-/*:1841*/
+/*:1840*/
 #line 1589 "dummy.w"
 };
-pool_pointer pool_ptr= /*1843:*/
-#line 27331 "dummy.w"
+pool_pointer pool_ptr= /*1842:*/
+#line 27320 "dummy.w"
 str_start_668
 
-/*:1843*/
+/*:1842*/
 #line 1590 "dummy.w"
 ;
-str_number str_ptr= /*1844:*/
-#line 27333 "dummy.w"
+str_number str_ptr= /*1843:*/
+#line 27322 "dummy.w"
 668
 
-/*:1844*/
+/*:1843*/
 #line 1591 "dummy.w"
 ;
 pool_pointer init_pool_ptr;
@@ -658,10 +658,10 @@ int breadth_max= 200;
 void print(int s)
 {
 pool_pointer j;
-if(s>=str_ptr||s<0)s= /*1428:*/
-#line 25515 "dummy.w"
+if(s>=str_ptr||s<0)s= /*1427:*/
+#line 25504 "dummy.w"
 256
-/*:1428*/
+/*:1427*/
 #line 1601 "dummy.w"
 ;
 for(j= str_start[s];j<str_start[s+1];j++)print_char(str_pool[j]);
@@ -1077,24 +1077,24 @@ info(omit_template)= end_template_token;
 
 link(end_span)= max_quarterword+1;info(end_span)= null;
 
-/*:824*//*849:*/
-#line 16197 "dummy.w"
+/*:824*//*848:*/
+#line 16188 "dummy.w"
 
 type(last_active)= hyphenated;line_number(last_active)= max_halfword;
 subtype(last_active)= 0;
 
-/*:849*//*1021:*/
-#line 19284 "dummy.w"
+/*:848*//*1020:*/
+#line 19275 "dummy.w"
 
 subtype(page_ins_head)= qi(255);
 type(page_ins_head)= split_up;link(page_ins_head)= page_ins_head;
 
-/*:1021*//*1029:*/
-#line 19431 "dummy.w"
+/*:1020*//*1028:*/
+#line 19422 "dummy.w"
 
 type(page_head)= glue_node;subtype(page_head)= normal;
 
-/*:1029*/
+/*:1028*/
 #line 3454 "dummy.w"
 ;
 avail= null;
@@ -1170,10 +1170,10 @@ p= link(p);
 #line 3675 "dummy.w"
 
 void print_font_and_char(int p)
-{if(p> mem_end)print_esc(/*1433:*/
-#line 25530 "dummy.w"
+{if(p> mem_end)print_esc(/*1432:*/
+#line 25519 "dummy.w"
 261
-/*:1433*/
+/*:1432*/
 #line 3677 "dummy.w"
 );
 else{/*288:*/
@@ -1273,10 +1273,10 @@ case hlist_node:case vlist_node:case unset_node:/*203:*/
 
 {if(type(p)==hlist_node)print_esc('h');
 else if(type(p)==vlist_node)print_esc('v');
-else print_esc(/*1435:*/
-#line 25536 "dummy.w"
+else print_esc(/*1434:*/
+#line 25525 "dummy.w"
 263
-/*:1435*/
+/*:1434*/
 #line 3817 "dummy.w"
 );
 print_str("box(");print_scaled(height(p));print_char('+');
@@ -1333,10 +1333,10 @@ break;
 case rule_node:/*206:*/
 #line 3868 "dummy.w"
 
-{print_esc(/*1436:*/
-#line 25539 "dummy.w"
+{print_esc(/*1435:*/
+#line 25528 "dummy.w"
 264
-/*:1436*/
+/*:1435*/
 #line 3869 "dummy.w"
 );print_rule_dimen(height(p));print_char('+');
 print_rule_dimen(depth(p));print_str(")x");print_rule_dimen(width(p));
@@ -1348,10 +1348,10 @@ break;
 case ins_node:/*207:*/
 #line 3873 "dummy.w"
 
-{print_esc(/*1437:*/
-#line 25542 "dummy.w"
+{print_esc(/*1436:*/
+#line 25531 "dummy.w"
 265
-/*:1437*/
+/*:1436*/
 #line 3874 "dummy.w"
 );print_int(qo(subtype(p)));
 print_str(", natural size ");print_scaled(height(p));
@@ -1364,23 +1364,23 @@ node_list_display(ins_ptr(p));
 /*:207*/
 #line 3802 "dummy.w"
 break;
-case whatsit_node:/*1402:*/
-#line 24967 "dummy.w"
+case whatsit_node:/*1401:*/
+#line 24958 "dummy.w"
 
 switch(subtype(p)){
-case special_node:{print_esc(/*1832:*/
-#line 26727 "dummy.w"
+case special_node:{print_esc(/*1831:*/
+#line 26716 "dummy.w"
 660
-/*:1832*/
-#line 24969 "dummy.w"
+/*:1831*/
+#line 24960 "dummy.w"
 );
 print_mark(write_tokens(p));
 }break;
-case language_node:{print_esc(/*1834:*/
-#line 26733 "dummy.w"
+case language_node:{print_esc(/*1833:*/
+#line 26722 "dummy.w"
 662
-/*:1834*/
-#line 24972 "dummy.w"
+/*:1833*/
+#line 24963 "dummy.w"
 );
 print_int(what_lang(p));print_str(" (hyphenmin ");
 print_int(what_lhm(p));print_char(',');
@@ -1392,8 +1392,6 @@ print_char(':');print_int(par_value(p).i);
 break;
 case graf_node:print_str("\\paragraf(");
 print_int(graf_penalty(p));
-print_char(' ');print_int(graf_continue(p));
-print_char(' ');print_int(graf_first_line(p));
 print_char(')');
 node_list_display(graf_params(p));
 node_list_display(graf_list(p));
@@ -1418,19 +1416,19 @@ if(shift_amount(p)!=0)
 {print_str(", shifted ");print_scaled(shift_amount(p));
 }
 if(set_stretch(p)!=0)
-{print_str(", stretch ");print_glue(set_stretch(p),set_stretch_order(p),/*1472:*/
-#line 25647 "dummy.w"
+{print_str(", stretch ");print_glue(set_stretch(p),set_stretch_order(p),/*1471:*/
+#line 25636 "dummy.w"
 300
-/*:1472*/
-#line 25009 "dummy.w"
+/*:1471*/
+#line 24998 "dummy.w"
 );
 }
 if(set_shrink(p)!=0)
-{print_str(", shrink ");print_glue(set_shrink(p),set_shrink_order(p),/*1472:*/
-#line 25647 "dummy.w"
+{print_str(", shrink ");print_glue(set_shrink(p),set_shrink_order(p),/*1471:*/
+#line 25636 "dummy.w"
 300
-/*:1472*/
-#line 25012 "dummy.w"
+/*:1471*/
+#line 25001 "dummy.w"
 );
 }
 print_str(", extent ");print_xdimen(set_extent(p));
@@ -1451,17 +1449,17 @@ print_str("\\image(");
 print_char('(');print_scaled(image_height(p));
 print_char('+');print_scaled(image_depth(p));
 print_str(")x");print_scaled(image_width(p));
-if(image_stretch(p)!=0){print_str(" plus ");print_glue(image_stretch(p),image_stretch_order(p),/*1472:*/
-#line 25647 "dummy.w"
+if(image_stretch(p)!=0){print_str(" plus ");print_glue(image_stretch(p),image_stretch_order(p),/*1471:*/
+#line 25636 "dummy.w"
 300
-/*:1472*/
-#line 25032 "dummy.w"
+/*:1471*/
+#line 25021 "dummy.w"
 );}
-if(image_shrink(p)!=0){print_str(" minus ");print_glue(image_shrink(p),image_shrink_order(p),/*1472:*/
-#line 25647 "dummy.w"
+if(image_shrink(p)!=0){print_str(" minus ");print_glue(image_shrink(p),image_shrink_order(p),/*1471:*/
+#line 25636 "dummy.w"
 300
-/*:1472*/
-#line 25033 "dummy.w"
+/*:1471*/
+#line 25022 "dummy.w"
 );}
 print_str(", section ");print_int(image_no(p));
 if(image_name(p)!=0){print_str(", ");print(image_name(p));}
@@ -1513,7 +1511,7 @@ break;
 default:print_str("whatsit?");
 }
 
-/*:1402*/
+/*:1401*/
 #line 3803 "dummy.w"
 break;
 case glue_node:/*208:*/
@@ -1541,10 +1539,10 @@ case kern_node:/*210:*/
 #line 3896 "dummy.w"
 
 if(subtype(p)!=mu_glue)
-{print_esc(/*1443:*/
-#line 25560 "dummy.w"
+{print_esc(/*1442:*/
+#line 25549 "dummy.w"
 271
-/*:1443*/
+/*:1442*/
 #line 3898 "dummy.w"
 );
 print_char(' ');
@@ -1552,10 +1550,10 @@ print_scaled(width(p));
 if(subtype(p)==acc_kern)print_str(" (for accent)");
 
 }
-else{print_esc(/*1444:*/
-#line 25563 "dummy.w"
+else{print_esc(/*1443:*/
+#line 25552 "dummy.w"
 272
-/*:1444*/
+/*:1443*/
 #line 3904 "dummy.w"
 );print_scaled(width(p));print_str("mu");
 }
@@ -1566,10 +1564,10 @@ break;
 case math_node:/*211:*/
 #line 3907 "dummy.w"
 
-{print_esc(/*1445:*/
-#line 25566 "dummy.w"
+{print_esc(/*1444:*/
+#line 25555 "dummy.w"
 273
-/*:1445*/
+/*:1444*/
 #line 3908 "dummy.w"
 );
 if(subtype(p)==before)print_str("on");
@@ -1598,10 +1596,10 @@ break;
 case penalty_node:/*213:*/
 #line 3924 "dummy.w"
 
-{print_esc(/*1446:*/
-#line 25569 "dummy.w"
+{print_esc(/*1445:*/
+#line 25558 "dummy.w"
 274
-/*:1446*/
+/*:1445*/
 #line 3925 "dummy.w"
 );print_int(penalty(p));
 }
@@ -1612,10 +1610,10 @@ break;
 case disc_node:/*214:*/
 #line 3931 "dummy.w"
 
-{print_esc(/*1447:*/
-#line 25572 "dummy.w"
+{print_esc(/*1446:*/
+#line 25561 "dummy.w"
 275
-/*:1447*/
+/*:1446*/
 #line 3932 "dummy.w"
 );
 if(replace_count(p)> 0)
@@ -1631,10 +1629,10 @@ break;
 case adjust_node:/*216:*/
 #line 3944 "dummy.w"
 
-{print_esc(/*1449:*/
-#line 25578 "dummy.w"
+{print_esc(/*1448:*/
+#line 25567 "dummy.w"
 277
-/*:1449*/
+/*:1448*/
 #line 3945 "dummy.w"
 );node_list_display(adjust_ptr(p));
 }
@@ -1742,8 +1740,8 @@ add_glue_ref(split_top_ptr(p));
 ins_ptr(r)= copy_node_list(ins_ptr(p));
 words= ins_node_size-1;
 }break;
-case whatsit_node:/*1404:*/
-#line 25096 "dummy.w"
+case whatsit_node:/*1403:*/
+#line 25085 "dummy.w"
 
 switch(subtype(p)){
 case open_node:{r= get_node(open_node_size);words= open_node_size;
@@ -1831,16 +1829,16 @@ case xdimen_node:
 r= get_node(xdimen_node_size);
 words= xdimen_node_size;
 break;
-default:confusion(/*1836:*/
-#line 26739 "dummy.w"
+default:confusion(/*1835:*/
+#line 26728 "dummy.w"
 664
-/*:1836*/
-#line 25183 "dummy.w"
+/*:1835*/
+#line 25172 "dummy.w"
 );
 
 }
 
-/*:1404*/
+/*:1403*/
 #line 4100 "dummy.w"
 break;
 case glue_node:{r= get_node(small_node_size);add_glue_ref(glue_ptr(p));
@@ -1863,10 +1861,10 @@ words= small_node_size;
 case adjust_node:{r= get_node(small_node_size);
 adjust_ptr(r)= copy_node_list(adjust_ptr(p));
 }break;
-default:confusion(/*1451:*/
-#line 25584 "dummy.w"
+default:confusion(/*1450:*/
+#line 25573 "dummy.w"
 279
-/*:1451*/
+/*:1450*/
 #line 4121 "dummy.w"
 );
 
@@ -2343,8 +2341,8 @@ link(q)= p;p= q;
 /*:680*/
 #line 13028 "dummy.w"
 break;
-case whatsit_node:/*1407:*/
-#line 25257 "dummy.w"
+case whatsit_node:/*1406:*/
+#line 25246 "dummy.w"
 
 {glue_ord o;
 if(image_height(p)> h)h= image_height(p);
@@ -2353,7 +2351,7 @@ o= image_stretch_order(p);total_stretch[o]= total_stretch[o]+image_stretch(p);
 o= image_shrink_order(p);total_shrink[o]= total_shrink[o]+image_shrink(p);
 }
 
-/*:1407*/
+/*:1406*/
 #line 13029 "dummy.w"
 ;break;
 case glue_node:/*681:*/
@@ -2494,10 +2492,10 @@ total_stretch[filll]= 0;total_shrink[filll]= 0
 while(p!=null)/*696:*/
 #line 13247 "dummy.w"
 
-{if(is_char_node(p))confusion(/*1691:*/
-#line 26304 "dummy.w"
+{if(is_char_node(p))confusion(/*1690:*/
+#line 26293 "dummy.w"
 519
-/*:1691*/
+/*:1690*/
 #line 13248 "dummy.w"
 );
 
@@ -2514,8 +2512,8 @@ if(width(p)+s> w)w= width(p)+s;
 /*:697*/
 #line 13252 "dummy.w"
 break;
-case whatsit_node:/*1406:*/
-#line 25249 "dummy.w"
+case whatsit_node:/*1405:*/
+#line 25238 "dummy.w"
 
 {glue_ord o;
 if(image_width(p)> w)w= image_width(p);
@@ -2524,7 +2522,7 @@ o= image_stretch_order(p);total_stretch[o]= total_stretch[o]+image_stretch(p);
 o= image_shrink_order(p);total_shrink[o]= total_shrink[o]+image_shrink(p);
 }
 
-/*:1406*/
+/*:1405*/
 #line 13253 "dummy.w"
 ;break;
 case glue_node:/*698:*/
@@ -2640,15 +2638,15 @@ end:return r;
 
 pointer just_box;
 
-/*:842*//*851:*/
-#line 16228 "dummy.w"
+/*:842*//*850:*/
+#line 16219 "dummy.w"
 
 pointer passive;
 pointer printed_node;
 halfword pass_number;
 
-/*:851*//*854:*/
-#line 16268 "dummy.w"
+/*:850*//*853:*/
+#line 16259 "dummy.w"
 
 scaled active_width0[6],*const active_width= active_width0-1;
 
@@ -2656,21 +2654,21 @@ scaled cur_active_width0[6],*const cur_active_width= cur_active_width0-1;
 scaled background0[6],*const background= background0-1;
 scaled break_width0[6],*const break_width= break_width0-1;
 
-/*:854*//*857:*/
-#line 16326 "dummy.w"
+/*:853*//*856:*/
+#line 16317 "dummy.w"
 
 bool no_shrink_error_yet;
 
-/*:857*//*861:*/
-#line 16369 "dummy.w"
+/*:856*//*860:*/
+#line 16360 "dummy.w"
 
 static pointer cur_p;
 bool second_pass;
 bool final_pass;
 int threshold;
 
-/*:861*//*867:*/
-#line 16471 "dummy.w"
+/*:860*//*866:*/
+#line 16462 "dummy.w"
 
 int minimal_demerits0[tight_fit-very_loose_fit+1],*const minimal_demerits= minimal_demerits0-very_loose_fit;
 
@@ -2681,13 +2679,13 @@ pointer best_place0[tight_fit-very_loose_fit+1],*const best_place= best_place0-v
 halfword best_pl_line0[tight_fit-very_loose_fit+1],*const best_pl_line= best_pl_line0-very_loose_fit;
 
 
-/*:867*//*874:*/
-#line 16590 "dummy.w"
+/*:866*//*873:*/
+#line 16581 "dummy.w"
 
 scaled disc_width;
 
-/*:874*//*883:*/
-#line 16731 "dummy.w"
+/*:873*//*882:*/
+#line 16722 "dummy.w"
 
 halfword easy_line;
 halfword last_special_line;
@@ -2698,8 +2696,8 @@ scaled second_width;
 scaled first_indent;
 scaled second_indent;
 
-/*:883*//*909:*/
-#line 17235 "dummy.w"
+/*:882*//*908:*/
+#line 17226 "dummy.w"
 
 pointer best_bet;
 int fewest_demerits;
@@ -2709,7 +2707,7 @@ int actual_looseness;
 int line_diff;
 
 
-/*:909*/
+/*:908*/
 #line 16090 "dummy.w"
 
 
@@ -2732,21 +2730,8 @@ link(tail)= p;tail= p;
 link(tail)= b;tail= b;prev_depth= depth(b);
 }
 
-/*:706*//*845:*/
-#line 16118 "dummy.w"
-
-void add_par_fill_skip(void)
-{if(is_char_node(tail))tail_append(new_penalty(inf_penalty))
-else if(type(tail)!=glue_node)tail_append(new_penalty(inf_penalty))
-else
-{type(tail)= penalty_node;delete_glue_ref(glue_ptr(tail));
-flush_node_list(leader_ptr(tail));penalty(tail)= inf_penalty;
-}
-link(tail)= new_glue(par_fill_skip);
-}
-
-/*:845*//*858:*/
-#line 16329 "dummy.w"
+/*:706*//*857:*/
+#line 16320 "dummy.w"
 
 pointer finite_shrink(pointer p)
 {pointer q;
@@ -2755,8 +2740,8 @@ q= new_spec(p);shrink_order(q)= normal;
 delete_glue_ref(p);return q;
 }
 
-/*:858*//*862:*/
-#line 16392 "dummy.w"
+/*:857*//*861:*/
+#line 16383 "dummy.w"
 
 void try_break(int pi,small_number break_type)
 {
@@ -2764,8 +2749,8 @@ pointer r;
 pointer prev_r;
 halfword old_l;
 bool no_break_yet;
-/*863:*/
-#line 16420 "dummy.w"
+/*862:*/
+#line 16411 "dummy.w"
 
 pointer prev_prev_r;
 pointer s;
@@ -2785,24 +2770,24 @@ pointer save_link;
 #endif
 scaled shortfall;
 
-/*:863*/
-#line 16399 "dummy.w"
+/*:862*/
+#line 16390 "dummy.w"
 
-/*864:*/
-#line 16439 "dummy.w"
+/*863:*/
+#line 16430 "dummy.w"
 
 if(abs(pi)>=inf_penalty)
 if(pi> 0)goto end;
 else pi= eject_penalty
 
-/*:864*/
-#line 16400 "dummy.w"
+/*:863*/
+#line 16391 "dummy.w"
 ;
 no_break_yet= true;prev_r= active;old_l= 0;
 do_all_six(copy_to_cur_active);
 loop{resume:r= link(prev_r);
-/*865:*/
-#line 16449 "dummy.w"
+/*864:*/
+#line 16440 "dummy.w"
 
 
 if(type(r)==delta_node)
@@ -2810,34 +2795,34 @@ if(type(r)==delta_node)
 prev_prev_r= prev_r;prev_r= r;goto resume;
 }
 
-/*:865*/
-#line 16405 "dummy.w"
+/*:864*/
+#line 16396 "dummy.w"
 ;
-/*869:*/
-#line 16495 "dummy.w"
+/*868:*/
+#line 16486 "dummy.w"
 
 {l= line_number(r);
 if(l> old_l)
 {
 if((minimum_demerits<awful_bad)&&
 ((old_l!=easy_line)||(r==last_active)))
-/*870:*/
-#line 16513 "dummy.w"
+/*869:*/
+#line 16504 "dummy.w"
 
-{if(no_break_yet)/*871:*/
-#line 16549 "dummy.w"
+{if(no_break_yet)/*870:*/
+#line 16540 "dummy.w"
 
 {no_break_yet= false;do_all_six(set_break_width_to_background);
 s= cur_p;
 if(break_type> unhyphenated)if(cur_p!=null)
-/*875:*/
-#line 16593 "dummy.w"
+/*874:*/
+#line 16584 "dummy.w"
 
 {t= replace_count(cur_p);v= cur_p;s= post_break(cur_p);
 while(t> 0)
 {decr(t);v= link(v);
-/*876:*/
-#line 16611 "dummy.w"
+/*875:*/
+#line 16602 "dummy.w"
 
 if(is_char_node(v))
 {f= font(v);
@@ -2850,22 +2835,22 @@ char_width(f)(char_info(f)(character(lig_char(v))));
 }break;
 case hlist_node:case vlist_node:case rule_node:case kern_node:
 break_width[1]= break_width[1]-width(v);break;
-default:confusion(/*1724:*/
-#line 26403 "dummy.w"
+default:confusion(/*1723:*/
+#line 26392 "dummy.w"
 552
-/*:1724*/
-#line 16623 "dummy.w"
+/*:1723*/
+#line 16614 "dummy.w"
 );
 
 }
 
-/*:876*/
-#line 16597 "dummy.w"
+/*:875*/
+#line 16588 "dummy.w"
 ;
 }
 while(s!=null)
-{/*877:*/
-#line 16627 "dummy.w"
+{/*876:*/
+#line 16618 "dummy.w"
 
 if(is_char_node(s))
 {f= font(s);
@@ -2878,17 +2863,17 @@ char_width(f)(char_info(f)(character(lig_char(s))));
 }break;
 case hlist_node:case vlist_node:case rule_node:case kern_node:
 break_width[1]= break_width[1]+width(s);break;
-default:confusion(/*1725:*/
-#line 26406 "dummy.w"
+default:confusion(/*1724:*/
+#line 26395 "dummy.w"
 553
-/*:1725*/
-#line 16639 "dummy.w"
+/*:1724*/
+#line 16630 "dummy.w"
 );
 
 }
 
-/*:877*/
-#line 16600 "dummy.w"
+/*:876*/
+#line 16591 "dummy.w"
 ;
 s= link(s);
 }
@@ -2897,22 +2882,22 @@ if(post_break(cur_p)==null)s= link(v);
 
 }
 
-/*:875*/
-#line 16553 "dummy.w"
+/*:874*/
+#line 16544 "dummy.w"
 ;
 while(s!=null)
 {if(is_char_node(s))goto done;
 switch(type(s)){
-case glue_node:/*872:*/
-#line 16568 "dummy.w"
+case glue_node:/*871:*/
+#line 16559 "dummy.w"
 
 {v= glue_ptr(s);break_width[1]= break_width[1]-width(v);
 break_width[2+stretch_order(v)]= break_width[2+stretch_order(v)]-stretch(v);
 break_width[6]= break_width[6]-shrink(v);
 }
 
-/*:872*/
-#line 16557 "dummy.w"
+/*:871*/
+#line 16548 "dummy.w"
 break;
 case penalty_node:do_nothing;break;
 case math_node:break_width[1]= break_width[1]-width(s);break;
@@ -2924,11 +2909,11 @@ s= link(s);
 }
 done:;}
 
-/*:871*/
-#line 16514 "dummy.w"
+/*:870*/
+#line 16505 "dummy.w"
 ;
-/*878:*/
-#line 16652 "dummy.w"
+/*877:*/
+#line 16643 "dummy.w"
 
 if(type(prev_r)==delta_node)
 {do_all_six(convert_to_break_width);
@@ -2942,16 +2927,16 @@ do_all_six(new_delta_to_break_width);
 link(prev_r)= q;prev_prev_r= prev_r;prev_r= q;
 }
 
-/*:878*/
-#line 16515 "dummy.w"
+/*:877*/
+#line 16506 "dummy.w"
 ;
 if(abs(adj_demerits)>=awful_bad-minimum_demerits)
 minimum_demerits= awful_bad-1;
 else minimum_demerits= minimum_demerits+abs(adj_demerits);
 for(fit_class= very_loose_fit;fit_class<=tight_fit;fit_class++)
 {if(minimal_demerits[fit_class]<=minimum_demerits)
-/*880:*/
-#line 16682 "dummy.w"
+/*879:*/
+#line 16673 "dummy.w"
 
 {q= get_node(passive_node_size);
 link(q)= passive;passive= q;cur_break(q)= cur_p;
@@ -2967,8 +2952,8 @@ total_demerits(q)= minimal_demerits[fit_class];
 link(q)= r;link(prev_r)= q;prev_r= q;
 #ifdef STAT
 if(tracing_paragraphs> 0)
-/*881:*/
-#line 16702 "dummy.w"
+/*880:*/
+#line 16693 "dummy.w"
 
 {print_nl("@@");print_int(serial(passive));
 
@@ -2981,21 +2966,21 @@ if(prev_break(passive)==null)print_char('0');
 else print_int(serial(prev_break(passive)));
 }
 
-/*:881*/
-#line 16697 "dummy.w"
+/*:880*/
+#line 16688 "dummy.w"
 ;
 #endif
 
 }
 
-/*:880*/
-#line 16521 "dummy.w"
+/*:879*/
+#line 16512 "dummy.w"
 ;
 minimal_demerits[fit_class]= awful_bad;
 }
 minimum_demerits= awful_bad;
-/*879:*/
-#line 16671 "dummy.w"
+/*878:*/
+#line 16662 "dummy.w"
 
 if(r!=last_active)
 {q= get_node(delta_node_size);link(q)= r;type(q)= delta_node;
@@ -3004,17 +2989,17 @@ do_all_six(new_delta_from_break_width);
 link(prev_r)= q;prev_prev_r= prev_r;prev_r= q;
 }
 
-/*:879*/
-#line 16525 "dummy.w"
+/*:878*/
+#line 16516 "dummy.w"
 ;
 }
 
-/*:870*/
-#line 16501 "dummy.w"
+/*:869*/
+#line 16492 "dummy.w"
 ;
 if(r==last_active)goto end;
-/*886:*/
-#line 16776 "dummy.w"
+/*885:*/
+#line 16767 "dummy.w"
 
 if(l> easy_line)
 {line_width= second_width;old_l= max_halfword-1;
@@ -3025,24 +3010,24 @@ else if(par_shape_ptr==null)line_width= first_width;
 else line_width= mem[par_shape_ptr+2*l].sc;
 }
 
-/*:886*/
-#line 16503 "dummy.w"
+/*:885*/
+#line 16494 "dummy.w"
 ;
 }
 }
 
-/*:869*/
-#line 16408 "dummy.w"
+/*:868*/
+#line 16399 "dummy.w"
 ;
-/*887:*/
-#line 16796 "dummy.w"
+/*886:*/
+#line 16787 "dummy.w"
 
 {artificial_demerits= false;
 
 shortfall= line_width-cur_active_width[1];
 if(shortfall> 0)
-/*888:*/
-#line 16826 "dummy.w"
+/*887:*/
+#line 16817 "dummy.w"
 
 if((cur_active_width[3]!=0)||(cur_active_width[4]!=0)||
 (cur_active_width[5]!=0))
@@ -3059,23 +3044,23 @@ else fit_class= decent_fit;
 done1:;
 }
 
-/*:888*/
-#line 16802 "dummy.w"
+/*:887*/
+#line 16793 "dummy.w"
 
-else/*889:*/
-#line 16845 "dummy.w"
+else/*888:*/
+#line 16836 "dummy.w"
 
 {if(-shortfall> cur_active_width[6])b= inf_bad+1;
 else b= badness(-shortfall,cur_active_width[6]);
 if(b> 12)fit_class= tight_fit;else fit_class= decent_fit;
 }
 
-/*:889*/
-#line 16804 "dummy.w"
+/*:888*/
+#line 16795 "dummy.w"
 ;
 if((b> inf_bad)||(pi==eject_penalty))
-/*890:*/
-#line 16860 "dummy.w"
+/*889:*/
+#line 16851 "dummy.w"
 
 {if(final_pass&&(minimum_demerits==awful_bad)&&
 (link(r)==last_active)&&
@@ -3085,19 +3070,19 @@ else if(b> threshold)goto deactivate;
 node_r_stays_active= false;
 }
 
-/*:890*/
-#line 16807 "dummy.w"
+/*:889*/
+#line 16798 "dummy.w"
 
 else{prev_r= r;
 if(b> threshold)goto resume;
 node_r_stays_active= true;
 }
-/*891:*/
-#line 16876 "dummy.w"
+/*890:*/
+#line 16867 "dummy.w"
 
 if(artificial_demerits)d= 0;
-else/*895:*/
-#line 16937 "dummy.w"
+else/*894:*/
+#line 16928 "dummy.w"
 
 {d= line_penalty+b;
 if(abs(d)>=10000)d= 100000000;else d= d*d;
@@ -3110,17 +3095,17 @@ else d= d+final_hyphen_demerits;
 if(abs(fit_class-fitness(r))> 1)d= d+adj_demerits;
 }
 
-/*:895*/
-#line 16878 "dummy.w"
+/*:894*/
+#line 16869 "dummy.w"
 ;
 #ifdef STAT
 if(tracing_paragraphs> 0)
-/*892:*/
-#line 16892 "dummy.w"
+/*891:*/
+#line 16883 "dummy.w"
 
 {if(printed_node!=cur_p)
-/*893:*/
-#line 16914 "dummy.w"
+/*892:*/
+#line 16905 "dummy.w"
 
 {print_nl("");
 if(cur_p==null)short_display(link(printed_node));
@@ -3131,41 +3116,41 @@ link(cur_p)= save_link;
 printed_node= cur_p;
 }
 
-/*:893*/
-#line 16894 "dummy.w"
+/*:892*/
+#line 16885 "dummy.w"
 ;
 print_nl("@");
 
-if(cur_p==null)print_esc(/*1616:*/
-#line 26079 "dummy.w"
+if(cur_p==null)print_esc(/*1615:*/
+#line 26068 "dummy.w"
 444
-/*:1616*/
-#line 16897 "dummy.w"
+/*:1615*/
+#line 16888 "dummy.w"
 );
 else if(type(cur_p)!=glue_node)
-{if(type(cur_p)==penalty_node)print_esc(/*1600:*/
-#line 26031 "dummy.w"
+{if(type(cur_p)==penalty_node)print_esc(/*1599:*/
+#line 26020 "dummy.w"
 428
-/*:1600*/
-#line 16899 "dummy.w"
+/*:1599*/
+#line 16890 "dummy.w"
 );
-else if(type(cur_p)==disc_node)print_esc(/*1447:*/
-#line 25572 "dummy.w"
+else if(type(cur_p)==disc_node)print_esc(/*1446:*/
+#line 25561 "dummy.w"
 275
-/*:1447*/
-#line 16900 "dummy.w"
+/*:1446*/
+#line 16891 "dummy.w"
 );
-else if(type(cur_p)==kern_node)print_esc(/*1443:*/
-#line 25560 "dummy.w"
+else if(type(cur_p)==kern_node)print_esc(/*1442:*/
+#line 25549 "dummy.w"
 271
-/*:1443*/
-#line 16901 "dummy.w"
+/*:1442*/
+#line 16892 "dummy.w"
 );
-else print_esc(/*1445:*/
-#line 25566 "dummy.w"
+else print_esc(/*1444:*/
+#line 25555 "dummy.w"
 273
-/*:1445*/
-#line 16902 "dummy.w"
+/*:1444*/
+#line 16893 "dummy.w"
 );
 }
 print_str(" via @@");
@@ -3178,8 +3163,8 @@ print_str(" p=");print_int(pi);print_str(" d=");
 if(artificial_demerits)print_char('*');else print_int(d);
 }
 
-/*:892*/
-#line 16881 "dummy.w"
+/*:891*/
+#line 16872 "dummy.w"
 ;
 #endif
 
@@ -3191,16 +3176,16 @@ best_place[fit_class]= break_node(r);best_pl_line[fit_class]= l;
 if(d<minimum_demerits)minimum_demerits= d;
 }
 
-/*:891*/
-#line 16812 "dummy.w"
+/*:890*/
+#line 16803 "dummy.w"
 ;
 if(node_r_stays_active)goto resume;
-deactivate:/*896:*/
-#line 16959 "dummy.w"
+deactivate:/*895:*/
+#line 16950 "dummy.w"
 
 link(prev_r)= link(r);free_node(r,active_node_size);
-if(prev_r==active)/*897:*/
-#line 16984 "dummy.w"
+if(prev_r==active)/*896:*/
+#line 16975 "dummy.w"
 
 {r= link(active);
 if(type(r)==delta_node)
@@ -3210,8 +3195,8 @@ link(active)= link(r);free_node(r,delta_node_size);
 }
 }
 
-/*:897*/
-#line 16962 "dummy.w"
+/*:896*/
+#line 16953 "dummy.w"
 
 else if(type(prev_r)==delta_node)
 {r= link(prev_r);
@@ -3227,19 +3212,19 @@ link(prev_r)= link(r);free_node(r,delta_node_size);
 }
 }
 
-/*:896*/
-#line 16814 "dummy.w"
+/*:895*/
+#line 16805 "dummy.w"
 ;
 }
 
-/*:887*/
-#line 16411 "dummy.w"
+/*:886*/
+#line 16402 "dummy.w"
 ;
 }
 end:;
 #ifdef STAT
-/*894:*/
-#line 16929 "dummy.w"
+/*893:*/
+#line 16920 "dummy.w"
 
 if(cur_p==printed_node)if(cur_p!=null)if(type(cur_p)==disc_node)
 {t= replace_count(cur_p);
@@ -3248,15 +3233,15 @@ while(t> 0)
 }
 }
 
-/*:894*/
-#line 16415 "dummy.w"
+/*:893*/
+#line 16406 "dummy.w"
 ;
 #endif
 
 }
 
-/*:862*//*914:*/
-#line 17306 "dummy.w"
+/*:861*//*913:*/
+#line 17297 "dummy.w"
 
 void post_line_break(int final_widow_penalty)
 {
@@ -3270,15 +3255,15 @@ scaled cur_indent;
 quarterword t;
 int pen;
 halfword cur_line;
-/*915:*/
-#line 17356 "dummy.w"
+/*914:*/
+#line 17347 "dummy.w"
 
 q= break_node(best_bet);cur_p= null;
 do{r= q;q= prev_break(q);next_break(r)= cur_p;cur_p= r;
 }while(!(q==null))
 
-/*:915*/
-#line 17319 "dummy.w"
+/*:914*/
+#line 17310 "dummy.w"
 ;
 cur_line= prev_graf+1;
 next_offset= hposition(link(temp_head));
@@ -3298,11 +3283,11 @@ next_offset= next_offset-node_pos;
 else
 next_offset= 0;
 }
-/*917:*/
-#line 17393 "dummy.w"
+/*916:*/
+#line 17384 "dummy.w"
 
-/*918:*/
-#line 17405 "dummy.w"
+/*917:*/
+#line 17396 "dummy.w"
 
 q= cur_break(cur_p);disc_break= false;post_disc_break= false;
 if(q!=null)
@@ -3313,12 +3298,12 @@ subtype(q)= right_skip_code+1;add_glue_ref(right_skip);
 goto done;
 }
 else{if(type(q)==disc_node)
-/*919:*/
-#line 17424 "dummy.w"
+/*918:*/
+#line 17415 "dummy.w"
 
 {t= replace_count(q);
-/*920:*/
-#line 17432 "dummy.w"
+/*919:*/
+#line 17423 "dummy.w"
 
 if(t==0)r= link(q);
 else{r= q;
@@ -3330,57 +3315,57 @@ r= link(s);link(s)= null;
 flush_node_list(link(q));set_replace_count(q,0);
 }
 
-/*:920*/
-#line 17426 "dummy.w"
+/*:919*/
+#line 17417 "dummy.w"
 ;
-if(post_break(q)!=null)/*921:*/
-#line 17446 "dummy.w"
+if(post_break(q)!=null)/*920:*/
+#line 17437 "dummy.w"
 
 {s= post_break(q);
 while(link(s)!=null)s= link(s);
 link(s)= r;r= post_break(q);post_break(q)= null;post_disc_break= true;
 }
 
-/*:921*/
-#line 17427 "dummy.w"
+/*:920*/
+#line 17418 "dummy.w"
 ;
-if(pre_break(q)!=null)/*922:*/
-#line 17455 "dummy.w"
+if(pre_break(q)!=null)/*921:*/
+#line 17446 "dummy.w"
 
 {s= pre_break(q);link(q)= s;
 while(link(s)!=null)s= link(s);
 pre_break(q)= null;q= s;
 }
 
-/*:922*/
-#line 17428 "dummy.w"
+/*:921*/
+#line 17419 "dummy.w"
 ;
 link(q)= r;disc_break= true;
 }
 
-/*:919*/
-#line 17415 "dummy.w"
+/*:918*/
+#line 17406 "dummy.w"
 
 else if((type(q)==math_node)||(type(q)==kern_node))width(q)= 0;
 }
 else{q= temp_head;
 while(link(q)!=null)q= link(q);
 }
-/*923:*/
-#line 17461 "dummy.w"
+/*922:*/
+#line 17452 "dummy.w"
 
 r= new_glue(right_skip);link(r)= link(q);link(q)= r;q= r
 
-/*:923*/
-#line 17421 "dummy.w"
+/*:922*/
+#line 17412 "dummy.w"
 ;
 done:
 
-/*:918*/
-#line 17395 "dummy.w"
+/*:917*/
+#line 17386 "dummy.w"
 ;
-/*924:*/
-#line 17468 "dummy.w"
+/*923:*/
+#line 17459 "dummy.w"
 
 r= link(q);link(q)= null;q= link(temp_head);link(temp_head)= r;
 if(left_skip!=zero_glue)
@@ -3388,11 +3373,11 @@ if(left_skip!=zero_glue)
 link(r)= q;q= r;
 }
 
-/*:924*/
-#line 17396 "dummy.w"
+/*:923*/
+#line 17387 "dummy.w"
 ;
-/*926:*/
-#line 17494 "dummy.w"
+/*925:*/
+#line 17485 "dummy.w"
 
 if(cur_line> last_special_line)
 {cur_width= second_width;cur_indent= second_indent;
@@ -3406,11 +3391,11 @@ cur_indent= mem[par_shape_ptr+2*cur_line-1].sc;
 adjust_tail= adjust_head;just_box= hpack(q,cur_width,exactly);
 shift_amount(just_box)= cur_indent
 
-/*:926*/
-#line 17397 "dummy.w"
+/*:925*/
+#line 17388 "dummy.w"
 ;
-/*925:*/
-#line 17475 "dummy.w"
+/*924:*/
+#line 17466 "dummy.w"
 
 if(first_line)
 {pointer p= happend_to_vlist(just_box);
@@ -3425,11 +3410,11 @@ if(adjust_head!=adjust_tail)
 }
 adjust_tail= null
 
-/*:925*/
-#line 17399 "dummy.w"
+/*:924*/
+#line 17390 "dummy.w"
 ;
-/*927:*/
-#line 17514 "dummy.w"
+/*926:*/
+#line 17505 "dummy.w"
 
 if(cur_line+1!=best_line)
 {pen= inter_line_penalty;
@@ -3442,17 +3427,17 @@ link(tail)= r;tail= r;
 }
 }
 
-/*:927*/
-#line 17400 "dummy.w"
+/*:926*/
+#line 17391 "dummy.w"
 
 
-/*:917*/
-#line 17339 "dummy.w"
+/*:916*/
+#line 17330 "dummy.w"
 ;
 incr(cur_line);cur_p= next_break(cur_p);
 if(cur_p!=null)if(!post_disc_break)
-/*916:*/
-#line 17368 "dummy.w"
+/*915:*/
+#line 17359 "dummy.w"
 
 {r= temp_head;
 loop{q= link(r);
@@ -3470,58 +3455,59 @@ link(temp_head)= q;
 }
 }
 
-/*:916*/
-#line 17342 "dummy.w"
+/*:915*/
+#line 17333 "dummy.w"
 ;
 }while(!(cur_p==null));
 if((cur_line!=best_line)||(link(temp_head)!=null))
-confusion(/*1729:*/
-#line 26418 "dummy.w"
+confusion(/*1728:*/
+#line 26407 "dummy.w"
 557
-/*:1729*/
-#line 17345 "dummy.w"
+/*:1728*/
+#line 17336 "dummy.w"
 );
 
 prev_graf= best_line-1;
 }
 
-/*:914*//*932:*/
-#line 17625 "dummy.w"
+/*:913*//*931:*/
+#line 17616 "dummy.w"
 
-/*:932*//*980:*/
-#line 18438 "dummy.w"
+/*:931*//*979:*/
+#line 18429 "dummy.w"
 
 #ifdef INIT
 #endif
 
-/*:980*/
+/*:979*/
 #line 16092 "dummy.w"
 
 
 void line_break(int final_widow_penalty,pointer par_ptr)
 {scaled x= cur_list.hs_field;
-/*898:*/
-#line 17013 "dummy.w"
+/*897:*/
+#line 17004 "dummy.w"
 
 bool auto_breaking;
 pointer prev_p;
 pointer q,r,s;
 internal_font_number f;
 
-/*:898*//*930:*/
-#line 17608 "dummy.w"
+/*:897*//*929:*/
+#line 17599 "dummy.w"
 
 
-/*:930*/
+/*:929*/
 #line 16096 "dummy.w"
 
+set_line_break_params();
 /*844:*/
-#line 16115 "dummy.w"
+#line 16117 "dummy.w"
 
 link(temp_head)= par_ptr;
 
-/*:844*//*859:*/
-#line 16337 "dummy.w"
+/*:844*//*858:*/
+#line 16328 "dummy.w"
 
 no_shrink_error_yet= true;
 check_shrinkage(left_skip);check_shrinkage(right_skip);
@@ -3531,8 +3517,8 @@ background[2+stretch_order(q)]= stretch(q);
 background[2+stretch_order(r)]= background[2+stretch_order(r)]+stretch(r);
 background[6]= shrink(q)+shrink(r);
 
-/*:859*//*868:*/
-#line 16481 "dummy.w"
+/*:858*//*867:*/
+#line 16472 "dummy.w"
 
 minimum_demerits= awful_bad;
 minimal_demerits[tight_fit]= awful_bad;
@@ -3540,16 +3526,16 @@ minimal_demerits[decent_fit]= awful_bad;
 minimal_demerits[loose_fit]= awful_bad;
 minimal_demerits[very_loose_fit]= awful_bad;
 
-/*:868*//*884:*/
-#line 16744 "dummy.w"
+/*:867*//*883:*/
+#line 16735 "dummy.w"
 
 if(par_shape_ptr==null)
 if(hang_indent==0)
 {last_special_line= 0;second_width= x;
 second_indent= 0;
 }
-else/*885:*/
-#line 16755 "dummy.w"
+else/*884:*/
+#line 16746 "dummy.w"
 
 {last_special_line= abs(hang_after);
 if(hang_after<0)
@@ -3565,18 +3551,18 @@ else second_indent= 0;
 }
 }
 
-/*:885*/
-#line 16750 "dummy.w"
+/*:884*/
+#line 16741 "dummy.w"
 
 else QUIT("parshape not yet implemented");
 if(looseness==0)easy_line= last_special_line;
 else easy_line= max_halfword
 
-/*:884*/
-#line 16097 "dummy.w"
+/*:883*/
+#line 16098 "dummy.w"
 ;
-/*899:*/
-#line 17023 "dummy.w"
+/*898:*/
+#line 17014 "dummy.w"
 
 threshold= pretolerance;
 if(threshold>=0)
@@ -3596,8 +3582,8 @@ final_pass= (emergency_stretch<=0);
 
 }
 loop{if(threshold> inf_bad)threshold= inf_bad;
-/*900:*/
-#line 17077 "dummy.w"
+/*899:*/
+#line 17068 "dummy.w"
 
 q= get_node(active_node_size);
 type(q)= unhyphenated;fitness(q)= decent_fit;
@@ -3607,18 +3593,18 @@ do_all_six(store_background);
 passive= null;printed_node= temp_head;pass_number= 0;
 font_in_short_display= null_font
 
-/*:900*/
-#line 17042 "dummy.w"
+/*:899*/
+#line 17033 "dummy.w"
 ;
 cur_p= link(temp_head);auto_breaking= true;
 prev_p= cur_p;
 while((cur_p!=null)&&(link(active)!=last_active))
-/*902:*/
-#line 17113 "dummy.w"
+/*901:*/
+#line 17104 "dummy.w"
 
 {if(is_char_node(cur_p))
-/*903:*/
-#line 17145 "dummy.w"
+/*902:*/
+#line 17136 "dummy.w"
 
 {prev_p= cur_p;
 do{f= font(cur_p);
@@ -3627,21 +3613,21 @@ cur_p= link(cur_p);
 }while(!(!is_char_node(cur_p)));
 }
 
-/*:903*/
-#line 17115 "dummy.w"
+/*:902*/
+#line 17106 "dummy.w"
 ;
 switch(type(cur_p)){
 case hlist_node:case vlist_node:case rule_node:act_width= act_width+width(cur_p);break;
-case whatsit_node:/*1409:*/
-#line 25269 "dummy.w"
+case whatsit_node:/*1408:*/
+#line 25258 "dummy.w"
 
 adv_past(cur_p)
 
-/*:1409*/
-#line 17118 "dummy.w"
+/*:1408*/
+#line 17109 "dummy.w"
 break;
-case glue_node:{/*904:*/
-#line 17156 "dummy.w"
+case glue_node:{/*903:*/
+#line 17147 "dummy.w"
 
 if(auto_breaking)
 {if(is_char_node(prev_p))try_break(0,unhyphenated);
@@ -3655,8 +3641,8 @@ active_width[2+stretch_order(q)]=
 active_width[2+stretch_order(q)]+stretch(q);
 active_width[6]= active_width[6]+shrink(q)
 
-/*:904*/
-#line 17120 "dummy.w"
+/*:903*/
+#line 17111 "dummy.w"
 ;
 }break;
 case kern_node:if(subtype(cur_p)==explicit)kern_break
@@ -3664,14 +3650,14 @@ else act_width= act_width+width(cur_p);break;
 case ligature_node:{f= font(lig_char(cur_p));
 act_width= act_width+char_width(f)(char_info(f)(character(lig_char(cur_p))));
 }break;
-case disc_node:/*905:*/
-#line 17172 "dummy.w"
+case disc_node:/*904:*/
+#line 17163 "dummy.w"
 
 {if(!is_auto_disc(cur_p)||second_pass||final_pass)
 {s= pre_break(cur_p);disc_width= 0;
 if(s==null)try_break(ex_hyphen_penalty,hyphenated);
-else{do{/*906:*/
-#line 17192 "dummy.w"
+else{do{/*905:*/
+#line 17183 "dummy.w"
 
 if(is_char_node(s))
 {f= font(s);
@@ -3684,17 +3670,17 @@ char_width(f)(char_info(f)(character(lig_char(s))));
 }break;
 case hlist_node:case vlist_node:case rule_node:case kern_node:
 disc_width= disc_width+width(s);break;
-default:confusion(/*1727:*/
-#line 26412 "dummy.w"
+default:confusion(/*1726:*/
+#line 26401 "dummy.w"
 555
-/*:1727*/
-#line 17204 "dummy.w"
+/*:1726*/
+#line 17195 "dummy.w"
 );
 
 }
 
-/*:906*/
-#line 17176 "dummy.w"
+/*:905*/
+#line 17167 "dummy.w"
 ;
 s= link(s);
 }while(!(s==null));
@@ -3705,8 +3691,8 @@ act_width= act_width-disc_width;
 }
 r= replace_count(cur_p);s= link(cur_p);
 while(r> 0)
-{/*907:*/
-#line 17208 "dummy.w"
+{/*906:*/
+#line 17199 "dummy.w"
 
 if(is_char_node(s))
 {f= font(s);
@@ -3719,52 +3705,52 @@ char_width(f)(char_info(f)(character(lig_char(s))));
 }break;
 case hlist_node:case vlist_node:case rule_node:case kern_node:
 act_width= act_width+width(s);break;
-default:confusion(/*1728:*/
-#line 26415 "dummy.w"
+default:confusion(/*1727:*/
+#line 26404 "dummy.w"
 556
-/*:1728*/
-#line 17220 "dummy.w"
+/*:1727*/
+#line 17211 "dummy.w"
 );
 
 }
 
-/*:907*/
-#line 17186 "dummy.w"
+/*:906*/
+#line 17177 "dummy.w"
 ;
 decr(r);s= link(s);
 }
 prev_p= cur_p;cur_p= s;goto done5;
 }
 
-/*:905*/
-#line 17127 "dummy.w"
+/*:904*/
+#line 17118 "dummy.w"
 
 case math_node:{auto_breaking= (subtype(cur_p)==after);kern_break;
 }break;
 case penalty_node:try_break(penalty(cur_p),unhyphenated);break;
 case mark_node:case ins_node:case adjust_node:do_nothing;break;
-default:confusion(/*1726:*/
-#line 26409 "dummy.w"
+default:confusion(/*1725:*/
+#line 26398 "dummy.w"
 554
-/*:1726*/
-#line 17132 "dummy.w"
+/*:1725*/
+#line 17123 "dummy.w"
 );
 
 }
 prev_p= cur_p;cur_p= link(cur_p);
 done5:;}
 
-/*:902*/
-#line 17048 "dummy.w"
+/*:901*/
+#line 17039 "dummy.w"
 ;
 if(cur_p==null)
-/*910:*/
-#line 17244 "dummy.w"
+/*909:*/
+#line 17235 "dummy.w"
 
 {try_break(eject_penalty,hyphenated);
 if(link(active)!=last_active)
-{/*911:*/
-#line 17254 "dummy.w"
+{/*910:*/
+#line 17245 "dummy.w"
 
 r= link(active);fewest_demerits= awful_bad;
 do{if(type(r)!=delta_node)if(total_demerits(r)<fewest_demerits)
@@ -3774,12 +3760,12 @@ r= link(r);
 }while(!(r==last_active));
 best_line= line_number(best_bet)
 
-/*:911*/
-#line 17247 "dummy.w"
+/*:910*/
+#line 17238 "dummy.w"
 ;
 if(looseness==0)goto done;
-/*912:*/
-#line 17268 "dummy.w"
+/*911:*/
+#line 17259 "dummy.w"
 
 {r= link(active);actual_looseness= 0;
 do{if(type(r)!=delta_node)
@@ -3799,18 +3785,18 @@ r= link(r);
 best_line= line_number(best_bet);
 }
 
-/*:912*/
-#line 17249 "dummy.w"
+/*:911*/
+#line 17240 "dummy.w"
 ;
 if((actual_looseness==looseness)||final_pass)goto done;
 }
 }
 
-/*:910*/
-#line 17051 "dummy.w"
+/*:909*/
+#line 17042 "dummy.w"
 ;
-/*901:*/
-#line 17086 "dummy.w"
+/*900:*/
+#line 17077 "dummy.w"
 
 q= link(active);
 while(q!=last_active)
@@ -3826,8 +3812,8 @@ free_node(q,passive_node_size);
 q= cur_p;
 }
 
-/*:901*/
-#line 17052 "dummy.w"
+/*:900*/
+#line 17043 "dummy.w"
 ;
 if(!second_pass)
 {
@@ -3848,19 +3834,19 @@ done:
 #ifdef STAT
 #endif
 
-/*:899*/
-#line 16098 "dummy.w"
+/*:898*/
+#line 16099 "dummy.w"
 ;
-/*913:*/
-#line 17292 "dummy.w"
+/*912:*/
+#line 17283 "dummy.w"
 
 post_line_break(final_widow_penalty)
 
-/*:913*/
-#line 16100 "dummy.w"
+/*:912*/
+#line 16101 "dummy.w"
 ;
-/*901:*/
-#line 17086 "dummy.w"
+/*900:*/
+#line 17077 "dummy.w"
 
 q= link(active);
 while(q!=last_active)
@@ -3876,13 +3862,14 @@ free_node(q,passive_node_size);
 q= cur_p;
 }
 
-/*:901*/
-#line 16101 "dummy.w"
+/*:900*/
+#line 16102 "dummy.w"
 ;
+hrestore_param_list();
 }
 
-/*:843*//*1007:*/
-#line 18943 "dummy.w"
+/*:843*//*1006:*/
+#line 18934 "dummy.w"
 
 
 #define ensure_vbox(N) 
@@ -3895,14 +3882,14 @@ stream_t*streams;
 
 extern scaled hvsize;
 
-/*1011:*/
-#line 19029 "dummy.w"
+/*1010:*/
+#line 19020 "dummy.w"
 
 scaled best_height_plus_depth;
 
 
-/*:1011*//*1020:*/
-#line 19231 "dummy.w"
+/*:1010*//*1019:*/
+#line 19222 "dummy.w"
 
 pointer page_tail;
 uint8_t page_contents;
@@ -3911,15 +3898,15 @@ pointer best_page_break;
 int least_page_cost;
 scaled best_size;
 
-/*:1020*//*1023:*/
-#line 19313 "dummy.w"
+/*:1019*//*1022:*/
+#line 19304 "dummy.w"
 
 scaled page_so_far[7];
 scaled page_depth;
 int insert_penalties;
 
-/*:1023*/
-#line 18955 "dummy.w"
+/*:1022*/
+#line 18946 "dummy.w"
 
 
 pointer prune_page_top(pointer p)
@@ -3928,8 +3915,8 @@ pointer q;
 prev_p= temp_head;link(temp_head)= p;
 while(p!=null)
 switch(type(p)){
-case hlist_node:case vlist_node:case rule_node:/*1008:*/
-#line 18976 "dummy.w"
+case hlist_node:case vlist_node:case rule_node:/*1007:*/
+#line 18967 "dummy.w"
 
 {temp_ptr= new_spec(pointer_def[glue_kind][split_top_skip_no]);
 q= new_glue(temp_ptr);glue_ref_count(temp_ptr)= null;link(prev_p)= q;link(q)= p;
@@ -3939,27 +3926,27 @@ else width(temp_ptr)= 0;
 p= null;
 }
 
-/*:1008*/
-#line 18964 "dummy.w"
+/*:1007*/
+#line 18955 "dummy.w"
 break;
 case whatsit_node:case mark_node:case ins_node:{prev_p= p;p= link(prev_p);
 }break;
 case glue_node:case kern_node:case penalty_node:{q= p;p= link(q);link(q)= null;
 link(prev_p)= p;flush_node_list(q);
 }break;
-default:confusion(/*1732:*/
-#line 26427 "dummy.w"
+default:confusion(/*1731:*/
+#line 26416 "dummy.w"
 560
-/*:1732*/
-#line 18970 "dummy.w"
+/*:1731*/
+#line 18961 "dummy.w"
 );
 
 }
 return link(temp_head);
 }
 
-/*:1007*//*1009:*/
-#line 19001 "dummy.w"
+/*:1006*//*1008:*/
+#line 18992 "dummy.w"
 
 pointer vert_break(pointer p,scaled h,scaled d)
 
@@ -3975,25 +3962,25 @@ scaled prev_dp;
 small_number t;
 prev_p= p;
 least_cost= awful_bad;do_all_six(set_height_zero);prev_dp= 0;
-loop{/*1012:*/
-#line 19037 "dummy.w"
+loop{/*1011:*/
+#line 19028 "dummy.w"
 
 if(p==null)pi= eject_penalty;
-else/*1013:*/
-#line 19052 "dummy.w"
+else/*1012:*/
+#line 19043 "dummy.w"
 
 switch(type(p)){
 case hlist_node:case vlist_node:case rule_node:{
 cur_height= cur_height+prev_dp+height(p);prev_dp= depth(p);
 goto not_found;
 }
-case whatsit_node:/*1412:*/
-#line 25278 "dummy.w"
+case whatsit_node:/*1411:*/
+#line 25267 "dummy.w"
 
 goto not_found
 
-/*:1412*/
-#line 19058 "dummy.w"
+/*:1411*/
+#line 19049 "dummy.w"
 ;
 case glue_node:if(precedes_break(prev_p))pi= 0;
 else goto update_heights;break;
@@ -4003,24 +3990,24 @@ if(t==glue_node)pi= 0;else goto update_heights;
 }break;
 case penalty_node:pi= penalty(p);break;
 case mark_node:case ins_node:goto not_found;
-default:confusion(/*1733:*/
-#line 26430 "dummy.w"
+default:confusion(/*1732:*/
+#line 26419 "dummy.w"
 561
-/*:1733*/
-#line 19067 "dummy.w"
+/*:1732*/
+#line 19058 "dummy.w"
 );
 
 }
 
-/*:1013*/
-#line 19041 "dummy.w"
+/*:1012*/
+#line 19032 "dummy.w"
 ;
-/*1014:*/
-#line 19073 "dummy.w"
+/*1013:*/
+#line 19064 "dummy.w"
 
 if(pi<inf_penalty)
-{/*1015:*/
-#line 19087 "dummy.w"
+{/*1014:*/
+#line 19078 "dummy.w"
 
 if(cur_height<h)
 if((active_height[3]!=0)||(active_height[4]!=0)||
@@ -4029,8 +4016,8 @@ else b= badness(h-cur_height,active_height[2]);
 else if(cur_height-h> active_height[6])b= awful_bad;
 else b= badness(cur_height-h,active_height[6])
 
-/*:1015*/
-#line 19075 "dummy.w"
+/*:1014*/
+#line 19066 "dummy.w"
 ;
 if(b<awful_bad)
 if(pi<=eject_penalty)b= pi;
@@ -4043,12 +4030,12 @@ best_height_plus_depth= cur_height+prev_dp;
 if((b==awful_bad)||(pi<=eject_penalty))goto done;
 }
 
-/*:1014*/
-#line 19043 "dummy.w"
+/*:1013*/
+#line 19034 "dummy.w"
 ;
 if((type(p)<glue_node)||(type(p)> kern_node))goto not_found;
-update_heights:/*1016:*/
-#line 19099 "dummy.w"
+update_heights:/*1015:*/
+#line 19090 "dummy.w"
 
 if(type(p)==kern_node)q= p;
 else{q= glue_ptr(p);
@@ -4064,24 +4051,24 @@ glue_ptr(p)= r;q= r;
 }
 cur_height= cur_height+prev_dp+width(q);prev_dp= 0
 
-/*:1016*/
-#line 19046 "dummy.w"
+/*:1015*/
+#line 19037 "dummy.w"
 ;
 not_found:if(prev_dp> d)
 {cur_height= cur_height+prev_dp-d;
 prev_dp= d;
 }
 
-/*:1012*/
-#line 19018 "dummy.w"
+/*:1011*/
+#line 19009 "dummy.w"
 ;
 prev_p= p;p= link(prev_p);
 }
 done:return best_place;
 }
 
-/*:1009*//*1028:*/
-#line 19398 "dummy.w"
+/*:1008*//*1027:*/
+#line 19389 "dummy.w"
 
 void freeze_page_specs(small_number s)
 {page_contents= s;
@@ -4091,8 +4078,8 @@ least_page_cost= awful_bad;
 
 }
 
-/*:1028*//*1036:*/
-#line 19487 "dummy.w"
+/*:1027*//*1035:*/
+#line 19478 "dummy.w"
 
 bool hbuild_page(void)
 {
@@ -4102,16 +4089,16 @@ int b,c;
 int pi;
 if(link(contrib_head)==null)return false;
 do{resume:p= link(contrib_head);
-/*1039:*/
-#line 19527 "dummy.w"
+/*1038:*/
+#line 19518 "dummy.w"
 
-/*1042:*/
-#line 19555 "dummy.w"
+/*1041:*/
+#line 19546 "dummy.w"
 
 switch(type(p)){
 case hlist_node:case vlist_node:case rule_node:if(page_contents<box_there)
-/*1043:*/
-#line 19576 "dummy.w"
+/*1042:*/
+#line 19567 "dummy.w"
 
 {if(page_contents==empty)freeze_page_specs(box_there);
 else page_contents= box_there;
@@ -4122,27 +4109,27 @@ else width(temp_ptr)= 0;
 link(q)= p;link(contrib_head)= q;goto resume;
 }
 
-/*:1043*/
-#line 19559 "dummy.w"
+/*:1042*/
+#line 19550 "dummy.w"
 
-else/*1044:*/
-#line 19586 "dummy.w"
+else/*1043:*/
+#line 19577 "dummy.w"
 
 {page_total= page_total+page_depth+height(p);
 page_depth= depth(p);
 goto contribute;
 }
 
-/*:1044*/
-#line 19560 "dummy.w"
+/*:1043*/
+#line 19551 "dummy.w"
 break;
-case whatsit_node:/*1411:*/
-#line 25275 "dummy.w"
+case whatsit_node:/*1410:*/
+#line 25264 "dummy.w"
 
 goto contribute
 
-/*:1411*/
-#line 19561 "dummy.w"
+/*:1410*/
+#line 19552 "dummy.w"
 ;
 case glue_node:if(page_contents<box_there)goto done1;
 else if(precedes_break(page_tail))pi= 0;
@@ -4154,24 +4141,24 @@ else goto update_heights;break;
 case penalty_node:if(page_contents<box_there)goto done1;else pi= penalty(p);break;
 case mark_node:goto contribute;
 case ins_node:happend_insertion(p);goto contribute;
-default:confusion(/*1744:*/
-#line 26463 "dummy.w"
+default:confusion(/*1743:*/
+#line 26452 "dummy.w"
 572
-/*:1744*/
-#line 19572 "dummy.w"
+/*:1743*/
+#line 19563 "dummy.w"
 );
 
 }
 
-/*:1042*/
-#line 19531 "dummy.w"
+/*:1041*/
+#line 19522 "dummy.w"
 ;
-/*1047:*/
-#line 19614 "dummy.w"
+/*1046:*/
+#line 19605 "dummy.w"
 
 if(pi<inf_penalty)
-{/*1049:*/
-#line 19658 "dummy.w"
+{/*1048:*/
+#line 19649 "dummy.w"
 
 if(page_total<page_goal)
 if((page_so_far[3]!=0)||(page_so_far[4]!=0)||
@@ -4180,8 +4167,8 @@ else b= badness(page_goal-page_total,page_so_far[2]);
 else if(page_total-page_goal> page_shrink)b= awful_bad;
 else b= badness(page_total-page_goal,page_shrink)
 
-/*:1049*/
-#line 19617 "dummy.w"
+/*:1048*/
+#line 19608 "dummy.w"
 ;
 if(b<awful_bad)
 if(pi<=eject_penalty)c= pi;
@@ -4209,12 +4196,12 @@ return true;
 }
 }
 
-/*:1047*/
-#line 19534 "dummy.w"
+/*:1046*/
+#line 19525 "dummy.w"
 ;
 if((type(p)<glue_node)||(type(p)> kern_node))goto contribute;
-update_heights:/*1046:*/
-#line 19599 "dummy.w"
+update_heights:/*1045:*/
+#line 19590 "dummy.w"
 
 if(type(p)==kern_node)q= p;
 else{q= glue_ptr(p);
@@ -4230,11 +4217,11 @@ glue_ptr(p)= r;q= r;
 }
 page_total= page_total+page_depth+width(q);page_depth= 0
 
-/*:1046*/
-#line 19537 "dummy.w"
+/*:1045*/
+#line 19528 "dummy.w"
 ;
-contribute:/*1045:*/
-#line 19592 "dummy.w"
+contribute:/*1044:*/
+#line 19583 "dummy.w"
 
 if(page_depth> page_max_depth)
 {page_total= 
@@ -4242,46 +4229,46 @@ page_total+page_depth-page_max_depth;
 page_depth= page_max_depth;
 }
 
-/*:1045*/
-#line 19538 "dummy.w"
+/*:1044*/
+#line 19529 "dummy.w"
 ;
-/*1040:*/
-#line 19543 "dummy.w"
+/*1039:*/
+#line 19534 "dummy.w"
 
 link(page_tail)= p;page_tail= p;
 link(contrib_head)= link(p);link(p)= null;goto done
 
-/*:1040*/
-#line 19539 "dummy.w"
+/*:1039*/
+#line 19530 "dummy.w"
 ;
-done1:/*1041:*/
-#line 19547 "dummy.w"
+done1:/*1040:*/
+#line 19538 "dummy.w"
 
 link(contrib_head)= link(p);link(p)= null;flush_node_list(p)
 
-/*:1041*/
-#line 19540 "dummy.w"
+/*:1040*/
+#line 19531 "dummy.w"
 ;
 done:
 
-/*:1039*/
-#line 19498 "dummy.w"
+/*:1038*/
+#line 19489 "dummy.w"
 ;
 }while(!(link(contrib_head)==null));
-/*1037:*/
-#line 19506 "dummy.w"
+/*1036:*/
+#line 19497 "dummy.w"
 
 if(nest_ptr==0)tail= contrib_head;
 else contrib_tail= contrib_head
 
-/*:1037*/
-#line 19500 "dummy.w"
+/*:1036*/
+#line 19491 "dummy.w"
 ;
 return false;
 }
 
-/*:1036*//*1050:*/
-#line 19666 "dummy.w"
+/*:1035*//*1049:*/
+#line 19657 "dummy.w"
 
 void happend_insertion(pointer p)
 {uint8_t n;
@@ -4292,8 +4279,8 @@ n= subtype(p);r= page_ins_head;
 while(n>=subtype(link(r)))r= link(r);
 n= qo(n);
 if(subtype(r)!=qi(n))
-/*1051:*/
-#line 19697 "dummy.w"
+/*1050:*/
+#line 19688 "dummy.w"
 
 {q= get_node(page_ins_node_size);link(q)= link(r);link(r)= q;r= q;
 subtype(r)= qi(n);type(r)= inserting;ensure_vbox(n);
@@ -4310,8 +4297,8 @@ if((shrink_order(q)!=normal)&&(shrink(q)!=0))
 DBG(DBGTEX,"Infinite glue shrinkage inserted from stream %d",n);
 }
 
-/*:1051*/
-#line 19677 "dummy.w"
+/*:1050*/
+#line 19668 "dummy.w"
 ;
 if(type(r)==split_up)insert_penalties= insert_penalties+float_cost(p);
 else{last_ins_ptr(r)= p;
@@ -4322,8 +4309,8 @@ else h= x_over_n(height(p),1000)*count(n);
 if(((h<=0)||(h<=delta))&&(height(p)+height(r)<=dimen(n)))
 {page_goal= page_goal-h;height(r)= height(r)+height(p);
 }
-else/*1052:*/
-#line 19723 "dummy.w"
+else/*1051:*/
+#line 19714 "dummy.w"
 
 {if(count(n)<=0)w= max_dimen;
 else{w= page_goal-page_total-page_depth;
@@ -4341,14 +4328,14 @@ if(q==null)insert_penalties= insert_penalties+eject_penalty;
 else if(type(q)==penalty_node)insert_penalties= insert_penalties+penalty(q);
 }
 
-/*:1052*/
-#line 19687 "dummy.w"
+/*:1051*/
+#line 19678 "dummy.w"
 ;
 }
 }
 
-/*:1050*//*1057:*/
-#line 19812 "dummy.w"
+/*:1049*//*1056:*/
+#line 19803 "dummy.w"
 
 void hpack_page(void)
 {
@@ -4369,8 +4356,8 @@ if(box(0)!=null)
 {flush_node_list(box(0));box(0)= null;}
 insert_penalties= 0;
 save_split_top_skip= split_top_skip;
-/*1061:*/
-#line 19898 "dummy.w"
+/*1060:*/
+#line 19889 "dummy.w"
 
 {r= link(page_ins_head);
 while(r!=page_ins_head)
@@ -4385,22 +4372,22 @@ r= link(r);
 }
 }
 
-/*:1061*/
-#line 19832 "dummy.w"
+/*:1060*/
+#line 19823 "dummy.w"
 ;
 q= hold_head;link(q)= null;prev_p= page_head;p= link(prev_p);
 while(p!=best_page_break)
 {if(type(p)==ins_node)
-{/*1063:*/
-#line 19924 "dummy.w"
+{/*1062:*/
+#line 19915 "dummy.w"
 
 {r= link(page_ins_head);
 while(subtype(r)!=subtype(p))r= link(r);
 if(best_ins_ptr(r)==null)wait= true;
 else{wait= false;s= last_ins_ptr(r);link(s)= ins_ptr(p);
 if(best_ins_ptr(r)==p)
-/*1064:*/
-#line 19940 "dummy.w"
+/*1063:*/
+#line 19931 "dummy.w"
 
 {if(type(r)==split_up)
 if((broken_ins(r)==p)&&(broken_ptr(r)!=null))
@@ -4423,15 +4410,15 @@ streams[n].p= temp_ptr;
 streams[n].t= s;
 }
 
-/*:1064*/
-#line 19931 "dummy.w"
+/*:1063*/
+#line 19922 "dummy.w"
 
 else{while(link(s)!=null)s= link(s);
 last_ins_ptr(r)= s;
 }
 }
-/*1065:*/
-#line 19962 "dummy.w"
+/*1064:*/
+#line 19953 "dummy.w"
 
 link(prev_p)= link(p);link(p)= null;
 if(wait)
@@ -4442,20 +4429,20 @@ free_node(p,ins_node_size);
 }
 p= prev_p
 
-/*:1065*/
-#line 19937 "dummy.w"
+/*:1064*/
+#line 19928 "dummy.w"
 ;
 }
 
-/*:1063*/
-#line 19837 "dummy.w"
+/*:1062*/
+#line 19828 "dummy.w"
 ;
 }
 prev_p= p;p= link(prev_p);
 }
 split_top_skip= save_split_top_skip;
-/*1060:*/
-#line 19876 "dummy.w"
+/*1059:*/
+#line 19867 "dummy.w"
 
 if(p!=null)
 {if(link(contrib_head)==null)
@@ -4472,11 +4459,11 @@ if(q!=hold_head)
 link(contrib_head)= link(hold_head);
 }
 
-/*:1060*/
-#line 19843 "dummy.w"
+/*:1059*/
+#line 19834 "dummy.w"
 ;
-/*1062:*/
-#line 19912 "dummy.w"
+/*1061:*/
+#line 19903 "dummy.w"
 
 r= link(page_ins_head);
 while(r!=page_ins_head)
@@ -4484,13 +4471,13 @@ while(r!=page_ins_head)
 }
 link(page_ins_head)= page_ins_head
 
-/*:1062*/
-#line 19844 "dummy.w"
+/*:1061*/
+#line 19835 "dummy.w"
 ;
 }
 
-/*:1057*//*1189:*/
-#line 21816 "dummy.w"
+/*:1056*//*1188:*/
+#line 21807 "dummy.w"
 
 
 void hdisplay(pointer p,pointer a,bool l)
@@ -4506,22 +4493,23 @@ internal_font_number f;
 int n;
 scaled v;
 scaled d;
+
 if(head==tail)
 {pop_nest();w= -max_dimen;x= cur_list.hs_field;offset= 0;
 }
 else{pointer par_ptr= link(head);
-add_par_fill_skip();
 pop_nest();
+store_map(par_ptr,node_pos,0);
 line_break(display_widow_penalty,par_ptr);
 x= cur_list.hs_field;
-/*1190:*/
-#line 21848 "dummy.w"
+/*1189:*/
+#line 21840 "dummy.w"
 
 v= shift_amount(just_box)+2*dimen_def[quad_no];w= -max_dimen;
 p= list_ptr(just_box);
 while(p!=null)
-{/*1191:*/
-#line 21865 "dummy.w"
+{/*1190:*/
+#line 21857 "dummy.w"
 
 reswitch:if(is_char_node(p))
 {f= font(p);d= char_width(f)(char_info(f)(character(p)));
@@ -4538,11 +4526,11 @@ p= lig_trick;goto reswitch;
 }
 
 /*:677*/
-#line 21873 "dummy.w"
+#line 21865 "dummy.w"
 
 case kern_node:case math_node:d= width(p);break;
-case glue_node:/*1192:*/
-#line 21887 "dummy.w"
+case glue_node:/*1191:*/
+#line 21879 "dummy.w"
 
 {q= glue_ptr(p);d= width(q);
 if(glue_sign(just_box)==stretching)
@@ -4558,21 +4546,21 @@ v= max_dimen;
 if(subtype(p)>=a_leaders)goto found;
 }
 
-/*:1192*/
-#line 21876 "dummy.w"
+/*:1191*/
+#line 21868 "dummy.w"
 break;
-case whatsit_node:/*1408:*/
-#line 25265 "dummy.w"
+case whatsit_node:/*1407:*/
+#line 25254 "dummy.w"
 d= 0
 
-/*:1408*/
-#line 21877 "dummy.w"
+/*:1407*/
+#line 21869 "dummy.w"
 ;break;
 default:d= 0;
 }
 
-/*:1191*/
-#line 21853 "dummy.w"
+/*:1190*/
+#line 21845 "dummy.w"
 ;
 if(v<max_dimen)v= v+d;
 goto not_found;
@@ -4585,13 +4573,13 @@ not_found:p= link(p);
 }
 done:
 
-/*:1190*/
-#line 21841 "dummy.w"
+/*:1189*/
+#line 21833 "dummy.w"
 ;
 }
 
-/*1193:*/
-#line 21905 "dummy.w"
+/*1192:*/
+#line 21897 "dummy.w"
 
 if(par_shape_ptr==null)
 if((hang_indent!=0)&&
@@ -4608,17 +4596,17 @@ else p= par_shape_ptr+2*(prev_graf+2);
 s= mem[p-1].sc;l= mem[p].sc;
 }
 
-/*:1193*/
-#line 21844 "dummy.w"
+/*:1192*/
+#line 21836 "dummy.w"
 ;
 pre_display_size= w;display_width= l;display_indent= s;
 }
 
-/*:1189*//*1244:*/
-#line 22571 "dummy.w"
+/*:1188*//*1243:*/
+#line 22563 "dummy.w"
 
-{/*1242:*/
-#line 22554 "dummy.w"
+{/*1241:*/
+#line 22546 "dummy.w"
 
 pointer b;
 scaled w;
@@ -4631,8 +4619,8 @@ small_number g1,g2;
 pointer r;
 pointer t;
 
-/*:1242*/
-#line 22572 "dummy.w"
+/*:1241*/
+#line 22564 "dummy.w"
 
 adjust_tail= adjust_head;b= hpack(p,natural);p= list_ptr(b);
 t= adjust_tail;adjust_tail= null;
@@ -4643,8 +4631,8 @@ if(a==null)
 else{e= width(a);q= e+math_quad;
 }
 if(w+q> z)
-/*1246:*/
-#line 22610 "dummy.w"
+/*1245:*/
+#line 22602 "dummy.w"
 
 {if((e!=0)&&((w-total_shrink[normal]+q<=z)||
 (total_shrink[fil]!=0)||(total_shrink[fill]!=0)||
@@ -4661,11 +4649,11 @@ b= hpack(p,z,exactly);
 w= width(b);
 }
 
-/*:1246*/
-#line 22583 "dummy.w"
+/*:1245*/
+#line 22575 "dummy.w"
 ;
-/*1247:*/
-#line 22634 "dummy.w"
+/*1246:*/
+#line 22626 "dummy.w"
 
 d= half(z-w);
 if((e> 0)&&(d<2*e))
@@ -4673,11 +4661,11 @@ if((e> 0)&&(d<2*e))
 if(p!=null)if(!is_char_node(p))if(type(p)==glue_node)d= 0;
 }
 
-/*:1247*/
-#line 22585 "dummy.w"
+/*:1246*/
+#line 22577 "dummy.w"
 ;
-/*1248:*/
-#line 22647 "dummy.w"
+/*1247:*/
+#line 22639 "dummy.w"
 
 tail_append(new_penalty(pre_display_penalty));
 store_map(tail,node_pos,offset);
@@ -4693,11 +4681,11 @@ tail_append(new_penalty(inf_penalty));store_map(tail,node_pos,offset);
 }
 else{tail_append(new_glue(pointer_def[glue_kind][g1]));store_map(tail,node_pos,offset);}
 
-/*:1248*/
-#line 22586 "dummy.w"
+/*:1247*/
+#line 22578 "dummy.w"
 ;
-/*1249:*/
-#line 22662 "dummy.w"
+/*1248:*/
+#line 22654 "dummy.w"
 
 if(e!=0)
 {r= new_kern(z-w-e-d);
@@ -4710,11 +4698,11 @@ b= hpack(b,natural);
 }
 shift_amount(b)= s+d;append_to_vlist(b,offset)
 
-/*:1249*/
-#line 22587 "dummy.w"
+/*:1248*/
+#line 22579 "dummy.w"
 ;
-/*1250:*/
-#line 22674 "dummy.w"
+/*1249:*/
+#line 22666 "dummy.w"
 
 if((a!=null)&&(e==0)&&!l)
 {tail_append(new_penalty(inf_penalty));
@@ -4730,8 +4718,8 @@ offset= (hpos-hstart)+1-node_pos;
 store_map(tail,node_pos,offset);
 if(g2> 0){tail_append(new_glue(pointer_def[glue_kind][g2]));store_map(tail,node_pos,offset);}
 
-/*:1250*/
-#line 22588 "dummy.w"
+/*:1249*/
+#line 22580 "dummy.w"
 ;
 prev_graf= prev_graf+3;
 cur_list.bs_pos= hpos+node_pos;
@@ -4739,4 +4727,4 @@ push_nest();mode= hmode;
 }
 }
 
-/*:1244*/
+/*:1243*/

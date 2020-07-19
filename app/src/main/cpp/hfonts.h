@@ -1,17 +1,17 @@
-/*323:*/
-#line 6144 "hint.w"
+/*327:*/
+#line 6214 "hint.w"
 
 #ifndef _HFONTS_H
 #define _HFONTS_H
-/*261:*/
-#line 4482 "hint.w"
+/*265:*/
+#line 4549 "hint.w"
 
 typedef enum{no_format,pk_format,t1_format,ot_format,tt_format}font_format_t;
-/*:261*//*262:*/
-#line 4493 "hint.w"
+/*:265*//*266:*/
+#line 4560 "hint.w"
 
-/*294:*/
-#line 5440 "hint.w"
+/*298:*/
+#line 5507 "hint.w"
 
 
 typedef struct
@@ -19,27 +19,27 @@ typedef struct
 unsigned int cs;
 unsigned char id;
 }pk_t;
-/*:294*//*298:*/
-#line 5609 "hint.w"
+/*:298*//*302:*/
+#line 5676 "hint.w"
 
 typedef stbtt_fontinfo tt_t;
 typedef struct
 {int dummy;
 }ttg_t;
-/*:298*//*302:*/
-#line 5662 "hint.w"
+/*:302*//*306:*/
+#line 5729 "hint.w"
 
 typedef struct
 {int dummy;
 }t1_t;
-/*:302*//*304:*/
-#line 5675 "hint.w"
+/*:306*//*308:*/
+#line 5742 "hint.w"
 
 typedef struct
 {int dummy;
 }ot_t;
-/*:304*/
-#line 4494 "hint.w"
+/*:308*/
+#line 4561 "hint.w"
 
 
 typedef struct font_s{
@@ -48,16 +48,16 @@ unsigned char*font_data;
 int size;
 double ds;
 double hppp,vppp;
-/*267:*/
-#line 4587 "hint.w"
+/*271:*/
+#line 4654 "hint.w"
 
 struct gcache_s**g0;
 struct gcache_s***g1;
 struct gcache_s****g2;
 struct gcache_s*****g3;
 
-/*:267*/
-#line 4502 "hint.w"
+/*:271*/
+#line 4569 "hint.w"
 
 font_format_t ff;
 union{
@@ -67,34 +67,34 @@ t1_t t1;
 ot_t ot;
 };
 }font_t;
-/*:262*//*268:*/
-#line 4599 "hint.w"
+/*:266*//*272:*/
+#line 4666 "hint.w"
 
 typedef struct gcache_s gcache_t;
-/*:268*//*273:*/
-#line 4792 "hint.w"
+/*:272*//*277:*/
+#line 4859 "hint.w"
 
-/*295:*/
-#line 5452 "hint.w"
+/*299:*/
+#line 5519 "hint.w"
 
 typedef struct
 {unsigned char flag;
 unsigned char*encoding;
 }pkg_t;
-/*:295*//*303:*/
-#line 5667 "hint.w"
+/*:299*//*307:*/
+#line 5734 "hint.w"
 
 typedef struct
 {int dummy;
 }t1g_t;
-/*:303*//*305:*/
-#line 5680 "hint.w"
+/*:307*//*309:*/
+#line 5747 "hint.w"
 
 typedef struct
 {int dummy;
 }otg_t;
-/*:305*/
-#line 4793 "hint.w"
+/*:309*/
+#line 4860 "hint.w"
 
 
 struct gcache_s{
@@ -112,10 +112,10 @@ t1g_t t1;
 otg_t ot;
 };
 };
-/*:273*/
-#line 6147 "hint.w"
+/*:277*/
+#line 6217 "hint.w"
 
 
 
 #endif
-/*:323*/
+/*:327*/

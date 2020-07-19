@@ -1,5 +1,5 @@
 	/*433:*/
-	#line 8755 "format.w"
+	#line 8757 "format.w"
 
 #include "basetypes.h"
 #include <string.h>
@@ -82,7 +82,7 @@ hbase_size= 0;
 hpos= hstart= hend= NULL;
 }
 	/*:274*/
-	#line 8772 "format.w"
+	#line 8774 "format.w"
 
 	/*262:*/
 	#line 5528 "format.w"
@@ -109,7 +109,7 @@ DBG(DBGDIR,"banner size=0x%x\n",hbanner_size);
 return true;
 }
 	/*:262*/
-	#line 8773 "format.w"
+	#line 8775 "format.w"
 
 	/*284:*/
 	#line 6022 "format.w"
@@ -136,7 +136,7 @@ e->file_name= strdup(file_name);
 DBG(DBGDIR,"Creating entry %d: \"%s\" size=0x%x xsize=0x%x\n",i,file_name,size,xsize);
 }
 	/*:285*/
-	#line 8774 "format.w"
+	#line 8776 "format.w"
 
 	/*35:*/
 	#line 1016 "format.w"
@@ -180,7 +180,7 @@ DBG(DBGDIR,"Creating entry %d: \"%s\" size=0x%x xsize=0x%x\n",i,file_name,size,x
   hset_entry(&(E),i,s,xs,file_name); \
 }
 	/*:293*/
-	#line 8775 "format.w"
+	#line 8777 "format.w"
 
 	/*263:*/
 	#line 5557 "format.w"
@@ -371,7 +371,7 @@ if(INFO(a)!=0)QUIT("End of maximum list with info %d",INFO(a));
 
 }
 	/*:311*/
-	#line 8776 "format.w"
+	#line 8778 "format.w"
 
 
 

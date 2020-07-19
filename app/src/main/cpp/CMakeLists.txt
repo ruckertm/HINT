@@ -5,7 +5,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -Wno-dangling-else -Wno-fo
 set(CFLAGS "${CFLAGS} -g -Wno-dangling-else -Wno-format -DDEBUG")
 
 # Import the CMakeLists.txt for the glm library
-#add_subdirectory(glm) # if your CMakeLists is at '../cpp'
+add_subdirectory(glm) # if your CMakeLists is at '../cpp'
 #add_subdirectory(../src/main/cpp/glm) # if your CMakeLists is at '../app'
 
 find_library( # Defines the name of the path variable that stores the
