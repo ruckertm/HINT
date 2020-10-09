@@ -39,9 +39,9 @@
 \titletrue
 
 \def\setrevision$#1: #2 ${\gdef\lastrevision{#2}}
-\setrevision$Revision: 2020 $
+\setrevision$Revision: 2056 $
 \def\setdate$#1(#2) ${\gdef\lastdate{#2}}
-\setdate$Date: 2020-07-19 19:34:43 +0200 (Sun, 19 Jul 2020) $
+\setdate$Date: 2020-09-24 12:26:49 +0200 (Thu, 24 Sep 2020) $
 
 \null
 
@@ -5524,12 +5524,16 @@ banner is 256 byte.
 To check the banner, we have the function |hcheck_banner|; 
 it returns |true| if successful.
 
+@<common variables@>=
+int version=1, subversion=1;
+char hbanner[MAX_BANNER+1];
+@
 
 @<function to check the banner@>=
-int version=1, subversion=0;
-char hbanner[MAX_BANNER+1];
+
 bool hcheck_banner(char *magic)
 { int hbanner_size=0;
+  int v;
   char *t;
   t=hbanner;
   if (strncmp(magic,hbanner,4)!=0) QUIT("This is not a %s file",magic);
@@ -5538,10 +5542,12 @@ bool hcheck_banner(char *magic)
   if(hbanner[hbanner_size-1]!='\n') QUIT("Banner exceeds maximum size=0x%x",MAX_BANNER);
   if (*t!=' ') QUIT("Space expected after %s",magic);
   else t++;
-  version=strtol(t,&t,10);
+  v=strtol(t,&t,10);
+  if (v!=version) QUIT("Wrong version: got %d, expected %d",v,version); 
   if (*t!='.') QUIT("Dot expected after version number %d",version);
   else t++;
-  subversion=strtol(t,&t,10);
+  v=strtol(t,&t,10);
+  if (v!=subversion) QUIT("Wrong subversion: got %d, expected %d",v,subversion); 
   if (*t!=' ' && *t!='\n') QUIT("Space expected after subversion number %d",subversion);
   LOG("%s file version %d.%d:%s",magic,version, subversion, t);
   DBG(DBGDIR,"banner size=0x%x\n",hbanner_size);
@@ -5582,7 +5588,7 @@ Writing the banner to a short format file is accomplished by calling
 and a (short) comment as the second argument.
 \putcode
 @<function to write the banner@>=
-extern int version, subversion;
+
 static size_t hput_banner(char *magic, char *s)
 { return fprintf(hout,"%s %d.%d %s\n",magic,version,subversion,s);
 }
@@ -6385,7 +6391,7 @@ static size_t hput_root(void)
   return s;
 }
 @<|hcompress| function@>@;
-extern bool option_compress;
+extern int option_compress;
 void hput_directory(void)
 { int i;
   @<set the file sizes for optional sections@>@;
@@ -6962,14 +6968,14 @@ void hget_param_list_node(list_t *l)
 \subsection{Fonts}\label{fonts}
 Another definition that has no corresponding content node is the
 font\index{font} definition.  Fonts by themselves do not constitute
-content, instead they are used in glyph\index{glyph} nodes.  Fonts are
-also a data type, that never occur directly in a content node; a
+content, instead they are used in glyph\index{glyph} nodes.
+Further, Fonts are never directly embedded in a content node; in a content node, a
 font is always specified by its font number. This limits the number of
 fonts that can be used in a \HINT/ file to at most 256.
 
 A long format font definition starts with the keyword ``\.{font}'' and
 is followed by the font number, as usual prefixed by an asterisk. Then
-comes the font specification with the optional font size, the font
+comes the font specification with the font size, the font
 name, the section number of the \TeX\ font metric file, and the
 section number of the file containing the glyphs for the font.
 The \HINT/ format supports \.{.pk} files, the traditional font format
@@ -7018,14 +7024,12 @@ Currently, it is only required that a font specifies
 an interword glue and a default discretionary break. After that comes
 a list of up to 12 font specific parameters.
 
-The optional font size specifies the desired font\index{font size}
-size. If omitted, we assign the value zero which implies the
-design\index{design size} size of the font as stored in the \.{.tfm}
-file.
+The font size specifies the desired ``at size''\index{font at size}
+which might be different from the ``design size''\index{font design size}
+of the font as stored in the \.{.tfm} file.
 
 In the short format, the font specification is given in the same order
-as in the long format.  The info value will be |b001| if a font size
-is present, otherwise it is~|b000|.
+as in the long format.
 
 Our internal representation of a font just stores the font name
 because in the long format we add the font name as a comment to glyph
@@ -7069,9 +7073,7 @@ might involve glyphs that reference font |f| (or other fonts).
 
 font: font_head font_param_list;
 
-font_head: string UNSIGNED UNSIGNED   @/
-		 {uint8_t f=$<u>@&0; SET_DBIT(f,font_kind); @+hfont_name[f]=strdup($1); $$=hput_font_head(f,hfont_name[f],0,$2,$3);}
-| string dimension UNSIGNED UNSIGNED @/
+font_head: string dimension UNSIGNED UNSIGNED @/
   	 	 {uint8_t f=$<u>@&0;  SET_DBIT(f,font_kind); @+hfont_name[f]=strdup($1); $$=hput_font_head(f,hfont_name[f],$2,$3,$4);};
 
 font_param_list: glue_node hyphen_node @+ | font_param_list font_param ;
@@ -7120,7 +7122,7 @@ static void hget_font_params(void)
 void hget_font_def(info_t i, uint8_t f)
 { char *n; @+dimen_t s=0;@+uint16_t m,y; 
   HGET_STRING(n);@+ hwrite_string(n);@+  hfont_name[f]=strdup(n);
-  if (i&b001) @+{ HGET32(s); @+if (s!=0) hwrite_dimension(s);@+}
+  HGET32(s); @+ hwrite_dimension(s);
   DBG(DBGDEF,"Font %s size 0x%x\n", n, s); 
   HGET16(m); @+RNG("Font metrics",m,3,max_section_no);
   HGET16(y); @+RNG("Font glyphs",y,3,max_section_no);
@@ -7136,7 +7138,7 @@ uint8_t hput_font_head(uint8_t f,  char *n, dimen_t s, @| uint16_t m, uint16_t y
 { info_t i=b000;
   DBG(DBGDEF,"Defining font %d (%s) size 0x%x\n", f, n, s); 
   hput_string(n);
-  if (s!=0) {HPUT32(s);@+ i=b001;@+} 
+  HPUT32(s);@+ 
   HPUT16(m); @+HPUT16(y); 
   return TAG(font_kind,i);
 }
@@ -7797,11 +7799,11 @@ option.
 @
 
 @<common variables@>=
-bool option_utf8=false;
-bool option_hex=false;
-bool option_force=false;
-bool option_global=false;
-bool option_compress=false;
+int option_utf8=false;
+int option_hex=false;
+int option_force=false;
+int option_global=false;
+int option_compress=false;
 
 char *in_name;
 char *stem_name;
@@ -7815,7 +7817,7 @@ char *out_ext;
 
 char *file_name=NULL;
 int file_name_length=0;
-bool option_log=false;
+int option_log=false;
 @ 
 
 Processing the command line looks for options and then sets the
@@ -8767,9 +8769,8 @@ extern void hget_max_definitions(void);
 #include "hformat.h"
 #include "hget.h"
 
-
-uint8_t *hpos=NULL, *hstart=NULL, *hend=NULL;
-
+@<hint types@>@;
+@<common variables@>@;
 
 @<map functions@>@;
 @<function to check the banner@>@;
@@ -8856,17 +8857,7 @@ extern void hput_list_size(uint32_t n, int i);
 #include "hformat.h"
 #include "hput.h"
 
-uint8_t *hpos=NULL, *hstart=NULL, *hend=NULL;
-FILE *hout;
-int version=1, subversion=0;
-bool option_compress=false;
-bool option_global=false;
-int next_range;
-range_pos_t *range_pos;
-int *page_on; 
-char *stem_name=NULL;
-int stem_length=0;
-
+@<common variables@>@;
 
 @<directory functions@>@;
 @<function to write the banner@>@;

@@ -19,12 +19,15 @@
 
 extern "C" {
 #include "error.h"
+#include <ft2build.h>
+#include FT_FREETYPE_H
 #include "stb_truetype.h"
 #include "hint.h"
 #include "hfonts.h"
 #include "hrender.h"
 #include "rendernative.h"
 #include "stb_image.h"
+
 };
 
 
@@ -275,6 +278,8 @@ static void GLtexture(gcache_t *g) {
     checkGlError("glGenTextures");
     glBindTexture(GL_TEXTURE_2D, GLtex);
     checkGlError("glBindTexture");
+    /* the first element in g->bits corresponds to the lower left pixel,
+     * the last element in g->bits to the upper right pixel. */
     glTexImage2D(
             GL_TEXTURE_2D,
             0,
@@ -297,6 +302,21 @@ static void GLtexture(gcache_t *g) {
     //MESSAGE("Generated GL texture %d",g->GLtexture);
 }
 
+void nativeSetPK(struct gcache_s*g)
+{GLtexture(g); /* can I free g->bits ? */}
+
+void nativeSetFreeType(struct gcache_s*g)
+{GLtexture(g);}
+
+
+void nativeFreeGlyph(gcache_t *g)
+/* Free resources associated with g. */
+{
+    if (g->GLtexture != 0) {
+        glDeleteTextures(1, &(g->GLtexture)); // probably not needed
+        g->GLtexture = 0;
+    }
+}
 extern "C" void nativeGlyph(double x, double y, double w, double h, gcache_t *g)
 /* Using GL to render a character texture
    Coordinates in points, origin bottom left, x and w right, y and h up
@@ -309,12 +329,12 @@ extern "C" void nativeGlyph(double x, double y, double w, double h, gcache_t *g)
     if (g->GLtexture == 0)
         GLtexture(g);
 
-    GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
-                       (GLfloat) x, (GLfloat) (y + h), 0.0f, 0.0f,
-                       (GLfloat) (x + w), (GLfloat) (y + h), 1.0f, 0.0f,
-                       (GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
-                       (GLfloat) (x + w), (GLfloat) (y + h), 1.0f, 0.0f,
-                       (GLfloat) (x + w), (GLfloat) y, 1.0f, 1.0f
+    GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 0.0f,
+                       (GLfloat) x, (GLfloat) (y + h), 0.0f, 1.0f,
+                       (GLfloat) (x + w), (GLfloat) (y + h), 1.0f, 1.0f,
+                       (GLfloat) x, (GLfloat) y, 0.0f, 0.0f,
+                       (GLfloat) (x + w), (GLfloat) (y + h), 1.0f, 1.0f,
+                       (GLfloat) (x + w), (GLfloat) y, 1.0f, 0.0f
     };
     glBindTexture(GL_TEXTURE_2D, g->GLtexture);
     checkGlError("glBindTexture");
@@ -412,138 +432,6 @@ extern "C" void nativeBlank(void) {
 }
 
 
-/* reading packed numbers from pk files */
-
-static int j; /* position of next nybble in data */
-static int r; /* current repeat count */
-static int dyn_f; /* dynamic f value */
-#define read_nybble() (j&1?(data[j++>>1]&0xF):((data[j++>>1]>>4)&0xF))
-
-static int packed_number(unsigned char *data) {
-    int i, k;
-    i = read_nybble();
-    if (i == 0) {
-        do {
-            k = read_nybble();
-            i++;
-        } while (k == 0);
-        while (i-- > 0) k = k * 16 + read_nybble();
-        return k - 15 + (13 - dyn_f) * 16 + dyn_f;
-    } else if (i <= dyn_f) return i;
-    else if (i < 14) return (i - dyn_f - 1) * 16 + read_nybble() + dyn_f + 1;
-    else {
-        if (i == 14) r = packed_number(data);
-        else r = 1;
-        return packed_number(data);
-    }
-}
-
-
-extern "C" void nativeSetRunlength(gcache_t *g, unsigned char *data) {
-    int x, y; /* position in bitmap */
-    unsigned int n; /* number of pixel left in current run */
-    int white = (g->pk.flag >> 3) & 1; /* whether pixel is white in current run */
-    unsigned char *line;
-    g->bits = (unsigned char *) calloc(g->w * g->h, 1);
-    if (g->bits == NULL) {
-        g->w = g->h = 0;
-        return;
-    } /* out of memory */
-    j = 0; /* static nybble position to start of data */
-    r = 0; /* static repeat count = 0 */
-    dyn_f = g->pk.flag >> 4; /* static dynamic f value */
-    n = 0;
-    x = g->h - 1;
-    line = g->bits + x * g->w;
-    while (x >= 0) {
-        int d;
-        y = 0;
-        while (y < (int) g->w) /* fill current line */
-        {
-            if (n <= 0) {
-                n = packed_number(data);
-                white = !white;
-            }
-            d = min(g->w - y, n); /* remaining pixel in current run and current line */
-            while (d > 0) {
-                line[y] = white ? 0x00 : 0xFF; /* White or Black */
-                d--;
-                y++;
-                n--;
-            }
-        }
-        x--;
-        line = g->bits + x * g->w;
-        while (r > 0 && x >= 0) /* copy previous line */
-        {
-            unsigned int k;
-            for (k = 0; k < g->w; k++) line[k] = line[k + g->w];
-            r--;
-            x--;
-            line = g->bits + x * g->w;
-        }
-    }
-    GLtexture(g);
-}
-
-extern "C" void nativeSetBitmaped(gcache_t *g, unsigned char *data) {
-    unsigned char *t = g->bits; /* byte=bit position in bits */
-    int j = 0; /* bit position in data */
-    int jj = 0; /* byte position in data */
-    unsigned char next; /* next byte at data[jj] */
-    int k = 0; /* bit position in next byte */
-    //MESSAGE("Unpacking bitmap");
-    g->bits = (unsigned char *) calloc(g->w * g->h, 1);
-    if (g->bits == NULL) {
-        g->w = g->h = 0;
-        return;
-    } /* out of memory */
-    for (j = 0; j < g->h * g->w; j++, t++) {
-        jj = j >> 3;
-        k = j & 0x7;
-        if (k == 0) {
-            next = data[jj];
-            k = 7;
-        }
-        if ((next >> (7 - k)) & 1) *t = 0x00; else *t = 0xFF;
-    }
-    GLtexture(g);
-}
-
-
-void nativeFreeGlyph(gcache_t *g)
-/* Free resources associated with g. */
-{
-    if (g->GLtexture != 0) {
-        glDeleteTextures(1, &(g->GLtexture)); // probably not needed
-        g->GLtexture = 0;
-    }
-}
-
-extern "C" void nativeSetTrueType(struct gcache_s *g) {
-    unsigned int x, y; /* position in bitmap */
-    unsigned char *bits;
-    unsigned int ww; /* width in Bytes */
-    unsigned char *line;
-
-    bits = g->bits;
-    g->bits = NULL;
-    ww = g->w;
-    g->bits = (unsigned char *) calloc(ww * g->h, 1);
-    if (g->bits == NULL) {
-        g->w = g->h = 0;
-        return;
-    } /* out of memory */
-    for (y = 0; y < g->h; y++) {
-        line = g->bits + (g->h - y - 1) * ww;
-        for (x = 0; x < g->w; x++)
-            line[x] = bits[y * g->w + x];
-    }
-    free(bits);
-    g->voff = -g->voff;
-    g->hoff = -g->hoff;
-    GLtexture(g);
-}
 
 /* ZOOMING */
 

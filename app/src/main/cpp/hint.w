@@ -27,8 +27,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 2020 ${}$}
-\def\lastdate{${}$Date: 2020-07-19 19:34:43 +0200 (Sun, 19 Jul 2020) ${}$}
+\def\lastrevision{${}$Revision: 2064 ${}$}
+\def\lastdate{${}$Date: 2020-10-05 18:26:42 +0200 (Mon, 05 Oct 2020) ${}$}
 
 \input titlepage.tex
 
@@ -478,7 +478,8 @@ as explained below, are necessary.
 When rendering fonts, we will need to find the section containing the actual glyphs.
 
 So we store the font name |n|, the section number for the font metrics |m| and the glyphs |q|, 
-the optional ``at size'' |s|, the pointer to the font glue |g|,
+the ``at size'' |s| (which might be different from the design size),
+the pointer to the font glue |g|,
 the pointer to the font hyphen |h|, and the font parameters |p|.
 
 @<\HINT/ types@>=
@@ -505,10 +506,15 @@ ALLOCATE(font_def, max_ref[font_kind]+1, font_def_t);
 free(font_def); font_def=NULL;
 @
 
-@<\HINT/ auxiliar functions@>=
 
-static void hget_font_params(uint8_t n, font_def_t *f)
-{@+HGET16(f->m); @+RNG("Font metrics",f->m,3,max_section_no);
+@<\HINT/ auxiliar functions@>=
+static void hget_font_def(uint8_t a, uint8_t n)
+{ char *t;
+  font_def_t *f=font_def+n;
+  HGET_STRING(t);f->n=strdup(t); 
+  DBG(DBGDEF,"Font %d: %s\n", n, t); 
+  HGET32(f->s); @+RNG("Font size",f->s,1,0x7fffffff);
+  HGET16(f->m); @+RNG("Font metrics",f->m,3,max_section_no);
   HGET16(f->q); @+RNG("Font glyphs",f->q,3,max_section_no);
   f->g=hget_glue_spec(); 
   f->h=hget_hyphen_node();
@@ -529,14 +535,12 @@ static void hget_font_params(uint8_t n, font_def_t *f)
   }
   DBG(DBGDEF,"End font definition\n");
 }
-static void hget_font_def(uint8_t a, uint8_t n)
-{ char *t;
-  HGET_STRING(t);font_def[n].n=strdup(t); 
-  DBG(DBGDEF,"Font %d: %s\n", n, t); 
-  if (INFO(a)&b001)  HGET32(font_def[n].s); else font_def[n].s=0;
-  hget_font_params(n,&(font_def[n]));
-}
+@
 
+After reading the definition section, we need to move the information from the \TeX\ font metric
+files included into \TeX's data structures.
+
+@<\HINT/ auxiliar functions@>=
 static void hget_font_metrics(void)
 { int i;
   for (i=0; i<=max_ref[font_kind]; i++)
@@ -553,6 +557,7 @@ static void hget_font_metrics(void)
 uint16_t hglyph_section(uint8_t f)
 {   return font_def[f].q;
 }
+
 int32_t font_at_size(uint8_t f)
 {  return font_def[f].s; /* at size */
 }
@@ -3833,26 +3838,6 @@ link(page_head)=q;
 best_page_break=null;
 @
 
-@<Put the \(o)optimal current page into box 0@>=
-if(box(0)!=null)QUIT("stream 0 must be empty");
-streams[0].p=link(page_head);
-streams[0].t=page_tail;
-@<clean up the lists used while building the page@>@;
-@
-
-
-@<clean up the lists used while building the page@>=
-@<Delete \(t)the page-insertion nodes@>@;
-@
-
-@ @<Delete \(t)the page-insertion nodes@>=
-r=link(page_ins_head);
-while (r!=page_ins_head) 
-  {@+q=link(r);free_node(r, page_ins_node_size);r=q;
-  } 
-link(page_ins_head)=page_ins_head;
-@
-
 \section{Recording Locations}
 When a \HINT/ viewer needs to output a certain page, it must be able to position
 the parser in the content section of the \HINT/ file.
@@ -4542,38 +4527,37 @@ or at least can serve as a starting point for implementing operating system spec
 versions.
 
 \subsection{Fonts}
-The \HINT/ file format supports four different types of fonts: The traditional PK fonts\cite{TR:pkfile},
+The \HINT/ file format supports four different types of fonts:
+The traditional PK fonts\cite{TR:pkfile} and the more modern
 PostScript Type1 fonts\cite{PST1} which are used by many \TeX\ engines, 
 TrueType\cite{TTT:TT} fonts, and OpenType fonts\cite{MS:OTF}\cite{ISO:OTF}.
+To render the latter, we use the FreeType Library\cite{freetype}
+by David Turner, Werner Lemberg, and others.
 
 @<font types@>=
-typedef	enum {@+ no_format, pk_format, t1_format, ot_format, tt_format@+ } font_format_t;
+typedef	enum {@+ no_format, pk_format, ft_format@+ } font_format_t;
 @
 
 
-The features of a font are described in a |font_s| structure.
-A major part of the structure is the glyph cache that provides fast access to the individual glyphs
-belonging to the font. Further, it includes an |ff| field containing the font format and a variant part 
-that differs for the different font formats.
+The features of a font are described in a |font_s| structure.  A major
+part of the structure is the glyph cache that provides fast access to
+the individual glyphs belonging to the font. Further, it includes an
+|ff| field containing the font format and a variant part that differs
+for the different font formats.
 
 
 @<font types@>=
-@<definitions of |pk_t|, |t1_t|, |ot_t|, and |tt_t| types@>@;
+@<definitions of |pk_t| and |ft_t| types@>@;
 
 typedef struct font_s {
   unsigned char n; /* the font number */
   unsigned char *font_data; /* pointer to the font data in the HINT file */
-  int size; /* the size of the font data in byte */
-  double ds; /* the design size in pt */
-  double hppp,vppp; /* the horizontal and vertical pixel per point */
-  @<the font cache@>@;
+  int data_size; /* the size of the font data in byte */
+  double s; /* the size in pt */
+  double hpxs,vpxs; /* the horizontal and vertical size of one pixel in pt */
+  @<the glyph cache@>@;
   font_format_t ff; /* the font format */
-  union { /* the font format specific parts */
-	  pk_t pk;
-	  tt_t tt;
-	  t1_t t1;
-	  ot_t ot;
-  };
+  union {@+ pk_t pk; @+ft_t tt;@+  }; /* the font format specific parts */
 } font_t;
 @
 The |fonts| table contains an entry for every possible font number.
@@ -4597,30 +4581,30 @@ struct font_s *hget_font(unsigned char f)
     QUIT("Out of memory for font %d",f);
   else
   { unsigned char *spos, *sstart, *send;
-    spos=hpos; sstart=hstart;send=hend;
+    spos=hpos; sstart=hstart;send=hend;@/
     fp->n=f;
-    hget_section(hglyph_section(f));
-    fp->size=hend-hstart;
+    hget_section(hglyph_section(f));@/
     fp->font_data=hstart;
+    fp->data_size=hend-hstart;@/
     hpos=spos; hstart=sstart;hend=send;
   }
+  fp->s=font_at_size(f)/(double)(1<<16);
   @<determine the font format and unpack the font@>@;
   fonts[f]=fp;
   return fonts[f];
 }
 @
-This function is used in the renderer, so it is exported together with an
+This function is used in the renderer, so it is exported and returns an
 opaque pointer type to the font structure.
 @<font |extern|@>=
-typedef struct font_s *font_s_ptr;
 extern struct font_s *hget_font(unsigned char f);
 @
 
 To initialize the |fonts| table and remove all fonts form memory, the
-|hint_clear_fonts| function is used with the |rm| parameter set to
-|true|. If set to |false| the action is less drastic: only the
-function |nativeFreeGlyph| is called for all glyphs. The bitmaps, for
-example, are retained.
+function |hint_clear_fonts|  is used with the |rm| parameter set to
+|true|. If |rm| is set to |false| the action is less drastic: only the
+function |nativeFreeGlyph| is called for all glyphs in the glyph cache,
+the |fonts| table and the glyph cache are retained.
 
 
 @<font functions@>=
@@ -4632,7 +4616,7 @@ void hint_clear_fonts(bool rm)
   for (f=0;f<=max_ref[font_kind];f++)
     if (fonts[f]!=NULL)
     { hfree_glyph_cache(fonts[f],rm);
-      if (rm) {  free(fonts[f]); fonts[f]=NULL; }
+      if (rm)@+ { @+ free(fonts[f]); fonts[f]=NULL;@+ }
     }
 }
 @
@@ -4642,7 +4626,7 @@ void hint_clear_fonts(bool rm)
 
 
 
-\subsubsection{The Font Cache}
+\subsubsection{The Glyph Cache}
 If possible, the glyphs belonging to a font are extracted only once from the font data,
 converted into a format suitable for the native rendering engine, and then cached for repeated use.
 The cached glyph representation for glyph |g| is stored in one of four trees. 
@@ -4651,7 +4635,7 @@ The order and depth of the trees reflects UTF-8 encoding.
    The other trees, |g1|, |g2|, and |g3| are of order $2^6$ and have a depth
    of 2, 3, and 4 levels respectively.
 
-@<the font cache@>=
+@<the glyph cache@>=
   struct gcache_s **g0; /* $0 \le |g| < 2^7$ */
   struct gcache_s ***g1;  /* $2^7 \le |g| < 2^{12}$ */
   struct gcache_s ****g2; /* $2^{12} \le |g| < 2^{18}$ */
@@ -4669,7 +4653,7 @@ typedef struct gcache_s gcache_t;
  
 To look up the cached glyph data for font |f| and charactercode |cc|, we use the function |g_lookup|.
 
-@<font functions@>=
+@<auxiliar font functions@>=
 #define G0_BITS 7
 #define G0_SIZE (1<<G0_BITS)
 #define G0_MASK (G0_SIZE-1)
@@ -4716,7 +4700,7 @@ if no more memory is available.
 static gcache_t g_undefined ={0};
 @
 
-@<font functions@>=
+@<auxiliar font functions@>=
 static gcache_t *hnew_g(gcache_t **g)
 { if (*g==NULL)
     *g=calloc(1, sizeof(gcache_t));
@@ -4762,18 +4746,23 @@ static gcache_t *hnew_g3(gcache_t ******g,unsigned int cc)
 }
 
 
-static gcache_t *hnew_glyph(font_t *pk, unsigned int cc)
-{ if (cc<G0_SIZE) return hnew_g0(&(pk->g0),cc);
-  else if (cc<G123_SIZE*G0_SIZE) return hnew_g1(&(pk->g1),cc);
-  else if (cc<G123_SIZE*G123_SIZE*G0_SIZE) return hnew_g2(&(pk->g2),cc);
-  else if (cc<G123_SIZE*G123_SIZE*G123_SIZE*G0_SIZE) return hnew_g3(&(pk->g3),cc);
+static gcache_t *hnew_glyph(font_t *f, unsigned int cc)
+{ if (cc<G0_SIZE) return hnew_g0(&(f->g0),cc);
+  else if (cc<G123_SIZE*G0_SIZE) return hnew_g1(&(f->g1),cc);
+  else if (cc<G123_SIZE*G123_SIZE*G0_SIZE) return hnew_g2(&(f->g2),cc);
+  else if (cc<G123_SIZE*G123_SIZE*G123_SIZE*G0_SIZE) return hnew_g3(&(f->g3),cc);
   else return &g_undefined;
 }
 @
 
 The next set of functions is used to clear the glyph cache.
-If the boolean parameter |rm| is true, the complete cache will 
-be deallocated.
+If the boolean parameter |rm| is |true|, the complete cache will 
+be deallocated. Otherwise only the function |nativeFreeGlyph| will be called.
+Together with the exported function |hint_clear_fonts| this offers
+the native rendering engine a method to relase allocated resources
+without the need to know the deatails of the glyph cache.
+The construction of the functions |hfree_g0| to |hfree_g3| mirrors
+the construction of |hnew_g0| to  |hnew_g3|
 
 @<font functions@>=
 static void hfree_g0(struct gcache_s **g, bool rm)
@@ -4823,92 +4812,102 @@ static void hfree_g3(struct gcache_s *****g, bool rm)
 static void hfree_glyph_cache(font_t *f, bool rm)
 { if (f->g0!=NULL)
   { hfree_g0(f->g0,rm);
-     if (rm) {free(f->g0); f->g0=NULL;@+}
+     if (rm) {@+free(f->g0); f->g0=NULL;@+}
   }
   if (f->g1!=NULL)
   { hfree_g1(f->g1,rm);
-     if (rm) {free(f->g1); f->g1=NULL;@+}
+     if (rm) {@+free(f->g1); f->g1=NULL;@+}
   }
   if (f->g2!=NULL)
   { hfree_g2(f->g2,rm);
-     if (rm) {free(f->g2); f->g2=NULL;@+}
+     if (rm) {@+free(f->g2); f->g2=NULL;@+}
   }
   if (f->g3!=NULL)
   { hfree_g3(f->g3,rm);
-     if (rm) {free(f->g3); f->g3=NULL;@+}
+     if (rm) {@+free(f->g3); f->g3=NULL;@+}
   }
 }
 @
 \subsection{Glyphs}
-The |gcache_s| structure may depend on the font encoding
-but also on the rendering engine that is used to display the glyphs. While the dependency on the
-font encoding is dynamic, the dependency on the rendering engine can be resolved at compile time.
+The |gcache_s| structure may depend on the font encoding but also on
+the rendering engine that is used to display the glyphs. While the
+dependency on the font encoding is dynamic, the dependency on the
+rendering engine can be resolved at compile time.
 
-Every |gcache_s| structure stores |w| and |h|, the width and height of the minimum bounding box in pixel;
- |hoff| and |voff|, the horizontal and vertical offset in pixel from the upper left pixel to the 
-reference pixel (right and down are positive).
-Then follows the representation of the glyph that is most convenient for rendering on the
-target sytem. For the Windows operating system, this is a byte array containing a device independent bitmap.
-For the Android operting system using OpenGLE 2.0 it's again a byte array for the bitmap and an identifier
-for the texture.
-Then there is a last part that is different for the different font encodings; it is prefixed
-by the font format number |ff|. The information in this last part 
-helps with on-demand decoding of glyphs.
+Every |gcache_s| structure stores |w| and |h|, the width and height of
+the minimum bounding box in pixel; |hoff| and |voff|, the horizontal
+and vertical offset in pixel from the upper left pixel to the
+reference pixel (right and down are positive), and then the array of bytes
+that represents the gray values of the bitmap.
+
+Next commes the
+representation of the glyph that is most convenient for rendering on
+the target sytem. For the Windows operating system, this is a handle to a
+device dependent bitmap.  For the Android
+operating system using Open~GLE~2.0 it's an identifier for the texture.
+Then there is a last part
+that is different for the different font encodings; it is taged by
+the font format number |ff|. The information in this last part helps
+with on-demand decoding of glyphs.
 
 
 @<font types@>=
-@<definitions of |pkg_t|, |t1g_t|, |otg_t|, and |ttg_t| types@>@;
+@<definitions of format specific types@>@;
 
 struct gcache_s {
   int w,h; 
   int hoff,voff; 
   unsigned char *bits; 
+#ifdef WIN32
+  HBITMAP hbmp;
+#endif
 #ifdef __ANDROID__
    unsigned int GLtexture;
 #endif
   font_format_t ff; 
   union {@+
-	  pkg_t pk;
-	  ttg_t tt;
-	  t1g_t t1;
-	  otg_t ot;@+
+	  pkg_t pk;@+
+	  ftg_t tt;@+
   };
 };
 @
 
-The above structure has a |GLtexture| member if rendering is done on the Android operating system
-using OpenEGL 2.0. To speed up the rendering of glyphs, the glyph bitmap is loaded into the graphics cards
-as a texture and from then on identified by a single integer, the |GLtexture|.
+The above structure has a |GLtexture| member if rendering is done on
+the Android operating system using Open~EGL 2.0. To speed up the
+rendering of glyphs, the glyph bitmap is loaded into the graphics
+cards as a texture and from then on identified by a single integer,
+the |GLtexture|.
 
-Occasionaly, however, the front-end will change the OpenGL context and the texture identifiers
-will loose their meaning. In this situation, it is not necessary to wipe out the entire glyph
-cache with all the extracted bitmaps but only the invalidation of the texture identifiers is needed.
-This effect can be achived by calling |hint_clear_fonts(false)|. It will call |nativeFreeGlyph|
-for all glyphs and this function can set the |GLtexture| value to zero.
+Occasionaly, however, the front-end will change the OpenGL context and
+the texture identifiers will loose their meaning. In this situation,
+it is not necessary to wipe out the entire glyph cache with all the
+extracted bitmaps but only the invalidation of the texture identifiers
+is needed.  This effect can be achived by calling
+|hint_clear_fonts(false)|. It will call |nativeFreeGlyph| for all
+glyphs and this function can set the |GLtexture| value to zero.
 
 
 The top level function to access a glyph is |hget_glyph|. Given a font pointer |fp| 
-and a character code |cc| it looks up the glyph in the font cache.
+and a character code |cc| it looks up the glyph in the glyph cache.
 For PK fonts, all cache entries are made when initializing the font.
-For TrueType fonts, a cache entry is made when the glyph is accessed the first time.
+For FreeType fonts, a cache entry is made when the glyph is accessed the first time.
 For both types of fonts, the unpacking is done just before the first use.
 
 @<font functions@>=
-gcache_t *hget_glyph(font_t *fp, unsigned int cc)
+gcache_t *hget_glyph(font_t *f, unsigned int cc)
 {
   gcache_t *g=NULL;
-  g=g_lookup(fp,cc);
+  g=g_lookup(f,cc);
   if (g==NULL)
-  { if (fp->ff==tt_format)
-      g=hnew_glyph(fp,cc);
+  { if (f->ff==ft_format)
+      g=hnew_glyph(f,cc);
     else  
       return NULL;
   }
   if (g->ff==no_format)           
-  { if (fp->ff==pk_format) pkunpack_glyph(g);
-    else if (fp->ff==tt_format) ttunpack_glyph(fp,g,cc);
-    else
-                QUIT("tt t1 and ot formats not yet supported");
+  { if (f->ff==pk_format) pkunpack_glyph(g);
+    else if (f->ff==ft_format) ft_unpack_glyph(f,g,cc);
+    else QUIT("Font format not supported");
   }
   return g;
 }
@@ -4916,44 +4915,44 @@ gcache_t *hget_glyph(font_t *fp, unsigned int cc)
 
 Rendering a glyph is the most complex rendering procedure. But with all the preparations,
 it boils down to a pretty short function to display a glyph, given by its charcter code |cc|,
-from font |f| at |x|, |y| in size |s|.
-@<font functions@>=
-void render_char(int x, int y, struct font_s *f, int32_t s, uint32_t cc)
+its font |f|, and its position and size  |x|, |y|, and |s| given as scaled points.
+Most of the function deals with the conversion of \TeX's measuring system,
+that is scaled points stored as 32 bit integers,
+into a representation that is more convenient for non \TeX{nical} sytems,
+namely regular points stored as |double| values. The latter is used by
+the native rendering functions. Most of the conversion is done by the macro |SP2PT|.
 
-{ double w, h, dx, dy, m;
+@<render macros@>=
+#define SP2PT(X) ((X)/(double)(1<<16))
+@
+@<font functions@>=
+void render_char(int x, int y, struct font_s *f, uint32_t cc)
+
+{ double w, h, dx, dy;
   gcache_t *g=hget_glyph(f,cc);
   if (g==NULL) return;
-  /* account for scaled fonts */
-  if (s==0) m=1.0;
-  else m=((double)s/(double)(1<<16))/f->ds; /* |s| is scaled by |1<<16| but |ds| is scaled by |1<<20| */
-  dx=((double)g->hoff/f->hppp)*m;
-  dy=((double)g->voff/f->vppp)*m;
-  w =((double)g->w/f->hppp)*m;
-  h =((double)g->h/f->vppp)*m;
+
+  dx=(double)g->hoff*f->hpxs;
+  dy=(double)g->voff*f->vpxs;@/
+  w =(double)g->w*f->hpxs;
+  h =(double)g->h*f->vpxs;
 
   nativeGlyph(SP2PT(x)-dx,SP2PT(y)-dy,w,h,g);
 }
 
 @
+\goodbreak
 @<font |extern|@>=
-extern void render_char(int x, int y, struct font_s *f, int32_t s, uint32_t cc);
+extern void render_char(int x, int y, struct font_s *f, uint32_t cc);
 @
 
 \subsection{Rules}
 Rendering rules, that is black rectangles, is simpler.
-The only task here is to convert \TeX's and \HINT/'s measuring system,
-that is scaled points stored as 32 bit integers, into a representation that is more convenient for
-non \TeX{nical} sytems, namely regular points stored as floating point values. The macro |SP2PT|
-does the job.
-@<render macros@>=
-#define SP2PT(X) ((X)/(double)(1<<16))
-@
-Now we can render a rule:
+
 @<render functions@>=
 static void render_rule(int x, int y, int w, int h)
-{ if (w<=0) return;
-  if (h<=0) return;
-  nativeRule(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h));
+{@+ if (w>0 &&  h>0)
+  nativeRule(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h));@+
 }
 @
 
@@ -4974,15 +4973,16 @@ void render_image(int x, int y, int w, int h, uint32_t n)
 
 
 
-\subsection{Lists}
-Now at last, we can render vertical and horizontal list. Two mutualy recursive procedures will
-accomplish the rendering. The functions are more or less modifications of \TeX's functions
-that write DVI files. They share a few global static variables that implement the
-current state of the renderer: |cur_h| and |cur_v| contain the current horizontal
-and vertical position; 
-|rule_ht|, |rule_dp|, and |rule_wd| contain the height, depth, and width of a rule that should
-be output next;
-|cur_f| and |cur_fp| contain the current font number and current font pointer.
+\subsection{Pages}
+Now at last, we can render pages. Two mutualy recursive procedures,
+rendering vertical and horizontal list, will accomplish the
+rendering. The functions are more or less modifications of \TeX's
+functions that write DVI files. They share a few global static
+variables that implement the current state of the renderer: |cur_h|
+and |cur_v| contain the current horizontal and vertical position;
+|rule_ht|, |rule_dp|, and |rule_wd| contain the height, depth, and
+width of a rule that should be output next; |cur_f| and |cur_fp|
+contain the current font number and current font pointer.
 
 
 @<render functions@>=
@@ -4990,7 +4990,6 @@ static scaled cur_h, cur_v;
 static scaled rule_ht, rule_dp, rule_wd; 
 static int cur_f; 
 static struct font_s *cur_fp;
-static int32_t cur_at_size; 
 
 static void vlist_render(pointer this_box);
 
@@ -5043,9 +5042,8 @@ if(link(p)==0xffff)
 #endif
      cur_fp=hget_font(f);
 	 cur_f= f;
-	 cur_at_size=font_at_size(f);
       }
-      render_char(cur_h, cur_v, cur_fp, cur_at_size,c);
+      render_char(cur_h, cur_v, cur_fp,c);
       cur_h= cur_h+char_width(f)(char_info(f)(c));
 #ifdef DEBUG
     if(link(p)==0xffff)
@@ -5389,7 +5387,7 @@ void hint_render(void)
 
 @
 \section{Native Rendering}\label{native}
-The {\tt rendernative.h} header file list all functions that the native renderer must implement.
+The {\tt rendernative.h} header file lists all functions that the native renderer must implement.
 
 To initialize the renderer call |nativeInit|. To release all resorces allocated call |nativeClear|.
 @<native rendering definitions@>=
@@ -5403,7 +5401,7 @@ To set the size of the drawing aerea in pixel and the resolution in dots (pixel)
 extern void nativeSetSize(int px_h, int px_v, double dpi);
 @ 
 
-The native Renderer may implement an optional procedure to switch between Dark and light mode.
+The native renderer may implement an optional procedure to switch between dark and light mode.
 @<native rendering definitions@>=
 extern void nativeSetDark(int dark);
 @
@@ -5434,40 +5432,48 @@ with the image data in memory from |istart| to (but not including) |iend| call:
 void nativeImage(double x, double y, double w, double h, unsigned char *istart, unsigned char *iend);
 @
 
-For PK fonts we need two functions, one to extract a runlength encoded
-glyph and on the extract a glyph coded as a bitmap. For True4Type fonts,
-we need just one to align the bitmap to |DWORD|s.
+For PK fonts and FreeType fonts we need two functions to translate the
+glyph bitmap in |g->bits| into a device dependent representation.
 @<native rendering definitions@>= 
-extern void nativeSetRunlength(struct gcache_s *g, unsigned char *g_data);
-extern void nativeSetBitmaped(struct gcache_s *g, unsigned char *g_data);
-extern void nativeSetTrueType(struct gcache_s *g);
+extern void nativeSetPK(struct gcache_s *g);
+extern void nativeSetFreeType(struct gcache_s *g);
 @
 
-Functions for PostScript Type 1 fonts and  OpenType fonts 
-still need a specification.
-
-To free any resources associated with a cached glyph |g| call:
+To free any native resources associated with a cached glyph |g| call:
 
 @<native rendering definitions@>=
 void nativeFreeGlyph(struct gcache_s *g);
 @
-This function is also called for all glyphs by the function |hint_clear_fonts|
+This function is also called for all glyphs by the function |hint_clear_fonts|.
 If the |rm| parameter to that function is |false|, the glyph cache is not deallocated
 only |nativeFreeGlyph| is executed for all glyphs.
 
 
-\section{Font Encodings}
+\section{Font Files}
 
 \subsection{PK Fonts}
 
-PK Files\cite{TR:pkfile}
-contain a compressed representation of bitmap fonts  produced by METAFONT and gftopk.
-After unpacking these fonts, we obtain a (device independent) bitmap for each glyph.
-On Windows the bitmap can be displayed on a Device Context using the |StretchDIBits| function.
-This function is capable of stretching or shrinking and hence can adjust the
-resolution. The resolution of the bitmap in the pk file is given be the 
-two parameters |hppp| (horizonttap pixel per point) and vppp (vertical pixel per point) which
-are found in the preamble of the pk file.
+PK Files
+contain a compressed representation of bitmap fonts  produced by \MF\ and {\tt gftopk}. The definitions and algorithms that follow here can be found,
+along with a more detailed description, in \cite{TR:pkfile}. 
+
+The first thing we need to know when a section of a \HINT/ file contains a font is
+the font format. We know, it contains a PK font if the first two byte contain the
+values |0xF7| and |0x59|.
+
+@<determine the font format and unpack the font@>=
+  if (fp->font_data[0]==0xF7 &&  fp->font_data[1]==0x59)
+  { fp->ff=pk_format;
+    if (!unpack_pk_file(fp)) { free(fp); fp=NULL; }
+  }
+@
+
+%After unpacking these fonts, we obtain a (device independent) bitmap for each glyph.
+%On Windows the bitmap can be displayed on a Device Context using the |StretchDIBits| function.
+%This function is capable of stretching or shrinking and hence can adjust the
+%resolution. The resolution of the bitmap in the pk file is given be the 
+%two parameters |hppp| (horizonttap pixel per point) and vppp (vertical pixel per point) which
+%are found in the preamble of the pk file.
 
 %For the memory device context we maintain its width, height as well as its
 %horizontal and vertical resolution in dpi (dots per inch).
@@ -5492,23 +5498,14 @@ are found in the preamble of the pk file.
 %cann then be displayed stretching it only be half the render factor thus obtaining an image
 %that is scaled down by exactly the render factor filling the complete client window.
 
-The first thing we need to know when a section of a \HINT/ file contains a font is
-the font format. We know, it contains a PK font if the first two byte contain the
-values |0xF7| and |0x59|.
 
-@<determine the font format and unpack the font@>=
-  if (fp->font_data[0]==0xF7 &&  fp->font_data[1]==0x59)
-  { fp->ff=pk_format;
-    if (!unpack_pkfile(fp)) { free(fp); fp=NULL; }
-  }
-@
-
-There is some information in the PK font that is specific to a PK font.
-@<definitions of |pk_t|, |t1_t|, |ot_t|, and |tt_t| types@>=
+The information in the PK file that is specific to a PK font is stored as a |pk_t| type:
+@<definitions of |pk_t| and |ft_t| types@>=
 
 typedef struct
 { unsigned char *pk_comment; /* the program that made the pk font */
   unsigned int cs; /* checksum */
+  double ds; /* the design size in pt */
   unsigned char id; /* the id currently allways 89 */
 } pk_t;
 @
@@ -5516,27 +5513,177 @@ typedef struct
 For every glyph, there is a |flag| byte in the PK file that tells how the corresponding glyph is
 encoded and a pointer to the encoding itself.
 
-@<definitions of |pkg_t|, |t1g_t|, |otg_t|, and |ttg_t| types@>=
+@<definitions of format specific types@>=
 typedef struct
 { unsigned char flag; /* encoding in the pk file */
   unsigned char *encoding;
 } pkg_t;
 @
 
-Now we have two functions: one to unpack a single glyph when it is needed for the first time,
-and one to unpack a font when it is needed for the first time.
+Before we define two functions, one to unpack a single glyph when it is needed for the first time,
+and one to unpack a font when it is needed for the first time, we define four primitive
+reading operations as macros.
 
 @<PK font functions@>=
-/* primitive operations */
 #define PK_READ_1_BYTE() (data[i++])
 #define PK_READ_2_BYTE() (k=PK_READ_1_BYTE(),k=k<<8,k=k+data[i++],k)
 #define PK_READ_3_BYTE() (k=PK_READ_2_BYTE(),k=k<<8,k=k+data[i++],k)
 #define PK_READ_4_BYTE() (k=PK_READ_3_BYTE(),k=k<<8,k=k+data[i++],k)
+@
 
+Here is the function to unpack a single glyph. 
+To extract the actual bitmap it uses either
+the function |pk_bitmap| or |pk_runlength|
 
+To parse a PK font file, it is necessary to read numbers that are packed in a series of 
+4 bit values called ``nybbles''.
+The parse state therefore needs to be aware of positions inside a byte.
+We store this state as a |pk_parse_t|.
+
+@<definitions of format specific types@>=
+typedef struct {
+int j; /* position of next nybble in data */
+int r; /* current repeat count */
+int f; /* dynamic f value */
+unsigned char *data; /* array of data bytes */
+} pk_parse_t;
+@
+Given a parse state |P|, we read the next nybble
+with the following macro:
+
+@<PK font functions@>=
+#define read_nybble(P) ((P).j&1?((P).data[(P).j++>>1]&0xF):(((P).data[(P).j++>>1]>>4)&0xF))
+@
+
+The pixel data stored in a PK file can be considered as a long sequence
+of black and white pixels. Insead of storing individual pixels,
+it is more space efficient to store run counts, that is the number of consecutive pixels
+of the same color. And since with glyphs often the same pattern of white and
+black pixels is repeated for several lines, it improves space efficiency if we
+store also repeat counts.
+
+Now here are the details of how run counts and repeat counts are stored
+as a sequence of nybbles:
+The value 15 indicates a repeat count of 1 (most common case).
+The value 14 indicates that the next nybble stores the repeat count.
+Values below 14 are dedicated to run counts.
+If the value $a$ is in the range $14>a>|f|$, we read a second nybble $b$
+and obtain the run count as $(a-|f|-1)*16+$b$+|f|+1$.
+Note that we add $|f|+1$; this is possible because
+the values from 1 to |f| are used directly as run counts.
+A sequence of |k| nybbles with value zero is followed by |k| nybbles
+that represent the run count---well, almost. We add the value of the
+largest run cont that can be expressed using any of the other methods plus one.
+
+The following function implements this procedure:
+
+@<PK font functions@>=
+static int packed_number(pk_parse_t *p)
+{ int i, k;
+  i= read_nybble(*p);
+  if (i==0)
+  { do { k=read_nybble(*p); i++; } while (k==0);
+    while (i-->0) k=k*16+read_nybble(*p);
+	return k-15+(13-p->f)*16+p->f;
+  }
+  else if (i<=p->f) return i;
+  else if (i<14) return (i-p->f-1)*16+read_nybble(*p)+p->f+1;
+  else
+  { if (i==14) p->r=packed_number(p);
+    else p->r= 1;
+    return packed_number(p);
+  }
+}
+@
+
+Now here is the function, that reads a bitmap encoded using
+run counts and repeat counts.
+The |data| array contains the run counts and repeat counts for a bitmap of height |g->h| and
+width |g->w| as a top-down bitmap, where the first bit corresponds to the
+top left pixel and the last bit to the bottom right pixel.
+The function will produce a bottom-up bitmap with one byte per pixel
+to conform to the format that is used by the FreeType library.
+We traverse the |data| nybbles sequentially in top-down order.
+The horizontal position |x| and the vertical position |y| in the
+target bitmap start at 0 and |g->h-1|.
+@<PK font functions@>=
+static void pk_runlength(gcache_t *g, unsigned char *data) {
+    pk_parse_t p;
+    int x, y; /* position in target bitmap */
+    unsigned char *bits; /* target bitmap */
+    int n; /* number of pixel left in current run */
+    unsigned char gray; /* whether pixel is white in current run */
+    bits=g->bits = (unsigned char *) calloc(g->w * g->h, 1);
+    if (bits == NULL) { g->w = g->h = 0;  return; } /* out of memory */
+    p.j = 0; /* nybble position to start of data */
+    p.r = 0; /* repeat count = 0 */
+    p.f = g->pk.flag >> 4; /* dynamic f value */
+    p.data=data; /* data bytes */
+    n = 0;
+    if ((g->pk.flag >> 3) & 1) gray=0x00;
+    else gray=0xff;
+    y = 0;
+    while (y <g->h) {
+        x = 0;
+        while (x < (int) g->w) /* fill current line */
+        { int d;
+          if (n <= 0) {
+                n = packed_number(&p);
+                gray = ~gray;
+          }
+          d = g->w-x;
+            if (d>n) d=n; /* remaining pixel in current run and current line */
+            for (;d>0;d--,x++,n--)
+              bits[y*g->w+x] = gray;
+        }
+        y++;
+        while (p.r > 0 && y <g->h) /* copy previous line */
+        { int k;
+          for (k = 0; k < g->w; k++)
+            bits[y*g->w+k] = bits[(y-1)*g->w+k];
+          p.r--;
+          y++;
+        }
+    }
+}
+@
+
+Very small bitmaps can be encoded simply using one bit per pixel.
+The |data| array contains a 1 bit per pixel bitmap of height |g->h| and
+width |g->w| as a top-down bitmap, where the first bit corresponds to the
+top left pixel and the last bit to the bottom right pixel.
+The function will produce a bottom-up bitmap with one byte per pixel
+to conform to the format that is used by the FreeType library.
+We traverse the |data| bits sequentially in top-down order
+using a |mask| to get the next bit and incrementing |data| when necessary.
+The horizontal position |x| and the vertical position |y| in the
+target bitmap start at 0 and |g->h-1|.
+@<PK font functions@>=
+static void pk_bitmap(gcache_t *g, unsigned char *data) {
+    unsigned char *bits; /* 1 bit per pixel */
+    int x, y; /* position in target bitmap */
+    unsigned char mask; /* bitmask for the next bit */
+ 
+    g->bits = bits = (unsigned char *) calloc(g->w * g->h, 1);
+    if (bits == NULL) {g->w = g->h = 0; return; } /* out of memory */
+    mask=0x80;
+    for (y=0; y<g->h; y++)
+      for (x=0; x<g->w; x++)
+        { if (*data & mask)
+            bits[y*g->w+x] = 0x00; /* black */
+          else
+            bits[y*g->w+x] = 0xFF; /* white */
+          mask=mask>>1;
+          if (mask==0) { data++; mask=0x80; }
+        }
+}
+@
+
+The next function unpacks the glyphs meta data and calls one of the
+unpacking functions just defined.
+@<PK font functions@>=
 
 static void pkunpack_glyph(gcache_t *g)
-/* unpack the data in the glyph into its internal representation */
 { int i,k;
   unsigned char *data;
   if (g==NULL || g->pk.encoding==NULL) return; /* no glyph, no data */
@@ -5571,12 +5718,15 @@ static void pkunpack_glyph(gcache_t *g)
 	g->hoff=(signed int)PK_READ_4_BYTE();
 	g->voff=(signed int)PK_READ_4_BYTE();
   }
-  if ((g->pk.flag>>4)==14) nativeSetBitmaped(g,data+i);
-  else nativeSetRunlength(g,data+i);
-#if 0
-  DBG(DBGRENDER,"Unpacked glyph %c (0x%x) w=%d h=%d hoff=%d voff=%d",g->cc,g->cc, g->w, g->h, g-> hoff, g->voff);
-#endif
+  if ((g->pk.flag>>4)==14) pk_bitmap(g,data+i);
+  else pk_runlength(g,data+i);
+  nativeSetPK(g);
 }
+@
+
+We finish with unpacking the whole PK font file.
+
+@<PK font functions@>=
 
 static gcache_t *hnew_glyph(font_t *pk, unsigned int cc);
 
@@ -5593,7 +5743,7 @@ static gcache_t *hnew_glyph(font_t *pk, unsigned int cc);
 #define PK_ID    89
 
 
-int unpack_pkfile(font_t *pk)
+int unpack_pk_file(font_t *pk)
 /* scan |pk->data| and extract information. Do not unpack glyphs, these are unpacked on demand. */
 {   int i,j;
     unsigned int k;
@@ -5601,7 +5751,7 @@ int unpack_pkfile(font_t *pk)
 	unsigned char *data;
     data=pk->font_data;
     i=0;
-	while (i< pk->size)
+	while (i< pk->data_size)
 	  switch(flag=data[i++])
 	{ case PK_XXX1: j=PK_READ_1_BYTE(); i=i+j; break;
 	  case PK_XXX2: j=PK_READ_2_BYTE(); i=i+j;  break;
@@ -5615,11 +5765,16 @@ int unpack_pkfile(font_t *pk)
 		if (pk->pk.id!=PK_ID) return 0;
 		csize=PK_READ_1_BYTE();
 		pk->pk.pk_comment=pk->font_data+i;
-	    i=i+csize;
-        pk->ds=PK_READ_4_BYTE()/(double)(1<<20);
+                i=i+csize;
+        pk->pk.ds=PK_READ_4_BYTE()/(double)(1<<20);
 		pk->pk.cs=PK_READ_4_BYTE();
-		pk->hppp=PK_READ_4_BYTE()/(double)(1<<16);
-		pk->vppp=PK_READ_4_BYTE()/(double)(1<<16);
+		pk->hpxs=(double)(1<<16)/PK_READ_4_BYTE();
+		pk->vpxs=(double)(1<<16)/PK_READ_4_BYTE();
+		if (pk->pk.ds!=pk->s) 
+		{ double m=pk->s/pk->pk.ds;
+		  pk->hpxs*=m;
+		  pk->vpxs*=m;
+		}
 #if 0    /* data is read only */
 		pk->comment[csize]=0;  /* After reading the data insert zero byte to terminate comment */
 #endif
@@ -5658,96 +5813,134 @@ int unpack_pkfile(font_t *pk)
 @
 
 
-\subsection{TrueType Fonts}
+\subsection{PostScript Type 1, TrueType, and OpenType Fonts}
+
+To unpack these fonts, we use the FreeType library\cite{freetype}.
+To use this library, we need a library variable and initialize it.
 
 
-To unpack TrueType fonts, we use the {\tt stb\_truetype.h} single C header file library\cite{SB:truetype}
-by Sean Barrett.
-
-@<include the STB TrueType Implementation@>=
-#define STB_TRUETYPE_IMPLEMENTATION
-#define STBTT_STATIC
-#include "stb_truetype.h"
+@<font variables@>=
+static FT_Library  ft_library=NULL;
 @
 
-The above header  file defines the proper data type for our |tt_t| type.
-A dummy type is sufficient for the glyphs.
+@<Initialize the FreeType library@>=
+if (ft_library==NULL) 
+{ int e=FT_Init_FreeType( &ft_library );
+  if (e) QUIT("Unable to initialize the FreeType library");
+}
+@
 
-@<definitions of |pk_t|, |t1_t|, |ot_t|, and |tt_t| types@>=
-typedef stbtt_fontinfo tt_t;
+Next we need a |FT_Face| variable, which we place in the |ft_t| type.
+@<definitions of |pk_t| and |ft_t| types@>=
+typedef struct
+{ FT_Face face;
+} ft_t;
+@
+
+The data type for FreeType glyphs is still empty.
+@<definitions of |pk_t| and |ft_t| types@>=
 typedef struct
 { int dummy;
-} ttg_t;
+} ftg_t;
 @
 
-We use |stbtt_InitFont| to unpack the font and initialize the |font_t| structure
-and we use |stbtt_GetCodepointBitmap| to obtain the bitmap for a glyph.
+We use |FT_New_Memory_Face| to unpack the font and initialize the |font_t| structure.
 To determine the rendering size, we use the function |font_at_size| to
-obtain the design size of the font in scaled point, and we set the resolution to 600dpi.
-From the font size and the resolution, we get the size of one em and
-the function |stbtt_ScaleForMappingEmToPixels| then computes
-the right scale factor for the TrueType renderer.
+obtain the size of the font in scaled point and convert it; the variable |f->s| 
+contains the size in point as a floating point value.
+Currently, we set the resolution to 600dpi because we render on a memory bitmap
+with 600 dpi resolution before we do a bitblock transfer to the real screen.
+This could---or should---perhaps change in the future.
 
-@<TrueType font functions@>=
-int unpack_ttfile(font_t *f)
-{
-  if (!stbtt_InitFont(&(f->tt),f->font_data,0))
-    return 0;
-f->ds=font_at_size(f->n)/(double)(1<<16); /* design size*/
-f->hppp=f->vppp=600.0/72.27;
-f->ff=tt_format;
-return 1;
+
+@<FreeType font functions@>=
+
+int unpack_ft_file(font_t *f)
+{ int e;
+  @<Initialize the FreeType library@>@;
+  f->hpxs=f->vpxs=72.27/600.0;
+  e = FT_New_Memory_Face( ft_library,
+                          f->font_data, f->data_size,0,&(f->tt.face));                              
+  if (e) return 0;
+  @<Select the correct encoding@>@;
+  @<Set the required size and transformation@>@;
+  f->ff=ft_format;
+  return 1;
 }
+@
 
+A FreeType font file may contain different character encodings,
+the most common beeing the Unicode encoding. \TeX's character
+encoding is a very special encoding, but fortunately most
+of the fonts used with \TeX\ contain the correct character map
+marked as |FT_ENCODING_ADOBE_CUSTOM|. We do not check for 
+errors, because it is better to use the font with the wrong
+character map than to quit the program.
 
-static void ttunpack_glyph(font_t *f, gcache_t *g, uint32_t cc)
-{ float em =f->hppp*f->ds;
-  float scale;
-  scale =stbtt_ScaleForMappingEmToPixels(&(f->tt),em);
-  g->bits=stbtt_GetCodepointBitmap(&(f->tt), scale, scale, cc, &(g->w), &(g->h), &(g->hoff),&(g->voff));
-  g->ff=tt_format;
-  nativeSetTrueType(g);
+@<Select the correct encoding@>=
+ e =FT_Select_Charmap(f->tt.face,FT_ENCODING_ADOBE_CUSTOM); 
+ if (e) LOG("Unable to select custom encoding for font %d\n",f->n);    
+@
+
+We use the FreeType library to render outline fonts. These fonts can be rendered at any
+size and we need to set the correct size. Note that FreeType needs the size in ``big points''
+not \TeX\ points.
+@<Set the required size and transformation@>=
+   e = FT_Set_Char_Size(
+            f->tt.face,    /* handle to face object           */
+            0,       /* |char_width| in $1/64$th of points  */
+            (FT_F26Dot6)(0.5+(f->s*64.0*72.0/72.27)),  /* |char_height| in $1/64$th of points */
+            72.27/f->hpxs,     /* horizontal device resolution    */
+            72.27/f->vpxs);   /* vertical device resolution      */
+  if (e) QUIT("Unable to set FreeType glyph size"); 
+  FT_Set_Transform(f->tt.face,0,0);
+@
+
+After translating the character code |cc| into the glyph index |i| using
+the character map selected above, we render the bitmap using |FT_Load_Glyph|
+with the |FT_LOAD_RENDER| flag. Instead of using |FT_LOAD_TARGET_NORMAL|
+one could also use |FT_LOAD_TARGET_LIGHT| which will apply hinting only
+to horizontal strokes, thereby keeping the character spacing undisturbed 
+but using slightly fuzzier bitmaps.
+We decrement the |bitmap_top| value by 1, mainly because {\tt dvips} does it,
+but comparing pk fonts to FreeType fonts, one can observe that glyphs
+in FreeType fonts are positioned slighly higher. Unfortunately the vertical
+displacement is magnified for scaled fonts, so subtracting 1 is not enough
+in this cases.
+
+@<FreeType font functions@>=
+static void ft_unpack_glyph(font_t *f, gcache_t *g, uint32_t cc)
+{ int e,i;
+
+  i = FT_Get_Char_Index( f->tt.face, cc);
+  e = FT_Load_Glyph(
+            f->tt.face,          /* handle to face object */
+            i,   /* glyph index           */
+            FT_LOAD_RENDER | FT_LOAD_TARGET_NORMAL );  /* load flags, see below */
+  if (e) QUIT("Unable to render FreeType glyph %c (%u)",(char)cc,cc);
+
+  g->w=f->tt.face->glyph->bitmap.width;
+  g->h=f->tt.face->glyph->bitmap.rows;
+  g->hoff=-f->tt.face->glyph->bitmap_left;
+  g->voff=f->tt.face->glyph->bitmap_top-1;
+  g->bits=calloc(g->w*g->h, 1);
+  if (g->bits==NULL) QUIT("Out of memory for FreeType glyph %c (%u)",(char)cc,cc);
+  memcpy(g->bits,f->tt.face->glyph->bitmap.buffer,g->w*g->h);
+  g->ff=ft_format;
+  nativeSetFreeType(g);
 }
 
 @
 
-The function |unpack_ttfile| returns |false| if the font is not a TrueType font.
+The function |unpack_ft_file| returns |false| if the font is not a FreeType font.
 
 @<determine the font format and unpack the font@>=
-  else if (unpack_ttfile(fp)) 
-      fp->ff=tt_format;
+  else if (unpack_ft_file(fp)) 
+      fp->ff=ft_format;
   else
       { QUIT("Font format not supported for font %d\n",fp->n);
         free(fp); fp=NULL; 
       }
-@
-
-
-\subsection{PostScript Type 1 Fonts}
- 
-@
-@<definitions of |pk_t|, |t1_t|, |ot_t|, and |tt_t| types@>=
-typedef struct
-{ int dummy;
-} t1_t;
-@
-@<definitions of |pkg_t|, |t1g_t|, |otg_t|, and |ttg_t| types@>=
-typedef struct
-{ int dummy;
-} t1g_t;
-@
-
-\subsection{OpenType Fonts}
-
-@<definitions of |pk_t|, |t1_t|, |ot_t|, and |tt_t| types@>=
-typedef struct
-{ int dummy;
-} ot_t;
-@
-@<definitions of |pkg_t|, |t1g_t|, |otg_t|, and |ttg_t| types@>=
-typedef struct
-{ int dummy;
-} otg_t;
 @
 
 
@@ -6227,14 +6420,17 @@ extern void hint_clear_fonts(bool rm);
 #include "hformat.h"
 #include "hint.h"
 #include "hget.h"
-@<include the STB TrueType Implementation@>@;
+#include <ft2build.h>
+#include FT_FREETYPE_H
 #include "hfonts.h"
 #include "hrender.h"
 #include "rendernative.h"
 
 @<font variables@>@;
 
-@<TrueType font functions@>@;
+@<auxiliar font functions@>@;
+
+@<FreeType font functions@>@;
 
 @<PK font functions@>@;
 

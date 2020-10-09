@@ -2,9 +2,9 @@
 TEX=	mfpreface.tex \
 	bmp.tex png.tex jpg.tex image.tex head.tex \
 	ctex.tex \
-	math.tex leaders.tex
+	math.tex leaders.tex format.tex
 
-TEXFLAGS = -m mobile -e -f
+TEXFLAGS = -mfmode=mobile -no-empty-page -hyphenate-first-word
 #leaders.tex
 
 #	simple.tex fonts.tex paging.tex hset.tex vset.tex vpack.tex baseline.tex \
@@ -25,6 +25,16 @@ $(LATEX:.tex=.hnt): %.hnt: %.tex
 %.HINT: %.hnt
 	../../hint/format/stretch $<
 
+FORMAT_INCLUDE= cwebmac.tex format.sty format.toc format.aux \
+	format.red.srt format.wrt.srt format.get.srt format.put.srt \
+	format.scn format.bbl format.ind 
+
+$(FORMAT_INCLUDE):$(addprefix ../../hint/format/,$(FORMAT_INCLUDE))
+	$(MAKE) -C ../../hint/format format.dvi
+	cp  $^ .
+
+format.hnt: $(FORMAT_INCLUDE)
+
 mf.base: modes.mf
 	echo mf.ini | inimf
 
@@ -36,3 +46,4 @@ clean:
 	rm -rf *.abs
 	rm -f \#* *~
 	rm -f $(LATEX:.tex=.HINT)  $(TEX:.tex=.HINT)
+

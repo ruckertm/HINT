@@ -1,52 +1,51 @@
-/*329:*/
-#line 6249 "hint.w"
+/*333:*/
+#line 6445 ".\\hint.w"
 
 #ifndef _RENDERNATIVE_H
 #define _RENDERNATIVE_H
 
-/*288:*/
-#line 5395 "hint.w"
+/*285:*/
+#line 5393 ".\\hint.w"
 
 extern void nativeInit(void);
 extern void nativeClear(void);
-/*:288*//*289:*/
-#line 5402 "hint.w"
+/*:285*//*286:*/
+#line 5400 ".\\hint.w"
 
 extern void nativeSetSize(int px_h,int px_v,double dpi);
-/*:289*//*290:*/
-#line 5407 "hint.w"
+/*:286*//*287:*/
+#line 5405 ".\\hint.w"
 
 extern void nativeSetDark(int dark);
-/*:290*//*291:*/
-#line 5412 "hint.w"
+/*:287*//*288:*/
+#line 5410 ".\\hint.w"
 
 extern void nativeBlank(void);
-/*:291*//*292:*/
-#line 5421 "hint.w"
+/*:288*//*289:*/
+#line 5419 ".\\hint.w"
 
 typedef struct gcache_s*gcache_s_ptr;
 extern void nativeGlyph(double x,double y,double w,double h,struct gcache_s*g);
-/*:292*//*293:*/
-#line 5427 "hint.w"
+/*:289*//*290:*/
+#line 5425 ".\\hint.w"
 
 void nativeRule(double x,double y,double w,double h);
-/*:293*//*294:*/
-#line 5433 "hint.w"
+/*:290*//*291:*/
+#line 5431 ".\\hint.w"
 
 void nativeImage(double x,double y,double w,double h,unsigned char*istart,unsigned char*iend);
-/*:294*//*295:*/
-#line 5440 "hint.w"
+/*:291*//*292:*/
+#line 5437 ".\\hint.w"
 
-extern void nativeSetRunlength(struct gcache_s*g,unsigned char*g_data);
-extern void nativeSetBitmaped(struct gcache_s*g,unsigned char*g_data);
-extern void nativeSetTrueType(struct gcache_s*g);
-/*:295*//*296:*/
-#line 5451 "hint.w"
+extern void nativeSetPK(struct gcache_s*g);
+extern void nativeSetFreeType(struct gcache_s*g);
+/*:292*//*293:*/
+#line 5444 ".\\hint.w"
 
 void nativeFreeGlyph(struct gcache_s*g);
-/*:296*/
-#line 6253 "hint.w"
+/*:293*/
+#line 6449 ".\\hint.w"
 
 
 #endif
-/*:329*/
+/*:333*/
