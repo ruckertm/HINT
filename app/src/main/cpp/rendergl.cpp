@@ -21,7 +21,6 @@ extern "C" {
 #include "error.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include "stb_truetype.h"
 #include "hint.h"
 #include "hfonts.h"
 #include "hrender.h"

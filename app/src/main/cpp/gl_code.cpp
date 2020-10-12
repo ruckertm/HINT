@@ -29,9 +29,6 @@
 
 extern "C" {
 #include <android/bitmap.h>
-
-//include "stb_truetype.h"
-//include "hfonts.h"
 #include "basetypes.h"
 #include "error.h"
 #include "hformat.h"
