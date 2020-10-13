@@ -1,18 +1,3 @@
-/*
- * Copyright (C) 2009 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 package edu.hm.cs.hintview;
 /*
@@ -37,7 +22,6 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.ParcelFileDescriptor;
-import android.print.PrintManager;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -45,7 +29,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.widget.Toast;
+
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -56,26 +40,6 @@ import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.opengles.GL10;
 
-import static java.lang.Thread.sleep;
-
-/**
- * A simple GLSurfaceView sub-class that demonstrate how to perform
- * OpenGL ES 2.0 rendering into a GL Surface. Note the following important
- * details:
- * <p>
- * - The class must use a custom context factory to enable 2.0 rendering.
- * See ContextFactory class definition below.
- * <p>
- * - The class must use a custom EGLConfigChooser to be able to select
- * an EGLConfig that supports 2.0. This is done by providing a config
- * specification to eglChooseConfig() that has the attribute
- * EGL10.ELG_RENDERABLE_TYPE containing the EGL_OPENGL_ES2_BIT flag
- * set. See ConfigChooser class definition below.
- * <p>
- * - The class must select the surface's format, then choose an EGLConfig
- * that matches it exactly (with regards to red/green/blue/alpha channels
- * bit depths). Failure to do so would result in an EGL_BAD_MATCH error.
- */
 public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener {
     private static String TAG = "HINTVIEWView";
     private static final boolean DEBUG = false;
@@ -84,9 +48,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
     private static int width, height;
     protected Renderer fileRenderer;
     private static boolean darkMode = false;
-    protected static boolean TeXzoom = false, ZoomOn = false, ZoomOff = false, Zooming = false;
-    protected static boolean doPrint = false;
-    protected static Bitmap printBitmap;
+    protected static boolean ZoomOn = false, ZoomOff = false, Zooming = false;
     protected static boolean Page_next = false, Page_prev = false;
     private GestureDetector touchGestureDetector;
     private ScaleGestureDetector scaleGestureDetector;
@@ -166,9 +128,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         darkMode = mode;
     }
 
-    public void setZoom(boolean mode) {
-        TeXzoom = mode;
-    }
+
 
     private static class ContextFactory implements GLSurfaceView.EGLContextFactory {
 
@@ -237,10 +197,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
             EGLConfig[] configs = new EGLConfig[numConfigs];
             egl.eglChooseConfig(display, s_configAttribs2, configs, numConfigs, num_config);
 
-            if (DEBUG) {
-                printConfigs(egl, display, configs);
-            }
-            /* Now return the "best" one
+             /* Now return the "best" one
              */
             return chooseConfig(egl, display, configs);
         }
@@ -282,97 +239,6 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
             return defaultValue;
         }
 
-        private void printConfigs(EGL10 egl, EGLDisplay display,
-                                  EGLConfig[] configs) {
-            int numConfigs = configs.length;
-            Log.w(TAG, String.format("%d configurations", numConfigs));
-            for (int i = 0; i < numConfigs; i++) {
-                Log.w(TAG, String.format("Configuration %d:\n", i));
-                printConfig(egl, display, configs[i]);
-            }
-        }
-
-        private void printConfig(EGL10 egl, EGLDisplay display,
-                                 EGLConfig config) {
-            int[] attributes = {
-                    EGL10.EGL_BUFFER_SIZE,
-                    EGL10.EGL_ALPHA_SIZE,
-                    EGL10.EGL_BLUE_SIZE,
-                    EGL10.EGL_GREEN_SIZE,
-                    EGL10.EGL_RED_SIZE,
-                    EGL10.EGL_DEPTH_SIZE,
-                    EGL10.EGL_STENCIL_SIZE,
-                    EGL10.EGL_CONFIG_CAVEAT,
-                    EGL10.EGL_CONFIG_ID,
-                    EGL10.EGL_LEVEL,
-                    EGL10.EGL_MAX_PBUFFER_HEIGHT,
-                    EGL10.EGL_MAX_PBUFFER_PIXELS,
-                    EGL10.EGL_MAX_PBUFFER_WIDTH,
-                    EGL10.EGL_NATIVE_RENDERABLE,
-                    EGL10.EGL_NATIVE_VISUAL_ID,
-                    EGL10.EGL_NATIVE_VISUAL_TYPE,
-                    0x3030, // EGL10.EGL_PRESERVED_RESOURCES,
-                    EGL10.EGL_SAMPLES,
-                    EGL10.EGL_SAMPLE_BUFFERS,
-                    EGL10.EGL_SURFACE_TYPE,
-                    EGL10.EGL_TRANSPARENT_TYPE,
-                    EGL10.EGL_TRANSPARENT_RED_VALUE,
-                    EGL10.EGL_TRANSPARENT_GREEN_VALUE,
-                    EGL10.EGL_TRANSPARENT_BLUE_VALUE,
-                    0x3039, // EGL10.EGL_BIND_TO_TEXTURE_RGB,
-                    0x303A, // EGL10.EGL_BIND_TO_TEXTURE_RGBA,
-                    0x303B, // EGL10.EGL_MIN_SWAP_INTERVAL,
-                    0x303C, // EGL10.EGL_MAX_SWAP_INTERVAL,
-                    EGL10.EGL_LUMINANCE_SIZE,
-                    EGL10.EGL_ALPHA_MASK_SIZE,
-                    EGL10.EGL_COLOR_BUFFER_TYPE,
-                    EGL10.EGL_RENDERABLE_TYPE,
-                    0x3042 // EGL10.EGL_CONFORMANT
-            };
-            String[] names = {
-                    "EGL_BUFFER_SIZE",
-                    "EGL_ALPHA_SIZE",
-                    "EGL_BLUE_SIZE",
-                    "EGL_GREEN_SIZE",
-                    "EGL_RED_SIZE",
-                    "EGL_DEPTH_SIZE",
-                    "EGL_STENCIL_SIZE",
-                    "EGL_CONFIG_CAVEAT",
-                    "EGL_CONFIG_ID",
-                    "EGL_LEVEL",
-                    "EGL_MAX_PBUFFER_HEIGHT",
-                    "EGL_MAX_PBUFFER_PIXELS",
-                    "EGL_MAX_PBUFFER_WIDTH",
-                    "EGL_NATIVE_RENDERABLE",
-                    "EGL_NATIVE_VISUAL_ID",
-                    "EGL_NATIVE_VISUAL_TYPE",
-                    "EGL_PRESERVED_RESOURCES",
-                    "EGL_SAMPLES",
-                    "EGL_SAMPLE_BUFFERS",
-                    "EGL_SURFACE_TYPE",
-                    "EGL_TRANSPARENT_TYPE",
-                    "EGL_TRANSPARENT_RED_VALUE",
-                    "EGL_TRANSPARENT_GREEN_VALUE",
-                    "EGL_TRANSPARENT_BLUE_VALUE",
-                    "EGL_BIND_TO_TEXTURE_RGB",
-                    "EGL_BIND_TO_TEXTURE_RGBA",
-                    "EGL_MIN_SWAP_INTERVAL",
-                    "EGL_MAX_SWAP_INTERVAL",
-                    "EGL_LUMINANCE_SIZE",
-                    "EGL_ALPHA_MASK_SIZE",
-                    "EGL_COLOR_BUFFER_TYPE",
-                    "EGL_RENDERABLE_TYPE",
-                    "EGL_CONFORMANT"
-            };
-            int[] value = new int[1];
-            for (int i = 0; i < attributes.length; i++) {
-                int attribute = attributes[i];
-                String name = names[i];
-                if (egl.eglGetConfigAttrib(display, config, attribute, value)) {
-                    Log.w(TAG, String.format("  %s: %d\n", name, value[0]));
-                }
-            }
-        }
 
         // Subclasses can adjust these values:
         protected int mRedSize;
@@ -398,12 +264,6 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
             this.view = view;
             this.context = context;
             renderErrorCallback = (RenderErrorCallback) context;
-        }
-
-        private void renderToBitmap(Bitmap bmp)
-        {   HINTVIEWLib.zoomBegin(); // renders to a texture
-            // here I need to copy the texture onto the bitmap
-            HINTVIEWLib.zoomEnd(); // release the texture
         }
 
         private boolean render_OK() {
@@ -455,16 +315,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         }
 
         public void onDrawFrame(GL10 gl) {
-            if (HINTVIEWView.doPrint)
-            {    Log.e("onDrawFrame ","start doPrint");
-                HINTVIEWLib.zoomBegin();
-                HINTVIEWLib.drawBitmap(printBitmap);
-                HINTVIEWView.doPrint=false;
-                Log.e("onDrawFrame ","done doPrint");
-                if (HINTVIEWActivity.adapter!=null)
-                    HINTVIEWActivity.adapter.onBitmapReady();
-                return;
-            }
+
             HINTVIEWLib.setMode(darkMode);
             HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi); /* needed for zooming */
             if (HINTVIEWView.Page_prev) {
@@ -477,23 +328,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
             }
             if (!render_OK()) return;
 
-            if (HINTVIEWView.TeXzoom)
-                HINTVIEWLib.draw();
-            else {
-                if (HINTVIEWView.ZoomOn) {
-                    HINTVIEWLib.zoomBegin();
-                    HINTVIEWView.ZoomOn = false;
-                    HINTVIEWView.Zooming = true;
-                } else if (HINTVIEWView.ZoomOff) {
-                    HINTVIEWLib.zoomEnd();
-                    HINTVIEWView.ZoomOff = false;
-                    HINTVIEWView.Zooming = false;
-                }
-                if (HINTVIEWView.Zooming)
-                    HINTVIEWLib.zoom();
-                else
-                    HINTVIEWLib.draw();
-            }
+            HINTVIEWLib.draw();
             render_OK();
         }
 

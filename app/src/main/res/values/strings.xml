@@ -29,6 +29,5 @@
     <string name="first_page">To first page</string>
     <string name="scale_one">Zoom to 100%</string>
     <string name="zoom_mode">TeX Zoom</string>
-    <string name="print">Print Document</string>
 </resources>
 

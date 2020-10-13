@@ -22,9 +22,9 @@ public class ScaleGestureHandler extends ScaleGestureDetector.SimpleOnScaleGestu
     @Override
     public void onScaleEnd(ScaleGestureDetector detector) {
         HINTVIEWView.ZoomOff=true;
-        //Log.w(TAG, "onScaleEnd ");
+        Log.w(TAG, "onScaleEnd "+ detector.isInProgress());
         view.requestRender();
-    }
+       }
     @Override
     public boolean onScale(ScaleGestureDetector detector) {
         float f = detector.getScaleFactor();

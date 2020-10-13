@@ -1,18 +1,3 @@
-/*
- * Copyright (C) 2007 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 package edu.hm.cs.hintview;
 
@@ -25,9 +10,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
-import android.print.PrintManager;
-import android.print.PrintDocumentAdapter;
 
 import android.util.Log;
 import android.view.Menu;
@@ -35,7 +17,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowInsets;
-import android.widget.Toast;
+
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -50,10 +32,8 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
     private static String TAG = "HINTVIEWActivity";
     private HINTVIEWView mView;
     private static Toolbar toolbar;
-    public static PrintHintDocumentAdapter adapter;
     private SharedPreferences sharedPref;
     private boolean darkMode = false;
-    private boolean TeXzoom = false;
 
     private static final int FILE_CHOOSER_REQUEST_CODE = 0x01;
 
@@ -74,7 +54,6 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
             filePos = sharedPref.getLong("curPos", 0);
         double scale = sharedPref.getFloat("textSize", (float) 1.0);
         darkMode = sharedPref.getBoolean("darkMode", false);
-        TeXzoom = sharedPref.getBoolean("TeXzoom", false);
 
         mView = findViewById(R.id.hintview);
         mView.setOnClickListener(new View.OnClickListener() {
@@ -95,7 +74,6 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
         }
         mView.setScale(scale);
         mView.setMode(darkMode);
-        mView.setZoom(TeXzoom);
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -175,7 +153,6 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
         super.onSaveInstanceState(outState);
         outState.putBoolean("toolbarVisible", toolbar.getTranslationY() >= 0);
         outState.putBoolean("darkMode", darkMode);
-        outState.putBoolean("TeXzoom", TeXzoom);
         Log.d(TAG, "toolbarVisible: " + (toolbar.getTranslationY() >= 0));
     }
 
@@ -188,8 +165,6 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
             public void run() {
                 final boolean toolbarVisible = savedInstanceState.getBoolean("toolbarVisible");
                 darkMode = savedInstanceState.getBoolean("darkMode");
-                TeXzoom = savedInstanceState.getBoolean("TeXzoom");
-                mView.setZoom(TeXzoom);
                 hideToolbar(mView, toolbarVisible);
             }
         }, 80);
@@ -222,7 +197,6 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
         editor.putLong("curPos", filePos);
         editor.putFloat("textSize", (float) mView.getScale());
         editor.putBoolean("darkMode", mView.getMode());
-        editor.putBoolean("TeXzoom", TeXzoom);
         editor.apply();
         Log.d(TAG, "onStop pos = " + Long.toHexString(filePos));
     }
@@ -233,8 +207,6 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
         MenuItem checkable;
         checkable = menu.findItem(R.id.dark);
         checkable.setChecked(darkMode);
-        checkable = menu.findItem(R.id.zoom);
-        checkable.setChecked(TeXzoom);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -247,13 +219,13 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         super.onOptionsItemSelected(item);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                hideToolbar(mView, false);
+            }
+        }, 80);
         switch (item.getItemId()) {
-            case R.id.zoom:
-                TeXzoom = !item.isChecked();
-                Log.d(TAG, "onOptionsItemSelected: TeXzoom=" + TeXzoom);
-                mView.setZoom(TeXzoom);
-                item.setChecked(TeXzoom);
-                return true;
             case R.id.dark:
                 darkMode = !item.isChecked();
                 Log.d(TAG, "onOptionsItemSelected: dark=" + darkMode);
@@ -276,10 +248,6 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
                 mView.setScale(1.0);
                 mView.requestRender();
                 return true;
-            case R.id.print:
-                Log.d(TAG, "print");
-                doPrint();
-                return true;
             default:
                 return false;
         }
@@ -294,31 +262,6 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
         } catch (ActivityNotFoundException e) {
             Log.e(TAG, "", e);
         }
-    }
-
-    private void doPrint() {
-
-        Log.e(TAG,"doPrint Begin\n");
-        // Get a PrintManager instance
-        final PrintManager printManager = (PrintManager) this.getSystemService(Context.PRINT_SERVICE);
-        if (printManager==null) {
-            Log.e(TAG, "Unable to obtain a printManager");
-            return;
-        }
-        if (adapter==null)
-          adapter = new PrintHintDocumentAdapter(mView);
-        // Set job name, which will be displayed in the print queue
-        final String jobName = mView.getFileUriStr();
-        // Start a print job, passing in a PrintDocumentAdapter implementation
-        // to handle the generation of a print document
-
-        Thread printThread = new Thread(new Runnable(){
-            public void run()
-            {
-                printManager.print(jobName, adapter, null);
-            }});
-        printThread.start();
-
     }
 
          @Override

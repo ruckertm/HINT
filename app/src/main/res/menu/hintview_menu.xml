@@ -5,9 +5,6 @@
         android:id="@+id/fileChooser"
         android:title="@string/open_file" />
     <item
-        android:id="@+id/print"
-        android:title="@string/print" />
-    <item
         android:id="@+id/toHome"
         android:title= "@string/first_page" />
     <item
@@ -17,8 +14,4 @@
         android:id="@+id/dark"
         android:checkable="true"
         android:title="@string/dark_mode" />
-    <item
-        android:id="@+id/zoom"
-        android:checkable="true"
-        android:title="@string/zoom_mode" />
 </menu>
