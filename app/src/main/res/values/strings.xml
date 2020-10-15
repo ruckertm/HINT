@@ -29,5 +29,10 @@
     <string name="first_page">To first page</string>
     <string name="scale_one">Zoom to 100%</string>
     <string name="zoom_mode">TeX Zoom</string>
+    <string name="hint_version">HINT Version 1.1</string>
+    <string name="viewer_version">Viewer Version 1.1</string>
+    <string name="about">About ...</string>
+    <string name="hint_icon">HINT Icon</string>
+    <string name="error_icon">Error Icon</string>
 </resources>
 

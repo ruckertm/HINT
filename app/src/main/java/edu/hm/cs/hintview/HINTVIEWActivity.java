@@ -1,8 +1,10 @@
 
 package edu.hm.cs.hintview;
 
+import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -18,6 +20,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowInsets;
 
+import android.app.Dialog;
+import android.widget.Button;
+import android.view.View.OnClickListener;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -226,6 +232,28 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
             }
         }, 80);
         switch (item.getItemId()) {
+            case R.id.about: {
+                final Dialog dialog = new Dialog(this);
+                //dialog.setCanceledOnTouchOutside(true);
+                //dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                //    @Override
+                //    public void onCancel(DialogInterface dialogInterface) {
+                //       dialog.dismiss();
+                //    }
+                //});
+                dialog.setContentView(R.layout.about);
+                TextView t=dialog.findViewById(R.id.textView2);
+                t.setText("Hello world");
+                Button dialogButton = (Button) dialog.findViewById(R.id.OKbutton);
+                dialogButton.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                    }
+                });
+                dialog.show();
+            }
+             return true;
             case R.id.dark:
                 darkMode = !item.isChecked();
                 Log.d(TAG, "onOptionsItemSelected: dark=" + darkMode);
@@ -286,10 +314,26 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
 
 
     @Override
-    public void onRenderErrorCallback(String errMsg) {
-        new Error(errMsg);
+    public void onRenderErrorCallback(final String errMsg) {
+        //new Error(errMsg);
+        final Context c=this;
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString("fileURI", null);
-        //Toast.makeText(this, errMsg, Toast.LENGTH_LONG).show();
-    }
+        this.runOnUiThread(new Runnable() {
+            public void run() {
+                final Dialog dialog = new Dialog(c);
+                dialog.setContentView(R.layout.render_error);
+                TextView t=dialog.findViewById(R.id.ErrorMsg);
+                t.setText(errMsg);
+                Button dialogButton = (Button) dialog.findViewById(R.id.OKbutton);
+                dialogButton.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                    }
+                });
+                dialog.show();
+            }
+        });
+     }
 }
