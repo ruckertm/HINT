@@ -177,11 +177,11 @@ extern uint32_t hposition(pointer p);
 extern void hloc_set(uint64_t h);
 extern void hloc_set_next(pointer p);
 /*:241*//*249:*/
-#line 4277 ".\\hint.w"
+#line 4278 ".\\hint.w"
 
 extern scaled hvsize,hhsize;
 /*:249*//*326:*/
-#line 6307 ".\\hint.w"
+#line 6311 ".\\hint.w"
 
 extern void leak_in(pointer p,int s);
 extern void leak_out(pointer p,int s);

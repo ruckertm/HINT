@@ -1,5 +1,5 @@
 /*330:*/
-#line 6390 ".\\hint.w"
+#line 6394 ".\\hint.w"
 
 #include <math.h> 
 #include "texextern.h"
@@ -10,26 +10,26 @@
 #include "texdefs.h"
 
 /*266:*/
-#line 4599 ".\\hint.w"
+#line 4600 ".\\hint.w"
 
 extern struct font_s*hget_font(unsigned char f);
 /*:266*//*278:*/
-#line 4945 ".\\hint.w"
+#line 4946 ".\\hint.w"
 
 extern void render_char(int x,int y,struct font_s*f,uint32_t cc);
 /*:278*/
-#line 6399 ".\\hint.w"
+#line 6403 ".\\hint.w"
 
 
 /*256:*/
-#line 4423 ".\\hint.w"
+#line 4424 ".\\hint.w"
 
 static bool forward_mode= false,backward_mode= false;
 /*:256*/
-#line 6401 ".\\hint.w"
+#line 6405 ".\\hint.w"
 
 /*254:*/
-#line 4373 ".\\hint.w"
+#line 4374 ".\\hint.w"
 
 
 uint64_t hint_page_top(uint64_t h)
@@ -50,7 +50,7 @@ backward_mode= false;
 return h;
 }
 /*:254*//*255:*/
-#line 4399 ".\\hint.w"
+#line 4400 ".\\hint.w"
 
 uint64_t hint_page_get(void)
 {
@@ -69,7 +69,7 @@ else
 return hint_page_top(i);
 }
 /*:255*//*257:*/
-#line 4428 ".\\hint.w"
+#line 4429 ".\\hint.w"
 
 uint64_t hint_next_page(void)
 {if(hbase==NULL)return 0;
@@ -86,7 +86,7 @@ return hint_page();
 }
 }
 /*:257*//*258:*/
-#line 4453 ".\\hint.w"
+#line 4454 ".\\hint.w"
 
 uint64_t hint_prev_page(void)
 {if(hbase==NULL)return 0;
@@ -104,7 +104,7 @@ else
 return hint_page_bottom(hint_page_get());
 }
 /*:258*//*259:*/
-#line 4478 ".\\hint.w"
+#line 4479 ".\\hint.w"
 
 uint64_t hint_page_bottom(uint64_t h)
 {if(hbase==NULL)return 0;
@@ -118,14 +118,14 @@ forward_mode= false;
 return hint_page_get();
 }
 /*:259*//*260:*/
-#line 4493 ".\\hint.w"
+#line 4494 ".\\hint.w"
 
 uint64_t hint_page_center(uint64_t h)
 {if(hbase==NULL)return hint_blank();
 QUIT("hint_page_center not yet implemented");
 }
 /*:260*//*261:*/
-#line 4504 ".\\hint.w"
+#line 4505 ".\\hint.w"
 
 void hint_resize(int px_h,int px_v,double dpi)
 {static int old_px_h= 0,old_px_v= 0;
@@ -139,14 +139,14 @@ forward_mode= false;
 backward_mode= false;
 }
 /*:261*//*279:*/
-#line 4952 ".\\hint.w"
+#line 4953 ".\\hint.w"
 
 static void render_rule(int x,int y,int w,int h)
 {if(w> 0&&h> 0)
 nativeRule(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h));
 }
 /*:279*//*280:*/
-#line 4963 ".\\hint.w"
+#line 4964 ".\\hint.w"
 
 void render_image(int x,int y,int w,int h,uint32_t n)
 {
@@ -157,7 +157,7 @@ nativeImage(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),hstart,hend);
 hpos= spos;hstart= sstart;hend= send;
 }
 /*:280*//*281:*/
-#line 4988 ".\\hint.w"
+#line 4989 ".\\hint.w"
 
 static scaled cur_h,cur_v;
 static scaled rule_ht,rule_dp,rule_wd;
@@ -527,14 +527,14 @@ p= link(p);
 }
 
 /*:281*//*282:*/
-#line 5363 ".\\hint.w"
+#line 5364 ".\\hint.w"
 
 uint64_t hint_blank(void)
 {nativeBlank();
 return 0;
 }
 /*:282*//*283:*/
-#line 5372 ".\\hint.w"
+#line 5373 ".\\hint.w"
 
 
 void hint_render(void)
@@ -549,6 +549,6 @@ else
 hlist_render(streams[0].p);
 }
 /*:283*/
-#line 6402 ".\\hint.w"
+#line 6406 ".\\hint.w"
 
 /*:330*/

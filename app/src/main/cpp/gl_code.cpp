@@ -39,12 +39,16 @@ extern "C" {
 char *in_name=NULL; /* to keep hget happy */
 
 // Functions from rendergl.c
-
+#if 0
+/Ü used for classic zoom removed in release 1.1 */
 extern void glZoomBegin(void);
 extern void glZoom(void);
 extern void glZoomEnd(void);
+#endif
+#if 0
+/* used for prining never got it working */
 extern void glDrawBitmap(uint32_t width, uint32_t height, uint32_t stride, void *pixel);
-
+#endif
 //DEPRECATED
 //extern void nativeSetColors(double fr, double fg, double fb, double br, double bg, double bb);
 };
@@ -107,18 +111,17 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_init(JNIEnv *env, jclass obj) {
 
 
 int fd=-1;
-static size_t hbase_size;
-extern "C" void hint_map(void) {
+static uint64_t hbase_size;
+extern "C" uint64_t hint_map(void) {
     struct stat st;
     LOGI("hint_map\n");
-     if (fd < 0) QUIT("Unable to open file");
-    if (fstat(fd, &st) < 0) QUIT("Unable to get file size");
+     if (fd < 0) MESSAGE("Unable to open file");
+    if (fstat(fd, &st) < 0) MESSAGE("Unable to get file size");
     hbase_size = st.st_size;
     hbase = (uint8_t *) mmap(NULL, hbase_size, PROT_READ, MAP_PRIVATE, fd, 0);
-    if (hbase == MAP_FAILED) QUIT("Unable to map file into memory");
+    if (hbase == MAP_FAILED) MESSAGE("Unable to map file into memory");
     close(fd);
-    hpos = hstart = hbase;
-    hend = hstart + hbase_size;
+    return hbase_size;
  }
 
 extern "C" void hint_unmap(void) {
@@ -126,7 +129,7 @@ extern "C" void hint_unmap(void) {
     if (hbase != NULL)
         munmap(hbase, hbase_size);
     hbase = NULL;
-    hpos = hstart = hend = NULL;
+    hbase_size=0;
 }
 
 
@@ -158,7 +161,8 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jclass obj) {
     HINT_TRY hint_render();HINT_CATCH("render");
 }
 
-
+#if 0
+/* used in printing but never completed */
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_drawBitmap(JNIEnv *env, jclass obj, jobject bitmap) {
 
@@ -189,7 +193,10 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_drawBitmap(JNIEnv *env, jclass obj, jobject 
         LOGE("AndroidBitmap_unlockPixels() failed ! error=%d", ret);
     }
 }
+#endif
 
+#if 0
+/* used for traditional zoom, removed in release 1.1 */
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_zoomBegin(JNIEnv *env, jclass obj) {
     LOGI("Zoom Begin\n");
@@ -207,6 +214,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_zoom(JNIEnv *env, jclass obj) {
     LOGI("Zoom\n");
     glZoom();
 }
+#endif
 
     extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_next(JNIEnv *env, jclass obj) {

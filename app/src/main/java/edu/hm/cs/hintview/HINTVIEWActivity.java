@@ -34,7 +34,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 
-public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.Renderer.RenderErrorCallback {
+public class HINTVIEWActivity extends AppCompatActivity {
     private static String TAG = "HINTVIEWActivity";
     private HINTVIEWView mView;
     private static Toolbar toolbar;
@@ -242,8 +242,6 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
                 //    }
                 //});
                 dialog.setContentView(R.layout.about);
-                TextView t=dialog.findViewById(R.id.textView2);
-                t.setText("Hello world");
                 Button dialogButton = (Button) dialog.findViewById(R.id.OKbutton);
                 dialogButton.setOnClickListener(new OnClickListener() {
                     @Override
@@ -311,29 +309,4 @@ public class HINTVIEWActivity extends AppCompatActivity implements HINTVIEWView.
             }
         }
     }
-
-
-    @Override
-    public void onRenderErrorCallback(final String errMsg) {
-        //new Error(errMsg);
-        final Context c=this;
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString("fileURI", null);
-        this.runOnUiThread(new Runnable() {
-            public void run() {
-                final Dialog dialog = new Dialog(c);
-                dialog.setContentView(R.layout.render_error);
-                TextView t=dialog.findViewById(R.id.ErrorMsg);
-                t.setText(errMsg);
-                Button dialogButton = (Button) dialog.findViewById(R.id.OKbutton);
-                dialogButton.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
-                    }
-                });
-                dialog.show();
-            }
-        });
-     }
 }

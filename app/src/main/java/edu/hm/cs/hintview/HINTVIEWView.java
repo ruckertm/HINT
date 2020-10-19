@@ -17,6 +17,7 @@ package edu.hm.cs.hintview;
  */
 
 
+import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -29,6 +30,8 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
 
 import java.io.FileNotFoundException;
@@ -257,20 +260,34 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         private HINTVIEWView view;
         private final Context context;
         private String fileUriStr;
+        private String ErrorMsg;
         private long pos;
-        private RenderErrorCallback renderErrorCallback;
 
         Renderer(Context context,HINTVIEWView view) {
             this.view = view;
             this.context = context;
-            renderErrorCallback = (RenderErrorCallback) context;
         }
 
         private boolean render_OK() {
-            String msg = HINTVIEWLib.error();
-            if (msg != null) {
-                Log.w(TAG, "Error in renderer: " + msg + "!");
-                renderErrorCallback.onRenderErrorCallback(msg);
+            ErrorMsg = HINTVIEWLib.error();
+            if (ErrorMsg != null) {
+                Log.w(TAG, "Error in renderer: " + ErrorMsg + "!");
+                view.post(new Runnable() {
+                    public void run() {
+                        final Dialog dialog = new Dialog(context);
+                        dialog.setContentView(R.layout.render_error);
+                        TextView t=dialog.findViewById(R.id.ErrorMsg);
+                        t.setText(ErrorMsg);
+                        Button dialogButton = (Button) dialog.findViewById(R.id.OKbutton);
+                        dialogButton.setOnClickListener(new OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                dialog.dismiss();
+                            }
+                        });
+                        dialog.show();
+                    }
+                });
                 this.fileUriStr = null;
                 this.pos = 0;
                 return false;
@@ -342,11 +359,6 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
 
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
             HINTVIEWLib.init();
-            render_OK();
-        }
-
-        public interface RenderErrorCallback{
-            public void onRenderErrorCallback(String errMsg);
         }
 
     }

@@ -1,5 +1,5 @@
 /*328:*/
-#line 6335 ".\\hint.w"
+#line 6339 ".\\hint.w"
 
 #include "basetypes.h"
 #include <string.h> 
@@ -229,7 +229,7 @@ hget_list();
   else { image_stretch(p)= image_shrink(p)= 0;image_stretch_order(p)= image_shrink_order(p)= normal;}\
   tail_append(p);}
 /*:191*/
-#line 6350 ".\\hint.w"
+#line 6354 ".\\hint.w"
 
 /*72:*/
 #line 1134 ".\\hint.w"
@@ -419,7 +419,7 @@ if ((I)&b100) hteg_xdimen_node(); else hget_xdimen_ref(HTEG8);
   HTEG16(image_no(p));RNG("Section number",image_no(p),3,max_section_no);  \
   tail_append(p);}
 /*:192*/
-#line 6351 ".\\hint.w"
+#line 6355 ".\\hint.w"
 
 
 
@@ -451,7 +451,7 @@ typedef struct param_def_t{
 struct param_def_t*next;
 param_t p;}param_def_t;
 /*:40*/
-#line 6354 ".\\hint.w"
+#line 6358 ".\\hint.w"
 
 
 
@@ -539,20 +539,20 @@ uint64_t page_loc[MAX_PAGE_POS];
 int cur_loc;
 static int lo_loc,hi_loc;
 /*:233*//*248:*/
-#line 4274 ".\\hint.w"
+#line 4275 ".\\hint.w"
 
 scaled hvsize,hhsize;
 /*:248*//*250:*/
-#line 4302 ".\\hint.w"
+#line 4303 ".\\hint.w"
 
 int page_v,page_h,offset_v,offset_h;
 /*:250*//*315:*/
-#line 6034 ".\\hint.w"
+#line 6036 ".\\hint.w"
 
 jmp_buf error_exit;
 char herror_string[MAX_HERROR];
 /*:315*/
-#line 6357 ".\\hint.w"
+#line 6361 ".\\hint.w"
 
 /*3:*/
 #line 190 ".\\hint.w"
@@ -605,7 +605,7 @@ static pointer hteg_list(void);
 
 static scaled hget_xdimen_node(void);
 /*:126*/
-#line 6358 ".\\hint.w"
+#line 6362 ".\\hint.w"
 
 /*9:*/
 #line 244 ".\\hint.w"
@@ -2026,7 +2026,7 @@ cur_loc= i;
 DBG(DBGPAGE,"loc_set_prev: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
 }
 /*:240*//*251:*/
-#line 4312 ".\\hint.w"
+#line 4313 ".\\hint.w"
 
 static void hset_margins(void)
 {if(cur_page==&(page_def[0])){
@@ -2049,7 +2049,7 @@ if(hvsize> page_v)hvsize= page_v;
 }
 }
 /*:251*//*253:*/
-#line 4342 ".\\hint.w"
+#line 4343 ".\\hint.w"
 
 static void houtput_template0(void)
 {pointer p,q,r;
@@ -2066,7 +2066,7 @@ shift_amount(p)+= offset_h;
 streams[0].p= q;
 }
 /*:253*//*325:*/
-#line 6266 ".\\hint.w"
+#line 6270 ".\\hint.w"
 
 static pointer leaks[1<<16]= {0};
 
@@ -2107,7 +2107,7 @@ fprintf(stderr,"ERROR:leak final: p=%d, s=%d\n",i,leaks[i]);
 #endif
 }
 /*:325*/
-#line 6359 ".\\hint.w"
+#line 6363 ".\\hint.w"
 
 /*1:*/
 #line 111 ".\\hint.w"
@@ -2591,7 +2591,7 @@ QUIT("Text in paragraph not yet implemented");
 return null;
 }
 /*:161*/
-#line 6360 ".\\hint.w"
+#line 6364 ".\\hint.w"
 
 /*75:*/
 #line 1162 ".\\hint.w"
@@ -2937,7 +2937,7 @@ line_break_params= save_lbp;
 }
 
 /*:171*/
-#line 6361 ".\\hint.w"
+#line 6365 ".\\hint.w"
 
 
 /*19:*/
@@ -3566,17 +3566,20 @@ page_loc[cur_loc]= 0;
 DBG(DBGPAGE,"loc_init: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
 }
 /*:237*//*242:*/
-#line 4141 ".\\hint.w"
+#line 4140 ".\\hint.w"
 
-static bool hint_is_open= false;
 void hint_begin(void)
-{if(hint_is_open)
+{uint64_t hbase_size;
+if(hbase!=NULL)
 hint_end();
 mem_init();
 list_init();
 hclear_dir();
 hclear_fonts();
-hint_map();
+hbase_size= hint_map();
+if(hbase_size==0)QUIT("Unable to map the input file");
+hpos= hstart= hbase;
+hend= hstart+hbase_size;
 hget_banner();
 hcheck_banner("hint");
 hget_directory();
@@ -3585,20 +3588,19 @@ hget_content_section();
 leak_clear();
 clear_map();
 hloc_init();
-hint_is_open= true;
 }
 
 void hint_end(void)
-{if(!hint_is_open)return;
+{if(hbase==NULL)return;
+hint_unmap();
+hpos= hstart= hend= NULL;
 hflush_contribution_list();hpage_init();
 flush_node_list(link(page_head));
 list_leaks();
-hint_unmap();
 hclear_dir();
-hint_is_open= false;
 }
 /*:242*//*244:*/
-#line 4187 ".\\hint.w"
+#line 4188 ".\\hint.w"
 
 bool hint_forward(void)
 {hpage_init();
@@ -3612,7 +3614,7 @@ if(hbuild_page())return true;
 return false;
 }
 /*:244*//*245:*/
-#line 4228 ".\\hint.w"
+#line 4229 ".\\hint.w"
 
 bool hint_backward(void)
 {hpage_init();
@@ -3626,7 +3628,7 @@ if(hbuild_page_up())return true;
 return false;
 }
 /*:245*//*247:*/
-#line 4256 ".\\hint.w"
+#line 4257 ".\\hint.w"
 
 bool flush_pages(uint32_t pos)
 {pointer p= link(head);
@@ -3643,7 +3645,7 @@ store_map(tail,pos,0);
 return false;
 }
 /*:247*/
-#line 6363 ".\\hint.w"
+#line 6367 ".\\hint.w"
 
 
 /*:328*/

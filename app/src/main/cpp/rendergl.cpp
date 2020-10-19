@@ -475,7 +475,8 @@ extern "C" void glSetZoomTexture(void)
     LOGI("GL Set Zoom Texture done\n");
 }
 
-
+#if 0
+/* used for classic zoom removed in release 1.1 */
 extern "C" void glZoomBegin(void) {
 
     LOGI("GL Zoom Begin\n");
@@ -538,6 +539,10 @@ extern "C" void glZoom(void) {
         glUniform1i(ourModeLocation, DARK_MODE);
     }
 }
+#endif
+
+#if 0
+/* used in printing, removed for release 1.1 */
 extern "C" void glDrawBitmap(uint32_t width, uint32_t height, uint32_t stride, void* pixels)
 { int x,y;
     LOGI("GL Draw Bitmap\n");
@@ -577,3 +582,4 @@ extern "C" void glDrawBitmap(uint32_t width, uint32_t height, uint32_t stride, v
     LOGI("GL Draw Bitmap done\n");
 
 }
+#endif

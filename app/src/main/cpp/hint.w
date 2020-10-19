@@ -27,8 +27,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 2064 ${}$}
-\def\lastdate{${}$Date: 2020-10-05 18:26:42 +0200 (Mon, 05 Oct 2020) ${}$}
+\def\lastrevision{${}$Revision: 2066 ${}$}
+\def\lastdate{${}$Date: 2020-10-13 16:54:47 +0200 (Tue, 13 Oct 2020) ${}$}
 
 \input titlepage.tex
 
@@ -4133,21 +4133,23 @@ system to the state it had before calling |hint_begin|.  Since mapping
 functions |hint_begin| and |hint_end| delegate the work to two
 functions, |hint_map| and |hint_unmap|, that must be implemented by
 the framework using the \HINT/ backend.  If mapping the file fails,
-the function |hint_map| should not return; it should leave the
-variables |hpos|, |hstart|, and |hend| untouched; and should set
-|hbase| to |NULL| and |hbase_size| to zero; otherwise, it should set
-these variables to the appropriate values.
+the function |hint_map| should set |hbase| to |NULL| and return zero;
+otherwise, it should set |hbase| to a valid memory address and return the number 
+of byte mapped.
 
 @<\HINT/ functions@>=
-static bool hint_is_open=false;
 void hint_begin(void)
-{ if (hint_is_open) 
+{ uint64_t hbase_size;
+  if (hbase!=NULL) 
     hint_end();
   mem_init();
   list_init(); 
   hclear_dir();
   hclear_fonts();
-  hint_map();
+  hbase_size=hint_map();
+  if (hbase_size==0) QUIT("Unable to map the input file");
+  hpos=hstart=hbase;
+  hend=hstart+hbase_size;
   hget_banner();
   hcheck_banner("hint");
   hget_directory();
@@ -4156,17 +4158,16 @@ void hint_begin(void)
   leak_clear();
   clear_map();
   hloc_init();
-  hint_is_open=true;
 }
 
 void hint_end(void)
-{ if (!hint_is_open) return;
+{ if (hbase==NULL) return;
+  hint_unmap(); 
+  hpos=hstart=hend=NULL;
   hflush_contribution_list(); hpage_init();
   flush_node_list(link(page_head));
   list_leaks();
-  hint_unmap();
   hclear_dir();
-  hint_is_open=false;
 }
 @
 
@@ -4174,7 +4175,7 @@ void hint_end(void)
 @<\HINT/ |extern|@>=
 extern void hint_begin(void);
 extern void hint_end(void);
-extern void hint_map(void);
+extern uint64_t hint_map(void);
 extern uint8_t *hbase;
 extern void hint_unmap(void);
 @
@@ -5926,6 +5927,7 @@ static void ft_unpack_glyph(font_t *f, gcache_t *g, uint32_t cc)
   g->bits=calloc(g->w*g->h, 1);
   if (g->bits==NULL) QUIT("Out of memory for FreeType glyph %c (%u)",(char)cc,cc);
   memcpy(g->bits,f->tt.face->glyph->bitmap.buffer,g->w*g->h);
+
   g->ff=ft_format;
   nativeSetFreeType(g);
 }
@@ -6189,11 +6191,13 @@ needs to be supplied.
 
 @<test functions@>=
 #ifndef _MSC_VER 
-void hint_map(void)
-{ hget_map(); }
+uint64_t hint_map(void)
+{ return hget_map();
+}
 
 void hint_unmap(void)
-{ hget_unmap(); }
+{ hget_unmap(); 
+}
 #endif
 @
 

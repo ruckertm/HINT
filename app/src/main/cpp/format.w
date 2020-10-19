@@ -5557,13 +5557,15 @@ bool hcheck_banner(char *magic)
 
 To read a short format file, we use the macro |HGET8|. It returns a single byte.
 We read the banner knowing that it ends with a newline character
-and is at most |MAX_BANNER| byte long.
+and is at most |MAX_BANNER| byte long. Because this is the first access to a yet unknown file,
+we are very carefull and make sure we do not read past the end of the file.
+Checking the banner is a separate step.
 
 \getcode
 @<get file functions@>=
 void hget_banner(void)
 { int i;
-  for (i=0;i<MAX_BANNER;i++)
+  for (i=0;i<MAX_BANNER && hpos<hend;i++)
   { hbanner[i]=HGET8;
     if (hbanner[i]=='\n') break;
   } 
@@ -5718,24 +5720,38 @@ file at address |hbase|.\label{map}
 
 @<map functions@>=
 @<|mmap| and |munmap| declarations@>@;
-static size_t hbase_size;
+static uint64_t hbase_size;
 uint8_t *hbase=NULL;
 extern char *in_name;
-void hget_map(void)
+uint64_t hget_map(void)
 { struct stat st;
   int fd;
+  hbase=NULL; hbase_size=0;
   fd = open(in_name, O_RDONLY, 0);
-  if (fd<0) QUIT("Unable to open file %s", in_name);
-  if (fstat(fd, &st)<0) QUIT("Unable to get file size");
+  if (fd<0)
+  { MESSAGE("Unable to open file %s", in_name);
+    return 0;
+  }
+  if (fstat(fd, &st)<0)
+  { MESSAGE("Unable to get file size");
+    close(fd);
+    return 0;
+  }
   hbase_size=st.st_size;
+  if (hbase_size==0)
+  { MESSAGE("File %s is empty",in_name);
+    close(fd);
+    return 0;
+  }
   hbase= mmap(NULL,hbase_size,PROT_READ,MAP_PRIVATE,fd, 0);
   if (hbase==MAP_FAILED) 
-  { hbase=NULL;hbase_size=0;
-    QUIT("Unable to map file into memory");
+  { close(fd);
+    hbase=NULL;hbase_size=0;
+    MESSAGE("Unable to map file into memory");
+    return 0;
   }
   close(fd);
-  hpos=hstart=hbase;
-  hend=hstart+hbase_size;
+  return hbase_size;
 }
 
 
@@ -5743,7 +5759,6 @@ void hget_unmap(void)
 { munmap(hbase,hbase_size);
   hbase=NULL;
   hbase_size=0;
-  hpos=hstart=hend=NULL;
 }
 @
 A small complication arrises from the fact that the |mmap| and
@@ -8737,7 +8752,7 @@ extern entry_t *dir;
 extern uint16_t section_no,  max_section_no;
 extern uint8_t *hpos, *hstart, *hend;
 
-extern void hget_map(void);
+extern uint64_t hget_map(void);
 extern void hget_unmap(void);
 
 extern void new_directory(uint32_t entries);
@@ -9066,12 +9081,15 @@ int main(int argc, char *argv[])
 { @<local variables in |main|@>@;
    in_ext=".hnt";
    out_ext=".HINT";
-
+  uint64_t  hbase_size;
   @<process the command line@>@;
   @<open the log file@>@;
   @<open the output file@>@;
   @<determine the |stem_name| from the output |file_name|@>@;
-  hget_map();
+  hbase_size=hget_map();
+  if (hbase_size==0) QUIT("Unable to map the input file");
+  hpos=hstart=hbase;
+  hend=hstart+hbase_size;
   hget_banner();
   hcheck_banner("hint");
   hput_banner("HINT","stretch");
@@ -9135,10 +9153,14 @@ int main(int argc, char *argv[])
 { @<local variables in |main|@>@;
    in_ext=".hnt";
    out_ext=".bak";
+  uint64_t  hbase_size;
 
   @<process the command line@>@;
   @<open the log file@>@;
-  hget_map();
+  hbase_size=hget_map();
+  if (hbase_size==0) QUIT("Unable to map the input file");
+  hpos=hstart=hbase;
+  hend=hstart+hbase_size;
   hget_banner();
   hcheck_banner("hint");
   hget_directory();

@@ -1,5 +1,5 @@
 /*327:*/
-#line 6317 ".\\hint.w"
+#line 6321 ".\\hint.w"
 
 #ifndef _HINT_H_
 #define _HINT_H_
@@ -42,20 +42,20 @@ extern void hloc_clear(void);
 extern bool hloc_next(void);
 extern bool hloc_prev(void);
 /*:236*//*243:*/
-#line 4174 ".\\hint.w"
+#line 4175 ".\\hint.w"
 
 extern void hint_begin(void);
 extern void hint_end(void);
-extern void hint_map(void);
+extern uint64_t hint_map(void);
 extern uint8_t*hbase;
 extern void hint_unmap(void);
 /*:243*//*246:*/
-#line 4246 ".\\hint.w"
+#line 4247 ".\\hint.w"
 
 extern bool hint_forward(void);
 extern bool hint_backward(void);
 /*:246*/
-#line 6329 ".\\hint.w"
+#line 6333 ".\\hint.w"
 
 
 #endif

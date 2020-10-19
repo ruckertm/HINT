@@ -1,5 +1,5 @@
 	/*434:*/
-	#line 8759 "format.w"
+	#line 8774 "format.w"
 
 #include "basetypes.h"
 #include <string.h>
@@ -71,7 +71,7 @@ stretch_t p,m;
 typedef
 struct{uint8_t pg;uint32_t pos;bool on;int link;}range_pos_t;
 	/*:251*/
-	#line 8772 "format.w"
+	#line 8787 "format.w"
 
 	/*252:*/
 	#line 5345 "format.w"
@@ -85,15 +85,15 @@ int*page_on;
 int version= 1,subversion= 1;
 char hbanner[MAX_BANNER+1];
 	/*:262*/	/*269:*/
-	#line 5653 "format.w"
+	#line 5655 "format.w"
 
 uint8_t*hpos= NULL,*hstart= NULL,*hend= NULL;
 	/*:269*/	/*325:*/
-	#line 7039 "format.w"
+	#line 7054 "format.w"
 
 char**hfont_name;
 	/*:325*/	/*365:*/
-	#line 7801 "format.w"
+	#line 7816 "format.w"
 
 int option_utf8= false;
 int option_hex= false;
@@ -105,18 +105,18 @@ char*in_name;
 char*stem_name;
 int stem_length= 0;
 	/*:365*/	/*368:*/
-	#line 7879 "format.w"
+	#line 7894 "format.w"
 
 FILE*hin= NULL,*hout= NULL;
 	/*:368*/
-	#line 8773 "format.w"
+	#line 8788 "format.w"
 
 
 	/*275:*/
-	#line 5719 "format.w"
+	#line 5721 "format.w"
 
 	/*276:*/
-	#line 5761 "format.w"
+	#line 5776 "format.w"
 
 #ifdef WIN32
 #include <windows.h>
@@ -147,26 +147,40 @@ return 0;
 #include <sys/mman.h>
 #endif
 	/*:276*/
-	#line 5720 "format.w"
+	#line 5722 "format.w"
 
-static size_t hbase_size;
+static uint64_t hbase_size;
 uint8_t*hbase= NULL;
 extern char*in_name;
-void hget_map(void)
+uint64_t hget_map(void)
 {struct stat st;
 int fd;
+hbase= NULL;hbase_size= 0;
 fd= open(in_name,O_RDONLY,0);
-if(fd<0)QUIT("Unable to open file %s",in_name);
-if(fstat(fd,&st)<0)QUIT("Unable to get file size");
+if(fd<0)
+{MESSAGE("Unable to open file %s",in_name);
+return 0;
+}
+if(fstat(fd,&st)<0)
+{MESSAGE("Unable to get file size");
+close(fd);
+return 0;
+}
 hbase_size= st.st_size;
+if(hbase_size==0)
+{MESSAGE("File %s is empty",in_name);
+close(fd);
+return 0;
+}
 hbase= mmap(NULL,hbase_size,PROT_READ,MAP_PRIVATE,fd,0);
 if(hbase==MAP_FAILED)
-{hbase= NULL;hbase_size= 0;
-QUIT("Unable to map file into memory");
+{close(fd);
+hbase= NULL;hbase_size= 0;
+MESSAGE("Unable to map file into memory");
+return 0;
 }
 close(fd);
-hpos= hstart= hbase;
-hend= hstart+hbase_size;
+return hbase_size;
 }
 
 
@@ -174,10 +188,9 @@ void hget_unmap(void)
 {munmap(hbase,hbase_size);
 hbase= NULL;
 hbase_size= 0;
-hpos= hstart= hend= NULL;
 }
 	/*:275*/
-	#line 8775 "format.w"
+	#line 8790 "format.w"
 
 	/*263:*/
 	#line 5532 "format.w"
@@ -206,10 +219,10 @@ DBG(DBGDIR,"banner size=0x%x\n",hbanner_size);
 return true;
 }
 	/*:263*/
-	#line 8776 "format.w"
+	#line 8791 "format.w"
 
 	/*285:*/
-	#line 6028 "format.w"
+	#line 6043 "format.w"
 
 entry_t*dir= NULL;
 uint16_t section_no,max_section_no;
@@ -221,7 +234,7 @@ ALLOCATE(dir,entries,entry_t);
 dir[0].section_no= 0;dir[1].section_no= 1;dir[2].section_no= 2;
 }
 	/*:285*/	/*286:*/
-	#line 6041 "format.w"
+	#line 6056 "format.w"
 
 void hset_entry(entry_t*e,uint16_t i,uint32_t size,uint32_t xsize,char*file_name)
 {e->section_no= i;
@@ -233,7 +246,7 @@ e->file_name= strdup(file_name);
 DBG(DBGDIR,"Creating entry %d: \"%s\" size=0x%x xsize=0x%x\n",i,file_name,size,xsize);
 }
 	/*:286*/
-	#line 8777 "format.w"
+	#line 8792 "format.w"
 
 	/*35:*/
 	#line 1016 "format.w"
@@ -242,7 +255,7 @@ DBG(DBGDIR,"Creating entry %d: \"%s\" size=0x%x xsize=0x%x\n",i,file_name,size,x
  while(hpos<hend && *hpos!=0) { RNG("String character",*hpos,0x20,0x7E); hpos++;}\
  hpos++;
 	/*:35*/	/*270:*/
-	#line 5661 "format.w"
+	#line 5663 "format.w"
 
 #define HGET_ERROR QUIT("HGET overrun in section %d at " SIZE_F "\n",section_no,hpos-hstart)
 #define HEND   ((hpos<=hend)?0:(HGET_ERROR,0))
@@ -253,7 +266,7 @@ DBG(DBGDIR,"Creating entry %d: \"%s\" size=0x%x xsize=0x%x\n",i,file_name,size,x
 #define HGET32(X) ((X)= (hpos[0]<<24)+(hpos[1]<<16)+(hpos[2]<<8)+hpos[3],hpos+= 4,HEND)
 #define HGETTAG(A) A= HGET8,DBGTAG(A,hpos-1)
 	/*:270*/	/*294:*/
-	#line 6225 "format.w"
+	#line 6240 "format.w"
 
 #define HGET_SIZE(I) \
   if ((I)&b100) { \
@@ -277,24 +290,24 @@ DBG(DBGDIR,"Creating entry %d: \"%s\" size=0x%x xsize=0x%x\n",i,file_name,size,x
   hset_entry(&(E),i,s,xs,file_name); \
 }
 	/*:294*/
-	#line 8778 "format.w"
+	#line 8793 "format.w"
 
 	/*264:*/
-	#line 5563 "format.w"
+	#line 5565 "format.w"
 
 void hget_banner(void)
 {int i;
-for(i= 0;i<MAX_BANNER;i++)
+for(i= 0;i<MAX_BANNER&&hpos<hend;i++)
 {hbanner[i]= HGET8;
 if(hbanner[i]=='\n')break;
 }
 hbanner[++i]= 0;
 }
 	/*:264*/	/*277:*/
-	#line 5803 "format.w"
+	#line 5818 "format.w"
 
 	/*279:*/
-	#line 5880 "format.w"
+	#line 5895 "format.w"
 
 
 static void hdecompress(uint16_t n)
@@ -331,7 +344,7 @@ hpos= hstart= buffer;
 hend= hstart+dir[n].xsize;
 }
 	/*:279*/
-	#line 5804 "format.w"
+	#line 5819 "format.w"
 
 
 void hget_section(uint16_t n)
@@ -348,7 +361,7 @@ if(dir[n].xsize>0)hdecompress(n);
 }
 }
 	/*:277*/	/*295:*/
-	#line 6249 "format.w"
+	#line 6264 "format.w"
 
 void hget_entry(entry_t*e)
 {	/*14:*/
@@ -359,7 +372,7 @@ uint32_t node_pos= hpos-hstart;
 if(hpos>=hend)QUIT("Attempt to read a start byte at the end of the section");
 HGETTAG(a);
 	/*:14*/
-	#line 6251 "format.w"
+	#line 6266 "format.w"
 
 DBG(DBGDIR,"Reading directory entry\n");
 switch(a)
@@ -381,12 +394,12 @@ if(a!=z)
 QUIT("Tag mismatch [%s,%d]!=[%s,%d] at 0x%x to "SIZE_F"\n",
 NAME(a),INFO(a),NAME(z),INFO(z),node_pos,hpos-hstart-1);
 	/*:15*/
-	#line 6264 "format.w"
+	#line 6279 "format.w"
 
 DBG(DBGDIR,"entry %d: size=0x%x xsize=0x%x\n",e->section_no,e->size,e->xsize);
 }
 	/*:295*/	/*296:*/
-	#line 6282 "format.w"
+	#line 6297 "format.w"
 
 static void hget_root(entry_t*root)
 {DBG(DBGDIR,"Get Root\n");
@@ -423,7 +436,7 @@ free(dir);dir= NULL;
 }
 
 	/*:296*/	/*312:*/
-	#line 6661 "format.w"
+	#line 6676 "format.w"
 
 void hget_max_definitions(void)
 {kind_t k;
@@ -435,7 +448,7 @@ uint32_t node_pos= hpos-hstart;
 if(hpos>=hend)QUIT("Attempt to read a start byte at the end of the section");
 HGETTAG(a);
 	/*:14*/
-	#line 6664 "format.w"
+	#line 6679 "format.w"
 
 if(a!=TAG(list_kind,0))QUIT("Start of maximum list expected");
 for(k= 0;k<32;k++)max_ref[k]= max_default[k];
@@ -461,14 +474,14 @@ if(a!=z)
 QUIT("Tag mismatch [%s,%d]!=[%s,%d] at 0x%x to "SIZE_F"\n",
 NAME(a),INFO(a),NAME(z),INFO(z),node_pos,hpos-hstart-1);
 	/*:15*/
-	#line 6681 "format.w"
+	#line 6696 "format.w"
 
 }
 if(INFO(a)!=0)QUIT("End of maximum list with info %d",INFO(a));
 
 }
 	/*:312*/
-	#line 8779 "format.w"
+	#line 8794 "format.w"
 
 
 
