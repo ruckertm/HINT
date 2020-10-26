@@ -25,7 +25,7 @@ import android.opengl.GLSurfaceView;
 import android.os.ParcelFileDescriptor;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
+//import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -74,7 +74,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
 
     public void init() {
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        Log.w(TAG, String.format("Resolution xdpi=%f ydpi=%f\n", metrics.xdpi, metrics.ydpi));
+        //Log.w(TAG, String.format("Resolution xdpi=%f ydpi=%f\n", metrics.xdpi, metrics.ydpi));
         xdpi = metrics.xdpi;
         ydpi = metrics.ydpi;
 
@@ -136,7 +136,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
     private static class ContextFactory implements GLSurfaceView.EGLContextFactory {
 
         public EGLContext createContext(EGL10 egl, EGLDisplay display, EGLConfig eglConfig) {
-            Log.w(TAG, "creating OpenGL ES 2.0 context");
+            //Log.w(TAG, "creating OpenGL ES 2.0 context");
             checkEglError("Before eglCreateContext", egl);
             int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
             int[] attrib_list = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL10.EGL_NONE};
@@ -153,7 +153,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
     private static void checkEglError(String prompt, EGL10 egl) {
         int error;
         while ((error = egl.eglGetError()) != EGL10.EGL_SUCCESS) {
-            Log.e(TAG, String.format("%s: EGL error: 0x%x", prompt, error));
+            //Log.e(TAG, String.format("%s: EGL error: 0x%x", prompt, error));
         }
     }
 
@@ -271,7 +271,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         private boolean render_OK() {
             ErrorMsg = HINTVIEWLib.error();
             if (ErrorMsg != null) {
-                Log.w(TAG, "Error in renderer: " + ErrorMsg + "!");
+                //Log.w(TAG, "Error in renderer: " + ErrorMsg + "!");
                 view.post(new Runnable() {
                     public void run() {
                         final Dialog dialog = new Dialog(context);
@@ -300,11 +300,11 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
             if (fileUriStr != null)
                 try {   //Gets called every time, after app gets maximized. So passing just the fileDescriptor to the renderer will result in an error
                     //bc it got already closed in the cpp code
-                    Log.w(TAG, "setFile " + fileUriStr + " at " + Long.toHexString(pos));
+                    //Log.w(TAG, "setFile " + fileUriStr + " at " + Long.toHexString(pos));
                     Uri fileURI = Uri.parse(fileUriStr);
                     ParcelFileDescriptor pfd = context.getContentResolver().openFileDescriptor(fileURI, "r");
                     int fd = pfd.detachFd();
-                    Log.w(TAG, "setFile fd = " + fd);
+                    //Log.w(TAG, "setFile fd = " + fd);
 
                     HINTVIEWLib.begin(fd);
                     if (render_OK()) {
@@ -314,16 +314,16 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
                     }
                     pfd.close();
                 } catch (FileNotFoundException e) {
-                    Log.e("", "", e);
+                    //Log.e("", "", e);
                 } catch (IOException e) {
-                    Log.e("", "", e);
+                    //Log.e("", "", e);
                 }
         }
 
         public long getPos() {
             long pos = 0;
             if (fileUriStr != null) pos = HINTVIEWLib.getPos();
-            Log.w(TAG, "getPos = " + Long.toHexString(pos));
+            //Log.w(TAG, "getPos = " + Long.toHexString(pos));
             return pos;
         }
 

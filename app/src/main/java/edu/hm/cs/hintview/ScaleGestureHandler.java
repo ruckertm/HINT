@@ -1,6 +1,6 @@
 package edu.hm.cs.hintview;
 
-import android.util.Log;
+//import android.util.Log;
 import android.view.ScaleGestureDetector;
 
 public class ScaleGestureHandler extends ScaleGestureDetector.SimpleOnScaleGestureListener {
@@ -22,7 +22,7 @@ public class ScaleGestureHandler extends ScaleGestureDetector.SimpleOnScaleGestu
     @Override
     public void onScaleEnd(ScaleGestureDetector detector) {
         HINTVIEWView.ZoomOff=true;
-        Log.w(TAG, "onScaleEnd "+ detector.isInProgress());
+        //Log.w(TAG, "onScaleEnd "+ detector.isInProgress());
         view.requestRender();
        }
     @Override

@@ -13,7 +13,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 
-import android.util.Log;
+//import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -106,13 +106,13 @@ public class HINTVIEWActivity extends AppCompatActivity {
             }
         });
 
-        Log.w(TAG, "onCreate URI= " + fileUriStr);
+       //Log.w(TAG, "onCreate URI= " + fileUriStr);
         if (fileUriStr == null) openFileChooser();
     }
 
     public static void hideToolbar(View view, boolean toolbarVisible) {
         toolbar.setTranslationY(toolbarVisible ? 0 : -toolbar.getHeight());
-        Log.w(TAG, "toolbar translation " + toolbar.getTranslationY());
+        //Log.w(TAG, "toolbar translation " + toolbar.getTranslationY());
         toolbar.requestTransparentRegion(toolbar);
         // hide Nav- & Status-bar
         view.setSystemUiVisibility(toolbarVisible ?
@@ -159,7 +159,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
         outState.putBoolean("toolbarVisible", toolbar.getTranslationY() >= 0);
         outState.putBoolean("darkMode", darkMode);
-        Log.d(TAG, "toolbarVisible: " + (toolbar.getTranslationY() >= 0));
+        //Log.d(TAG, "toolbarVisible: " + (toolbar.getTranslationY() >= 0));
     }
 
     @Override
@@ -204,7 +204,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
         editor.putFloat("textSize", (float) mView.getScale());
         editor.putBoolean("darkMode", mView.getMode());
         editor.apply();
-        Log.d(TAG, "onStop pos = " + Long.toHexString(filePos));
+        //Log.d(TAG, "onStop pos = " + Long.toHexString(filePos));
     }
 
 
@@ -254,23 +254,23 @@ public class HINTVIEWActivity extends AppCompatActivity {
              return true;
             case R.id.dark:
                 darkMode = !item.isChecked();
-                Log.d(TAG, "onOptionsItemSelected: dark=" + darkMode);
+                //Log.d(TAG, "onOptionsItemSelected: dark=" + darkMode);
                 mView.setMode(darkMode);
                 item.setChecked(darkMode);
                 setToolbar(darkMode);
                 mView.requestRender();
                 return true;
             case R.id.fileChooser:
-                Log.d(TAG, "onOptionsItemSelected: File Chooser");
+                //Log.d(TAG, "onOptionsItemSelected: File Chooser");
                 openFileChooser();
                 return true;
             case R.id.toHome:
-                Log.d(TAG, "to first page");
+                //Log.d(TAG, "to first page");
                 HINTVIEWLib.home();
                 mView.requestRender();
                 return true;
             case R.id.scaleOne:
-                Log.d(TAG, "scale one");
+                //Log.d(TAG, "scale one");
                 mView.setScale(1.0);
                 mView.requestRender();
                 return true;
@@ -286,7 +286,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
         try {
             startActivityForResult(intent, FILE_CHOOSER_REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
-            Log.e(TAG, "", e);
+            //Log.e(TAG, "", e);
         }
     }
 
@@ -299,13 +299,13 @@ public class HINTVIEWActivity extends AppCompatActivity {
                 getContentResolver().openInputStream(data.getData()).close();
                 mView.setFile(data.getData().toString(), 0);
             } catch (FileNotFoundException e) {
-                Log.e(TAG, "", e);
+                //Log.e(TAG, "", e);
                 openFileChooser();
             } catch (java.lang.SecurityException e) {
                 //no permissions after restart of the device
                 openFileChooser();
             } catch (IOException e) {
-               Log.e(TAG,"Exception in openFileChoser");
+               //Log.e(TAG,"Exception in openFileChoser");
             }
         }
     }

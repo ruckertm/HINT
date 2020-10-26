@@ -1,8 +1,11 @@
 
 TEX=	mfpreface.tex \
-	bmp.tex png.tex jpg.tex image.tex head.tex \
-	ctex.tex \
-	math.tex leaders.tex format.tex
+	png.tex jpg.tex image.tex head.tex \
+	math.tex leaders.tex ligature.tex 
+
+TEX_EXTRA= ctex.tex format.tex
+
+IMAGE= A.png A.jpg Loewe.jpg Head.jpg
 
 TEXFLAGS = -mfmode=mobile -no-empty-page -hyphenate-first-word
 #leaders.tex
@@ -14,9 +17,14 @@ TEXFLAGS = -mfmode=mobile -no-empty-page -hyphenate-first-word
 
 LATEX= ueb2.tex sample2e.tex
 
-all:  $(LATEX:.tex=.hnt)  $(TEX:.tex=.hnt)
+HNT=  $(LATEX:.tex=.hnt)  $(TEX:.tex=.hnt) $(TEX_EXTRA:.tex=.hnt)
+
+all: $(HNT)
 
 $(TEX:.tex=.hnt): %.hnt: %.tex 
+	hitex $(TEXFLAGS) $<
+
+$(TEX_EXTRA:.tex=.hnt): %.hnt: %.tex 
 	hitex $(TEXFLAGS) $<
 
 $(LATEX:.tex=.hnt): %.hnt: %.tex 
@@ -40,6 +48,13 @@ mf.base: modes.mf
 
 cmmf.base: modes.mf
 	echo cmmf.ini | inimf
+
+www: all
+	cp $(HNT) /c/home/hint/www/examples
+	cp $(TEX) $(LATEX)  /c/home/hint/www/examples
+	cp $(IMAGE)  /c/home/hint/www/examples
+
+
 
 clean:
 	rm -f *.dvi *.hnt *.aux *.log
