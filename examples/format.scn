@@ -1,0 +1,182 @@
+\I\X9:alternative kind names\X
+\U6.
+\I\X430:\.{basetypes.h }\X
+\I\X18, 103, 108, 116, 126, 155, 162, 169, 176, 182, 190, 198, 205, 210, 215, 219, 225, 233, 241, 245\ETs 334:cases to get content\X
+\U16.
+\I\X391, 393, 395, 396, 398, 401, 404, 407, 409, 411, 413, 415, 417, 419, 421, 423, 425, 427\ETs 429:cases to skip content\X
+\U382.
+\I\X374:close the input file\X
+\U439.
+\I\X376:close the log file\X
+\Us439, 440\ETs442.
+\I\X375:close the output file\X
+\Us439\ET440.
+\I\X252, 262, 269, 325, 365\ETs 368:common variables\X
+\Us434, 436, 439, 440\ETs442.
+\I\X363:debug constants\X
+\U337.
+\I\X306\ET 378:debug macros\X
+\U337.
+\I\X340, 342, 344, 346, 348, 350, 352\ETs 354:default names\X
+\U337.
+\I\X349:define \\{baseline\_defaults}\X
+\U338.
+\I\X7:define \\{content\_name} and \\{definition\_name}\X
+\U338.
+\I\X343\ET 347:define \\{dimen\_defaults}\X
+\U338.
+\I\X341:define \\{int\_defaults}\X
+\U338.
+\I\X339:define \\{max\_ref}, \\{max\_fixed} and \\{max\_default}\X
+\U338.
+\I\X353:define \\{page\_defaults}\X
+\U338.
+\I\X355:define \\{range\_defaults}\X
+\U338.
+\I\X351:define \\{stream\_defaults}\X
+\U338.
+\I\X345:define \\{xdimen\_defaults}\X
+\U338.
+\I\X314:definition checks\X
+\Us438\ET440.
+\I\X373:determine the \\{stem\_name} from the output \\{file\_name}\X
+\U440.
+\I\X290:determine whether \\{file\_name} is absolute or relative\X
+\U289.
+\I\X284:directory entry type\X
+\Us433, 435, 439, 440\ETs442.
+\I\X285\ETs 286:directory functions\X
+\Us434, 436, 439, 440\ETs442.
+\I\X380:enable bison debugging\X
+\Us437\ET438.
+\I\X377:\.{error.h }\X
+\I\X362:explain usage\X
+\Us439, 440\ETs442.
+\I\X66, 67\ETs 68:extract mantissa and exponent\X
+\U65.
+\I\X263:function to check the banner\X
+\Us434, 439, 440\ETs442.
+\I\X266:function to write the banner\X
+\Us436, 439\ETs440.
+\I\X264, 277, 295, 296\ETs 312:get file functions\X
+\Us434, 440\ETs442.
+\I\X35, 270\ETs 294:get file macros\X
+\Us433, 434, 440\ETs442.
+\I\X432:get function declarations\X
+\U440.
+\I\X16, 50, 73, 82, 90, 91, 118, 128, 135, 147, 157, 200, 240, 250, 259, 304, 318, 324, 331\ETs 360:get functions\X
+\U440.
+\I\X17, 89, 95, 104, 117, 127, 136, 146, 156, 163, 170, 177, 183, 191, 199, 206, 211, 226, 234, 246\ETs 335:get macros\X
+\U440.
+\I\X239:get stream information for normal streams\X
+\U240.
+\I\X337:\.{hformat.h }\X
+\I\X434:\.{hget.c }\X
+\I\X433:\.{hget.h }\X
+\I\X6, 10, 54, 74, 79, 84, 93, 120, 178\ETs 326:hint basic types\X
+\U337.
+\I\X11, 75, 110, 121, 254, 261\ETs 274:hint macros\X
+\Us337\ET435.
+\I\X1, 111, 130, 138, 149, 150, 164, 185, 193, 228\ETs 251:hint types\X
+\Us434, 435, 439, 440\ETs442.
+\I\X436:\.{hput.c }\X
+\I\X435:\.{hput.h }\X
+\I\X253, 315\ETs 327:initialize definitions\X
+\Us304\ET309.
+\I\X8:kinds\X
+\Us6\ET7.
+\I\X366:local variables in \\{main}\X
+\Us439, 440\ETs442.
+\I\X291:make sure the path in \\{file\_name} exists\X
+\Us292\ET372.
+\I\X288:make sure \\{access} is defined\X
+\U292.
+\I\X275:map functions\X
+\Us434, 440\ETs442.
+\I\X338:\.{mkhformat.c }\X
+\I\X62:normalize the mantissa\X
+\U59.
+\I\X371:open the input file\X
+\U439.
+\I\X370:open the log file\X
+\Us439, 440\ETs442.
+\I\X372:open the output file\X
+\Us439\ET440.
+\I\X310, 319\ETs 379:parsing functions\X
+\U438.
+\I\X5, 27, 36, 48, 56, 80, 87, 98, 102, 114, 124, 132, 143, 153, 161, 167, 174, 181, 188, 196, 204, 209, 214, 218, 224, 231, 238, 244, 249, 257, 267, 283, 302, 309, 317, 322, 330, 333\ETs 358:parsing rules\X
+\U438.
+\I\X367:process the command line\X
+\Us439, 440\ETs442.
+\I\X12, 13, 34, 51, 72, 83, 92, 94, 105, 109, 119, 129, 137, 148, 158, 171, 184, 192, 201, 227, 235, 260, 268, 271, 278, 298, 299, 305, 313, 332\ETs 361:put functions\X
+\Us436\ET439.
+\I\X272\ET 273:put macros\X
+\Us435\ET439.
+\I\X15:read and check the end byte \|z\X
+\Us16, 91, 118, 128, 135, 147, 157, 200, 240, 295, 312, 318\ETs331.
+\I\X265:read the banner\X
+\U439.
+\I\X61:read the mantissa\X
+\U59.
+\I\X63:read the optional exponent\X
+\U59.
+\I\X60:read the optional sign\X
+\U59.
+\I\X14:read the start byte \|a\X
+\Us16, 91, 118, 128, 135, 147, 157, 200, 240, 295, 312, 318\ETs331.
+\I\X64:return the binary representation\X
+\U59.
+\I\X21, 30, 37, 39, 41, 43\ETs 139:scanning definitions\X
+\U437.
+\I\X59:scanning functions\X
+\U437.
+\I\X20, 23, 26, 29, 38, 40, 42, 44, 55, 58\ETs 142:scanning macros\X
+\U437.
+\I\X3, 22, 25, 32, 46, 53, 57, 78, 86, 97, 101, 107, 113, 123, 141, 152, 160, 166, 173, 180, 187, 195, 203, 208, 213, 217, 223, 230, 237, 248, 256, 282, 301, 308, 321, 329\ETs 357:scanning rules\X
+\U437.
+\I\X297:set the file sizes for optional sections\X
+\U298.
+\I\X439:\.{shrink.c }\X
+\I\X437:\.{shrink.l }\X
+\I\X438:\.{shrink.y }\X
+\I\X384:skip and check the start byte \|a\X
+\Us382, 388, 399, 402, 405\ETs422.
+\I\X441:skip function declarations\X
+\U442.
+\I\X381, 382, 386, 388, 399, 402, 405\ETs 422:skip functions\X
+\U442.
+\I\X385, 387, 389, 390, 392, 394, 397, 400, 403, 406, 408, 410, 412, 414, 416, 418, 420, 424, 426\ETs 428:skip macros\X
+\U442.
+\I\X383:skip the end byte \|z\X
+\Us382, 388, 399, 402, 405\ETs422.
+\I\X442:\.{skip.c }\X
+\I\X440:\.{stretch.c }\X
+\I\X2, 4, 24, 31, 45, 47, 52, 77, 85, 96, 100, 106, 112, 122, 131, 140, 151, 159, 165, 172, 179, 186, 194, 202, 207, 212, 216, 222, 229, 236, 242, 247, 255, 281, 300, 307, 316, 320, 328\ETs 356:symbols\X
+\U438.
+\I\X364\ET 369:variables in {\tt hformat.c}\X
+\U338.
+\I\X287:without {\tt -f} skip writing an existing file\X
+\U292.
+\I\X289:without {\tt -g} compute a local \\{file\_name}\X
+\Us292, 297\ETs299.
+\I\X134:write a list\X
+\U133.
+\I\X144:write a text\X
+\U133.
+\I\X431:write function declarations\X
+\U440.
+\I\X19, 28, 33, 49, 65, 76, 81, 88, 99, 115, 125, 133, 145, 154, 168, 175, 189, 197, 220, 232, 258, 292, 293, 303, 311, 323, 336\ETs 359:write functions\X
+\U440.
+\I\X69:write large numbers\X
+\U65.
+\I\X70:write medium numbers\X
+\U65.
+\I\X71:write small numbers\X
+\U65.
+\I\X280:\\{hcompress} function\X
+\U298.
+\I\X279:\\{hdecompress} function\X
+\U277.
+\I\X276:\\{mmap} and \\{munmap} declarations\X
+\U275.
+

@@ -5,6 +5,8 @@ TEX=	mfpreface.tex \
 
 TEX_EXTRA= ctex.tex format.tex
 
+HNT_EXTRA= cwebman-ru.hnt
+
 IMAGE= A.png A.jpg Loewe.jpg Head.jpg
 
 TEXFLAGS = -mfmode=mobile -no-empty-page -hyphenate-first-word
@@ -18,6 +20,7 @@ TEXFLAGS = -mfmode=mobile -no-empty-page -hyphenate-first-word
 LATEX= ueb2.tex sample2e.tex
 
 HNT=  $(LATEX:.tex=.hnt)  $(TEX:.tex=.hnt) $(TEX_EXTRA:.tex=.hnt)
+HINT=  $(LATEX:.tex=.HINT)  $(TEX:.tex=.HINT) $(TEX_EXTRA:.tex=.HINT)
 
 all: $(HNT)
 
@@ -50,15 +53,15 @@ cmmf.base: modes.mf
 	echo cmmf.ini | inimf
 
 www: all
-	cp $(HNT) /c/home/hint/www/examples
+	cp $(HNT)$(HNT_EXTRA) /c/home/hint/www/examples
 	cp $(TEX) $(LATEX)  /c/home/hint/www/examples
 	cp $(IMAGE)  /c/home/hint/www/examples
 
 
 
 clean:
-	rm -f *.dvi *.hnt *.aux *.log
+	rm -f *.dvi *.aux *.log *.pdf
 	rm -rf *.abs
 	rm -f \#* *~
-	rm -f $(LATEX:.tex=.HINT)  $(TEX:.tex=.HINT)
+	rm -f $(HINT) $(HNT)
 

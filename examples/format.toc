@@ -1,0 +1,122 @@
+\catcode `\@=11\relax 
+\vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf \hfill }{\fam \bffam \tenbf Preface\penalty \@M \ } \hfill \hbox to 2em{\hss \fam \bffam \tenbf v}}
+\vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf \hfill }{\fam \bffam \tenbf Contents\penalty \@M \ } \hfill \hbox to 2em{\hss \fam \bffam \tenbf vii}}
+\vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf 1\hfill }{\fam \bffam \tenbf Introduction\penalty \@M \ } \hfill \hbox to 2em{\hss \fam \bffam \tenbf 1}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 1.1\hfill }{\fam \z@ \tenrm Glyphs\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 1}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 1.2\hfill }{\fam \z@ \tenrm Scanning the Long Format\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 2}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 1.3\hfill }{\fam \z@ \tenrm Parsing the Long Format\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 3}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 1.4\hfill }{\fam \z@ \tenrm Writing the Short Format\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 4}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 1.5\hfill }{\fam \z@ \tenrm Parsing the Short Format\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 7}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 1.6\hfill }{\fam \z@ \tenrm Writing the Long Format\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 9}}
+\vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf 2\hfill }{\fam \bffam \tenbf Data Types\penalty \@M \ } \hfill \hbox to 2em{\hss \fam \bffam \tenbf 11}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 2.1\hfill }{\fam \z@ \tenrm Integers\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 11}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 2.2\hfill }{\fam \z@ \tenrm Strings\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 12}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 2.3\hfill }{\fam \z@ \tenrm Character Codes\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 14}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 2.4\hfill }{\fam \z@ \tenrm Floating Point Numbers\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 18}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 2.5\hfill }{\fam \z@ \tenrm Fixed Point Numbers\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 24}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 2.6\hfill }{\fam \z@ \tenrm Dimensions\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 24}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 2.7\hfill }{\fam \z@ \tenrm Extended Dimensions\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 26}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 2.8\hfill }{\fam \z@ \tenrm Stretch and Shrink\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 29}}
+\vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf 3\hfill }{\fam \bffam \tenbf Simple Nodes\penalty \@M \ } \hfill \hbox to 2em{\hss \fam \bffam \tenbf 33}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 3.1\hfill }{\fam \z@ \tenrm Penalties\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 33}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 3.2\hfill }{\fam \z@ \tenrm Languages\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 34}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 3.3\hfill }{\fam \z@ \tenrm Rules\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 35}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 3.4\hfill }{\fam \z@ \tenrm Glue\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 38}}
+\vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf 4\hfill }{\fam \bffam \tenbf Lists\penalty \@M \ } \hfill \hbox to 2em{\hss \fam \bffam \tenbf 43}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 4.1\hfill }{\fam \z@ \tenrm Plain Lists\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 45}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 4.2\hfill }{\fam \z@ \tenrm Texts\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 48}}
+\vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf 5\hfill }{\fam \bffam \tenbf Composite Nodes\penalty \@M \ } \hfill \hbox to 2em{\hss \fam \bffam \tenbf 57}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 5.1\hfill }{\fam \z@ \tenrm Boxes\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 57}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 5.2\hfill }{\fam \z@ \tenrm Extended Boxes\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 60}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 5.3\hfill }{\fam \z@ \tenrm Kerns\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 63}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 5.4\hfill }{\fam \z@ \tenrm Leaders\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 65}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 5.5\hfill }{\fam \z@ \tenrm Baseline Skips\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 66}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 5.6\hfill }{\fam \z@ \tenrm Ligatures\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 69}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 5.7\hfill }{\fam \z@ \tenrm Hyphenation\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 71}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 5.8\hfill }{\fam \z@ \tenrm Paragraphs\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 74}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 5.9\hfill }{\fam \z@ \tenrm Mathematics\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 76}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 5.10\hfill }{\fam \z@ \tenrm Adjustments\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 78}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 5.11\hfill }{\fam \z@ \tenrm Tables\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 79}}
+\vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf 6\hfill }{\fam \bffam \tenbf Extensions to {\unhbox \voidb@x \hbox {T\kern -.1667em\lower .424ex\hbox {E}\hskip -.125em X}}\penalty \@M \ } \hfill \hbox to 2em{\hss \fam \bffam \tenbf 83}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 6.1\hfill }{\fam \z@ \tenrm Images\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 83}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 6.2\hfill }{\fam \z@ \tenrm Colors\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 85}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 6.3\hfill }{\fam \z@ \tenrm Positions, Links, and Labels\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 85}}
+\vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf 7\hfill }{\fam \bffam \tenbf Replacing {\unhbox \voidb@x \hbox {T\kern -.1667em\lower .424ex\hbox {E}\hskip -.125em X}}'s Page Building Process\penalty \@M \ } \hfill \hbox to 2em{\hss \fam \bffam \tenbf 89}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 7.1\hfill }{\fam \z@ \tenrm Stream Definitions\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 93}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 7.2\hfill }{\fam \z@ \tenrm Stream Content\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 96}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 7.3\hfill }{\fam \z@ \tenrm Page Template Definitions\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 97}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 7.4\hfill }{\fam \z@ \tenrm Page Ranges\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 99}}
+\vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf 8\hfill }{\fam \bffam \tenbf File Structure\penalty \@M \ } \hfill \hbox to 2em{\hss \fam \bffam \tenbf 105}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 8.1\hfill }{\fam \z@ \tenrm Banner\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 105}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 8.2\hfill }{\fam \z@ \tenrm Long Format Files\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 107}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 8.3\hfill }{\fam \z@ \tenrm Short Format Files\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 107}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 8.4\hfill }{\fam \z@ \tenrm Mapping a Short Format File\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 109}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 8.5\hfill }{\fam \z@ \tenrm Compression\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 113}}
+\vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf 9\hfill }{\fam \bffam \tenbf Directory Section\penalty \@M \ } \hfill \hbox to 2em{\hss \fam \bffam \tenbf 115}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 9.1\hfill }{\fam \z@ \tenrm Directories in Long Format\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 115}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 9.2\hfill }{\fam \z@ \tenrm Directories in Short Format\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 119}}
+\vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf 10\hfill }{\fam \bffam \tenbf Definition Section\penalty \@M \ } \hfill \hbox to 2em{\hss \fam \bffam \tenbf 125}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 10.1\hfill }{\fam \z@ \tenrm Maximum Values\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 127}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 10.2\hfill }{\fam \z@ \tenrm Definitions\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 130}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 10.3\hfill }{\fam \z@ \tenrm Parameter Lists\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 133}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 10.4\hfill }{\fam \z@ \tenrm Fonts\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 135}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 10.5\hfill }{\fam \z@ \tenrm References\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 138}}
+\vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf 11\hfill }{\fam \bffam \tenbf Defaults\penalty \@M \ } \hfill \hbox to 2em{\hss \fam \bffam \tenbf 141}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 11.1\hfill }{\fam \z@ \tenrm Integers\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 143}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 11.2\hfill }{\fam \z@ \tenrm Dimensions\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 144}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 11.3\hfill }{\fam \z@ \tenrm Extended Dimensions\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 145}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 11.4\hfill }{\fam \z@ \tenrm Glue\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 145}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 11.5\hfill }{\fam \z@ \tenrm Baseline Skips\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 147}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 11.6\hfill }{\fam \z@ \tenrm Streams\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 147}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 11.7\hfill }{\fam \z@ \tenrm Page Templates\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 148}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm 11.8\hfill }{\fam \z@ \tenrm Page Ranges\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 148}}
+\vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf 12\hfill }{\fam \bffam \tenbf Content Section\penalty \@M \ } \hfill \hbox to 2em{\hss \fam \bffam \tenbf 149}}
+\vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf 13\hfill }{\fam \bffam \tenbf Processing the Command Line\penalty \@M \ } \hfill \hbox to 2em{\hss \fam \bffam \tenbf 151}}
+\vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf 14\hfill }{\fam \bffam \tenbf Error Handling and Debugging\penalty \@M \ } \hfill \hbox to 2em{\hss \fam \bffam \tenbf 157}}
+\vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf \hfill }{\fam \bffam \tenbf Appendix\penalty \@M \ } \hfill \hbox to 2em{\hss \fam \bffam \tenbf 159}}
+\vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf A\hfill }{\fam \bffam \tenbf Reading Short Format Files Backwards\penalty \@M \ } \hfill \hbox to 2em{\hss \fam \bffam \tenbf 159}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm A.1\hfill }{\fam \z@ \tenrm Floating Point Numbers\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 160}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm A.2\hfill }{\fam \z@ \tenrm Extended Dimensions\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 161}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm A.3\hfill }{\fam \z@ \tenrm Stretch and Shrink\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 161}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm A.4\hfill }{\fam \z@ \tenrm Glyphs\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 161}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm A.5\hfill }{\fam \z@ \tenrm Penalties\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 162}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm A.6\hfill }{\fam \z@ \tenrm Kerns\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 162}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm A.7\hfill }{\fam \z@ \tenrm Language\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 162}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm A.8\hfill }{\fam \z@ \tenrm Rules\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 162}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm A.9\hfill }{\fam \z@ \tenrm Glue\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 163}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm A.10\hfill }{\fam \z@ \tenrm Boxes\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 164}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm A.11\hfill }{\fam \z@ \tenrm Extended Boxes\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 165}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm A.12\hfill }{\fam \z@ \tenrm Leaders\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 166}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm A.13\hfill }{\fam \z@ \tenrm Baseline Skips\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 166}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm A.14\hfill }{\fam \z@ \tenrm Ligatures\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 167}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm A.15\hfill }{\fam \z@ \tenrm Hyphenation\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 167}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm A.16\hfill }{\fam \z@ \tenrm Paragraphs\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 168}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm A.17\hfill }{\fam \z@ \tenrm Mathematics\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 168}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm A.18\hfill }{\fam \z@ \tenrm Images\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 169}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm A.19\hfill }{\fam \z@ \tenrm Plain Lists, Texts, and Parameter Lists\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 169}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm A.20\hfill }{\fam \z@ \tenrm Adjustments\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 170}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm A.21\hfill }{\fam \z@ \tenrm Tables\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 170}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm A.22\hfill }{\fam \z@ \tenrm Stream Nodes\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 171}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm A.23\hfill }{\fam \z@ \tenrm References\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 171}}
+\vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf B\hfill }{\fam \bffam \tenbf Code and Header Files\penalty \@M \ } \hfill \hbox to 2em{\hss \fam \bffam \tenbf 173}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm B.1\hfill }{\fam \z@ \tenrm {\fam \ttfam \tentt basetypes.h}\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 173}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm B.2\hfill }{\fam \z@ \tenrm {\fam \ttfam \tentt hformat.h}\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 174}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm B.3\hfill }{\fam \z@ \tenrm {\fam \ttfam \tentt hget.h}\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 174}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm B.4\hfill }{\fam \z@ \tenrm {\fam \ttfam \tentt hget.c}\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 175}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm B.5\hfill }{\fam \z@ \tenrm {\fam \ttfam \tentt hput.h}\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 176}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm B.6\hfill }{\fam \z@ \tenrm {\fam \ttfam \tentt hput.c}\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 177}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm B.7\hfill }{\fam \z@ \tenrm {\fam \ttfam \tentt shrink.l}\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 177}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm B.8\hfill }{\fam \z@ \tenrm {\fam \ttfam \tentt shrink.y}\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 178}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm B.9\hfill }{\fam \z@ \tenrm {\fam \ttfam \tentt shrink.c}\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 179}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm B.10\hfill }{\fam \z@ \tenrm {\fam \ttfam \tentt stretch.c}\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 180}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm B.11\hfill }{\fam \z@ \tenrm {\fam \ttfam \tentt hteg.h}\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 181}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm B.12\hfill }{\fam \z@ \tenrm {\fam \ttfam \tentt skip.c}\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 182}}
+\vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf C\hfill }{\fam \bffam \tenbf List of Format Definitions\penalty \@M \ } \hfill \hbox to 2em{\hss \fam \bffam \tenbf 183}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm C.1\hfill }{\fam \z@ \tenrm Reading the Long Format\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 183}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm C.2\hfill }{\fam \z@ \tenrm Writing the Long Format\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 184}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm C.3\hfill }{\fam \z@ \tenrm Reading the Short Format\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 185}}
+\noindent \hbox to\hsize {\kern 2em\hbox to 3em{\fam \z@ \tenrm C.4\hfill }{\fam \z@ \tenrm Writing the Short Format\penalty \@M \ }\leaders \hbox to .5em{.\hfil }\hfill \hbox to 2em{\hss 186}}
+\vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf \hfill }{\fam \bffam \tenbf Cross Reference of Code\penalty \@M \ } \hfill \hbox to 2em{\hss \fam \bffam \tenbf 189}}
+\vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf \hfill }{\fam \bffam \tenbf References\penalty \@M \ } \hfill \hbox to 2em{\hss \fam \bffam \tenbf 193}}
+\vskip \smallskipamount \vskip 0pt plus 12pt\penalty -100\vskip 0pt plus -12pt\noindent \hbox to\hsize {\hbox to 2em{\fam \bffam \tenbf \hfill }{\fam \bffam \tenbf Index\penalty \@M \ } \hfill \hbox to 2em{\hss \fam \bffam \tenbf 195}}
+

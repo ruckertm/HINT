@@ -1,0 +1,104 @@
+\begin{thebibliography}{10}
+
+\bibitem{ietf:language}
+Ed. A.~Phillips and Ed. M.~Davis.
+\newblock {\em Tags for Identifying Languages}.
+\newblock IETF Internet Engineering Task Force, rfc 5646, bcp 47 edition,
+  September 2009.
+
+\bibitem{RFC1950}
+Peter Deutsch and {Jaen-Loup} Gailly.
+\newblock {\em {RFC1950}, ZLIB Compressed Data Format Specification Version
+  3.3}.
+\newblock RFC Editor, United States, 1996.
+
+\bibitem{zlib}
+{Jaen-loup} Gailly and Mark Adler.
+\newblock zlib.
+\newblock {\tt http://zlib.net/}.
+
+\bibitem{iana:charset-mib}
+IANA Internet Assigned Numbers Authority, Los Angeles, CA.
+\newblock {\em IANA Charset MIB}, May 2014.
+
+\bibitem{iana:charset}
+IANA Internet Assigned Numbers Authority, Los Angeles, CA.
+\newblock {\em Character Sets Registry}, December 2018.
+
+\bibitem{iana:language}
+IANA Internet Assigned Numbers Authority, Los Angeles, CA.
+\newblock {\em Language Tags}, April 2020.
+
+\bibitem{IEEE754-1985}
+{IEEE Computer Society Standards Committee. Working group of the Microprocessor
+  Standards Subcommittee} and {American National Standards Institute}.
+\newblock {\em {IEEE} standard for binary floating-point arithmetic}.
+\newblock IEEE Computer Society Press, 1985.
+
+\bibitem{IEEE754-2008}
+{IEEE Computer Society Standards Committee. Working group of the Microprocessor
+  Standards Subcommittee} and {American National Standards Institute}.
+\newblock {IEEE Standard 754-2008}.
+\newblock Technical report, August 2008.
+
+\bibitem{DK:texbook}
+Donald~E. Knuth.
+\newblock {\em The \TeX\ book}.
+\newblock Computers $\AND$ Typesetting, Volume~A. Addison-Wesley Publishing
+  Company, 1984.
+
+\bibitem{Knuth:tex}
+Donald~E. Knuth.
+\newblock {\em \TeX: The Program}.
+\newblock Computers $\AND$ Typesetting, Volume~B. Addison-Wesley, 1986.
+
+\bibitem{Knuth:lp}
+Donald~E. Knuth.
+\newblock {\em Literate Programming}.
+\newblock CSLI Lecture Notes Number 27. Center for the Study of Language and
+  Information, Stanford, CA, 1992.
+
+\bibitem{Knuth:cweb}
+Donald~E. Knuth and Silvio Levy.
+\newblock {\em {The CWEB System of Structured Documentation}}.
+\newblock Addison Wesley, 1994.
+\newblock {\tt https://ctan.org/pkg/cweb}.
+
+\bibitem{JL:flexbison}
+John~R. Levine.
+\newblock {\em flex $\AND$ bison}.
+\newblock {O'Reilly Media}, 2009.
+\newblock ISBN 978-0-596-15597-1.
+
+\bibitem{JL:lexyacc}
+John R. Levine~Tony Mason and Doug Brown.
+\newblock {\em lex $\AND$ yacc}.
+\newblock {O'Reilly Media}, 2012.
+
+\bibitem{ietf:charset-mib}
+Ira McDonald.
+\newblock {\em IANA Charset MIB}.
+\newblock IETF Internet Engineering Task Force, rfc 3808 edition, June 2004.
+
+\bibitem{MR:tug37}
+Martin Ruckert.
+\newblock {C}omputer {M}odern {R}oman fonts for ebooks.
+\newblock {\em TUGboat}, 37(3):277--280, 2016.
+
+\bibitem{MR:tug38}
+Martin Ruckert.
+\newblock Converting {\TeX} from {WEB} to cweb.
+\newblock {\em TUGboat}, 38(3):353--358, 2017.
+
+\bibitem{MR:webtocweb}
+Martin Ruckert.
+\newblock {\em {WEB} to cweb}.
+\newblock August 2017.
+\newblock ISBN 1-548-58234-4. {\tt https://amazon.com/dp/1548582344}.
+
+\bibitem{MR:tug39}
+Martin Ruckert.
+\newblock {HINT}: Reflowing {\TeX} output.
+\newblock {\em TUGboat}, 39(3):217--223, 2018.
+
+\end{thebibliography}

@@ -1,0 +1,41 @@
+\indexentry{1}{0}{11}{Data Types}
+\indexentry{1}{1}{14}{Strings}
+\indexentry{1}{1}{18}{Character Codes}
+\indexentry{1}{1}{26}{Dimensions}
+\indexentry{1}{1}{28}{Extended Dimensions}
+\indexentry{1}{1}{29}{Stretch and Shrink}
+\indexentry{2}{0}{33}{Simple Nodes}
+\indexentry{2}{1}{7}{Glyphs}
+\indexentry{2}{1}{34}{Penalties}
+\indexentry{2}{1}{35}{Languages}
+\indexentry{2}{1}{38}{Rules}
+\indexentry{2}{1}{41}{Glue}
+\indexentry{3}{0}{43}{Lists}
+\indexentry{3}{1}{47}{Plain Lists}
+\indexentry{3}{1}{55}{Texts}
+\indexentry{4}{0}{57}{Composite Nodes}
+\indexentry{4}{1}{60}{Boxes}
+\indexentry{4}{1}{65}{Kerns}
+\indexentry{4}{1}{68}{Baseline Skips}
+\indexentry{4}{1}{71}{Ligatures}
+\indexentry{4}{1}{74}{Hyphenation}
+\indexentry{4}{1}{81}{Tables}
+\indexentry{5}{0}{83}{Extensions to {\unhbox \voidb@x \hbox {T\kern -.1667em\lower .424ex\hbox {E}\hskip -.125em X}}}
+\indexentry{5}{1}{84}{Images}
+\indexentry{5}{1}{94}{Stream Definitions}
+\indexentry{5}{1}{96}{Stream Content}
+\indexentry{5}{1}{98}{Page Template Definitions}
+\indexentry{5}{1}{102}{Page Ranges}
+\indexentry{6}{0}{105}{File Structure}
+\indexentry{6}{1}{107}{Banner}
+\indexentry{6}{1}{109}{Primitives}
+\indexentry{6}{1}{122}{Directory Section}
+\indexentry{6}{1}{124}{Optional Sections}
+\indexentry{6}{1}{126}{Definition Section}
+\indexentry{6}{1}{150}{Content Section}
+\indexentry{7}{0}{126}{Definitions}
+\indexentry{7}{1}{129}{Maximum Values}
+\indexentry{7}{1}{131}{Definitions}
+\indexentry{7}{1}{133}{Parameter Lists}
+\indexentry{7}{1}{138}{Fonts}
+\indexentry{7}{1}{138}{References}
