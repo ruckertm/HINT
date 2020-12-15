@@ -29,16 +29,18 @@ Compile using Android Studio
 
 - install Android Studio [https://developer.android.com/studio/install](https://developer.android.com/studio/install)
 - set Android SDK Path correctly (accept Adroid Studio to modify project's local.properties file)
-- install NDK
-  - In Android Studio: Tools -> SDK Manager -> SDK Tools -> NDK
-- go to Gradle Scripts local.properties, correct ndk.dir and sdk.dir, if there is no ndk.dir add it. Usually the ndk.dir is the sdk.dir appended by `\\ndk-bundle`
+- install NDK and CMake
+  - In Android Studio: Tools -> SDK Manager -> SDK Tools -> NDK (Side by side)
+  Click 'Show Package Details' and make sure ndk 21.1.6352462 is checked
+  - In Android Studio: Tools -> SDK Manager -> SDK Tools -> CMake
+- deprecated with Android Studio 4.0: ~~go to Gradle Scripts local.properties, correct ndk.dir and sdk.dir, if there is no ndk.dir add it. Usually the ndk.dir is the sdk.dir appended by `\\ndk-bundle`~~
 - File -> Sync Project With Gradle Files
 - Run/Debug Configurations select Android App and make sure no errors are given
 
 GLM
 ---
 
-Download https://github.com/g-truc/glm/releases/tag/0.9.9.5
+Download https://github.com/g-truc/glm/releases/tag/0.9.9.8
 
 Move the contained GLM folder (glm in glm) to ~/AppData/Local/Android/SDK/ndk-bundle/toolchains/llvm/prebuilt/windowsx86_64/sysroot/usr/include/glm
 
@@ -47,7 +49,7 @@ Move the contained GLM folder (glm in glm) to ~/AppData/Local/Android/SDK/ndk-bu
 Setup
 -----
 - copy files from examples/*.hnt to Download Folder on Android Device
-(if you can't access the Download Folder, send all files via email and download them on your device)
+(if you can't access the Download Folder, send all files via email and download them on your device): in Android Studio go to Device File Explorer (lower right Border of Android Studio) - look for storage/emulated/0/Download, right click on Download and upload *.hnt files from examples folder
 - give app permission to access storage on Android Device
 
 
