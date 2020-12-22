@@ -31,7 +31,7 @@ Compile using Android Studio
 - set Android SDK Path correctly (accept Adroid Studio to modify project's local.properties file)
 - install NDK and CMake
   - In Android Studio: Tools -> SDK Manager -> SDK Tools -> NDK (Side by side)
-  Click 'Show Package Details' and make sure ndk 21.1.6352462 is checked
+  Click 'Show Package Details' and make sure ndk 21.0.6113669 is checked
   - In Android Studio: Tools -> SDK Manager -> SDK Tools -> CMake
 - deprecated with Android Studio 4.0: ~~go to Gradle Scripts local.properties, correct ndk.dir and sdk.dir, if there is no ndk.dir add it. Usually the ndk.dir is the sdk.dir appended by `\\ndk-bundle`~~
 - File -> Sync Project With Gradle Files
