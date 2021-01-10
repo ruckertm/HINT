@@ -12,10 +12,12 @@
 #include <stdlib.h>
 #include <math.h>
 
+#if 0
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#endif
 
 extern "C" {
 #include "error.h"
@@ -261,8 +263,20 @@ extern "C" void nativeSetSize(int px_h, int px_v, double dpi)
 
     // GL Coordinates are in points
     ourProjectionLocation = glGetUniformLocation(gProgram, "projection");
+#if 0
     glm::mat4 projection = glm::ortho(0.0f, pt_h, pt_v, 0.0f);
     glUniformMatrix4fv(ourProjectionLocation, 1, 0, glm::value_ptr(projection));
+#else
+    GLfloat MVP[4][4]= {{0}};
+    MVP[0][0]=2.0/pt_h; // x: scale to -1 to +1
+    MVP[1][1]=-2.0/pt_v; // y: scale to 1 to -1
+    MVP[2][2]=0.0f; // z: don't care
+    MVP[3][0]=-1.0f; // x position: left
+    MVP[3][1]=1.0f; // y position: up
+    MVP[3][2]=0.0f; // don't care
+    MVP[3][3]=1.0f; // w: identity
+    glUniformMatrix4fv(ourProjectionLocation, 1, 0, &MVP[0][0]);
+#endif
     glViewport(0, 0, px_h, px_v);
     cur_h=px_h;
     cur_v=px_v;
