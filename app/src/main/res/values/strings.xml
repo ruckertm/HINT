@@ -16,5 +16,6 @@
     <string name="about">About &#8230;</string>
     <string name="hint_icon">HINT Icon</string>
     <string name="error_icon">Error Icon</string>
+    <string name="search">Search</string>
 </resources>
 
