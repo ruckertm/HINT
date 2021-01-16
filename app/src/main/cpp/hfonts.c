@@ -568,11 +568,13 @@ return g;
 /*:275*//*277:*/
 #line 4929 ".\\hint.w"
 
-void render_char(int x,int y,struct font_s*f,uint32_t cc)
+void render_char(int x,int y,struct font_s*f,uint32_t cc, bool searched)
 
 {double w,h,dx,dy;
 gcache_t*g= hget_glyph(f,cc);
 if(g==NULL)return;
+
+g->searched = searched;
 
 dx= (double)g->hoff*f->hpxs;
 dy= (double)g->voff*f->vpxs;

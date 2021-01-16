@@ -339,12 +339,20 @@ extern "C" void nativeGlyph(double x, double y, double w, double h, gcache_t *g)
                        (GLfloat) (x + w), (GLfloat) (y + h), 1.0f, 1.0f,
                        (GLfloat) (x + w), (GLfloat) y, 1.0f, 0.0f
     };
+
+    int ourColorLocation = glGetUniformLocation(gProgram, "ourColor");
+    if (g->searched) {
+        glUniform4f(ourColorLocation, 1.0f, 0.0f, 0.0f, 0.0f);
+    }
+
     glBindTexture(GL_TEXTURE_2D, g->GLtexture);
     checkGlError("glBindTexture");
     glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
     checkGlError("glVertexAttribPointer");
     glDrawArrays(GL_TRIANGLES, 0, 6);
     checkGlError("glDrawArrays");
+
+    glUniform4f(ourColorLocation, defaultFgColor[0], defaultFgColor[1], defaultFgColor[2], 0.0f);
 }
 
 

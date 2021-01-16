@@ -16,7 +16,7 @@ extern struct font_s*hget_font(unsigned char f);
 /*:266*//*278:*/
 #line 4946 ".\\hint.w"
 
-extern void render_char(int x,int y,struct font_s*f,uint32_t cc);
+extern void render_char(int x,int y,struct font_s*f,uint32_t cc, bool searched);
 /*:278*/
 #line 6403 ".\\hint.w"
 
@@ -218,7 +218,16 @@ f,p,mem[p].i);
 cur_fp= hget_font(f);
 cur_f= f;
 }
-render_char(cur_h,cur_v,cur_fp,c);
+bool searched = false;
+if (searchString != null){
+    if(c == searchString[curSearch]) {
+        searched = true;
+        ++curSearch;
+    } else {
+        curSearch = 0;
+    }
+}
+render_char(cur_h,cur_v,cur_fp,c, searched);
 cur_h= cur_h+char_width(f)(char_info(f)(c));
 #ifdef DEBUG
 if(link(p)==0xffff)

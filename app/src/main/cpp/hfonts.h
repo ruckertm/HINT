@@ -86,6 +86,7 @@ unsigned char*data;
 struct gcache_s{
 int w,h;
 int hoff,voff;
+bool searched;
 unsigned char*bits;
 #ifdef WIN32
 HBITMAP hbmp;
