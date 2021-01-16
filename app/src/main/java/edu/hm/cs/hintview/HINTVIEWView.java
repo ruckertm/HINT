@@ -51,6 +51,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
     private static int width, height;
     protected Renderer fileRenderer;
     private static boolean darkMode = false;
+    private static String queryString;
     protected static boolean ZoomOn = false, ZoomOff = false, Zooming = false;
     protected static boolean Page_next = false, Page_prev = false;
     private GestureDetector touchGestureDetector;
@@ -131,6 +132,9 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         darkMode = mode;
     }
 
+    public void setQueryString(String query) {
+        queryString = query;
+    }
 
 
     private static class ContextFactory implements GLSurfaceView.EGLContextFactory {

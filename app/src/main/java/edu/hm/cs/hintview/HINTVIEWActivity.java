@@ -23,6 +23,7 @@ import android.view.WindowInsets;
 import android.app.Dialog;
 import android.widget.Button;
 import android.view.View.OnClickListener;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -218,19 +219,53 @@ public class HINTVIEWActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        new MenuInflater(this).inflate(R.menu.hintview_menu, menu);
+        MenuInflater inflater = new MenuInflater(this);
+        inflater.inflate(R.menu.hintview_menu, menu);
+
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView =
+                (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getComponentName()));
+
+
+
+        final SearchView.OnQueryTextListener queryTextListener = new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                mView.setQueryString(query);
+                mView.requestRender();
+                return true;
+            }
+        };
+
+        final SearchView.OnCloseListener closeListener = new SearchView.OnCloseListener(){
+            @Override
+            public boolean onClose() {
+                mView.setQueryString(null);
+                mView.requestRender();
+                return true;
+            }
+        };
+
+        searchView.setOnQueryTextListener(queryTextListener);
+        searchView.setOnCloseListener(closeListener);
+
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         super.onOptionsItemSelected(item);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                hideToolbar(mView, false);
-            }
-        }, 80);
+        boolean hideToolbar = true;
+        boolean res = false;
         switch (item.getItemId()) {
             case R.id.about: {
                 final Dialog dialog = new Dialog(this);
@@ -251,7 +286,8 @@ public class HINTVIEWActivity extends AppCompatActivity {
                 });
                 dialog.show();
             }
-             return true;
+            res = true;
+            break;
             case R.id.dark:
                 darkMode = !item.isChecked();
                 //Log.d(TAG, "onOptionsItemSelected: dark=" + darkMode);
@@ -259,24 +295,42 @@ public class HINTVIEWActivity extends AppCompatActivity {
                 item.setChecked(darkMode);
                 setToolbar(darkMode);
                 mView.requestRender();
-                return true;
+                res = true;
+                break;
             case R.id.fileChooser:
                 //Log.d(TAG, "onOptionsItemSelected: File Chooser");
                 openFileChooser();
-                return true;
+                res = true;
+                break;
             case R.id.toHome:
                 //Log.d(TAG, "to first page");
                 HINTVIEWLib.home();
                 mView.requestRender();
-                return true;
+                res = true;
+                break;
             case R.id.scaleOne:
                 //Log.d(TAG, "scale one");
                 mView.setScale(1.0);
                 mView.requestRender();
-                return true;
+                res = true;
+                break;
+            case R.id.search:
+                hideToolbar = false;
+                res = true;
+                break;
             default:
-                return false;
+                res = false;
+                break;
         }
+        if (hideToolbar) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    hideToolbar(mView, false);
+                }
+            }, 80);
+        }
+        return res;
     }
 
     public void openFileChooser() {
