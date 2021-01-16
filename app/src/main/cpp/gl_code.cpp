@@ -258,3 +258,12 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_home(JNIEnv *env, jclass obj) {
     HINT_TRY hint_page_top(0);HINT_CATCH("top 0");
 }
 
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_setQueryString(JNIEnv *env, jclass clazz, jstring query_string) {
+    char *convertedValue = NULL;
+    if (query_string != NULL) {
+        jboolean isCopy;
+        convertedValue = const_cast<char *>((env)->GetStringUTFChars(query_string, &isCopy));
+    }
+    set_search(&convertedValue[0]);
+}

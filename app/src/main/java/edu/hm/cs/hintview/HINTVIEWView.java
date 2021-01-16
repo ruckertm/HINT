@@ -338,6 +338,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         public void onDrawFrame(GL10 gl) {
 
             HINTVIEWLib.setMode(darkMode);
+            HINTVIEWLib.setQueryString(queryString);
             HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi); /* needed for zooming */
             if (HINTVIEWView.Page_prev) {
                 HINTVIEWLib.prev();
@@ -357,6 +358,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
             width = w;
             height = h;
             HINTVIEWLib.setMode(darkMode);
+            HINTVIEWLib.setQueryString(queryString);
             HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi);
             render_OK();
         }

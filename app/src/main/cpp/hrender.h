@@ -23,6 +23,7 @@ extern uint64_t hint_next_page(void);
 extern uint64_t hint_prev_page(void);
 extern void hint_resize(int px_h,int px_v,double dpi);
 extern void hint_clear_fonts(bool rm);
+extern void set_search(char *value);
 
 #endif
 /*:329*/

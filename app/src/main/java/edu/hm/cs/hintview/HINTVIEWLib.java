@@ -32,6 +32,8 @@ public class HINTVIEWLib {
 
     public static native void setMode(boolean mode);
 
+    public static native void setQueryString(String queryString);
+
     public static native void home();
 
     public static native void zoomBegin();
@@ -39,5 +41,4 @@ public class HINTVIEWLib {
     public static native void zoomEnd();
 
     public static native void zoom();
-
 }

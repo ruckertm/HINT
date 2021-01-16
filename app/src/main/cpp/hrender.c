@@ -31,6 +31,8 @@ static bool forward_mode= false,backward_mode= false;
 /*254:*/
 #line 4374 ".\\hint.w"
 
+static char *searchString = null;
+static int curSearch = 0;
 
 uint64_t hint_page_top(uint64_t h)
 {if(hbase==NULL)return 0;
@@ -552,3 +554,7 @@ hlist_render(streams[0].p);
 #line 6406 ".\\hint.w"
 
 /*:330*/
+
+void set_search(char *value) {
+    searchString = value;
+}
