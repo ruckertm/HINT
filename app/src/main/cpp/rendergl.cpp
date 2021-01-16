@@ -52,6 +52,7 @@ static void checkGlError(const char *op) {
 static GLuint gProgram;
 static GLuint gvPositionHandle;
 static int mode;
+static GLfloat defaultFgColor[3];
 
 
 auto gVertexShader =
@@ -72,10 +73,10 @@ auto gFragmentShader =
         "uniform int ourMode;\n"
         "void main() {\n"
         "  if(ourMode==1) { \n"
-        "     vec3 invColor = (vec3(1.0)-texture2D(ourTexture,TexCoord).xyz);"
+        "     vec3 invColor = (vec3(1.0)-ourColor.xyz);"
         "     gl_FragColor = vec4(invColor.xyz, texture2D(ourTexture,TexCoord).w);\n"
         "  } else {\n"
-        "     gl_FragColor = vec4(texture2D(ourTexture,TexCoord));\n"
+        "     gl_FragColor = vec4(ourColor.xyz, texture2D(ourTexture,TexCoord).w);\n"
         "  } \n"
         "}\n";
 
@@ -221,6 +222,9 @@ static void nativeSetColors(GLfloat fr, GLfloat fg, GLfloat fb, GLfloat br, GLfl
 {
     int ourColorLocation = glGetUniformLocation(gProgram, "ourColor");
     glClearColor(br, bg, bb, 1.0f);
+    defaultFgColor[0] = fr;
+    defaultFgColor[1] = fg;
+    defaultFgColor[2] = fb;
     glUniform4f(ourColorLocation, fr, fg, fb, 0.0f);
 }
 
