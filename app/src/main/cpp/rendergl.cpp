@@ -72,12 +72,7 @@ auto gFragmentShader =
         "uniform vec4 ourColor;\n"
         "uniform int ourMode;\n"
         "void main() {\n"
-        "  if(ourMode==1) { \n"
-        "     vec3 invColor = (vec3(1.0)-ourColor.xyz);"
-        "     gl_FragColor = vec4(invColor.xyz, texture2D(ourTexture,TexCoord).w);\n"
-        "  } else {\n"
         "     gl_FragColor = vec4(ourColor.xyz, texture2D(ourTexture,TexCoord).w);\n"
-        "  } \n"
         "}\n";
 
 static GLuint loadShader(GLenum shaderType, const char *pSource) {
