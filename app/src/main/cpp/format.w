@@ -39,9 +39,9 @@
 \titletrue
 
 \def\setrevision$#1: #2 ${\gdef\lastrevision{#2}}
-\setrevision$Revision: 2056 $
+\setrevision$Revision: 2072 $
 \def\setdate$#1(#2) ${\gdef\lastdate{#2}}
-\setdate$Date: 2020-09-24 12:26:49 +0200 (Thu, 24 Sep 2020) $
+\setdate$Date: 2020-10-26 12:08:30 +0100 (Mon, 26 Oct 2020) $
 
 \null
 
@@ -86,7 +86,7 @@
   \vskip 10pt plus 0.5fill
   \hskip 0pt plus 2fill\it F\"ur meine Mutter\hskip 0pt plus 0.5fill\hbox{}
   \vskip 10pt plus 3fill
-  \leftline{\smalltitlefont Version 1.0}
+  \leftline{\smalltitlefont Version 1.1}
   \bigskip
   \raggedright\baselineskip=12pt
   \bf MARTIN RUCKERT \ \it Munich University of Applied Sciences\par

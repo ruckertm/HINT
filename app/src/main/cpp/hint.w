@@ -18,7 +18,6 @@
 % 
 \input hint.sty
 \input changefile.sty
-\input epsf.tex
 
 @i symbols.w
 \makeindex
@@ -27,8 +26,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 2066 ${}$}
-\def\lastdate{${}$Date: 2020-10-13 16:54:47 +0200 (Tue, 13 Oct 2020) ${}$}
+\def\lastrevision{${}$Revision: 2300 ${}$}
+\def\lastdate{${}$Date: 2021-03-31 17:13:42 +0200 (Wed, 31 Mar 2021) ${}$}
 
 \input titlepage.tex
 
@@ -295,10 +294,6 @@ ALLOCATE(xdimen_def, max_ref[xdimen_kind]+1, xdimen_t);
 @<free definitions@>=
 free(xdimen_def); xdimen_def=NULL;
 @
-@<\TeX\ |extern|@>=
-extern void print_xdimen(int i);
-
-@
 
 @<\HINT/ auxiliar functions@>=
 static scaled xdimen(xdimen_t *x)
@@ -390,8 +385,6 @@ void hget_baseline_ref(uint8_t n)
   cur_lsl=baseline_def[n].lsl;
 }
 
-
-
 pointer happend_to_vlist(pointer @!b)
 {@+scaled d; /*deficiency of space between baselines*/ 
 pointer @!p=null; /*a new glue node*/ 
@@ -411,8 +404,7 @@ cur_list.bs_pos=NULL;
 return p;
 } 
 @
-@<\TeX\ |extern|@>=
-extern void print_baseline_skip(int i);
+@<\HINT/ |extern|@>=
 extern pointer happend_to_vlist(pointer b);
 @
 
@@ -458,14 +450,6 @@ return p;
 @<\HINT/ declarations@>=
 static pointer hprepend_to_vlist(pointer b);
 @
-
-The printing routine for whatsit nodes requires a function to print baseline skips. Since
-\HINT/ never allocates a baseline skip node, the following function will suffice:
-@<\HINT/ functions@>=
-void print_baseline_skip(int i)
-{}
-@
-
 
 
 \subsection{Fonts}\label{fonts}
@@ -737,7 +721,7 @@ void hrestore_param_list(void)
   QUIT("Parameter save stack flow");
 }
 @
-@<\TeX\ |extern|@>=
+@<\HINT/ |extern|@>=
 extern void hrestore_param_list(void);
 @
 
@@ -792,6 +776,17 @@ The variable |streams| is used to contain the stream records
 that store the main content and the content of insertions.
 These records replace the box registers of \TeX.
 
+@<\HINT/ |extern|@>=
+typedef struct { /* should go to hint.h */
+pointer p, t; /* head and tail */
+} stream_t;
+extern stream_t *streams;
+@
+
+@<\HINT/ variables@>=
+stream_t *streams;
+@
+ 
 @<allocate definitions@>=
 ALLOCATE(streams, max_ref[stream_kind]+1, stream_t);
 @
@@ -1007,6 +1002,10 @@ streams[0].p=vpackage(streams[0].p,hvsize,exactly,page_max_depth);
 }
 @
 
+@<\HINT/ |extern|@>=
+extern void hfill_page_template(void);
+@
+
 \subsection{References}
 There are only a few functions that still need to be defined.
 @<\HINT/ auxiliar functions@>=
@@ -1060,7 +1059,7 @@ name.
 \subsection{The Content Section}
 To position the input stream on the content section we use the following function:
 @<get functions@>=
-void hget_content_section()
+static void hget_content_section()
 { @+DBG(DBGDIR,"Reading Content Section\n");
   hget_section(2);@+
 }
@@ -2791,7 +2790,7 @@ void set_line_break_params(void)
 { hset_param_list(line_break_params);
 }
 @
-@<\TeX\ |extern|@>=
+@<\HINT/ |extern|@>=
 extern void set_line_break_params(void);
 @
 
@@ -3215,18 +3214,6 @@ included in the code extracted from \TeX.
 The file {\tt textypes.h} is dependent only on the definition of 
 basic types as given in the file {\tt basetypes.h} which is defined in {\tt format.w}.
 
-A third file, {\tt texextern.h}, is included in the code extracted from \TeX.
-@(texextern.h@>=
-#ifndef _TEXEXTERN_H_
-#define _TEXEXTERN_H_
-#include "basetypes.h"
-#include "textypes.h"
-#include "error.h"
-#include "hformat.h"
-
-@<\TeX\ |extern|@>@;
-#endif
-@
 It lists |extern| declarations of variables and functions that are extracted from \TeX.
 This file is not extracted form \TeX's source code, but when 
 it is included in the extracted code, the
@@ -3269,7 +3256,7 @@ We modify the corresponding macros accordingly.
 
 The variables containing the parameter definitions are declared |extern|.
 
-@<\TeX\ |extern|@>=
+@<\HINT/ |extern|@>=
 extern pointer*pointer_def[32];
 extern scaled*dimen_def;
 extern int32_t*integer_def;
@@ -3356,7 +3343,7 @@ Now lets consider the modifications to \TeX's list handling.
 We conclude the section with the external declarations and necessary macros.
 
 @<\TeX\ |extern|@>=
-extern void list_init(void);
+
 extern list_state_record cur_list;
 extern list_state_record nest[];
 extern uint16_t nest_ptr;
@@ -3407,21 +3394,9 @@ that are yet undefined. Here is a list of all of them
 which we will put into a header file to force the compiler
 to check for consistent use accross compilation units.
 
-@<\TeX\ |extern|@>=
+@<\HINT/ |extern|@>=
 extern stream_t *streams;
-extern bool hbuild_page(void);
-extern halfword badness(scaled @!t, scaled @!s); /*compute badness, given |t >= 0|*/ 
-extern bool flush_pages(uint32_t pos); /*do this to flush the last or first page*/ 
-extern uint8_t page_contents; /*what is on the current page so far?*/ 
-extern pointer @!page_tail; /*the final node on the current page*/ 
-extern scaled @!page_max_depth; /*maximum box depth on page being built*/ 
-extern scaled @!page_depth;	/*depth of the current page*/ 
-extern scaled @!page_so_far[7]; /*height and glue of the current page*/ 
-extern int @!least_page_cost; /*the score for this currently best page*/ 
-extern int @!insert_penalties; /*sum of the penalties for held-over insertions*/
-extern pointer @!best_page_break; /*break here to get the best page known so far*/ 
-extern scaled @!best_size; /*its |page_goal|*/
-extern void hfill_page_template(void);
+extern bool flush_pages(uint32_t pos); 
 extern pointer skip(uint8_t n);
 extern pointer *box_ptr(uint8_t n);
 extern int count(uint8_t n);
@@ -3476,6 +3451,10 @@ void hpage_init(void)
 }
 @
 
+@<\HINT/ |extern|@>=
+extern void hpage_init(void);
+@
+
 When the viewer does not follow the natural sequence of pages but wants to
 move to an arbitrary location in the \HINT/ file, the contribution list needs to be flushed. 
 The rest is done by |hpage_init|.
@@ -3511,25 +3490,6 @@ Now we see how to extract and modify this function from the \TeX\ sources.
 
 \changestyle{hfont.tex}
 
-
-@<\TeX\ |extern|@>=
-extern char **const font_name;
-extern int *const @!width_base; /*base addresses for widths*/
-extern int *const @!height_base;  /*base addresses for heights*/
-extern int *const @!depth_base; /*base addresses for depths*/ 
-extern void read_font_info(int f, char *n, scaled s); /*input a \.{TFM} file*/ 
-extern memory_word @!font_info[];
-extern int *const @!char_base;  /*base addresses for |char_info|*/ 
-extern eight_bits *const font_bc;  /*beginning (smallest) character code*/
-extern eight_bits *const font_ec; /*ending (largest) character code*/ 
-extern scaled *const font_size; /*``at'' size*/
-extern scaled *const font_dsize; /*``design'' size*/
-
-extern void hclear_fonts(void); /*clear the font memory*/
-@
-
-
-
 \section{Building Pages Bottom Up}
 \TeX's page builder (see section~\secref{texbuildpage}) moves nodes from the contribution list 
 to the current page, filling it from top to bottom, and finds an optimal page break to end the page.
@@ -3551,7 +3511,7 @@ closely the exposition of \TeX's page builder in part 45 of {\it \TeX: The Progr
 So here is the outline of the function |hbuild_page_up|. 
 
 @<\HINT/ functions@>=
-bool hbuild_page_up(void) /*append contributions to the current page*/ 
+static bool hbuild_page_up(void) /*append contributions to the current page*/ 
 {@+
 static scaled page_top_height;
 pointer p; /*the node being appended*/ 
@@ -3881,7 +3841,7 @@ The first function is the initialization function that clears the table. It
 sets all records to zero. 
 
 @<\HINT/ functions@>=
-void clear_map(void)
+static void clear_map(void)
 { @+memset(map,0,sizeof(map));
 }
 @
@@ -4107,7 +4067,7 @@ void hloc_set_prev(pointer p)
 
 The following functions are used inside the \TeX\ library:
 
-@<\TeX\ |extern|@>=
+@<\HINT/ |extern|@>=
 extern void hloc_init(void);
 extern void store_map(pointer p, uint32_t pos, uint32_t offset); /*store the location of |p|*/
 extern uint32_t hposition(pointer p); /* return the position of |p| or 0*/
@@ -4275,7 +4235,7 @@ We needed:
 @<\HINT/ variables@>=
 scaled hvsize, hhsize;
 @
-@<\TeX\ |extern|@>=
+@<\HINT/ |extern|@>=
 extern scaled hvsize, hhsize;
 @
 The variables |hvsize| and |hhsize| give the vertical and horizontal
@@ -4383,7 +4343,7 @@ uint64_t hint_page_top(uint64_t h)
   if (h>0xffffffff)
     hget_par_node(h>>32);
   hint_forward();
-#ifdef DEBUG
+#if 0
   show_box(streams[0].p);
 #endif
   forward_mode=true;
@@ -4859,12 +4819,7 @@ struct gcache_s {
   int w,h; 
   int hoff,voff; 
   unsigned char *bits; 
-#ifdef WIN32
-  HBITMAP hbmp;
-#endif
-#ifdef __ANDROID__
-   unsigned int GLtexture;
-#endif
+  unsigned int GLtexture;
   font_format_t ff; 
   union {@+
 	  pkg_t pk;@+
@@ -5045,7 +5000,7 @@ if(link(p)==0xffff)
 	 cur_f= f;
       }
       render_char(cur_h, cur_v, cur_fp,c);
-      cur_h= cur_h+char_width(f)(char_info(f)(c));
+      cur_h= cur_h+char_width(f, char_info(f, c));
 #ifdef DEBUG
     if(link(p)==0xffff)
         QUIT("Undefined link in charlist mem[0x%x]=0x%x\n",p,mem[p].i);
@@ -5343,7 +5298,7 @@ move_past:
     cur_v= cur_v+rule_ht;
   } /* end |if| */
   next_p:
-#ifdef DEBUG
+#if 0
       if (link(p)==1 || link(p)==0xffff) {
         show_box(streams[0].p);
         QUIT("vertical node mem[0x%x] =0x%x ->linking to node 0x%x\n",
@@ -5951,6 +5906,7 @@ The function |unpack_ft_file| returns |false| if the font is not a FreeType font
 There is no good program without good error handling
 \index{error message}\index{debugging}.
 The file {\tt error.h} is responsible for defining these macros:
+\itemize
 \item |LOG| to write out messages on a log file or a log window.
 The primary use of this macro is for debugging purposes.
 \item |MESSAGE| to give information to the user during regular use.
@@ -5965,6 +5921,7 @@ The |QUIT| macro will therefore write the error message into a character array
 and invoke a |longjmp| to take an error exit.
 \item |HINT_TRY| might be used in the front-end to define a point of recovery;
 an |else| clause can then be used to catch and process errors.
+\enditemize
 
 The implementation of these macros is highly implementation dependent.
 So the following provides some useful defaults and special solutions
@@ -5992,7 +5949,7 @@ extern jmp_buf error_exit;
 extern void hmessage(char *title, char *format, ...);
 #define MESSAGE(...)  hmessage("HINT",__VA_ARGS__)
 
-extern void herror(char *title, char *msg);
+extern int herror(char *title, char *msg);
 #define ERROR_MESSAGE  herror("HINT ERROR",herror_string)
 #endif
 #endif
@@ -6061,8 +6018,7 @@ the \TeX\ library and the \HINT/ library. Here is the main program:
 #include "error.h"
 #include "hformat.h"
 #include "hget.h"
-
-#include "texextern.h"
+#include "htex.h"
 #include "hint.h"
 extern int page_h, page_v;
 
@@ -6211,11 +6167,9 @@ int page_count=0;
 
 @<show the page@>=
 { page_count++;
-  print_str("\nCompleted box being shipped out [");
-  print_int(page_count);
-  print_str("]");
+  fprintf(hlog,"\nCompleted box being shipped out [%d]",page_count);
   show_box(streams[0].p);
-  print_str("\n");
+  fprintf(hlog,"\n");
 }
 
 
@@ -6228,11 +6182,10 @@ The following code  is similar to the code for the {\tt skip} program described 
 #include <string.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include "texextern.h"
 #include "error.h"
 #include "hformat.h"
 #include "hget.h"
-
+#include "htex.h"
 #include "hint.h"
 
 @<test variables@>@;
@@ -6308,7 +6261,7 @@ static void list_leaks(void)
 }
 @ 
 
-@<\TeX\ |extern|@>=
+@<\HINT/ |extern|@>=
 extern void leak_in(pointer p, int s);
 extern void leak_out(pointer p, int s);
 @
@@ -6318,17 +6271,20 @@ extern void leak_out(pointer p, int s);
 \section{The Source Files}
 
 \subsection{{\tt hint.h}}
+
+The {\tt hint.h} file lists functions and variables exported from {\tt hint.c}.
+Care was taken not to use \TeX's types but the |pointer| and |scaled| type
+are still necessary. In case {\tt htex.h} is not included prior (nor after!)
+{\tt hint.h}, both types are defined separately.
+
 @(hint.h@>=
 #ifndef _HINT_H_
 #define _HINT_H_
 
-extern void hget_definition_section(void);
-extern void hget_content_section(void);
-
-extern void clear_map(void); /*clear the location table*/
-extern void hpage_init(void);
-extern bool hbuild_page_up(void); /*append contributions to the current page*/ 
-
+#ifndef pointer
+#define pointer int16_t
+typedef int scaled;
+#endif
 
 @<\HINT/ |extern|@>@;
 
@@ -6343,17 +6299,13 @@ extern bool hbuild_page_up(void); /*append contributions to the current page*/
 #include <zlib.h>@#
 #include "error.h"
 #include "hformat.h"
-
-#include "texextern.h"
-#include "hint.h"
 #include "hrender.h"
-
-#include "texdefs.h"
 #include "hget.h"
+#include "htex.h"
+#include "hint.h"
 
 @<GET macros@>@;
 @<TEG macros@>@;
-
 
 @<\HINT/ types@>@;
 
@@ -6392,13 +6344,15 @@ extern void hint_clear_fonts(bool rm);
 
 \subsection{{\tt hrender.c}}
 @(hrender.c@>=
+#include "basetypes.h"
+#include "error.h"
+#include "hformat.h"
 #include <math.h>
-#include "texextern.h"
 #include "hget.h"
-#include "hint.h"
 #include "hrender.h"
 #include "rendernative.h"
-#include "texdefs.h"
+#include "htex.h"
+#include "hint.h"
 
 @<font |extern|@>@;
 

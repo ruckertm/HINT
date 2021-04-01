@@ -1,5 +1,5 @@
 /*314:*/
-#line 5976 ".\\hint.w"
+#line 5933 "hint.w"
 
 #ifndef _ERROR_H
 #define _ERROR_H
@@ -19,7 +19,7 @@ extern jmp_buf error_exit;
 extern void hmessage(char*title,char*format,...);
 #define MESSAGE(...)  hmessage("HINT",__VA_ARGS__)
 
-extern void herror(char*title,char*msg);
+extern int herror(char*title,char*msg);
 #define ERROR_MESSAGE  herror("HINT ERROR",herror_string)
 #endif
 #endif
