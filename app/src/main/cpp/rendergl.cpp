@@ -72,7 +72,15 @@ auto gFragmentShader =
         "uniform vec4 ourColor;\n"
         "uniform int ourMode;\n"
         "void main() {\n"
+        "  if(ourMode==1) { \n"
         "     gl_FragColor = vec4(ourColor.xyz, texture2D(ourTexture,TexCoord).w);\n"
+        "  } else {\n"
+        "     if (ourColor.w == 1.0f) {\n"
+        "         gl_FragColor = vec4(ourColor.xyz, texture2D(ourTexture,TexCoord).w);\n"
+        "     } else {\n"
+        "         gl_FragColor = vec4(texture2D(ourTexture,TexCoord));\n"
+        "     }\n"
+        "  } \n"
         "}\n";
 
 static GLuint loadShader(GLenum shaderType, const char *pSource) {
@@ -187,7 +195,7 @@ extern "C" void nativeInit(void) {
     glEnableVertexAttribArray(gvPositionHandle);
     checkGlError("glEnableVertexAttribArray");
 
-    int ourColorLocation = glGetUniformLocation(gProgram, "ourColor");
+    //int ourColorLocation = glGetUniformLocation(gProgram, "ourColor");
     //int ourProjectionLocation = glGetUniformLocation(gProgram, "projection");
     glUseProgram(gProgram);
 
@@ -337,7 +345,7 @@ extern "C" void nativeGlyph(double x, double y, double w, double h, gcache_t *g)
 
     int ourColorLocation = glGetUniformLocation(gProgram, "ourColor");
     if (g->searched) {
-        glUniform4f(ourColorLocation, 1.0f, 0.0f, 0.0f, 0.0f);
+        glUniform4f(ourColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
     }
 
     glBindTexture(GL_TEXTURE_2D, g->GLtexture);

@@ -4,16 +4,16 @@ package edu.hm.cs.hintview;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 
-//import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -23,6 +23,8 @@ import android.view.WindowInsets;
 import android.app.Dialog;
 import android.widget.Button;
 import android.view.View.OnClickListener;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.TextView;
 
@@ -38,7 +40,9 @@ import java.io.IOException;
 public class HINTVIEWActivity extends AppCompatActivity {
     private static String TAG = "HINTVIEWActivity";
     private HINTVIEWView mView;
-    private static Toolbar toolbar;
+    private static Toolbar toolbar = null;
+    private static SearchView searchView = null;
+    private static Menu searchMenu = null;
     private SharedPreferences sharedPref;
     private boolean darkMode = false;
 
@@ -83,8 +87,10 @@ public class HINTVIEWActivity extends AppCompatActivity {
         mView.setMode(darkMode);
 
         toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        setToolbar(darkMode);
+        //if (toolbar != null) {
+            setSupportActionBar(toolbar);
+            setToolbar(darkMode);
+        //}
 
         findViewById(R.id.root).setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
 
@@ -143,6 +149,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
         toolbar.setBackgroundColor(toolbar_color);
         toolbar.setTitleTextColor(text_color);
         setOverflowButtonColor(text_color);
+        setSearchWidgetColor(text_color);
     }
 
     private void setOverflowButtonColor(final int color) {
@@ -154,6 +161,69 @@ public class HINTVIEWActivity extends AppCompatActivity {
         }
     }
 
+    private void setSearchWidgetColor (final int color) {
+        if (searchView != null) {
+            MenuItem searchItem = searchMenu.findItem(R.id.search);
+            Drawable drawable = searchItem.getIcon();
+            if (drawable != null) {
+                drawable = DrawableCompat.wrap(drawable);
+                DrawableCompat.setTint(drawable.mutate(), color);
+                searchItem.setIcon(drawable);
+            }
+
+            //drawable.setColorFilter(BlendModeColorFilterCompat.createBlendModeColorFilterCompat(color, BlendModeCompat.SRC_ATOP));
+            EditText searchText = (EditText) searchView.findViewById(searchView.getContext()
+                    .getResources()
+                    .getIdentifier("android:id/search_src_text", null, null));
+            //AutoCompleteTextView searchText = (AutoCompleteTextView) searchView.findViewById(R.id.search_src_text);
+
+            if (searchText != null) {
+                searchText.setHintTextColor(color);
+                searchText.setTextColor(color);
+                searchText.setHighlightColor(color);
+                searchText.setLinkTextColor(color);
+            }
+
+            ImageView searchIcon = (ImageView) searchView.findViewById(searchView.getContext()
+                    .getResources()
+                    .getIdentifier("android:id/search_go_btn", null, null));
+
+            if (searchIcon != null) {
+                searchIcon.setColorFilter(color);
+            }
+            searchIcon = (ImageView) searchView.findViewById(searchView.getContext()
+                    .getResources()
+                    .getIdentifier("android:id/search_close_btn", null, null));
+
+            if (searchIcon != null) {
+                searchIcon.setColorFilter(color);
+            }
+
+            searchIcon = (ImageView) searchView.findViewById(searchView.getContext()
+                    .getResources()
+                    .getIdentifier("android:id/search_mag_icon", null, null));
+
+            if (searchIcon != null) {
+                searchIcon.setColorFilter(color);
+            }
+
+            searchIcon = (ImageView) searchView.findViewById(searchView.getContext()
+                    .getResources()
+                    .getIdentifier("android:id/search_button", null, null));
+
+            if (searchIcon != null) {
+                searchIcon.setColorFilter(color);
+            }
+
+            searchIcon = (ImageView) searchView.findViewById(searchView.getContext()
+                    .getResources()
+                    .getIdentifier("android:id/search_voice_btn", null, null));
+
+            if (searchIcon != null) {
+                searchIcon.setColorFilter(color);
+            }
+        }
+    }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
@@ -208,7 +278,6 @@ public class HINTVIEWActivity extends AppCompatActivity {
         //Log.d(TAG, "onStop pos = " + Long.toHexString(filePos));
     }
 
-
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem checkable;
@@ -219,18 +288,18 @@ public class HINTVIEWActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        searchMenu = menu;
         MenuInflater inflater = new MenuInflater(this);
         inflater.inflate(R.menu.hintview_menu, menu);
 
         // Associate searchable configuration with the SearchView
         SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView =
+        searchView =
                 (SearchView) menu.findItem(R.id.search).getActionView();
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
-
-
+        searchView.setSubmitButtonEnabled(true);
 
         final SearchView.OnQueryTextListener queryTextListener = new SearchView.OnQueryTextListener() {
             @Override
