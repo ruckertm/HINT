@@ -197,6 +197,8 @@ extern "C" void nativeInit(void) {
     //int ourProjectionLocation = glGetUniformLocation(gProgram, "projection");
     glUseProgram(gProgram);
 
+    mkRuleTexture();
+    hint_clear_fonts(false);
 #if 0
     GLfloat mv[4];
     glGetFloatv(GL_MAX_VIEWPORT_DIMS,mv);
