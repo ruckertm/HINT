@@ -26,8 +26,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 2300 ${}$}
-\def\lastdate{${}$Date: 2021-03-31 17:13:42 +0200 (Wed, 31 Mar 2021) ${}$}
+\def\lastrevision{${}$Revision: 2302 ${}$}
+\def\lastdate{${}$Date: 2021-04-07 19:17:22 +0200 (Wed, 07 Apr 2021) ${}$}
 
 \input titlepage.tex
 
@@ -996,6 +996,7 @@ void hfill_page_template(void)
   }
   else
   houtput_template0();
+  hmark_page();
 #if 0
 streams[0].p=vpackage(streams[0].p,hvsize,exactly,page_max_depth);
 #endif
@@ -2322,6 +2323,8 @@ case TAG(baseline_kind,b111): @+{@+ HTEG_BASELINE(b111);@+}@+break;
 @
 
 
+new_character(f,c)
+
 \subsection{Ligatures}
 We ignore the replacement characters because we do not need them for the display.
 @<GET macros@>=
@@ -2329,24 +2332,26 @@ We ignore the replacement characters because we do not need them for the display
 {@+pointer p;@+uint8_t f;@+ uint32_t c; @+uint8_t s,*t;\
 f=HGET8;\
 if ((I)==7) s=HGET8;@+else s=(I);\
-t=hpos+s; c=hget_utf8(); hpos=t;\
+t=hpos+s; c=hget_utf8();p=new_ligature(f, c, null); tail_append(p);\
+{pointer r=lig_char(p); while (hpos<t) {link(r)=new_character(0,hget_utf8()); r=link(r);}}\
+hpos=t;\
 if ((I)==7)@/\
 { @+uint8_t t;@+ t=HGET8; \
   if(t!=s) @/\
   QUIT("Sizes in ligature don't match %d!=%d",s,t);}\
-p=new_ligature(f, c, null); tail_append(p); \
 }
 @
 
 @<TEG macros@>=
 #define @[HTEG_LIG(I)@] @/\
-{@+pointer p;@+uint8_t f;@+ uint32_t c; @+uint8_t s,*t;\
+{@+pointer p;@+ uint32_t c; @+uint8_t s,*t;\
 if ((I)==7) @+s=HTEG8; @+else s=(I);\
-t=hpos-s; hpos=t; c=hget_utf8(); hpos=t;\
+t=hpos; hpos=t-s; c=hget_utf8();p=new_ligature(0, c, null); tail_append(p); \
+{pointer r=lig_char(p); while (hpos<t) {link(r)=new_character(0,hget_utf8()); r=link(r);}}\
+hpos=t-s;\
 if ((I)==7) { uint8_t n;@+ n=HTEG8;\
   if(n!=s)   QUIT("Sizes in ligature don't match %d!=%d",s,n);}\
-f=HTEG8;\
-p=new_ligature(f, c, null); tail_append(p); \
+font(lig_char(p))=HTEG8;\
 }
 @
 
@@ -4458,6 +4463,296 @@ uint64_t  hint_page_center(uint64_t h)
 }
 @
 
+\subsection{Searching}\label{search}
+Searching starts in the user interface with defining a string to search for.
+The simples form of searching is the highlighting of all matching strings on the current
+page. The highlighting itself is the responsibility of the graphical user interface.
+All the backend needs to do is marking the glyphs that need to be highlighted.
+For this purpose, every call to |nativeGlyph| passes a style parameter.
+Currently two style bits are defined: |MARK_BIT| and |FOCUS_BIT|.
+@<render macros@>=
+#define MARK_BIT 0x1
+#define FOCUS_BIT 0x2
+@
+Calling the function |hint_set_mark(char *m, int s)| will cause the |MARK_BIT| to be set in the style parameter |s|
+for all glyphs on the current page that belong to a character string matching |m| of lenght |s|.
+If |m==NULL|, the |MARK_BIT| will be zero for all glyphs.
+The |FOCUS_BIT| is associated with a second string; but at any time, at most one occurence of this
+string on the current page will have glyphs with the |FOCUS_BIT| set.
+Similar as before, calling the function |hint_set_focus(char *f, int s)| will define the focus string.
+To set or move the focus, call one of these functions: |hint_next_focus| or |hint_prev_focus|.
+Both take a position and return a position in the \HINT/ file.
+|hint_next_focus| finds the first occurrence of the focus string at or after the given position,
+that has not yet the focus. This string will ``get the focus'', that is: The glyphs belonging to the
+string will have the |FOCUS_BIT| set; if necessary, the current page will move forward to
+contain the focus string; and the position of the new focus will be returned.
+Calling |hint_next_focus| with parameter |pos| will return |pos| only if the focus string is found at
+|pos| and this occurrence did not yet have the focus.
+|hint_prev_focus| works the same way but in backward direction.
+|hint_next_focus| and |hint_prev_focus| will return |0xFFFFFFFFFFFFFFFF| if no new
+occurrence of the focus string could be found.
+
+Marking will require two passes over the current page: the first pass is triggered by
+calling the |hint_set_mark| function. It will traverse the current page and find all
+occurrences of the given string. To store these occurencies, the distances beween two such occurences
+are determined and stored in an array. To keep the storage of these distances compact,
+we use a variable length encoding and we limit the total size of such encodings,
+assuming that it is of no use to have hundreds of highlighted words on a single page.
+
+@<render variables@>=
+#define MAX_MARK_DIST 512
+static uint8_t mark_dist[MAX_MARK_DIST+5]; /* space for a final 4 byte number and $\infty$ */
+static int m_ptr,m_dist,m_state, m_length, m_spaces, m_chars;
+static char *m_str;
+@
+
+For the variable length encoding we use the following convention.
+A length of 0 to |0x7F| (7 bit) is stored as a single byte.
+A length of |0x80| to |0x3FFF| (14 bit) is stored as two byte,
+setting the topmost two bits of the first byte to $10$ as a marker.
+Larger values use three, four, or five byte setting the topmost
+three, four, or five bits to $110$, $1110$, and $11110$.
+The byte |0xFF| is used as a shorthand for infinity.
+The distance values are stored in an byte array |mark_dist| at position |m_ptr|.
+
+
+@<store |m_dist|@>=
+{ if (m_ptr<MAX_MARK_DIST)
+  { if (m_dist<=0x7F) mark_dist[m_ptr++]=m_dist;
+    else if (m_dist<=0x3FFF)
+    { mark_dist[m_ptr++]=0x80| (m_dist>>8);
+      mark_dist[m_ptr++]= (m_dist&0xFF);
+    }
+    else if (m_dist<=0x1FFFFF)
+    { mark_dist[m_ptr++]=0xC0| (m_dist>>16);
+      mark_dist[m_ptr++]= ((m_dist>>8)&0xFF);
+      mark_dist[m_ptr++]= (m_dist&0xFF);
+    }
+    else if (m_dist<=0xFFFFFFF)
+    { mark_dist[m_ptr++]=0xE0| (m_dist>>24);
+      mark_dist[m_ptr++]= ((m_dist>>16)&0xFF);
+      mark_dist[m_ptr++]= ((m_dist>>8)&0xFF);
+      mark_dist[m_ptr++]= (m_dist&0xFF);
+    }
+    else
+    { mark_dist[m_ptr++]=0xF0;
+      mark_dist[m_ptr++]= ((m_dist>>24)&0xFF);
+      mark_dist[m_ptr++]= ((m_dist>>16)&0xFF);
+      mark_dist[m_ptr++]= ((m_dist>>8)&0xFF);
+      mark_dist[m_ptr++]= (m_dist&0xFF);
+    }
+  }
+}
+@
+
+@<read |m_dist|@>=
+{  m_dist= mark_dist[m_ptr++];
+   if (m_dist<0x80) ;
+   else if (m_dist<0xC0)
+      m_dist=((m_dist&~0xC0)<<8)+mark_dist[m_ptr++];
+   else if (m_dist==0xFF) m_dist=0xFFFFFFFF;
+   else if (m_dist<0xE0)
+   { m_dist=((m_dist&~0xE0)<<8)+mark_dist[m_ptr++];
+     m_dist=(m_dist<<8)+mark_dist[m_ptr++];
+   }
+   else if (m_dist<0xF0)
+   { m_dist=((m_dist&~0xF0)<<8)+mark_dist[m_ptr++];
+     m_dist=(m_dist<<8)+mark_dist[m_ptr++];
+     m_dist=(m_dist<<8)+mark_dist[m_ptr++];
+   }
+   else
+   { m_dist=mark_dist[m_ptr++];
+     m_dist=(m_dist<<8)+mark_dist[m_ptr++];
+     m_dist=(m_dist<<8)+mark_dist[m_ptr++];
+     m_dist=(m_dist<<8)+mark_dist[m_ptr++];
+   }
+ }
+ @
+
+
+The marking uses three functions: Two perform an inorder traversal
+of the current page, delivering a stream of characters to
+the function |next_mark_char|. The latter function finds matches
+and writes distances.
+The variable |m_state| records the number of characters that
+already matched. We have to do some more work to match spaces.
+
+
+@<render functions@>=
+static void next_m_char(uint32_t c)
+{ if (m_state<0) m_state=-m_state;
+reconsider:
+  if (m_state==0 && c!=m_str[0])
+    m_dist++;
+  else if (c==m_str[m_state])
+  { if (m_state==0) m_spaces=0;
+    m_state++;
+    if (m_state==m_length)
+    { @<store |m_dist|@>
+      m_dist=0;
+      m_state=0;
+     }
+  }
+  else
+  { m_dist=m_dist+m_state-m_spaces;
+    m_state=0;
+    goto reconsider;
+  }
+}
+@
+We need to account for spaces only if they are inside the search string.
+All other spaces are silently ignored. Also multiple spaces are matched as a single space.
+@<reduce multiple spaces to single spaces@>=
+if (m_length>0)
+{ int i,k;
+  m_spaces=0;
+  for (i=k=0;i<m_length;i++)
+    if (m_str[i]!=' '|| m_str[i+1]!=' ')
+    { m_str[k]=m_str[i];
+      if (m_str[k]==' ') m_spaces++;
+      k++;
+    }
+  m_str[k]=0;
+  m_length=k;
+  m_chars=m_length-m_spaces;
+}
+@
+Glues in horizontal lists, but not kerns are considered spaces.
+Further the end of a horizontal list inside a vertical list is
+considered a space. While skipping spaces, we set |m_state| to
+a negative value and to complete the bookkeeping we count the number
+of spaces that are included in the |m_state|.
+
+@<render functions@>=
+static void next_m_space(void)
+{ if (m_state==0 && m_str[0]==' ')
+  { m_state=-1; m_spaces=1; }
+  else if (m_state>=0 && m_str[m_state]==' ')
+  { if (m_state==0) m_spaces=0;
+    m_state++; m_spaces++;
+    if (m_state==m_length)
+    { @<store |m_dist|@>
+      m_dist=0;
+      m_state=0;
+    }
+    else
+      m_state=-m_state;
+  }
+  else if (m_state>0)
+  { m_dist=m_dist+m_state-m_spaces; m_state=0;}
+}
+@
+
+After these preparations, we are ready to traverse the current page.
+
+@<render functions@>=
+static void vlist_mark(pointer this_box);
+static void hlist_mark(pointer this_box)
+{ pointer p;
+  p=list_ptr(this_box);
+  while(p!=null)
+  { if(is_char_node(p)) next_m_char(character(p));
+    else switch (type(p))
+    { case hlist_node: if(list_ptr(p)!=null) hlist_mark(p); break;
+      case vlist_node:  if(list_ptr(p)!=null) vlist_mark(p); break;
+      case ligature_node:
+      { pointer q=lig_ptr(p);
+        while (q!=null)
+        { next_m_char(character(q)); q=link(q);
+        }
+      }
+      break;
+      case glue_node: next_m_space(); break;
+      default: break;
+    }
+    p= link(p);
+  }
+}
+
+static void vlist_mark(pointer this_box)
+{ pointer p;
+  p=list_ptr(this_box);
+  while(p!=null)
+  { switch (type(p))
+    { case hlist_node: if(list_ptr(p)!=null) hlist_mark(p); next_m_space(); break;
+      case vlist_node:  if(list_ptr(p)!=null) vlist_mark(p); break;
+      default: break;
+    }
+    p= link(p);
+  }
+}
+@
+
+At the start of the renderer, we set |m_ptr|, |m_dist| to zero and |m_state| to |MARK_BIT|
+The renderer will then assume it is at the end of a marked sequence of glyphs,
+read the first entry from |mark_dist| (which might be zero) and starts with
+the appropriate number of non-marked glyphs.
+
+@<initialize marking@>=
+   m_ptr=0;m_dist=0;m_state=MARK_BIT;
+@
+
+Before traversing the page for marking, we also initialize the variables appropriately.
+
+@<render functions@>=
+void hmark_page(void)
+{ if (streams==NULL || streams[0].p==null) return;
+  m_ptr=0;
+  if (m_length>0)
+  { m_dist=0;
+    m_state=0;
+    if(type(streams[0].p)==vlist_node)
+       vlist_mark(streams[0].p);
+    else
+       hlist_mark(streams[0].p);
+  }
+  mark_dist[m_ptr++]=0xFF; /* infinity */
+}
+
+void hint_set_mark(char *m, int s)
+{ m_str=m;
+  m_length=s;
+  @<reduce multiple spaces to single spaces@>@;
+  hmark_page();
+}
+@
+We need a dummy version for our test programs.
+@<test functions@>=
+void hmark_page(void)
+{return; }
+@
+
+
+Finaly, we need to implement the setting of the |MARK_BIT| in |hlist_render|.
+Because unmarked and marked characters alternate, we set |m_state==MARK_BIT|
+while marked characters are rendered and zero otherwise.
+|m_dist| is the number of characters remaining in the current stretch.
+
+@<update |m_state|@>=
+{ while (m_dist==0)
+  { m_state^=MARK_BIT;
+    if (m_state&MARK_BIT) m_dist=m_chars;
+    else @<read |m_dist|@>@;
+  }
+  m_dist--;
+}
+@
+
+
+And we need to traverse the list of charactes that generated a ligature.
+@<account for the characters that generated the ligature@>=
+{ pointer q;
+  cur_s=0;
+  q=lig_ptr(p);
+  while (q!=null)
+  { @<update |m_state|@>@;
+    cur_s|=m_state;
+    q=link(q);
+  }
+}
+@
+
+
 
 \subsection{Changing the page dimensions}
 A central feature of a \HINT/ viewer is its ability to change the dimensions and the
@@ -4882,7 +5177,7 @@ the native rendering functions. Most of the conversion is done by the macro |SP2
 #define SP2PT(X) ((X)/(double)(1<<16))
 @
 @<font functions@>=
-void render_char(int x, int y, struct font_s *f, uint32_t cc)
+void render_char(int x, int y, struct font_s *f, uint32_t cc, uint8_t s)
 
 { double w, h, dx, dy;
   gcache_t *g=hget_glyph(f,cc);
@@ -4892,14 +5187,13 @@ void render_char(int x, int y, struct font_s *f, uint32_t cc)
   dy=(double)g->voff*f->vpxs;@/
   w =(double)g->w*f->hpxs;
   h =(double)g->h*f->vpxs;
-
-  nativeGlyph(SP2PT(x)-dx,SP2PT(y)-dy,w,h,g);
+  nativeGlyph(SP2PT(x),dx,SP2PT(y),dy,w,h,g,s);
 }
 
 @
 \goodbreak
 @<font |extern|@>=
-extern void render_char(int x, int y, struct font_s *f, uint32_t cc);
+extern void render_char(int x, int y, struct font_s *f, uint32_t cc, uint8_t s);
 @
 
 \subsection{Rules}
@@ -4963,6 +5257,9 @@ scaled edge;
 double glue_temp;
 double cur_glue;
 scaled cur_g;
+uint8_t cur_s=0;
+uint8_t f;
+uint32_t c;
 
 cur_g= 0;
 cur_glue= 0.0;
@@ -4978,7 +5275,7 @@ base_line= cur_v;
 left_edge= cur_h;
 
 while(p!=null)
-{ reswitch:
+{
 #ifdef DEBUG
 if(p==0xffff)
         QUIT("Undefined pointer in hlist 0x%x\n",p);
@@ -4986,27 +5283,30 @@ if(link(p)==0xffff)
         QUIT("Undefined link in hlist mem[0x%x]=0x%x\n",p,mem[p].i);
 #endif
   if(is_char_node(p))
-  { do {
-      uint8_t f= font(p);
-      uint32_t c= character(p);
+  { do
+    { @<update |m_state|@>@;
+      cur_s=m_state;
+      f= font(p);
+      c= character(p);
+render_char:        
       if(f!=cur_f)
       {
 #ifdef DEBUG
-      if(f> max_ref[font_kind])
+        if(f> max_ref[font_kind])
            QUIT("Undefined Font %d mem[0x%x]=0x%x\n",
                 f,p,mem[p].i);
 #endif
-     cur_fp=hget_font(f);
-	 cur_f= f;
+        cur_fp=hget_font(f);
+        cur_f= f;
       }
-      render_char(cur_h, cur_v, cur_fp,c);
+      render_char(cur_h, cur_v, cur_fp,c,cur_s);
       cur_h= cur_h+char_width(f, char_info(f, c));
 #ifdef DEBUG
-    if(link(p)==0xffff)
+      if(link(p)==0xffff)
         QUIT("Undefined link in charlist mem[0x%x]=0x%x\n",p,mem[p].i);
 #endif
-p= link(p);
-    } while(!(!is_char_node(p)));
+      p= link(p);
+    } while(is_char_node(p));
   }
   else
   { switch(type(p)) 
@@ -5058,7 +5358,8 @@ p= link(p);
 	    }
 	    break;
      case glue_node:
-     { pointer g= glue_ptr(p);rule_wd= width(g)-cur_g;
+     { pointer g;
+        g=glue_ptr(p);rule_wd= width(g)-cur_g;
         if(g_sign!=normal)
         { if(g_sign==stretching)
           { if(stretch_order(g)==g_order)
@@ -5119,9 +5420,10 @@ p= link(p);
 	   cur_h= cur_h+width(p);
 	   break;
      case ligature_node:
-       mem[lig_trick]= mem[lig_char(p)];link(lig_trick)= link(p);
-       p= lig_trick;
-	   goto reswitch;
+      f= font(lig_char(p));
+      c= character(lig_char(p));
+      @<account for the characters that generated the ligature@>@;
+      goto render_char;
      default:;
    }
    goto next_p;
@@ -5189,7 +5491,8 @@ while(p!=null)
 	    { cur_v= cur_v+height(p);save_v= cur_v;
           cur_h= left_edge+shift_amount(p);
           if(type(p)==vlist_node)vlist_render(p);
-	   	  else hlist_render(p);
+	  else
+           hlist_render(p);
           cur_v= save_v+depth(p);cur_h= left_edge;
         }
         break;
@@ -5332,7 +5635,8 @@ void hint_render(void)
    if (streams==NULL || streams[0].p==null) return;
    cur_h= 0;
    cur_v= height(streams[0].p);
-   cur_f=-1;cur_fp=NULL; 
+   cur_f=-1;cur_fp=NULL;
+   @<initialize marking@>@;
    if(type(streams[0].p)==vlist_node)
      vlist_render(streams[0].p);
    else 
@@ -5371,13 +5675,19 @@ In the following, if not otherwise stated, all dimensions are given as double va
 We have $72.27\,\hbox{pt} = 1\,\hbox{inch}$ and $1\,\hbox{inch} = 2.54\, \hbox{cm}$.
 
 
-To render the glyph |g| at position $(|x|,|y|)$ with width |w| and height |h| call:
+To render the glyph |g| with reference point at $(|dx|,|dy|)$
+at position $(|x|,|y|)$ with width |w| and height |h| and style |s| call:
 @<native rendering definitions@>=
 typedef struct gcache_s *gcache_s_ptr;
-extern void nativeGlyph(double x, double y, double w, double h, struct gcache_s *g);
+
+extern void nativeGlyph(double x, double dx, double y, double dy, double w, double h, struct gcache_s *g, uint8_t s);
 @
+For an explanation of the style parameter see section~\secref{search}.
+
+
 
 To render a black rectangle at position  $(|x|,|y|)$ with width |w| and height |h| call:
+
 @<native rendering definitions@>=
 void nativeRule(double x, double y, double w, double h);
 @
@@ -6338,6 +6648,11 @@ extern uint64_t hint_next_page(void);
 extern uint64_t hint_prev_page(void);
 extern void hint_resize(int px_h, int px_v, double dpi);
 extern void hint_clear_fonts(bool rm);
+extern void hint_set_mark(char *m, int s);
+extern void hmark_page(void);
+extern void hint_set_focus(char *f, int s);
+extern uint64_t hint_next_focus(uint64_t pos);
+extern uint64_t hint_prev_focus(uint64_t pos);
 
 #endif 
 @
@@ -6353,7 +6668,7 @@ extern void hint_clear_fonts(bool rm);
 #include "rendernative.h"
 #include "htex.h"
 #include "hint.h"
-
+@<render macros@>@;
 @<font |extern|@>@;
 
 @<render variables@>@;
@@ -6365,6 +6680,7 @@ extern void hint_clear_fonts(bool rm);
 @(hfonts.h@>=
 #ifndef _HFONTS_H
 #define _HFONTS_H
+
 @<font types@>@;
 
 
