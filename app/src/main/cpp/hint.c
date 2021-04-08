@@ -1,5 +1,5 @@
 /*341:*/
-#line 6605 "hint.w"
+#line 6610 "hint.w"
 
 #include "basetypes.h"
 #include <string.h> 
@@ -227,7 +227,7 @@ hget_list();
   else { image_stretch(p)= image_shrink(p)= 0;image_stretch_order(p)= image_shrink_order(p)= normal;}\
   tail_append(p);}
 /*:192*/
-#line 6617 "hint.w"
+#line 6622 "hint.w"
 
 /*73:*/
 #line 1134 "hint.w"
@@ -418,7 +418,7 @@ if ((I)&b100) hteg_xdimen_node(); else hget_xdimen_ref(HTEG8);
   HTEG16(image_no(p));RNG("Section number",image_no(p),3,max_section_no);  \
   tail_append(p);}
 /*:193*/
-#line 6618 "hint.w"
+#line 6623 "hint.w"
 
 
 /*22:*/
@@ -449,7 +449,7 @@ typedef struct param_def_t{
 struct param_def_t*next;
 param_t p;}param_def_t;
 /*:38*/
-#line 6620 "hint.w"
+#line 6625 "hint.w"
 
 
 
@@ -549,12 +549,12 @@ scaled hvsize,hhsize;
 
 int page_v,page_h,offset_v,offset_h;
 /*:250*//*328:*/
-#line 6303 "hint.w"
+#line 6308 "hint.w"
 
 jmp_buf error_exit;
 char herror_string[MAX_HERROR];
 /*:328*/
-#line 6623 "hint.w"
+#line 6628 "hint.w"
 
 /*3:*/
 #line 189 "hint.w"
@@ -607,7 +607,7 @@ static pointer hteg_list(void);
 
 static scaled hget_xdimen_node(void);
 /*:127*/
-#line 6624 "hint.w"
+#line 6629 "hint.w"
 
 /*9:*/
 #line 243 "hint.w"
@@ -2068,7 +2068,7 @@ shift_amount(p)+= offset_h;
 streams[0].p= q;
 }
 /*:253*//*338:*/
-#line 6533 "hint.w"
+#line 6538 "hint.w"
 
 static pointer leaks[1<<16]= {0};
 
@@ -2109,7 +2109,7 @@ fprintf(stderr,"ERROR:leak final: p=%d, s=%d\n",i,leaks[i]);
 #endif
 }
 /*:338*/
-#line 6625 "hint.w"
+#line 6630 "hint.w"
 
 /*1:*/
 #line 110 "hint.w"
@@ -2591,7 +2591,7 @@ QUIT("Text in paragraph not yet implemented");
 return null;
 }
 /*:162*/
-#line 6626 "hint.w"
+#line 6631 "hint.w"
 
 /*76:*/
 #line 1162 "hint.w"
@@ -2937,7 +2937,7 @@ line_break_params= save_lbp;
 }
 
 /*:172*/
-#line 6627 "hint.w"
+#line 6632 "hint.w"
 
 
 /*18:*/
@@ -3641,7 +3641,7 @@ store_map(tail,pos,0);
 return false;
 }
 /*:247*/
-#line 6629 "hint.w"
+#line 6634 "hint.w"
 
 
 /*:341*/

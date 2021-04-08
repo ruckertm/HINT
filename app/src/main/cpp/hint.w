@@ -4594,8 +4594,13 @@ reconsider:
      }
   }
   else
-  { m_dist=m_dist+m_state-m_spaces;
-    m_state=0;
+  { int i=0,k=0;
+    do {
+      if (m_str[i]==' ') k++;
+      i++;
+    } while (i<m_state && strncmp(m_str,m_str+i,m_state-i)!=0);
+    m_dist=m_dist+i-k;
+    m_state=m_state-i;
     goto reconsider;
   }
 }
