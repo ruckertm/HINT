@@ -330,7 +330,7 @@ void nativeFreeGlyph(gcache_t *g)
         g->GLtexture = 0;
     }
 }
-extern "C" void nativeGlyph(double x, double y, double w, double h, gcache_t *g)
+extern "C" void  nativeGlyph(double x,double dx,double y,double dy,double w,double h,struct gcache_s*g,uint8_t s)
 /* Using GL to render a character texture
    Coordinates in points, origin bottom left, x and w right, y and h up
    x,y position
@@ -338,7 +338,8 @@ extern "C" void nativeGlyph(double x, double y, double w, double h, gcache_t *g)
 
   */
 { //LOGI("Rendering texture %i at (%f,%f) sized %fx%f",GLtexture,x/SPf,y/SPf,w/SPf,h/SPf);
-
+    x=x-dx;
+    y=y-dy;
     if (g->GLtexture == 0)
         GLtexture(g);
 
