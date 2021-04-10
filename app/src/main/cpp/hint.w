@@ -26,8 +26,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 2302 ${}$}
-\def\lastdate{${}$Date: 2021-04-07 19:17:22 +0200 (Wed, 07 Apr 2021) ${}$}
+\def\lastrevision{${}$Revision: 2311 ${}$}
+\def\lastdate{${}$Date: 2021-04-10 15:45:45 +0200 (Sat, 10 Apr 2021) ${}$}
 
 \input titlepage.tex
 
@@ -4464,110 +4464,123 @@ uint64_t  hint_page_center(uint64_t h)
 @
 
 \subsection{Searching}\label{search}
-Searching starts in the user interface with defining a string to search for.
-The simples form of searching is the highlighting of all matching strings on the current
-page. The highlighting itself is the responsibility of the graphical user interface.
-All the backend needs to do is marking the glyphs that need to be highlighted.
-For this purpose, every call to |nativeGlyph| passes a style parameter.
+Searching starts in the user interface with defining a string to
+search for.  The simples form of searching is the highlighting of all
+matching strings on the current page. The highlighting itself is the
+responsibility of the graphical user interface.  The backend just needs
+to indicate which glyphs must be highlighted.  For this
+purpose, every call to |nativeGlyph| passes a style parameter.
 Currently two style bits are defined: |MARK_BIT| and |FOCUS_BIT|.
 @<render macros@>=
 #define MARK_BIT 0x1
 #define FOCUS_BIT 0x2
 @
-Calling the function |hint_set_mark(char *m, int s)| will cause the |MARK_BIT| to be set in the style parameter |s|
-for all glyphs on the current page that belong to a character string matching |m| of lenght |s|.
-If |m==NULL|, the |MARK_BIT| will be zero for all glyphs.
-The |FOCUS_BIT| is associated with a second string; but at any time, at most one occurence of this
-string on the current page will have glyphs with the |FOCUS_BIT| set.
-Similar as before, calling the function |hint_set_focus(char *f, int s)| will define the focus string.
-To set or move the focus, call one of these functions: |hint_next_focus| or |hint_prev_focus|.
-Both take a position and return a position in the \HINT/ file.
-|hint_next_focus| finds the first occurrence of the focus string at or after the given position,
-that has not yet the focus. This string will ``get the focus'', that is: The glyphs belonging to the
-string will have the |FOCUS_BIT| set; if necessary, the current page will move forward to
-contain the focus string; and the position of the new focus will be returned.
-Calling |hint_next_focus| with parameter |pos| will return |pos| only if the focus string is found at
-|pos| and this occurrence did not yet have the focus.
-|hint_prev_focus| works the same way but in backward direction.
-|hint_next_focus| and |hint_prev_focus| will return |0xFFFFFFFFFFFFFFFF| if no new
-occurrence of the focus string could be found.
+
+Calling the function |hint_set_mark(char *m, int s)| will cause the
+|MARK_BIT| to be set in the style parameter |s| for all glyphs on the
+current page that belong to a character string matching |m| of length
+|s|.  If |m==NULL|, the |MARK_BIT| will be zero for all glyphs.  The
+``focus'' can be associated with one occurence of the marked string;
+its glyphs will have the |FOCUS_BIT| set.
+To set or to move the focus, two functions are available: |hint_next_mark| and
+|hint_prev_mark|.
+|hint_next_mark| moves the focus to the next occurence, or to the
+first one if currently no focus is set. If necessary,
+the current page will move forward to contain another occurrence;
+|hint_prev_mark| works the same way but searches in backward
+direction.  |hint_next_mark| and |hint_prev_mark| will return |true|
+if a new aoccurence was found and return |false| otherwise.
 
 Marking will require two passes over the current page: the first pass is triggered by
 calling the |hint_set_mark| function. It will traverse the current page and find all
-occurrences of the given string. To store these occurencies, the distances beween two such occurences
-are determined and stored in an array. To keep the storage of these distances compact,
-we use a variable length encoding and we limit the total size of such encodings,
+occurrences of the given string. The second pass is the rendering pass by the function
+|hint_render|.
+
+To implement these functions, we need a data structure
+to store these occurencies:
+we store the distances beween two occurences
+in an array. If there is no next occurrence, we store $\infty$.
+To keep the storage of these distances compact,
+we use a variable length encoding, and we limit the total size of such encodings
 assuming that it is of no use to have hundreds of highlighted words on a single page.
 
 @<render variables@>=
-#define MAX_MARK_DIST 512
-static uint8_t mark_dist[MAX_MARK_DIST+5]; /* space for a final 4 byte number and $\infty$ */
-static int m_ptr,m_dist,m_state, m_length, m_spaces, m_chars;
+#define MAX_M_DIST 512
+static uint8_t m_dist[MAX_M_DIST+5]; /* space for a final 5 byte number and $\infty$ */
+static int m_ptr,m_state, m_length, m_spaces, m_chars;
+static uint32_t m_d;
 static char *m_str;
 @
 
-For the variable length encoding we use the following convention.
-A length of 0 to |0x7F| (7 bit) is stored as a single byte.
-A length of |0x80| to |0x3FFF| (14 bit) is stored as two byte,
-setting the topmost two bits of the first byte to $10$ as a marker.
-Larger values use three, four, or five byte setting the topmost
-three, four, or five bits to $110$, $1110$, and $11110$.
-The byte |0xFF| is used as a shorthand for infinity.
-The distance values are stored in an byte array |mark_dist| at position |m_ptr|.
+For the variable length encoding we use the following convention:
+The single byte |0xFF| means $\infty$.
+Else if the most significant bit is set, the distance is given by
+the remaining 7 bits.
+Else if the most significant bit is not set, the remaining 7 bits
+are added to the left of the number contained in the following bytes.
 
+Using this convention, $\infty$ and all distances $0\le d < |0x7F$
+can be stored in a single byte. The first distance that needs two byte
+is |0x7F| it is stored as |0x00 0x7F| because storing it as |0x80+0x7F| would mean
+$\infty$.
+With two byte values up to $2^{14}$  can be stored. This should be sufficient
+for most cases because a) with such large distances there can't be many occurencies
+on a single page, and b) the current implementation uses 16 bit pointers
+and that gives a strict upper bound on the number of characters.
+Because the \HINT/ file format limits the content section to $2^{32}$ byte
+a 5 byte encoding is sufficient for any distance that could occur in any \HINT/ file.
 
-@<store |m_dist|@>=
-{ if (m_ptr<MAX_MARK_DIST)
-  { if (m_dist<=0x7F) mark_dist[m_ptr++]=m_dist;
-    else if (m_dist<=0x3FFF)
-    { mark_dist[m_ptr++]=0x80| (m_dist>>8);
-      mark_dist[m_ptr++]= (m_dist&0xFF);
-    }
-    else if (m_dist<=0x1FFFFF)
-    { mark_dist[m_ptr++]=0xC0| (m_dist>>16);
-      mark_dist[m_ptr++]= ((m_dist>>8)&0xFF);
-      mark_dist[m_ptr++]= (m_dist&0xFF);
-    }
-    else if (m_dist<=0xFFFFFFF)
-    { mark_dist[m_ptr++]=0xE0| (m_dist>>24);
-      mark_dist[m_ptr++]= ((m_dist>>16)&0xFF);
-      mark_dist[m_ptr++]= ((m_dist>>8)&0xFF);
-      mark_dist[m_ptr++]= (m_dist&0xFF);
-    }
+Here are the functions, to maipulate the |m_dist| array.
+We assume that the last entry in the |m_dist| array is always $\infty$.
+@<render functions@>=
+static void m_put(uint32_t d) /* write into |m_dist| */
+{ if (m_ptr<MAX_M_DIST)
+  { if (d==0xFF)
+      m_dist[m_ptr++]=d;
+   else if (d<0x7F)
+      m_dist[m_ptr++]=0x80+d;
     else
-    { mark_dist[m_ptr++]=0xF0;
-      mark_dist[m_ptr++]= ((m_dist>>24)&0xFF);
-      mark_dist[m_ptr++]= ((m_dist>>16)&0xFF);
-      mark_dist[m_ptr++]= ((m_dist>>8)&0xFF);
-      mark_dist[m_ptr++]= (m_dist&0xFF);
+    { if (d<(1<<14))
+      {
+        two_byte:     
+        m_dist[m_ptr++]=d>>7;
+        m_dist[m_ptr++]=0x80+(d&0x7F);
+        return;
+      }
+      if (d>=(1<<28)) m_dist[m_ptr++]=d>>28;
+      if (d>=(1<<21)) m_dist[m_ptr++]=(d>>21)&0x7F;
+      if (d>=(1<<14)) m_dist[m_ptr++]=(d>>14)&0x7F;
+      d=d&((1<<14)-1);
+      goto two_byte;
     }
   }
+}      
+
+static uint32_t m_get(void)  /* read from |m_dist| */
+{ uint32_t x,y;
+  x=m_dist[m_ptr++];
+  if (x==0xFF) return 0xFFFFFFFF;
+  if (x&0x80) return x&0x7F;
+  while (true)
+  { y=m_dist[m_ptr++];
+    if (y&0x80) return (x<<7)+(y&0x7F);
+    x=(x<<7)+y;
+  }
+}
+
+static int m_next(int i) /* advance to next enty */
+{ while ((0x80&m_dist[i])==0) i++;
+  if (m_dist[i]==0xFF) return 0;
+  else return i+1;
+}
+
+static int m_prev(int i) /* advance to previous entry */
+{ i--;
+  if (i<=0) return 0;
+  while (i>0 && (0x80&m_dist[i-1])==0) i--;
+  return i;
 }
 @
-
-@<read |m_dist|@>=
-{  m_dist= mark_dist[m_ptr++];
-   if (m_dist<0x80) ;
-   else if (m_dist<0xC0)
-      m_dist=((m_dist&~0xC0)<<8)+mark_dist[m_ptr++];
-   else if (m_dist==0xFF) m_dist=0xFFFFFFFF;
-   else if (m_dist<0xE0)
-   { m_dist=((m_dist&~0xE0)<<8)+mark_dist[m_ptr++];
-     m_dist=(m_dist<<8)+mark_dist[m_ptr++];
-   }
-   else if (m_dist<0xF0)
-   { m_dist=((m_dist&~0xF0)<<8)+mark_dist[m_ptr++];
-     m_dist=(m_dist<<8)+mark_dist[m_ptr++];
-     m_dist=(m_dist<<8)+mark_dist[m_ptr++];
-   }
-   else
-   { m_dist=mark_dist[m_ptr++];
-     m_dist=(m_dist<<8)+mark_dist[m_ptr++];
-     m_dist=(m_dist<<8)+mark_dist[m_ptr++];
-     m_dist=(m_dist<<8)+mark_dist[m_ptr++];
-   }
- }
- @
 
 
 The marking uses three functions: Two perform an inorder traversal
@@ -4583,13 +4596,13 @@ static void next_m_char(uint32_t c)
 { if (m_state<0) m_state=-m_state;
 reconsider:
   if (m_state==0 && c!=m_str[0])
-    m_dist++;
+    m_d++;
   else if (c==m_str[m_state])
   { if (m_state==0) m_spaces=0;
     m_state++;
     if (m_state==m_length)
-    { @<store |m_dist|@>
-      m_dist=0;
+    { m_put(m_d);
+      m_d=0;
       m_state=0;
      }
   }
@@ -4599,7 +4612,7 @@ reconsider:
       if (m_str[i]==' ') k++;
       i++;
     } while (i<m_state && strncmp(m_str,m_str+i,m_state-i)!=0);
-    m_dist=m_dist+i-k;
+    m_d=m_d+i-k;
     m_state=m_state-i;
     goto reconsider;
   }
@@ -4636,15 +4649,15 @@ static void next_m_space(void)
   { if (m_state==0) m_spaces=0;
     m_state++; m_spaces++;
     if (m_state==m_length)
-    { @<store |m_dist|@>
-      m_dist=0;
+    { m_put(m_d);
+      m_d=0;
       m_state=0;
     }
     else
       m_state=-m_state;
   }
   else if (m_state>0)
-  { m_dist=m_dist+m_state-m_spaces; m_state=0;}
+  { m_d=m_d+m_state-m_spaces; m_state=0;}
 }
 @
 
@@ -4688,13 +4701,13 @@ static void vlist_mark(pointer this_box)
 }
 @
 
-At the start of the renderer, we set |m_ptr|, |m_dist| to zero and |m_state| to |MARK_BIT|
+At the start of the renderer, we set |m_ptr=m_d=0|and |m_state=MARK_BIT|.
 The renderer will then assume it is at the end of a marked sequence of glyphs,
-read the first entry from |mark_dist| (which might be zero) and starts with
+read the first entry from |m_dist| (which might be zero) and starts with
 the appropriate number of non-marked glyphs.
 
 @<initialize marking@>=
-   m_ptr=0;m_dist=0;m_state=MARK_BIT;
+   m_ptr=0; m_d=0;m_state=MARK_BIT;
 @
 
 Before traversing the page for marking, we also initialize the variables appropriately.
@@ -4703,15 +4716,16 @@ Before traversing the page for marking, we also initialize the variables appropr
 void hmark_page(void)
 { if (streams==NULL || streams[0].p==null) return;
   m_ptr=0;
+  m_focus=0;
   if (m_length>0)
-  { m_dist=0;
+  { m_d=0;
     m_state=0;
     if(type(streams[0].p)==vlist_node)
        vlist_mark(streams[0].p);
     else
        hlist_mark(streams[0].p);
   }
-  mark_dist[m_ptr++]=0xFF; /* infinity */
+  m_dist[m_ptr++]=0xFF; /* $\infty$ */
 }
 
 void hint_set_mark(char *m, int s)
@@ -4721,6 +4735,7 @@ void hint_set_mark(char *m, int s)
   hmark_page();
 }
 @
+
 We need a dummy version for our test programs.
 @<test functions@>=
 void hmark_page(void)
@@ -4731,15 +4746,21 @@ void hmark_page(void)
 Finaly, we need to implement the setting of the |MARK_BIT| in |hlist_render|.
 Because unmarked and marked characters alternate, we set |m_state==MARK_BIT|
 while marked characters are rendered and zero otherwise.
-|m_dist| is the number of characters remaining in the current stretch.
+|m_d| is the number of characters remaining in the current stretch.
 
 @<update |m_state|@>=
-{ while (m_dist==0)
+{ while (m_d==0)
   { m_state^=MARK_BIT;
-    if (m_state&MARK_BIT) m_dist=m_chars;
-    else @<read |m_dist|@>@;
+    if (m_state&MARK_BIT)
+    { if (m_ptr==m_focus) m_state|=FOCUS_BIT; else  m_state&=~FOCUS_BIT;
+      m_d=m_chars;
+    }
+    else
+    { m_state&=~FOCUS_BIT;
+      m_d=m_get();
+    }
   }
-  m_dist--;
+  m_d--;
 }
 @
 
@@ -4757,11 +4778,43 @@ And we need to traverse the list of charactes that generated a ligature.
 }
 @
 
+To search for a string within a page or in the entire document,
+two further functions are necessary to move the ``focus''.
+If there is no focus,|hint_next_mark| will set the focus to the first occurence
+on the current page, if there is already a focus, it will move it forward to the next
+occurence, possibly rendering the next page or some page further along in the document.
+It will return |true| on success and |false| if there is no next occurence.
+The function |hint_prev_mark| will again set the focus to the first occurence
+on the current page if there is no focus yet, but otherwise will move the focus
+backwards to the previous occurence, possibly rendering the previous page.
+It will return |true| on success and |false| on failure.
 
+The variable that captures the current focus is |m_focus|.
+If there is no focus, it is zero. If it is positive,
+|m_focus| points after the distance in the |m_dist| array that preceeds
+the occurence that has the focus.
+
+@<render variables@>=
+static int m_focus=0;
+@
+
+
+@<render functions@>=
+bool hint_prev_mark(void)
+{ m_focus=m_prev(m_focus);
+  return (m_focus!=0);
+}
+
+bool hint_next_mark(void)
+{ m_focus=m_next(m_focus);
+  return (m_focus!=0);
+}
+@
 
 \subsection{Changing the page dimensions}
 A central feature of a \HINT/ viewer is its ability to change the dimensions and the
 resolution of the displayed pages. To do so the function |hint_resize| is called.
+
 @<render functions@>=
 void hint_resize(int px_h, int px_v, double dpi)
 { static int old_px_h=0, old_px_v=0;
@@ -6653,12 +6706,10 @@ extern uint64_t hint_next_page(void);
 extern uint64_t hint_prev_page(void);
 extern void hint_resize(int px_h, int px_v, double dpi);
 extern void hint_clear_fonts(bool rm);
-extern void hint_set_mark(char *m, int s);
 extern void hmark_page(void);
-extern void hint_set_focus(char *f, int s);
-extern uint64_t hint_next_focus(uint64_t pos);
-extern uint64_t hint_prev_focus(uint64_t pos);
-
+extern void hint_set_mark(char *m, int s);
+extern bool hint_prev_mark(void);
+extern bool hint_next_mark(void);
 #endif 
 @
 
@@ -6667,6 +6718,7 @@ extern uint64_t hint_prev_focus(uint64_t pos);
 #include "basetypes.h"
 #include "error.h"
 #include "hformat.h"
+#include <string.h>
 #include <math.h>
 #include "hget.h"
 #include "hrender.h"
