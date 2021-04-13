@@ -1,5 +1,5 @@
-/*341:*/
-#line 6648 "hint.w"
+/*340:*/
+#line 6659 "hint.w"
 
 #ifndef _HINT_H_
 #define _HINT_H_
@@ -105,14 +105,14 @@ extern bool hint_backward(void);
 #line 4243 "hint.w"
 
 extern scaled hvsize,hhsize;
-/*:249*//*340:*/
-#line 6632 "hint.w"
+/*:249*//*339:*/
+#line 6643 "hint.w"
 
 extern void leak_in(pointer p,int s);
 extern void leak_out(pointer p,int s);
-/*:340*/
-#line 6657 "hint.w"
+/*:339*/
+#line 6668 "hint.w"
 
 
 #endif
-/*:341*/
+/*:340*/

@@ -26,8 +26,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 2311 ${}$}
-\def\lastdate{${}$Date: 2021-04-10 15:45:45 +0200 (Sat, 10 Apr 2021) ${}$}
+\def\lastrevision{${}$Revision: 2313 ${}$}
+\def\lastdate{${}$Date: 2021-04-13 19:30:11 +0200 (Tue, 13 Apr 2021) ${}$}
 
 \input titlepage.tex
 
@@ -4507,7 +4507,8 @@ assuming that it is of no use to have hundreds of highlighted words on a single 
 @<render variables@>=
 #define MAX_M_DIST 512
 static uint8_t m_dist[MAX_M_DIST+5]; /* space for a final 5 byte number and $\infty$ */
-static int m_ptr,m_state, m_length, m_spaces, m_chars;
+static int m_ptr, m_max, m_state, m_length, m_spaces, m_chars, m_focus;
+static uint64_t m_page;
 static uint32_t m_d;
 static char *m_str;
 @
@@ -4536,7 +4537,7 @@ We assume that the last entry in the |m_dist| array is always $\infty$.
 static void m_put(uint32_t d) /* write into |m_dist| */
 { if (m_ptr<MAX_M_DIST)
   { if (d==0xFF)
-      m_dist[m_ptr++]=d;
+      m_dist[m_max=m_ptr]=0xFF;
    else if (d<0x7F)
       m_dist[m_ptr++]=0x80+d;
     else
@@ -4575,8 +4576,8 @@ static int m_next(int i) /* advance to next enty */
 }
 
 static int m_prev(int i) /* advance to previous entry */
-{ i--;
-  if (i<=0) return 0;
+{ if (i<=0) return m_max;
+  i--;
   while (i>0 && (0x80&m_dist[i-1])==0) i--;
   return i;
 }
@@ -4716,7 +4717,10 @@ Before traversing the page for marking, we also initialize the variables appropr
 void hmark_page(void)
 { if (streams==NULL || streams[0].p==null) return;
   m_ptr=0;
-  m_focus=0;
+  if (m_page!=page_loc[cur_loc])
+  { m_page=page_loc[cur_loc]; 
+    m_focus=0;
+  }
   if (m_length>0)
   { m_d=0;
     m_state=0;
@@ -4725,7 +4729,8 @@ void hmark_page(void)
     else
        hlist_mark(streams[0].p);
   }
-  m_dist[m_ptr++]=0xFF; /* $\infty$ */
+  m_put(0xFF); /* $\infty$ */
+  if (m_focus>=m_max) m_focus=0;
 }
 
 void hint_set_mark(char *m, int s)
@@ -4794,19 +4799,25 @@ If there is no focus, it is zero. If it is positive,
 |m_focus| points after the distance in the |m_dist| array that preceeds
 the occurence that has the focus.
 
-@<render variables@>=
-static int m_focus=0;
-@
 
 
 @<render functions@>=
 bool hint_prev_mark(void)
 { m_focus=m_prev(m_focus);
+  while (m_focus==0 && m_page>0)
+  { hint_prev_page();
+    m_focus=m_prev(0);
+  }
   return (m_focus!=0);
 }
 
 bool hint_next_mark(void)
 { m_focus=m_next(m_focus);
+  while (m_focus==0)
+  { uint64_t p=m_page;
+    if (p==hint_next_page()) break;
+    m_focus=m_next(0);
+  }  
   return (m_focus!=0);
 }
 @

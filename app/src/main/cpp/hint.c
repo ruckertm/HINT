@@ -1,5 +1,5 @@
-/*342:*/
-#line 6663 "hint.w"
+/*341:*/
+#line 6674 "hint.w"
 
 #include "basetypes.h"
 #include <string.h> 
@@ -227,7 +227,7 @@ hget_list();
   else { image_stretch(p)= image_shrink(p)= 0;image_stretch_order(p)= image_shrink_order(p)= normal;}\
   tail_append(p);}
 /*:192*/
-#line 6675 "hint.w"
+#line 6686 "hint.w"
 
 /*73:*/
 #line 1134 "hint.w"
@@ -418,7 +418,7 @@ if ((I)&b100) hteg_xdimen_node(); else hget_xdimen_ref(HTEG8);
   HTEG16(image_no(p));RNG("Section number",image_no(p),3,max_section_no);  \
   tail_append(p);}
 /*:193*/
-#line 6676 "hint.w"
+#line 6687 "hint.w"
 
 
 /*22:*/
@@ -449,7 +449,7 @@ typedef struct param_def_t{
 struct param_def_t*next;
 param_t p;}param_def_t;
 /*:38*/
-#line 6678 "hint.w"
+#line 6689 "hint.w"
 
 
 
@@ -548,13 +548,13 @@ scaled hvsize,hhsize;
 #line 4268 "hint.w"
 
 int page_v,page_h,offset_v,offset_h;
-/*:250*//*329:*/
-#line 6361 "hint.w"
+/*:250*//*328:*/
+#line 6372 "hint.w"
 
 jmp_buf error_exit;
 char herror_string[MAX_HERROR];
-/*:329*/
-#line 6681 "hint.w"
+/*:328*/
+#line 6692 "hint.w"
 
 /*3:*/
 #line 189 "hint.w"
@@ -607,7 +607,7 @@ static pointer hteg_list(void);
 
 static scaled hget_xdimen_node(void);
 /*:127*/
-#line 6682 "hint.w"
+#line 6693 "hint.w"
 
 /*9:*/
 #line 243 "hint.w"
@@ -2067,8 +2067,8 @@ list_ptr(q)= r;
 shift_amount(p)+= offset_h;
 streams[0].p= q;
 }
-/*:253*//*339:*/
-#line 6591 "hint.w"
+/*:253*//*338:*/
+#line 6602 "hint.w"
 
 static pointer leaks[1<<16]= {0};
 
@@ -2108,8 +2108,8 @@ if(leaks[i]!=0)
 fprintf(stderr,"ERROR:leak final: p=%d, s=%d\n",i,leaks[i]);
 #endif
 }
-/*:339*/
-#line 6683 "hint.w"
+/*:338*/
+#line 6694 "hint.w"
 
 /*1:*/
 #line 110 "hint.w"
@@ -2591,7 +2591,7 @@ QUIT("Text in paragraph not yet implemented");
 return null;
 }
 /*:162*/
-#line 6684 "hint.w"
+#line 6695 "hint.w"
 
 /*76:*/
 #line 1162 "hint.w"
@@ -2937,7 +2937,7 @@ line_break_params= save_lbp;
 }
 
 /*:172*/
-#line 6685 "hint.w"
+#line 6696 "hint.w"
 
 
 /*18:*/
@@ -3641,7 +3641,7 @@ store_map(tail,pos,0);
 return false;
 }
 /*:247*/
-#line 6687 "hint.w"
+#line 6698 "hint.w"
 
 
-/*:342*/
+/*:341*/
