@@ -630,12 +630,6 @@ void flush_node_list(pointer @!p) /*erase list of nodes starting at |p|*/
 @z
 
 @x
-    case whatsit_node: @<Wipe out the whatsit node |p| and |goto done|@>@;
-@y
-    case whatsit_node: goto done;
-@z
-
-@x
     case mark_node: delete_token_ref(mark_ptr(p));@+break;
 @y
 @z
@@ -1427,9 +1421,84 @@ vertical list, together with associated penalties and other insertions@>;
 @z
 
 @x
-  flush_node_list(link(q));replace_count(q)=0;
+@ @<Change discretionary to compulsory...@>=
+{@+t=replace_count(q);
+@<Destroy the |t| nodes following |q|, and make |r| point to the following node@>;
+if (post_break(q)!=null) @<Transplant the post-break list@>;
+if (pre_break(q)!=null) @<Transplant the pre-break list@>;
+link(q)=r;disc_break=true;
+}
 @y
-  flush_node_list(link(q));set_replace_count(q,0);
+@ @<Change discretionary to compulsory...@>=
+{@+pointer pre_q = pre_break(q);
+pointer post_q = post_break(q);
+t=replace_count(q);
+type(q)=whatsit_node;
+subtype(q)=ignore_node;
+ignore_info(q)=1;
+@<Keep the |t| nodes following |q|, and make |r| point to the following node@>;
+s=get_node(ignore_node_size);
+type(s)=whatsit_node;
+subtype(s)=ignore_node;
+ignore_info(s)=0;
+ignore_list(s)=null;
+link(s)=r; r=s;
+if (post_q!=null) @<Transplant the post-break list@>;
+if (pre_q!=null) @<Transplant the pre-break list@>;
+link(q)=r;disc_break=true;
+}
+@z
+
+@x
+@ @<Destroy the |t| nodes following |q|...@>=
+if (t==0) r=link(q);
+else{@+r=q;
+  while (t > 1)
+    {@+r=link(r);decr(t);
+    }
+  s=link(r);
+  r=link(s);link(s)=null;
+  flush_node_list(link(q));replace_count(q)=0;
+  }
+@y
+@ @<Keep the |t| nodes following |q|...@>=
+if (t==0) {ignore_list(q)=null; r=link(q);}
+else{@+r=q;
+  while (t > 1)
+    {@+r=link(r);decr(t);
+    }
+  s=link(r);
+  r=link(s);link(s)=null;
+  ignore_list(q)=link(q);
+  }
+@z
+
+@x
+@<Transplant the post-break list@>=
+{@+s=post_break(q);
+while (link(s)!=null) s=link(s);
+link(s)=r;r=post_break(q);post_break(q)=null;post_disc_break=true;
+}
+@y
+@<Transplant the post-break list@>=
+{@+s=post_q;
+while (link(s)!=null) s=link(s);
+link(s)=r;r=post_q;post_disc_break=true;
+}
+@z
+
+@x
+@<Transplant the pre-break list@>=
+{@+s=pre_break(q);link(q)=s;
+while (link(s)!=null) s=link(s);
+pre_break(q)=null;q=s;
+}
+@y
+@<Transplant the pre-break list@>=
+{@+s=pre_q;link(q)=s;
+while (link(s)!=null) s=link(s);
+q=s;
+}
 @z
 
 @x
@@ -2078,6 +2147,11 @@ if (g2 > 0) { tail_append(new_glue(pointer_def[glue_kind][g2]));store_map(tail, 
 @d xdimen_hfactor(A)   mem[A+2].sc
 @d xdimen_vfactor(A)   mem[A+3].sc
 
+@d ignore_node 23 /* ignored used to attach extra information */
+@d ignore_node_size 2
+@d ignore_info(A)    type(A+1)
+@d ignore_list(A)    link(A+1)
+
 @
 @z
 
@@ -2099,6 +2173,7 @@ if (g2 > 0) { tail_append(new_glue(pointer_def[glue_kind][g2]));store_map(tail, 
   case setstream_node: print("setstream");@+break;
   case stream_node: print("stream");@+break;
   case xdimen_node: print("xdimen");@+break;
+  case ignore_node: print("ignore");@+break;
 @z
 
 @x
@@ -2116,11 +2191,12 @@ case vset_node:
 case align_node: @+break;@#
 case image_node: break; /* see section~\secref{imageext}, page~\pageref{imageext} */
 case setpage_node: break; /* see section~\secref{pageext}, page~\pageref{pageext} */
-case stream_node: break;
-case setstream_node: break;
-case stream_before_node: break;
-case stream_after_node: break;
-case xdimen_node: break;
+case stream_node:
+case setstream_node:
+case stream_before_node:
+case stream_after_node:
+case xdimen_node:
+case ignore_node: @+break;
 @z
 
 @x
@@ -2201,6 +2277,10 @@ case align_node:
   print_char(':');
   node_list_display(align_list(p));
   break;
+case ignore_node:
+  print_esc("ignore ");print_int(ignore_info(p));print_char(':');
+  node_list_display(ignore_list(p));
+  break;
 case stream_node:
   print_esc("stream");print_int(stream_insertion(p));
   print_char('(');print_int(stream_number(p));print_char(')');
@@ -2227,6 +2307,7 @@ case graf_node:
 case disp_node:
 {@+r=get_node(disp_node_size);
   display_left(r)=display_left(p);
+  display_no_bs(r)=display_no_bs(p);
   display_eqno(r)=copy_node_list(display_eqno(p));
   display_formula(r)=copy_node_list(display_formula(p));
   display_params(r)=copy_node_list(display_params(p));
@@ -2281,6 +2362,12 @@ case setstream_node:
     setstream_after(r)=copy_node_list(setstream_after(p));
     words=setstream_node_size-1;
   } @+break;
+case ignore_node:
+    r=get_node(ignore_node_size);
+    ignore_info(r)=ignore_info(p);
+    ignore_list(r)=copy_node_list(ignore_list(p));
+    words=ignore_node_size-1;
+  break;
 case stream_node:
     r=get_node(stream_node_size);
     words=stream_node_size;
@@ -2293,6 +2380,10 @@ default:confusion("ext2");
 @z
 
 @x
+case open_node: free_node(p, open_node_size);@+break;
+case write_node: case special_node: {@+delete_token_ref(write_tokens(p));
+  free_node(p, write_node_size);goto done;
+  }
 case close_node: case language_node: free_node(p, small_node_size);@+break;
 @y
 case close_node: case language_node: free_node(p, small_node_size);@+break;
@@ -2341,6 +2432,9 @@ case setstream_node:
   flush_node_list(setstream_before(p));
   flush_node_list(setstream_after(p));
   free_node(p,setstream_node_size); @+break;
+case ignore_node:
+  flush_node_list(ignore_list(p));
+  free_node(p,ignore_node_size); @+break;
 case stream_node:
   free_node(p,stream_node_size); @+break;
 case xdimen_node:
@@ -2351,6 +2445,7 @@ case xdimen_node:
 @ @<Incorporate a whatsit node into a vbox@>=do_nothing
 @y
 @ @<Incorporate a whatsit node into a vbox@>=
+if (subtype(p)==image_node)
 { @+glue_ord o;
   if (image_width(p)> w) w= image_width(p);
   x= x+d+image_height(p);d=0;
@@ -2363,6 +2458,7 @@ case xdimen_node:
 @ @<Incorporate a whatsit node into an hbox@>=do_nothing
 @y
 @ @<Incorporate a whatsit node into an hbox@>=
+if (subtype(p)==image_node)
 {@+glue_ord o;
   if (image_height(p)> h) h= image_height(p);
   x= x+image_width(p);
@@ -2389,6 +2485,7 @@ case hpack_node:  case vpack_node: case hset_node: case vset_node:
 case image_node:
 case align_node:
 case setpage_node: case setstream_node:
+case ignore_node:
 case xdimen_node: break;
 default:confusion("ext4");
 @z

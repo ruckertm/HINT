@@ -26,8 +26,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 2313 ${}$}
-\def\lastdate{${}$Date: 2021-04-13 19:30:11 +0200 (Tue, 13 Apr 2021) ${}$}
+\def\lastrevision{${}$Revision: 2317 ${}$}
+\def\lastdate{${}$Date: 2021-04-17 14:49:18 +0200 (Sat, 17 Apr 2021) ${}$}
 
 \input titlepage.tex
 
@@ -992,14 +992,13 @@ void hfill_page_template(void)
     hpos=hpos+cur_page->t;
     p=hget_list();
     hpos=spos,hstart=sstart,hend=send;
+    if (streams[0].p!=null) flush_node_list(streams[0].p);
+    streams[0].p=streams[0].t=null;
     streams[0].p=vpackage(p,page_v,exactly,page_max_depth);
   }
   else
   houtput_template0();
   hmark_page();
-#if 0
-streams[0].p=vpackage(streams[0].p,hvsize,exactly,page_max_depth);
-#endif
 }
 @
 
@@ -1696,7 +1695,7 @@ static pointer hget_text_list(uint32_t s)
 static pointer hget_list(void)
 { @+if (!IS_LIST(*hpos)) return null;
   else
-  {@+pointer p;
+  {@+pointer p=null;
     uint32_t s, t;
     @<read the start byte |a|@>@;
     s=hget_list_size(INFO(a)); 
@@ -2321,9 +2320,6 @@ case TAG(baseline_kind,b101): @+{@+ HTEG_BASELINE(b101);@+}@+break;
 case TAG(baseline_kind,b110): @+{@+ HTEG_BASELINE(b110);@+}@+break;
 case TAG(baseline_kind,b111): @+{@+ HTEG_BASELINE(b111);@+}@+break;
 @
-
-
-new_character(f,c)
 
 \subsection{Ligatures}
 We ignore the replacement characters because we do not need them for the display.
@@ -3522,7 +3518,7 @@ static scaled page_top_height;
 pointer p; /*the node being appended*/ 
 pointer @!q,@!r; /*nodes being examined*/ 
 int @!b, @!c; /*badness and cost of current page*/ 
-int @!pi; /*penalty to be added to the badness*/ 
+int @!pi=0; /*penalty to be added to the badness*/ 
 if (link(contrib_head)==null) return false;
 @/do@+{ p=link(contrib_head);@/
 @<Prepend node |p| to the current page; if it is time for a page break, fill the page template and return |true|@>;
@@ -4309,7 +4305,8 @@ to the box constructed by the page builder.
 static void houtput_template0(void)
 { pointer p,q,r;
  if (streams[0].p==null) return;
-  p=vpackage(streams[0].p,hvsize,exactly,page_max_depth);
+  p=streams[0].p; streams[0].p=null;
+  p=vpackage(p,hvsize,exactly,page_max_depth);
   r=new_kern(offset_v);
   link(r)=p;
   q=new_null_box();
@@ -4507,7 +4504,9 @@ assuming that it is of no use to have hundreds of highlighted words on a single 
 @<render variables@>=
 #define MAX_M_DIST 512
 static uint8_t m_dist[MAX_M_DIST+5]; /* space for a final 5 byte number and $\infty$ */
-static int m_ptr, m_max, m_state, m_length, m_spaces, m_chars, m_focus;
+static int m_ptr, m_max, m_state, m_length, m_spaces, 
+  m_chars, m_focus, m_ignore;
+;
 static uint64_t m_page;
 static uint32_t m_d;
 static char *m_str;
@@ -4520,7 +4519,7 @@ the remaining 7 bits.
 Else if the most significant bit is not set, the remaining 7 bits
 are added to the left of the number contained in the following bytes.
 
-Using this convention, $\infty$ and all distances $0\le d < |0x7F$
+Using this convention, $\infty$ and all distances $0\le d < |0x7F|$
 can be stored in a single byte. The first distance that needs two byte
 is |0x7F| it is stored as |0x00 0x7F| because storing it as |0x80+0x7F| would mean
 $\infty$.
@@ -4594,7 +4593,8 @@ already matched. We have to do some more work to match spaces.
 
 @<render functions@>=
 static void next_m_char(uint32_t c)
-{ if (m_state<0) m_state=-m_state;
+{ if (m_ignore) return;
+  if (m_state<0) m_state=-m_state;
 reconsider:
   if (m_state==0 && c!=m_str[0])
     m_d++;
@@ -4644,7 +4644,8 @@ of spaces that are included in the |m_state|.
 
 @<render functions@>=
 static void next_m_space(void)
-{ if (m_state==0 && m_str[0]==' ')
+{ if (m_ignore) return;
+  if (m_state==0 && m_str[0]==' ')
   { m_state=-1; m_spaces=1; }
   else if (m_state>=0 && m_str[m_state]==' ')
   { if (m_state==0) m_spaces=0;
@@ -4665,15 +4666,13 @@ static void next_m_space(void)
 After these preparations, we are ready to traverse the current page.
 
 @<render functions@>=
-static void vlist_mark(pointer this_box);
-static void hlist_mark(pointer this_box)
-{ pointer p;
-  p=list_ptr(this_box);
-  while(p!=null)
+static void vlist_mark(pointer p);
+static void hlist_mark(pointer p)
+{ while(p!=null)
   { if(is_char_node(p)) next_m_char(character(p));
     else switch (type(p))
-    { case hlist_node: if(list_ptr(p)!=null) hlist_mark(p); break;
-      case vlist_node:  if(list_ptr(p)!=null) vlist_mark(p); break;
+    { case hlist_node: if(list_ptr(p)!=null) hlist_mark(list_ptr(p)); break;
+      case vlist_node:  if(list_ptr(p)!=null) vlist_mark(list_ptr(p)); break;
       case ligature_node:
       { pointer q=lig_ptr(p);
         while (q!=null)
@@ -4682,19 +4681,27 @@ static void hlist_mark(pointer this_box)
       }
       break;
       case glue_node: next_m_space(); break;
+      case whatsit_node:
+        if (subtype(p)==ignore_node)
+        { if (ignore_info(p)==1)
+          { hlist_mark(ignore_list(p));
+            m_ignore=1;
+          }
+          else
+            m_ignore=0;          
+        }
+        break;
       default: break;
     }
     p= link(p);
   }
 }
 
-static void vlist_mark(pointer this_box)
-{ pointer p;
-  p=list_ptr(this_box);
-  while(p!=null)
+static void vlist_mark(pointer p)
+{ while(p!=null)
   { switch (type(p))
-    { case hlist_node: if(list_ptr(p)!=null) hlist_mark(p); next_m_space(); break;
-      case vlist_node:  if(list_ptr(p)!=null) vlist_mark(p); break;
+    { case hlist_node: if(list_ptr(p)!=null) hlist_mark(list_ptr(p)); next_m_space(); break;
+      case vlist_node:  if(list_ptr(p)!=null) vlist_mark(list_ptr(p)); break;
       default: break;
     }
     p= link(p);
@@ -4708,7 +4715,7 @@ read the first entry from |m_dist| (which might be zero) and starts with
 the appropriate number of non-marked glyphs.
 
 @<initialize marking@>=
-   m_ptr=0; m_d=0;m_state=MARK_BIT;
+   m_ptr=0; m_d=0;m_state=MARK_BIT;m_ignore=0; cur_s=0;
 @
 
 Before traversing the page for marking, we also initialize the variables appropriately.
@@ -4716,7 +4723,7 @@ Before traversing the page for marking, we also initialize the variables appropr
 @<render functions@>=
 void hmark_page(void)
 { if (streams==NULL || streams[0].p==null) return;
-  m_ptr=0;
+  m_ptr=0; m_ignore=0;
   if (m_page!=page_loc[cur_loc])
   { m_page=page_loc[cur_loc]; 
     m_focus=0;
@@ -4725,9 +4732,9 @@ void hmark_page(void)
   { m_d=0;
     m_state=0;
     if(type(streams[0].p)==vlist_node)
-       vlist_mark(streams[0].p);
+       vlist_mark(list_ptr(streams[0].p));
     else
-       hlist_mark(streams[0].p);
+       hlist_mark(list_ptr(streams[0].p));
   }
   m_put(0xFF); /* $\infty$ */
   if (m_focus>=m_max) m_focus=0;
@@ -4770,8 +4777,10 @@ while marked characters are rendered and zero otherwise.
 @
 
 
-And we need to traverse the list of charactes that generated a ligature.
+We need to traverse the list of characters that generated a ligature.
+If any of these characters is marked, the whole ligature is marked.
 @<account for the characters that generated the ligature@>=
+if (!m_ignore)
 { pointer q;
   cur_s=0;
   q=lig_ptr(p);
@@ -4782,6 +4791,62 @@ And we need to traverse the list of charactes that generated a ligature.
   }
 }
 @
+Ignore nodes are generated when words are hyphenated.
+During hyphenation, the content contained in the |ignore_list|
+was replaced by the |pre_break| list, a line ending, and the
+|post_break| list. In many cases, the |ignore_list| and
+the |post_break| list are empty
+and the |pre_break| list contains just a hyphen character.
+In difficult cases, like ``\hbox{dif- ficult}'',
+the ligature ``ffi'' is in the |ignore_list|, the |pre_break|
+list contains ``f-'' and the |post_break| list contains
+the ligature ``fi''. Because in the latter case, there is no
+simple relation between the |ignore_list< and its replacement,
+we will mark the whole replacement if any part of the ignore
+list is marked.
+Because the |ignore_list| may contaon boxes, traversing it
+is inherently recursive and we start with a function that
+traverses a list of nodes accounting for |m_state| changes
+but without rendering them. We assume that the |ignore_list|
+consist (recursively!) entirely of character, kern, box, rule, and ligature nodes.
+
+@<render functions@>=
+void m_ignore_list(pointer p)
+{ while(p!=null)
+  { if(is_char_node(p))
+    { @<update |m_state|@>@;
+      cur_s|=m_state;
+    }
+    else
+    { switch(type(p)) 
+      { case hlist_node:
+        case vlist_node: m_ignore_list(list_ptr(p)); break;
+        case ligature_node:
+        { pointer q=lig_ptr(p);
+          while (q!=null)
+          { @<update |m_state|@>@;
+            cur_s|=m_state;
+            q=link(q);
+          }
+        }
+        break;
+      }
+    }
+    p=link(p);
+  }
+}
+@
+
+@<handle an ignore node@>=
+if (ignore_info(p)==1)
+{ cur_s=0;
+  m_ignore_list(ignore_list(p));
+  m_ignore=1;
+}
+else
+  m_ignore=0;
+@
+
 
 To search for a string within a page or in the entire document,
 two further functions are necessary to move the ``focus''.
@@ -5303,13 +5368,15 @@ and |cur_v| contain the current horizontal and vertical position;
 width of a rule that should be output next; |cur_f| and |cur_fp|
 contain the current font number and current font pointer.
 
-
-@<render functions@>=
+@<render variables@>=
 static scaled cur_h, cur_v;
 static scaled rule_ht, rule_dp, rule_wd; 
 static int cur_f; 
 static struct font_s *cur_fp;
+static uint8_t cur_s=0;
+@
 
+@<render functions@>=
 static void vlist_render(pointer this_box);
 
 static void hlist_render(pointer this_box)
@@ -5326,7 +5393,7 @@ scaled edge;
 double glue_temp;
 double cur_glue;
 scaled cur_g;
-uint8_t cur_s=0;
+
 uint8_t f;
 uint32_t c;
 
@@ -5353,11 +5420,13 @@ if(link(p)==0xffff)
 #endif
   if(is_char_node(p))
   { do
-    { @<update |m_state|@>@;
-      cur_s=m_state;
+    { if (!m_ignore)
+      { @<update |m_state|@>@;
+        cur_s=m_state;
+      }
       f= font(p);
       c= character(p);
-render_char:        
+render_c:        
       if(f!=cur_f)
       {
 #ifdef DEBUG
@@ -5398,34 +5467,36 @@ render_char:
        }
        break;
      case rule_node:
-	   rule_ht= height(p);rule_dp= depth(p);rule_wd= width(p);
+       rule_ht= height(p);rule_dp= depth(p);rule_wd= width(p);
        goto fin_rule;
      case whatsit_node:
-		if (subtype(p)==image_node)
-		{ scaled h,w;
-		  w=image_width(p);
-		  h=image_height(p);
-		  if(g_sign!=normal)
-	      { if(g_sign==stretching)
-	        { if(image_stretch_order(p)==g_order)
-	          { vet_glue((double)(glue_set(this_box))*image_stretch(p));
-       		    w=w+round(glue_temp);
-	          }
-	        }
-	        else if(image_shrink_order(p)==g_order)
-	        { vet_glue((double)(glue_set(this_box))*image_shrink(p));
-	          w=w-round(glue_temp);
-	        }
-	      }
-		  if (w!=image_width(p))
-		  { double f;
-		    f=(double)w/(double)image_width(p);
-		    h=round((double)h*f);
-		  }
-  		  render_image(cur_h, cur_v, w, h,image_no(p));
-          cur_h= cur_h+w; 
-	    }
-	    break;
+       if (subtype(p)==ignore_node)
+       { @<handle an ignore node@>@; }
+       else if (subtype(p)==image_node)
+       { scaled h,w;
+         w=image_width(p);
+         h=image_height(p);
+         if(g_sign!=normal)
+         { if(g_sign==stretching)
+           { if(image_stretch_order(p)==g_order)
+             { vet_glue((double)(glue_set(this_box))*image_stretch(p));
+               w=w+round(glue_temp);
+	     }
+	   }
+           else if(image_shrink_order(p)==g_order)
+           { vet_glue((double)(glue_set(this_box))*image_shrink(p));
+             w=w-round(glue_temp);
+           }
+         }
+         if (w!=image_width(p))
+         { double f;
+           f=(double)w/(double)image_width(p);
+           h=round((double)h*f);
+         }
+         render_image(cur_h, cur_v, w, h,image_no(p));
+         cur_h= cur_h+w; 
+       }
+       break;
      case glue_node:
      { pointer g;
         g=glue_ptr(p);rule_wd= width(g)-cur_g;
@@ -5492,7 +5563,7 @@ render_char:
       f= font(lig_char(p));
       c= character(lig_char(p));
       @<account for the characters that generated the ligature@>@;
-      goto render_char;
+      goto render_c;
      default:;
    }
    goto next_p;

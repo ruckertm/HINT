@@ -1,15 +1,15 @@
 	/*433:*/
-	#line 8747 "format.w"
+	#line 8749 "format.w"
 
 
 	/*35:*/
-	#line 1016 "format.w"
+	#line 1018 "format.w"
 
 #define HGET_STRING(S) S= (char*)hpos;\
  while(hpos<hend && *hpos!=0) { RNG("String character",*hpos,0x20,0x7E); hpos++;}\
  hpos++;
 	/*:35*/	/*270:*/
-	#line 5663 "format.w"
+	#line 5665 "format.w"
 
 #define HGET_ERROR QUIT("HGET overrun in section %d at " SIZE_F "\n",section_no,hpos-hstart)
 #define HEND   ((hpos<=hend)?0:(HGET_ERROR,0))
@@ -20,7 +20,7 @@
 #define HGET32(X) ((X)= (hpos[0]<<24)+(hpos[1]<<16)+(hpos[2]<<8)+hpos[3],hpos+= 4,HEND)
 #define HGETTAG(A) A= HGET8,DBGTAG(A,hpos-1)
 	/*:270*/	/*294:*/
-	#line 6240 "format.w"
+	#line 6243 "format.w"
 
 #define HGET_SIZE(I) \
   if ((I)&b100) { \
@@ -44,10 +44,10 @@
   hset_entry(&(E),i,s,xs,file_name); \
 }
 	/*:294*/
-	#line 8749 "format.w"
+	#line 8751 "format.w"
 
 	/*284:*/
-	#line 6029 "format.w"
+	#line 6031 "format.w"
 
 typedef struct{
 uint64_t pos;
@@ -58,7 +58,7 @@ uint8_t*buffer;
 uint32_t bsize;
 }entry_t;
 	/*:284*/
-	#line 8750 "format.w"
+	#line 8752 "format.w"
 
 extern entry_t*dir;
 extern uint16_t section_no,max_section_no;

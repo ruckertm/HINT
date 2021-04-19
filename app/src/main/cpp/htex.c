@@ -50,26 +50,26 @@ static pointer rover;
 #line 2662 "btex.w"
 
 /*:128*//*657:*/
-#line 1056 "htex.ch"
+#line 1050 "htex.ch"
 
 static scaled total_stretch0[filll-normal+1],*const total_stretch= total_stretch0-normal,total_shrink0[filll-normal+1],*const total_shrink= total_shrink0-normal;
 
 #line 12886 "btex.w"
 
 /*:657*//*659:*/
-#line 1064 "htex.ch"
+#line 1058 "htex.ch"
 
 pointer adjust_tail= null;
 #line 12894 "btex.w"
 
 /*:659*//*828:*/
-#line 1178 "htex.ch"
+#line 1172 "htex.ch"
 
 pointer just_box;
 #line 16008 "btex.w"
 
 /*:828*//*836:*/
-#line 1228 "htex.ch"
+#line 1222 "htex.ch"
 
 static pointer passive;
 #line 16151 "btex.w"
@@ -77,7 +77,7 @@ static pointer printed_node;
 static halfword pass_number;
 
 /*:836*//*839:*/
-#line 1235 "htex.ch"
+#line 1229 "htex.ch"
 
 static scaled active_width0[6],*const active_width= active_width0-1;
 #line 16190 "btex.w"
@@ -87,13 +87,13 @@ static scaled background0[6],*const background= background0-1;
 static scaled break_width0[6],*const break_width= break_width0-1;
 
 /*:839*//*842:*/
-#line 1242 "htex.ch"
+#line 1236 "htex.ch"
 
 static bool no_shrink_error_yet;
 #line 16247 "btex.w"
 
 /*:842*//*846:*/
-#line 1265 "htex.ch"
+#line 1259 "htex.ch"
 
 static pointer cur_p;
 #line 16299 "btex.w"
@@ -102,7 +102,7 @@ static bool final_pass;
 static int threshold;
 
 /*:846*//*852:*/
-#line 1273 "htex.ch"
+#line 1267 "htex.ch"
 
 static int minimal_demerits0[tight_fit-very_loose_fit+1],*const minimal_demerits= minimal_demerits0-very_loose_fit;
 
@@ -115,13 +115,13 @@ static halfword best_pl_line0[tight_fit-very_loose_fit+1],*const best_pl_line= b
 
 
 /*:852*//*859:*/
-#line 1281 "htex.ch"
+#line 1275 "htex.ch"
 
 static scaled disc_width;
 #line 16518 "btex.w"
 
 /*:859*//*868:*/
-#line 1288 "htex.ch"
+#line 1282 "htex.ch"
 
 static halfword easy_line;
 #line 16658 "btex.w"
@@ -134,7 +134,7 @@ static scaled first_indent;
 static scaled second_indent;
 
 /*:868*//*894:*/
-#line 1392 "htex.ch"
+#line 1386 "htex.ch"
 
 static pointer best_bet;
 #line 17168 "btex.w"
@@ -146,14 +146,14 @@ static int line_diff;
 
 
 /*:894*//*995:*/
-#line 1512 "htex.ch"
+#line 1581 "htex.ch"
 
 scaled best_height_plus_depth;
 
 #line 18914 "btex.w"
 
 /*:995*//*1004:*/
-#line 1542 "htex.ch"
+#line 1611 "htex.ch"
 
 pointer page_tail;
 #line 19120 "btex.w"
@@ -164,7 +164,7 @@ int least_page_cost;
 scaled best_size;
 
 /*:1004*//*1006:*/
-#line 1553 "htex.ch"
+#line 1622 "htex.ch"
 
 scaled page_so_far[8];
 #line 19205 "btex.w"
@@ -615,9 +615,75 @@ case ins_node:{flush_node_list(ins_ptr(p));
 delete_glue_ref(split_top_ptr(p));
 free_node(p,ins_node_size);goto done;
 }
-#line 635 "htex.ch"
-case whatsit_node:goto done;
-#line 3921 "btex.w"
+case whatsit_node:/*1387:*/
+#line 24730 "btex.w"
+
+{switch(subtype(p)){
+#line 2389 "htex.ch"
+case close_node:case language_node:free_node(p,small_node_size);break;
+case par_node:
+if(par_type(p)==glue_type)fast_delete_glue_ref(par_value(p).i);
+free_node(p,par_node_size);break;
+case graf_node:
+delete_xdimen_ref(graf_extent(p));
+flush_node_list(graf_params(p));
+flush_node_list(graf_list(p));
+free_node(p,graf_node_size);break;
+case disp_node:
+flush_node_list(display_eqno(p));
+flush_node_list(display_formula(p));
+flush_node_list(display_params(p));
+free_node(p,disp_node_size);break;
+case baseline_node:
+free_node(p,baseline_node_size);break;
+case hpack_node:case vpack_node:
+delete_xdimen_ref(pack_extent(p));
+flush_node_list(list_ptr(p));
+free_node(p,pack_node_size);break;
+case hset_node:case vset_node:
+delete_xdimen_ref(set_extent(p));
+flush_node_list(list_ptr(p));
+free_node(p,set_node_size);break;
+case image_node:
+free_node(p,image_node_size);break;
+case align_node:
+delete_xdimen_ref(align_extent(p));
+flush_node_list(align_preamble(p));
+flush_node_list(align_list(p));
+free_node(p,align_node_size);break;
+case setpage_node:
+delete_glue_ref(setpage_topskip(p));
+delete_xdimen_ref(setpage_height(p));
+delete_xdimen_ref(setpage_width(p));
+flush_node_list(setpage_list(p));
+flush_node_list(setpage_streams(p));
+free_node(p,setpage_node_size);break;
+case setstream_node:
+delete_xdimen_ref(setstream_max(p));
+delete_xdimen_ref(setstream_width(p));
+delete_glue_ref(setstream_topskip(p));
+delete_glue_ref(setstream_height(p));
+flush_node_list(setstream_before(p));
+flush_node_list(setstream_after(p));
+free_node(p,setstream_node_size);break;
+case ignore_node:
+flush_node_list(ignore_list(p));
+free_node(p,ignore_node_size);break;
+case stream_node:
+free_node(p,stream_node_size);break;
+case xdimen_node:
+free_node(p,xdimen_node_size);
+#line 24737 "btex.w"
+default:confusion("ext3");
+
+}
+goto done;
+}
+
+#line 2447 "htex.ch"
+/*:1387*/
+#line 3920 "btex.w"
+
 case glue_node:{fast_delete_glue_ref(glue_ptr(p));
 if(leader_ptr(p)!=null)flush_node_list(leader_ptr(p));
 }break;
@@ -628,7 +694,7 @@ case disc_node:{flush_node_list(pre_break(p));
 flush_node_list(post_break(p));
 }break;
 case adjust_node:flush_node_list(adjust_ptr(p));break;
-#line 647 "htex.ch"
+#line 641 "htex.ch"
 default:QUIT("Confusion while flushing node list");
 #line 3933 "btex.w"
 
@@ -640,7 +706,7 @@ p= q;
 }
 
 /*:210*//*212:*/
-#line 661 "htex.ch"
+#line 655 "htex.ch"
 
 pointer copy_node_list(pointer p)
 
@@ -684,7 +750,7 @@ add_token_ref(write_tokens(p));words= write_node_size;
 case close_node:case language_node:{r= get_node(small_node_size);
 words= small_node_size;
 }break;
-#line 2215 "htex.ch"
+#line 2295 "htex.ch"
 case par_node:
 {r= get_node(par_node_size);
 if(par_type(p)==glue_type)add_glue_ref(par_value(p).i);
@@ -700,6 +766,7 @@ words= graf_node_size-1;
 case disp_node:
 {r= get_node(disp_node_size);
 display_left(r)= display_left(p);
+display_no_bs(r)= display_no_bs(p);
 display_eqno(r)= copy_node_list(display_eqno(p));
 display_formula(r)= copy_node_list(display_formula(p));
 display_params(r)= copy_node_list(display_params(p));
@@ -754,6 +821,12 @@ setstream_before(r)= copy_node_list(setstream_before(p));
 setstream_after(r)= copy_node_list(setstream_after(p));
 words= setstream_node_size-1;
 }break;
+case ignore_node:
+r= get_node(ignore_node_size);
+ignore_info(r)= ignore_info(p);
+ignore_list(r)= copy_node_list(ignore_list(p));
+words= ignore_node_size-1;
+break;
 case stream_node:
 r= get_node(stream_node_size);
 words= stream_node_size;
@@ -811,11 +884,11 @@ return q;
 }
 
 /*:212*//*223:*/
-#line 713 "htex.ch"
+#line 707 "htex.ch"
 
 
 /*221:*/
-#line 699 "htex.ch"
+#line 693 "htex.ch"
 
 static list_state_record nest[nest_size+1];
 int nest_ptr;
@@ -824,7 +897,7 @@ list_state_record cur_list;
 #line 4328 "btex.w"
 
 /*:221*/
-#line 715 "htex.ch"
+#line 709 "htex.ch"
 
 
 void list_init(void)
@@ -835,7 +908,7 @@ mode= vmode;head= contrib_head;tail= contrib_head;
 prev_height= prev_depth= ignore_depth;
 }
 /*:223*//*225:*/
-#line 732 "htex.ch"
+#line 726 "htex.ch"
 
 void push_nest(void)
 #line 4354 "btex.w"
@@ -845,14 +918,14 @@ if(nest_ptr==nest_size)overflow("semantic nest size",nest_size);
 
 }
 nest[nest_ptr]= cur_list;
-#line 739 "htex.ch"
+#line 733 "htex.ch"
 incr(nest_ptr);head= get_avail();tail= head;prev_graf= 0;
 cur_list.bs_pos= NULL;cur_bs= baseline_skip;cur_ls= line_skip;cur_lsl= line_skip_limit;
 #line 4361 "btex.w"
 }
 
 /*:225*//*226:*/
-#line 746 "htex.ch"
+#line 740 "htex.ch"
 
 void pop_nest(void)
 #line 4369 "btex.w"
@@ -860,7 +933,7 @@ void pop_nest(void)
 }
 
 /*:226*//*559:*/
-#line 923 "htex.ch"
+#line 917 "htex.ch"
 
 memory_word font_info[font_mem_size+1];
 
@@ -876,7 +949,7 @@ scaled font_size0[font_max-font_base+1],*const font_size= font_size0-font_base;
 static scaled font_dsize0[font_max-font_base+1],*const font_dsize= font_dsize0-font_base;
 static font_index font_params0[font_max-font_base+1],*const font_params= font_params0-font_base;
 
-#line 937 "htex.ch"
+#line 931 "htex.ch"
 char*font_name0[font_max-font_base+1],**const font_name= font_name0-font_base;
 #line 10732 "btex.w"
 static eight_bits font_bc0[font_max-font_base+1],*const font_bc= font_bc0-font_base;
@@ -900,7 +973,7 @@ static int16_t font_false_bchar0[font_max-font_base+1],*const font_false_bchar= 
 
 
 /*:559*//*560:*/
-#line 944 "htex.ch"
+#line 938 "htex.ch"
 
 int char_base0[font_max-font_base+1],*const char_base= char_base0-font_base;
 #line 10763 "btex.w"
@@ -923,7 +996,7 @@ static int param_base0[font_max-font_base+1],*const param_base= param_base0-font
 
 
 /*:560*//*570:*/
-#line 952 "htex.ch"
+#line 946 "htex.ch"
 
 void read_font_info(int f,char*nom,scaled s)
 #line 10909 "btex.w"
@@ -945,7 +1018,7 @@ int alpha;int beta;
 #line 10960 "btex.w"
 
 /*573:*/
-#line 984 "htex.ch"
+#line 978 "htex.ch"
 
 file_opened= true
 #line 10978 "btex.w"
@@ -985,7 +1058,7 @@ if((nw==0)||(nh==0)||(nd==0)||(ni==0))abort;
 lf= lf-6-lh;
 if(np<7)lf= lf+7-np;
 if((font_ptr==font_max)||(fmem_ptr+lf> font_mem_size))
-#line 1000 "htex.ch"
+#line 994 "htex.ch"
 QUIT("Not enough room left for font %s\n",nom);
 #line 11033 "btex.w"
 char_base[f]= fmem_ptr-bc;
@@ -1132,7 +1205,7 @@ fget;font_info[param_base[f]].sc=
 (sw*020)+(fbyte/020);
 }
 else store_scaled(font_info[param_base[f]+k-1].sc);
-#line 1006 "htex.ch"
+#line 1000 "htex.ch"
 if(hpos>=hend)abort;
 #line 11194 "btex.w"
 for(k= np+1;k<=7;k++)font_info[param_base[f]+k-1].sc= 0;
@@ -1145,7 +1218,7 @@ for(k= np+1;k<=7;k++)font_info[param_base[f]+k-1].sc= 0;
 #line 11204 "btex.w"
 
 if(np>=7)font_params[f]= np;else font_params[f]= 7;
-#line 1012 "htex.ch"
+#line 1006 "htex.ch"
 hyphen_char[f]= skew_char[f]= -1;
 #line 11207 "btex.w"
 if(bch_label<nl)bchar_label[f]= bch_label+lig_kern_base[f];
@@ -1162,7 +1235,7 @@ font_bc[f]= bc;font_ec[f]= ec;font_glue[f]= null;
 adjust(char_base);adjust(width_base);adjust(lig_kern_base);
 adjust(kern_base);adjust(exten_base);
 decr(param_base[f]);
-#line 1023 "htex.ch"
+#line 1017 "htex.ch"
 fmem_ptr= fmem_ptr+lf;goto done
 #line 11222 "btex.w"
 
@@ -1170,18 +1243,18 @@ fmem_ptr= fmem_ptr+lf;goto done
 #line 10970 "btex.w"
 
 
-#line 984 "htex.ch"
+#line 978 "htex.ch"
 /*:572*/
 #line 10926 "btex.w"
 ;
-#line 972 "htex.ch"
+#line 966 "htex.ch"
 bad_tfm:QUIT("Bad tfm file: %s\n",nom);
 done:;
 #line 10930 "btex.w"
 }
 
 /*:570*//*592:*/
-#line 1039 "htex.ch"
+#line 1033 "htex.ch"
 
 pointer new_character(internal_font_number f,eight_bits c)
 {pointer p;
@@ -1195,7 +1268,7 @@ return p;
 #line 11319 "btex.w"
 
 /*:592*//*661:*/
-#line 1071 "htex.ch"
+#line 1065 "htex.ch"
 
 pointer hpack(pointer p,scaled w,small_number m)
 #line 12900 "btex.w"
@@ -1209,7 +1282,7 @@ glue_ord o;
 internal_font_number f;
 four_quarters i;
 eight_bits hd;
-#line 1078 "htex.ch"
+#line 1072 "htex.ch"
 r= get_node(box_node_size);type(r)= hlist_node;
 #line 12911 "btex.w"
 subtype(r)= min_quarterword;shift_amount(r)= 0;
@@ -1278,8 +1351,9 @@ link(q)= p;p= q;
 #line 12943 "btex.w"
 break;
 case whatsit_node:/*1389:*/
-#line 2365 "htex.ch"
+#line 2460 "htex.ch"
 
+if(subtype(p)==image_node)
 {glue_ord o;
 if(image_height(p)> h)h= image_height(p);
 x= x+image_width(p);
@@ -1388,7 +1462,7 @@ else{glue_sign(r)= normal;
 set_glue_ratio_zero(glue_set(r));
 }
 if((total_shrink[o]<-x)&&(o==normal)&&(list_ptr(r)!=null))
-#line 1103 "htex.ch"
+#line 1097 "htex.ch"
 set_glue_ratio_one(glue_set(r));
 #line 13104 "btex.w"
 goto end;
@@ -1406,7 +1480,7 @@ end:return r;
 }
 
 /*:661*//*681:*/
-#line 1113 "htex.ch"
+#line 1107 "htex.ch"
 
 pointer vpackage(pointer p,scaled h,small_number m,scaled l)
 #line 13146 "btex.w"
@@ -1416,7 +1490,7 @@ scaled w,d,x;
 scaled s;
 pointer g;
 glue_ord o;
-#line 1120 "htex.ch"
+#line 1114 "htex.ch"
 r= get_node(box_node_size);type(r)= vlist_node;
 #line 13153 "btex.w"
 subtype(r)= min_quarterword;shift_amount(r)= 0;
@@ -1452,8 +1526,9 @@ if(width(p)+s> w)w= width(p)+s;
 #line 13175 "btex.w"
 break;
 case whatsit_node:/*1388:*/
-#line 2353 "htex.ch"
+#line 2447 "htex.ch"
 
+if(subtype(p)==image_node)
 {glue_ord o;
 if(image_width(p)> w)w= image_width(p);
 x= x+d+image_height(p);d= 0;
@@ -1462,7 +1537,7 @@ o= image_shrink_order(p);total_shrink[o]= total_shrink[o]+image_shrink(p);
 }
 #line 24744 "btex.w"
 
-#line 2365 "htex.ch"
+#line 2460 "htex.ch"
 /*:1388*/
 #line 13176 "btex.w"
 ;break;
@@ -1555,7 +1630,7 @@ else{glue_sign(r)= normal;
 set_glue_ratio_zero(glue_set(r));
 }
 if((total_shrink[o]<-x)&&(o==normal)&&(list_ptr(r)!=null))
-#line 1145 "htex.ch"
+#line 1139 "htex.ch"
 set_glue_ratio_one(glue_set(r));
 #line 13272 "btex.w"
 goto end;
@@ -1573,11 +1648,11 @@ end:return r;
 }
 
 /*:681*//*829:*/
-#line 1187 "htex.ch"
+#line 1181 "htex.ch"
 
 
 /*692:*/
-#line 1151 "htex.ch"
+#line 1145 "htex.ch"
 
 void append_to_vlist(pointer b,uint32_t offset)
 #line 13296 "btex.w"
@@ -1585,7 +1660,7 @@ void append_to_vlist(pointer b,uint32_t offset)
 pointer p;
 if(prev_depth> ignore_depth)
 {d= width(baseline_skip)-prev_depth-height(b);
-#line 1161 "htex.ch"
+#line 1155 "htex.ch"
 if(d<line_skip_limit)p= new_glue(line_skip);
 else{temp_ptr= new_spec(baseline_skip);
 p= new_glue(temp_ptr);glue_ref_count(temp_ptr)= null;
@@ -1603,7 +1678,7 @@ link(tail)= b;tail= b;prev_depth= depth(b);
 
 static pointer finite_shrink(pointer p)
 {pointer q;
-#line 1259 "htex.ch"
+#line 1253 "htex.ch"
 QUIT("Infinite glue shrinkage found in a paragraph");
 #line 16262 "btex.w"
 q= new_spec(p);shrink_order(q)= normal;
@@ -2082,7 +2157,7 @@ static void post_line_break(int final_widow_penalty)
 {
 pointer q,r,s;
 bool disc_break;
-#line 1399 "htex.ch"
+#line 1393 "htex.ch"
 bool post_disc_break;
 bool first_line= true;
 uint32_t line_offset,next_offset;
@@ -2103,7 +2178,7 @@ do{r= q;q= prev_break(q);next_break(r)= cur_p;cur_p= r;
 #line 17248 "btex.w"
 ;
 cur_line= prev_graf+1;
-#line 1408 "htex.ch"
+#line 1402 "htex.ch"
 next_offset= hposition(link(temp_head));
 if(next_offset> node_pos)
 next_offset= next_offset-node_pos;
@@ -2137,52 +2212,66 @@ goto done;
 }
 else{if(type(q)==disc_node)
 /*904:*/
-#line 17336 "btex.w"
+#line 1432 "htex.ch"
 
-{t= replace_count(q);
+{pointer pre_q= pre_break(q);
+pointer post_q= post_break(q);
+t= replace_count(q);
+type(q)= whatsit_node;
+subtype(q)= ignore_node;
+ignore_info(q)= 1;
 /*905:*/
-#line 17344 "btex.w"
+#line 1464 "htex.ch"
 
-if(t==0)r= link(q);
+if(t==0){ignore_list(q)= null;r= link(q);}
 else{r= q;
 while(t> 1)
 {r= link(r);decr(t);
 }
 s= link(r);
 r= link(s);link(s)= null;
-#line 1432 "htex.ch"
-flush_node_list(link(q));set_replace_count(q,0);
-#line 17353 "btex.w"
+ignore_list(q)= link(q);
 }
+#line 17354 "btex.w"
 
 /*:905*/
-#line 17338 "btex.w"
+#line 1439 "htex.ch"
 ;
-if(post_break(q)!=null)/*906:*/
-#line 17358 "btex.w"
+s= get_node(ignore_node_size);
+type(s)= whatsit_node;
+subtype(s)= ignore_node;
+ignore_info(s)= 0;
+ignore_list(s)= null;
+link(s)= r;r= s;
+if(post_q!=null)/*906:*/
+#line 1483 "htex.ch"
 
-{s= post_break(q);
+{s= post_q;
 while(link(s)!=null)s= link(s);
-link(s)= r;r= post_break(q);post_break(q)= null;post_disc_break= true;
+link(s)= r;r= post_q;post_disc_break= true;
 }
+#line 17363 "btex.w"
 
 /*:906*/
-#line 17339 "btex.w"
+#line 1446 "htex.ch"
 ;
-if(pre_break(q)!=null)/*907:*/
-#line 17367 "btex.w"
+if(pre_q!=null)/*907:*/
+#line 1497 "htex.ch"
 
-{s= pre_break(q);link(q)= s;
+{s= pre_q;link(q)= s;
 while(link(s)!=null)s= link(s);
-pre_break(q)= null;q= s;
+q= s;
 }
+#line 17372 "btex.w"
 
 /*:907*/
-#line 17340 "btex.w"
+#line 1447 "htex.ch"
 ;
 link(q)= r;disc_break= true;
 }
+#line 17343 "btex.w"
 
+#line 1464 "htex.ch"
 /*:904*/
 #line 17327 "btex.w"
 
@@ -2194,7 +2283,7 @@ while(link(q)!=null)q= link(q);
 /*908:*/
 #line 17373 "btex.w"
 
-#line 1438 "htex.ch"
+#line 1507 "htex.ch"
 r= new_glue(right_skip);link(r)= link(q);link(q)= r;q= r
 #line 17375 "btex.w"
 
@@ -2203,6 +2292,7 @@ r= new_glue(right_skip);link(r)= link(q);link(q)= r;q= r
 ;
 done:
 
+#line 1432 "htex.ch"
 /*:903*/
 #line 17307 "btex.w"
 ;
@@ -2211,7 +2301,7 @@ done:
 
 r= link(q);link(q)= null;q= link(temp_head);link(temp_head)= r;
 if(left_skip!=zero_glue)
-#line 1444 "htex.ch"
+#line 1513 "htex.ch"
 {r= new_glue(left_skip);
 #line 17384 "btex.w"
 link(r)= q;q= r;
@@ -2241,7 +2331,7 @@ shift_amount(just_box)= cur_indent
 /*910:*/
 #line 17387 "btex.w"
 
-#line 1450 "htex.ch"
+#line 1519 "htex.ch"
 if(first_line)
 {pointer p= happend_to_vlist(just_box);
 uint32_t pos= hposition(p);
@@ -2268,7 +2358,7 @@ if(cur_line==prev_graf+1)pen= pen+club_penalty;
 if(cur_line+2==best_line)pen= pen+final_widow_penalty;
 if(disc_break)pen= pen+broken_penalty;
 if(pen!=0)
-#line 1463 "htex.ch"
+#line 1532 "htex.ch"
 {r= new_penalty(pen);store_map(r,node_pos,next_offset);
 #line 17427 "btex.w"
 link(tail)= r;tail= r;
@@ -2280,7 +2370,7 @@ link(tail)= r;tail= r;
 
 
 /*:902*/
-#line 1426 "htex.ch"
+#line 1420 "htex.ch"
 ;
 #line 17252 "btex.w"
 incr(cur_line);cur_p= next_break(cur_p);
@@ -2317,7 +2407,7 @@ prev_graf= best_line-1;
 /*:899*//*917:*/
 #line 17532 "btex.w"
 
-#line 1475 "htex.ch"
+#line 1544 "htex.ch"
 /*:917*//*965:*/
 #line 18345 "btex.w"
 
@@ -2326,7 +2416,7 @@ prev_graf= best_line-1;
 #endif
 
 /*:965*/
-#line 1189 "htex.ch"
+#line 1183 "htex.ch"
 
 
 void line_break(int final_widow_penalty,pointer par_ptr)
@@ -2337,7 +2427,7 @@ void line_break(int final_widow_penalty,pointer par_ptr)
 
 bool auto_breaking;
 pointer prev_p;
-#line 1328 "htex.ch"
+#line 1322 "htex.ch"
 pointer q,r,s;
 #line 16945 "btex.w"
 internal_font_number f;
@@ -2350,11 +2440,11 @@ internal_font_number f;
 /*:915*/
 #line 16017 "btex.w"
 
-#line 1198 "htex.ch"
+#line 1192 "htex.ch"
 set_line_break_params();
 #line 16019 "btex.w"
 /*830:*/
-#line 1221 "htex.ch"
+#line 1215 "htex.ch"
 
 link(temp_head)= par_ptr;
 #line 16050 "btex.w"
@@ -2384,7 +2474,7 @@ minimal_demerits[very_loose_fit]= awful_bad;
 
 if(par_shape_ptr==null)
 if(hang_indent==0)
-#line 1295 "htex.ch"
+#line 1289 "htex.ch"
 {last_special_line= 0;second_width= x;
 #line 16673 "btex.w"
 second_indent= 0;
@@ -2394,12 +2484,12 @@ else/*870:*/
 
 {last_special_line= abs(hang_after);
 if(hang_after<0)
-#line 1310 "htex.ch"
+#line 1304 "htex.ch"
 {first_width= x-abs(hang_indent);
 #line 16687 "btex.w"
 if(hang_indent>=0)first_indent= hang_indent;
 else first_indent= 0;
-#line 1319 "htex.ch"
+#line 1313 "htex.ch"
 second_width= x;second_indent= 0;
 }
 else{first_width= x;first_indent= 0;
@@ -2413,7 +2503,7 @@ else second_indent= 0;
 /*:870*/
 #line 16675 "btex.w"
 
-#line 1304 "htex.ch"
+#line 1298 "htex.ch"
 else QUIT("parshape not yet implemented");
 #line 16680 "btex.w"
 if(looseness==0)easy_line= last_special_line;
@@ -2429,7 +2519,7 @@ threshold= pretolerance;
 if(threshold>=0)
 {
 #ifdef STAT
-#line 1335 "htex.ch"
+#line 1329 "htex.ch"
  if(tracing_paragraphs> 0)
 {print_nl("@firstpass");}
 #line 16958 "btex.w"
@@ -2518,7 +2608,7 @@ act_width= act_width+char_width(f,char_info(f,character(lig_char(cur_p))));
 case disc_node:/*890:*/
 #line 17106 "btex.w"
 
-#line 1378 "htex.ch"
+#line 1372 "htex.ch"
 {if(!is_auto_disc(cur_p)||second_pass||final_pass)
 {s= pre_break(cur_p);disc_width= 0;
 #line 17108 "btex.w"
@@ -2550,7 +2640,7 @@ act_width= act_width+disc_width;
 try_break(hyphen_penalty,hyphenated);
 act_width= act_width-disc_width;
 }
-#line 1385 "htex.ch"
+#line 1379 "htex.ch"
 }
 r= replace_count(cur_p);s= link(cur_p);
 #line 17117 "btex.w"
@@ -2678,7 +2768,7 @@ threshold= tolerance;second_pass= true;final_pass= (emergency_stretch<=0);
 }
 else{
 #ifdef STAT
-#line 1353 "htex.ch"
+#line 1347 "htex.ch"
  if(tracing_paragraphs> 0)
 print_nl("@emergencypass");
 #line 16993 "btex.w"
@@ -2722,13 +2812,13 @@ q= cur_p;
 /*:886*/
 #line 16023 "btex.w"
 ;
-#line 1204 "htex.ch"
+#line 1198 "htex.ch"
 hrestore_param_list();
 #line 16025 "btex.w"
 }
 
 /*:829*//*991:*/
-#line 1487 "htex.ch"
+#line 1556 "htex.ch"
 
 
 #define ensure_vbox(N) 
@@ -2743,7 +2833,7 @@ switch(type(p)){
 case hlist_node:case vlist_node:case rule_node:/*992:*/
 #line 18861 "btex.w"
 
-#line 1497 "htex.ch"
+#line 1566 "htex.ch"
 {temp_ptr= new_spec(pointer_def[glue_kind][split_top_skip_no]);
 q= new_glue(temp_ptr);glue_ref_count(temp_ptr)= null;link(prev_p)= q;link(q)= p;
 #line 18863 "btex.w"
@@ -2768,7 +2858,7 @@ return link(temp_head);
 }
 
 /*:991*//*993:*/
-#line 1504 "htex.ch"
+#line 1573 "htex.ch"
 
 static pointer vert_break(pointer p,scaled h,scaled d)
 #line 18886 "btex.w"
@@ -2860,7 +2950,7 @@ else{q= glue_ptr(p);
 active_height[2+stretch_order(q)]= 
 active_height[2+stretch_order(q)]+stretch(q);
 active_height[6]= active_height[6]+shrink(q);
-#line 1530 "htex.ch"
+#line 1599 "htex.ch"
 if((shrink_order(q)!=normal)&&(shrink(q)!=0))
 {
 DBG(DBGTEX,"Infinite glue shrinkage found in box being split");
@@ -2888,12 +2978,12 @@ done:return best_place;
 }
 
 /*:993*//*1011:*/
-#line 1560 "htex.ch"
+#line 1629 "htex.ch"
 
 void freeze_page_specs(small_number s)
 #line 19287 "btex.w"
 {page_contents= s;
-#line 1567 "htex.ch"
+#line 1636 "htex.ch"
 page_goal= hvsize;page_max_depth= max_depth;
 #line 19289 "btex.w"
 page_depth= 0;do_all_six(set_page_so_far_zero);
@@ -2903,7 +2993,7 @@ least_page_cost= awful_bad;
 }
 
 /*:1011*//*1019:*/
-#line 1593 "htex.ch"
+#line 1662 "htex.ch"
 
 bool hbuild_page(void)
 #line 19385 "btex.w"
@@ -2912,7 +3002,7 @@ pointer p;
 pointer q,r;
 int b,c;
 int pi;
-#line 1602 "htex.ch"
+#line 1671 "htex.ch"
 if(link(contrib_head)==null)return false;
 #line 19393 "btex.w"
 do{resume:p= link(contrib_head);
@@ -2930,7 +3020,7 @@ case hlist_node:case vlist_node:case rule_node:if(page_contents<box_there)
 
 {if(page_contents==empty)freeze_page_specs(box_there);
 else page_contents= box_there;
-#line 1632 "htex.ch"
+#line 1701 "htex.ch"
 temp_ptr= new_spec(pointer_def[glue_kind][top_skip_no]);
 q= new_glue(temp_ptr);glue_ref_count(temp_ptr)= null;
 #line 19478 "btex.w"
@@ -2965,14 +3055,14 @@ case glue_node:if(page_contents<box_there)goto done1;
 else if(precedes_break(page_tail))pi= 0;
 else goto update_heights;break;
 case kern_node:if(page_contents<box_there)goto done1;
-#line 1620 "htex.ch"
+#line 1689 "htex.ch"
 else if(link(p)==null)return false;
 #line 19465 "btex.w"
 else if(type(link(p))==glue_node)pi= 0;
 else goto update_heights;break;
 case penalty_node:if(page_contents<box_there)goto done1;else pi= penalty(p);break;
 case mark_node:goto contribute;
-#line 1626 "htex.ch"
+#line 1695 "htex.ch"
 case ins_node:happend_insertion(p);goto contribute;
 #line 19470 "btex.w"
 default:confusion("page");
@@ -2996,7 +3086,7 @@ else b= badness(page_goal-page_total,page_so_far[2]);
 else if(page_total-page_goal> page_shrink)b= awful_bad;
 else b= badness(page_total-page_goal,page_shrink)
 
-#line 1683 "htex.ch"
+#line 1752 "htex.ch"
 /*:1032*/
 #line 19520 "btex.w"
 ;
@@ -3018,7 +3108,7 @@ r= link(r);
 }
 }
 if((c==awful_bad)||(pi<=eject_penalty))
-#line 1671 "htex.ch"
+#line 1740 "htex.ch"
 {hloc_set_next(best_page_break);
 if(p==best_page_break)best_page_break= null;
 hpack_page();
@@ -3040,7 +3130,7 @@ else{q= glue_ptr(p);
 page_so_far[2+stretch_order(q)]= 
 page_so_far[2+stretch_order(q)]+stretch(q);
 page_shrink= page_shrink+shrink(q);
-#line 1650 "htex.ch"
+#line 1719 "htex.ch"
 if((shrink_order(q)!=normal)&&(shrink(q)!=0))
 {
 DBG(DBGTEX,"Infinite glue shrinkage found on current page");
@@ -3098,13 +3188,13 @@ else contrib_tail= contrib_head
 /*:1020*/
 #line 19399 "btex.w"
 ;
-#line 1613 "htex.ch"
+#line 1682 "htex.ch"
 return false;
 }
 #line 19401 "btex.w"
 
 /*:1019*//*1033:*/
-#line 1683 "htex.ch"
+#line 1752 "htex.ch"
 
 void happend_insertion(pointer p)
 {uint8_t n;
@@ -3130,7 +3220,7 @@ else h= x_over_n(height(r),1000)*count(n);
 page_goal= page_goal-h-width(q);
 page_so_far[2+stretch_order(q)]= page_so_far[2+stretch_order(q)]+stretch(q);
 page_shrink= page_shrink+shrink(q);
-#line 1707 "htex.ch"
+#line 1776 "htex.ch"
 if((shrink_order(q)!=normal)&&(shrink(q)!=0))
 DBG(DBGTEX,"Infinite glue shrinkage inserted from stream %d",n);
 #line 19618 "btex.w"
@@ -3176,7 +3266,7 @@ else if(type(q)==penalty_node)insert_penalties= insert_penalties+penalty(q);
 }
 
 /*:1033*//*1040:*/
-#line 1741 "htex.ch"
+#line 1810 "htex.ch"
 
 void hpack_page(void)
 {
@@ -3214,7 +3304,7 @@ r= link(r);
 }
 
 /*:1044*/
-#line 1761 "htex.ch"
+#line 1830 "htex.ch"
 ;
 q= hold_head;link(q)= null;prev_p= page_head;p= link(prev_p);
 while(p!=best_page_break)
@@ -3242,14 +3332,14 @@ height(p)= height(temp_ptr)+depth(temp_ptr);
 free_node(temp_ptr,box_node_size);wait= true;
 }
 }
-#line 1799 "htex.ch"
+#line 1868 "htex.ch"
 while(link(s)!=null)s= link(s);
 best_ins_ptr(r)= null;
 #line 19850 "btex.w"
 n= qo(subtype(r));
 temp_ptr= list_ptr(box(n));
 free_node(box(n),box_node_size);
-#line 1806 "htex.ch"
+#line 1875 "htex.ch"
 streams[n].p= temp_ptr;
 streams[n].t= s;
 #line 19854 "btex.w"
@@ -3280,7 +3370,7 @@ p= prev_p
 }
 
 /*:1046*/
-#line 1766 "htex.ch"
+#line 1835 "htex.ch"
 ;
 }
 prev_p= p;p= link(prev_p);
@@ -3297,7 +3387,7 @@ link(page_tail)= link(contrib_head);
 link(contrib_head)= p;
 link(prev_p)= null;
 }
-#line 1788 "htex.ch"
+#line 1857 "htex.ch"
 streams[0].p= link(page_head);link(page_head)= null;page_tail= page_head;
 streams[0].t= prev_p;
 if(q!=hold_head)
@@ -3307,7 +3397,7 @@ link(contrib_head)= link(hold_head);
 #line 19787 "btex.w"
 
 /*:1043*/
-#line 1772 "htex.ch"
+#line 1841 "htex.ch"
 ;
 /*1045:*/
 #line 19808 "btex.w"
@@ -3319,13 +3409,13 @@ while(r!=page_ins_head)
 link(page_ins_head)= page_ins_head
 
 /*:1045*/
-#line 1773 "htex.ch"
+#line 1842 "htex.ch"
 ;
 }
 #line 19739 "btex.w"
 
 /*:1040*//*1172:*/
-#line 1823 "htex.ch"
+#line 1892 "htex.ch"
 
 void hdisplay(pointer p,pointer a,bool l)
 {
@@ -3353,7 +3443,7 @@ x= cur_list.hs_field;
 /*1173:*/
 #line 21730 "btex.w"
 
-#line 1863 "htex.ch"
+#line 1932 "htex.ch"
 v= shift_amount(just_box)+2*dimen_def[quad_no];w= -max_dimen;
 #line 21732 "btex.w"
 p= list_ptr(just_box);
@@ -3403,7 +3493,7 @@ case whatsit_node:/*1390:*/
 #line 24747 "btex.w"
 d= 0
 
-#line 2378 "htex.ch"
+#line 2474 "htex.ch"
 /*:1390*/
 #line 21759 "btex.w"
 ;break;
@@ -3436,12 +3526,12 @@ if(par_shape_ptr==null)
 if((hang_indent!=0)&&
 (((hang_after>=0)&&(prev_graf+2> hang_after))||
 (prev_graf+1<-hang_after)))
-#line 1869 "htex.ch"
+#line 1938 "htex.ch"
 {l= x-abs(hang_indent);
 #line 21793 "btex.w"
 if(hang_indent> 0)s= hang_indent;else s= 0;
 }
-#line 1875 "htex.ch"
+#line 1944 "htex.ch"
 else{l= x;s= 0;
 #line 21796 "btex.w"
 }
@@ -3454,13 +3544,13 @@ s= mem[p-1].sc;l= mem[p].sc;
 /*:1176*/
 #line 21720 "btex.w"
 ;
-#line 1857 "htex.ch"
+#line 1926 "htex.ch"
 pre_display_size= w;display_width= l;display_indent= s;
 #line 21728 "btex.w"
 }
 
 /*:1172*//*1227:*/
-#line 1887 "htex.ch"
+#line 1956 "htex.ch"
 
 {/*1225:*/
 #line 22436 "btex.w"
@@ -3477,17 +3567,17 @@ pointer r;
 pointer t;
 
 /*:1225*/
-#line 1888 "htex.ch"
+#line 1957 "htex.ch"
 
 adjust_tail= adjust_head;b= hpack(p,natural);p= list_ptr(b);
 t= adjust_tail;adjust_tail= null;
 w= width(b);z= display_width;s= display_indent;
-#line 1897 "htex.ch"
+#line 1966 "htex.ch"
 if(a==null)
 #line 22459 "btex.w"
 {e= 0;q= 0;
 }
-#line 1903 "htex.ch"
+#line 1972 "htex.ch"
 else{e= width(a);q= e+math_quad;
 #line 22462 "btex.w"
 }
@@ -3528,7 +3618,7 @@ if(p!=null)if(!is_char_node(p))if(type(p)==glue_node)d= 0;
 /*1231:*/
 #line 22525 "btex.w"
 
-#line 1930 "htex.ch"
+#line 1999 "htex.ch"
 tail_append(new_penalty(pre_display_penalty));
 store_map(tail,node_pos,offset);
 if((d+s<=pre_display_size)||l)
@@ -3559,7 +3649,7 @@ else{link(b)= r;link(r)= a;
 }
 b= hpack(b,natural);
 }
-#line 1948 "htex.ch"
+#line 2017 "htex.ch"
 shift_amount(b)= s+d;append_to_vlist(b,offset)
 #line 22550 "btex.w"
 
@@ -3572,7 +3662,7 @@ shift_amount(b)= s+d;append_to_vlist(b,offset)
 if((a!=null)&&(e==0)&&!l)
 {tail_append(new_penalty(inf_penalty));
 shift_amount(a)= s+z-width(a);
-#line 1954 "htex.ch"
+#line 2023 "htex.ch"
 append_to_vlist(a,offset);
 #line 22556 "btex.w"
 g2= 0;
@@ -3580,7 +3670,7 @@ g2= 0;
 if(t!=adjust_head)
 {link(tail)= link(adjust_head);tail= t;
 }
-#line 1961 "htex.ch"
+#line 2030 "htex.ch"
 tail_append(new_penalty(post_display_penalty));
 offset= (hpos-hstart)+1-node_pos;
 store_map(tail,node_pos,offset);
@@ -3590,7 +3680,7 @@ if(g2> 0){tail_append(new_glue(pointer_def[glue_kind][g2]));store_map(tail,node_
 /*:1233*/
 #line 22470 "btex.w"
 ;
-#line 1909 "htex.ch"
+#line 1978 "htex.ch"
 prev_graf= prev_graf+3;
 cur_list.bs_pos= hpos+node_pos;
 push_nest();mode= hmode;

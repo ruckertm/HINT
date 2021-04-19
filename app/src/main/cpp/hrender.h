@@ -1,19 +1,19 @@
-/*342:*/
-#line 6703 "hint.w"
+/*345:*/
+#line 6774 "hint.w"
 
 #ifndef _HRENDER_H
 #define _HRENDER_H
 /*261:*/
-#line 4474 "hint.w"
+#line 4471 "hint.w"
 
 #define MARK_BIT 0x1
 #define FOCUS_BIT 0x2
-/*:261*//*289:*/
-#line 5245 "hint.w"
+/*:261*//*291:*/
+#line 5310 "hint.w"
 
 #define SP2PT(X) ((X)/(double)(1<<16))
-/*:289*/
-#line 6706 "hint.w"
+/*:291*/
+#line 6777 "hint.w"
 
 
 extern int page_h,page_v;
@@ -33,4 +33,4 @@ extern void hint_set_mark(char*m,int s);
 extern bool hint_prev_mark(void);
 extern bool hint_next_mark(void);
 #endif
-/*:342*/
+/*:345*/

@@ -39,9 +39,9 @@
 \titletrue
 
 \def\setrevision$#1: #2 ${\gdef\lastrevision{#2}}
-\setrevision$Revision: 2072 $
+\setrevision$Revision: 2314 $
 \def\setdate$#1(#2) ${\gdef\lastdate{#2}}
-\setdate$Date: 2020-10-26 12:08:30 +0100 (Mon, 26 Oct 2020) $
+\setdate$Date: 2021-04-16 10:34:27 +0200 (Fri, 16 Apr 2021) $
 
 \null
 
@@ -481,6 +481,7 @@ typedef enum {@+@<kinds@>@+,@+ @<alternative kind names@> @+} kind_t;
 @
 
 @<define |content_name| and |definition_name|@>=
+{
 #define DEF_KIND(C,D,N) @[#C@]
 const char *content_name[32]=@+{@+@<kinds@>@;@+}@+;
 #undef DEF_KIND@#
@@ -490,7 +491,8 @@ for (k=0; k<= 31;k++)
   if (k<31) printf(", ");
 }
 printf("};\n\n");
-
+}
+{
 #define DEF_KIND(C,D,N) @[#D@]
 const char *definition_name[0x20]=@+{@+@<kinds@>@;@+}@+;
 #undef DEF_KIND
@@ -500,7 +502,7 @@ for (k=0; k<= 31;k++)
   if (k<31) printf(", ");
 }
 printf("};\n\n");
-
+}
 @ 
 
 \goodbreak
@@ -6151,7 +6153,7 @@ It remains to create the direcories along the path we might have constructed.
 #endif
            QUIT("Unable to create directory %s",file_name);
          DBG(DBGDIR,"Creating directory %s\n",file_name);
-      } else if (!S_ISDIR(s.st_mode))
+      } else if (!(S_IFDIR&s.st_mode))
         QUIT("Unable to create directory %s, file exists",file_name);
       *path_end='/';
     }
@@ -6167,6 +6169,7 @@ It remains to create the direcories along the path we might have constructed.
 @<make sure |access| is defined@>@;
 extern char *stem_name;
 extern int stem_length;
+
 
 void hwrite_aux_files(void)
 { int i;
@@ -8650,8 +8653,9 @@ case TAG(baseline_kind,0):  HTEG_REF(baseline_kind); @+break;
 
 \subsection{{\tt basetypes.h}}
 To define basic types in a portable way, we create an include file.
-The macro |_MSC_VER| (Microsoft Visual C Version) is defined only if
-using the respective compiler.\index{false+\\{false}}\index{true+\\{true}}\index{bool+\&{bool}}
+The macro |_MSC_VER| (Microsoft Visual C Version)\index{Microsoft Visual C}
+is defined only if using the respective compiler.
+\index{false+\\{false}}\index{true+\\{true}}\index{bool+\&{bool}}
 @(basetypes.h@>=
 #ifndef __BASETYPES_H__
 #define __BASETYPES_H__
@@ -8674,8 +8678,6 @@ using the respective compiler.\index{false+\\{false}}\index{true+\\{true}}\index
 #define false (!true)
 #define __SIZEOF_FLOAT__ 4
 #define __SIZEOF_DOUBLE__ 8
-typedef float float32_t;
-typedef double float64_t;
 #define INT32_MAX              (2147483647)
 #define PRIx64 "I64x"
 #pragma  @[warning( disable : @[4244@]@t @> @[4996@]@t @> @[4127@])@]
@@ -8683,12 +8685,12 @@ typedef double float64_t;
 #include <stdint.h>
 #include <stdbool.h>
 #include <inttypes.h>
-typedef float float32_t;
-typedef double float64_t;
 #ifdef WIN32
 #include <io.h>
 #endif
 #endif
+typedef float float32_t;
+typedef double float64_t;
 #if __SIZEOF_FLOAT__!=4
 #error  @=float32 type must have size 4@>
 #endif
@@ -8866,6 +8868,7 @@ extern void hput_list_size(uint32_t n, int i);
 #include "basetypes.h"
 #include <string.h>
 #include <ctype.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <zlib.h>
 #include "error.h"
@@ -8885,7 +8888,6 @@ The definitions for lex are collected in the file {\tt shrink.l}
 @(shrink.l@>=
 %{
 #include "basetypes.h"
-#include <unistd.h>
 #include "error.h"
 #include "hformat.h"
 #include "hput.h"
@@ -8906,8 +8908,6 @@ int yywrap (void ){ return 1;}
 %option  nounistd nounput noinput noyy_top_state
 
 @<scanning definitions@>@/
-
-
 
 %%
 
@@ -8980,8 +8980,13 @@ extern int yylex(void);
 #include "basetypes.h"
 #include <string.h>
 #include <ctype.h>
+#include <sys/types.h>
 #include <sys/stat.h>
+#ifdef WIN32
+#include <direct.h>
+#endif
 #include <zlib.h>
+
 #include "error.h"
 #include "hformat.h"
 @<hint types@>@;
@@ -9051,7 +9056,11 @@ format into a \HINT/ file in long format.
 #include <string.h>
 #include <ctype.h>
 #include <zlib.h>
+#include <sys/types.h>
 #include <sys/stat.h>
+#ifdef WIN32
+#include <direct.h>
+#endif
 #include <fcntl.h>
 #include "error.h"
 #include "hformat.h"
@@ -9079,9 +9088,9 @@ format into a \HINT/ file in long format.
 
 int main(int argc, char *argv[])
 { @<local variables in |main|@>@;
-   in_ext=".hnt";
-   out_ext=".HINT";
   uint64_t  hbase_size;
+  in_ext=".hnt";
+  out_ext=".HINT";
   @<process the command line@>@;
   @<open the log file@>@;
   @<open the output file@>@;
@@ -9130,6 +9139,7 @@ backwards.
 #include "basetypes.h"
 #include <string.h>
 #include <zlib.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include "error.h"
@@ -9151,9 +9161,9 @@ backwards.
 
 int main(int argc, char *argv[])
 { @<local variables in |main|@>@;
-   in_ext=".hnt";
-   out_ext=".bak";
   uint64_t  hbase_size;
+  in_ext=".hnt";
+  out_ext=".bak";
 
   @<process the command line@>@;
   @<open the log file@>@;
