@@ -1,5 +1,5 @@
-/*1410:*/
-#line 2499 "htex.ch"
+/*1409:*/
+#line 2517 "htex.ch"
 
 #define banner "This is TeX, Version 3.14159265 (HINT)" \
 
@@ -1700,6 +1700,12 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define ignore_info(A) type(A+1) 
 #define ignore_list(A) link(A+1)  \
 
+#define link_node 24
+#define link_node_size 2
+#define link_label(A) link(A+1) 
+#define link_on(A) type(A+1)  \
+ \
+
 #define immediate_code 4
 #define set_language_code 5 \
 
@@ -1708,7 +1714,7 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define end_write_token cs_token_flag+end_write \
 
 
-#line 2500 "htex.ch"
+#line 2518 "htex.ch"
 
 enum{/*11:*/
 #line 353 "btex.w"
@@ -1752,7 +1758,7 @@ file_name_size= 1024,
 empty_string= 256
 
 /*:11*/
-#line 2501 "htex.ch"
+#line 2519 "htex.ch"
 };
 /*18:*/
 #line 493 "btex.w"
@@ -1828,7 +1834,7 @@ typedef int8_t glue_ord;
 
 typedef struct{int16_t mode_field;
 pointer head_field,tail_field;
-#line 663 "htex.ch"
+#line 664 "htex.ch"
 int pg_field;
 pointer bs_field,ls_field;
 scaled lsl_field;
@@ -1876,7 +1882,7 @@ typedef uint16_t trie_pointer;
 typedef int16_t hyph_pointer;
 
 /*:948*/
-#line 2502 "htex.ch"
+#line 2520 "htex.ch"
 
 extern void list_init(void);
 extern void hpack_page(void);
@@ -1904,7 +1910,7 @@ extern int*const char_base;
 extern int*const width_base;
 extern memory_word font_info[];
 extern scaled*const font_size;
-#line 2516 "htex.ch"
+#line 2534 "htex.ch"
 extern char**const font_name;
 extern void hclear_fonts(void);
 extern void read_font_info(int f,char*nom,scaled s);
@@ -1915,7 +1921,7 @@ extern pointer lo_mem_max;
 extern pointer hi_mem_min;
 extern memory_word*const mem;
 extern pointer just_box;
-#line 2524 "htex.ch"
+#line 2542 "htex.ch"
 extern void append_to_vlist(pointer b,uint32_t offset);
 #line 25004 "btex.w"
 extern pointer adjust_tail;
@@ -1936,5 +1942,5 @@ extern int nest_ptr;
 extern void pop_nest(void);
 extern void push_nest(void);
 extern void delete_glue_ref(pointer p);
-#line 2530 "htex.ch"
-void line_break(int final_widow_penalty,pointer par_ptr);/*:1410*/
+#line 2548 "htex.ch"
+void line_break(int final_widow_penalty,pointer par_ptr);/*:1409*/

@@ -3,9 +3,9 @@
 
 unsigned int debugflags=DBGNONE;
 FILE *hlog=NULL;
-const char *content_name[32]={"text", "list", "param", "xdimen", "adjust", "glyph", "kern", "glue", "ligature", "hyphen", "language", "rule", "image", "leaders", "baseline", "hbox", "vbox", "par", "math", "table", "item", "hset", "vset", "hpack", "vpack", "stream", "page", "range", "undefined1", "undefined2", "undefined3", "penalty"};
+const char *content_name[32]={"text", "list", "param", "xdimen", "adjust", "glyph", "kern", "glue", "ligature", "hyphen", "language", "rule", "image", "leaders", "baseline", "hbox", "vbox", "par", "math", "table", "item", "hset", "vset", "hpack", "vpack", "stream", "page", "range", "link", "undefined2", "undefined3", "penalty"};
 
-const char *definition_name[32]={"text", "list", "param", "xdimen", "adjust", "font", "dimen", "glue", "ligature", "hyphen", "language", "rule", "image", "leaders", "baseline", "hbox", "vbox", "par", "math", "table", "item", "hset", "vset", "hpack", "vpack", "stream", "page", "range", "undefined1", "undefined2", "undefined3", "int"};
+const char *definition_name[32]={"text", "list", "param", "xdimen", "adjust", "font", "dimen", "glue", "ligature", "hyphen", "language", "rule", "image", "leaders", "baseline", "hbox", "vbox", "par", "math", "table", "item", "hset", "vset", "hpack", "vpack", "stream", "page", "range", "label", "undefined2", "undefined3", "int"};
 
 int32_t int_defaults[MAX_INT_DEFAULT+1]={0, 100, 200, 10, 50, 50, 150, 150, 50, 100, 10000, 0, 0, 10000, 5000, 10000, 0, 720, 4, 7, 1776, 1, 20000};
 
@@ -33,9 +33,11 @@ xdimen_t xdimen_defaults[MAX_XDIMEN_DEFAULT+1]={{0x0, 0.0, 0.0}, {0x0, 1.0, 0.0}
 
 baseline_t baseline_defaults[MAX_BASELINE_DEFAULT+1]={{{{0x0, 0.000000, 0.000000},{0.000000, 0},{0.000000, 0}}, {{0x0, 0.000000, 0.000000},{0.000000, 0},{0.000000, 0}}, 0x0}};
 
-int max_fixed[32]= {256, 256, -1, 2, 256, -1, 0, 2, -1, -1, -1, -1, -1, -1, 0, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 0, 0, 0, 256, 256, 256, 0};
+int max_fixed[32]= {65536, 65536, -1, 2, 65536, -1, 0, 2, -1, -1, -1, -1, -1, -1, 0, 65536, 65536, 65536, 65536, 65536, 65536, 65536, 65536, 65536, 65536, 0, 0, 0, -1, 65536, 65536, 0};
 
 int max_default[32]= {-1, -1, -1, 2, -1, -1, 9, 14, -1, -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, -1, -1, -1, 22};
 
 int max_ref[32]= {-1, -1, -1, 2, -1, -1, 9, 14, -1, -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, -1, -1, -1, 22};
+
+int max_public=-1;
 

@@ -49,6 +49,7 @@ static void initialize(void) /*this procedure gets things started properly*/
 #include <stdio.h>
 #include <math.h>
 #include "basetypes.h"
+#include "hformat.h"
 #include "error.h"
 #include "hget.h"
 #include "htex.h"
@@ -2152,7 +2153,11 @@ if (g2 > 0) { tail_append(new_glue(pointer_def[glue_kind][g2]));store_map(tail, 
 @d ignore_info(A)    type(A+1)
 @d ignore_list(A)    link(A+1)
 
-@
+@d link_node 24 /* represents a link to a another location */
+@d link_node_size 2
+@d link_label(A) link(A+1) /* the reference number of the label */
+@d link_on(A)    type(A+1) /* 1 for on, 0 for off */
+
 @z
 
 @x
@@ -2168,6 +2173,7 @@ if (g2 > 0) { tail_append(new_glue(pointer_def[glue_kind][g2]));store_map(tail, 
   case hset_node: print("hset");@+break;
   case vset_node: print("vset");@+break;
   case image_node: print("image");@+break;
+  case link_node: print("link");@+break;
   case align_node: print("align");@+break;
   case setpage_node: print("setpage");@+break;
   case setstream_node: print("setstream");@+break;
@@ -2196,7 +2202,8 @@ case setstream_node:
 case stream_before_node:
 case stream_after_node:
 case xdimen_node:
-case ignore_node: @+break;
+case ignore_node:
+case link_node: @+break;
 @z
 
 @x
@@ -2280,6 +2287,10 @@ case align_node:
 case ignore_node:
   print_esc("ignore ");print_int(ignore_info(p));print_char(':');
   node_list_display(ignore_list(p));
+  break;
+case link_node:
+  print_esc("link ");print_int(link_label(p));
+  if (link_on(p)) print(": on"); else print(": off");
   break;
 case stream_node:
   print_esc("stream");print_int(stream_insertion(p));
@@ -2368,6 +2379,10 @@ case ignore_node:
     ignore_list(r)=copy_node_list(ignore_list(p));
     words=ignore_node_size-1;
   break;
+case link_node:
+    r=get_node(link_node_size);
+    words=link_node_size;
+    break;
 case stream_node:
     r=get_node(stream_node_size);
     words=stream_node_size;
@@ -2435,6 +2450,8 @@ case setstream_node:
 case ignore_node:
   flush_node_list(ignore_list(p));
   free_node(p,ignore_node_size); @+break;
+case link_node:
+  free_node(p,link_node_size);@+break;
 case stream_node:
   free_node(p,stream_node_size); @+break;
 case xdimen_node:
@@ -2486,6 +2503,7 @@ case image_node:
 case align_node:
 case setpage_node: case setstream_node:
 case ignore_node:
+case link_node:
 case xdimen_node: break;
 default:confusion("ext4");
 @z

@@ -26,8 +26,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 2317 ${}$}
-\def\lastdate{${}$Date: 2021-04-17 14:49:18 +0200 (Sat, 17 Apr 2021) ${}$}
+\def\lastrevision{${}$Revision: 2349 ${}$}
+\def\lastdate{${}$Date: 2021-05-06 18:24:31 +0200 (Thu, 06 May 2021) ${}$}
 
 \input titlepage.tex
 
@@ -109,9 +109,10 @@ By default, we store definitions as pointers to \TeX's data structures.
 
 @<get functions@>=
 void hget_def_node(void)
-{ @+uint8_t n;
+{ @+int n;
   @<read the start byte |a|@>@;
-  n=HGET8;
+  if (KIND(a)==label_kind && (INFO(a)&b001)) HGET16(n);
+  else n=HGET8; 
   if (max_fixed[KIND(a)]>max_default[KIND(a)]) 
       QUIT("Definitions for kind %s not supported", definition_name[KIND(a)]);
     if(n>max_ref[KIND(a)] || n <= max_fixed[KIND(a)]) 
@@ -124,13 +125,14 @@ void hget_def_node(void)
   { case language_kind: { char *t;  HGET_STRING(t); break; }
     case font_kind: hget_font_def(a,n); break;
     case int_kind: integer_def[n]=hget_integer_def(a); break;
-    case dimen_kind: dimen_def[n]=hget_dimen_def(); break;
+    case dimen_kind: dimen_def[n]=hget_dimen_def(a); break;
     case xdimen_kind: hget_xdimen_def(INFO(a),&(xdimen_def[n])); break;
     case baseline_kind: hget_baseline_def(a,n); break;
     case glue_kind: pointer_def[glue_kind][n]=hget_glue_def(a); break;
     case param_kind:  param_def[n]=hget_param_list(a); break;
     case range_kind: hget_range_def(a,n); break;
     case page_kind: hget_page_def(a,n); break;
+    case label_kind: hget_label_def(a,n); break;
     default:  pointer_def[KIND(a)][n]=hget_definition(a); break;
   }
   @<read and check the end byte |z|@>@;
@@ -189,12 +191,13 @@ pointer *pointer_def[32]={NULL};
 @<\HINT/ declarations@>=
 static void hget_font_def(uint8_t a, uint8_t n);
 static int32_t hget_integer_def(uint8_t a);
-static scaled hget_dimen_def(void);
+static scaled hget_dimen_def(uint8_t a);
 static pointer hget_glue_def(uint8_t a);
 static void hget_baseline_def(uint8_t a, uint8_t n);
 static param_def_t *hget_param_list(uint8_t a);
 static void hget_range_def(uint8_t a, uint8_t pg);
 static void hget_page_def(uint8_t a, uint8_t n);
+static void hget_label_def(uint8_t a, int n);
 static void hget_font_metrics();
 static pointer hget_definition(uint8_t a);
 @
@@ -204,7 +207,7 @@ static pointer hget_definition(uint8_t a);
 { kind_t k;
   for (k=0;k<32;k++)
   { if (k==font_kind || k==int_kind|| k==dimen_kind||k==xdimen_kind||
-        k==glue_kind||k==baseline_kind|| k==range_kind||k==page_kind||k==param_kind||k==stream_kind)
+        k==glue_kind||k==baseline_kind|| k==range_kind||k==page_kind||k==param_kind||k==stream_kind||k==label_kind)
        continue;
     if (max_ref[k]>=0 && max_ref[k]<=256)
     { DBG(DBGDEF,"Allocating definitions for %s (kind %d): %d entries of " SIZE_F " byte each\n",
@@ -224,9 +227,11 @@ for (k=0;k<32;k++)
 
 
 Now lets consider the few exceptions where definitions are not stored as pointers.
-We start with the simple ones.
-\subsubsection{Integers}
+We start with the data types.
 
+\subsection{Data Types}
+\subsubsection{Integers}
+\noindent
 @<\HINT/ variables@>=
 int32_t *integer_def;
 @
@@ -242,16 +247,16 @@ free(integer_def); integer_def=NULL;
 
 @<\HINT/ auxiliar functions@>=
 static int32_t hget_integer_def(uint8_t a)
-{ if (INFO(a)==1) { int8_t n=HGET8; return n;}
-  else  if (INFO(a)==2) { int16_t n; HGET16(n); return n;}
-  else if (INFO(a)==4) {int32_t n; HGET32(n); return n;}
+{@+ if (INFO(a)==1) {@+ int8_t n=HGET8; @+return n;@+}
+  else  if (INFO(a)==2) {@+ int16_t n;@+ HGET16(n);@+ return n;@+}
+  else if (INFO(a)==4) {@+int32_t n;@+ HGET32(n);@+ return n;@+}
   else TAGERR(a);
   return 0;
 }
 
 static int32_t hget_integer_ref(uint8_t n)
 { @+REF_RNG(int_kind,n);
-  return integer_def[n];
+  return integer_def[n];@+
 }
 @
 
@@ -270,13 +275,16 @@ free(dimen_def); dimen_def=NULL;
 @
 
 @<get functions@>=
-static scaled hget_dimen_def(void)
-{ scaled d; HGET32(d); return d;
-}
-
 scaled hget_dimen_ref(uint8_t n)
 { @+REF_RNG(dimen_kind,n);
   return dimen_def[n];
+}
+
+static scaled hget_dimen_def(uint8_t a)
+{@+ if (INFO(a)==b000)
+    return hget_dimen_ref(HGET8);
+  else  
+  {@+ scaled d; @+HGET32(d); return d; @+}
 }
 @
 
@@ -297,11 +305,11 @@ free(xdimen_def); xdimen_def=NULL;
 
 @<\HINT/ auxiliar functions@>=
 static scaled xdimen(xdimen_t *x)
-{ return round(x->w+(double)x->h*(double)hhsize+(double)x->v*(double)hvsize);
+{ @+return round(x->w+(double)x->h*(double)hhsize+@|(double)x->v*(double)hvsize);
 }
 static scaled hget_xdimen_ref(uint8_t n)
 { @+REF_RNG(xdimen_kind,n);
-  return  xdimen(xdimen_def+n);
+  return  xdimen(xdimen_def+n);@+
 }
 @
 
@@ -313,34 +321,30 @@ void print_xdimen(int i)
 @
 
 
-\subsubsection{Glues}
-
+\subsection{Glues}
+\noindent
 @<\HINT/ auxiliar functions@>=
 
 static pointer hget_glue_ref(uint8_t n)
 { @+REF_RNG(glue_kind,n);
-  return  pointer_def[glue_kind][n];
+  return  pointer_def[glue_kind][n];@+
 }
 
 static pointer hget_glue_def(uint8_t a)
-{ pointer p;
+{@+ pointer p;
   if (INFO(a)==b000)
-  { p= hget_glue_ref(HGET8);
-    add_glue_ref(p);
+  {@+ p= hget_glue_ref(HGET8);
+    add_glue_ref(p);@+
   }
   else
-  { HGET_GLUE(INFO(a)); }
+   HGET_GLUE(INFO(a));
   return p;
 }
 
 pointer hget_param_glue(uint8_t n)
 { @+REF_RNG(glue_kind,n);
-  return  new_glue(pointer_def[glue_kind][n]);
+  return  new_glue(pointer_def[glue_kind][n]);@+
 }
-@
-
-@<\TeX\ |extern|@>=
-extern pointer hget_param_glue(uint8_t n);
 @
 
 @<allocate definitions@>=
@@ -372,7 +376,7 @@ free(baseline_def); baseline_def=NULL;
 
 @<get functions@>=
 static void hget_baseline_def(uint8_t a, uint8_t n)
-{ HGET_BASELINE(INFO(a));
+{ @+HGET_BASELINE(INFO(a));
   baseline_def[n].bs=cur_bs;add_glue_ref(cur_bs);
   baseline_def[n].ls=cur_ls;add_glue_ref(cur_ls);
   baseline_def[n].lsl=cur_lsl;
@@ -629,7 +633,7 @@ static param_def_t *hget_param_list(uint8_t a)
     q->k=KIND(a);
     DBG(DBGTAGS,"Defining %s %d\n", definition_name[KIND(a)],q->n);
     if (KIND(a)==int_kind) q->v=hget_integer_def(a);
-    else if (KIND(a)==dimen_kind) q->v=hget_dimen_def();
+    else if (KIND(a)==dimen_kind) q->v=hget_dimen_def(a);
     else if (KIND(a)==glue_kind) q->v=hget_glue_def(a);
     else TAGERR(a);
     @<read and check the end byte |z|@>@;
@@ -752,7 +756,7 @@ static void hget_range_def(uint8_t a, uint8_t pg)
   else f=0;
   if (INFO(a)&b010) @+
   { @+if (INFO(a)&b001) HGET32(t); @+else HGET16(t); @+}
-  else t=0xFFFFFFFF;
+  else t=HINT_NO_POS;
   range_def[n].pg=pg;
   range_def[n].f=f;
   range_def[n].t=t;
@@ -1006,6 +1010,44 @@ void hfill_page_template(void)
 extern void hfill_page_template(void);
 @
 
+\subsection{Labels}
+
+The variable |label_def| is used to store label definitions.
+
+@<\HINT/ variables@>=
+label_t *label_def=NULL;
+@
+
+@<allocate definitions@>=
+if (max_ref[label_kind]>=0)
+ALLOCATE(label_def, max_ref[label_kind]+1, label_t);
+@
+
+@<free definitions@>=
+free(label_def); label_def=NULL;
+@
+
+The function |hget_label_def| reads a label definition from the definition section.
+
+@<get functions@>=
+void hget_label_def(uint8_t a, int n)
+{@+ label_t *t=label_def+n;
+  HGET32(t->pos);
+  t->where=HGET8;
+  if (t->where==0 || t->where>3) t->where=3;
+  if (INFO(a)&b100) /*public*/
+  {@+ char *s;
+    RNG("Public label",n,0,max_public);
+    t->major=HGET8; t->minor=HGET8;
+    HGET_STRING(s); t->n=strdup(s);
+  }
+  if (INFO(a)&b010) /* secondary position */
+  {@+ HGET32(t->pos0); t->f=HGET8;@+}
+  else t->pos0=t->pos;
+}
+@
+
+
 \subsection{References}
 There are only a few functions that still need to be defined.
 @<\HINT/ auxiliar functions@>=
@@ -1246,7 +1288,7 @@ static float32_t hteg_float32(void)
 }
 @
 
-\subsection{Extended dimensions}
+\subsection{Extended Dimensions}
 The viewer can convert extended dimensions immediately to regular dimensions
 because |hsize| and |vsize| are known.
 
@@ -1401,11 +1443,6 @@ case TAG(glyph_kind,3): @+HTEG_GLYPH(3);@+break;
 case TAG(glyph_kind,4): @+HTEG_GLYPH(4);@+break;
 @
 
-@<\TeX\ |extern|@>=
-extern pointer new_character(uint8_t f, uint8_t c);
-@
-
-
 \subsection{Penalties}
 \noindent
 @<cases to get content@>=
@@ -1418,10 +1455,6 @@ case TAG(penalty_kind,2): @+ {@+int16_t n;@+ HGET16(n);@+RNG("Penalty",n,-20000,
 case TAG(penalty_kind,0):  @+ tail_append(new_penalty(hget_integer_ref(HTEG8))); @+break;
 case TAG(penalty_kind,1):  @+ {@+tail_append(new_penalty(HTEG8));@+} @+break;
 case TAG(penalty_kind,2):  @+{@+int16_t n;@+ HTEG16(n);@+RNG("Penalty",n,-20000,+20000); @+tail_append(new_penalty(n)); @+} @+break;
-@
-
-@<\TeX\ |extern|@>=
-extern pointer new_penalty(int m);
 @
 
 \subsection{Languages}
@@ -1621,13 +1654,6 @@ static pointer hteg_glue_node(void)
   if (p!=null) return spec2glue(p);
   else return new_glue(zero_glue);
 }
-@
-
-
-
-
-@<\TeX\ |extern|@>=
-extern pointer new_glue(pointer q);
 @
 
 \subsection{Lists}
@@ -2470,8 +2496,6 @@ case TAG(par_kind,b100): @+HGET_PAR(b100);@+break;
 case TAG(par_kind,b110): @+HGET_PAR(b110);@+break;
 @
 
-
-
 The function |hget_paragraph| uses \TeX's |line_break| routine.
 If a page is broken in the middle of a paragraph,
 we will need the exact position of the line that starts
@@ -2994,11 +3018,6 @@ case TAG(math_kind,b111): tail_append(new_math(0,before));@+break;
 case TAG(math_kind,b011):  tail_append(new_math(0,after));@+break;
 @
 
-@<\TeX\ |extern|@>=
-extern pointer new_math(scaled w, small_number s);
-
-@
-
 \subsection{Adjustments}
 Vertical adjustments are inside horizontal lists. They migrate to the enclosing vertical list
 where they are unpacked and added after the horizontal material.
@@ -3200,6 +3219,37 @@ case TAG(image_kind,b110): @+ HTEG_IMAGE(b110);@+break;
 case TAG(image_kind,b111): @+ HTEG_IMAGE(b111);@+break;
 @
 
+\subsection{Links and Labels}
+@<GET macros@>=
+#define @[HGET_LINK(I)@] @/\
+{ @+pointer p;\
+  p=get_node(link_node_size);  type(p)=whatsit_node; subtype(p)=link_node;\
+  if (I&b001) HGET16(link_label(p));@+ else link_label(p)=HGET8; \
+  if (I&b010) link_on(p)=1; else link_on(p)=0;\
+  tail_append(p);}
+@
+
+@<TEG macros@>=
+#define @[HTEG_LINK(I)@] @/\
+{ @+pointer p;\
+  p=get_node(link_node_size);  type(p)=whatsit_node; subtype(p)=link_node;\
+  if (I&b001) HTEG16(link_label(p));@+ else link_label(p)=HTEG8; \
+  if (I&b010) link_on(p)=1; else link_on(p)=0;\
+  tail_append(p);}
+@
+
+@<cases to get content@>=
+case TAG(link_kind,b000): @+ HGET_LINK(b000); break;
+case TAG(link_kind,b001): @+ HGET_LINK(b001); break;
+case TAG(link_kind,b010): @+ HGET_LINK(b010); break;
+case TAG(link_kind,b011): @+ HGET_LINK(b011); break;
+@
+@<cases to teg content@>=
+case TAG(link_kind,b000): @+ HTEG_LINK(b000); break;
+case TAG(link_kind,b001): @+ HTEG_LINK(b001); break;
+case TAG(link_kind,b010): @+ HTEG_LINK(b010); break;
+case TAG(link_kind,b011): @+ HTEG_LINK(b011); break;
+@
 
 \section{Routines from \TeX}
 \subsection{Header Files and the \TeX\ Library}
@@ -3267,28 +3317,10 @@ extern int32_t*integer_def;
 \subsection{Printing}
 
 \changestyle{hprint.tex}
-These are the |extern| declarations:
-@<\TeX\ |extern|@>=
-extern void print_str(char *s);
-extern void print_int(int n);
-extern void print_char(ASCII_code @!s);
-extern void overflow(char *@!s, int @!n); /*stop due to finiteness*/ 
-extern void show_box(pointer p);
-extern void confusion(str_number @!s);  /*consistency check violated; |s| tells where*/ 
-@
 
 \subsection{Arithmetic}
 
 \changestyle{harith.tex}
-
-We add external declarations. 
-
-@<\TeX\ |extern|@>=
-extern int half(int x);
-extern scaled x_over_n(scaled x,int n);
-extern scaled xn_over_d(scaled x, int n, int d);
-@
-
 
 \subsection{Memory}
 \TeX's main data structure is the |mem| array. In this section, we will extract the
@@ -3296,42 +3328,11 @@ extern scaled xn_over_d(scaled x, int n, int d);
  
 \changestyle{hmem.tex}
 
-The following declarations will suffice:
-
-@<\TeX\ |extern|@>=
-extern memory_word *const mem; /*the big dynamic storage area*/ 
-extern pointer temp_ptr;  /*a pointer variable for occasional emergency use*/ 
-extern pointer @!lo_mem_max; /*the largest location of variable-size memory in use*/ 
-extern pointer hi_mem_min; /*the smallest location of one-word memory in use*/ 
-extern pointer @!avail; /*head of the list of available one-word nodes*/ 
-extern int @!var_used, @!dyn_used; /*how much memory is in use*/ 
-extern pointer get_avail(void); /*single-word node allocation*/ 
-extern  pointer get_node(int @!s); /*variable-size node allocation*/ 
-extern void free_node(pointer @!p, halfword @!s); /*variable-size node liberation*/ 
-extern void flush_node_list(pointer @!p); /*erase list of nodes starting at |p|*/ 
-extern void mem_init(void); /*initialize the memory management*/
-@
-
-
 \subsection{Boxes and Friends}
 
 In this section we will export the functions that create structures in |mem|: boxes, rules, ligatures and more such things.
 
 \changestyle{hbox.tex}
-
-The above functions are used throughout the \HINT/ and \TeX\ code.
-
-@<\TeX\ |extern|@>=
-extern pointer new_null_box(void); /*creates a new box node*/ 
-extern pointer new_rule(void);
-extern pointer new_disc(void); /*creates an empty |disc_node|*/ 
-extern pointer new_kern(scaled w);
-extern pointer new_spec(pointer @!p); /*duplicates a glue specification*/ 
-extern pointer new_ligature(quarterword @!f, quarterword @!c, pointer @!q);
-extern void delete_glue_ref(pointer @!p); /*|p| points to a glue specification*/ 
-extern pointer copy_node_list(pointer @!p); /*makes a duplicate of the
-  node list that starts at |p| and returns a pointer to the new list*/ 
-@
 
 \subsection{Lists and Nesting}
 Most of \TeX's operations are performed on the ``current list''. 
@@ -3341,49 +3342,15 @@ Now lets consider the modifications to \TeX's list handling.
  
 \changestyle{hlist.tex}
 
-We conclude the section with the external declarations and necessary macros.
-
-@<\TeX\ |extern|@>=
-
-extern list_state_record cur_list;
-extern list_state_record nest[];
-extern uint16_t nest_ptr;
-extern void push_nest(void);
-extern void pop_nest(void);
-@
-
 \subsection{Line Breaking}
 
 \changestyle{hlinebreak.tex}
 
-Here are the declarations we need to be extern:
-
-@<\TeX\ |extern|@>=
-extern scaled *const active_width;   /*distance from first active node to~|cur_p|*/ 
-extern void line_break(int final_widow_penalty, pointer par_ptr);
-extern pointer @!just_box; /*the |hlist_node| for the last line of the new paragraph*/ 
-extern pointer @!adjust_tail; /*tail of adjustment list*/ 
-extern void append_to_vlist(pointer @!b, uint32_t offset);
-
-@
-
 \subsection{Displayed Formulas}
 \changestyle{hdisplay.tex}
 
-
-@<\TeX\ |extern|@>=
-extern void hdisplay(pointer p, pointer a, bool l);
-@
-
 \subsection{Packing Boxes}
 \changestyle{hpack.tex}
-
-@<\TeX\ |extern|@>=
-extern  pointer hpack(pointer @!p, scaled @!w, small_number @!m);
-extern pointer vpackage(pointer @!p, scaled @!h, small_number @!m, scaled @!l);
-scaled *const @!total_stretch, *const @!total_shrink;  /*glue found by |hpack| or |vpack|*/ 
-@
-
 
 \subsection{Page Building}\label{texbuildpage}
 
@@ -3477,13 +3444,6 @@ extern void hflush_contribution_list(void);
 To handle insertions in the page building process we extract code from \TeX.
 
 \changestyle{hinsert.tex}
-
-@<\TeX\ |extern|@>=
-extern void happend_insertion(pointer p);
-extern void hpack_page(void);
-@
-
-
 
 \subsection{Font Metric Files}
 In section~\secref{fonts} we mentioned the \TeX\ function  |read_font_info|. 
@@ -3597,9 +3557,6 @@ else
 @
 
 To fix page parameters before it is too late, \TeX\ uses the function |freeze_page_specs|.
-@<\TeX\ |extern|@>=
-extern void freeze_page_specs(small_number s);
-@
 
 The necessary topskip glue is determined when the final box is inserted
 into the page. Until then its natural height is included in the |page_total|
@@ -3809,20 +3766,34 @@ by the page builder. It is usually a penalty or glue node less often
 also a kern node. So the page builder knows the node where the page break occurs
 and we simply need a way to determine the position in the content section from the
 node. We could of course store the position inside each node. But this would make 
-all nodes bigger and since \TeX's pointers are limited to 16 bit this is not a good idea.
+all nodes bigger and since (in the current implementation)
+\TeX's pointers are limited to 16 bit, this is not a good idea.
 A second alternative would be to generate the pages directly from
 the node representations in the \HINT/ file. This is ultimatively the best solution
 but requires rewriting \TeX's algorithms to work with that new representation---and I
 simply don't have the time to do that.
 So I choose a third alternative: 
 I implement a table to map node pointers to positions.
-Unfortunately , the position alone is not sufficient. Page breaks
+Unfortunately, the position alone is not sufficient. Page breaks
 often occur in the middle of a paragraph, and for the line breaking
 algorithm, the information stored in the paragraph node is essential.
 Therefore the table will store also an offset to the enclosing top level node.
 (A text node---not implemented yet---will possibly need the current font.)
 We call the complete information associated with the position a ``location''
 and the location is what we store in the table.
+
+When implementing a \HINT/ viewer, it will become necessary to store
+positions inside a \HINT/ file for later use. For example, a \HINT/ viewer
+may want to open a \HINT/ file exactly at the position where the user has
+stopped reading last time. We do not want to burden such programs with
+all the details of a |location_t| type. Hence we commit ourself to code
+locations in an |uint64_t| value and will make sure that these
+values contain enough information to position the \HINT/ file to
+a unique and reproducible position.
+The |uint64_t| type is an opaque type for the user interface,
+but by storing the 32 bit position
+inside the content section in the most significant bits, the user interface can compare
+the 64 bit integers to find out if a location preceeds an other location. 
 
 \subsection{Mapping node pointers to locations}
 Since \TeX's pointers are only 16-bit integers the most simple
@@ -3832,7 +3803,7 @@ and all other nodes have two or more memory words, we can use not only
 the table entry at the pointer value |p| but also the table entry at $|p|+1$.
 We use the first for the node position and the second for a node's offset
 from the enclosing  paragraph node 
-or other node that is split across pages.
+or other top level node that is split across pages.
 
 @<\HINT/ variables@>=
 static uint32_t map[0x10000];
@@ -3843,7 +3814,7 @@ sets all records to zero.
 
 @<\HINT/ functions@>=
 static void clear_map(void)
-{ @+memset(map,0,sizeof(map));
+{ @+memset(map,0,sizeof(map));@+
 }
 @
 
@@ -3856,30 +3827,30 @@ To delete an entry, simply call |store_map(p,0,0)|.
 
 @<\HINT/ functions@>=
 void store_map(pointer p, uint32_t pos, uint32_t offset)
-{ map[p]=pos;
-  map[p+1]=offset;
+{@+ map[p]=pos;
+  map[p+1]=offset;@+
 }
 
 uint32_t hposition(pointer p) 
-{ return map[p];
+{@+ return map[p];@+
 }
 @  
 
-When implementing a \HINT/ viewer, it will become necessary to store
-positions inside a \HINT/ file for later use. For example, a \HINT/ viewer
-may want to open a \HINT/ file exactly at the position where the user has
-stopped reading last time. We do not want to burden such programs with
-all the details of a |location_t| type. Hence we commit ourself to code
-locations in an |uint64_t| value and will make sure that these
-values contain enough information to position the \HINT/ file to
-a unique and reproducible position.
-To do so, we simply code the position in the low 32 bits and the
-offset in the high 32 bits.
+The function that takes information form the cache and converts it to a |uint64_t| location, as mentioned above, commes next. It returns |HINT_NO_LOC| if no information is in the cache.
+This value is used to indicate that a variable contains no valid location.
 
+@<\HINT/ |extern|@>=
+#define HINT_NO_LOC 0xFFFFFFFFFFFFFFFF
+#define PAGE_LOC(P,Q) (((uint64_t)((P)+(Q))<<32) + (uint64_t)(Q))
+#define LOC_POS(P) ((P)>>32) /* the node position */
+#define LOC_OFF(P) ((P)&0xFFFFFFFF) /* the distance to the top level node */
+#define LOC_POS0(P) (LOC_POS(P)-LOC_OFF(P)) /* the top level position */
+@
 
 @<\HINT/ auxiliar functions@>=
-uint64_t hlocation(pointer p) /* return the location of |p| or 0*/
-{ @+return (uint64_t)(map[p]) + (((uint64_t)map[p+1])<<32);
+
+static uint64_t hlocation(pointer p)
+{ @+return PAGE_LOC(map[p],map[p+1]);@+
 }
 @  
 
@@ -3932,7 +3903,7 @@ void hloc_clear(void)
 
 bool hloc_next(void)
 { @+int i=cur_loc;
-  if ((page_loc[cur_loc]&0xffffffff)>=hend-hstart) 
+  if (LOC_POS(page_loc[cur_loc])>=hend-hstart) 
     return false;
   NEXT_PAGE(i);
   if (i==hi_loc) 
@@ -3965,7 +3936,7 @@ the page cache itself. We start with the initialization function:
 
 @<\HINT/ functions@>=
 void hloc_init(void)
-{ cur_loc=0;
+{@+cur_loc=0;
   hloc_clear();
   page_loc[cur_loc]=0;
   DBG(DBGPAGE,"loc_init: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
@@ -3980,13 +3951,13 @@ In other cases, the new position is already somewhere in the page cache,
 for example if we follow a link, and later return to the same position.
 In this case we just change |cur_loc| to point to the new position in the cache.
 A more drastic action needs to be taken if the value of |h| is not in the page location cache.
-if the location of the current page is new, we do not know anything about the position
+If the location of the current page is new, we do not know anything about the position
 of following or preceeding pages and we have to clear the cache. 
 
 @<\HINT/ auxiliar functions@>=
 
 void hloc_set(uint64_t h)
-{ int i;
+{@+ int i;
   if (page_loc[cur_loc]==h) return;
   for (i=lo_loc,NEXT_PAGE(i); i!=hi_loc; NEXT_PAGE(i))
    if (page_loc[i]==h)
@@ -4066,7 +4037,7 @@ void hloc_set_prev(pointer p)
 }
 @
 
-The following functions are used inside the \TeX\ library:
+The following functions are called from the \TeX\ code:
 
 @<\HINT/ |extern|@>=
 extern void hloc_init(void);
@@ -4096,22 +4067,23 @@ functions, |hint_map| and |hint_unmap|, that must be implemented by
 the framework using the \HINT/ backend.  If mapping the file fails,
 the function |hint_map| should set |hbase| to |NULL| and return zero;
 otherwise, it should set |hbase| to a valid memory address and return the number 
-of byte mapped.
+of byte mapped. The value of |hbase| can therefore be used to check whether a \HINT/
+file is loaded.
 
 @<\HINT/ functions@>=
 void hint_begin(void)
-{ uint64_t hbase_size;
+{ @+uint64_t hbase_size;
   if (hbase!=NULL) 
     hint_end();
   mem_init();
   list_init(); 
   hclear_dir();
-  hclear_fonts();
+  hclear_fonts();@/
   hbase_size=hint_map();
   if (hbase_size==0) QUIT("Unable to map the input file");
   hpos=hstart=hbase;
   hend=hstart+hbase_size;
-  hget_banner();
+  hget_banner();@/
   hcheck_banner("hint");
   hget_directory();
   hget_definition_section();
@@ -4122,9 +4094,9 @@ void hint_begin(void)
 }
 
 void hint_end(void)
-{ if (hbase==NULL) return;
+{ @+if (hbase==NULL) return;
   hint_unmap(); 
-  hpos=hstart=hend=NULL;
+  hbase=hpos=hstart=hend=NULL;
   hflush_contribution_list(); hpage_init();
   flush_node_list(link(page_head));
   list_leaks();
@@ -4142,13 +4114,35 @@ extern void hint_unmap(void);
 @
 
 
+\subsection{Changing the Page Dimensions}
+A central feature of a \HINT/ viewer is its ability to change the dimensions and the
+resolution of the displayed pages. To do so the function |hint_resize| is called.
+
+@<render functions@>=
+void hint_resize(int px_h, int px_v, double dpi)
+{ static int old_px_h=0, old_px_v=0;
+  static double old_dpi=0.0;
+  nativeSetSize(px_h, px_v, dpi);
+  if (old_px_h==px_h && old_px_v==px_v && old_dpi==dpi) return;
+  old_px_h=px_h; old_px_v=px_v; old_dpi=dpi;
+  hloc_clear();
+  hflush_contribution_list(); hpage_init();
+  forward_mode=false;
+  backward_mode=false;
+}
+@
+The function tells the native renderer about the change, clears all locations
+from the location cache, removes nodes from the contribution list,
+and resets the rendering direction.
+
+
 \subsection{Building Pages Forward and Backward}
 After opening the \HINT/ file, \HINT/ viewers need a to be able to move forward to
 the next page. Here is the function to do that.
 
 @<\HINT/ functions@>=
 bool hint_forward(void)
-{ hpage_init();
+{@+ hpage_init();
   if (hbuild_page()) return true;
   while (hpos<hend)
   { hget_content();
@@ -4162,7 +4156,7 @@ return false;
 This function attempts to produce a page in forward mode. If successful it returns |true|
 and the caller can set the |forward_mode| variable to |true| to indicate that the current page
 was produced in forward mode. If unsuccessfull, it returns false.
-First the function |hpage_init| returns the ``old'' current page, stored in |streams[0].p|, to
+First the function |hpage_init| returns the ``old'' current page to
 free storage and initializes the variables that control the page building process.
 It is then assumed that any material still on the contribution list should fill the
 new page top to bottom. The call to |hbuild_page| will move any such material 
@@ -4181,7 +4175,7 @@ in the location cache as starting point for the next page.
 
 To summarize: If the variable |forward_mode| is |true|, the |hint_forward| function
 can be called to produce the next page reusing all the work already done while
-producing the current page. In the location cache, we will have at least two enties: 
+producing the current page. After the call, we will have at least two enties in the location cache:
 the top of the current page and the top of the next page.
 
 
@@ -4189,7 +4183,7 @@ the top of the current page and the top of the next page.
 Similarly, we implement paging backward.
  @<\HINT/ functions@>=
 bool hint_backward(void)
-{ hpage_init();
+{@+ hpage_init();
   if (hbuild_page_up()) return true;
   while (hpos>hstart)
   { hteg_content();
@@ -4203,8 +4197,8 @@ bool hint_backward(void)
 Here it is assumed that the material in the contribution list
 belongs to the bottom of the preceeding page and |hpos| will
 indicate where parsing should contine when producing the previous page.
-In the location cache there are at least two enties: the top of the current page and the top of the next page.
-
+ After the call, we will have at least two enties in the location cache:
+the top of the current page and the top of the next page.
 @<\HINT/ |extern|@>=
 extern bool hint_forward(void);
 extern bool hint_backward(void);
@@ -4337,13 +4331,13 @@ The viewer might store this location to be able to return to this page at a late
 
 uint64_t hint_page_top(uint64_t h)
 { if (hbase==NULL) return 0;
-  hpos=hstart+(h&0xffffffff);
+  hpos=hstart+LOC_POS0(h);
   if (hpos>=hend)
     return hint_page_bottom(hend-hstart);
   hflush_contribution_list();
   hloc_set(h);
-  if (h>0xffffffff)
-    hget_par_node(h>>32);
+  if (LOC_OFF(h))
+    hget_par_node(LOC_OFF(h));
   hint_forward();
 #if 0
   show_box(streams[0].p);
@@ -4442,9 +4436,9 @@ and return the new location.
 uint64_t  hint_page_bottom(uint64_t h)
 { if (hbase==NULL) return 0;
   hflush_contribution_list(); 
-  hpos=hstart+(h&0xffffffff);
-  if (h>0xffffffff)
-    hteg_par_node(h>>32);
+  hpos=hstart+LOC_POS0(h);
+  if (LOC_OFF(h))
+    hteg_par_node(LOC_OFF(h));
   if (!hint_backward())  return hint_page();
   backward_mode=true;
   forward_mode=false;
@@ -4454,10 +4448,130 @@ uint64_t  hint_page_bottom(uint64_t h)
 A function to build a page centered around a given location completes the set of
 page building functions.
 @<render functions@>=
-uint64_t  hint_page_center(uint64_t h)
+uint64_t  hint_page_middle(uint64_t h)
 { if (hbase==NULL) return hint_blank();
-  QUIT("hint_page_center not yet implemented");
+  QUIT("hint_page_middle not yet implemented");
 }
+@
+
+\subsection{Links}
+A \HINT/ file may contain two types of links: internal links and public links.
+Internal links are part of the displayed document and can be activated to
+navigate to a different location in the document.
+Internal links will be implemented soon.
+
+Public links are made available to the user interface which can display them for example
+in a menu from which the user can select them to move to the desired location.
+
+The first question the user interface will ask is: Are there any public labels
+and if yes, how many? Public labels are numbered from 0 to |max_public| and
+the following function will answer the question:
+
+@<\HINT/ functions@>=
+int hint_get_label_max(void)
+{@+ return max_public;@+}
+@
+If it returns a negative value, there are no public labels; if it returns $n\ge 0$,
+there are $n+1$ public labels numbered $0$ to $n$.
+
+For the communication with the user interface, a simple data type is used.
+It reveals only the information relevant to the user interface
+and allocates the necessary memory, even for the title string, in a single chunk.
+
+@<\HINT/ |extern|@>=
+typedef struct { uint64_t pos;  uint8_t major, minor; uint8_t where; char title[]; } hint_label_t;
+@
+The |pos| field contains a ``position'' in the hint file (like the ones returned from
+and passed to functions like |hint_page_top|). The user interface will use it to
+navigate to the desired position on the \HINT/ file.
+The remainder of the record is used to organize and identify the label.
+Most importantly, a public label has a title. The titel, for example
+``Introduction'' or ``Chapter 1'', will tell the user what
+to expect when moving to the place that carries this label.
+The major and minor numbers are designed so that the user interface
+can organize the labels. 
+Labels that have the same major number belong to
+a group of related labels. So the user interface may indent them or put them in
+a sub menu. Major and minor numbers are also strictly consecutive. That means
+that the first label with number~0 has a major and a minor number of zero;
+and if a label with major number~3 and minor number~5 existst then the label
+preceeding it must have major number~3 and minor number~4; further
+if a label with major number~2 and minor number~0 existst, then the
+label preceeding it must have a major number~1.
+
+Labels with a minor number of zero are often just a heading for the following
+labels with the same major number and minor numbers 1, 2, 3, \dots\
+These labels then have a |pos| value of |HINT_NO_LOC|, a value that
+can never be an actual location in a \HINT/ file.
+
+To obtain the information for the public label $i$, the following function can be called:
+
+@<\HINT/ functions@>=
+hint_label_t *hint_get_label(int i)
+{@+ hint_label_t *p;
+  if (i<0 || i>max_public) return NULL;
+  p=(hint_label_t *)malloc(sizeof(hint_label_t)+strlen(label_def[i].n)+1);
+  if (p==NULL) QUIT("Out of memory for abel information");
+  p->pos=((uint64_t)label_def[i].pos<<32)+@|(label_def[i].pos-label_def[i].pos0);@/
+  p->major=label_def[i].major;@+  p->minor=label_def[i].minor;@/
+  p->where=label_def[i].where;
+  strcpy(p->title,label_def[i].n);@/
+  return p;
+}
+@
+If $i$ is in the valid range from 0 to |max_public|, the function
+returns a pointer to a |hint_label_t| that was allocated with |malloc|.
+If the pointer is no longer needed, the user interface should pass the pointer
+to |free| to release the memory.
+
+To actually navigate to the position of label $i$, two simpler functions
+are available.
+
+@<\HINT/ functions@>=
+uint64_t hint_get_label_pos(int i)
+{@+ if (i<0 || i>max_public) return HINT_NO_LOC;
+  return ((uint64_t)label_def[i].pos<<32)+(label_def[i].pos-label_def[i].pos0) ;
+}
+uint8_t hint_get_label_where(int i)
+{@+ if (i<0 || i>max_public) return HINT_TOP;
+  return label_def[i].where;
+}
+@
+
+In both cases the parameter |i| is the labels index.
+|hint_get_label_pos| returns the label's position and  |hint_get_label_where| indicates where the
+label should be placed on the page.
+The values are:
+@<\HINT/ |extern|@>=
+#define HINT_TOP 1
+#define HINT_BOTTOM 2
+#define HINT_MIDDLE 3
+@
+The user interface should pass the position to
+|hint_page_top|, |hint_page_bottom|, or |hint_page_middle| to obtain
+the desired page.
+As a shortcut, it can call this function:
+
+@<render functions@>=
+ uint64_t hint_get_label_page(int i)
+{@+ uint64_t h;
+  uint8_t w;
+  h=hint_get_label_pos(i);
+  if (h==HINT_NO_LOC) return h;
+  w= hint_get_label_where(i);
+  if (w==HINT_TOP) return hint_page_top(h);
+  else if (w==HINT_BOTTOM) return hint_page_bottom(h);
+  else return hint_page_middle(h);
+}
+@
+
+Here is a summary of the above functions:
+@<\HINT/ |extern|@>=
+extern int hint_get_label_max(void);
+extern hint_label_t *hint_get_label(int i);
+extern uint64_t hint_get_label_pos(int i);
+extern uint8_t hint_get_label_where(int i);
+extern uint64_t hint_get_label_page(int i);
 @
 
 \subsection{Searching}\label{search}
@@ -4468,7 +4582,7 @@ responsibility of the graphical user interface.  The backend just needs
 to indicate which glyphs must be highlighted.  For this
 purpose, every call to |nativeGlyph| passes a style parameter.
 Currently two style bits are defined: |MARK_BIT| and |FOCUS_BIT|.
-@<render macros@>=
+@<render definitions@>=
 #define MARK_BIT 0x1
 #define FOCUS_BIT 0x2
 @
@@ -4559,7 +4673,7 @@ static void m_put(uint32_t d) /* write into |m_dist| */
 static uint32_t m_get(void)  /* read from |m_dist| */
 { uint32_t x,y;
   x=m_dist[m_ptr++];
-  if (x==0xFF) return 0xFFFFFFFF;
+  if (x==0xFF) return HINT_NO_POS;
   if (x&0x80) return x&0x7F;
   while (true)
   { y=m_dist[m_ptr++];
@@ -4801,7 +4915,7 @@ In difficult cases, like ``\hbox{dif- ficult}'',
 the ligature ``ffi'' is in the |ignore_list|, the |pre_break|
 list contains ``f-'' and the |post_break| list contains
 the ligature ``fi''. Because in the latter case, there is no
-simple relation between the |ignore_list< and its replacement,
+simple relation between the |ignore_list| and its replacement,
 we will mark the whole replacement if any part of the ignore
 list is marked.
 Because the |ignore_list| may contaon boxes, traversing it
@@ -4887,26 +5001,6 @@ bool hint_next_mark(void)
 }
 @
 
-\subsection{Changing the page dimensions}
-A central feature of a \HINT/ viewer is its ability to change the dimensions and the
-resolution of the displayed pages. To do so the function |hint_resize| is called.
-
-@<render functions@>=
-void hint_resize(int px_h, int px_v, double dpi)
-{ static int old_px_h=0, old_px_v=0;
-  static double old_dpi=0.0;
-  nativeSetSize(px_h, px_v, dpi);
-  if (old_px_h==px_h && old_px_v==px_v && old_dpi==dpi) return;
-  old_px_h=px_h; old_px_v=px_v; old_dpi=dpi;
-  hloc_clear();
-  hflush_contribution_list(); hpage_init();
-  forward_mode=false;
-  backward_mode=false;
-}
-@
-The function tells the native renderer about the change, clears all locations
-from the location cache, removes nodes from the contribution list,
-and resets the rendering direction.
 
 
 \section{Rendering \HINT/ Files}
@@ -5307,7 +5401,7 @@ into a representation that is more convenient for non \TeX{nical} sytems,
 namely regular points stored as |double| values. The latter is used by
 the native rendering functions. Most of the conversion is done by the macro |SP2PT|.
 
-@<render macros@>=
+@<render definitions@>=
 #define SP2PT(X) ((X)/(double)(1<<16))
 @
 @<font functions@>=
@@ -6774,14 +6868,14 @@ typedef int scaled;
 @(hrender.h@>=
 #ifndef _HRENDER_H
 #define _HRENDER_H
-@<render macros@>@;
+@<render definitions@>@;
 
 extern int page_h, page_v;
 extern uint64_t hint_blank(void);
 extern void     hint_render(void);
 extern uint64_t hint_page_get(void);
 extern uint64_t hint_page_top(uint64_t h);
-extern uint64_t hint_page_center(uint64_t h);
+extern uint64_t hint_page_middle(uint64_t h);
 extern uint64_t hint_page_bottom(uint64_t h);
 extern uint64_t hint_page(void);
 extern uint64_t hint_next_page(void);
@@ -6792,6 +6886,8 @@ extern void hmark_page(void);
 extern void hint_set_mark(char *m, int s);
 extern bool hint_prev_mark(void);
 extern bool hint_next_mark(void);
+
+
 #endif 
 @
 
@@ -6807,7 +6903,7 @@ extern bool hint_next_mark(void);
 #include "rendernative.h"
 #include "htex.h"
 #include "hint.h"
-@<render macros@>@;
+
 @<font |extern|@>@;
 
 @<render variables@>@;

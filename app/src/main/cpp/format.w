@@ -39,9 +39,9 @@
 \titletrue
 
 \def\setrevision$#1: #2 ${\gdef\lastrevision{#2}}
-\setrevision$Revision: 2314 $
+\setrevision$Revision: 2349 $
 \def\setdate$#1(#2) ${\gdef\lastdate{#2}}
-\setdate$Date: 2021-04-16 10:34:27 +0200 (Fri, 16 Apr 2021) $
+\setdate$Date: 2021-05-06 18:24:31 +0200 (Thu, 06 May 2021) $
 
 \null
 
@@ -462,13 +462,13 @@ To describe the content of a short \HINT/ file, 32 different kinds\index{kind} o
 Hence the kind of a node can be stored in 5 bits and the remaining bits of the start byte
 can be used to contain a 3 bit ``info''\index{info} value. 
 
-We define an enumeration type to give symbolic names to the kind values.
+We define an enumeration type to give symbolic names to the kind-values.
 The exact numerical values are of no specific importance;
 we will see in section~\secref{text}, however, that the assignment chosen below,
 has certain advantages.
  
-Because the usage of kind values in content nodes is 
-slightly different from the usage in definition nodes, we define alternative names for some kind values.
+Because the usage of kind-values in content nodes is 
+slightly different from the usage in definition nodes, we define alternative names for some kind-values.
 To display readable names instead of numerical values when debugging,
 we define two arrays of strings as well. Keeping the definitions consistent
 is achieved by creating all definitions from the same list
@@ -567,18 +567,18 @@ DEF_KIND(v@&pack,v@&pack,24),@/
 DEF_KIND(s@&tream,s@&tream,25),@/
 DEF_KIND(p@&age,p@&age,26),@/
 DEF_KIND(r@&ange,r@&ange,27),@/
-DEF_KIND(u@&ndefined1,u@&ndefined1,28),@/
+DEF_KIND(l@&ink,l@&abel,28),@/
 DEF_KIND(u@&ndefined2,u@&ndefined2,29),@/
 DEF_KIND(u@&ndefined3,u@&ndefined3,30),@/
 DEF_KIND(p@&enalty, i@&nt,31)
 @t@>
 @
 
-For a few kind values we have
+For a few kind-values we have
 alternative names; we will use them in the definition section 
 to express different intentions when using them.
 @<alternative kind names@>=
-font_kind=glyph_kind,int_kind=penalty_kind, dimen_kind=kern_kind,@/@t{}@>
+font_kind=glyph_kind,int_kind=penalty_kind, dimen_kind=kern_kind, label_kind=link_kind,@/@t{}@>
 @
 
 The info\index{info value} values can be used to represent numbers in the range 0 to 7; for an example
@@ -630,7 +630,7 @@ they follow most of the time the same schema:
 \item First, we define a variable for |info|.
 \item Then follows the main part of the function body, where we 
 decide on the output format, do the actual output and set the |info| value accordingly.
-\item We combine the info value with the kind value and return the correct tag.
+\item We combine the info value with the kind-value and return the correct tag.
 \item The tag value will be passed to |hput_tags| which generates
 debugging information, if requested, and stores the tag before and after the node content.
 \enditemize
@@ -645,16 +645,20 @@ Naturally, we use the |info| bits to store the number of bytes needed for the ch
 
 \codesection{\putsymbol}{Writing the Short Format}\putindex{1}{2}{Glyphs}
 @<put functions@>=
+static uint8_t hput_n(uint32_t n)
+{ if (n<=0xFF) @+
+  {@+HPUT8(n);@+ return 1;@+}
+  else if (n<=0xFFFF) @+
+  {@+HPUT16(n);@+ return 2;@+}
+  else if (n<=0xFFFFFF)@+ 
+  {@+HPUT24(n);@+ return 3;@+}
+  else @+
+  {@+HPUT32(n);@+ return 4;@+}
+}
+
 uint8_t hput_glyph(glyph_t *g)
 { info_t info;
-  if (g->c<=0xFF) @+
-  {@+HPUT8(g->c);@+ info=1;@+}
-  else if (g->c<=0xFFFF) @+
-  {@+HPUT16(g->c);@+ info=2;@+}
-  else if (g->c<=0xFFFFFF)@+ 
-  {@+HPUT24(g->c);@+ info=3;@+}
-  else @+
-  {@+HPUT32(g->c);@+ info=4;@+}
+  info = hput_n(g->c);
   HPUT8(g->f);@/
   return TAG(glyph_kind,info);
 }
@@ -759,12 +763,14 @@ node in long format.
 
 \codesection{\getsymbol}{Reading the Short Format}\getindex{1}{2}{Glyphs}
 @<get macros@>=
+#define @[HGET_N(I,X)@] \
+  if ((I)==1) (X)=HGET8;\
+  else if ((I)==2) HGET16(X);\
+  else if ((I)==3) HGET24(X);\
+  else HGET32(X);
+
 #define @[HGET_GLYPH(I,G)@] \
-  if (I==1) (G).c=HGET8;\
-  else if (I==2) HGET16((G).c);\
-  else if (I==3) HGET24((G).c);\
-  else if (I==4) HGET32((G).c);\
-  (G).f=HGET8; @+REF_RNG(font_kind,(G).f);@/\
+  HGET_N(I,(G).c); (G).f=HGET8; @+REF_RNG(font_kind,(G).f);@/\
   hwrite_glyph(&(G));\
 @
 
@@ -821,7 +827,10 @@ void hwrite_start(void)
 
 void hwrite_end(void)
 { nesting--; hwritec('>'); 
- if (nesting==0 && section_no==2) hwrite_range();
+  if (section_no==2)
+  { if (nesting==0) hwrite_range();
+    hwrite_label();
+  }
 }
 
 void hwrite_comment(char *str)
@@ -1653,9 +1662,11 @@ void hwrite_dimension(dimen_t x)
 In the short format, dimensions are stored as 32 bit scaled point values without conversion.
 \getcode
 @<get functions@>=
-void hget_dimen(void)
-{ uint32_t d;
-  HGET32(d); hwrite_dimension(d);
+void hget_dimen(uint8_t a)
+{ if (INFO(a)==b000)
+  {uint8_t r; r=HGET8; REF(dimen_kind,r); hwrite_ref(r);}
+  else
+  { uint32_t d; HGET32(d); hwrite_dimension(d); }
 }
 @
 
@@ -1932,7 +1943,7 @@ used. Instead penalties must be between -20000 and +20000.
 (\TeX\ specifies a range of -10000 to +10000, but plain \TeX\ uses the value -20000 
 when it defines the supereject control sequence.)  
 The more general node is called an integer node; 
-it shares the same kind value |int_kind=penalty_kind|
+it shares the same kind-value |int_kind=penalty_kind|
 but allows the full range of values.  
 The info value of a penalty node is 1 or 2 and indicates the number of bytes
 used to store the integer. The info value 4 can be used for general
@@ -2445,9 +2456,9 @@ When a node contains multiple other nodes, we package these nodes into a list\in
 It is important to note that list nodes never occur as individual nodes, 
 they only occur as parts of other nodes.
 In total, we have four different types of lists: plain lists that use the
-kind value |list_kind|, text\index{text} lists that use the kind value |text_kind|,
-adjustments that use the kind value |adjust_kind|,
-and parameter\index{parameter} lists that use the kind value |param_kind|.
+kind-value |list_kind|, text\index{text} lists that use the kind-value |text_kind|,
+adjustments that use the kind-value |adjust_kind|,
+and parameter\index{parameter} lists that use the kind-value |param_kind|.
 A description of the first two types of lists follows here.
 Adjustments\index{adjustment} are just plain lists of vertical material described in section~\secref{adjust}, and
 parameter lists are described in section~\secref{paramlist}.
@@ -2604,8 +2615,8 @@ in longer lists by a factor of about 3. Hence if we do not have an estimate,
 we reserve only a single byte to store the size of a list.
 The statistics looks different for lists stored as a text: The number of texts
 that require two byte for the size is slightly larger than the number of texts that 
-need only one byte, and the total amount of data stored in these texts is larger by a factor of 2 to 7
-than the total amount of data found in all other texts.
+need only one byte, and the total amount of data stored in these texts is larger
+by a factor of 2 to 7 than the total amount of data found in all other texts.
 Hence as a default, we reserve two byte to store the size for texts.
 
 
@@ -2680,11 +2691,9 @@ void hget_size_boundary(info_t info)
 uint32_t hget_list_size(info_t info)
 { uint32_t n;  
   if (info==1) return 0;
-  else if (info==2) n=HGET8;
-  else if (info==3) HGET16(n);
-  else if (info==4) HGET24(n);
-  else if (info==5) HGET32(n);
-  else QUIT("List info %d must be 1, 2, 3, 4, or 5",info);
+  if (info>5)  
+    QUIT("List info %d must be 1, 2, 3, 4, or 5",info);
+  HGET_N(info-1,n);
   return n;
 } 
 
@@ -2745,6 +2754,7 @@ uint8_t hput_list(uint32_t start_pos, list_t *l)
     { int d= j-i;
       DBG(DBGNODE,"Moving %u byte by %d\n", l->s,d);
       memmove(hstart+l->p+d,hstart+l->p,l->s);
+      @<adjust label positions after moving a list@>@;
       l->p=l->p+d;@+
       list_end=list_end+d;
     }
@@ -2759,105 +2769,123 @@ uint8_t hput_list(uint32_t start_pos, list_t *l)
 
 
 \subsection{Texts}\label{text}
-A Text\index{text} is a list of nodes with a representation optimized for character nodes.
-In the long format, a sequence of characters like \.{Hello} is written
-\.{<glyph 'H'} \.{*0>} \.{<glyph} \.{'e'} \.{*0>} \.{<glyph 'l' *0>} 
-\.{<glyph 'l' *0>} \.{<glyph 'o' *0>}, and even in the short
-format it requires 4 byte per character! As a text, the same sequence is written  \.{"Hello"} in the
-long format and the short format requires usually just 1 byte per character.
-Indeed except the bytes with values from |0x00| to |0x20|, which are considered 
-control\index{control code} codes, all bytes and all \hbox{UTF-8}\index{UTF8} multibyte sequences
-are simply considered character\index{character code} codes. They are equivalent to a glyph node 
-in the ``current font''. The current\index{current font} font\index{font}
-is font number 0 at the beginning of a text
-and it can be changed using the control codes. We introduce the concept of a ``current font''
-because we do not expect the font to change too often, and it allows for a more compact
-representation if we do not store the font with every character code. It has an
-important disadvantage though: storing only font changes prevents us from parsing
-a text backwards; we always have to start at the beginning of the text, where the
-font is known to be font number 0.
+A Text\index{text} is a list of nodes with a representation optimized
+for character nodes.  In the long format, a sequence of characters
+like \.{Hello} is written \.{<glyph 'H'} \.{*0>} \.{<glyph} \.{'e'}
+\.{*0>} \.{<glyph 'l' *0>} \.{<glyph 'l' *0>} \.{<glyph 'o' *0>}, and
+even in the short format it requires 4 byte per character! As a text,
+the same sequence is written \.{"Hello"} in the long format and the
+short format requires usually just 1 byte per character.  Indeed
+except the bytes with values from |0x00| to |0x20|, which are
+considered control\index{control code} codes, all bytes and all
+\hbox{UTF-8}\index{UTF8} multibyte sequences are simply considered
+character\index{character code} codes. They are equivalent to a glyph
+node in the ``current font''. The current\index{current font}
+font\index{font} is font number 0 at the beginning of a text and it
+can be changed using the control codes. We introduce the concept of a
+``current font'' because we do not expect the font to change too
+often, and it allows for a more compact representation if we do not
+store the font with every character code. It has an important
+disadvantage though: storing only font changes prevents us from
+parsing a text backwards; we always have to start at the beginning of
+the text, where the font is known to be font number 0.
 
-Defining a second format for encoding lists of nodes adds another difficulty to the problem we had
-discussed at the beginning of section~\secref{lists}. When we try to recover from an error and
-start reading a content stream
-at an arbitrary position, the first thing we need to find out is whether at this position we have
-the tag byte of an ordinary node or whether we have a position inside a text.
+Defining a second format for encoding lists of nodes adds another
+difficulty to the problem we had discussed at the beginning of
+section~\secref{lists}. When we try to recover from an error and start
+reading a content stream at an arbitrary position, the first thing we
+need to find out is whether at this position we have the tag byte of
+an ordinary node or whether we have a position inside a text.
 
-Inside a text, character nodes start with a byte in the range |0x21|--|0xF7|. This is a wide range
-and it overlaps considerably with the range of valid tag bytes. It is however possible to choose
-the kind values in such a way that the control codes do not overlap with the valid tag bytes that
-start a node. For this reason, the values |text_kind==0|, |list_kind==1|, |param_kind==2|,
-|xdimen_kind==3|, and |adjust_kind==4| were chosen on page~\pageref{kinddef}.
-Texts, lists, parameter lists, and extended dimensions occur only {\it inside} of content nodes, but
-are not content nodes in their own right; so the values |0x00| to |0x1F| are not used as tag bytes
-of content nodes. The value |0x20| would, as a tag byte, indicate an adjust node (|adjust_kind==4|)
-with info value zero. Because there are no predefined adjustments,  |0x20| is not used as a tag byte either.
-(An alternative choice would be to use the kind value 4 for paragraph nodes because there are no
-predefined paragraphs.)
+Inside a text, character nodes start with a byte in the range
+|0x21|--|0xF7|. This is a wide range and it overlaps considerably with
+the range of valid tag bytes. It is however possible to choose the
+kind-values in such a way that the control codes do not overlap with
+the valid tag bytes that start a node. For this reason, the values
+|text_kind==0|, |list_kind==1|, |param_kind==2|, |xdimen_kind==3|, and
+|adjust_kind==4| were chosen on page~\pageref{kinddef}.  Texts, lists,
+parameter lists, and extended dimensions occur only {\it inside} of
+content nodes, but are not content nodes in their own right; so the
+values |0x00| to |0x1F| are not used as tag bytes of content
+nodes. The value |0x20| would, as a tag byte, indicate an adjust node
+(|adjust_kind==4|) with info value zero. Because there are no
+predefined adjustments, |0x20| is not used as a tag byte either.
+(An alternative choice would be to use the kind-value 4 for paragraph
+nodes because there are no predefined paragraphs.)
 
-The largest byte that starts an UTF8 code is |0xF7|; hence, there are eight possible control codes,
-from |0xF8| to |0xFF|, available.
-The first three values  |0xF8|, |0xF9|, and |0xFA| are actually used for penalty nodes
-with info values, 0, 1, and 2. The last four  |0xFC|,  |0xFD|,  |0xFE|, and  |0xFF| are
-used as boundary marks for the text size and therefore we use only |0xFB| as control code.
+The largest byte that starts an UTF8 code is |0xF7|; hence, there are
+eight possible control codes, from |0xF8| to |0xFF|, available.  The
+first three values |0xF8|, |0xF9|, and |0xFA| are actually used for
+penalty nodes with info values, 0, 1, and 2. The last four |0xFC|,
+|0xFD|, |0xFE|, and |0xFF| are used as boundary marks for the text
+size and therefore we use only |0xFB| as control code.
 
-In the long format, we do not provide a syntax for specifying a size estimate\index{estimate} as we
-did for plain lists, because we expect text to be quite short. We allocate two byte
-for the size and hope that this will prove to be sufficient most of the time.
-Further, we will disallow the use of non-printable
-ASCII codes, because these are---by definition---not very readable, and we will
-give special meaning to some of the printable ASCII codes because we will need
-a notation for the beginning and ending of a text, for nodes inside a text, 
-and the control codes.
+In the long format, we do not provide a syntax for specifying a size
+estimate\index{estimate} as we did for plain lists, because we expect
+text to be quite short. We allocate two byte for the size and hope
+that this will prove to be sufficient most of the time.  Further, we
+will disallow the use of non-printable ASCII codes, because these
+are---by definition---not very readable, and we will give special
+meaning to some of the printable ASCII codes because we will need a
+notation for the beginning and ending of a text, for nodes inside a
+text, and the control codes.
 
 Here are the details:
 \itemize
 
-\item In the long format, a text starts and ends with a double\index{double quote} quote character ``\.{"}''.
-In the short format, texts are encoded similar to lists using the kind value |text_kind|.
+\item In the long format, a text starts and ends with a
+double\index{double quote} quote character ``\.{"}''.  In the short
+format, texts are encoded similar to lists using the kind-value
+|text_kind|.
 
-\item Arbitrary nodes can be embedded inside a text. In the long format, they are enclosed
-in pointed brackets  \.{<} \dots \.{>} as usual. In the short format, an arbitrary node 
-can follow the control code $|txt_node|=|0x1E|$. Because text may occur in nodes, the scanner needs
-to be able to parse texts nested inside nodes nested inside nodes nested inside texts \dots\ To
-accomplish this, we use the ``stack'' option of \.{flex} and 
-include the popping and pushing the
+\item Arbitrary nodes can be embedded inside a text. In the long
+format, they are enclosed in pointed brackets \.{<} \dots \.{>} as
+usual. In the short format, an arbitrary node can follow the control
+code $|txt_node|=|0x1E|$. Because text may occur in nodes, the scanner
+needs to be able to parse texts nested inside nodes nested inside
+nodes nested inside texts \dots\ To accomplish this, we use the
+``stack'' option of \.{flex} and include the popping and pushing the
 stack in the macros |SCAN_START| and |SCAN_END|.
 
-\item The space\index{space character} character ``\.{\ }'' with ASCII value |0x20| stands in both formats for the 
-font specific interword glue node (control code |txt_glue|).
+\item The space\index{space character} character ``\.{\ }'' with ASCII
+value |0x20| stands in both formats for the font specific interword
+glue node (control code |txt_glue|).
 
-\item The hyphen\index{hyphen character} character ``\.{-}'' in the long format 
-and the control code $|txt_hyphen|=|0x1F|$ in the short format
-stand for the font specific hyphen node.
+\item The hyphen\index{hyphen character} character ``\.{-}'' in the
+long format and the control code $|txt_hyphen|=|0x1F|$ in the short
+format stand for the font specific hyphen node.
 
-\item In the long format, the backslash\index{backslash} character ``\.{\\}'' is used as an escape character.
-It is used to introduce notations for control codes, as described below, and to access
-the character codes of those ASCII characters that otherwise carry a special meaning.
-For example ``\.{\\"}'' denotes the character code of the double quote character ``\.{"}'';
-and similarly ``\.{\\\\}'',  ``\.{\\<}'', ``\.{\\>}'', ``\.{\\\ }'', and ``\.{\\-}'' 
-denote the character codes of ``\.{\\}'', ``\.{<}'', ``\.{>}'', ``\.{\ }'',  and ``\.{-}'' respectively.
+\item In the long format, the backslash\index{backslash} character
+``\.{\\}'' is used as an escape character.  It is used to introduce
+notations for control codes, as described below, and to access the
+character codes of those ASCII characters that otherwise carry a
+special meaning.  For example ``\.{\\"}'' denotes the character code
+of the double quote character ``\.{"}''; and similarly ``\.{\\\\}'',
+``\.{\\<}'', ``\.{\\>}'', ``\.{\\\ }'', and ``\.{\\-}'' denote the
+character codes of ``\.{\\}'', ``\.{<}'', ``\.{>}'', ``\.{\ }'', and
+``\.{-}'' respectively.
 
 
-\item In the long format, a TAB-character (ASCII code |0x09|)\index{tab character}
-is silently converted to a space\index{space character} character (ASCII code |0x20|);
-a NL-character\index{newline character} (ASCII code |0x0A|), together with surrounding
-spaces, TAB-characters, and CR-characters\index{carriage return character}  (ASCII code |0x0D|), is silently converted
-to a single space character. 
-All other ASCII characters in the range |0x00| to |0x1F| 
-are not allowed inside a text. This rule avoids the problems arising from ``invisible''
-characters embedded in a text and it allows to break texts into lines, even with indentation\index{indentation},
-at word boundaries.
+\item In the long format, a TAB-character (ASCII code
+|0x09|)\index{tab character} is silently converted to a
+space\index{space character} character (ASCII code |0x20|); 
+a NL-character\index{newline character} (ASCII code |0x0A|), together
+with surrounding spaces, TAB-characters, 
+and CR-characters\index{carriage return character} (ASCII code |0x0D|), 
+is silently converted to a single space character.  All other ASCII
+characters in the range |0x00| to |0x1F| are not allowed inside a
+text. This rule avoids the problems arising from ``invisible''
+characters embedded in a text and it allows to break texts into lines,
+even with indentation\index{indentation}, at word boundaries.
 
-To allow breaking a text into lines without inserting spaces,  
-a NL-character together with surrounding
-spaces, TAB-characters, and CR-characters is completely ignored
-if the whole group of spaces, TAB-characters, CR-characters, and the NL-character is
-preceded by a backslash character. 
+To allow breaking a text into lines without inserting spaces, a
+NL-character together with surrounding spaces, TAB-characters, and
+CR-characters is completely ignored if the whole group of spaces,
+TAB-characters, CR-characters, and the NL-character is preceded by a
+backslash character.
 
-For example, the text ``\.{"There\ is\ no\ more\ gas\ in\ the\ tank."}''\hfil\break
-can be written as 
-\medskip
+For example, the text ``\.{"There\ is\ no\ more\ gas\ in\ the\
+tank."}''\hfil\break can be written as \medskip
  
 \qquad\vbox{\hsize=0.5\hsize\noindent
 \.{"There\ is\ }\hfil\break
@@ -2865,25 +2893,30 @@ can be written as
 \.{\hbox to 2em {$\rightarrow$\hfill}as in the tank."}
 }\hss
 
-To break long lines when writing a long format file, we use the variable |txt_length|
-to keep track of the approximate length of the current line.
+To break long lines when writing a long format file, we use the
+variable |txt_length| to keep track of the approximate length of the
+current line.
 
-\item The control codes  $|txt_font|=|0x00|$, |0x01|, |0x02|, \dots, and |0x07| are used to 
-change the current font to 
-font number 0, 1, 2, \dots, and 7. In the long format these control codes are written
-\.{\\0}, \.{\\1}, \.{\\2}, \dots, and \.{\\7}.
+\item The control codes $|txt_font|=|0x00|$, |0x01|, |0x02|, \dots,
+and |0x07| are used to change the current font to font 
+number 0, 1, 2, \dots, and 7. In the long format these control 
+codes are written \.{\\0}, \.{\\1}, \.{\\2}, \dots, and \.{\\7}.
 
-\item The control code $|txt_global|=|0x08|$ is followed by a second parameter byte. If the value
-of the parameter byte is $n$, it will set the current font to font number $n$.
-In the long format, the two byte sequence is written
-``\.{\\F}$n$\.{\\}''  where $n$ is the decimal representation of the font number.
+\item The control code $|txt_global|=|0x08|$ is followed by a second
+parameter byte. If the value of the parameter byte is $n$, it will set
+the current font to font number $n$.  In the long format, the two byte
+sequence is written ``\.{\\F}$n$\.{\\}'' where $n$ is the decimal
+representation of the font number.
 
 
-\item The control codes |0x09|, |0x0A|, |0x0B|, |0x0C|, |0x0E|, |0x0E|, |0x0F|, and |0x10| 
-are also followed by a second parameter byte. They are used to reference 
-the global definitions of penalty\index{penalty}, kern\index{kern}, ligature\index{ligature}, hyphen\index{hyphen}, glue\index{glue}, language\index{language}, rule\index{rule}, and image\index{image} nodes.
-The parameter byte contains the reference number. 
-For example, the byte sequence  |0x09| |0x03|  is equivalent to the node \.{<penalty *3>}.
+\item The control codes |0x09|, |0x0A|, |0x0B|, |0x0C|, |0x0E|,
+|0x0E|, |0x0F|, and |0x10| are also followed by a second parameter
+byte. They are used to reference the global definitions of
+penalty\index{penalty}, kern\index{kern}, ligature\index{ligature},
+hyphen\index{hyphen}, glue\index{glue}, language\index{language},
+rule\index{rule}, and image\index{image} nodes.  The parameter byte
+contains the reference number.  For example, the byte sequence |0x09|
+|0x03| is equivalent to the node \.{<penalty *3>}.
 In the long format these two-byte sequences are written,
 ``\.{\\P}$n$\.{\\}'' (penalty),
 ``\.{\\K}$n$\.{\\}'' (kern),
@@ -2892,41 +2925,49 @@ In the long format these two-byte sequences are written,
 ``\.{\\G}$n$\.{\\}'' (glue),
 ``\.{\\S}$n$\.{\\}'' (speak or german Sprache),
 ``\.{\\R}$n$\.{\\}'' (rule), and
-``\.{\\I}$n$\.{\\}'' (image), where $n$ is the decimal representation of the parameter value.
+``\.{\\I}$n$\.{\\}'' (image), where $n$ is the decimal representation 
+                     of the parameter value.
 
 
-\item The control codes from  $|txt_local|=|0x11|$ to |0x1C| are used to reference
-one of the 12 font specific parameters\index{font parameter}. In the long format they are
-written ``\.{\\a}'', ``\.{\\b}'', ``\.{\\c}'', \dots,  ``\.{\\j}'', ``\.{\\k}'', ``\.{\\l}''. 
+\item The control codes from $|txt_local|=|0x11|$ to |0x1C| are used
+to reference one of the 12 font specific parameters\index{font
+parameter}. In the long format they are written ``\.{\\a}'',
+``\.{\\b}'', ``\.{\\c}'', \dots, ``\.{\\j}'', ``\.{\\k}'',``\.{\\l}''.
 
 
-\item  The control code $|txt_cc|=|0x1D|$ is used as a prefix for an arbitrary 
-character code represented as an UTF-8 multibyte sequence. 
+\item The control code $|txt_cc|=|0x1D|$ is used as a prefix for an
+arbitrary character code represented as an UTF-8 multibyte sequence.
 Its main purpose is providing a method for including character codes
 less or equal to |0x20| which otherwise would be considered control
-codes.  In the long format, the byte sequence is written
-``\.{\\C}$n$\.{\\}'' where $n$ is the decimal representation of the
-character code.
+codes.  In the long format, the byte sequence is written ``\.{\\C}$n$\.{\\}'' 
+where $n$ is the decimal representation of the character code.
 
 
-\item The control code $|txt_node|=|0x1E|$ is used as a prefix for an arbitrary node in short format.
-In the long format, it is  written ``\.{<}'' and is followed by the node content 
-in long format terminated by  ``\.{>}''.
+\item The control code $|txt_node|=|0x1E|$ is used as a prefix for an
+arbitrary node in short format.  In the long format, it is written
+``\.{<}'' and is followed by the node content in long format
+terminated by ``\.{>}''.
 
-\item The control code $|txt_hyphen|=|0x1F|$  is used to access the font specific discretionary hyphen\index{hyphen}.
-In the long format it is simply written as ``\.{-}''. 
+\item The control code $|txt_hyphen|=|0x1F|$ is used to access the
+font specific discretionary hyphen\index{hyphen}.  In the long format
+it is simply written as ``\.{-}''.
 
-\item The control code $|txt_glue|=|0x20|$ is the space character, it is used to access the font specific
-interword\index{interword glue} glue. In the long format, we use the space character\index{space character} ``\.{\ }'' as well.
+\item The control code $|txt_glue|=|0x20|$ is the space character, it
+is used to access the font specific interword\index{interword glue}
+glue. In the long format, we use the space character\index{space
+character} ``\.{\ }'' as well.
 
-\item The control code $|txt_ignore|=|0xFB|$ is ignored, its position can be used in a link to specify a position
-between two characters. In the long format it is written as ``\.{\\@@}''.
+\item The control code $|txt_ignore|=|0xFB|$ is ignored, its position
+can be used in a link to specify a position between two characters. In
+the long format it is written as ``\.{\\@@}''.
 
 \enditemize
-For the control codes, we define an enumeration type and for references, a reference type.
+For the control codes, we define an enumeration type 
+and for references, a reference type.
 @<hint types@>=
-typedef enum { @+txt_font=0x00, txt_global=0x08, txt_local=0x11, txt_cc=0x1D, txt_node=0x1E,
-txt_hyphen=0x1F, txt_glue=0x20, txt_ignore=0xFB} txt_t;
+typedef enum { @+txt_font=0x00, txt_global=0x08, txt_local=0x11, 
+               txt_cc=0x1D, txt_node=0x1E, txt_hyphen=0x1F,
+               txt_glue=0x20, txt_ignore=0xFB} txt_t;
 @
 
 \readcode
@@ -3003,7 +3044,7 @@ txt_hyphen=0x1F, txt_glue=0x20, txt_ignore=0xFB} txt_t;
 @<scanning macros@>=
 #define @[SCAN_REF(K)@] @[yylval.rf.k=K;@+ yylval.rf.n=atoi(yytext+2)@;@]
 static int scan_level=0;
-#define SCAN_START          @[yy_push_state(INITIAL);@+scan_level++;@]
+#define SCAN_START          @[yy_push_state(INITIAL);@+if (1==scan_level++) hpos0=hpos;@]
 #define SCAN_END            @[if (scan_level--) yy_pop_state(); @/else QUIT("Too many '>' in line %d",yylineno)@]
 #define SCAN_TXT_START      @[BEGIN(TXT)@;@]
 #define SCAN_TXT_END        @[BEGIN(INITIAL)@;@]
@@ -3191,7 +3232,7 @@ void hput_txt_local(uint8_t n)
 
 
 @<hint types@>=
-typedef struct { @+kind_t k; @+uint8_t n; @+} ref_t;
+typedef struct { @+kind_t k; @+int n; @+} ref_t;
 @
 
 
@@ -3879,7 +3920,7 @@ typedef struct{@+uint8_t f; @+list_t l;@+} lig_t;
 replace_cc:@+ | replace_cc TXT_CC { hput_utf8($2); };
 lig_cc:  UNSIGNED {$$=hpos-hstart; hput_utf8($1); };
 lig_cc:  CHARCODE {$$=hpos-hstart; hput_utf8($1); };
-ref: REFERENCE {HPUT8($1); $$=$1; };
+ref: REFERENCE { HPUT8($1); $$=$1; };
 ligature:  ref { REF(font_kind,$1);}   lig_cc TXT_START replace_cc TXT_END @/
           { $$.f=$1; $$.l.p=$3; $$.l.s=(hpos-hstart)-$3; 
             RNG("Ligature size",$$.l.s,0,255);};
@@ -4241,6 +4282,7 @@ we use |b011| for ``off'' and |b111| for ``on''.
 @<symbols@>=
 %token ON "on"
 %token OFF "off"
+%type <i> on_off
 @
 
 @<scanning rules@>=
@@ -4249,8 +4291,8 @@ we use |b011| for ``off'' and |b111| for ``on''.
 @
 
 @<parsing rules@>=
-math: ON  { $$=b111; };
-math: OFF { $$=b011; };
+on_off:  ON {$$=1;} | OFF {$$=0;}
+math: on_off  { $$=b011|($1<<2); };
 @
 
 \getcode
@@ -4537,30 +4579,6 @@ uint8_t hput_image(image_t *x)
 }
 @
 
-\subsection{Colors}
-Colors\index{color} are certainly one of the features you will find in the final \HINT/ file format.
-Here some remarks must suffice.
-
-A \HINT/ viewer must be capable of rendering a page given just any valid
-position inside the content section. Therefore \HINT/ files are stateless;
-there is no need to search for preceding commands that might change a state
-variable.
-As a consequence, we can not just define a ``color change node''.
-Colors could be specified as an optional parameter of a glyph node, but the
-amount of data necessary would be considerable. In texts, on the other hand,
-a color change control code would be possible because we parse texts only in forward
-direction. The current font  would then become a current color and font with the appropriate
-changes for positions.  
-
-A more attractive alternative would be to specify colored fonts. 
-This would require an optional
-color argument for a font. For example one could have a cmr10 font in black as
-font number 3, and a cmr10 font in blue as font number 4. Having 256 different fonts,
-this is definitely a possibility because rarely you would need that many fonts 
-or that many colors. If necessary and desired, one could allow 16 bit font numbers
-of overcome the problem.
-
-Background colors could be associated with boxes as an optional parameter.
 
 \subsection{Positions, Links, and Labels}\index{position}\index{link}\index{label}
 A viewer can usually not display the entire content section of
@@ -4579,7 +4597,15 @@ Let's assume that the viewer uses a \HINT/ file in short
 format---after all that's the format designed for precisely this use.
 A position inside the content section is then the position of the
 starting byte of a node. Such a position can be stored as a 32 bit
-number.  To render a page starting at that position is not difficult:
+number. Because even the smallest node contains two tag bytes,
+the position of any node is strictly smaller than the maximum 32 bit
+number which we can conveniently use as a ``non position''.
+
+@<hint macros@>=
+#define HINT_NO_POS 0xFFFFFFFF
+@
+
+To render a page starting at a given position is not difficult:
 We just read content nodes, starting at the given position and feed
 them to \TeX's page builder until the page is complete. To implement a
 ``clickable'' table of content this is good enough. We store with
@@ -4616,7 +4642,7 @@ reached the current page using the table of content or even an index
 or a search form.
 
 This is the most complex case to consider: a link from an index or a
-search form to the position of a keyword in the main text. Lets assume
+search form to the position of a keyword in the main text. Let's assume
 someone looks up the word ``M\"unchen''.  Should the viewer then
 generate a page that starts in the middle of a sentence with the word
 ``M\"unchen''? Probably not! We want a page that shows at least the whole sentence if
@@ -4634,91 +4660,656 @@ keyword.
 
 To summarize, we need three different ways to render a page for a given position:
 \itemize
-\item A page that starts exactly at the give position.
-\item A page that ends exactly at the give position.
+\item A page that starts exactly at the given position.
+\item A page that ends exactly at the given position.
 \item The ``best'' page that contains the given position somewhere in the middle.
 \enditemize
 
-A possible way to find the ``best'' page for the latter case could be the following:
+\noindent
+A possible way to find the ``best'' page for the latter case 
+could be the following:
 \itemize
-\item If the position is inside a paragraph, break the paragraph into lines. One line will contain
-the target position. Let's call this the target line.
-\item If the paragraph will not fit entirely on the page, start the page with the beginning of the 
-paragraph if that will place the target line on the page, otherwise
-display an equal amount of lines before and after the target line. 
-\item Else traverse the content list backward for about $2/3$ of the page height and forward for about $2/3$
-of the page height, searching for the smallest negative penalty node. 
-Use the  penalty node found as either the beginning
-or ending of the page. 
-\item If there are several equally low negative penalty nodes. Prefer penalties preceding the target line
-over penalty nodes following it. A good page start is more important than a good page end.
-\item If there are are still several equally low negative penalty nodes, choose the one whose distance
-to the target line is closest to $1/2$ of the page height.
-\item If no negative penalty nodes could be found, start the page with the paragraph containing the target line.
-\item Once the page start (or end) is found, use \TeX's page builder (or its reverse variant) to complete the page.
+\item If the position is inside a paragraph, break the paragraph 
+  into lines. One line will contain
+  the target position. Let's call this the target line.
+\item If the paragraph will not fit entirely on the page, 
+  start the page with the beginning of the 
+  paragraph if that will place the target line on the page, otherwise
+  display about half a page of it before the target line. 
+\item Else traverse the content list backward for about $2/3$ of the
+  page height and forward for about $2/3$ of the page height, searching
+  for the smallest negative penalty node.  Use the penalty node found as
+  either the beginning or ending of the page.  
+\item If there are several equally low negative penalty nodes. Prefer
+  penalties preceding the target line over penalty nodes following
+  it. A good page start is more important than a good page end.
+\item If there are are still several equally low negative penalty
+  nodes, choose the one whose distance to the target line is closest
+  to $1/2$ of the page height.  
+\item If no negative penalty nodes could be found, start the page with
+  the paragraph containing the target line.  
+\item Once the page start (or end) is found, use \TeX's page builder
+  (or its reverse variant) to complete the page.
 \enditemize
 
 We call nodes that reference a position inside the content section a
-link node.  As with other nodes, we can use predefined links. The
-first 256 of them can be referenced by a single byte.  We should
-reserve reference number 0 for a link to the beginning of the content
-and reference number 1 for a link to the end of the content.  Probably
-having only 256 links would be a severe restriction, hence we will
-allow also 16 bit reference numbers.  If still more links are needed,
-links can be embedded directly in the content stream.  We need two
-types of links, a start link and an end link such that the content
+link node. We need two types of links, a start link and an end link 
+such that the content
 between the two will constitute the visible part of the link.
+Hence, link nodes will always occur in pairs of a start link 
+followed by an end link
+with the same reference %, the same nesting level, not sure!
+and no other link nodes between them.
+
+To encode a position inside the content section that can be used
+as the target of link node, an other kind of node is needed which
+we call a ``label''.
+It is possible though that link nodes and label nodes can share
+the same kind-value and we have |link_kind==label_kind|.
+
+The implementation of links and labels has to solve the
+problem of forward links:
+a link node that references a label
+that is not yet defined. 
+We solve this problem by
+keeping all labels in the definition section.
+So for every label at least a definition is available 
+before we start with the content section and we can fill
+in the position when the label is found.
+If we restrict labels to the definition section and
+do not have an alternative, the number of possible references
+is a hard limit on the number of labels in a document.
+Therefore label references are allowed to use 16 bit reference numbers.
+
+Links are not the only way to navigate inside a large
+document. The user interface can also present a selection
+of labels  in a menu. The labels that a \HINT/ document 
+makes visible to the user interface are called ``public''.
+Public labels have a unique name that should tell the user
+what to expect when navigating to the label, for example
+``Table of Content''. 
+In addition, public labels are ordered by a major and a minor
+number. Labels that have the same major number are considered
+to belong to the same group of lables and the user interface
+might present them together in a sub-menu.
+To make access to the public labels as simple as possible,
+\HINT/ requires that public labels are defined before
+any of the non public labels, that they use the reference numbers
+$0,1,\ldots\,$|max_public|, and that they are sorted
+by their major and minor numbers.
+This restriction could, however, be quite a burden when editing
+a \HINT/ file (in long format, of course). When adding or
+deleting a public label, the reference numbers of  the
+following non public labels would change and a consistent
+update of the affected link and label nodes would be required.
+To make editing simpler, the long format uses the name
+of a public label to reference the label, and it starts 
+the enumeration of the non public labels with reference
+number 0 instead of $|max_public|+1$. This keeps the
+reference numbers of non public labels in the long 
+format independent of the number of public labels.
+
+These considerations are reflected in the data structure  used
+to represent and store labels.
+
+@<hint types@>=
+typedef enum {l_ref16=b001, l_nested=b010, l_public=b100,
+ l_defined=0x10, l_used=0x20, l_pos=0x40} l_flags_t;  
+typedef
+struct {@+ l_flags_t i;@+ uint32_t pos; /* flags and position */
+         uint8_t where; /* where on the rendered page */
+         int next; /* reference in a linked list */
+         uint32_t pos0;@+ uint8_t f; /* secondary position */
+         char *n; @+ uint8_t major,minor; /* public labels */
+ } label_t;
+
+@
+
+@<common variables@>=
+label_t *labels;
+int first_label=-1;
+int public_count=0;
+bool public_labels;
+
+@
 
 
-In the short format, we will use the |b100| bit of the info value to
-distinguish them: 1 indicates start link, 0 indicates end link. The
-two low bits of the info value will be 0 for an 8 bit reference
-number, 1 for a 16 bit reference number,  2 for an immediate
-link without secondary position and current font, and  3 for an immediate
-link with 32 bit secondary position and current font. 
-The link itself consists of a primary position, an optional
-secondary position, an optional current font, and a position type. The
-position type is 0 for the exact page top, 1 for the exact page
-bottom, and 2 for the approximate middle as described above. 
+@<initialize definitions@>=
+if (max_ref[label_kind]>=0)@/
+{ ALLOCATE(labels,max_ref[label_kind]+1,label_t);
+  public_labels=true;@+
+}
+@
 
-In the long format, a position can not be expressed as a byte
-position; instead we use labels.  A label is identified by a unique
-name expressed as a string. For example we can write
-\.{<label} \.{'label10'>} and then we can use \.{'label10'} as a 
-symbolic reference to the position of the node
-that follows the label node. When translating the long format to the
-short format, these label nodes will disappear. To keep readable label
-names, the links in the short format may specify an optional name that
-is used for labels. If no name is given, a label name is
-generated. When translating the short format to the long format, we
-test just before writing a new node whether there is a link to this
-node and insert a label if so. Because we write nodes in ascending
-order of positions, we can sort the labels in ascending order of
-position and compare |hpos| with the position of the next label in
-this order.  Immediate back links pose a problem for this translation
-because the node has already been written without a label when we
-encounter the link node that refers to it. If we encounter such a link
-we must resort to a two pass translation: We log the information
-about the back link and continue with the translation.  After the
-whole file is translated, we check the log, and if unresolved back
-links where found, we sort them into the previously incomplete list of
-links and repeat the translation.
 
-When translating the long format to the short format, immediate
-forward links pose a similar problem: We can not encode the links
-position because we have not yet encountered the label. In case we
-have unused reference numbers for predefined links, we will convert the immediate link into a
-predefined link. Predefined links can be completed with positions when
-we find the labels, all we need to know to encode the link itself is the
-reference number. If all 16 bit numbers are already in use, we reserve
-the maximum amount of memory ( 8 bit for the type information,
-32 bit for the primary position, 32 bit for the secondary position,
-and 8 bit for the font number) in the stream and keep a linked list of
-positions for the given label (the reserved space in the link nodes
-can be used of that purpose) and fill in the information once we find
-the corresponding label.
+Besides the |labels| pointer to the array of label definitions,
+we have three more common variables:
+The variable |first_label| will be used together with the |next| field to
+construct linked lists of labels.
+the variable |public_labels| is |true| while 
+reading the definitions of public
+labels in the long format, and the variable |public_count| counts them.
+On first sight this seems 
+unnecessary because the long format states with each public
+label its reference number and no other kind of definition needs
+such a counter. So this demands an explanation:
 
-Links and Labels are not yet implemented.
+In the short format, the difference between public and non public
+labels almost disappears: public labels have a name and two numbers,
+major and minor, associated. But all the extra information is used only
+in the user interface---if at all. In every other respect, 
+public labels are treated as a subset
+of labels in general. Every label has a unique reference number
+in the range 0 to |max_ref[label_kind]|; the subset of public
+labels uses the reference numbers from 0 to |max_public|,
+and the subset of non public labels uses the reference numbers 
+from |max_public|+1 to |max_ref[label_kind]|.
+The |labels| array used by the programs {\tt stretch} and {\tt shrink}
+reflects this view on labels.
+
+The long format, in contrast, treats public and non public labels as two different
+sets of entities. Public labels have reference numbers from 0 to |max_public|
+and non public lables have reference numbers from 0 to |max_ref[label_kind]|.
+The independence of both numberings allows adding and deleting public
+labels without the need to change the reference numbers of the non public
+labels. This feature seemed important enough to take some extra
+steps. The public labels are never accessed by their
+reference number but always by using their name; the reference numbers
+given in the definition section are purely informational and are never
+used. The definitions are counted and their number has to match
+the given |max_public| value.
+
+When translating the \HINT/ format from short to long or from long to short,
+care must be taken not to confuse the different semantics. As a rule,
+the {\tt stretch} and {\tt shrink} programs use the short format
+semantics whenever possible. When reading the long format,
+we switch the value of |max_ref[label_kind]| from not including |max_public| 
+to including |max_public| right after reading the maximum values.
+
+@<make |max_ref[label_kind]| include  |max_public|@>=
+max_ref[label_kind]+=max_public+1;
+@
+
+From then on, we translate reference numbers of non public labels by
+adding or subtracting |max_public|+1;
+and when writing the maximum values in the long format, 
+we adjust the value of |max_ref[label_kind]|.
+
+In the short format, the value of |max_public| is stored with the other maximum values
+using the kind value |label_kind| and the info value |b101| for single byte 
+and |b110| for double byte values.
+
+@<cases of getting special maximum values@>=
+case TAG(label_kind,b101): max_public=HGET8;
+   DBG(DBGDEF,"max(public) = %d\n",max_public); break; 
+case TAG(label_kind,b110): HGET16(max_public); 
+   DBG(DBGDEF,"max(public) = %d\n",max_public); break; 
+@
+
+@<cases of putting special maximum values@>=
+if (max_public>-1)
+{ uint32_t pos=hpos++-hstart;
+  DBG(DBGDEF,"max(public) = %d\n",max_public);
+  hput_tags(pos,TAG(label_kind,b100|hput_n(max_public)));
+}
+@
+
+@<cases of writing special maximum values@>=
+case label_kind:
+if (max_ref[label_kind]>max_public)
+{ hwrite_start();
+  hwritef("label %d",max_ref[k]-max_public-1);
+  hwrite_end();
+}
+if (max_public>-1)
+{ hwrite_start();
+  hwritef("public %d", max_public);
+  hwrite_end();
+}
+break;
+@
+
+@<parsing rules@>=
+max_value: PUBLIC UNSIGNED  { max_public=$2; 
+     DBG(DBGDEF,"Setting max public to %d\n",max_public);break; };
+@
+
+The label specifications are in the definition section,
+where public labels come first and are sorted by major and minor
+numbers. Major and minor number must each fit into a byte.
+Further the user interface may rely on the fact that the
+numbers are consecutive: So if the number 2.3 exist, also 2.2
+must exist, and 4.0 can not exist unless 3.$x$ exists for some $x$.
+(The current implementation does not check this restriction.)
+If the minor number is omited, it is set to 0.
+
+The info bits of a label have the following meaning:
+|b100| indicates a public label, |b010| indicates the presence
+of a secondary position, and |b001| indicates a two byte
+reference number. These bits are also reflected in the |l_flags| field.
+Every label that occurs in the definition section gets its |l_defined| flag set;
+if the label is used in a link, its |l_used| flag is set; 
+and if its position is known, its |l_pos| flag is set.
+
+The |where| field indicates where the label position
+should be on the rendered page: at the top,
+at the bottom, or somewhere in the middle.
+An undefined label has |where| equal to zero.
+
+@<hint macros@>=
+#define HINT_TOP 1
+#define HINT_BOT 2
+#define HINT_MID 3
+@
+
+\readcode
+@s PUBLIC symbol
+@s LABEL symbol
+@s LINK symbol
+@s BOT symbol
+@s MID symbol
+@s place symbol
+@s public_label symbol
+
+@<symbols@>=
+%token PUBLIC "public"
+%token LABEL "label"
+%token LINK "link"
+%token BOT "bot"
+%token MID "mid"
+%type <lb> public_label
+%type <i> place
+@
+
+@<scanning rules@>=
+::@=public@>         :< return PUBLIC; >:
+::@=label@>         :< return LABEL; >:
+::@=link@>          :< return LINK; >:
+::@=bot@>          :< return BOT; >:
+::@=mid@>          :< return MID; >:
+@
+
+@<parsing rules@>=
+place: TOP {$$=HINT_TOP;} |  BOT {$$=HINT_BOT;} |  MID {$$=HINT_MID;} | {$$=3;};
+public_label: UNSIGNED UNSIGNED string place 
+       { $$.i=l_public;
+         RNG("major",$1,0,0xFF); $$.major=$1;@/
+         RNG("minor",$2,0,0xFF); $$.minor=$2;@/
+         $$.n=$3; $$.where=$4;
+       }
+     | UNSIGNED  string place 
+       { $$.i=l_public;@/
+         RNG("major",$1,0,0xFF); $$.major=$1; $$.minor=0;@/
+         $$.n=$2; $$.where=$3;
+       };
+@
+
+Inside content nodes, labels are identified by a reference number or
+a name. 
+
+@<parsing rules@>=
+content_node: START LABEL REFERENCE END 
+              {  hset_label_pos($3); }
+            | START PUBLIC string END 
+              { hset_public_label_pos($3); }
+            | start LINK REFERENCE on_off END  
+              { hput_tags($1,hput_link($3,$4)); }
+            | start LINK string on_off END  
+              { hput_tags($1,hput_public_link($3,$4)); }
+@
+
+After parsing a label definition,
+one of the following functions 
+is called with the label information obtained by the
+parser. 
+
+@<put functions@>=
+int hset_public_label(label_t *l)
+{ label_t *t;
+  if (!public_labels)@/
+      QUIT("Public label %s after non public label",l->n);
+  RNG("Public label",public_count,0,max_public);@/
+  t=labels+public_count;
+  if (public_count>0xFF) t->i|=l_ref16;
+  public_count++;
+  if (l->n[0]==0) QUIT("Public label %d.%d with empty name",l->major,l->minor);
+  t->n=strdup(l->n);
+  t->major=l->major;
+  t->minor=l->minor;
+  t->where=l->where;
+  t->i=l->i|l_defined;
+  return public_count-1;
+}
+
+void hset_label(uint16_t n, uint8_t w)
+{ label_t *t;
+  if (public_labels)
+  { public_labels=false;
+    if (public_count!=max_public+1)
+      QUIT("Number of public labels %d must match"@/" maximum number %d+1",
+            public_count, max_public);
+  }
+  n=n+max_public+1;
+  REF_RNG(label_kind,n);
+  t=labels+n;@/
+  t->i=l_defined;
+  if (n>0xFF) t->i|=l_ref16;
+  t->where=w;
+}
+@
+All that can be done by the above functions
+is storing the data obtained in the |labels| array.
+The generation of the short format output is
+postponed until the entire content section has been parsed and
+the positions of all labels are known.
+
+One more complication needs to be considered: The |hput_list| function
+is allowed to move lists in the output stream and if positions
+inside the list were recorded in a label, these labels need an
+adjustment. To find out quickly if any labels are affected, we 
+construct a linked list of labels starting with the reference number
+of the most recent label in |first_label| and the 
+reference number of the label preceeding label |i| in |labels[i].next|.
+Because labels are recorded with strictly increasing positions,
+the list will be sorted with positions strictly decreasing.
+
+
+@<put functions@>=
+void hset_label_pos(int n)
+{ label_t *t;
+  n=n+max_public+1;
+  REF_RNG(label_kind,n);
+  t=labels+n;@/
+  if (!(t->i&l_defined))
+    QUIT("Reference to undefined label %d",n-max_public-1);
+  if (t->i&l_pos)
+    QUIT("Duplicate definition of label %d",n-max_public-1);
+  t->pos=hpos-hstart;
+  t->i|=l_pos;
+  if (hpos>hpos0) {t->i|=l_nested; t->pos0=hpos0-hstart;  t->f=0; @+}
+  else  t->pos0=t->pos;
+  t->next=first_label; first_label=n;
+}
+
+int hfind_public_label(char *name)
+{ int n;
+  for (n=0;n<=max_public;n++)
+    if ((labels[n].i&l_defined) && strcmp(labels[n].n,name)==0) return n;
+  QUIT("Reference to undefined public label %s", name);
+}
+
+void hset_public_label_pos(char *name)
+{ int n;
+  label_t *t;
+  n=hfind_public_label(name);
+  t=labels+n;@/
+  if (t->i&l_pos)
+    QUIT("Duplicate definition of public label %d",n);
+  t->pos=hpos-hstart;
+  t->i|=l_pos;
+  if (hpos>hpos0) {t->i|=l_nested; t->pos0=hpos0-hstart;  t->f=0; @+}
+  else  t->pos0=t->pos;
+  t->next=first_label; first_label=n;
+}
+@
+
+@<adjust label positions after moving a list@>=
+{ int i;
+  for (i=first_label;i>=0 && labels[i].pos>=l->p;i=labels[i].next)
+  { DBG(DBGNODE,"Moving label *%d by %d\n", i,d);
+    labels[i].pos+=d;
+    if (labels[i].pos0>=l->p) labels[i].pos0+=d;
+  }
+}
+@
+
+
+The following functions are the reverse of the above parsing rules.
+Note that the |hwrite_label| function is different from the
+usual |hwrite_|\dots\ functions. And we will see shortly why that is so.
+
+%see |hwrite_range|
+\writecode
+@<write functions@>=
+void hwrite_label_def(label_t *l, int n)
+{@+hwrite_start(); 
+ if (l->i&l_public)
+  { hwritef("public"); 
+    hwrite_ref(n);
+    if (l->minor!=0) hwritef(" %d %d '%s'", l->major,l->minor,l->n);
+    else hwritef(" %d '%s'", l->major,l->n);
+  }  
+  else
+  { hwritef("label"); 
+    hwrite_ref(n-max_public-1);
+  }
+  if (l->where==HINT_TOP) hwritef(" top");
+  else if (l->where==HINT_BOT) hwritef(" bot");
+  hwrite_end();
+}
+
+
+void hwrite_label(void)  /* called in |hwrite_end| */
+{@+ while (first_label>=0 && (uint32_t)(hpos-hstart)>=labels[first_label].pos)@/
+  { label_t *t=labels+first_label;
+    hwrite_start();
+    if (t->i&l_public)
+      hwritef("public '%s'",t->n);
+    else
+      hwritef("label *%d",first_label-max_public-1);
+    nesting--;hwritec('>'); /* avoid a recursive call to |hwrite_end| */
+    first_label=labels[first_label].next;
+  }
+}
+
+void hwrite_link(uint16_t n, uint8_t on)
+{ label_t *t;
+  REF_RNG(label_kind,n);
+  t=labels+n;
+  if (t->i&l_public) hwritef(" '%s'",t->n);
+  else {
+   if (!(t->i&l_defined)) QUIT("Link to undefined label *%d",n-max_public-1);
+   hwrite_ref(n-max_public-1);
+  }
+  if (on) hwritef(" on");
+  else hwritef(" off");
+  t->i|=l_used;
+}
+@
+
+The short format specifys the label positions in the definition section.
+This is not possible in the long format because there are no ``positions''
+in the long format. Therefore label nodes must
+be inserted in the content section just before writing those nodes
+that should come after the label. The function |hwrite_label| is called
+in |hwrite_end|. At that point |hpos| is the position of the next node
+and it can be compared with the positions of the labels taken from
+the definition section. 
+Because |hpos| is strictly increasing, the comparison 
+can be made efficient by sorting the labels. 
+The sorting uses the |next| field in the 
+array of |labels| to construct a linked list. After sorting, the value of 
+|first_label| is the index of the label with the smallest position; 
+and for each |i|, the value of |labels[i].next| is the index of
+the label with the next bigger position. If |labels[i].next| is negative,
+there is no next bigger position.
+Currently a simple insertion sort is used.
+The insertion sort will work well if the labels are already
+mostly in ascending order.
+If we expect lots of labels in random order,
+a more sophisticated sorting algorithm might be appropriate.
+
+
+
+@<write functions@>=
+void hsort_labels(void)
+{ int i;
+  while (max_ref[label_kind]>=0 &&!(labels[max_ref[label_kind]].i&l_defined))
+    max_ref[label_kind]--;
+  if (max_ref[label_kind]<=0)
+  { first_label=-1; return; @+} /* empty list */
+  DBG(DBGDEF,"Sorting %d labels\n",max_ref[label_kind]+1);
+  first_label=max_ref[label_kind]; labels[first_label].next=-1; 
+  for (i=max_ref[label_kind]-1; i>=0; i--) /* insert label |i| */
+    if (labels[i].i&l_defined&&labels[i].i&l_pos)@/
+    { uint32_t pos=labels[i].pos;
+      if (labels[first_label].pos >= pos)@/
+      {  labels[i].next= first_label; first_label=i;@+ } /* new smallest */
+      else @/
+      { int j;
+        for (j= first_label;
+             labels[j].next>=0 && labels[labels[j].next].pos<pos; 
+             j=labels[j].next) continue;
+        labels[i].next=labels[j].next; labels[j].next=i;
+      }
+    }
+}
+@
+
+
+
+
+The function |hget_label| is used to get label information from the
+definition section store it in the |labels| array, and write it
+out in long format. In the long format the definition section does
+not specify any position information. This information is later embedded
+as label nodes in the content section.
+ 
+\getcode
+@<get functions@>=
+void hget_label(uint8_t a, int n)
+{ label_t *t=labels+n;
+  HGET32(t->pos);
+  t->where=HGET8;
+  if (t->where==0 || t->where>3) QUIT("Label %d where value invalid: %d",n,t->where);
+  t->i=l_defined;
+  if (t->pos!=HINT_NO_POS) t->i|=l_pos;
+  if (INFO(a)&b100) /*public*/
+  { RNG("Public label",n,0,max_public);
+    t->major=HGET8; t->minor=HGET8; HGET_STRING(t->n); t->i|=l_public;
+  }
+  if (INFO(a)&b010) /* secondary position */
+  { HGET32(t->pos0); t->f=HGET8; t->i|=l_nested;@+}
+  else t->pos0=t->pos;
+  hwrite_label_def(t,n);
+}
+@
+
+The reading of short format link nodes is simpler.
+We use the |b001| info bit to indicate a 16 bit reference
+number and the |b010| info bit to indicate an ``on'' link.
+
+@<get macros@>=
+#define @[HGET_LINK(I)@] @/\
+{ uint16_t n; if (I&b001) HGET16(n);@+ else n=HGET8; @+ hwrite_link(n,I&b010); @+}
+@
+
+@<cases to get content@>=
+case TAG(link_kind,b000): @+ HGET_LINK(b000); break;
+case TAG(link_kind,b001): @+ HGET_LINK(b001); break;
+case TAG(link_kind,b010): @+ HGET_LINK(b010); break;
+case TAG(link_kind,b011): @+ HGET_LINK(b011); break;
+@
+
+
+The function |hput_label| is the reverse of |hget_label|.
+|hput_label_defs| is called by the parser after the entire content
+section has been processed; it appends the label definitions 
+to the definition section.
+%Before calling it, the value of the  |t->i| must be adjusted
+\putcode
+@<put functions@>=
+uint8_t hput_label(int n, label_t *l)
+{ info_t i=b000;
+  if (n>0xFF) {i|=b001; HPUT16(n);@+} else HPUT8(n);
+  HPUT32(l->pos);
+  HPUT8(l->where);
+  if (l->i&l_public)@/
+  { i|=b100; HPUT8(l->major); HPUT8(l->minor); hput_string(l->n); @+} 
+  if (l->pos!=l->pos0)
+  { i|=b010; HPUT32(l->pos0); HPUT8(l->f); @+} 
+  return TAG(label_kind,i);
+}
+
+extern void hput_definitions_end(void);
+void hput_label_defs(void)
+{ int i;
+  section_no=1;
+  hstart=dir[1].buffer;
+  hend=hstart+ dir[1].bsize;
+  hpos=hstart+dir[1].size;
+  for (i=0; i<=max_ref[label_kind]; i++)@/
+  { label_t *l=labels+i;
+    if (l->i&l_defined)
+    { uint32_t pos;
+      if (!(l->i&l_pos))
+      {  if (l->i&l_public) l->pos=HINT_NO_POS;
+         else continue;
+      }
+      pos=hpos++-hstart;
+      DBG(DBGDEF,"Label *%d defined\n",i);@/
+      hput_tags(pos,hput_label(i,l));
+    }
+    else if (i<=max_public)
+      QUIT("Undefined public label *%d",i);
+  }
+  hput_definitions_end();
+}
+@
+ 
+The function |hput_link| will insert the reference in the output stream and return
+the appropriate tag.
+@<put functions@>=
+
+uint8_t hput_link(int n, int on)
+{ info_t i;
+  REF_RNG(label_kind,n);
+  n=n+max_public+1;
+  if (!(labels[n].i&l_defined))
+    QUIT("Linking to undefined label %d",n);
+  labels[n].i|=l_used;
+  if (on) i=b010;@+ else i=b000;
+  if (n>0xFF) { i|=b001; HPUT16(n);@+} else HPUT8(n);
+  
+  return TAG(link_kind,i);
+}
+
+uint8_t hput_public_link(char *name, int on)
+{ info_t i=b000;
+  int n;
+  n=hfind_public_label(name);
+  labels[n].i|=l_used;
+  if (on) i=b010; @+else i=b000;
+  if (n>0xFF) { i|=b001; HPUT16(n);@+} else HPUT8(n);
+  return TAG(link_kind,i);
+}
+@
+
+\subsection{Colors}
+Colors\index{color} are certainly one of the features you will find in the final \HINT/ file format.
+Here some remarks must suffice.
+
+A \HINT/ viewer must be capable of rendering a page given just any valid
+position inside the content section. Therefore \HINT/ files are stateless;
+there is no need to search for preceding commands that might change a state
+variable.
+As a consequence, we can not just define a ``color change node''.
+Colors could be specified as an optional parameter of a glyph node, but the
+amount of data necessary would be considerable. In texts, on the other hand,
+a color change control code would be possible because we parse texts only in forward
+direction. The current font  would then become a current color and font with the appropriate
+changes for positions.  
+
+A more attractive alternative would be to specify colored fonts. 
+This would require an optional
+color argument for a font. For example one could have a cmr10 font in black as
+font number 3, and a cmr10 font in blue as font number 4. Having 256 different fonts,
+this is definitely a possibility because rarely you would need that many fonts 
+or that many colors. If necessary and desired, one could allow 16 bit font numbers
+of overcome the problem.
+
+Background colors could be associated with boxes as an optional parameter.
+
  
 \section{Replacing \TeX's Page Building Process}
 
@@ -5274,7 +5865,7 @@ void hget_page(void)
   HGET_STRING(n);@+ hwrite_string(n);
   p=HGET8; @+ if (p!=1) hwritef(" %d",p);
   hget_glue_node();
-  hget_dimen();
+  hget_dimen(TAG(dimen_kind,b001));
   hget_xdimen_node(&x); @+hwrite_xdimen_node(&x); /* page height */
   hget_xdimen_node(&x); @+hwrite_xdimen_node(&x); /* page width */
   hget_list(&l);@+ hwrite_list(&l);
@@ -5334,7 +5925,7 @@ start position and the end position.
 
 A zero start position
 is not stored, the info bit |b100| indicates a nonzero start position.
-An end position equal to |0xFFFFFFFFF| is not stored, 
+An end position equal to |HINT_NO_POS| is not stored, 
 the info bit |b010| indicates a smaller end position.
 The info bit |b001| indicates that positions are stored using 2 byte
 otherwise 4 byte are used for the positions.
@@ -5404,21 +5995,23 @@ void hget_range(info_t info, uint8_t pg)
   else from=0;
   if (info&b010) @+
   { @+if (info&b001) HGET32(to); @+else HGET16(to); @+}
-  else to=0xFFFFFFFF;
+  else to=HINT_NO_POS;
   range_pos[next_range].pg=pg;
   range_pos[next_range].on=true;
   range_pos[next_range].pos=from;
   DBG(DBGRANGE,"Range *%d from 0x%x\n",pg,from);
   DBG(DBGRANGE,"Range *%d to 0x%x\n",pg,to);
   next_range++;
-  if (to!=0xFFFFFFFF) @/
+  if (to!=HINT_NO_POS) @/
   { range_pos[next_range].pg=pg;
     range_pos[next_range].on=false;
     range_pos[next_range].pos=to;
     next_range++;
   }
 }
+@
 
+@<write functions@>=
 void hsort_ranges(void) /* simple insert sort by position */
 { int i;
   DBG(DBGRANGE,"Range sorting %d positions\n",next_range-1);
@@ -5459,7 +6052,7 @@ void hput_range(uint8_t pg, bool on)
          page_on[pg]=0; }
   next_range++;
 }
-extern void hput_definitions_end(void);
+
 void hput_range_defs(void)
 { int i;
   section_no=1;
@@ -5474,10 +6067,10 @@ void hput_range_defs(void)
       HPUT8(range_pos[i].pg);
       from= range_pos[i].pos;
       if (range_pos[i].link!=0) to = range_pos[range_pos[i].link].pos;
-      else to=0xFFFFFFFF;
+      else to=HINT_NO_POS;
       if (from!=0) @/
       { info=info|b100;@+ if (from>0xFFFF) @+ info=info|b001;@+}
-      if (to!=0xFFFFFFFF) @/
+      if (to!=HINT_NO_POS) @/
       { info=info|b010;@+ if (to>0xFFFF) info=info|b001;@+ }
       if (info & b100) @/
       { @+if (info & b001) HPUT32(from); @+else HPUT16(from); @+}
@@ -5653,9 +6246,11 @@ memory and use three variables to access it:  |hstart|
 points to the first byte of the section, |hend| points
 to the byte after the last byte of the section, and |hpos| points to the 
 current position inside the section.\label{hpos}
+The auxiliar variable |hpos*| contains the |hpos| value of the
+last content node on nesting level zero.
 
 @<common variables@>=
-uint8_t *hpos=NULL, *hstart=NULL, *hend=NULL;
+uint8_t *hpos=NULL, *hstart=NULL, *hend=NULL, *hpos0=NULL;
 @
 
 There are two sets of macros that read or write binary data at the current position
@@ -5752,7 +6347,9 @@ uint64_t hget_map(void)
     MESSAGE("Unable to map file into memory");
     return 0;
   }
+#ifndef WIN32  
   close(fd);
+#endif  
   return hbase_size;
 }
 
@@ -5824,11 +6421,11 @@ void hget_section(uint16_t n)
 { DBG(DBGDIR,"Reading section %d\n",n);
   RNG("Section number",n,0,max_section_no);
   if (dir[n].buffer!=NULL && dir[n].xsize>0)
-  { hpos=hstart=dir[n].buffer;
+  { hpos0=hpos=hstart=dir[n].buffer;
     hend=hstart+dir[n].xsize;
   }
   else
-  { hpos=hstart=hbase+dir[n].pos; 
+  { hpos0=hpos=hstart=hbase+dir[n].pos; 
     hend=hstart+dir[n].size;
     if (dir[n].xsize>0) hdecompress(n);
   }
@@ -5851,12 +6448,12 @@ void new_output_buffers(void)
 
 void  hput_increase_buffer(uint32_t n)
 {  size_t bsize;
-   uint32_t pos;
+   uint32_t pos, pos0;
    const double buffer_factor=1.4142136; /* $\sqrt 2$ */
-   pos=hpos-hstart;
+   pos=hpos-hstart; pos0=hpos0-hstart;
    bsize=dir[section_no].bsize*buffer_factor+0.5;
    if (bsize<pos+n) bsize=pos+n;
-   if (bsize>=0xFFFFFFFF) bsize=0xFFFFFFFF;
+   if (bsize>=HINT_NO_POS) bsize=HINT_NO_POS;
    if (bsize<pos+n)  QUIT(@["Unable to increase buffer size " SIZE_F " by 0x%x byte"@],@|hpos-hstart,n);
    DBG(DBGBUFFER,@["Reallocating output buffer "@|" for section %d from 0x%x to " SIZE_F " byte\n"@],
        section_no,dir[section_no].bsize,bsize);
@@ -5864,7 +6461,7 @@ void  hput_increase_buffer(uint32_t n)
    dir[section_no].bsize=(uint32_t)bsize;
    hstart=dir[section_no].buffer;
    hend=hstart+bsize;
-   hpos=hstart+pos;
+   hpos0=hstart+pos0; hpos=hstart+pos;
 }
 
 
@@ -5926,7 +6523,7 @@ static void hdecompress(uint16_t n)
     QUIT("Unable to finalize decompression: %s",z.msg);
   dir[n].buffer=buffer;
   dir[n].bsize=dir[n].xsize;
-  hpos=hstart=buffer;
+  hpos0=hpos=hstart=buffer;
   hend=hstart+dir[n].xsize;
 }
 @
@@ -6169,7 +6766,6 @@ It remains to create the direcories along the path we might have constructed.
 @<make sure |access| is defined@>@;
 extern char *stem_name;
 extern int stem_length;
-
 
 void hwrite_aux_files(void)
 { int i;
@@ -6571,26 +7167,28 @@ void hput_definitions_end(void)
 To help implementations allocating the right amount of memory for the
 definitions, the definition section starts with a list of maximum
 values.  For each kind of node, we store the maximum valid reference
-number in the array |max_ref| which is indexed by the kind values.
-For a reference number |n| and kind value $k$ we have 
+number in the array |max_ref| which is indexed by the kind-values.
+For a reference number |n| and kind-value $k$ we have 
 $0\le n\le |max_ref[k]|$.  
 To make sure that a hint file without any definitions
 will work, some definitions have default values. 
 The initialization of default and maximum values is described 
 in section~\secref{defaults}. The maximum
 reference number that has a default value is stored in the array
-|max_default|.  We have $-1 \le |max_default[k]| \le |max_ref[k]| \le
-255$.  Specifying maximum values that are lower than the
+|max_default|.  
+We have $-1 \le |max_default[k]| \le |max_ref[k]| < 2^{16}$,
+and for most $k$ even $|max_ref[k]| < 2^{8}$,
+Specifying maximum values that are lower than the
 default\index{default value} values is not allowed in the short
 format; in the long format, lower values are silently ignored.  Some
 default values are permanently fixed; for example the zero glue with
 reference number |zero_skip_no| must never change. The array
 |max_fixed| stores the maximum reference number that has a fixed value for a
-given kind.  Definitions with reference numbers lower than the
+given kind.  Definitions with reference numbers less or equal than the
 corresponding |max_fixed[k]| number are disallowed. Usually we have
-$-1 \le |max_fixed[k]| \le |max_default[k]| $, but if for a kind value
+$-1 \le |max_fixed[k]| \le |max_default[k]| $, but if for a kind-value
 $k$ no definitions, and hence no maximum values are allowed, we set
-$|max_fixed[k]|=|0x100|>|max_default[k]| $.
+$|max_fixed[k]|=|0x10000|>|max_default[k]| $.
 
 
 We use the |max_ref| array whenever we find a
@@ -6604,12 +7202,17 @@ reference number in the input to check if it is within the proper range.
 In the long format file, the list of maximum values starts with
  ``\.{<max }'', then follow pairs of keywords and numbers like
  ``\.{<glue 57>}'', and it ends with ``\.{>}''.  In the short format,
- we start the list of maximums with a |list_kind| tag and end it with
- a |list_kind| tag.  Each maximum value is preceded and followed by a
- tag byte with the appropriate kind value. The info value is always 1
- because at present, reference numbers---and therefore maximum
- values---are restricted to the range 0 to 255 in order to fit into a
- single byte. Other info values are reserved for future extensions.
+we start the list of maximums with a |list_kind| tag and end it with
+a |list_kind| tag.  Each maximum value is preceded and followed by a
+tag byte with the appropriate kind-value. The info value is 1 if
+the maximum value is in the range 0 to |0xFF| and fits into a
+single byte; the info value is 2 if it fits into two byte.
+Currently only the |label_kind| is allowed to use two byte.
+@<debug macros@>=
+#define MAX_REF(K) ((K)==label_kind?0xFFFF:0xFF)
+@
+
+Other info values are reserved for future extensions.
 After reading the maximum values, we initialize the data structures for
 the defininitions.
 
@@ -6628,7 +7231,9 @@ the defininitions.
 @
 @<parsing rules@>=
 max_definitions: START MAX max_list END @|
- { @<initialize definitions@>@; hput_max_definitions(); };
+ { @<make |max_ref[label_kind]| include  |max_public|@>@;
+   @<initialize definitions@>@;@+ hput_max_definitions(); };
+
 max_list:@+ | max_list START max_value END;
 
 max_value: FONT UNSIGNED      { hset_max(font_kind,$2); }
@@ -6646,16 +7251,17 @@ max_value: FONT UNSIGNED      { hset_max(font_kind,$2); }
          | PARAM UNSIGNED     { hset_max(param_kind,$2); }
          | STREAMDEF UNSIGNED    { hset_max(stream_kind,$2); }
          | PAGE UNSIGNED      { hset_max(page_kind,$2); }
-         | RANGE UNSIGNED     { hset_max(range_kind,$2); };
+         | RANGE UNSIGNED     { hset_max(range_kind,$2); }
+         | LABEL UNSIGNED     { hset_max(label_kind,$2); };
+
 @
 
 @<parsing functions@>=
 void hset_max(kind_t k, int n)
 { DBG(DBGDEF,"Setting max %s to %d\n",definition_name[k],n);
-  RNG("Maximum",n,max_fixed[k]+1,0xFF); 
+  RNG("Maximum",n,max_fixed[k]+1,MAX_REF(k)); 
   if (n>max_ref[k]) 
-  { max_ref[k]=n; 
-  }
+   max_ref[k]=n; 
 }
 @
 
@@ -6667,9 +7273,14 @@ void hwrite_max_definitions(void)
   hwritef("max");
   for (k=0; k<32;k++)
     if (max_ref[k]>max_default[k])@/
-    { hwrite_start();
-      hwritef("%s %d",definition_name[k], max_ref[k]);
-      hwrite_end();
+    { switch (k)
+      { @<cases of writing special maximum values@>@;
+        default:
+          hwrite_start();
+          hwritef("%s %d",definition_name[k], max_ref[k]);
+          hwrite_end();
+          break;
+      }
     }
   hwrite_end();
 }          
@@ -6688,18 +7299,27 @@ void hget_max_definitions(void)
     node_pos=hpos-hstart;
     HGETTAG(a);
     if  (KIND(a)==list_kind) break;
-    if (INFO(a)!=1) QUIT("Maximum info %d not supported",INFO(a));
     k=KIND(a);
+    if (INFO(a)==1)  n=HGET8;
+    else if  (INFO(a)==2)  HGET16(n);
+    else 
+    { switch (a)
+      { @<cases of getting special maximum values@>@;
+        default:
+          QUIT("Maximum info %d for kind %s not supported",
+             INFO(a),definition_name[k]); break;
+      }
+      goto end_byte;
+    }
     if (max_fixed[k]>max_default[k]) 
-      QUIT("Maximum value for kind %s not supported",definition_name[k]);
-    n=HGET8;
-    RNG("Maximum number",n,max_ref[k],0xFF);
+      QUIT("Maximum value for kind %s not supported",definition_name[k]);   
+    RNG("Maximum number",n,max_default[k],MAX_REF(k));
     max_ref[k]=n;
     DBG(DBGDEF,"max(%s) = %d\n",definition_name[k],max_ref[k]);
+   end_byte:
    @<read and check the end byte |z|@>@;
   }
   if (INFO(a)!=0) QUIT("End of maximum list with info %d", INFO(a));
-
 }
 @
 
@@ -6712,11 +7332,11 @@ void hput_max_definitions(void)
   HPUTTAG(list_kind,0);
   for (k=0; k<32; k++)
     if (max_ref[k]>max_default[k])
-    { DBG(DBGDEF,"max(%s) = %d\n",definition_name[k],max_ref[k]);
-      HPUTTAG(k,1); 
-      HPUT8(max_ref[k]);
-      HPUTTAG(k,1); 
+    { uint32_t pos=hpos++-hstart;
+      DBG(DBGDEF,"max(%s) = %d\n",definition_name[k],max_ref[k]);
+      hput_tags(pos,TAG(k,hput_n(max_ref[k])));
     }
+  @<cases of putting special maximum values@>@;
   HPUTTAG(list_kind,0);
   DBG(DBGDEF,"Max Definitions End\n");
 }
@@ -6734,14 +7354,14 @@ Such a definition differs from a normal content node just by an extra
 byte value immediately following the keyword respectively  start byte.
 
 Whenever we need this glue in the content section, we can say 
-``{\tt \.{<}glue *71\.{>}}''.  Because we restrict the number of definitions
-for every node type to at most 256, a single byte is sufficient to
+``{\tt \.{<}glue *71\.{>}}''.  Because we restrict the number of glue definitions
+to at most 256, a single byte is sufficient to
 store the reference number.  The \.{shrink} and \.{stretch} programs
-will, however, not bother to store the definitions. Instead they will
+will, however, not bother to store the glue definitions. Instead they will
 write them in the new format immediately to the output.
 
 The parser will handle definitions in any order, but the order is relevant
-if a definiton references another definition, and of course, 
+if a definition references another definition, and of course, 
 it never does any harm to present definitions in a systematic way.
 
 As a rule, the definition of a reference must always preceed the
@@ -6752,7 +7372,7 @@ references inside the definition section.
 The definitions for integers, dimensions, extended dimensions,
  languages, rules, ligatures, and images are ``simple''.
 They never contain references and so it is always possible to list them first.
-The definition of glues may contain extended definitions,
+The definition of glues may contain extended dimensions,
 the definitions of baselines may reference glue nodes, and 
 the definitions of parameter lists contain definitions of integers, dimensions,
 and glues. So these definitions should follow in this order.
@@ -6794,15 +7414,16 @@ and language nodes which might occur in boxes and page templates.
 Possible ordering restrictions can be satisfied if languages are defined first
 and fonts second.
 
-To check the define before use policy, we use an array of bitvectors.
-Where we have for every reference number |N| and every kind |K| a single
+To check the define before use policy, we use an array of bitvectors,
+but we limit checking to the first 256 references.
+We have for every reference number $|N|<256$ and every kind |K| a single
 bit which is set if and only if the corresponding reference is defined.
 
 @<definition checks@>=
 uint32_t definition_bits[0x100/32][32]={{0}};
 
-#define @[SET_DBIT(N,K)@] (definition_bits[N/32][K]|=(1<<((N)&(32-1))))
-#define @[GET_DBIT(N,K)@] ((definition_bits[N/32][K]>>((N)&(32-1)))&1)
+#define @[SET_DBIT(N,K)@] ((N)>0xFF?1:(definition_bits[N/32][K]|=(1<<((N)&(32-1)))))
+#define @[GET_DBIT(N,K)@] ((N)>0xFF?1:((definition_bits[N/32][K]>>((N)&(32-1)))&1))
 #define @[DEF(D,K,N)@] (D).k=K;@+ (D).n=(N);@+SET_DBIT((D).n,(D).k);\
 	DBG(DBGDEF,"Defining %s %d\n",definition_name[(D).k],(D).n);\
 	RNG("Definition",(D).n,max_fixed[(D).k]+1,max_ref[(D).k]);
@@ -6832,35 +7453,60 @@ definition_bits[0][range_kind]=(1<<(MAX_RANGE_DEFAULT+1))-1;
 @
 
 @<parsing rules@>=
-
 def_node: 
-  start FONT    ref font END  @| { DEF($$,font_kind,$3);@+   hput_tags($1,$4);@+} 
-| start INTEGER     ref integer END   @| { DEF($$,int_kind,$3);@+   hput_tags($1,hput_int($4));@+} 
-| start DIMEN   ref dimension END @| { DEF($$,dimen_kind,$3);@+   hput_tags($1,hput_dimen($4));} 
-| start LANGUAGE ref string END @| { DEF($$,language_kind,$3);@+hput_string($4); hput_tags($1,TAG(language_kind,0));}
-| start GLUE    ref glue END      @| { DEF($$,glue_kind,$3);@+    hput_tags($1,hput_glue(&($4)));} 
-| start XDIMEN  ref xdimen END    @| { DEF($$,xdimen_kind,$3);@+  hput_tags($1,hput_xdimen(&($4)));} 
-| start RULE    ref rule END      @| { DEF($$,rule_kind,$3);@+    hput_tags($1,hput_rule(&($4)));} 
-| start LEADERS ref leaders END   @| { DEF($$,leaders_kind,$3);@+ hput_tags($1,TAG(leaders_kind, $4));} 
-| start BASELINE ref baseline END @| { DEF($$,baseline_kind,$3);@+hput_tags($1,TAG(baseline_kind, $4));} 
-| start LIGATURE ref ligature END @| { DEF($$,ligature_kind,$3);@+hput_tags($1,hput_ligature(&($4)));} 
-| start HYPHEN ref hyphen END     @| { DEF($$,hyphen_kind,$3);@+  hput_tags($1,hput_hyphen(&($4)));} 
-| start IMAGE  ref image END      @| { DEF($$,image_kind,$3);@+   hput_tags($1,hput_image(&($4)));}
-| start PARAM  ref param_list END @| { DEF($$,param_kind,$3);@+   hput_tags($1,hput_list($1+2,&($4)));} 
-| start PAGE   ref page END       @| { DEF($$,page_kind,$3);@+    hput_tags($1,TAG(page_kind,0));}; 
+  start FONT    ref font END       @| { DEF($$,font_kind,$3);@+   hput_tags($1,$4);@+} 
+| start INTEGER ref integer END    @| { DEF($$,int_kind,$3);@+   hput_tags($1,hput_int($4));@+} 
+| start DIMEN   ref dimension END  @| { DEF($$,dimen_kind,$3);@+   hput_tags($1,hput_dimen($4));} 
+| start LANGUAGE ref string END    @| { DEF($$,language_kind,$3);@+hput_string($4); hput_tags($1,TAG(language_kind,0));}
+| start GLUE    ref glue END       @| { DEF($$,glue_kind,$3);@+    hput_tags($1,hput_glue(&($4)));} 
+| start XDIMEN  ref xdimen END     @| { DEF($$,xdimen_kind,$3);@+  hput_tags($1,hput_xdimen(&($4)));} 
+| start RULE    ref rule END       @| { DEF($$,rule_kind,$3);@+    hput_tags($1,hput_rule(&($4)));} 
+| start LEADERS ref leaders END    @| { DEF($$,leaders_kind,$3);@+ hput_tags($1,TAG(leaders_kind, $4));} 
+| start BASELINE ref baseline END  @| { DEF($$,baseline_kind,$3);@+hput_tags($1,TAG(baseline_kind, $4));} 
+| start LIGATURE ref ligature END  @| { DEF($$,ligature_kind,$3);@+hput_tags($1,hput_ligature(&($4)));} 
+| start HYPHEN ref hyphen END      @| { DEF($$,hyphen_kind,$3);@+  hput_tags($1,hput_hyphen(&($4)));} 
+| start IMAGE  ref image END       @| { DEF($$,image_kind,$3);@+   hput_tags($1,hput_image(&($4)));}
+| START PUBLIC REFERENCE public_label END @| { DEF($$,label_kind,hset_public_label(&($4))); }
+| START LABEL REFERENCE place END  @| { DEF($$,label_kind,$3); hset_label($3,$4); }
+| start PARAM  ref param_list END  @| { DEF($$,param_kind,$3);@+   hput_tags($1,hput_list($1+2,&($4)));} 
+| start PAGE   ref page END        @| { DEF($$,page_kind,$3);@+    hput_tags($1,TAG(page_kind,0));}; 
 @
+
+There are a few cases where one wants to define a reference by a reference.
+For example, a \HINT/ file may want to set the {\tt parfillskip} glue to zero.
+While there are multiple ways to define the zero glue, the canonical way is a reference
+using the |zero_glue_no|. All these cases have in common that the reference to be defined
+is one of the default references and the defining reference is one of the fixed references.
+We add a few parsing rules and a testing macro for those cases where the number
+of default definitions are greater than the number of fixed definitions.
+
+@<definition checks@>=
+#define @[DEF_REF(D,K,M,N)@]  DEF(D,K,M);\
+if ((M)>max_default[K]) QUIT("Defining non default reference %d for %s",M,definition_name[K]); \
+if ((N)>max_fixed[K]) QUIT("Defining reference %d for %s by non fixed reference %d",M,definition_name[K],N); 
+@
+
+@<parsing rules@>=
+def_node:
+  start INTEGER ref ref  END {DEF_REF($$,int_kind,$3,$4); hput_tags($1,TAG(int_kind,0)); }
+| start DIMEN   ref ref  END {DEF_REF($$,dimen_kind,$3,$4); hput_tags($1,TAG(dimen_kind,0)); }
+| start GLUE    ref ref  END {DEF_REF($$,glue_kind,$3,$4); hput_tags($1,TAG(glue_kind,0)); };
+@
+
+
+
 
 \goodbreak
 \vbox{\getcode\vskip -\baselineskip\writecode}
 
 @<get functions@>=
 void hget_definition(int n, uint8_t a, uint32_t node_pos)
-{   switch(KIND(a))
-    { case font_kind: hget_font_def(INFO(a),n);@+ break;
+{@+ switch(KIND(a))
+    { case font_kind: hget_font_def(n);@+ break;
       case param_kind:
         {@+ list_t l; @+HGET_LIST(INFO(a),l); @+hwrite_param_list(&l); @+ break;@+} 
       case page_kind: hget_page(); @+break;
-      case dimen_kind:  hget_dimen(); @+break;
+      case dimen_kind:  hget_dimen(a); @+break;
       case xdimen_kind:
         {@+ xdimen_t x;  @+hget_xdimen(a,&x); @+hwrite_xdimen(&x); @+break;@+ }
       case language_kind:
@@ -6870,10 +7516,6 @@ void hget_definition(int n, uint8_t a, uint32_t node_pos)
         { char *n; HGET_STRING(n);@+ hwrite_string(n); }
         break;
       default:
-#if 0
-        if (INFO(a)==0 && n> max_fixed[KIND(a)])
-          QUIT("References not allowed in definition %d",n);
-#endif          
         hget_content(a); @+break;
     }
 }
@@ -6881,9 +7523,15 @@ void hget_definition(int n, uint8_t a, uint32_t node_pos)
 
 void hget_def_node(ref_t *df)
 { @<read the start byte |a|@>@;
-  DEF(*df,KIND(a),HGET8);
+  df->k=KIND(a);
+  if (KIND(a)==label_kind && (INFO(a)&b001)) HGET16(df->n);
+  else df->n=HGET8; 
+  REF_RNG(df->k,df->n);
+  SET_DBIT(df->n,df->k);
   if (df->k==range_kind)
-    hget_range(INFO(a),df->n);
+      hget_range(INFO(a),df->n);
+  else if (df->k==label_kind)
+      hget_label(INFO(a),df->n);
   else 
   { hwrite_start(); @+hwritef("%s *%d",definition_name[df->k],df->n);
     hget_definition(df->n,a,node_pos);
@@ -6922,7 +7570,7 @@ void check_param_def(ref_t *df)
 @
 
 The definitions below repeat the definitions we have seen for lists in section~\secref{plainlists} 
-with small modifications. For example we use the kind value |param_kind|. An empty parameter list
+with small modifications. For example we use the kind-value |param_kind|. An empty parameter list
 is omitted in the long format as well as in the short format.
 
 \goodbreak
@@ -7137,7 +7785,7 @@ static void hget_font_params(void)
 }
 
 
-void hget_font_def(info_t i, uint8_t f)
+void hget_font_def(uint8_t f)
 { char *n; @+dimen_t s=0;@+uint16_t m,y; 
   HGET_STRING(n);@+ hwrite_string(n);@+  hfont_name[f]=strdup(n);
   HGET32(s); @+ hwrite_dimension(s);
@@ -7250,7 +7898,7 @@ Actually the defaults for extended dimensions and baselines are not needed by \T
 routines, but it is nice to have default values for the extended dimensions that represent
 \.{hsize}, \.{vsize}, or a zero baseline skip. 
 
-The array |max_default| contains for each kind value the maximum number of
+The array |max_default| contains for each kind-value the maximum number of
 the default values. The function |hset_max| is used to initialize them.
 
 The programs \.{shrink} and \.{stretch} actually do not use the defaults.
@@ -7278,7 +7926,7 @@ extern const char *content_name[32];
 extern const char *definition_name[32];
 extern unsigned int debugflags;
 extern FILE *hlog;
-extern int max_fixed[32], max_default[32], max_ref[32];
+extern int max_fixed[32], max_default[32], max_ref[32], max_public;
 extern int32_t int_defaults[MAX_INT_DEFAULT+1];
 extern dimen_t dimen_defaults[MAX_DIMEN_DEFAULT+1];
 extern xdimen_t xdimen_defaults[MAX_XDIMEN_DEFAULT+1];
@@ -7315,32 +7963,33 @@ int main(void)
          
   @<define |content_name| and |definition_name|@>@;
 
-  for (k=0; k<32; k++) max_default[k]=-1,max_fixed[k]=0x100;
+  for (k=0; k<32; k++) max_default[k]=-1,max_fixed[k]=0x10000;
   @<define |int_defaults|@>@;
   @<define |dimen_defaults|@>@;
+  @<define |glue_defaults|@>@;
   @<define |xdimen_defaults|@>@;
   @<define |baseline_defaults|@>@;
   @<define |page_defaults|@>@;
   @<define |stream_defaults|@>@;
   @<define |range_defaults|@>@;
 
-  @<define |max_ref|, |max_fixed| and |max_default|@>@;
+  @<define variables for maximum values@>@;
  
   return 0;
 }
 @
 
 Above, we have set |max_default| to $-1$, meaning no defaults, 
-and |max_fixed| to |0x100|, meaning no definitions.
+and |max_fixed| to |0x10000|, meaning no definitions.
 The following subsections will overwrite these values for 
 all kinds of definitions that have defaults.
 It remains to reset |max_fixed| to $-1$ for all those kinds 
 that have no defaults but allow definitions.
 Then we can print out both arrays.
-@<define |max_ref|, |max_fixed| and |max_default|@>=
+@<define variables for maximum values@>=
   max_fixed[font_kind]= max_fixed[ligature_kind]= max_fixed[hyphen_kind]
   =max_fixed[language_kind]=max_fixed[rule_kind]= max_fixed[image_kind]
-  = max_fixed[leaders_kind]= max_fixed[param_kind]= -1;@#
+  = max_fixed[leaders_kind]= max_fixed[param_kind]=max_fixed[label_kind]= -1;@#
   printf("int max_fixed[32]= {");
   for (k=0; k<32; k++)@/
   { printf("%d",max_fixed[k]);@+
@@ -7359,6 +8008,7 @@ Then we can print out both arrays.
     if (k<31) printf(", ");@+
   }
   printf("};\n\n");
+  printf("int max_public=-1;\n\n");
 @
 
 \subsection{Integers}
@@ -7368,7 +8018,7 @@ which is used by \HINT/ uses many integer parameters to fine tune
 its operations. As we will see, all these integer parameters have a predefined
 integer number that refers to an integer definition.
 
-Integers and penalties\index{penalty} share the same kind value. So a penalty node that references
+Integers and penalties\index{penalty} share the same kind-value. So a penalty node that references
 one of the predefined penalties, simply contains the integer number as a reference
 number.
 
@@ -7540,7 +8190,7 @@ par_fill_skip_no=14
 #define MAX_GLUE_DEFAULT par_fill_skip_no
 @
 
-@<define |dimen_defaults|@>=
+@<define |glue_defaults|@>=
 max_default[glue_kind]=MAX_GLUE_DEFAULT;
 max_fixed[glue_kind]=fill_skip_no;
 
@@ -7669,7 +8319,8 @@ max_fixed[range_kind]=zero_range_no;
 
 
 \section{Content Section}
-The content section\index{content section} is just a list of nodes. Within the \.{shrink} program,
+The content section\index{content section} is just a list of nodes. 
+Within the \.{shrink} program,
 reading a node in long format will trigger writing the node in short format.
 Similarly within the \.{stretch} program, reading a node
 in short form will cause writing it in long format. As a consequence,
@@ -7692,7 +8343,8 @@ is accomplished by parsing the |content_list|.
 
 @<parsing rules@>=
 content_section: START CONTENT @/
-                 { hput_content_start(); } content_list END {hput_content_end();  hput_range_defs();};
+                 { hput_content_start(); } content_list END 
+                 { hput_content_end();  hput_range_defs(); hput_label_defs(); };
 @
 
 %\writecode
@@ -7703,6 +8355,7 @@ void hwrite_content_section(void)
 { section_no=2;
   hwritef("<content");
   hsort_ranges();
+  hsort_labels();
   hget_content_section();
   hwritef("\n>\n");
 }
@@ -7715,6 +8368,7 @@ void hget_content_section()
 { DBG(DBGDIR,"Content\n");
   hget_section(2);
   hwrite_range();
+  hwrite_label();
   while(hpos<hend)
     hget_content_node();
 }
@@ -7726,7 +8380,7 @@ void hget_content_section()
 void hput_content_start(void)
 { DBG(DBGDIR,"Content Section\n");
   section_no=2;
-  hpos=hstart=dir[2].buffer;
+  hpos0=hpos=hstart=dir[2].buffer;
   hend=hstart+dir[2].bsize;
 
 }
@@ -8525,6 +9179,21 @@ case TAG(image_kind,b110): @+ { image_t x;@+HTEG_IMAGE(b110,x);@+}@+break;
 case TAG(image_kind,b111): @+ { image_t x;@+HTEG_IMAGE(b111,x);@+}@+break;
 @
 
+\subsection{Links and Labels}
+\noindent
+@<skip macros@>=
+#define @[HTEG_LINK(I)@] @/\
+{ uint16_t n; if (I&b001) HTEG16(n);@+ else HTEG8(n); @+}
+@
+
+@<cases to skip content@>=
+case TAG(link_kind,b000): @+ HTEG_LINK(b000); break;
+case TAG(link_kind,b001): @+ HTEG_LINK(b001); break;
+case TAG(link_kind,b010): @+ HTEG_LINK(b010); break;
+case TAG(link_kind,b011): @+ HTEG_LINK(b011); break;
+@
+
+
 \subsection{Plain Lists, Texts, and Parameter Lists}\index{list}
 \noindent
 @<skip functions@>=
@@ -8685,6 +9354,7 @@ is defined only if using the respective compiler.
 #include <stdint.h>
 #include <stdbool.h>
 #include <inttypes.h>
+#include <unistd.h>
 #ifdef WIN32
 #include <io.h>
 #endif
@@ -8713,6 +9383,7 @@ header file.
 #define @[hwritec(c)@] @[putc(c,hout)@]
 #define @[hwritef(...)@] @[fprintf(hout,__VA_ARGS__)@]
 extern void hwrite_range(void);
+extern void hwrite_label(void);
 extern void hwrite_charcode(uint32_t c);
 extern void hwrite_ref_node(uint8_t k, uint8_t n);
 extern void hwrite_ref(uint8_t n);
@@ -8743,16 +9414,16 @@ extern void hget_param_list_node(list_t *l);
 extern uint32_t hget_list_size(info_t info);
 extern void hget_size_boundary(info_t info);
 extern void hget_max_definitions(void);
-extern void hget_font_def(info_t i, uint8_t f);
+extern void hget_font_def(uint8_t f);
 @
 
 @(hget.h@>=
-
 @<get file macros@>@;
+@<hint types@>@;
 @<directory entry type@>@;
 extern entry_t *dir;
 extern uint16_t section_no,  max_section_no;
-extern uint8_t *hpos, *hstart, *hend;
+extern uint8_t *hpos, *hstart, *hend, *hpos0;
 
 extern uint64_t hget_map(void);
 extern void hget_unmap(void);
@@ -8786,13 +9457,12 @@ extern void hget_max_definitions(void);
 #include "hformat.h"
 #include "hget.h"
 
-@<hint types@>@;
 @<common variables@>@;
 
 @<map functions@>@;
 @<function to check the banner@>@;
 @<directory functions@>@;
-@<get file macros@>@;
+
 @<get file functions@>@;
 
 
@@ -8810,10 +9480,14 @@ that write the short format.
 @<directory entry type@>@;
 extern entry_t *dir;
 extern uint16_t section_no,  max_section_no;
-extern uint8_t *hpos, *hstart, *hend;
+extern uint8_t *hpos, *hstart, *hend, *hpos0;
 extern int next_range;
 extern range_pos_t *range_pos;
 extern int *page_on; 
+extern label_t *labels;
+extern int max_public,public_count;
+extern bool public_labels;
+
 
 extern FILE *hout;
 extern void new_directory(uint32_t entries);
@@ -8824,6 +9498,14 @@ extern void hput_definitions_start(void);
 extern void hput_definitions_end(void);
 extern void hput_content_start(void);
 extern void hput_content_end(void);
+
+extern int hset_public_label(label_t *l);
+extern void hset_label(uint16_t n, uint8_t w);
+extern void hset_public_label_pos(char *name);
+extern void hset_label_pos(int n);
+extern uint8_t hput_link(int n, int on);
+extern uint8_t hput_public_link(char *name, int on);
+extern void hput_label_defs(void);
 
 extern void hput_tags(uint32_t pos, uint8_t tag);
 extern uint8_t hput_glyph(glyph_t *g);
@@ -8938,7 +9620,8 @@ char **hfont_name;
 
 @<definition checks@>@;
 
-extern void hset_entry(entry_t *e, uint16_t i, uint32_t size, uint32_t xsize, @|char *file_name);
+extern void hset_entry(entry_t *e, uint16_t i, uint32_t size, 
+                       uint32_t xsize, @|char *file_name);
 
 @<enable bison debugging@>@;
 extern int yylex(void);
@@ -8953,7 +9636,7 @@ extern int yylex(void);
 
 %union {uint32_t u; @+ int32_t i; @+ char *s; @+ float64_t f; @+ glyph_t c; 
         @+  dimen_t d; @+ stretch_t st; @+ xdimen_t xd; @+ kern_t kt;
-        @+ rule_t r; @+ glue_t g; @+ @+ image_t x; 
+        @+ rule_t r; @+ glue_t g; @+ @+ image_t x;@+ label_t lb; 
         @+ list_t l; @+ box_t h;  @+ hyphen_t hy; @+ lig_t lg;
         @+ ref_t rf; @+ info_t info; @+ order_t o;@+bool b; @+ 
    }
@@ -8989,6 +9672,7 @@ extern int yylex(void);
 
 #include "error.h"
 #include "hformat.h"
+
 @<hint types@>@;
 #include "shrink.tab.h"
 
