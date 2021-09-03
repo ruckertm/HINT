@@ -16,8 +16,9 @@
 %  
 % Martin Ruckert, Hochschule Muenchen, Lothstrasse 64, 80336 Muenchen
 % 
-\input hint.sty
-\input changefile.sty
+\input ../hint.sty
+\input ../changefile.sty
+\input epsf.tex
 
 @i symbols.w
 \makeindex
@@ -26,8 +27,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 2349 ${}$}
-\def\lastdate{${}$Date: 2021-05-06 18:24:31 +0200 (Thu, 06 May 2021) ${}$}
+\def\lastrevision{${}$Revision: 2485 ${}$}
+\def\lastdate{${}$Date: 2021-08-19 19:37:13 +0200 (Thu, 19 Aug 2021) ${}$}
 
 \input titlepage.tex
 
@@ -52,8 +53,8 @@ August 20, 2019 \hfill Martin Ruckert}
 
 \section{Introduction}\label{intro}
 This program has three main parts:
-The first part reads a \HINT/ file\cite{MR:format} and reconstructs \TeX's contribution list\cite{Knuth:tex}.
-The routines found in this part translate data structures found in a \HINT/ file 
+The first part reads a \HINT\ file\cite{MR:format} and reconstructs \TeX's contribution list\cite{Knuth:tex}.
+The routines found in this part translate data structures found in a \HINT\ file 
 into \TeX's internal data structures. 
 Some data structures, notably paragraph nodes, will require substantial
 processing before moving the results to the contribution list; for example, paragraph nodes
@@ -78,7 +79,7 @@ is based on the Windows\raise.5ex\hbox{\registered} operating system and its 32 
 
 \section{Reading Definitions}
 This chapter starts with the reimplementation of the parser for
-short format \HINT/ files as described in {\it HINT: The File Format}\cite{MR:format}
+short format \HINT\ files as described in {\it HINT: The File Format}\cite{MR:format}
 which constitutes the definitive specification of this format.
 Where as the latter uses an internal represenation that is
 completely independent of \TeX\ and therefore does not need any knowlegde of
@@ -109,17 +110,13 @@ By default, we store definitions as pointers to \TeX's data structures.
 
 @<get functions@>=
 void hget_def_node(void)
-{ @+int n;
+{ kind_t k;
+  int n;
   @<read the start byte |a|@>@;
-  if (KIND(a)==label_kind && (INFO(a)&b001)) HGET16(n);
+  k=KIND(a);
+  if (k==label_kind && (INFO(a)&b001)) HGET16(n);
   else n=HGET8; 
-  if (max_fixed[KIND(a)]>max_default[KIND(a)]) 
-      QUIT("Definitions for kind %s not supported", definition_name[KIND(a)]);
-    if(n>max_ref[KIND(a)] || n <= max_fixed[KIND(a)]) 
-      QUIT("Definition %d for %s out of range [%d - %d]",@|
-        n, definition_name[KIND(a)],max_fixed[KIND(a)]+1,max_ref[KIND(a)]);
-
-  if (KIND(a)!=range_kind) REF_RNG(KIND(a),n);
+  if (k!=range_kind) REF_RNG(k,n);
   DBG(DBGTAGS,"Defining %s %d\n", definition_name[KIND(a)],n);
   switch(KIND(a))
   { case language_kind: { char *t;  HGET_STRING(t); break; }
@@ -132,9 +129,14 @@ void hget_def_node(void)
     case param_kind:  param_def[n]=hget_param_list(a); break;
     case range_kind: hget_range_def(a,n); break;
     case page_kind: hget_page_def(a,n); break;
-    case label_kind: hget_label_def(a,n); break;
+    case label_kind: hget_outline_or_label_def(INFO(a),n); break;
     default:  pointer_def[KIND(a)][n]=hget_definition(a); break;
   }
+  if (max_fixed[k]>max_default[k]) 
+    QUIT("Definitions for kind %s not supported", definition_name[k]);
+  if(n>max_ref[k] || n <= max_fixed[k]) 
+    QUIT("Definition %d for %s out of range [%d - %d]",@|
+        n, definition_name[k],max_fixed[k]+1,max_ref[k]);
   @<read and check the end byte |z|@>@;
 }
 
@@ -165,12 +167,15 @@ void hset_default_definitions(void)
   }
 }
 
+void free_definitions(void)
+{ @<free definitions@>@;
+}
 
 void hget_definition_section(void)
 { DBG(DBGDEF,"Definitions\n");
   hget_section(1);
   DBG(DBGDEF,"Reading list of maximum values\n");
-  @<free definitions@>@;
+  free_definitions();
   hget_max_definitions();
   @<allocate definitions@>@;
   hset_default_definitions();
@@ -183,12 +188,12 @@ void hget_definition_section(void)
 @
 
 
-@<\HINT/ variables@>=
+@<\HINT\ variables@>=
 pointer *pointer_def[32]={NULL};
 @
 
 
-@<\HINT/ declarations@>=
+@<\HINT\ declarations@>=
 static void hget_font_def(uint8_t a, uint8_t n);
 static int32_t hget_integer_def(uint8_t a);
 static scaled hget_dimen_def(uint8_t a);
@@ -197,7 +202,7 @@ static void hget_baseline_def(uint8_t a, uint8_t n);
 static param_def_t *hget_param_list(uint8_t a);
 static void hget_range_def(uint8_t a, uint8_t pg);
 static void hget_page_def(uint8_t a, uint8_t n);
-static void hget_label_def(uint8_t a, int n);
+static void hget_outline_or_label_def(info_t i, int n);
 static void hget_font_metrics();
 static pointer hget_definition(uint8_t a);
 @
@@ -232,7 +237,7 @@ We start with the data types.
 \subsection{Data Types}
 \subsubsection{Integers}
 \noindent
-@<\HINT/ variables@>=
+@<\HINT\ variables@>=
 int32_t *integer_def;
 @
 
@@ -245,7 +250,7 @@ ALLOCATE(integer_def, max_ref[int_kind]+1, int32_t);
 free(integer_def); integer_def=NULL;
 @
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 static int32_t hget_integer_def(uint8_t a)
 {@+ if (INFO(a)==1) {@+ int8_t n=HGET8; @+return n;@+}
   else  if (INFO(a)==2) {@+ int16_t n;@+ HGET16(n);@+ return n;@+}
@@ -262,7 +267,7 @@ static int32_t hget_integer_ref(uint8_t n)
 
 \subsubsection{Dimensions}
 
-@<\HINT/ variables@>=
+@<\HINT\ variables@>=
 scaled *dimen_def;
 @
 
@@ -292,7 +297,7 @@ static scaled hget_dimen_def(uint8_t a)
 
 \subsubsection{Extended Dimensions}
 
-@<\HINT/ variables@>=
+@<\HINT\ variables@>=
 xdimen_t *xdimen_def;
 @
 
@@ -303,7 +308,7 @@ ALLOCATE(xdimen_def, max_ref[xdimen_kind]+1, xdimen_t);
 free(xdimen_def); xdimen_def=NULL;
 @
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 static scaled xdimen(xdimen_t *x)
 { @+return round(x->w+(double)x->h*(double)hhsize+@|(double)x->v*(double)hvsize);
 }
@@ -314,8 +319,8 @@ static scaled hget_xdimen_ref(uint8_t n)
 @
 
 The printing routine for whatsit nodes requires a function to print extended dimensions. Since
-\HINT/ never allocates a extended dimension node, the following function will suffice:
-@<\HINT/ functions@>=
+\HINT\ never allocates a extended dimension node, the following function will suffice:
+@<\HINT\ functions@>=
 void print_xdimen(int i)
 {}
 @
@@ -323,7 +328,7 @@ void print_xdimen(int i)
 
 \subsection{Glues}
 \noindent
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 
 static pointer hget_glue_ref(uint8_t n)
 { @+REF_RNG(glue_kind,n);
@@ -352,17 +357,17 @@ ALLOCATE(pointer_def[glue_kind],max_ref[glue_kind]+1, pointer);
 @
 
 \subsection{Baseline Skips}
-Baseline skip specifications are stored using variables of type |bs_t|.
-Baseline skips are allowed only in vertical lists and
-the actual baseline skip glue will be inserted just before appending the next hbox or vbox to
-the list. Until then we keep a possible baseline specification on a stack that parallels \TeX's
-semantic nest.
+Baseline skip specifications are stored using variables of type
+|bs_t|.  Baseline skips are allowed only in vertical lists and the
+actual baseline skip glue will be inserted just before appending the
+next hbox or vbox to the list. Until then we keep a possible baseline
+specification on a stack that parallels \TeX's semantic nest.
 
-@<\HINT/ types@>=
+@<\HINT\ types@>=
 typedef struct { pointer bs, ls; scaled lsl;} bs_t;
 @
 
-@<\HINT/ variables@>=
+@<\HINT\ variables@>=
 bs_t *baseline_def=NULL;
 @
 
@@ -408,9 +413,7 @@ cur_list.bs_pos=NULL;
 return p;
 } 
 @
-@<\HINT/ |extern|@>=
-extern pointer happend_to_vlist(pointer b);
-@
+
 
 When we build pages from the bottom up, we need a routine similar to
 |happend_to_vlist| which is called |hprepend_to_vlist|.
@@ -451,14 +454,14 @@ return p;
 } 
 @
 
-@<\HINT/ declarations@>=
+@<\HINT\ declarations@>=
 static pointer hprepend_to_vlist(pointer b);
 @
 
 
 \subsection{Fonts}\label{fonts}
-\TeX\ gets ist knowlegde about fonts from font metric files. \HINT/ will not need all of that
-information, but for now, the complete \TeX\ font metric file is included inside the \HINT/ file,
+\TeX\ gets ist knowlegde about fonts from font metric files. \HINT\ will not need all of that
+information, but for now, the complete \TeX\ font metric file is included inside the \HINT\ file,
 and we can load all that information by calling the procedure |read_font_info| defined by \TeX.
 Because \TeX\ reads the font metric file using a special |fget| macro, only a few modifications,
 as explained below, are necessary.
@@ -470,7 +473,7 @@ the ``at size'' |s| (which might be different from the design size),
 the pointer to the font glue |g|,
 the pointer to the font hyphen |h|, and the font parameters |p|.
 
-@<\HINT/ types@>=
+@<\HINT\ types@>=
 typedef struct {
 char *n;
 uint16_t m,q;
@@ -482,7 +485,7 @@ pointer p[MAX_FONT_PARAMS+1];
 extern font_def_t *font_def;
 @
 
-@<\HINT/ variables@>=
+@<\HINT\ variables@>=
 font_def_t *font_def;
 @
 
@@ -495,7 +498,7 @@ free(font_def); font_def=NULL;
 @
 
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 static void hget_font_def(uint8_t a, uint8_t n)
 { char *t;
   font_def_t *f=font_def+n;
@@ -505,7 +508,7 @@ static void hget_font_def(uint8_t a, uint8_t n)
   HGET16(f->m); @+RNG("Font metrics",f->m,3,max_section_no);
   HGET16(f->q); @+RNG("Font glyphs",f->q,3,max_section_no);
   f->g=hget_glue_spec(); 
-  f->h=hget_hyphen_node();
+  f->h=hget_disc_node();
   DBG(DBGDEF,"Start font parameters\n");
   while (KIND(*hpos)!=font_kind)@/  
   { kind_t k;
@@ -515,7 +518,7 @@ static void hget_font_def(uint8_t a, uint8_t n)
     n=HGET8;
     DBG(DBGDEF,"Reading font parameter %d: %s\n",n, definition_name[k]);
     if (k!=penalty_kind && k!=kern_kind && k!=ligature_kind && @|
-        k!=hyphen_kind && k!=glue_kind && k!=language_kind && @| k!=rule_kind && k!=image_kind)
+        k!=disc_kind && k!=glue_kind && k!=language_kind && @| k!=rule_kind && k!=image_kind)
       QUIT("Font parameter %d has invalid type %s",n, content_name[n]);
     RNG("Font parameter",n,0,MAX_FONT_PARAMS);
     f->p[n]=hget_definition(a);
@@ -528,7 +531,7 @@ static void hget_font_def(uint8_t a, uint8_t n)
 After reading the definition section, we need to move the information from the \TeX\ font metric
 files included into \TeX's data structures.
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 static void hget_font_metrics(void)
 { int i;
   for (i=0; i<=max_ref[font_kind]; i++)
@@ -541,7 +544,12 @@ static void hget_font_metrics(void)
       font_def[i].s=font_size[i];
     }
 }
+@
 
+We export the font section and at-size using two functions
+to be used in {\tt hfonts.c}.
+
+@<\HINT\ functions@>=
 uint16_t hglyph_section(uint8_t f)
 {   return font_def[f].q;
 }
@@ -549,20 +557,18 @@ uint16_t hglyph_section(uint8_t f)
 int32_t font_at_size(uint8_t f)
 {  return font_def[f].s; /* at size */
 }
+@
 
+@<\HINT\ font access functions@>=
+extern uint16_t hglyph_section(uint8_t f);
+extern int32_t font_at_size(uint8_t f);
 @
 
 We used:
 
-@<\HINT/ declarations@>=
+@<\HINT\ declarations@>=
 static pointer hget_glue_spec(void);
-static pointer hget_hyphen_node(void);
-@
-and defined
-@<\HINT/ |extern|@>=
-extern uint16_t hglyph_section(uint8_t f);
-extern int32_t font_at_size(uint8_t f);
-
+static pointer hget_disc_node(void);
 @
 
 \subsection{Parameter Lists}\label{getparamlist}
@@ -572,7 +578,7 @@ Since all values are integer types, a single integer type, large enough for |int
 is sufficient. 
 To form linked lists of parameter definitions, we add a |next| pointer. The variable |param_def| contains the dynamically allocated 
 array of lists of parameter definitions.
-@<\HINT/ types@>=
+@<\HINT\ types@>=
 typedef struct param_t {
 uint8_t n,k;@+
 int32_t v;@+
@@ -584,7 +590,7 @@ param_t p; } param_def_t;
 @
 
 
-@<\HINT/ variables@>=
+@<\HINT\ variables@>=
 param_def_t **param_def;
 @
 
@@ -601,7 +607,7 @@ if (param_def!=NULL)
 free(param_def); param_def=NULL;
 @
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 static void free_param_list(param_def_t *p)
 { while (p!=NULL)
   { param_def_t *q=p;
@@ -611,9 +617,9 @@ static void free_param_list(param_def_t *p)
 } 
 @
 
-Next we implement reading a parameter list from a \HINT/ file.
+Next we implement reading a parameter list from a \HINT\ file.
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 static param_def_t *hget_param_list(uint8_t a)
 { uint32_t s,t;
   param_def_t *p=NULL;
@@ -663,12 +669,6 @@ param_def_t *hget_param_list_ref(uint8_t n)
   return param_def[n];
 }
 @
-We used:
-
-@<\HINT/ declarations@>=
-static uint32_t hget_list_size(info_t info);
-static void hget_size_boundary(info_t info);
-@
 
 Finaly, here are two functions that set and restore global parameters
 based on a parameter list.
@@ -681,7 +681,7 @@ we want to set and restore the parameter settings for the displayed equation
 without affecting the settings for line breaking. To do so, we use the special kind value |0xFF|
 to record the boundary between two sets of parameters on the |par_save| stack.
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 #define MAX_SAVE 100
 #define SAVE_BOUNDARY 0xFF
 static param_t par_save[MAX_SAVE];
@@ -725,12 +725,12 @@ void hrestore_param_list(void)
   QUIT("Parameter save stack flow");
 }
 @
-@<\HINT/ |extern|@>=
+@<\HINT\ |extern|@>=
 extern void hrestore_param_list(void);
 @
 
 \subsection{Page Ranges}
-@<\HINT/ variables@>=
+@<\HINT\ variables@>=
 typedef struct {
  uint8_t pg;
  uint32_t f,t;
@@ -745,7 +745,7 @@ ALLOCATE(range_def, max_ref[range_kind]+1, range_def_t);
 free(range_def); range_def=NULL;
 @
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 static void hget_range_def(uint8_t a, uint8_t pg)
 { static uint8_t n=0;
   uint32_t f, t; 
@@ -780,14 +780,14 @@ The variable |streams| is used to contain the stream records
 that store the main content and the content of insertions.
 These records replace the box registers of \TeX.
 
-@<\HINT/ |extern|@>=
+@<\HINT\ |extern|@>=
 typedef struct { /* should go to hint.h */
 pointer p, t; /* head and tail */
 } stream_t;
 extern stream_t *streams;
 @
 
-@<\HINT/ variables@>=
+@<\HINT\ variables@>=
 stream_t *streams;
 @
  
@@ -801,7 +801,7 @@ free(streams); streams=NULL;
 
 
 We put a stream definition into avariable of type |stream_def_t|.
-@<\HINT/ variables@>=
+@<\HINT\ variables@>=
 typedef struct {
   xdimen_t x; /* maximum height */
   int f; /* factor */
@@ -818,7 +818,7 @@ which we use when reading page templates.
 We pass in the pointer to the array of stream definitions
 belonging to the current page.
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 static void hget_xdimen_def_node(xdimen_t *x);
 
 static bool hget_stream_def(stream_def_t *s)
@@ -835,10 +835,10 @@ static bool hget_stream_def(stream_def_t *s)
       else if (INFO(a)==b101) QUIT("first stream not yet implemented");
       else if(INFO(a)==b110) QUIT("last stream not yet implemented");
       else if (INFO(a)==b111) QUIT("top stream not yet implemented");
-      s->b=hget_list();
+      s->b=hget_list_pointer();
       hget_xdimen_def_node(&(s->w));
       s->g=hget_glue_spec();
-      s->a=hget_list();
+      s->a=hget_list_pointer();
       s->h=hget_glue_spec();
    }
    @<read and check the end byte |z|@>@;
@@ -874,7 +874,7 @@ case TAG(stream_kind,b100): hinsert_stream(HGET8); @+ break;
 \subsection{Page Templates}
 
 
-@<\HINT/ variables@>=
+@<\HINT\ variables@>=
 typedef struct {
   char *n; /* name */
   dimen_t d; /* max page depth */
@@ -918,7 +918,7 @@ if (page_def!=NULL)
 }
 @
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 
 static void hset_cur_page(void)
 { int i;
@@ -946,7 +946,7 @@ static void hget_page_def(uint8_t a, uint8_t i)
 @
 
 
-@<\HINT/ functions@>=
+@<\HINT\ functions@>=
 static void hinsert_stream(uint8_t n)
 { REF_RNG(stream_kind,n);
   if (streams[n].p==null) return;
@@ -976,7 +976,7 @@ static void hinsert_stream(uint8_t n)
 
 Now comes the top level function to fill a template:
 
-@<\HINT/ functions@>=
+@<\HINT\ functions@>=
 void hfill_page_template(void)
 { pointer p;
 #if 0
@@ -994,7 +994,7 @@ void hfill_page_template(void)
     uint8_t *spos=hpos, *sstart=hstart, *send=hend;
     hget_section(1);
     hpos=hpos+cur_page->t;
-    p=hget_list();
+    p=hget_list_pointer();
     hpos=spos,hstart=sstart,hend=send;
     if (streams[0].p!=null) flush_node_list(streams[0].p);
     streams[0].p=streams[0].t=null;
@@ -1006,51 +1006,94 @@ void hfill_page_template(void)
 }
 @
 
-@<\HINT/ |extern|@>=
+@<\HINT\ |extern|@>=
 extern void hfill_page_template(void);
 @
 
-\subsection{Labels}
+\subsection{Labels and Outlines}\label{labels}
+We store labels in the |labels| variable provided by {\tt hget.c}.
+Because we will expose outlines to the \HINT\ viewer, we choose
+a representation that fits the viewer's requirements; it is explaned in
+section~\secref{outlines}. Here we declare, allocate/deallocate,
+and initialize the variable |hint_outlines| together with the 
+variable |labels|.
 
-The variable |label_def| is used to store label definitions.
-
-@<\HINT/ variables@>=
-label_t *label_def=NULL;
+@<\HINT\ variables@>=
+hint_outline_t *hint_outlines=NULL;
+int outline_no=-1;
 @
 
 @<allocate definitions@>=
 if (max_ref[label_kind]>=0)
-ALLOCATE(label_def, max_ref[label_kind]+1, label_t);
+ALLOCATE(labels, max_ref[label_kind]+1, label_t);
+if (max_outline>=0)
+ALLOCATE(hint_outlines, max_outline+1, hint_outline_t);
 @
 
 @<free definitions@>=
-free(label_def); label_def=NULL;
+free(labels); labels=NULL;
+{ int k;
+  for (k=0;k<=max_outline;k++) free(hint_outlines[k].title);
+}
+free(hint_outlines); hint_outlines=NULL; outline_no=-1;
+max_outline=-1;
 @
 
-The function |hget_label_def| reads a label definition from the definition section.
+The function |hget_outline_or_label_def| reads a label or outline
+definition from the definition section. The |b100| bit tells the
+difference.
 
 @<get functions@>=
-void hget_label_def(uint8_t a, int n)
-{@+ label_t *t=label_def+n;
+void hget_outline_or_label_def(info_t i, int n)
+{ @+if (i&b100)
+   @<get and store an outline@>@;
+  else
+    @<get and store a label@>@;
+}
+@
+
+@<get and store a label@>=
+{@+ label_t *t=labels+n;
   HGET32(t->pos);
   t->where=HGET8;
-  if (t->where==0 || t->where>3) t->where=3;
-  if (INFO(a)&b100) /*public*/
-  {@+ char *s;
-    RNG("Public label",n,0,max_public);
-    t->major=HGET8; t->minor=HGET8;
-    HGET_STRING(s); t->n=strdup(s);
-  }
-  if (INFO(a)&b010) /* secondary position */
+  if (t->where>LABEL_MID) t->where=LABEL_UNDEF;
+  if (i&b010) /* secondary position */
   {@+ HGET32(t->pos0); t->f=HGET8;@+}
   else t->pos0=t->pos;
 }
 @
 
+@<get and store an outline@>=
+{@+hint_outline_t *t;
+   uint64_t pos;
+   uint8_t where;
+   outline_no++;
+   RNG("Outline",outline_no,0,max_outline);
+   t=hint_outlines+outline_no;
+   t->depth=HGET8;
+   t->p=hget_list_pointer();
+   t->title=strdup(hlist_to_string(t->p));
+   @<get |where| and |pos| from label |n|@>@;
+   t->where=where;
+   t->pos=pos;
+}
+@
+
+@<get |where| and |pos| from label |n|@>=
+   where=labels[n].where;
+#if 0   
+   pos=((uint64_t)labels[n].pos<<32)+@|(labels[n].pos-labels[n].pos0);
+#else
+   pos=((uint64_t)labels[n].pos0<<32); /* offsets still dont work in all cases and need fixing */
+#endif
+@
+
+
+The function |hlist_to_string| is defined in section~\secref{listtraversal}.
 
 \subsection{References}
 There are only a few functions that still need to be defined.
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 static pointer hget_ligature_ref(uint8_t n)
 { @+REF_RNG(ligature_kind,n);
   return copy_node_list(pointer_def[ligature_kind][n]);
@@ -1067,8 +1110,8 @@ static pointer hget_image_ref(uint16_t n)
 }
 
 static pointer hget_hyphen_ref(uint8_t n)
-{ @+REF_RNG(hyphen_kind,n);
-  return copy_node_list(pointer_def[hyphen_kind][n]);
+{ @+REF_RNG(disc_kind,n);
+  return copy_node_list(pointer_def[disc_kind][n]);
 }
 
 static pointer hget_leaders_ref(uint8_t n)
@@ -1082,8 +1125,8 @@ static pointer hget_leaders_ref(uint8_t n)
 @
 
 \section{Reading Content Nodes}
-The following section explains how to read the content section and convert the \HINT/
-representation of the content to the \TeX\ representation. While in the future we might have
+The following section explains how to read the content section and convert
+the \HINT\ representation of the content to the \TeX\ representation. While in the future we might have
 a renderer that does not use the \TeX\ representation, which was designed about 50 years ago,
 at present the reuse of \TeX's functions and data structure saves development time.
 
@@ -1109,7 +1152,7 @@ static void hget_content_section()
 There is no separate ``|teg|'' function in this case. If necessary, one can set |hpos=hend|.
 
 
-The basic data structure of a \HINT/ file is a node. We distinguish content- and definition-nodes. 
+The basic data structure of a \HINT\ file is a node. We distinguish content- and definition-nodes. 
 In both cases, a node consists of a start byte followed by
 the content or the definition and a matching end byte.
  
@@ -1134,7 +1177,7 @@ The |hget_node| function gets the next node from the input based on the tag byte
 and adds it to the current list. The function is used in |hget_content| to read a content node
 but also in the function |hget_definition| to get the content of a definition. 
 
-@<\HINT/ functions@>=
+@<\HINT\ functions@>=
 
 static void hget_node(uint8_t a)
 { @+switch (a)@/
@@ -1166,20 +1209,12 @@ static pointer hget_definition(uint8_t a)
 }
 @
 
-@<\HINT/ declarations@>=
+@<\HINT\ declarations@>=
 static void hget_content(void);
 @
 
 Now let's turn to the backwards version.
-The primitive reading operations are defined by the following macros:
-@<TEG macros@>=
-#define @[HBACK(X)@] @[((hpos-(X)<hstart)?(QUIT("HTEG underflow\n"),NULL):(hpos-=(X)))@]
-
-#define @[HTEG8@]     (HBACK(1),hpos[0])
-#define @[HTEG16(X)@] (HBACK(2),(X)=(hpos[0]<<8)+hpos[1])
-#define @[HTEG24(X)@] (HBACK(3),(X)=(hpos[0]<<16)+(hpos[1]<<8)+hpos[2])
-#define @[HTEG32(X)@] (HBACK(4),(X)=(hpos[0]<<24)+(hpos[1]<<16)+(hpos[2]<<8)+hpos[3])
-@
+The primitive reading operations are taken from {\tt hget.h}.
 
 The next macros read and check start and end byte.
 
@@ -1198,7 +1233,9 @@ The next macros read and check start and end byte.
 
 We conclude the section with the equivalents of |hget_node| and |hget_content|.
  The |node_pos| points to
-the end byte while reading the node and points to the start byte when reading the node is done.
+the end byte while reading the node and points to the start byte when reading the node is done. WE record the node position for all nodes on nesting level zero,
+because after a penalty, the page can start with pretty much any node type,
+and it is better to err on the save side.
 
 @<teg functions@>=
 static void hteg_node(uint8_t z)
@@ -1216,12 +1253,18 @@ void hteg_content(void)
   hteg_node(z);
   @<read and check the start byte |a|@>@;
   node_pos=hpos-hstart;
-  if (nest_ptr==0 && tail!=head && (type(tail)==penalty_node || type(tail)==glue_node || type(tail)==kern_node))
+  if (nest_ptr==0 && tail!=head
+#if 0
+  && (type(tail)==penalty_node || type(tail)==glue_node
+  || type(tail)==hlist_node || type(tail)==vlist_node
+  || type(tail)==kern_node)
+#endif
+)
       store_map(tail,node_pos,0);
 }
 @
 
-@<\HINT/ declarations@>=
+@<\HINT\ declarations@>=
 static void hteg_content(void);
 @
 
@@ -1239,54 +1282,6 @@ the most complex nodes.
 @
 Strings occur only in the definition section. Hence, there is no need to parse strings in the backward direction.
 
-\subsection{UTF8 Character Codes}
-@<GET macros@>=
-#define @[HGET_UTF8C(X)@]  (X)=HGET8;@+ if ((X&0xC0)!=0x80) \
-  QUIT("UTF8 continuation byte expected at " SIZE_F " got 0x%02X\n",hpos-hstart-1,X)@;
-@
-
-@<get functions@>=
-uint32_t hget_utf8(void)
-{ uint8_t a;
-  a=HGET8;
-  if (a<0x80) return a;
-  else
-  { if ((a&0xE0)==0xC0) @/
-    { uint8_t b; @+ HGET_UTF8C(b);
-      return ((a&~0xE0)<<6)+(b&~0xC0);
-    }
-    else if ((a&0xF0)==0xE0) @/
-    { uint8_t b,c;  @+ HGET_UTF8C(b); @+ HGET_UTF8C(c);
-      return ((a&~0xF0)<<12)+((b&~0xC0)<<6)+(c&~0xC0);
-    }
-    else if ((a&0xF8)==0xF0) @/
-    { uint8_t b,c,d;  @+ HGET_UTF8C(b); @+ HGET_UTF8C(c); @+ HGET_UTF8C(d);
-      return ((a&~0xF8)<<18)@|+ ((b&~0xC0)<<12)+((c&~0xC0)<<6)+(d&~0xC0);
-    }
-    else QUIT("UTF8 byte sequence expected");
-  }
-}
-@
-We will parse UTF-8 codes only in forward direction.
-
-\subsection{Floating Point Numbers}
-We need a way to read binary floating point numbers.
-
-@<\HINT/ auxiliar functions@>=
-static float32_t hget_float32(void)
-{  @+union {@+float32_t d; @+ uint32_t bits; @+} u;
-   HGET32(u.bits);
-   return u.d;
-}
-@
-
-@<\HINT/ auxiliar functions@>=
-static float32_t hteg_float32(void)
-{  @+union {@+float32_t d; @+ uint32_t bits; @+} u;
-   HTEG32(u.bits);
-   return u.d;
-}
-@
 
 \subsection{Extended Dimensions}
 The viewer can convert extended dimensions immediately to regular dimensions
@@ -1307,7 +1302,7 @@ because |hsize| and |vsize| are known.
   if((I)&b100) HTEG32((X).w);@+ else (X).w=0;\
 @
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 
 static void hget_xdimen_def(info_t i, xdimen_t *x)
 { switch(i)
@@ -1360,7 +1355,7 @@ static void hget_xdimen_def_node(xdimen_t *x)
 
 @
 
-@<\HINT/ auxiliar  functions@>=
+@<\HINT\ auxiliar  functions@>=
 scaled hteg_xdimen(uint8_t a)
 { @+xdimen_t x;
   switch(a)
@@ -1458,7 +1453,7 @@ case TAG(penalty_kind,2):  @+{@+int16_t n;@+ HTEG16(n);@+RNG("Penalty",n,-20000,
 @
 
 \subsection{Languages}
-When rendering \HINT/ files, the language information can be ignored.
+When rendering \HINT\ files, the language information can be ignored.
 @<cases to get content@>=
 case TAG(language_kind,b000):(void)HGET8; 
 case TAG(language_kind,1): 
@@ -1535,7 +1530,7 @@ pointer hget_rule_node(void)
 }
 @
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 static pointer hteg_rule_node(void)
 { @+ pointer q=null;
   @<read the end byte |z|@>@;
@@ -1553,23 +1548,23 @@ static pointer hteg_rule_node(void)
 @<GET macros@>=
 #define @[HGET_GLUE(I)@] @/\
   p= get_node(glue_spec_size); \
-  if(I==b111) width(p)=hget_xdimen_node(); \
-  else {@+ width(p)=0; @+if((I)&b100) HGET32(width(p));@+} \
+  if((I)!=b111) { if ((I)&b100) HGET32(width(p));@+ else width(p)=0; }\
   if((I)&b010) HGET_STRETCH(stretch(p),stretch_order(p))@; else stretch(p)=0, stretch_order(p)=normal;\
-  if((I)&b001) HGET_STRETCH(shrink(p),shrink_order(p))@; else shrink(p)=0, shrink_order(p)=normal;
+  if((I)&b001) HGET_STRETCH(shrink(p),shrink_order(p))@; else shrink(p)=0, shrink_order(p)=normal;\
+  if(I==b111) width(p)=hget_xdimen_node();
 @
 
-@<\HINT/ declarations@>=
+@<\HINT\ declarations@>=
 static scaled hget_xdimen_node(void);
 @
 
 @<TEG macros@>=
 #define @[HTEG_GLUE(I)@] @/\
   p= get_node(glue_spec_size); \
+  if(I==b111) width(p)=hget_xdimen_node();\
   if((I)&b001) HTEG_STRETCH(shrink(p),shrink_order(p))@; else shrink(p)=0, shrink_order(p)=normal;\
   if((I)&b010) HTEG_STRETCH(stretch(p),stretch_order(p))@; else stretch(p)=0, stretch_order(p)=normal;\
-  if(I==b111) width(p)=hteg_xdimen_node(); \
-  else {@+ width(p)=0; @+if((I)&b100) HTEG32(width(p));@+} 
+  if((I)!=b111) { if ((I)&b100) HGET32(width(p));@+ else width(p)=0; } 
 @
 
 
@@ -1604,7 +1599,7 @@ case, it is important to maintain a correct reference count.
 Once the reference count is correct, the function |spec2glue| can be used to create a
 glue node using the new pointer.
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 static pointer hget_glue_spec(void)
 { @+pointer p=null;
   uint8_t a,z; /* the start and the end byte*/
@@ -1634,7 +1629,7 @@ static pointer hget_glue_node(void)
 }
 @
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 static pointer hteg_glue_spec(void)
 { @+pointer p=null;
   uint8_t a,z; /* the start and the end byte*/
@@ -1671,34 +1666,15 @@ For now, we use \TeX's features:
 
 
 @<GET macros@>=
-#define @[IS_LIST(X)@]  (KIND(X)==list_kind || KIND(X)==adjust_kind || @/\
+#define @[IS_LIST(X)@]  (KIND(X)==list_kind || @/\
         KIND(X)==text_kind  ||@| KIND(X)==param_kind)
 @
 @<TEG macros@>=
-#define @[IS_LIST(X)@]  (KIND(X)==list_kind || KIND(X)==adjust_kind || @/\
+#define @[IS_LIST(X)@]  (KIND(X)==list_kind || @/\
         KIND(X)==text_kind  ||@| KIND(X)==param_kind)
 @
 
-@<\HINT/ auxiliar functions@>=
-static void hget_size_boundary(info_t info)
-{ @+uint32_t n;
-  if (info<2) return;
-  n=HGET8;
-  if (n-1!=0x100-info) QUIT(@["Size boundary byte 0x%x with info value %d at " SIZE_F@],
-                            n, info,hpos-hstart-1);
-}
-
-static uint32_t hget_list_size(info_t info)
-{ @+uint32_t n;  
-  if (info==1) return 0;
-  else if (info==2) n=HGET8;
-  else if (info==3) HGET16(n);
-  else if (info==4) HGET24(n);
-  else if (info==5) HGET32(n);
-  else QUIT("List info %d must be 1, 2, 3, 4, or 5",info);
-  return n;
-} 
-
+@<\HINT\ auxiliar functions@>=
 static pointer hget_node_list(uint32_t s)
 { @+ uint8_t *list_end=hpos+s;
   pointer p;
@@ -1713,12 +1689,8 @@ static pointer hget_node_list(uint32_t s)
   return p;  
 }
 
-static pointer hget_text_list(uint32_t s)
-{@+  QUIT("Text not implemented");
-  return null;
-}
-
-static pointer hget_list(void)
+static pointer hget_text_list(uint32_t s);
+static pointer hget_list_pointer(void)
 { @+if (!IS_LIST(*hpos)) return null;
   else
   {@+pointer p=null;
@@ -1744,43 +1716,7 @@ When we need to parse a list backwards that is part of a node. We still want the
 in forward order. The simplest way to do this, is moving to the beginning of the list and then
 parsing it in forward order.
 
-@<\HINT/ auxiliar functions@>=
-#if 0
-void hteg_size_boundary(info_t info)
-{ @+uint32_t n;
-  if (info<2) return;
-  n=HTEG8;
-  if (n-1!=0x100-info) QUIT(@["Size boundary byte 0x%x with info value %d at " SIZE_F@],
-                            n, info,hpos-hstart);
-}
-#endif
-
-static uint32_t hteg_list_size(info_t info)
-{ @+uint32_t n;  
-  if (info==1) return 0;
-  else if (info==2) n=HTEG8;
-  else if (info==3) HTEG16(n);
-  else if (info==4) HTEG24(n);
-  else if (info==5) HTEG32(n);
-  else QUIT("List info %d must be 1, 2, 3, 4, or 5",info);
-  return n;
-} 
-
-#if 0
-pointer hteg_node_list(uint32_t s)
-{ @+ uint8_t *list_start=hpos-s;
-  pointer p;
-  push_nest();
-  cur_list.bs_pos=NULL;
-  while (hpos>list_start)
-    hteg_content();
-  if (needs_bs) 
-    QUIT("Unexpected trailing baseline node");
-  p=link(head);
-  pop_nest();
-  return p;  
-}
-#endif
+@<\HINT\ auxiliar functions@>=
 
 static void hskip_list()
 { if (IS_LIST(*hpos))
@@ -1807,12 +1743,12 @@ static void hskip_list_back()
     hpos = hpos-1;  
 }
 
-pointer hteg_list(void)
+pointer hteg_list_pointer(void)
 { uint8_t *list_start;
   pointer p;
   hskip_list_back();
   list_start=hpos;
-  p=hget_list();
+  p=hget_list_pointer();
   hpos=list_start;
   return p;
 }
@@ -1825,7 +1761,7 @@ Here we define the function that reads parameter lists backwards. Having seen ho
 the function should contain no surprises. We start with a simple functions to read an integer definition.
 
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 #if 0
 static int32_t hteg_integer_def(uint8_t z)
 { if (INFO(z)==1) { int8_t n=HTEG8; return n;}
@@ -1896,13 +1832,13 @@ if ((I)&b010) HGET32(shift_amount(p));\
 if ((I)&b100) @/{@+int8_t x; glue_set(p)=hget_float32();@/\
   x=HGET8; @+ glue_order(p)=x&0xF;\ 
   x=x>>4; glue_sign(p)=(x<0?shrinking:(x>0?stretching:normal));}\
-list_ptr(p)=hget_list();
+list_ptr(p)=hget_list_pointer();
 @
 
 @<TEG macros@>=
 #define @[HTEG_BOX(I)@] \
 p=new_null_box();\
-list_ptr(p)=hteg_list();\
+list_ptr(p)=hteg_list_pointer();\
 if ((I)&b100) @/{@+int8_t x=HTEG8;@+ glue_order(p)=x&0xF;\ 
    x=x>>4; glue_sign(p)=(x<0?shrinking:(x>0?stretching:normal));\
    glue_set(p)=hteg_float32(); }\
@@ -1915,11 +1851,9 @@ node_pos=hpos-hstart-1;
 
 
 
-@<\HINT/ declarations@>=
-static float32_t hget_float32(void);
-static float32_t hteg_float32(void);
-static pointer hget_list(void);
-static pointer hteg_list(void);
+@<\HINT\ declarations@>=
+static pointer hget_list_pointer(void);
+static pointer hteg_list_pointer(void);
 @
 
 
@@ -1986,7 +1920,7 @@ pointer hget_vbox_node(void)
 }
 @
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 static pointer hteg_hbox_node(void)
 { @+  @<read the end byte |z|@>@;
    if (KIND(z)!=hbox_kind) QUIT("Hbox expected at 0x%x got %s",node_pos,NAME(z));
@@ -2016,11 +1950,11 @@ We start with boxes that just need their glue to be set.
 #define @[HGET_SET(I)@] @/\
  scaled x, st, sh; @+uint8_t sto, sho; \
  p=new_null_box();\
- if ((I)&b100) x= hget_xdimen_node();  else x=hget_xdimen_ref(HGET8);\
  HGET32(height(p)); if ((I)&b001) HGET32(depth(p)); HGET32(width(p));\
  if ((I)&b010) HGET32(shift_amount(p));\
  HGET_STRETCH(st,sto); @+  HGET_STRETCH(sh,sho);@/\
- list_ptr(p)=hget_list();
+ if ((I)&b100) x= hget_xdimen_node();  else x=hget_xdimen_ref(HGET8);\
+ list_ptr(p)=hget_list_pointer();
 @
 
 
@@ -2028,14 +1962,14 @@ We start with boxes that just need their glue to be set.
 #define @[HTEG_SET(I)@] @/\
   scaled x, st, sh; @+uint8_t sto, sho; \
   p=new_null_box();\
-  list_ptr(p)=hteg_list();\
+  list_ptr(p)=hteg_list_pointer();\
+  if ((I)&b100) x=hteg_xdimen_node(); else x=hget_xdimen_ref(HTEG8);\
   HTEG_STRETCH(sh,sho);@+HTEG_STRETCH(st,sto);\
   if ((I)&b010) HTEG32(shift_amount(p)); \
   HTEG32(width(p));@+if ((I)&b001) HTEG32(depth(p));@+HTEG32(height(p)); \
-  if ((I)&b100) x=hteg_xdimen_node(); else x=hget_xdimen_ref(HTEG8);\
   node_pos=hpos-hstart-1;
 @
-@<\HINT/ declarations@>=
+@<\HINT\ declarations@>=
 static scaled hget_xdimen_node(void);
 @
 
@@ -2083,7 +2017,7 @@ case TAG(vset_kind,b111): @+{@+pointer p;HTEG_SET(b111); @+vset(p,sto,st,sho,sh,
 The function |hset| computes |glue_set(p)| of a hlist node
 depending on the available stretch, shrink, and the target width |x|;
 the function |vset| does the equivalent for vlist nodes.
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 static void hset(pointer p,@/
           uint8_t sto, scaled st,uint8_t sho,scaled sh, scaled w)
 { @+scaled x;
@@ -2158,11 +2092,11 @@ need to traverse the content list before we can set the glue.
 @<GET macros@>=
 #define @[HGET_PACK(K,I)@] @/\
 { pointer p; @+scaled x, s=0, d; @+ uint8_t m; \
- if ((I)&b100) x= hget_xdimen_node();  else x=hget_xdimen_ref(HGET8);\
  if ((I)&b001) m=additional; else m=exactly; \
  if ((I)&b010) HGET32(s);\
  if (K==vpack_kind) HGET32(d); \
- p=hget_list(); \
+ if ((I)&b100) x= hget_xdimen_node();  else x=hget_xdimen_ref(HGET8);\
+ p=hget_list_pointer(); \
  if (K==vpack_kind) p=vpackage(p,x,m,d); else p=hpack(p,x,m);\
  shift_amount(p)=s;\
  happend_to_vlist(p);@+}
@@ -2171,11 +2105,11 @@ need to traverse the content list before we can set the glue.
 @<TEG macros@>=
 #define @[HTEG_PACK(K,I)@] @/\
 { pointer p;@+ scaled x, s, d; @+ uint8_t m; \
- p=hteg_list();\
+ p=hteg_list_pointer();\
+ if ((I)&b100) x=hteg_xdimen_node();@+  else x=hget_xdimen_ref(HTEG8);\
  if (K==vpack_kind) HTEG32(d); \
  if ((I)&b010) HTEG32(s);\
  if ((I)&b001) m=additional; else m=exactly; \
- if ((I)&b100) x=hteg_xdimen_node();@+  else x=hget_xdimen_ref(HTEG8);\
  node_pos=hpos-hstart-1;\
  if (K==vpack_kind) p=vpackage(p,x,m,d); else p=hpack(p,x,m);\
  hprepend_to_vlist(p);@+} 
@@ -2275,7 +2209,9 @@ case TAG(kern_kind,b111): @+  { @+HTEG_KERN(b111);@+ } @+break;
 
 @<GET macros@>=
 #define @[HGET_LEADERS(I)@]@/ \
-{@+pointer p=hget_glue_node();@+subtype(p)=a_leaders+((I)&b011)-1;\
+{@+pointer p;\
+ if ((I)&b100)p=hget_glue_node(); else {p=spec2glue(zero_glue); incr(glue_ref_count(zero_glue));} \
+@+subtype(p)=a_leaders+((I)&b011)-1;\
 if (KIND(*hpos)==rule_kind) leader_ptr(p)=hget_rule_node(); \
 else if (KIND(*hpos)==hbox_kind) leader_ptr(p)=hget_hbox_node(); \
 else  leader_ptr(p)=hget_vbox_node();\
@@ -2284,10 +2220,12 @@ tail_append(p);}
 
 @<TEG macros@>=
 #define @[HTEG_LEADERS(I)@]@/ \
-{@+pointer p=hteg_glue_node();@+subtype(p)=a_leaders+((I)&b011)-1;\
-if (KIND(*(hpos-1))==rule_kind) leader_ptr(p)=hteg_rule_node(); \
-else if (KIND(*(hpos-1))==hbox_kind) leader_ptr(p)=hteg_hbox_node(); \
-else  leader_ptr(p)=hteg_vbox_node();\
+{@+pointer p,q;\
+if (KIND(*(hpos-1))==rule_kind) q=hteg_rule_node(); \
+else if (KIND(*(hpos-1))==hbox_kind) q=hteg_hbox_node(); \
+else  q=hteg_vbox_node();\
+if ((I)&b100) p=hteg_glue_node(); else {p=spec2glue(zero_glue); incr(glue_ref_count(zero_glue));} \
+leader_ptr(p)=q;@+subtype(p)=a_leaders+((I)&b011)-1;\
 tail_append(p);}
 @
 
@@ -2298,12 +2236,18 @@ case TAG(leaders_kind,0):        @+ tail_append(hget_leaders_ref(HGET8)); @+brea
 case TAG(leaders_kind,1):        @+ HGET_LEADERS(1); @+break;
 case TAG(leaders_kind,2):        @+ HGET_LEADERS(2); @+break;
 case TAG(leaders_kind,3):        @+ HGET_LEADERS(3); @+break;
+case TAG(leaders_kind,b100|1):        @+ HGET_LEADERS(b100|1); @+break;
+case TAG(leaders_kind,b100|2):        @+ HGET_LEADERS(b100|2); @+break;
+case TAG(leaders_kind,b100|3):        @+ HGET_LEADERS(b100|3); @+break;
 @
 @<cases to teg content@>=
 case TAG(leaders_kind,0):        @+ tail_append(hget_leaders_ref(HTEG8)); @+break;
 case TAG(leaders_kind,1):        @+ HTEG_LEADERS(1); @+break;
 case TAG(leaders_kind,2):        @+ HTEG_LEADERS(2); @+break;
 case TAG(leaders_kind,3):        @+ HTEG_LEADERS(3); @+break;
+case TAG(leaders_kind,b100|1):        @+ HTEG_LEADERS(b100|1); @+break;
+case TAG(leaders_kind,b100|2):        @+ HTEG_LEADERS(b100|2); @+break;
+case TAG(leaders_kind,b100|3):        @+ HTEG_LEADERS(b100|3); @+break;
 @
 
 
@@ -2312,16 +2256,16 @@ case TAG(leaders_kind,3):        @+ HTEG_LEADERS(3); @+break;
 @<GET macros@>=
 #define @[HGET_BASELINE(I)@] \
   cur_list.bs_pos=hpos-1; \
-  if((I)&b100) cur_bs=hget_glue_spec(); else cur_bs=zero_glue; \
-  if((I)&b010) cur_ls=hget_glue_spec(); else cur_ls=zero_glue; \
   if((I)&b001) HGET32(cur_lsl); @+else cur_lsl=0; \
+  if((I)&b100) cur_bs=hget_glue_spec(); else cur_bs=zero_glue; \
+  if((I)&b010) cur_ls=hget_glue_spec(); else cur_ls=zero_glue;
 @
 
 @<TEG macros@>=
 #define @[HTEG_BASELINE(I)@] \
-  if((I)&b001) HTEG32(cur_lsl); @+else cur_lsl=0; \
   if((I)&b010) cur_ls=hteg_glue_spec(); else cur_ls=zero_glue; \
   if((I)&b100) cur_bs=hteg_glue_spec(); else cur_bs=zero_glue; \
+  if((I)&b001) HTEG32(cur_lsl); @+else cur_lsl=0; \
   cur_list.bs_pos=hpos-1; 
 @
 
@@ -2348,31 +2292,40 @@ case TAG(baseline_kind,b111): @+{@+ HTEG_BASELINE(b111);@+}@+break;
 @
 
 \subsection{Ligatures}
-We ignore the replacement characters because we do not need them for the display.
+Ligatures are currently the only kind of node that uses lists of character codes
+encoded as texts. So we define first a simplified version of |hget_text_list|.
+
+
+@<\HINT\ auxiliar functions@>=
+static pointer hget_text_list(uint32_t s)
+{ pointer p=null;
+  pointer *pp=&p;
+  uint8_t *t=hpos+s;
+  while (hpos<t) {*pp=new_character(0,hget_utf8()); pp=&link(*pp);}
+  return p;
+}
+@
+
+
 @<GET macros@>=
 #define @[HGET_LIG(I)@] @/\
-{@+pointer p;@+uint8_t f;@+ uint32_t c; @+uint8_t s,*t;\
+{@+pointer p,q;@+uint8_t f;\
 f=HGET8;\
-if ((I)==7) s=HGET8;@+else s=(I);\
-t=hpos+s; c=hget_utf8();p=new_ligature(f, c, null); tail_append(p);\
-{pointer r=lig_char(p); while (hpos<t) {link(r)=new_character(0,hget_utf8()); r=link(r);}}\
-hpos=t;\
-if ((I)==7)@/\
-{ @+uint8_t t;@+ t=HGET8; \
-  if(t!=s) @/\
-  QUIT("Sizes in ligature don't match %d!=%d",s,t);}\
+if ((I)==7) q=hget_list_pointer(); else q=hget_text_list(I);\
+if (q==null) QUIT("Ligature with empty list");\
+p=new_ligature(f, character(q), link(q)); tail_append(p);\
+link(q)=null; flush_node_list(q);\
 }
 @
 
 @<TEG macros@>=
 #define @[HTEG_LIG(I)@] @/\
-{@+pointer p;@+ uint32_t c; @+uint8_t s,*t;\
-if ((I)==7) @+s=HTEG8; @+else s=(I);\
-t=hpos; hpos=t-s; c=hget_utf8();p=new_ligature(0, c, null); tail_append(p); \
-{pointer r=lig_char(p); while (hpos<t) {link(r)=new_character(0,hget_utf8()); r=link(r);}}\
-hpos=t-s;\
-if ((I)==7) { uint8_t n;@+ n=HTEG8;\
-  if(n!=s)   QUIT("Sizes in ligature don't match %d!=%d",s,n);}\
+{@+pointer p,q;\
+if ((I)==7) q=hteg_list_pointer();\
+else {uint8_t *t=hpos; hpos=t-I; q=hget_text_list(I); hpos=t-I;}\
+if (q==null) QUIT("Ligature with empty list");\
+p=new_ligature(0, character(q), link(q)); tail_append(p);\
+link(q)=null; flush_node_list(q);\
 font(lig_char(p))=HTEG8;\
 }
 @
@@ -2407,56 +2360,56 @@ If it is zero we set the |auto_disc| flag in the
 new node.
 
 @<GET macros@>=
-#define @[HGET_HYPHEN(I)@]\
+#define @[HGET_DISC(I)@]\
   pointer p=new_disc(); \
-  if ((I)&b100) pre_break(p)=hget_list(); \
-  if ((I)&b010) post_break(p)=hget_list(); \
-  if ((I)&b001) {uint8_t r; @+r=HGET8; set_replace_count(p,r); \
+  if ((I)&b100) {uint8_t r; @+r=HGET8; set_replace_count(p,r); \
                  if ((r&0x80)==0) set_auto_disc(p); @+}\
-  else  set_auto_disc(p);
+  else  set_auto_disc(p); \
+  if ((I)&b010) pre_break(p)=hget_list_pointer(); \
+  if ((I)&b001) post_break(p)=hget_list_pointer();
 @
 
 @<TEG macros@>=
-#define @[HTEG_HYPHEN(I)@]\
+#define @[HTEG_DISC(I)@]\
   pointer p=new_disc(); \
-  if ((I)&b001) {uint8_t r; @+r=HTEG8; set_replace_count(p,r); \
+  if ((I)&b001) post_break(p)=hteg_list_pointer(); \
+  if ((I)&b010) pre_break(p)=hteg_list_pointer(); \
+  if ((I)&b100) {uint8_t r; @+r=HTEG8; set_replace_count(p,r); \
                  if ((r&0x80)==0) set_auto_disc(p); @+}\
-  else  set_auto_disc(p);\
-  if ((I)&b010) post_break(p)=hteg_list(); \
-  if ((I)&b100) pre_break(p)=hteg_list(); 
+  else  set_auto_disc(p);
 @
 
 
 
 @<cases to get content@>=
-case TAG(hyphen_kind,b000): @+tail_append(hget_hyphen_ref(HGET8));  @+break;
-case TAG(hyphen_kind,b001): @+{@+HGET_HYPHEN(b001);@+tail_append(p);@+} @+break;
-case TAG(hyphen_kind,b010): @+{@+HGET_HYPHEN(b010);@+tail_append(p);@+} @+break;
-case TAG(hyphen_kind,b011): @+{@+HGET_HYPHEN(b011);@+tail_append(p);@+} @+break;
-case TAG(hyphen_kind,b100): @+{@+HGET_HYPHEN(b100);@+tail_append(p);@+} @+break;
-case TAG(hyphen_kind,b101): @+{@+HGET_HYPHEN(b101);@+tail_append(p);@+} @+break;
-case TAG(hyphen_kind,b110): @+{@+HGET_HYPHEN(b110);@+tail_append(p);@+} @+break;
-case TAG(hyphen_kind,b111): @+{@+HGET_HYPHEN(b111);@+tail_append(p);@+} @+break;
+case TAG(disc_kind,b000): @+tail_append(hget_hyphen_ref(HGET8));  @+break;
+case TAG(disc_kind,b001): @+{@+HGET_DISC(b001);@+tail_append(p);@+} @+break;
+case TAG(disc_kind,b010): @+{@+HGET_DISC(b010);@+tail_append(p);@+} @+break;
+case TAG(disc_kind,b011): @+{@+HGET_DISC(b011);@+tail_append(p);@+} @+break;
+case TAG(disc_kind,b100): @+{@+HGET_DISC(b100);@+tail_append(p);@+} @+break;
+case TAG(disc_kind,b101): @+{@+HGET_DISC(b101);@+tail_append(p);@+} @+break;
+case TAG(disc_kind,b110): @+{@+HGET_DISC(b110);@+tail_append(p);@+} @+break;
+case TAG(disc_kind,b111): @+{@+HGET_DISC(b111);@+tail_append(p);@+} @+break;
 @
 @<cases to teg content@>=
-case TAG(hyphen_kind,b000): @+tail_append(hget_hyphen_ref(HTEG8));  @+break;
-case TAG(hyphen_kind,b001): @+{@+HTEG_HYPHEN(b001);@+tail_append(p);@+} @+break;
-case TAG(hyphen_kind,b010): @+{@+HTEG_HYPHEN(b010);@+tail_append(p);@+} @+break;
-case TAG(hyphen_kind,b011): @+{@+HTEG_HYPHEN(b011);@+tail_append(p);@+} @+break;
-case TAG(hyphen_kind,b100): @+{@+HTEG_HYPHEN(b100);@+tail_append(p);@+} @+break;
-case TAG(hyphen_kind,b101): @+{@+HTEG_HYPHEN(b101);@+tail_append(p);@+} @+break;
-case TAG(hyphen_kind,b110): @+{@+HTEG_HYPHEN(b110);@+tail_append(p);@+} @+break;
-case TAG(hyphen_kind,b111): @+{@+HTEG_HYPHEN(b111);@+tail_append(p);@+} @+break;
+case TAG(disc_kind,b000): @+tail_append(hget_hyphen_ref(HTEG8));  @+break;
+case TAG(disc_kind,b001): @+{@+HTEG_DISC(b001);@+tail_append(p);@+} @+break;
+case TAG(disc_kind,b010): @+{@+HTEG_DISC(b010);@+tail_append(p);@+} @+break;
+case TAG(disc_kind,b011): @+{@+HTEG_DISC(b011);@+tail_append(p);@+} @+break;
+case TAG(disc_kind,b100): @+{@+HTEG_DISC(b100);@+tail_append(p);@+} @+break;
+case TAG(disc_kind,b101): @+{@+HTEG_DISC(b101);@+tail_append(p);@+} @+break;
+case TAG(disc_kind,b110): @+{@+HTEG_DISC(b110);@+tail_append(p);@+} @+break;
+case TAG(disc_kind,b111): @+{@+HTEG_DISC(b111);@+tail_append(p);@+} @+break;
 @
 
 
-@<\HINT/ auxiliar functions@>=
-static pointer hget_hyphen_node(void)
+@<\HINT\ auxiliar functions@>=
+static pointer hget_disc_node(void)
 {  @+@<read the start byte |a|@>@;
-   if (KIND(a)!=hyphen_kind || INFO(a)==b000) 
+   if (KIND(a)!=disc_kind || INFO(a)==b000) 
       QUIT("Hyphen expected at 0x%x got %s,%d",node_pos,NAME(a),INFO(a));
    { @+
-   HGET_HYPHEN(INFO(a));
+   HGET_DISC(INFO(a));
    @<read and check the end byte |z|@>@;
    return p;
    }
@@ -2464,12 +2417,12 @@ static pointer hget_hyphen_node(void)
 @
 
 @<teg functions@>=
-pointer hteg_hyphen_node(void)
+pointer hteg_disc_node(void)
 {  @+@<read the end byte |z|@>@;
-   if (KIND(z)!=hyphen_kind || INFO(z)==b000) 
+   if (KIND(z)!=disc_kind || INFO(z)==b000) 
       QUIT("Hyphen expected at 0x%x got %s,%d",node_pos,NAME(z),INFO(z));
    { @+
-   HTEG_HYPHEN(INFO(z));
+   HTEG_DISC(INFO(z));
    @<read and check the start byte |a|@>@;
    return p;
    }
@@ -2483,8 +2436,10 @@ pointer hteg_hyphen_node(void)
 #define @[HGET_PAR(I)@] @/\
 { @+scaled x=0;\
   param_def_t *q;\
+  if ((I)==b100) q=hget_param_list_ref(HGET8);\
   if ((I)&b100) x=hget_xdimen_node(); else x=hget_xdimen_ref(HGET8);\
-  if ((I)&b010) q=hget_param_list_node(); else q=hget_param_list_ref(HGET8);\
+  if ((I)&b010) q=hget_param_list_node(); \
+  else if ((I)!=b100) q=hget_param_list_ref(HGET8);\
   hget_paragraph(x,0,q);\
 }
 @
@@ -2523,7 +2478,7 @@ feature of \TeX.  If the offset is positive, unwanted nodes are pruned
 from the beginning of the list in the same way \TeX\ does it. We also
 transplant the post-break list of a discretionary hyphen.
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 static void transplant_post_break_list(void)
 { @+pointer r, q=link(head);
   int t=replace_count(q);
@@ -2590,7 +2545,7 @@ the initial or the final part of it.
 
 We start with processing the entire paragraph.
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 pointer hget_paragraph_all(scaled x)
 { @+
   uint32_t s, t;
@@ -2653,7 +2608,7 @@ Next we look at retrieving the final part staring at a given position inside the
 We examine the start of the node list and replace a hyphen node by its post break list.
 Otherwise we remove unwanted space from the beginning of the list.
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 pointer hget_paragraph_final(scaled x, uint8_t *from)
 { @+
   uint32_t s, t;
@@ -2734,7 +2689,7 @@ pointer hget_paragraph_initial(scaled x, uint8_t *to)
            store_map(p,node_pos,0); /* we store the position of horizontal nodes and compute the offset of vertical nodes later */
       }
     }
-    if (KIND(*to)==hyphen_kind)
+    if (KIND(*to)==disc_kind)
     { hget_content();
       store_map(tail,node_pos,0); 
       transplant_pre_break_list();
@@ -2783,7 +2738,7 @@ open question. Here, we just add a penalty and a zero glue.
 @
 
 
-With every paragraph the \HINT/ file specifies a parameter list containing
+With every paragraph the \HINT\ file specifies a parameter list containing
 those parameters of the line breaking algorithm that differ from the
 parameter values in the definition section. These changes are relevant for line
 breaking only, not for parsing the paragraphs content. On the contrary,
@@ -2803,24 +2758,24 @@ When we parse a paragraph we put the current paragraph parameters in a global
 variable, and save a possible outer parameter list in a local variable to restore
 the global varaiable once the paragraph is finished.
 
-@<\HINT/ variables@>=
+@<\HINT\ variables@>=
 static param_def_t *line_break_params=NULL;
 @
 
 We provide a functions to set the parameters from this special variable,
 thus avoiding the export of the |param_def_t| type.
 
-@<\HINT/ functions@>=
+@<\HINT\ functions@>=
 void set_line_break_params(void)
 { hset_param_list(line_break_params);
 }
 @
-@<\HINT/ |extern|@>=
+@<\HINT\ |extern|@>=
 extern void set_line_break_params(void);
 @
 
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 pointer hget_paragraph(scaled x, uint32_t offset, param_def_t *q)
 { @+
   pointer p, par_head;
@@ -2845,6 +2800,8 @@ void hget_par_node(uint32_t offset)
 { @+ scaled x=0;
   param_def_t *q;
   @<read the start byte |a|@>@;
+  if (KIND(a)!=par_kind)
+    QUIT("Paragrap expected found tag [%s,%d] at " SIZE_F "\n",NAME(a),INFO(a),hpos-hstart);
   node_pos=(hpos-hstart)-1;
   if (INFO(a)&b100) x=hget_xdimen_node(); else x=hget_xdimen_ref(HGET8);
   if (INFO(a)&b010) q=hget_param_list_node(); else q=hget_param_list_ref(HGET8);
@@ -2852,7 +2809,7 @@ void hget_par_node(uint32_t offset)
   @<read and check the end byte |z|@>@;
 }
 @
-@<\HINT/ |extern|@>=
+@<\HINT\ |extern|@>=
 extern void hget_par_node(uint32_t offset);
 @
 
@@ -2871,18 +2828,20 @@ before the first line---this has to wait until we know the box that preceeds the
 paragraph---the |bs_pos| is set to |NULL|. Further we store the value of |prev_height|
 to be able to restore it after line breaking.
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 void hteg_paragraph(info_t i)
 {@+scaled x=0;
-  param_def_t *q;
+  param_def_t *q=null;
   pointer par_head;
   uint8_t *bs_pos=cur_list.bs_pos; /* the possible baseline skip */ 
   scaled ph=prev_height; 
   uint8_t *list_start, *par_start;
   hskip_list_back();
   list_start=hpos;
-  if (INFO(i)&b010) q=hteg_param_list_node(); else q=hget_param_list_ref(HTEG8);
+  if (INFO(i)&b010) q=hteg_param_list_node(); 
+  else if (INFO(i)!=b100) q=hget_param_list_ref(HTEG8);
   if (INFO(i)&b100) x=hteg_xdimen_node(); else x=hget_xdimen_ref(HTEG8);
+  if (INFO(i)==b100) q=hget_param_list_ref(HTEG8);
   par_start=hpos;
   node_pos=par_start-hstart-1;
   hpos=list_start;
@@ -2895,9 +2854,9 @@ void hteg_paragraph(info_t i)
 The |hget_paragraph| function adds the individual lines in top to
 bottom order to the current list. Running the page builder in bottom
 up direction requires, however, that the lines come in bottom to top
-oder. The following code, removes the lines of the paragraph from the
+order. The following code, removes the lines of the paragraph from the
 current list, reverses the links, and attaches the list again in the new order.
-Before callling |hprepend_to_vlist|, we restore the position of the
+Before calling |hprepend_to_vlist|, we restore the position of the
 baseline skip and the previous height.
 At the end, we update the |tail| pointer and the |prev_height|.
 
@@ -2950,7 +2909,7 @@ void hteg_par_node(uint32_t offset)
 }
 
 @
-@<\HINT/ |extern|@>=
+@<\HINT\ |extern|@>=
 extern void hteg_par_node(uint32_t offset);
 @
 
@@ -2962,7 +2921,7 @@ extern void hteg_par_node(uint32_t offset);
 {@+ param_def_t *q;@+ pointer p=null, a=null;\
 if ((I)&b100) q=hget_param_list_node(); else q=hget_param_list_ref(HGET8);\
 if ((I)&b010) a=hget_hbox_node(); \
-p=hget_list(); \
+p=hget_list_pointer(); \
 if ((I)&b001) a=hget_hbox_node();\
 hset_param_list(q); hdisplay(p,a,((I)&b010)!=0); hrestore_param_list();\
 }
@@ -2972,7 +2931,7 @@ hset_param_list(q); hdisplay(p,a,((I)&b010)!=0); hrestore_param_list();\
 #define @[HTEG_MATH(I)@] \
 {@+ param_def_t *q;@+ pointer p=null, a=null;\
 if ((I)&b001) a=hteg_hbox_node();\
-p=hteg_list(); \
+p=hteg_list_pointer(); \
 if ((I)&b010) a=hteg_hbox_node(); \
 if ((I)&b100) q=hteg_param_list_node(); else q=hget_param_list_ref(HTEG8);\
 hset_param_list(q); hdisplay(p,a,((I)&b010)!=0); hrestore_param_list();\
@@ -3023,28 +2982,20 @@ Vertical adjustments are inside horizontal lists. They migrate to the enclosing 
 where they are unpacked and added after the horizontal material.
 Inside a paragraph, this means the adjustment comes after the line that contains the adjustment.
 Outside a paragraph, \TeX\ will do the moving and unpacking even before the adjustment has a
-chance to get into the \HINT/ file. If we parse paragraphs, we parse in forward direction;
+chance to get into the \HINT\ file. If we parse paragraphs, we parse in forward direction;
 hence, we do not need to parse adjustments in backward direction.
 
 @<GET macros@>=
 #define @[HGET_ADJUST(I)@] @/\ 
-{ @+pointer p; uint32_t s,t;\
+{ @+pointer p;\
   p=get_node(small_node_size); type(p)=adjust_node; subtype(p)=normal;\
-  s=hget_list_size(I); hget_size_boundary(I); \
-  adjust_ptr(p)=hget_node_list(s);\
+  adjust_ptr(p)=hget_list_pointer(); \
   tail_append(p);\
-  hget_size_boundary(I);  t=hget_list_size(I); \
-  if (t!=s) QUIT("List sizes at " SIZE_F " do not match 0x%x != 0x%x",hpos-hstart-1,s,t);\
 }
 @
 
-
 @<cases to get content@>=
 case TAG(adjust_kind,1):  @+HGET_ADJUST(1); @+ break;
-case TAG(adjust_kind,2):  @+HGET_ADJUST(2); @+ break;
-case TAG(adjust_kind,3):  @+HGET_ADJUST(3); @+ break;
-case TAG(adjust_kind,4):  @+HGET_ADJUST(4); @+ break;
-case TAG(adjust_kind,5):  @+HGET_ADJUST(5); @+ break;
 @
 
 \subsection{Tables}
@@ -3055,16 +3006,16 @@ Currently tables are not yet implemented. We skip table and item nodes
 if(I&b010) /* v */; @+else /* h */;\
 if ((I)&b001) /* add */;@+ else /* to */;\
 if ((I)&b100) hget_xdimen_node(); else hget_xdimen_ref(HGET8);\
-hget_list(); /* tabskip */ \
-hget_list(); /* items */
+hget_list_pointer(); /* tabskip */ \
+hget_list_pointer(); /* items */
 @
 
 @<TEG macros@>=
 #define @[HTEG_TABLE(I)@] \
 if(I&b010) /* v */; @+else /* h */;\
 if ((I)&b001) /* add */;@+ else /* to */;\
-hteg_list();  /* items */ \
-hteg_list(); /* tabskip */ \
+hteg_list_pointer();  /* items */ \
+hteg_list_pointer(); /* tabskip */ \
 if ((I)&b100) hteg_xdimen_node(); else hget_xdimen_ref(HTEG8);
 @
 
@@ -3081,14 +3032,14 @@ case TAG(table_kind,b101): @+ HGET_TABLE(b101); @+ break;
 case TAG(table_kind,b110): @+ HGET_TABLE(b110); @+ break;
 case TAG(table_kind,b111): @+ HGET_TABLE(b111); @+ break;@#
 
-case TAG(item_kind,b000):  hget_list();@+@+ break;
+case TAG(item_kind,b000):  hget_list_pointer();@+@+ break;
 case TAG(item_kind,b001):  hget_content();@+break;
 case TAG(item_kind,b010):  hget_content();@+break;
 case TAG(item_kind,b011):  hget_content();@+break;
 case TAG(item_kind,b100):  hget_content();@+break;
 case TAG(item_kind,b101):  hget_content();@+break;
 case TAG(item_kind,b110):  hget_content();@+break;
-case TAG(item_kind,b111):  hget_content();@+(void)HGET8;@+break;
+case TAG(item_kind,b111):  (void)HGET8;@+hget_content();@+break;
 @
 
 @<cases to teg content@>=
@@ -3101,19 +3052,19 @@ case TAG(table_kind,b101): @+ HTEG_TABLE(b101); @+ break;
 case TAG(table_kind,b110): @+ HTEG_TABLE(b110); @+ break;
 case TAG(table_kind,b111): @+ HTEG_TABLE(b111); @+ break;@#
 
-case TAG(item_kind,b000):  hteg_list(); @+ break;
+case TAG(item_kind,b000):  hteg_list_pointer(); @+ break;
 case TAG(item_kind,b001):  hteg_content(); @+ break;
 case TAG(item_kind,b010):  hteg_content(); @+ break;
 case TAG(item_kind,b011):  hteg_content(); @+ break;
 case TAG(item_kind,b100):  hteg_content(); @+ break;
 case TAG(item_kind,b101):  hteg_content(); @+ break;
 case TAG(item_kind,b110):  hteg_content(); @+ break;
-case TAG(item_kind,b111):  (void)HTEG8;@+hteg_content(); @+ break;
+case TAG(item_kind,b111):  hteg_content(); @+(void)HTEG8;@+ break;
 @
 \subsection{Insertions and Stream Content}
 Hi\TeX\ generates streams from insertion nodes and here we need to reverse
 this process. While \TeX\ assigns insertion numbers starting at 254 and counting
-down, \HINT/ assigns stream numbers in the order of appearance starting at 1
+down, \HINT\ assigns stream numbers in the order of appearance starting at 1
 and counting up. We partly reverse this process here by mapping the
 stream number $n$ to the insertion number $255-n$.
 
@@ -3124,7 +3075,7 @@ the reference counts for glues. If the parameter list is given explicitely,
 the newly created glue nodes already have the correct reference count.
 The function parameter  |f| is set to |true| in the latter case.
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 static void hset_stream_params(pointer p,bool f, param_def_t *q)
 { param_def_t *r;
   pointer s;
@@ -3152,7 +3103,7 @@ static void hset_stream_params(pointer p,bool f, param_def_t *q)
   p=get_node(ins_node_size); type(p)=ins_node;\
   subtype(p)=HGET8;@+RNG("Stream",subtype(p),1,254); \
   if ((I)&b010) q=hget_param_list_node(); else q=hget_param_list_ref(HGET8); \
-  ins_ptr(p)=hget_list(); \
+  ins_ptr(p)=hget_list_pointer(); \
   if ((I)&b010) hset_stream_params(p,true,q); else hset_stream_params(p,false,q);\
   tail_append(p);}
 @
@@ -3160,7 +3111,7 @@ static void hset_stream_params(pointer p,bool f, param_def_t *q)
 @<TEG macros@>=
 #define @[HTEG_STREAM(I)@] @/\
 {pointer p=get_node(ins_node_size); type(p)=ins_node;\
- ins_ptr(p)=hteg_list();\
+ ins_ptr(p)=hteg_list_pointer();\
  if ((I)&b010) {param_def_t *q=hteg_param_list_node();  hset_stream_params(p,true,q);}\
  else {param_def_t *q=hget_param_list_ref(HTEG8);  hset_stream_params(p,false,q);}\
  subtype(p)=HTEG8;@+RNG("Stream",subtype(p),1,254);\
@@ -3219,22 +3170,26 @@ case TAG(image_kind,b110): @+ HTEG_IMAGE(b110);@+break;
 case TAG(image_kind,b111): @+ HTEG_IMAGE(b111);@+break;
 @
 
-\subsection{Links and Labels}
+\subsection{Links}
 @<GET macros@>=
 #define @[HGET_LINK(I)@] @/\
 { @+pointer p;\
-  p=get_node(link_node_size);  type(p)=whatsit_node; subtype(p)=link_node;\
-  if (I&b001) HGET16(link_label(p));@+ else link_label(p)=HGET8; \
-  if (I&b010) link_on(p)=1; else link_on(p)=0;\
+  p=get_node(link_node_size);  type(p)=whatsit_node;\
+  if (I&b010) subtype(p)=start_link_node; else subtype(p)=end_link_node;\
+  if (I&b001) HGET16(label_ref(p));@+ else label_ref(p)=HGET8; \
+  RNG("label",label_ref(p),0,max_ref[label_kind]);\
+  label_has_name(p)=0;\
   tail_append(p);}
 @
 
 @<TEG macros@>=
 #define @[HTEG_LINK(I)@] @/\
 { @+pointer p;\
-  p=get_node(link_node_size);  type(p)=whatsit_node; subtype(p)=link_node;\
-  if (I&b001) HTEG16(link_label(p));@+ else link_label(p)=HTEG8; \
-  if (I&b010) link_on(p)=1; else link_on(p)=0;\
+  p=get_node(link_node_size);  type(p)=whatsit_node;\
+  if (I&b010) subtype(p)=start_link_node; else subtype(p)=end_link_node;\
+  if (I&b001) HTEG16(label_ref(p));@+ else label_ref(p)=HTEG8; \
+  RNG("label",label_ref(p),0,max_ref[label_kind]);\
+  label_has_name(p)=0;\
   tail_append(p);}
 @
 
@@ -3275,10 +3230,10 @@ implemented but rather needed by the \TeX\ library.
 The additional include file {\tt hformat.h} 
 is necessary because it provides a replacement for
 \TeX's table of equivalents. 
-\TeX's table of equivalents is no longer needed because \HINT/ does not define
+\TeX's table of equivalents is no longer needed because \HINT\ does not define
 new values.
 The include file {\tt hformat.h} depends on {\tt error.h}
-and provides the usual \HINT/ debugging output macros.  
+and provides the usual \HINT\ debugging output macros.  
 The file {\tt error.h} defines macros to implement error handling.
 
 For complex types like |memory_word| or |list_state_record|, \TeX\ uses
@@ -3298,16 +3253,16 @@ Now let's see how to extract code from \TeX.
 
 \subsection{Parameters}
 
-\TeX's table of equivalents is no longer needed since \HINT/ will never change
+\TeX's table of equivalents is no longer needed since \HINT\ will never change
 any assignments. The functions of \TeX, however, use several of \TeX's variables
-as parameters. These are now found as part of \HINT/'s definitions.
+as parameters. These are now found as part of \HINT's definitions.
 We modify the corresponding macros accordingly.
 
 \changestyle{params.tex}
 
 The variables containing the parameter definitions are declared |extern|.
 
-@<\HINT/ |extern|@>=
+@<\HINT\ |extern|@>=
 extern pointer*pointer_def[32];
 extern scaled*dimen_def;
 extern int32_t*integer_def;
@@ -3336,7 +3291,7 @@ In this section we will export the functions that create structures in |mem|: bo
 
 \subsection{Lists and Nesting}
 Most of \TeX's operations are performed on the ``current list''. 
-When \HINT/ reads nodes from the input file, it will follow this principle and add nodes
+When \HINT\ reads nodes from the input file, it will follow this principle and add nodes
 to the current list. Lists can be nested and the list on the outermost level is the contribution list which we encounter again in section~\secref{texbuildpage}. 
 Now lets consider the modifications to \TeX's list handling.
  
@@ -3362,7 +3317,7 @@ that are yet undefined. Here is a list of all of them
 which we will put into a header file to force the compiler
 to check for consistent use accross compilation units.
 
-@<\HINT/ |extern|@>=
+@<\HINT\ |extern|@>=
 extern stream_t *streams;
 extern bool flush_pages(uint32_t pos); 
 extern pointer skip(uint8_t n);
@@ -3371,7 +3326,7 @@ extern int count(uint8_t n);
 extern scaled dimen(uint8_t n);
 @
 
-@<\HINT/ functions@>=
+@<\HINT\ functions@>=
 pointer skip(uint8_t n)
 { return cur_page->s[n].g; }
 pointer *box_ptr(uint8_t n)
@@ -3396,7 +3351,7 @@ It initializes the variables used by the page builder to make it ready to start
 a new page.
 % do not set |prev_depth=ignore_depth; prev_graf=0;| otherwise baseline skips do not work properly
 
-@<\HINT/ functions@>=
+@<\HINT\ functions@>=
 void hpage_init(void)
 { int i;
   if (streams==NULL||cur_page==NULL) return;
@@ -3419,15 +3374,15 @@ void hpage_init(void)
 }
 @
 
-@<\HINT/ |extern|@>=
+@<\HINT\ |extern|@>=
 extern void hpage_init(void);
 @
 
 When the viewer does not follow the natural sequence of pages but wants to
-move to an arbitrary location in the \HINT/ file, the contribution list needs to be flushed. 
+move to an arbitrary location in the \HINT\ file, the contribution list needs to be flushed. 
 The rest is done by |hpage_init|.
 
-@<\HINT/ functions@>=
+@<\HINT\ functions@>=
 void hflush_contribution_list(void)
 { if (link(contrib_head)!=null)
   { flush_node_list(link(contrib_head));
@@ -3436,7 +3391,7 @@ void hflush_contribution_list(void)
 }
 @
 
-@<\HINT/ |extern|@>=
+@<\HINT\ |extern|@>=
 extern void hflush_contribution_list(void);
 @
 
@@ -3454,24 +3409,24 @@ Now we see how to extract and modify this function from the \TeX\ sources.
 \section{Building Pages Bottom Up}
 \TeX's page builder (see section~\secref{texbuildpage}) moves nodes from the contribution list 
 to the current page, filling it from top to bottom, and finds an optimal page break to end the page.
-When a \HINT/ viewer needs to move to the previous page, only the start of the present page 
+When a \HINT\ viewer needs to move to the previous page, only the start of the present page 
 might be known. In this situation, the start of the present page determines the end of the
-previous page and the \HINT/ page builder needs to find an optimal page break to start the previous page.
+previous page and the \HINT\ page builder needs to find an optimal page break to start the previous page.
 
-We have seen already, how parsing the \HINT/ file backwards will fill the contribution list,
+We have seen already, how parsing the \HINT\ file backwards will fill the contribution list,
 moving the current position backwards, and adding new nodes at the end of the list.
 Now we need to construct a page builder, that
 moves these nodes from the head of the contribution list to the top of the current page,
 building it from the bottom up until the optimal
 page start is found. It is clear that optimizing different objectives will produce different
-outcomes. So the pages \HINT/ finds in backward direction might be different from the ones
-\TeX\ or \HINT/ find when paging forward. Therefore complete compatibility with \TeX\ is
+outcomes. So the pages \HINT\ finds in backward direction might be different from the ones
+\TeX\ or \HINT\ find when paging forward. Therefore complete compatibility with \TeX\ is
 not an issue. Still we want to do a good job and therefore the following exposition follows
 closely the exposition of \TeX's page builder in part 45 of {\it \TeX: The Program\/}\cite{Knuth:tex}.
 
 So here is the outline of the function |hbuild_page_up|. 
 
-@<\HINT/ functions@>=
+@<\HINT\ functions@>=
 static bool hbuild_page_up(void) /*append contributions to the current page*/ 
 {@+
 static scaled page_top_height;
@@ -3527,7 +3482,7 @@ page. So we do not incorporate these nodes immediately into the |page_so_far| va
 but keep track of them in the |top_so_far| variables. Whenever we add a node that makes the
 accumulated nodes at the top non-discardable, we add them to the |page_so_far| variables.
 
-@<\HINT/ variables@>=
+@<\HINT\ variables@>=
 static scaled page_height;
 static scaled top_so_far[8];
 @
@@ -3757,8 +3712,8 @@ best_page_break=null;
 @
 
 \section{Recording Locations}
-When a \HINT/ viewer needs to output a certain page, it must be able to position
-the parser in the content section of the \HINT/ file.
+When a \HINT\ viewer needs to output a certain page, it must be able to position
+the parser in the content section of the \HINT\ file.
 For example when we want to go backwards to the previous page, 
 we must position the parser where the current page starts and go backwards from there.
 The start of the current page was determined
@@ -3769,7 +3724,7 @@ node. We could of course store the position inside each node. But this would mak
 all nodes bigger and since (in the current implementation)
 \TeX's pointers are limited to 16 bit, this is not a good idea.
 A second alternative would be to generate the pages directly from
-the node representations in the \HINT/ file. This is ultimatively the best solution
+the node representations in the \HINT\ file. This is ultimatively the best solution
 but requires rewriting \TeX's algorithms to work with that new representation---and I
 simply don't have the time to do that.
 So I choose a third alternative: 
@@ -3782,13 +3737,13 @@ Therefore the table will store also an offset to the enclosing top level node.
 We call the complete information associated with the position a ``location''
 and the location is what we store in the table.
 
-When implementing a \HINT/ viewer, it will become necessary to store
-positions inside a \HINT/ file for later use. For example, a \HINT/ viewer
-may want to open a \HINT/ file exactly at the position where the user has
+When implementing a \HINT\ viewer, it will become necessary to store
+positions inside a \HINT\ file for later use. For example, a \HINT\ viewer
+may want to open a \HINT\ file exactly at the position where the user has
 stopped reading last time. We do not want to burden such programs with
 all the details of a |location_t| type. Hence we commit ourself to code
 locations in an |uint64_t| value and will make sure that these
-values contain enough information to position the \HINT/ file to
+values contain enough information to position the \HINT\ file to
 a unique and reproducible position.
 The |uint64_t| type is an opaque type for the user interface,
 but by storing the 32 bit position
@@ -3805,14 +3760,14 @@ We use the first for the node position and the second for a node's offset
 from the enclosing  paragraph node 
 or other top level node that is split across pages.
 
-@<\HINT/ variables@>=
+@<\HINT\ variables@>=
 static uint32_t map[0x10000];
 @
 
 The first function is the initialization function that clears the table. It 
 sets all records to zero. 
 
-@<\HINT/ functions@>=
+@<\HINT\ functions@>=
 static void clear_map(void)
 { @+memset(map,0,sizeof(map));@+
 }
@@ -3825,9 +3780,9 @@ and |hposition| returns for a given pointer the position inside the
 content section, or zero if no such position is known.
 To delete an entry, simply call |store_map(p,0,0)|.
 
-@<\HINT/ functions@>=
-void store_map(pointer p, uint32_t pos, uint32_t offset)
-{@+ map[p]=pos;
+@<\HINT\ functions@>=
+void store_map(pointer p, uint32_t pos0, uint32_t offset)
+{@+ map[p]=pos0;
   map[p+1]=offset;@+
 }
 
@@ -3839,15 +3794,15 @@ uint32_t hposition(pointer p)
 The function that takes information form the cache and converts it to a |uint64_t| location, as mentioned above, commes next. It returns |HINT_NO_LOC| if no information is in the cache.
 This value is used to indicate that a variable contains no valid location.
 
-@<\HINT/ |extern|@>=
+@<\HINT\ |extern|@>=
 #define HINT_NO_LOC 0xFFFFFFFFFFFFFFFF
-#define PAGE_LOC(P,Q) (((uint64_t)((P)+(Q))<<32) + (uint64_t)(Q))
+#define PAGE_LOC(POS0,OFF) (((uint64_t)((POS0)+(OFF))<<32) + (uint64_t)(OFF))
 #define LOC_POS(P) ((P)>>32) /* the node position */
 #define LOC_OFF(P) ((P)&0xFFFFFFFF) /* the distance to the top level node */
 #define LOC_POS0(P) (LOC_POS(P)-LOC_OFF(P)) /* the top level position */
 @
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 
 static uint64_t hlocation(pointer p)
 { @+return PAGE_LOC(map[p],map[p+1]);@+
@@ -3856,7 +3811,7 @@ static uint64_t hlocation(pointer p)
 
 \subsection{Caching page locations}
 The location table is complemented by a cache for page locations.
-When we move trough a \HINT/ file by paging forward and then want to
+When we move trough a \HINT\ file by paging forward and then want to
 return to the previous page, we want to see the previous page exactly
 as we just have seen it. Generating the previous page based on its
 bottom location may, however, produce a completely different
@@ -3869,14 +3824,14 @@ We do not cache an arbitraty amount of pages, because readers will
 not remember to many pages either. We keep a limited amount
 of locations sorted by their position in a circular buffer.
 
-@<\HINT/ variables@>=
+@<\HINT\ variables@>=
 #define MAX_PAGE_POS (1<<3) /* must be a power of 2 */
 
 uint64_t page_loc[MAX_PAGE_POS];
 int cur_loc;
 static int lo_loc, hi_loc;
 @
-@<\HINT/ |extern|@>=
+@<\HINT\ |extern|@>=
 extern uint64_t page_loc[];
 extern int cur_loc;
 @
@@ -3893,7 +3848,7 @@ in the circular buffer. |hloc_clear| clears the page location cache
 except for the current page. |hloc_next| moves the current location to the next page
 if there is a next page in the cache. |hloc_prev| does the same for the preceeding page.
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 #define @[NEXT_PAGE(X)@] (X=(X+1)&(MAX_PAGE_POS-1))
 #define @[PREV_PAGE(X)@] (X=(X-1)&(MAX_PAGE_POS-1))
 @#
@@ -3925,7 +3880,7 @@ bool hloc_prev(void)
 
 
 @
-@<\HINT/ |extern|@>=
+@<\HINT\ |extern|@>=
 extern void hloc_clear(void); /* keep only |cur_loc| in the cache */
 extern bool hloc_next(void);  /* advance to the next page if possible */
 extern bool hloc_prev(void);  /* advance to the previous page if possible */
@@ -3934,7 +3889,7 @@ extern bool hloc_prev(void);  /* advance to the previous page if possible */
 After these preparations, we can turn our attention to the functions that manage
 the page cache itself. We start with the initialization function:
 
-@<\HINT/ functions@>=
+@<\HINT\ functions@>=
 void hloc_init(void)
 {@+cur_loc=0;
   hloc_clear();
@@ -3954,7 +3909,7 @@ A more drastic action needs to be taken if the value of |h| is not in the page l
 If the location of the current page is new, we do not know anything about the position
 of following or preceeding pages and we have to clear the cache. 
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 
 void hloc_set(uint64_t h)
 {@+ int i;
@@ -3978,7 +3933,7 @@ void hloc_set(uint64_t h)
  keep them in the cache.
  
  
- @<\HINT/ auxiliar functions@>=
+ @<\HINT\ auxiliar functions@>=
 
 void hloc_set_next(pointer p)
 { @+int i=cur_loc;
@@ -4014,7 +3969,7 @@ Since the function |hloc_set_prev| is called only after generating a new page in
 mode, we will set the current page to the new location and keep only the position of the 
 old current page as position of the next page in the cache.
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 void hloc_set_prev(pointer p)
 { @+int i=cur_loc;
   uint64_t h=hlocation(p); 
@@ -4039,7 +3994,7 @@ void hloc_set_prev(pointer p)
 
 The following functions are called from the \TeX\ code:
 
-@<\HINT/ |extern|@>=
+@<\HINT\ |extern|@>=
 extern void hloc_init(void);
 extern void store_map(pointer p, uint32_t pos, uint32_t offset); /*store the location of |p|*/
 extern uint32_t hposition(pointer p); /* return the position of |p| or 0*/
@@ -4048,43 +4003,42 @@ extern void hloc_set_next(pointer p);/* record the location of |p| as the start 
 @
 
 \section{The Top-Level Interface}
-The \HINT/ library seeks to provide a basis for the implementation of
-\HINT/ viewers. For this purpose, it presents a top-level functional
+The \HINT\ library seeks to provide a basis for the implementation of
+\HINT\ viewers. For this purpose, it presents a top-level functional
 interface which strives to be easy to use and yet exposes the
 necessary functionality to allow different viewers on different
 systems.
 
-\subsection{Opening and Closing a \HINT/ File}
+\subsection{Opening and Closing a \HINT\ File}
 The first function an application needs to call is |hint_begin| and
 the last function is |hint_end|.  The former initialized \TeX's
 memory, maps the file, and prepares the system to be ready for all the
 functions that follow; the latter will release all resources obtained
-when calling one of the top level \HINT/ functions returning the
+when calling one of the top level \HINT\ functions returning the
 system to the state it had before calling |hint_begin|.  Since mapping
-(and unmapping) the \HINT/ file to memory is system depended, the
+(and unmapping) the \HINT\ file to memory is system depended, the
 functions |hint_begin| and |hint_end| delegate the work to two
 functions, |hint_map| and |hint_unmap|, that must be implemented by
-the framework using the \HINT/ backend.  If mapping the file fails,
-the function |hint_map| should set |hbase| to |NULL| and return zero;
-otherwise, it should set |hbase| to a valid memory address and return the number 
-of byte mapped. The value of |hbase| can therefore be used to check whether a \HINT/
-file is loaded.
+the framework using the \HINT\ backend.  If mapping the file fails,
+the function |hint_map| should set |hin_addr| to |NULL| and return zero;
+otherwise, it should set |hin_addr| to a valid memory address and return the number 
+of byte mapped. The value of |hin_addr| can therefore be used to check whether a \HINT\ file is loaded.
 
-@<\HINT/ functions@>=
+@<\HINT\ functions@>=
 void hint_begin(void)
-{ @+uint64_t hbase_size;
-  if (hbase!=NULL) 
-    hint_end();
+{ if (!hint_map()) return;
+  hpos=hstart=hin_addr;
+  hend=hstart+hin_size;
+  hflush_contribution_list(); hpage_init();
+  flush_node_list(link(page_head));
+  free_definitions();
   mem_init();
   list_init(); 
   hclear_dir();
   hclear_fonts();@/
-  hbase_size=hint_map();
-  if (hbase_size==0) QUIT("Unable to map the input file");
-  hpos=hstart=hbase;
-  hend=hstart+hbase_size;
   hget_banner();@/
-  hcheck_banner("hint");
+  if (!hcheck_banner("hint"))
+  { hint_unmap(); return; }
   hget_directory();
   hget_definition_section();
   hget_content_section();
@@ -4094,28 +4048,28 @@ void hint_begin(void)
 }
 
 void hint_end(void)
-{ @+if (hbase==NULL) return;
+{ @+if (hin_addr==NULL) return;
   hint_unmap(); 
-  hbase=hpos=hstart=hend=NULL;
+  hin_addr=hpos=hstart=hend=NULL;
   hflush_contribution_list(); hpage_init();
   flush_node_list(link(page_head));
+  free_definitions();
   list_leaks();
   hclear_dir();
 }
 @
 
 
-@<\HINT/ |extern|@>=
+@<\HINT\ |extern|@>=
 extern void hint_begin(void);
 extern void hint_end(void);
-extern uint64_t hint_map(void);
-extern uint8_t *hbase;
+extern bool hint_map(void);
 extern void hint_unmap(void);
 @
 
 
 \subsection{Changing the Page Dimensions}
-A central feature of a \HINT/ viewer is its ability to change the dimensions and the
+A central feature of a \HINT\ viewer is its ability to change the dimensions and the
 resolution of the displayed pages. To do so the function |hint_resize| is called.
 
 @<render functions@>=
@@ -4137,10 +4091,10 @@ and resets the rendering direction.
 
 
 \subsection{Building Pages Forward and Backward}
-After opening the \HINT/ file, \HINT/ viewers need a to be able to move forward to
+After opening the \HINT\ file, \HINT\ viewers need a to be able to move forward to
 the next page. Here is the function to do that.
 
-@<\HINT/ functions@>=
+@<\HINT\ functions@>=
 bool hint_forward(void)
 {@+ hpage_init();
   if (hbuild_page()) return true;
@@ -4160,15 +4114,15 @@ First the function |hpage_init| returns the ``old'' current page to
 free storage and initializes the variables that control the page building process.
 It is then assumed that any material still on the contribution list should fill the
 new page top to bottom. The call to |hbuild_page| will move any such material 
-to the new page. Further material is then taken from the \HINT/ file with parsing starting 
+to the new page. Further material is then taken from the \HINT\ file with parsing starting 
 at |hpos| which should point to a top level node.
 If the end-of-file is reached before the (nonempty) page is completed, a call to |flush_pages|
 adds some glue and a penalty to eject the page.
 
-The page builder usually considers material from the \HINT/ file until the page
+The page builder usually considers material from the \HINT\ file until the page
 becomes overfull before it backs up to the position of the best page break.
 The extra material past this break is put back on the contribution list
-in preparation for the next page. The |hpos| pointer to the \HINT/ file will then
+in preparation for the next page. The |hpos| pointer to the \HINT\ file will then
 point to the position where parsing should continue.
 Last not least, the page builder will store the location of the page break
 in the location cache as starting point for the next page.
@@ -4181,7 +4135,7 @@ the top of the current page and the top of the next page.
 
 
 Similarly, we implement paging backward.
- @<\HINT/ functions@>=
+ @<\HINT\ functions@>=
 bool hint_backward(void)
 {@+ hpage_init();
   if (hbuild_page_up()) return true;
@@ -4199,17 +4153,17 @@ belongs to the bottom of the preceeding page and |hpos| will
 indicate where parsing should contine when producing the previous page.
  After the call, we will have at least two enties in the location cache:
 the top of the current page and the top of the next page.
-@<\HINT/ |extern|@>=
+@<\HINT\ |extern|@>=
 extern bool hint_forward(void);
 extern bool hint_backward(void);
 @
 
-When the page builder has reached the end of the \HINT/ file, it must make sure that
+When the page builder has reached the end of the \HINT\ file, it must make sure that
 the material that still is in the contribution list gets flushed out.
 To do so the function |flush_pages| adds some space and a large negative penalty.
 Calling one of the previous functions will then deliver the remaining pages.
 
-@<\HINT/ functions@>=
+@<\HINT\ functions@>=
 bool flush_pages(uint32_t pos)
 { pointer p=link(head);
   while (p!=null && 
@@ -4227,10 +4181,10 @@ bool flush_pages(uint32_t pos)
 @
 We needed:
 
-@<\HINT/ variables@>=
+@<\HINT\ variables@>=
 scaled hvsize, hhsize;
 @
-@<\HINT/ |extern|@>=
+@<\HINT\ |extern|@>=
 extern scaled hvsize, hhsize;
 @
 The variables |hvsize| and |hhsize| give the vertical and horizontal
@@ -4238,12 +4192,12 @@ size of the main body of text. They are determined by subtracting the
 margins from |page_v| and |page_h| as determined by the GUI.
 
 The five functions defined so far constitute a minimal basis for
-processing \HINT/ files.  Section~\secref{testing} presents two
-programs, used to test the \HINT/ engine, which are implemented with
+processing \HINT\ files.  Section~\secref{testing} presents two
+programs, used to test the \HINT\ engine, which are implemented with
 just these functions.
 
 \subsection{Page Composition}
-The page builder of \HINT/, to tell the truth, is not building the
+The page builder of \HINT, to tell the truth, is not building the
 page, it is just assembling the material that should be displayed on
 the page: the main body of text and floating material like footnotes
 or illustrations.  To make a nice looking page, we need to combine the
@@ -4255,7 +4209,7 @@ and |page_v|, it computes the horizontal and vertical dimensions of
 the main body of text as well as the offset of its top/left
 position. The dimensions are given in scaled points.
 
-@<\HINT/ variables@>=
+@<\HINT\ variables@>=
 int page_v, page_h, offset_v, offset_h;
 @
 
@@ -4265,7 +4219,7 @@ letter size page---that's the old default of plain \TeX---and decreases the magi
 until the margin becomes zero for a page that is merely 1 inch wide.
 
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
  static void hset_margins(void)
 {  if (cur_page==&(page_def[0])) {
    offset_h=page_h/8- 0x48000;
@@ -4295,7 +4249,7 @@ A more sophisticated page composition can be achived with page templates.
 Here is the build-in page template number 0 which attaches the margins just computed
 to the box constructed by the page builder.
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 static void houtput_template0(void)
 { pointer p,q,r;
  if (streams[0].p==null) return;
@@ -4313,9 +4267,9 @@ static void houtput_template0(void)
  }
 @
 
-\subsection{Moving around in the \HINT/ file}
-The basic capability of \HINT/ is producing a page that starts at a given position in the
-\HINT/ file. The function |hint_page_top| provides this capability.
+\subsection{Moving around in the \HINT\ file}
+The basic capability of \HINT\ is producing a page that starts at a given position in the
+\HINT\ file. The function |hint_page_top| provides this capability.
 If successful, it stores a pointer to the page it created in the variable |streams[0].p|.
 As long as this pointer is not |null| it can be used to render the page or search
 the page for content.
@@ -4330,7 +4284,7 @@ The viewer might store this location to be able to return to this page at a late
 @<render functions@>=
 
 uint64_t hint_page_top(uint64_t h)
-{ if (hbase==NULL) return 0;
+{ if (hin_addr==NULL) return 0;
   hpos=hstart+LOC_POS0(h);
   if (hpos>=hend)
     return hint_page_bottom(hend-hstart);
@@ -4348,19 +4302,25 @@ uint64_t hint_page_top(uint64_t h)
 }
 @
 
-Using the previous function, we implement |hint_page| which rerenders the current page.
+If the viewer needs the position of the current page at a later time, it can
+call |hint_page_get|.
+@<render functions@>=
+uint64_t hint_page_get(void)
+{@+
+ DBG(DBGPAGE,"page_get: %d : 0x%" PRIx64 "\n",cur_loc,page_loc[cur_loc]);
+@/
+if (hin_addr==NULL) return 0;
+return page_loc[cur_loc];
+ }
+@
+
+
+Using the previous functions, we implement |hint_page| which rerenders the current page.
 If |streams[0].p!=null| a valid current page still exists and nothing needs to be done.
 If |streams[0].p==null|, we obtain the current pages top position using |hint_page_get|
 and pass the position to |hint_page_top|.
 
 @<render functions@>=
-uint64_t hint_page_get(void)
-{@+
- DBG(DBGPAGE,"page_get: %d : 0x%" PRIx64 "\n",cur_loc,page_loc[cur_loc]);
-@/ 
-return page_loc[cur_loc];
- }
-
 uint64_t hint_page(void)
 { uint64_t i;
   if (streams==NULL) return 0;
@@ -4372,10 +4332,91 @@ uint64_t hint_page(void)
 }
 @
 To display the first page simply call |hint_page_top(0)|.
+An other page that a user may want to see is the document's ``home'' page.
+Its position is stored in the zero label. It can be displayed by
+calling |hint_page_home|.
+
+@<render functions@>=
+uint64_t hint_home_page(void)
+{@+ uint64_t pos;
+  uint8_t where;
+  int n=zero_label_no;
+  @<get |where| and |pos| from label |n|@>@;
+  @<render the page at |pos| using |where| and return@>@; 
+}
+@
+
+If a viewer caches file positions from one invocation to the next, which
+is a convenient feature, it runs the risk that the file contents might
+have changed in the meantime and the position is no longer valid.
+This is especialy likely if the hint viewer is used for viewing a file
+while editing its source. For these cases, a more robust approach is needed.
+The functions |hint_get_fpos| and |hint_set_fpos| are provided for this
+purpose. The first one returns a floating point number in the range $0.0$
+to $1.0$ where $0.0$ corresponds to the first byte and $1.0$ to the last
+byte in the content section. The second function accepts such a floating point number,
+finds the closest position in the content section that can be used as
+the top of a page, renders the page, and returns the position.
+If between a call to |hint_get_fpos| and |hint_set_fpos| the file does not
+change or changes only slightly, the displayed page should not change
+or change only slightly. If the file changes significantly, of course,
+also the displayed page might be completely different.
+
+The simple part is |hint_get_fpos|.
+@<render functions@>=
+double hint_get_fpos(void)
+{@+
+ DBG(DBGPAGE,"get_fpos: %d : 0x%" PRIx64 "\n",cur_loc,page_loc[cur_loc]);
+@/
+if (hin_addr==NULL) return 0.0;
+return (double)LOC_POS(page_loc[cur_loc])@|/(double)(hend-hstart);
+ }
+@
+
+To implement |hint_set_fpos| we use |hff_pos| to ``fast forward''
+to the desired position. If this position is inside a paragraph,
+we compute the closest offset that is a possible line break.
+
+@<render functions@>=
+uint64_t hint_set_fpos(double fpos)
+{@+uint32_t pos, pos0;
+ uint8_t *p,*q;
+ DBG(DBGPAGE,"set_fpos: %f\n",fpos);@/
+ if (hin_addr==NULL) return 0;
+ if (fpos<0.0) fpos=0.0;
+ if (fpos>1.0) fpos=1.0;
+ pos = round((hend-hstart)*fpos);
+ p=hstart+pos;
+ q=hpos=hstart;
+ while (hpos<p)
+ {@+ q=hpos; hff_hpos();@+ }
+ if (hpos>p)
+ { pos=pos0=q-hstart;
+   if (KIND(*q)==par_kind && KIND(hff_tag)==list_kind && hff_list_size>0)
+   { q=hpos=hstart+hff_list_pos;
+     if (p>hpos+hff_list_size) p=hpos+hff_list_size;
+     while (hpos<p)
+     { if (KIND(*hpos)==glue_kind ||@| KIND(*hpos)==penalty_kind ||@| KIND(*hpos)==disc_kind)
+         q=hpos;
+       hff_hpos();
+     }
+     if (KIND(*hpos)==glue_kind ||@| KIND(*hpos)==penalty_kind ||@| KIND(*hpos)==disc_kind)
+     { if (p-hpos<p-q)  pos=hpos-hstart;
+       else pos=q-hstart;
+     }
+     else
+       pos=q-hstart;
+   }
+ }
+ else
+   pos=pos0=hpos-hstart;
+ return hint_page_top(PAGE_LOC(pos0,pos-pos0));
+ }
+@
 
 Now let's consider moving to the next page. 
 If we produced the current page using |hint_forward|, we can simply call
-|hint_forward| again. For this reason we use the variables  |forward_mode| and |backward_mode|
+|hint_forward| again. For this reason, we use the variables  |forward_mode| and |backward_mode|
 to keep track of the direction.
 @<render variables@>=
 static bool forward_mode=false, backward_mode=false;
@@ -4384,7 +4425,7 @@ If simply moving forward does not work---we might not know the position of the n
 or are not in forward mode, or we might be at the end of the file---we just rerender the current page.
 @<render functions@>=
 uint64_t hint_next_page(void)
-{ if (hbase==NULL) return 0;
+{ if (hin_addr==NULL) return 0;
   if (hloc_next()&& forward_mode)
   { if (!hint_forward())
 	{ hloc_prev(); return hint_page(); }	
@@ -4400,7 +4441,7 @@ uint64_t hint_next_page(void)
 @
 
 Things are a bit more complex for paging backwards. The page that we produce here is usually
-different from what \HINT/ will produce in forward mode.
+different from what \HINT\ will produce in forward mode.
 First we check the location cache. If there is an entry for the preceeding page,
 we will take the location and produce the page in forward mode, because this way the
 reader can get the same page as seen before. If we do not have a cached page location,
@@ -4409,7 +4450,7 @@ If we are lucky, we are in backward mode. In this case, we do not need to
 throw away the information in the contribution list and we call |hint_backward|.
 @<render functions@>=
 uint64_t hint_prev_page(void)
-{ if (hbase==NULL) return 0;
+{ if (hin_addr==NULL) return 0;
   if (hloc_prev())
   { hflush_contribution_list(); hpage_init();
     return hint_page();
@@ -4434,7 +4475,8 @@ If successfull, it will set |cur_loc| to the current page. Finally, we attach th
 and return the new location.
 @<render functions@>=
 uint64_t  hint_page_bottom(uint64_t h)
-{ if (hbase==NULL) return 0;
+{ if (hin_addr==NULL) return 0;
+  hloc_set(h);
   hflush_contribution_list(); 
   hpos=hstart+LOC_POS0(h);
   if (LOC_OFF(h))
@@ -4449,146 +4491,320 @@ A function to build a page centered around a given location completes the set of
 page building functions.
 @<render functions@>=
 uint64_t  hint_page_middle(uint64_t h)
-{ if (hbase==NULL) return hint_blank();
+{ if (hin_addr==NULL) return hint_blank();
   QUIT("hint_page_middle not yet implemented");
 }
 @
 
-\subsection{Links}
-A \HINT/ file may contain two types of links: internal links and public links.
-Internal links are part of the displayed document and can be activated to
-navigate to a different location in the document.
-Internal links will be implemented soon.
-
-Public links are made available to the user interface which can display them for example
+\subsection{Outlines}\label{outlines}
+A \HINT\ file may contain two types of links: internal links and outlines.
+We look at outlines first and deal with internal links after we have seen outlines
+and searching in section~\secref{search}.
+Outlines are made available to the user interface 
+which can display them for example
 in a menu from which the user can select them to move to the desired location.
 
-The first question the user interface will ask is: Are there any public labels
-and if yes, how many? Public labels are numbered from 0 to |max_public| and
+The first question the user interface will ask is: Are there any outline items
+and if yes, how many? Outline items are numbered from 0 to |max_outline| and
 the following function will answer the question:
 
-@<\HINT/ functions@>=
-int hint_get_label_max(void)
-{@+ return max_public;@+}
+@<\HINT\ functions@>=
+int hint_get_outline_max(void)
+{@+ return max_outline;@+}
 @
-If it returns a negative value, there are no public labels; if it returns $n\ge 0$,
-there are $n+1$ public labels numbered $0$ to $n$.
+If it returns a negative value, there are no outline links;
+if it returns $n\ge 0$,
+there are $n+1$ outline links numbered $0$ to $n$.
 
-For the communication with the user interface, a simple data type is used.
-It reveals only the information relevant to the user interface
-and allocates the necessary memory, even for the title string, in a single chunk.
+For the communication with the user interface, 
+a simple data type is used for outlines.
+It contains the information relevant to the 
+user interface.
 
-@<\HINT/ |extern|@>=
-typedef struct { uint64_t pos;  uint8_t major, minor; uint8_t where; char title[]; } hint_label_t;
-@
-The |pos| field contains a ``position'' in the hint file (like the ones returned from
-and passed to functions like |hint_page_top|). The user interface will use it to
-navigate to the desired position on the \HINT/ file.
-The remainder of the record is used to organize and identify the label.
-Most importantly, a public label has a title. The titel, for example
-``Introduction'' or ``Chapter 1'', will tell the user what
-to expect when moving to the place that carries this label.
-The major and minor numbers are designed so that the user interface
-can organize the labels. 
-Labels that have the same major number belong to
-a group of related labels. So the user interface may indent them or put them in
-a sub menu. Major and minor numbers are also strictly consecutive. That means
-that the first label with number~0 has a major and a minor number of zero;
-and if a label with major number~3 and minor number~5 existst then the label
-preceeding it must have major number~3 and minor number~4; further
-if a label with major number~2 and minor number~0 existst, then the
-label preceeding it must have a major number~1.
-
-Labels with a minor number of zero are often just a heading for the following
-labels with the same major number and minor numbers 1, 2, 3, \dots\
-These labels then have a |pos| value of |HINT_NO_LOC|, a value that
-can never be an actual location in a \HINT/ file.
-
-To obtain the information for the public label $i$, the following function can be called:
-
-@<\HINT/ functions@>=
-hint_label_t *hint_get_label(int i)
-{@+ hint_label_t *p;
-  if (i<0 || i>max_public) return NULL;
-  p=(hint_label_t *)malloc(sizeof(hint_label_t)+strlen(label_def[i].n)+1);
-  if (p==NULL) QUIT("Out of memory for abel information");
-  p->pos=((uint64_t)label_def[i].pos<<32)+@|(label_def[i].pos-label_def[i].pos0);@/
-  p->major=label_def[i].major;@+  p->minor=label_def[i].minor;@/
-  p->where=label_def[i].where;
-  strcpy(p->title,label_def[i].n);@/
-  return p;
-}
-@
-If $i$ is in the valid range from 0 to |max_public|, the function
-returns a pointer to a |hint_label_t| that was allocated with |malloc|.
-If the pointer is no longer needed, the user interface should pass the pointer
-to |free| to release the memory.
-
-To actually navigate to the position of label $i$, two simpler functions
-are available.
-
-@<\HINT/ functions@>=
-uint64_t hint_get_label_pos(int i)
-{@+ if (i<0 || i>max_public) return HINT_NO_LOC;
-  return ((uint64_t)label_def[i].pos<<32)+(label_def[i].pos-label_def[i].pos0) ;
-}
-uint8_t hint_get_label_where(int i)
-{@+ if (i<0 || i>max_public) return HINT_TOP;
-  return label_def[i].where;
-}
+@<\HINT\ |extern|@>=
+typedef struct { 
+uint64_t pos;  
+uint8_t depth; 
+uint8_t where; 
+int p; /* pointer to the list of title nodes */
+char *title; /* title as sequence of utf8 character codes */
+} hint_outline_t;
+extern hint_outline_t *hint_outlines;
 @
 
-In both cases the parameter |i| is the labels index.
-|hint_get_label_pos| returns the label's position and  |hint_get_label_where| indicates where the
+The |pos| field contains a ``position'' in the hint file 
+(like the ones returned from and passed to functions like |hint_page_top|). 
+The user interface can use it to
+navigate to the desired position in the \HINT\ file.
+The |where| field indicates where the
 label should be placed on the page.
 The values are:
-@<\HINT/ |extern|@>=
-#define HINT_TOP 1
-#define HINT_BOTTOM 2
-#define HINT_MIDDLE 3
+@<\HINT\ |extern|@>=
+#define LABEL_UNDEF 0
+#define LABEL_TOP 1
+#define LABEL_BOT 2
+#define LABEL_MID 3
 @
+
 The user interface should pass the position to
 |hint_page_top|, |hint_page_bottom|, or |hint_page_middle| to obtain
 the desired page.
 As a shortcut, it can call this function:
-
 @<render functions@>=
- uint64_t hint_get_label_page(int i)
-{@+ uint64_t h;
-  uint8_t w;
-  h=hint_get_label_pos(i);
-  if (h==HINT_NO_LOC) return h;
-  w= hint_get_label_where(i);
-  if (w==HINT_TOP) return hint_page_top(h);
-  else if (w==HINT_BOTTOM) return hint_page_bottom(h);
-  else return hint_page_middle(h);
+ uint64_t hint_outline_page(int i)
+{@+ uint64_t pos;
+  uint8_t where;
+  if (i<0||i>max_outline) return  hint_page_get();
+  pos=hint_outlines[i].pos;
+  where=hint_outlines[i].where;
+  @<render the page at |pos| using |where| and return@>@; 
 }
 @
 
+@<render the page at |pos| using |where| and return@>=
+  if (where==LABEL_TOP) return hint_page_top(pos);
+  else if (where==LABEL_BOT) return hint_page_bottom(pos);
+  else if (where==LABEL_MID)  return hint_page_top(pos); /* middle not yet implemented */
+  else return  hint_page_get();
+@
+
+The remainder of the record is used to organize and identify the outline links.
+The |depth| is there so that the user interface
+can organize the outline links in form of a tree. 
+So the user interface may indent them or put them in
+a sub menu.
+
+Most importantly, an outline link has a title. The titel, for example
+``Introduction'' or ``Chapter 1'', will tell the user what
+to expect when moving to the place that carries this label.
+In general, the title is a horizontal list of nodes.
+The pointer to this list is stored in the |p| field.
+The renderer can use this pointer to render the label.
+If the user interface decides to use GUI components provided by
+the host window manager, a representation of the title
+as a utf-8 string might be more appropriate. The conversion
+of node lists to utf-8 strings is explained in the next section. 
+
+The user interface can call the following function to obtain
+information about the outline links:
+
+@<\HINT\ functions@>=
+hint_outline_t *hint_get_outlines(void)
+{@+ return hint_outlines;
+}
+@
+The function
+returns a pointer to an array of type |hint_outline_t[]|, that can be indexed
+from 0 to |max_outline|.
+
 Here is a summary of the above functions:
-@<\HINT/ |extern|@>=
-extern int hint_get_label_max(void);
-extern hint_label_t *hint_get_label(int i);
-extern uint64_t hint_get_label_pos(int i);
-extern uint8_t hint_get_label_where(int i);
-extern uint64_t hint_get_label_page(int i);
+@<\HINT\ |extern|@>=
+extern int hint_get_outline_max(void);
+extern hint_outline_t *hint_get_outlines(void);
+extern uint64_t hint_outline_page(int i);
+@
+
+
+\subsection{Traversing node lists}\label{listtraversal}
+The creation of a titel string for outlines and the implementation
+of searching for a string within a page (see section~\secref{search})
+both require traversing \TeX's node lists, ignoring all the typesetting 
+stuff, just returning a stream of character codes.
+
+The traversal is started with either one of two mutually
+recursive functions: |trv_vlist| or |trv_hlist|.
+Two state variables controll the traversal: |trv_ignore| and |trv_skip_space|.
+
+|trv_ignore| will be true between two ignore nodes.
+Ignore nodes are generated when words are hyphenated.
+During hyphenation, the |replace_count| tells how many nodes
+are to be ignored. These nodes are now moved to
+the |ignore_list| of the ignore node. 
+The content now contained in the |ignore_list|
+is then replaced by the |pre_break| list, a line ending, and the
+|post_break| list. In many cases, the |ignore_list| and
+the |post_break| list are empty
+and the |pre_break| list contains just a hyphen character.
+In difficult cases, like ``\hbox{dif- ficult}'',
+the ligature ``ffi'' is in the |ignore_list|, the |pre_break|
+list contains ``f-'' and the |post_break| list contains
+the ligature ``fi''.
+
+|trv_skip_space| will be true immediately after observing
+a ``space''  in the stream of characters until a non space will arrive,
+thus reducing multiple spaces to a single space.
+Spaces need some
+extra care because on the page, glue nodes and line endings
+play the role of spaces in addition to explicit space
+characters for example when printing out \CEE/ strings
+like |"Hello world"|.
+Glues in horizontal lists, but not kerns, are considered spaces;
+further the end of a horizontal list inside a vertical list is
+considered a space; and characters with character code |0x20|
+are considered spaces.
+
+To initialize the traversal, call |trv_init|. Its parameter
+is a function |f| that will receive the stream of characters.
+During traversal, the function is stored in the variable |trv_stream|. 
+
+@<\HINT\ functions@>=
+static bool trv_ignore=false;
+static bool trv_skip_space=false;
+static void (*trv_stream)(uint32_t c);
+void trv_init(void (*f)(uint32_t c))
+{trv_ignore=false;trv_skip_space=false; trv_stream=f;}
+
+static void trv_char(uint32_t c)
+{ if (c==0x20) trv_skip_space=true;
+  else
+  { if (trv_skip_space)
+    { trv_skip_space=false; trv_stream(0x20);}
+    trv_stream(c);
+  }
+}
+
+void trv_hlist(pointer p)
+{ while(p!=null)
+  { if(is_char_node(p))
+    { if (!trv_ignore) trv_char(character(p));
+    }
+    else switch (type(p))
+    { case hlist_node: if(list_ptr(p)!=null) trv_hlist(list_ptr(p)); break;
+      case vlist_node:  if(list_ptr(p)!=null) trv_vlist(list_ptr(p)); break;
+      case ligature_node:
+      if (!trv_ignore)
+      { pointer q=lig_ptr(p);
+        while (q!=null)
+        { trv_char(character(q));
+          q=link(q);
+        }
+      }
+      break;
+      case glue_node: 
+        if (!trv_ignore) trv_skip_space=true; 
+        break;
+      case whatsit_node:
+        if (subtype(p)==ignore_node)
+        { if (ignore_info(p)==1)
+          { trv_hlist(ignore_list(p));
+            trv_ignore=true;
+          }
+          else
+            trv_ignore=false;          
+        }
+        break;
+      default: break;
+    }
+    p= link(p);
+  }
+}
+
+void trv_vlist(pointer p)
+{ while(p!=null)
+  { switch (type(p))
+    { case hlist_node: if(list_ptr(p)!=null) trv_hlist(list_ptr(p));  
+        if (!trv_ignore) trv_skip_space=true;
+        break;
+      case vlist_node:  if(list_ptr(p)!=null) trv_vlist(list_ptr(p)); break;
+      default: break;
+    }
+    p= link(p);
+  }
+}
+@
+
+@<\HINT\ |extern|@>=
+extern void trv_init(void (*f)(uint32_t c));
+extern void trv_vlist(pointer p);
+extern void trv_hlist(pointer p);
+@
+
+Using these functions we can now implement the function
+|hlist_to_string|. Currently this function is used only
+for outline titles and we limit the string size to 
+at most 255, not counting the trailing zero.
+
+@<\HINT\ auxiliar functions@>=
+static int trv_string_size=0;
+static char trv_string[256];
+#define TRV_UTF8(C) (trv_string[trv_string_size++]=(C)) 
+static void trv_string_collect(uint32_t c)
+{ if (trv_string_size<256-5) /* enough space for c and the final zero byte */
+  { if (c<0x80) 
+      TRV_UTF8(c);
+    else if (c<0x800)
+    { TRV_UTF8(0xC0|(c>>6));@+ TRV_UTF8(0x80|(c&0x3F));@+ } 
+    else if (c<0x10000)@/
+    { TRV_UTF8(0xE0|(c>>12)); TRV_UTF8(0x80|((c>>6)&0x3F));@+ TRV_UTF8(0x80|(c&0x3F)); } 
+    else if (c<0x200000)@/
+    { TRV_UTF8(0xF0|(c>>18));@+ TRV_UTF8(0x80|((c>>12)&0x3F)); 
+      TRV_UTF8(0x80|((c>>6)&0x3F));@+ TRV_UTF8(0x80|(c&0x3F)); } 
+    else
+     RNG("character code in outline",c,0,0x1FFFFF);
+  }
+}
+
+char *hlist_to_string(pointer p)
+{ trv_string_size=0;
+  trv_init(trv_string_collect);
+  trv_hlist(p);
+  trv_string[trv_string_size]=0;
+  return trv_string;
+}
 @
 
 \subsection{Searching}\label{search}
 Searching starts in the user interface with defining a string to
-search for.  The simples form of searching is the highlighting of all
+search for.
+The variable |m_str| points to the given string and |m_length| is
+its length. Further, we keep track of the number of characters,
+not counting the spaces, in the search string for reasons explained below.
+
+@<render variables@>=
+static char *m_str;
+static int  m_length, m_chars;
+@
+
+@<render functions@>=
+void hint_set_mark(char *m, int s)
+{ m_str=m;
+  m_length=s;
+  @<remove unwanted spaces@>@;
+  hmark_page();
+}
+@
+
+Leading spaces are removed and
+multiple spaces in the search string are reduced to a single space.
+@<remove unwanted spaces@>=
+if (m_length>0)
+{ int i,j,k;
+  for (i=j=k=0;i<m_length && m_str[i]==' ';i++) continue;
+  for (;i<m_length;i++)
+    if (m_str[i]!=' '|| m_str[i+1]!=' ')
+    { m_str[k]=m_str[i];
+      if (m_str[k]==' ') j++;
+      k++;
+    }
+  m_str[k]=0;
+  m_length=k;
+  m_chars=m_length-j;
+}
+@
+
+In its simplest form, searching is the highlighting of all
 matching strings on the current page. The highlighting itself is the
 responsibility of the graphical user interface.  The backend just needs
 to indicate which glyphs must be highlighted.  For this
 purpose, every call to |nativeGlyph| passes a style parameter.
-Currently two style bits are defined: |MARK_BIT| and |FOCUS_BIT|.
+For searching, two style bits are defined: |MARK_BIT| and |FOCUS_BIT|.
 @<render definitions@>=
 #define MARK_BIT 0x1
 #define FOCUS_BIT 0x2
 @
 
 Calling the function |hint_set_mark(char *m, int s)| will cause the
-|MARK_BIT| to be set in the style parameter |s| for all glyphs on the
+|MARK_BIT| to be set in the style parameter for all glyphs on the
 current page that belong to a character string matching |m| of length
 |s|.  If |m==NULL|, the |MARK_BIT| will be zero for all glyphs.  The
 ``focus'' can be associated with one occurence of the marked string;
@@ -4600,7 +4816,7 @@ first one if currently no focus is set. If necessary,
 the current page will move forward to contain another occurrence;
 |hint_prev_mark| works the same way but searches in backward
 direction.  |hint_next_mark| and |hint_prev_mark| will return |true|
-if a new aoccurence was found and return |false| otherwise.
+if a new occurence was found and return |false| otherwise.
 
 Marking will require two passes over the current page: the first pass is triggered by
 calling the |hint_set_mark| function. It will traverse the current page and find all
@@ -4613,42 +4829,45 @@ we store the distances beween two occurences
 in an array. If there is no next occurrence, we store $\infty$.
 To keep the storage of these distances compact,
 we use a variable length encoding, and we limit the total size of such encodings
-assuming that it is of no use to have hundreds of highlighted words on a single page.
+assuming that it is of no use to have thousands of highlighted words on a single page.
 
 @<render variables@>=
 #define MAX_M_DIST 512
 static uint8_t m_dist[MAX_M_DIST+5]; /* space for a final 5 byte number and $\infty$ */
-static int m_ptr, m_max, m_state, m_length, m_spaces, 
-  m_chars, m_focus, m_ignore;
-;
-static uint64_t m_page;
-static uint32_t m_d;
-static char *m_str;
+static int m_ptr, m_max; 
 @
 
-For the variable length encoding we use the following convention:
+For the variable length encoding, we use the following convention:
 The single byte |0xFF| means $\infty$.
 Else if the most significant bit is set, the distance is given by
 the remaining 7 bits.
 Else if the most significant bit is not set, the remaining 7 bits
-are added to the left of the number contained in the following bytes.
+are added as most significant bits to
+the number contained in the following bytes.
 
 Using this convention, $\infty$ and all distances $0\le d < |0x7F|$
 can be stored in a single byte. The first distance that needs two byte
-is |0x7F| it is stored as |0x00 0x7F| because storing it as |0x80+0x7F| would mean
+is |0x7F| it is stored as |0x00 0x7F| because setting the
+most significant bit of |0x7F| would give |0xFF| which means
 $\infty$.
-With two byte values up to $2^{14}$  can be stored. This should be sufficient
-for most cases because a) with such large distances there can't be many occurencies
+With two byte, values up to $2^{14}$  can be stored. This should be sufficient
+for most cases because a) with such large distances there can't be 
+many occurrences
 on a single page, and b) the current implementation uses 16 bit pointers
 and that gives a strict upper bound on the number of characters.
-Because the \HINT/ file format limits the content section to $2^{32}$ byte
-a 5 byte encoding is sufficient for any distance that could occur in any \HINT/ file.
+Because the \HINT\ file format limits the content section to $2^{32}$ byte
+a 5 byte encoding is sufficient for any distance that could occur in any \HINT\ file.
 
-Here are the functions, to maipulate the |m_dist| array.
-We assume that the last entry in the |m_dist| array is always $\infty$.
+Here are the functions, to manipulate the |m_dist| array.
+The variable |m_ptr| points to the current position in the |m_dist|
+array, the variable |m_max| points the the last entry in |m_dist|.
+When reading the |m_dist| array, we can assume that the last entry in the 
+|m_dist| array is $\infty$.
+|m_put| writes distance |d| at position |m_ptr|; |m_get| reads and
+returns the distance at position |m_ptr|; both advance |m_ptr|.
 @<render functions@>=
 static void m_put(uint32_t d) /* write into |m_dist| */
-{ if (m_ptr<MAX_M_DIST)
+{@+ if (m_ptr<MAX_M_DIST)
   { if (d==0xFF)
       m_dist[m_max=m_ptr]=0xFF;
    else if (d<0x7F)
@@ -4681,7 +4900,13 @@ static uint32_t m_get(void)  /* read from |m_dist| */
     x=(x<<7)+y;
   }
 }
+@
 
+The next two functions are used to move the focus forward
+or backwards. |i| points past the distance that
+defined the current focus. It is moved forward or backward
+over one entry in the |m_dist| array.
+@<render functions@>=
 static int m_next(int i) /* advance to next enty */
 { while ((0x80&m_dist[i])==0) i++;
   if (m_dist[i]==0xFF) return 0;
@@ -4696,22 +4921,31 @@ static int m_prev(int i) /* advance to previous entry */
 }
 @
 
-
-The marking uses three functions: Two perform an inorder traversal
-of the current page, delivering a stream of characters to
-the function |next_mark_char|. The latter function finds matches
+The marking uses the page traversal functions defined in
+section~\secref{listtraversal} to deliver a stream of characters to
+the function |next_m_char|. The latter function finds matches
 and writes distances.
-The variable |m_state| records the number of characters that
-already matched. We have to do some more work to match spaces.
+The variable |m_state| records the total number of characters that
+already matched; the variable |m_spaces| records the number of space characters
+included in |m_state|.
+To simplify rendering, the rendering will only count characters not spaces.
+Therefor the distance |m_d|
+between two matches is the number of non-space characters between the two matches.
 
+@<render variables@>=
+static int  m_state, m_spaces;
+static uint32_t m_d;
+@
 
 @<render functions@>=
 static void next_m_char(uint32_t c)
-{ if (m_ignore) return;
-  if (m_state<0) m_state=-m_state;
+{
 reconsider:
+  
   if (m_state==0 && c!=m_str[0])
-    m_d++;
+  { if (c!=' ')   
+      m_d++;
+  }
   else if (c==m_str[m_state])
   { if (m_state==0) m_spaces=0;
     m_state++;
@@ -4722,44 +4956,38 @@ reconsider:
      }
   }
   else
-  { int i=0,k=0;
+   @<end of matching prefix@>@;
+ 
+
+}
+@
+
+If we have matched |m_state| characters and then found a non matching
+character, we should not continue the matching after the prefix but
+we should go back to the second character of the prefix and try
+starting there. While we can not rewind the traversal, we do have
+the characters that we need to reconsider in the |m_str| itself.
+After all the characters from the traversal did match the
+characters in |m_str|. So we try matching |m_str| against |m_str+i|,
+moving |i| forward as far as necessary. Then we jump back to
+the beginning of the matching routine to reconsider matching |c|.
+@<end of matching prefix@>=
+  { int i=0,j=0;
     do {
-      if (m_str[i]==' ') k++;
+      if (m_str[i]==' ') j++;
       i++;
     } while (i<m_state && strncmp(m_str,m_str+i,m_state-i)!=0);
-    m_d=m_d+i-k;
+    m_d=m_d+i-j;
     m_state=m_state-i;
     goto reconsider;
   }
-}
 @
-We need to account for spaces only if they are inside the search string.
-All other spaces are silently ignored. Also multiple spaces are matched as a single space.
-@<reduce multiple spaces to single spaces@>=
-if (m_length>0)
-{ int i,k;
-  m_spaces=0;
-  for (i=k=0;i<m_length;i++)
-    if (m_str[i]!=' '|| m_str[i+1]!=' ')
-    { m_str[k]=m_str[i];
-      if (m_str[k]==' ') m_spaces++;
-      k++;
-    }
-  m_str[k]=0;
-  m_length=k;
-  m_chars=m_length-m_spaces;
-}
-@
-Glues in horizontal lists, but not kerns are considered spaces.
-Further the end of a horizontal list inside a vertical list is
-considered a space. While skipping spaces, we set |m_state| to
-a negative value and to complete the bookkeeping we count the number
-of spaces that are included in the |m_state|.
+
 
 @<render functions@>=
+#if 0
 static void next_m_space(void)
-{ if (m_ignore) return;
-  if (m_state==0 && m_str[0]==' ')
+{ if (m_state==0 && m_str[0]==' ')
   { m_state=-1; m_spaces=1; }
   else if (m_state>=0 && m_str[m_state]==' ')
   { if (m_state==0) m_spaces=0;
@@ -4775,26 +5003,27 @@ static void next_m_space(void)
   else if (m_state>0)
   { m_d=m_d+m_state-m_spaces; m_state=0;}
 }
+#endif
 @
 
-After these preparations, we are ready to traverse the current page.
 
 @<render functions@>=
+#if 0
 static void vlist_mark(pointer p);
 static void hlist_mark(pointer p)
 { while(p!=null)
-  { if(is_char_node(p)) next_m_char(character(p));
+  { if(is_char_node(p)&&!m_ignore) next_m_char(character(p));
     else switch (type(p))
     { case hlist_node: if(list_ptr(p)!=null) hlist_mark(list_ptr(p)); break;
       case vlist_node:  if(list_ptr(p)!=null) vlist_mark(list_ptr(p)); break;
       case ligature_node:
       { pointer q=lig_ptr(p);
         while (q!=null)
-        { next_m_char(character(q)); q=link(q);
+        { if (!m_ignore) next_m_char(character(q)); q=link(q);
         }
       }
       break;
-      case glue_node: next_m_space(); break;
+      case glue_node: if (!m_ignore) next_m_space(); break;
       case whatsit_node:
         if (subtype(p)==ignore_node)
         { if (ignore_info(p)==1)
@@ -4814,30 +5043,27 @@ static void hlist_mark(pointer p)
 static void vlist_mark(pointer p)
 { while(p!=null)
   { switch (type(p))
-    { case hlist_node: if(list_ptr(p)!=null) hlist_mark(list_ptr(p)); next_m_space(); break;
+    { case hlist_node: if(list_ptr(p)!=null) hlist_mark(list_ptr(p));  
+         if (!m_ignore) next_m_space(); break;
       case vlist_node:  if(list_ptr(p)!=null) vlist_mark(list_ptr(p)); break;
       default: break;
     }
     p= link(p);
   }
 }
+#endif
 @
 
-At the start of the renderer, we set |m_ptr=m_d=0|and |m_state=MARK_BIT|.
-The renderer will then assume it is at the end of a marked sequence of glyphs,
-read the first entry from |m_dist| (which might be zero) and starts with
-the appropriate number of non-marked glyphs.
-
-@<initialize marking@>=
-   m_ptr=0; m_d=0;m_state=MARK_BIT;m_ignore=0; cur_s=0;
+@<render variables@>=
+static int m_focus;
+static uint64_t m_page;
 @
-
-Before traversing the page for marking, we also initialize the variables appropriately.
+After these preparations, we are ready to traverse the current page.
 
 @<render functions@>=
 void hmark_page(void)
 { if (streams==NULL || streams[0].p==null) return;
-  m_ptr=0; m_ignore=0;
+  m_ptr=0; 
   if (m_page!=page_loc[cur_loc])
   { m_page=page_loc[cur_loc]; 
     m_focus=0;
@@ -4845,22 +5071,17 @@ void hmark_page(void)
   if (m_length>0)
   { m_d=0;
     m_state=0;
+    trv_init(next_m_char);
     if(type(streams[0].p)==vlist_node)
-       vlist_mark(list_ptr(streams[0].p));
+       trv_vlist(list_ptr(streams[0].p));
     else
-       hlist_mark(list_ptr(streams[0].p));
+       trv_hlist(list_ptr(streams[0].p));
   }
   m_put(0xFF); /* $\infty$ */
   if (m_focus>=m_max) m_focus=0;
 }
-
-void hint_set_mark(char *m, int s)
-{ m_str=m;
-  m_length=s;
-  @<reduce multiple spaces to single spaces@>@;
-  hmark_page();
-}
 @
+
 
 We need a dummy version for our test programs.
 @<test functions@>=
@@ -4868,21 +5089,41 @@ void hmark_page(void)
 {return; }
 @
 
+When the renderer traverses the page two more variables are needed.
+@<render variables@>=
+static bool c_ignore;
+static int m_style;
+@
+|m_style| will have the |MARK_BIT| set while rendering a marked sequence
+of characters and it will be zero while rendering non-marked
+characters. |c_ignore| will be |true| while rendering characters
+that were introduced by the pre- and post-lists of discretionary hyphens.
+|m_d| will contain the number of characters left in the current stretch
+of marked or unmarked characters.
+|m_ptr| will point to the value in the |m_dist| array that we will need
+for the next stretch of unmarked characters
 
-Finaly, we need to implement the setting of the |MARK_BIT| in |hlist_render|.
-Because unmarked and marked characters alternate, we set |m_state==MARK_BIT|
-while marked characters are rendered and zero otherwise.
-|m_d| is the number of characters remaining in the current stretch.
+At the start of the renderer, we set |m_ptr=m_d=0| and |m_style=MARK_BIT|.
+The renderer will then assume it is at the end of a marked sequence of glyphs,
+read the first entry from |m_dist| (which might be zero) and starts with
+the appropriate number of non-marked glyphs.
 
-@<update |m_state|@>=
+@<initialize marking@>=
+m_ptr=0; m_d=0;m_style=MARK_BIT;c_ignore=false; cur_style=0;
+@
+
+Whenever the renderer encounters a character, it will need to
+update |m_style|.
+
+@<update |m_style|@>=
 { while (m_d==0)
-  { m_state^=MARK_BIT;
-    if (m_state&MARK_BIT)
-    { if (m_ptr==m_focus) m_state|=FOCUS_BIT; else  m_state&=~FOCUS_BIT;
+  { m_style^=MARK_BIT;
+    if (m_style&MARK_BIT)
+    { if (m_ptr==m_focus) m_style|=FOCUS_BIT; else  m_style&=~FOCUS_BIT;
       m_d=m_chars;
     }
     else
-    { m_state&=~FOCUS_BIT;
+    { m_style&=~FOCUS_BIT;
       m_d=m_get();
     }
   }
@@ -4890,56 +5131,66 @@ while marked characters are rendered and zero otherwise.
 }
 @
 
-
-We need to traverse the list of characters that generated a ligature.
+When rendering a ligature, we consider for the purpose of marking
+the characters that generated the ligature.
 If any of these characters is marked, the whole ligature is marked.
 @<account for the characters that generated the ligature@>=
-if (!m_ignore)
+if (!c_ignore)
 { pointer q;
-  cur_s=0;
+  cur_style=cur_style&~(MARK_BIT|FOCUS_BIT);
   q=lig_ptr(p);
   while (q!=null)
-  { @<update |m_state|@>@;
-    cur_s|=m_state;
+  { @<update |m_style|@>@;
+    cur_style|=m_style;
     q=link(q);
   }
 }
 @
-Ignore nodes are generated when words are hyphenated.
-During hyphenation, the content contained in the |ignore_list|
-was replaced by the |pre_break| list, a line ending, and the
-|post_break| list. In many cases, the |ignore_list| and
-the |post_break| list are empty
-and the |pre_break| list contains just a hyphen character.
-In difficult cases, like ``\hbox{dif- ficult}'',
-the ligature ``ffi'' is in the |ignore_list|, the |pre_break|
-list contains ``f-'' and the |post_break| list contains
-the ligature ``fi''. Because in the latter case, there is no
-simple relation between the |ignore_list| and its replacement,
+
+When the renderer encounters an ignore node with |ignore_info(p)==1|
+it should ignore all the following characters until
+it encounters the matching ignore node with |ignore_info(p)==0|.
+This is done by setting |c_ignore|.
+
+@<handle an ignore node@>=
+if (subtype(p)==ignore_node)
+{ if (ignore_info(p)==1)
+  { cur_style=cur_style&~(MARK_BIT|FOCUS_BIT);
+    c_ignore_list(ignore_list(p));
+    c_ignore=true;
+  }
+  else
+    c_ignore=false;
+}
+@
+
+Instead of the ignored nodes, the renderer considers the characters
+stored in the |ignore_list|.
+Because there is no simple relation between the |ignore_list| and its replacement,
 we will mark the whole replacement if any part of the ignore
 list is marked.
-Because the |ignore_list| may contaon boxes, traversing it
+Because the |ignore_list| may contain boxes, traversing it
 is inherently recursive and we start with a function that
-traverses a list of nodes accounting for |m_state| changes
+traverses a list of nodes accounting for |m_style| changes
 but without rendering them. We assume that the |ignore_list|
 consist (recursively!) entirely of character, kern, box, rule, and ligature nodes.
 
 @<render functions@>=
-void m_ignore_list(pointer p)
+void c_ignore_list(pointer p)
 { while(p!=null)
   { if(is_char_node(p))
-    { @<update |m_state|@>@;
-      cur_s|=m_state;
+    { @<update |m_style|@>@;
+      cur_style|=m_style;
     }
     else
     { switch(type(p)) 
       { case hlist_node:
-        case vlist_node: m_ignore_list(list_ptr(p)); break;
+        case vlist_node: c_ignore_list(list_ptr(p)); break;
         case ligature_node:
         { pointer q=lig_ptr(p);
           while (q!=null)
-          { @<update |m_state|@>@;
-            cur_s|=m_state;
+          { @<update |m_style|@>@;
+            cur_style|=m_style;
             q=link(q);
           }
         }
@@ -4951,20 +5202,11 @@ void m_ignore_list(pointer p)
 }
 @
 
-@<handle an ignore node@>=
-if (ignore_info(p)==1)
-{ cur_s=0;
-  m_ignore_list(ignore_list(p));
-  m_ignore=1;
-}
-else
-  m_ignore=0;
-@
 
 
 To search for a string within a page or in the entire document,
 two further functions are necessary to move the ``focus''.
-If there is no focus,|hint_next_mark| will set the focus to the first occurence
+If there is no focus, |hint_next_mark| will set the focus to the first occurence
 on the current page, if there is already a focus, it will move it forward to the next
 occurence, possibly rendering the next page or some page further along in the document.
 It will return |true| on success and |false| if there is no next occurence.
@@ -5001,17 +5243,220 @@ bool hint_next_mark(void)
 }
 @
 
+\subsection{Links}\label{links}
+Internal links are part of the displayed document and can be activated to
+navigate to a different location in the document.
+Similar to marked characters, characters that belong to a link get
+a style bit set.
+@<render definitions@>=
+#define LINK_BIT 0x4
+@
+The renderer can switch the |LINK_BIT| on and off when it encounters a link node.
+Because of line breaking, a link might be spread over multiple
+lines or even pages. To detect an unfinished link
+at the end of a horizontal list, the local variable |local_link| is used;
+the current link is then recorded in |cur_link|.
+To collect data about all links on a page, the renderer calls |add_new_link|
+when a link starts and |end_new_link| when it ends.
+
+@<render variables@>=
+static int cur_link=-1;
+@
+
+@<handle a link node@>=
+if (subtype(p)==start_link_node)
+{ cur_style|=LINK_BIT;
+  local_link=label_ref(p);
+  add_new_link(local_link,this_box,cur_h,cur_v);
+}
+else if (subtype(p)==end_link_node)
+{  cur_style&=~LINK_BIT;
+   end_new_link(local_link,this_box,cur_h,cur_v);
+   local_link=-1;
+}
+@
+
+If at the end of a horizontal list |local_link| is |true| an additional
+end link is signaled.
+
+@<end an unfinished link@>=
+if (local_link>=0)
+{ end_new_link(local_link,this_box,cur_h,cur_v);
+  cur_link=local_link;
+}
+@
+
+And the call for another |add_new_link| is inserted at the
+start of the next horizontal list.
+
+@<start an unfinished link@>=
+if (cur_link>=0)
+{ add_new_link(cur_link,this_box,cur_h,cur_v);
+  local_link=cur_link;
+  cur_link=-1;
+}
+@
+
+To enable the user interface to take action if a link is clicked or
+if the mouse moves over a link, the backend supplies
+the necessary information in the |hint_links| and |max_links| variables.
+|hint_links| is a dynamic array, indexed from 0 to |max_links|.
+If |max_links| is negative, no links are available.
 
 
-\section{Rendering \HINT/ Files}
-How to render a \HINT/ file on any specific device depends largely on the
+
+@<\HINT\ |extern|@>=
+typedef struct { 
+uint64_t pos;  
+uint8_t where; 
+int top, bottom, left, right;
+} hint_link_t;
+extern hint_link_t *hint_links;
+extern int max_link;
+@
+
+@<\HINT\ variables@>=
+hint_link_t *hint_links=NULL;
+int max_link=-1;
+@
+
+The |hint_links| array is filled with the necessary information
+when the page is rendered.
+
+@<render functions@>=
+static int links_allocated=0;
+void add_new_link(int n, pointer p, scaled h, scaled v)
+{ hint_link_t *t;
+   uint64_t pos;
+   uint8_t where;
+  max_link++;
+  if (max_link>=links_allocated)
+  {  if (links_allocated<=0)
+     { links_allocated=32;
+       ALLOCATE(hint_links,links_allocated,hint_link_t);
+     }
+     else
+     { links_allocated=links_allocated*1.4142136+0.5; /* $\sqrt 2$ */
+        REALLOCATE(hint_links,links_allocated,hint_link_t);
+     }
+  }
+  t=hint_links+max_link;
+  REF_RNG(label_kind,n);
+  @<get |where| and |pos| from label |n|@>@;
+  t->where=where;
+  t->pos=pos;
+  if (type(p)==hlist_node)
+  { scaled hp=height(p), dp=depth(p);
+    t->top=v-hp;
+    t->bottom=v+dp;
+    t->left=h;
+    t->right=h;
+  }
+  else
+  { t->top=v;
+    t->bottom=v;
+    t->left=h;
+    t->right=h+width(p);
+  }
+}
+
+void end_new_link(int n, pointer p, scaled h, scaled v)
+{ hint_link_t *t;
+  t=hint_links+max_link;
+  if (type(p)==hlist_node)
+    t->right=h;
+  else
+    t->bottom=v;
+}
+@
+
+
+Given the coordinates of a point on the page,
+currently only a linear search for a matching link is implemented.
+If many links are expected on a single page, for example in the index
+of a large book where pages are full of keywords each having multiple
+links to different positions in the book, a more sophisticated
+search might be needed. If the links in the array are sorted
+by increasing top boundaries, the search can stop early if the
+y coordinate is above the top coordinate of a link; all following
+links will have an equal or even larger top boundary.
+If there is a chain indices of links sorted by the bottom boundaries,
+the search along the bottom boundaries can also terminate
+early. Together this should limit the search to a short stretch of links.
+
+The following function returns a index into the |hint_links|
+array or $-1$ if no link is at the given position.
+
+To speed up processing, it remembers the last hit.
+
+@<render functions@>=
+int hint_find_link(scaled x, scaled y)
+{ static int last_hit=-1;
+  int i;
+  hint_link_t *t;
+  if (max_link<0) return -1;
+  if (last_hit<0 || last_hit>max_link) last_hit=0;
+  i=last_hit;
+  t=hint_links+i;
+  if (t->top<=y && t->bottom>=y && t->left<=x && t->right>=x)
+    return i;
+  else if (y<t->top)
+  { while (i>0)
+    { i--;
+      t=hint_links+i;
+      if (t->top<=y && t->bottom>=y && t->left<=x && t->right>=x)
+      { last_hit=i;  return i; }
+    }
+    return -1;
+  }
+  else
+  { int k;
+    for (k=0;k<=max_link;k++)
+    { i=i+1;
+      if (i>max_link) i=0;
+      t=hint_links+i;
+      if (t->top<=y && t->bottom>=y && t->left<=x && t->right>=x)
+      { last_hit=i;  return i; }
+    }
+    return -1;
+  }
+}
+@
+If a link is selected,
+the user interface should pass the position to
+|hint_page_top|, |hint_page_bottom|, or |hint_page_middle| to obtain
+the desired page.
+As a shortcut, it can call this function:
+@<render functions@>=
+ uint64_t hint_link_page(int i)
+{@+ uint64_t h;
+  uint8_t w;
+  if (i<0||i>max_link) return  hint_page_get();
+  h=hint_links[i].pos;
+  w=hint_links[i].where;
+  if (w==LABEL_TOP) return hint_page_top(h);
+  else if (w==LABEL_BOT) return hint_page_bottom(h);
+  else if (w==LABEL_MID) return hint_page_top(h); /* middle not yet implemented */
+  else return  hint_page_get();
+}
+@
+
+Here is a summary of the above functions:
+@<\HINT\ |extern|@>=
+extern int hint_find_link(scaled x, scaled y);
+extern uint64_t hint_link_page(int i);
+@
+
+
+\section{Rendering \HINT\ Files}
+How to render a \HINT\ file on any specific device depends largely on the
 operating system and its API encapsulating the device. Never the less, there
 are some functions that can be shared accross many different operating systems
 or at least can serve as a starting point for implementing operating system specific
 versions.
 
 \subsection{Fonts}
-The \HINT/ file format supports four different types of fonts:
+The \HINT\ file format supports four different types of fonts:
 The traditional PK fonts\cite{TR:pkfile} and the more modern
 PostScript Type1 fonts\cite{PST1} which are used by many \TeX\ engines, 
 TrueType\cite{TTT:TT} fonts, and OpenType fonts\cite{MS:OTF}\cite{ISO:OTF}.
@@ -5051,8 +5496,7 @@ static font_t *fonts[0x100]={NULL};
 @
 
 Given a font number |f| the following function returns a pointer to the 
-corresponding font structure, extracting the necessary information from the \HINT/
-file if necessary.
+corresponding font structure, extracting the necessary information from the \HINT\ file if necessary.
 @<font functions@>=
 struct font_s *hget_font(unsigned char f)
 { font_t *fp;
@@ -5436,7 +5880,7 @@ static void render_rule(int x, int y, int w, int h)
 
 \subsection{Images}
 When we need to render an image, we should not bother the native renderer with finding the
-image data in segment |n| of the \HINT/ file. Instead we pass a pointer to the first byte and a pointer
+image data in segment |n| of the \HINT\ file. Instead we pass a pointer to the first byte and a pointer
 past the last byte. We also pass the position and size as we did for rules.
 @<render functions@>=
 void render_image(int x, int y, int w, int h, uint32_t n)
@@ -5453,7 +5897,7 @@ void render_image(int x, int y, int w, int h, uint32_t n)
 
 \subsection{Pages}
 Now at last, we can render pages. Two mutualy recursive procedures,
-rendering vertical and horizontal list, will accomplish the
+rendering vertical and horizontal lists, will accomplish the
 rendering. The functions are more or less modifications of \TeX's
 functions that write DVI files. They share a few global static
 variables that implement the current state of the renderer: |cur_h|
@@ -5467,7 +5911,7 @@ static scaled cur_h, cur_v;
 static scaled rule_ht, rule_dp, rule_wd; 
 static int cur_f; 
 static struct font_s *cur_fp;
-static uint8_t cur_s=0;
+static uint8_t cur_style=0;
 @
 
 @<render functions@>=
@@ -5487,7 +5931,7 @@ scaled edge;
 double glue_temp;
 double cur_glue;
 scaled cur_g;
-
+int local_link=-1;
 uint8_t f;
 uint32_t c;
 
@@ -5503,7 +5947,7 @@ if(p==0xffff)
 #endif
 base_line= cur_v;
 left_edge= cur_h;
-
+@<start an unfinished link@>@;
 while(p!=null)
 {
 #ifdef DEBUG
@@ -5514,12 +5958,14 @@ if(link(p)==0xffff)
 #endif
   if(is_char_node(p))
   { do
-    { if (!m_ignore)
-      { @<update |m_state|@>@;
-        cur_s=m_state;
-      }
-      f= font(p);
+    { f= font(p);
       c= character(p);
+      if (!c_ignore && c!=' ')
+      { cur_style=cur_style&~(MARK_BIT|FOCUS_BIT);
+        @<update |m_style|@>@;
+        cur_style|=m_style;
+      }
+
 render_c:        
       if(f!=cur_f)
       {
@@ -5531,7 +5977,7 @@ render_c:
         cur_fp=hget_font(f);
         cur_f= f;
       }
-      render_char(cur_h, cur_v, cur_fp,c,cur_s);
+      render_char(cur_h, cur_v, cur_fp,c,cur_style);
       cur_h= cur_h+char_width(f, char_info(f, c));
 #ifdef DEBUG
       if(link(p)==0xffff)
@@ -5564,8 +6010,8 @@ render_c:
        rule_ht= height(p);rule_dp= depth(p);rule_wd= width(p);
        goto fin_rule;
      case whatsit_node:
-       if (subtype(p)==ignore_node)
-       { @<handle an ignore node@>@; }
+       @<handle an ignore node@>@;
+       else @<handle a link node@>@;
        else if (subtype(p)==image_node)
        { scaled h,w;
          w=image_width(p);
@@ -5637,10 +6083,12 @@ render_c:
 		  /*Output a leader box at |cur_h|,...*/
           { cur_v= base_line+shift_amount(leader_box);
 		    save_h=cur_h;
+                    c_ignore=true;
 			if(type(leader_box)==vlist_node)
 				vlist_render(leader_box);
 			else 
 				hlist_render(leader_box);
+                     c_ignore=false;
 			cur_v= base_line;
 			cur_h= save_h+leader_wd+lx;
 		  }
@@ -5681,6 +6129,7 @@ fin_rule:
     p= link(p);
  }
 } /* end |while| */
+@<end an unfinished link@>@;
 } /* end |hlist_render| */
 
 static void vlist_render(pointer this_box)
@@ -5734,7 +6183,7 @@ while(p!=null)
 	    rule_ht= height(p);rule_dp= depth(p);rule_wd= width(p);
         goto fin_rule;
       case whatsit_node:
-		if (subtype(p)==image_node)
+              if (subtype(p)==image_node)
 		{ scaled h,w;
 		  w=image_width(p);
 		  h=image_height(p);
@@ -5803,10 +6252,12 @@ while(p!=null)
 		    while(cur_v+leader_ht<=edge)
 		    { cur_h= left_edge+shift_amount(leader_box);
 		      cur_v= cur_v+height(leader_box);save_v= cur_v;
+                      c_ignore=true;
 		      if (type(leader_box)==vlist_node) 
 				  vlist_render(leader_box);
 			  else 
 				  hlist_render(leader_box);
+                      c_ignore=false;
 		      cur_h= left_edge;
 		      cur_v= save_v-height(leader_box)+leader_ht+lx;
 		    }
@@ -5870,16 +6321,15 @@ void hint_render(void)
    cur_h= 0;
    cur_v= height(streams[0].p);
    cur_f=-1;cur_fp=NULL;
+   cur_link=-1; max_link=-1;
    @<initialize marking@>@;
    if(type(streams[0].p)==vlist_node)
      vlist_render(streams[0].p);
-   else 
-	 hlist_render(streams[0].p);
+   else
+     hlist_render(streams[0].p);
 }
 @
 
-
-@
 \section{Native Rendering}\label{native}
 The {\tt rendernative.h} header file lists all functions that the native renderer must implement.
 
@@ -5957,7 +6407,7 @@ PK Files
 contain a compressed representation of bitmap fonts  produced by \MF\ and {\tt gftopk}. The definitions and algorithms that follow here can be found,
 along with a more detailed description, in \cite{TR:pkfile}. 
 
-The first thing we need to know when a section of a \HINT/ file contains a font is
+The first thing we need to know when a section of a \HINT\ file contains a font is
 the font format. We know, it contains a PK font if the first two byte contain the
 values |0xF7| and |0x59|.
 
@@ -6056,7 +6506,7 @@ with the following macro:
 @
 
 The pixel data stored in a PK file can be considered as a long sequence
-of black and white pixels. Insead of storing individual pixels,
+of black and white pixels. Instead of storing individual pixels,
 it is more space efficient to store run counts, that is the number of consecutive pixels
 of the same color. And since with glyphs often the same pattern of white and
 black pixels is repeated for several lines, it improves space efficiency if we
@@ -6534,17 +6984,17 @@ extern int herror(char *title, char *msg);
 
 
 The following variables are required for the error handling: 
-@<\HINT/ variables@>=
+@<\HINT\ variables@>=
 jmp_buf error_exit;
 char herror_string[MAX_HERROR];
 @
 
-\section{Testing \HINT/}\label{testing}
-\subsection{Comparing \HINT/ Output to \TeX\ Output}
-One objective of \HINT/ is to make the following diagram is commutative:
-$$\epsfbox{images/diagram.eps}$$
-In order to test this property of \TeX, Hi\TeX, and \HINT/, we write a command line
-version of \HINT/, called {\tt hintcl}, 
+\section{Testing \HINT}\label{testing}
+\subsection{Comparing \HINT\ Output to \TeX\ Output}
+One objective of \HINT\ is to make the following diagram commutative:
+$$\includefig{diagram}$$
+In order to test this property of \TeX, Hi\TeX, and \HINT, we write a command line
+version of \HINT, called {\tt hintcl}, 
 and run it together with \TeX\ and Hi\TeX\ against a collection
 of test files. Since testing the equality of DVI files is not very convenient,
 we use |show_box| to print a page description of every page and compare them
@@ -6552,7 +7002,7 @@ against the page descriptions produced by \TeX\  when {\tt tracingoutput} is ena
 We expect to see no differences.
 
 The testfile also illustrates nicely how to use the different functions of
-the \TeX\ library and the \HINT/ library. Here is the main program:
+the \TeX\ library and the \HINT\ library. Here is the main program:
 
 @(main.c@>=
 #include "basetypes.h"
@@ -6617,16 +7067,16 @@ Processing of the command line is straight forward:
     }
     else /* the input file name */
     { int path_length=(int)strlen(*argv);
-      ALLOCATE(in_name,path_length+6,char);
-      strcpy(in_name,*argv);
+      ALLOCATE(hin_name,path_length+6,char);
+      strcpy(hin_name,*argv);
        if (path_length<4 
-          || strncmp(in_name+path_length-4,".hnt",4)!=0)
-      { strcat(in_name,".hnt");
+          || strncmp(hin_name+path_length-4,".hnt",4)!=0)
+      { strcat(hin_name,".hnt");
         path_length+=4;
       }
       stem_length=path_length-4;
       ALLOCATE(stem_name,stem_length+6,char);
-      strncpy(stem_name,in_name,stem_length);
+      strncpy(stem_name,hin_name,stem_length);
       stem_name[stem_length]=0;
       if (*(argv+1)!=NULL) goto explain_usage;
     }
@@ -6657,7 +7107,7 @@ fprintf(stderr,"\t\t\t XX=%03X   buffer debugging\n", DBGBUFFER);@/
 Processing the command line looks for options and then sets the
 input file name\index{file name}.
 
-The log file gets the extension {\tt .hlg}, short for \HINT/ log file.
+The log file gets the extension {\tt .hlg}, short for \HINT\ log file.
 
 @<open the log file@> =
 #ifdef DEBUG
@@ -6686,25 +7136,23 @@ if (hlog!=NULL) fclose(hlog);
 
 To map and unmap the input file, the function |hint_map| and
 |hint_unmap| are needed. Here we use the default implementations.
-Under the windows operating system a different implementation
-needs to be supplied.
+Depending on the operating system, different implementations
+may be supplied.
 
 @<test functions@>=
-#ifndef _MSC_VER 
-uint64_t hint_map(void)
+
+bool hint_map(void)
 { return hget_map();
 }
 
 void hint_unmap(void)
 { hget_unmap(); 
 }
-#endif
+
 @
 
 
 @<test variables@>=
-
-char *in_name=NULL;
 int page_count=0;
 @
 
@@ -6719,7 +7167,7 @@ int page_count=0;
 
 @
 \subsection{Testing the Backwards Reading}
-The following code  is similar to the code for the {\tt skip} program described in \cite{MR:format}. It test reading the \HINT/ file from end to start.
+The following code  is similar to the code for the {\tt skip} program described in \cite{MR:format}. It test reading the \HINT\ file from end to start.
 
 @(back.c@>=
 #include "basetypes.h"
@@ -6764,7 +7212,7 @@ To find memory leaks, we make a table big enough for all 16 bit values (pointers
 and record a pointer with the allocated size when allocated and remove it when deallocated.
 We can then list the currently allocated records.
 
-@<\HINT/ auxiliar functions@>=
+@<\HINT\ auxiliar functions@>=
 static pointer leaks[1<<16] = {0};
 
 static void leak_clear(void)
@@ -6805,7 +7253,7 @@ static void list_leaks(void)
 }
 @ 
 
-@<\HINT/ |extern|@>=
+@<\HINT\ |extern|@>=
 extern void leak_in(pointer p, int s);
 extern void leak_out(pointer p, int s);
 @
@@ -6819,18 +7267,17 @@ extern void leak_out(pointer p, int s);
 The {\tt hint.h} file lists functions and variables exported from {\tt hint.c}.
 Care was taken not to use \TeX's types but the |pointer| and |scaled| type
 are still necessary. In case {\tt htex.h} is not included prior (nor after!)
-{\tt hint.h}, both types are defined separately.
+{\tt hint.h}, both types are defined separately. The compiler will produce
+error mesages it the definitions in {\tt hint.h} and {\tt htex.h} don't agree.
 
 @(hint.h@>=
 #ifndef _HINT_H_
 #define _HINT_H_
 
-#ifndef pointer
-#define pointer int16_t
+typedef uint16_t pointer;
 typedef int scaled;
-#endif
 
-@<\HINT/ |extern|@>@;
+@<\HINT\ |extern|@>@;
 
 #endif
 @
@@ -6851,16 +7298,16 @@ typedef int scaled;
 @<GET macros@>@;
 @<TEG macros@>@;
 
-@<\HINT/ types@>@;
+@<\HINT\ types@>@;
 
 
-@<\HINT/ variables@>@;
-@<\HINT/ declarations@>@;
-@<\HINT/ auxiliar functions@>@;
+@<\HINT\ variables@>@;
+@<\HINT\ declarations@>@;
+@<\HINT\ auxiliar functions@>@;
 @<get functions@>@;
 @<teg functions@>@;
 
-@<\HINT/ functions@>@;
+@<\HINT\ functions@>@;
 
 @
 
@@ -6880,13 +7327,15 @@ extern uint64_t hint_page_bottom(uint64_t h);
 extern uint64_t hint_page(void);
 extern uint64_t hint_next_page(void);
 extern uint64_t hint_prev_page(void);
+extern uint64_t hint_home_page(void);
 extern void hint_resize(int px_h, int px_v, double dpi);
 extern void hint_clear_fonts(bool rm);
 extern void hmark_page(void);
 extern void hint_set_mark(char *m, int s);
 extern bool hint_prev_mark(void);
 extern bool hint_next_mark(void);
-
+extern double hint_get_fpos(void);
+extern uint64_t hint_set_fpos(double fpos);
 
 #endif 
 @
@@ -6927,7 +7376,7 @@ extern bool hint_next_mark(void);
 #include "basetypes.h"
 #include "error.h"
 #include "hformat.h"
-#include "hint.h"
+
 #include "hget.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -6936,7 +7385,7 @@ extern bool hint_next_mark(void);
 #include "rendernative.h"
 
 @<font variables@>@;
-
+@<\HINT\ font access functions@>@;
 @<auxiliar font functions@>@;
 
 @<FreeType font functions@>@;
@@ -6948,9 +7397,9 @@ extern bool hint_next_mark(void);
 @
 
 \subsection{{\tt rendernative.h}}
-This header file is included in the native rendering code and in \HINT/'s rendering code.
+This header file is included in the native rendering code and in \HINT's rendering code.
 It makes sure that the implementation of the native functions matches the prototypes used in
-the \HINT/ rendering functions.
+the \HINT\ rendering functions.
 @(rendernative.h@>=
 #ifndef _RENDERNATIVE_H
 #define _RENDERNATIVE_H
@@ -6960,12 +7409,7 @@ the \HINT/ rendering functions.
 #endif 
 @
 
-
-
-\plainsection{Crossreference of Code}
 \crosssections
-
-
 
 \plainsection{References}
 

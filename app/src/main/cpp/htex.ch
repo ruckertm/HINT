@@ -14,6 +14,9 @@ static void initialize(void) /*this procedure gets things started properly*/
 @<Error handling procedures@>@;
 @y
 @(htex.c@>=
+#ifndef _HETX_H_
+#define _HTEX_H_
+
 #include "basetypes.h"
 #include <string.h>
 #include <math.h>
@@ -26,6 +29,7 @@ static void initialize(void) /*this procedure gets things started properly*/
 @<Selected global variables@>@;
 @#
 @<Basic error handling procedures@>@;
+#endif
 @z
 
 @x
@@ -44,13 +48,11 @@ static void initialize(void) /*this procedure gets things started properly*/
 #define wlog_cr         @[pascal_write(log_file,"\n")@]
 @y
 @ @(hprint.c@>=
-#include <stdint.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <math.h>
 #include "basetypes.h"
-#include "hformat.h"
 #include "error.h"
+#include "hformat.h"
 #include "hget.h"
 #include "htex.h"
 #include "hint.h"
@@ -201,6 +203,10 @@ static void print_xdimen(pointer p)
   if (xdimen_vfactor(p)!=0)
   { print_char('+');print_scaled(xdimen_vfactor(p));print("*vsize");}
 }
+
+static void print_label(pointer p)
+{ print("goto *"); print_int(label_ref(p));
+}
 @z
 
 @x
@@ -288,6 +294,15 @@ else{@+decr(hi_mem_min);p=hi_mem_min;
 else{@+decr(hi_mem_min);p=hi_mem_min;
   if (hi_mem_min <= lo_mem_max)
     {@+
+@z
+
+@x
+@p static void flush_list(pointer @!p) /*makes list of single-word nodes
+  available*/
+@y
+@(htex.c@>=
+static void flush_list(pointer @!p) /*makes list of single-word nodes
+  available*/
 @z
 
 @x
@@ -608,6 +623,15 @@ if (pool_ptr+depth_threshold >= pool_size)
 @(hprint.c@>=
 void show_box(pointer @!p)
 {@+depth_threshold=200; breadth_max=200;
+@z
+
+@x
+@p static void delete_token_ref(pointer @!p) /*|p| points to the reference count
+  of a token list that is losing one reference*/
+@y
+@(htex.c@>=
+static void delete_token_ref(pointer @!p) /*|p| points to the reference count
+  of a token list that is losing one reference*/
 @z
 
 @x
@@ -1144,6 +1168,7 @@ else if (o==normal) if (list_ptr(r)!=null)
 @p void append_to_vlist(pointer @!b)
 @y
 @<Declare subprocedures for |line_break|@>=
+extern pointer happend_to_vlist(pointer b);
 void append_to_vlist(pointer @!b, uint32_t offset)
 @z
 
@@ -1241,6 +1266,10 @@ static bool @!no_shrink_error_yet; /*have we complained about infinite shrinkage
 @x
 if (no_shrink_error_yet)
   {@+no_shrink_error_yet=false;
+#ifdef @!STAT
+  if (tracing_paragraphs > 0) end_diagnostic(true);
+#endif
+@;
   print_err("Infinite glue shrinkage found in a paragraph");
 @.Infinite glue shrinkage...@>
   help5("The paragraph just ended includes some glue that has",@/
@@ -1249,6 +1278,10 @@ if (no_shrink_error_yet)
   "of any length to fit on one line. But it's safe to proceed,",@/
   "since the offensive shrinkability has been made finite.");
   error();
+#ifdef @!STAT
+  if (tracing_paragraphs > 0) begin_diagnostic();
+#endif
+@;
   }
 @y
   QUIT("Infinite glue shrinkage found in a paragraph");
@@ -2149,14 +2182,25 @@ if (g2 > 0) { tail_append(new_glue(pointer_def[glue_kind][g2]));store_map(tail, 
 @d xdimen_vfactor(A)   mem[A+3].sc
 
 @d ignore_node 23 /* ignored used to attach extra information */
-@d ignore_node_size 2
+@d ignore_node_size small_node_size /* same as |disc_node| */
 @d ignore_info(A)    type(A+1)
 @d ignore_list(A)    link(A+1)
 
-@d link_node 24 /* represents a link to a another location */
-@d link_node_size 2
-@d link_label(A) link(A+1) /* the reference number of the label */
-@d link_on(A)    type(A+1) /* 1 for on, 0 for off */
+@d label_node 24 /* represents a link to a another location */
+@d label_node_size 2
+@d label_has_name(A)  type(A+1) /* 1 for a name , 0 for a number */
+@d label_where(A)  subtype(A+1) /* 1 for top, 2 for bot, 3 for mid */
+@d label_ptr(A) link(A+1) /* for a name the token list or the number */
+@d label_ref(A) link(A+1) /*alternatively the label number */
+
+@d start_link_node 25 /* represents a link to a another location */
+@d end_link_node 26 /* represents a link to a another location */
+@d link_node_size 2 /* second word like a |label_node| */
+
+@d outline_node 27 /* represents an outline item */
+@d outline_node_size 4 /* second word like a |label_node| */
+@d outline_ptr(A)   link(A+2) /* text to be displayed */
+@d outline_depth(A) mem[A+3].i /* depth of sub items */
 
 @z
 
@@ -2173,7 +2217,10 @@ if (g2 > 0) { tail_append(new_glue(pointer_def[glue_kind][g2]));store_map(tail, 
   case hset_node: print("hset");@+break;
   case vset_node: print("vset");@+break;
   case image_node: print("image");@+break;
-  case link_node: print("link");@+break;
+  case start_link_node: print("startlink");@+break;
+  case end_link_node: print("endlink");@+break;
+  case label_node: print("dest");@+break;
+  case outline_node: print("outline");@+break;
   case align_node: print("align");@+break;
   case setpage_node: print("setpage");@+break;
   case setstream_node: print("setstream");@+break;
@@ -2196,14 +2243,29 @@ case hset_node:
 case vset_node:
 case align_node: @+break;@#
 case image_node: break; /* see section~\secref{imageext}, page~\pageref{imageext} */
+case label_node: /* see section~\secref{linkext}, page~\pageref{linkext} */
+case outline_node:
+case start_link_node: case end_link_node: @+break;@#
 case setpage_node: break; /* see section~\secref{pageext}, page~\pageref{pageext} */
 case stream_node:
 case setstream_node:
 case stream_before_node:
 case stream_after_node:
 case xdimen_node:
-case ignore_node:
-case link_node: @+break;
+case ignore_node: @+break;
+@z
+
+@x
+static void print_write_whatsit(char *@!s, pointer @!p)
+@y
+static void print_mark(int @!p);
+static void print_label(pointer @!p)
+{ print("goto ");
+  if (label_has_name(p)) { print("name "); print_mark(label_ptr(p));}
+  else { print("num "); print_int(label_ptr(p));}
+}
+
+static void print_write_whatsit(char *@!s, pointer @!p)
 @z
 
 @x
@@ -2288,9 +2350,12 @@ case ignore_node:
   print_esc("ignore ");print_int(ignore_info(p));print_char(':');
   node_list_display(ignore_list(p));
   break;
-case link_node:
-  print_esc("link ");print_int(link_label(p));
-  if (link_on(p)) print(": on"); else print(": off");
+case start_link_node:
+  print_esc("startlink ");
+  print_label(p);
+  break;
+case end_link_node:
+  print_esc("endlink ");
   break;
 case stream_node:
   print_esc("stream");print_int(stream_insertion(p));
@@ -2379,9 +2444,25 @@ case ignore_node:
     ignore_list(r)=copy_node_list(ignore_list(p));
     words=ignore_node_size-1;
   break;
-case link_node:
+case start_link_node:
+    r=get_node(link_node_size);
+    if (label_has_name(p)) add_token_ref(label_ptr(p));
+    words=link_node_size;
+    break;
+case end_link_node:
     r=get_node(link_node_size);
     words=link_node_size;
+    break;
+case label_node:
+    r=get_node(label_node_size);
+    if (label_has_name(p)) add_token_ref(label_ptr(p));
+    words=label_node_size;
+    break;
+case outline_node:
+    r=get_node(outline_node_size);
+    if (label_has_name(p)) add_token_ref(label_ptr(p));
+    outline_ptr(r)=copy_node_list(outline_ptr(p));
+    words=outline_node_size-1;
     break;
 case stream_node:
     r=get_node(stream_node_size);
@@ -2450,8 +2531,18 @@ case setstream_node:
 case ignore_node:
   flush_node_list(ignore_list(p));
   free_node(p,ignore_node_size); @+break;
-case link_node:
+case start_link_node:
+  if (label_has_name(p)) delete_token_ref(label_ptr(p));
   free_node(p,link_node_size);@+break;
+case end_link_node:
+  free_node(p,link_node_size);@+break;
+case label_node:
+  if (label_has_name(p)) delete_token_ref(label_ptr(p));
+  free_node(p,label_node_size);@+break;
+case outline_node:
+  if (label_has_name(p)) delete_token_ref(label_ptr(p));
+  flush_node_list(outline_ptr(p));
+  free_node(p,outline_node_size);@+break;
 case stream_node:
   free_node(p,stream_node_size); @+break;
 case xdimen_node:
@@ -2492,20 +2583,17 @@ if (subtype(p)==image_node)
 @z
 
 @x
+switch (subtype(p)) {
+case open_node: case write_node: case close_node: @<Do some work that has been queued
+up for \.{\\write}@>@;@+break;
+case special_node: special_out(p);@+break;
+case language_node: do_nothing;@+break;
 default:confusion("ext4");
+@:this can't happen ext4}{\quad ext4@>
+}
 @y
-case par_node:
-case graf_node:
-case disp_node:
-case baseline_node:
-case hpack_node:  case vpack_node: case hset_node: case vset_node:
-case image_node:
-case align_node:
-case setpage_node: case setstream_node:
-case ignore_node:
-case link_node:
-case xdimen_node: break;
-default:confusion("ext4");
+if (subtype(p)==open_node||subtype(p)==write_node||subtype(p)==close_node)
+@<Do some work that has been queued up for \.{\\write}@>@;
 @z
 
 @x

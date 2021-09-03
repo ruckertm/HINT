@@ -36,7 +36,6 @@ extern "C" {
 #include "hint.h"
 #include "hrender.h"
 #include "rendernative.h"
-char *in_name=NULL; /* to keep hget happy */
 
 // Functions from rendergl.c
 #if 0
@@ -68,6 +67,9 @@ JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_begin(JNIEnv *env, jclass obj, jint fileDescriptor);
 JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, jint height,
+                                           jdouble xdpi, jdouble ydpi);
+JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_singleTap(JNIEnv *env, jclass obj, jdouble x, jdouble y,
                                            jdouble xdpi, jdouble ydpi);
 JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jclass obj);
@@ -111,25 +113,26 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_init(JNIEnv *env, jclass obj) {
 
 
 int fd=-1;
-static uint64_t hbase_size;
-extern "C" uint64_t hint_map(void) {
+
+extern "C" bool hint_map(void) {
     struct stat st;
     LOGI("hint_map\n");
      if (fd < 0) MESSAGE("Unable to open file");
     if (fstat(fd, &st) < 0) MESSAGE("Unable to get file size");
-    hbase_size = st.st_size;
-    hbase = (uint8_t *) mmap(NULL, hbase_size, PROT_READ, MAP_PRIVATE, fd, 0);
-    if (hbase == MAP_FAILED) MESSAGE("Unable to map file into memory");
+    hin_size = st.st_size;
+	hin_time = st.st_mtime;
+    hin_addr = (uint8_t *) mmap(NULL, hin_size, PROT_READ, MAP_PRIVATE, fd, 0);
+    if (hin_addr == MAP_FAILED) MESSAGE("Unable to map file into memory");
     close(fd);
-    return hbase_size;
+    return true;
  }
 
 extern "C" void hint_unmap(void) {
     LOGI("hint_unmap\n");
-    if (hbase != NULL)
-        munmap(hbase, hbase_size);
-    hbase = NULL;
-    hbase_size=0;
+    if (hin_addr != NULL)
+        munmap(hin_addr, hin_size);
+    hin_addr = NULL;
+    hin_size=0;
 }
 
 
@@ -152,6 +155,18 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, 
     hint_resize(width, height, xdpi);
     hint_page();
     }HINT_CATCH("resize");
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_singleTap(JNIEnv *env, jclass obj, jdouble x, jdouble y,
+                                           jdouble xdpi, jdouble ydpi) {
+    LOGI("hint_find_link(x=%f y=%f xdpi=%f ydpi=%f))\n", x, y, xdpi, ydpi);
+    HINT_TRY {
+        int link;
+        link=hint_find_link(round((x*0x10000)*72.27/xdpi),
+                    round((y*0x10000)*72.27/ydpi));
+        if (link>=0) hint_link_page(link);
+    } HINT_CATCH("singleTap");
 }
 
 
@@ -253,8 +268,8 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_setMode(JNIEnv *env, jclass obj, jboolean mo
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_home(JNIEnv *env, jclass obj) {
-    // go to first page
-    LOGI("hint_page_top(0)\n");
-    HINT_TRY hint_page_top(0);HINT_CATCH("top 0");
+    // go to home page
+    LOGI("hint_home_page()\n");
+    HINT_TRY hint_home_page();HINT_CATCH("home page");
 }
 

@@ -8,7 +8,7 @@
     <string name="hintview_activity">HintView</string>
     <string name="dark_mode">Night Mode</string>
     <string name="open_file">Open Document…</string>
-    <string name="first_page">To first page</string>
+    <string name="home_page">To home page</string>
     <string name="scale_one">Zoom to 100%</string>
     <string name="zoom_mode">TeX Zoom</string>
     <string name="hint_version">HINT Version 1.1</string>

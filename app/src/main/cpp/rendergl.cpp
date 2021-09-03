@@ -53,8 +53,7 @@ static void checkGlError(const char *op) {
 
 static GLuint gProgram;
 static GLuint gvPositionHandle;
-static int mode;
-
+static GLuint ourColorLocation, isImageLocation;
 
 auto gVertexShader =
         "#version 100\n"
@@ -71,11 +70,11 @@ auto gFragmentShader =
         "varying vec2 TexCoord;\n"
         "uniform sampler2D ourTexture;\n"
         "uniform vec4 ourColor;\n"
-        "uniform int ourMode;\n"
+        "uniform int isImage;\n"
         "void main() {\n"
-        "  if(ourMode==1) { \n"
-        "     vec3 invColor = (vec3(1.0)-texture2D(ourTexture,TexCoord).xyz);"
-        "     gl_FragColor = vec4(invColor.xyz, texture2D(ourTexture,TexCoord).w);\n"
+        "  if(isImage==0) { \n"
+        "     gl_FragColor.a = texture2D(ourTexture,TexCoord).a;\n"
+        "     gl_FragColor.rgb = ourColor.rgb;\n"
         "  } else {\n"
         "     gl_FragColor = vec4(texture2D(ourTexture,TexCoord));\n"
         "  } \n"
@@ -193,7 +192,9 @@ extern "C" void nativeInit(void) {
     glEnableVertexAttribArray(gvPositionHandle);
     checkGlError("glEnableVertexAttribArray");
 
-    int ourColorLocation = glGetUniformLocation(gProgram, "ourColor");
+    ourColorLocation = glGetUniformLocation(gProgram, "ourColor");
+    isImageLocation = glGetUniformLocation(gProgram, "isImage");
+
     //int ourProjectionLocation = glGetUniformLocation(gProgram, "projection");
     glUseProgram(gProgram);
 
@@ -218,26 +219,22 @@ extern "C" void nativeInit(void) {
     LOGI("nativeInit done\n");
 }
 
+static GLfloat curfr, curfg, curfb;
+static uint8_t last_style=0;
 static void nativeSetColors(GLfloat fr, GLfloat fg, GLfloat fb, GLfloat br, GLfloat bg, GLfloat bb)
 /* set foreground and background rgb colors */
 {
-    int ourColorLocation = glGetUniformLocation(gProgram, "ourColor");
     glClearColor(br, bg, bb, 1.0f);
+    curfr=fr; curfg=fg; curfb=fb;
     glUniform4f(ourColorLocation, fr, fg, fb, 0.0f);
 }
 
 extern "C" void nativeSetDark(int dark) {
     LOGI("SetDark %d GL Graphics\n", dark);
-    // set dark mode (= inverted texture colors)
+
     if (dark) {
-        int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
-        glUniform1i(ourModeLocation, DARK_MODE);
-        mode = DARK_MODE;
-        nativeSetColors(1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f);
+        nativeSetColors(1.0f, 1.0f, 0.9f, 0.0f, 0.0f, 0.1f);
     } else {
-        int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
-        glUniform1i(ourModeLocation, LIGHT_MODE);
-        mode = LIGHT_MODE;
         nativeSetColors(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
     }
 }
@@ -335,7 +332,7 @@ extern "C" void  nativeGlyph(double x,double dx,double y,double dy,double w,doub
    Coordinates in points, origin bottom left, x and w right, y and h up
    x,y position
    w,h width and height
-
+   s style bits
   */
 { //LOGI("Rendering texture %i at (%f,%f) sized %fx%f",GLtexture,x/SPf,y/SPf,w/SPf,h/SPf);
     x=x-dx;
@@ -354,6 +351,17 @@ extern "C" void  nativeGlyph(double x,double dx,double y,double dy,double w,doub
     checkGlError("glBindTexture");
     glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
     checkGlError("glVertexAttribPointer");
+    if (s!=last_style)
+    { if (s&FOCUS_BIT)
+            glUniform4f(ourColorLocation, 0.0f, 1.0f, 0.0f, 0.0f);
+        else if (s&MARK_BIT)
+            glUniform4f(ourColorLocation, 1.0f, 0.0f, 0.0f, 0.0f);
+        else if (s&LINK_BIT)
+            glUniform4f(ourColorLocation, 0.0f, 0.0f, 1.0f, 0.0f);
+        else
+           glUniform4f(ourColorLocation, curfr, curfg,curfb, 0.0f);
+        last_style=s;
+    }
     glDrawArrays(GL_TRIANGLES, 0, 6);
     checkGlError("glDrawArrays");
 }
@@ -389,7 +397,6 @@ nativeImage(double x, double y, double w, double h, unsigned char *b, unsigned c
  */
 {
     int width, height, nrChannels;
-    int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
     unsigned char *data = stbi_load_from_memory(b, (int) (e - b), &width, &height, &nrChannels, 0);
     if (data) {
         LOGI("image width=%d, height=%d nrChannels=%d\n", width, height, nrChannels);
@@ -424,18 +431,12 @@ nativeImage(double x, double y, double w, double h, unsigned char *b, unsigned c
 
         glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
         checkGlError("glVertexAttribPointer");
-        if (mode == DARK_MODE) {
-            //set light mode
-            glUniform1i(ourModeLocation, LIGHT_MODE);
-        }
+        // make sure that image is always rendered in correct colors
+        glUniform1i(isImageLocation, 1);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         checkGlError("glDrawArrays");
+        glUniform1i(isImageLocation, 0);
         stbi_image_free(data);
-        // make sure that image is always rendered in correct colors and not inverted in dark mode
-        if (mode == DARK_MODE) {
-            //set back to dark mode
-            glUniform1i(ourModeLocation, DARK_MODE);
-        }
     } else {
         LOGI("Can not read image %p", *b);
     }
@@ -501,7 +502,6 @@ extern "C" void glZoomBegin(void) {
     LOGI("GL Zoom Begin after Zoom Texture\n");
     glZoomFB();
 
-    nativeSetDark(mode);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     glViewport(0, 0, cur_h, cur_v);
     zoom_h=pt_v;
@@ -524,7 +524,6 @@ extern "C" void glZoomEnd(void) {
 }
 
 extern "C" void glZoom(void) {
-    int ourModeLocation = glGetUniformLocation(gProgram, "ourMode");
     LOGI("GL Zooming scale=%f \n",1.0);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT); // blank the canvas
     GLfloat x = 0.0;
@@ -543,16 +542,8 @@ extern "C" void glZoom(void) {
     checkGlError("glBindTexture");
     glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
     checkGlError("glVertexAttribPointer");
-    if (mode == DARK_MODE) {
-        //set light mode
-        glUniform1i(ourModeLocation, LIGHT_MODE);
-    }
     glDrawArrays(GL_TRIANGLES, 0, 6);
     checkGlError("glDrawArrays");
-    if (mode == DARK_MODE) {
-        //set back to dark mode
-        glUniform1i(ourModeLocation, DARK_MODE);
-    }
 }
 #endif
 

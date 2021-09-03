@@ -7,7 +7,7 @@
         android:title="@string/open_file" />
     <item
         android:id="@+id/toHome"
-        android:title= "@string/first_page" />
+        android:title= "@string/home_page" />
     <item
         android:id="@+id/scaleOne"
         android:title="@string/scale_one" />

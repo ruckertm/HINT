@@ -27,9 +27,6 @@ all: $(HNT)
 $(TEX:.tex=.hnt): %.hnt: %.tex 
 	hitex $(TEXFLAGS) $<
 
-$(TEX_EXTRA:.tex=.hnt): %.hnt: %.tex 
-	hitex $(TEXFLAGS) $<
-
 $(LATEX:.tex=.hnt): %.hnt: %.tex 
 	hilatex $(TEXFLAGS) $<
 
@@ -44,7 +41,9 @@ $(FORMAT_INCLUDE):$(addprefix ../../hint/format/,$(FORMAT_INCLUDE))
 	$(MAKE) -C ../../hint/format format.dvi
 	cp  $^ .
 
-format.hnt: $(FORMAT_INCLUDE)
+format.hnt:
+	$(MAKE) -C ../../hint/format format.hnt
+	cp ../../hint/format/format.hnt .
 
 mf.base: modes.mf
 	echo mf.ini | inimf

@@ -1,16 +1,112 @@
-	/*463:*/
-	#line 9420 "format.w"
+	/*505:*/
+	#line 9986 "format.w"
 
-	/*35:*/
-	#line 1027 "format.w"
+	/*1:*/
+	#line 321 "format.w"
+
+typedef struct{uint32_t c;uint8_t f;}glyph_t;
+	/*:1*/	/*113:*/
+	#line 2146 "format.w"
+
+typedef struct{
+dimen_t h,d,w;
+}rule_t;
+	/*:113*/	/*122:*/
+	#line 2260 "format.w"
+
+typedef struct{
+bool x;
+xdimen_t d;
+}kern_t;
+	/*:122*/	/*140:*/
+	#line 2681 "format.w"
+
+typedef struct{
+kind_t k;
+uint32_t p;
+uint32_t s;
+}list_t;
+	/*:140*/	/*148:*/
+	#line 3103 "format.w"
+
+typedef enum{txt_font= 0x00,txt_global= 0x08,txt_local= 0x11,
+txt_cc= 0x1D,txt_node= 0x1E,txt_hyphen= 0x1F,
+txt_glue= 0x20,txt_ignore= 0xFB}txt_t;
+	/*:148*/	/*159:*/
+	#line 3370 "format.w"
+
+typedef struct{kind_t k;int n;}ref_t;
+	/*:159*/	/*160:*/
+	#line 3405 "format.w"
+
+typedef struct{dimen_t h,d,w,a;float32_t r;int8_t s,o;list_t l;}box_t;
+	/*:160*/	/*187:*/
+	#line 3961 "format.w"
+
+typedef struct{uint8_t f;list_t l;}lig_t;
+	/*:187*/	/*195:*/
+	#line 4078 "format.w"
+
+typedef struct disc_t{bool x;list_t p,q;uint8_t r;}disc_t;
+	/*:195*/	/*228:*/
+	#line 4599 "format.w"
+
+typedef struct{
+uint16_t n;
+dimen_t w,h;
+stretch_t p,m;
+}image_t;
+	/*:228*/	/*264:*/
+	#line 5238 "format.w"
+
+typedef struct{
+uint8_t*t;
+int s;
+int d;
+uint16_t r;
+}outline_t;
+	/*:264*/	/*291:*/
+	#line 6054 "format.w"
+
+typedef
+struct{uint8_t pg;uint32_t pos;bool on;int link;}range_pos_t;
+	/*:291*/
+	#line 9987 "format.w"
+
+	/*325:*/
+	#line 6788 "format.w"
+
+typedef struct{
+uint64_t pos;
+uint32_t size,xsize;
+uint16_t section_no;
+char*file_name;
+uint8_t*buffer;
+uint32_t bsize;
+}entry_t;
+	/*:325*/
+	#line 9988 "format.w"
+
+	/*37:*/
+	#line 1055 "format.w"
 
 #define HGET_STRING(S) S= (char*)hpos;\
  while(hpos<hend && *hpos!=0) { RNG("String character",*hpos,0x20,0x7E); hpos++;}\
  hpos++;
-	/*:35*/	/*295:*/
-	#line 6260 "format.w"
+	/*:37*/	/*146:*/
+	#line 2850 "format.w"
 
-#define HGET_ERROR QUIT("HGET overrun in section %d at " SIZE_F "\n",section_no,hpos-hstart)
+#define HGET_LIST(I,L) \
+    (L).s= hget_list_size(I); hget_size_boundary(I);\
+    (L).p= hpos-hstart; \
+    hpos= hpos+(L).s; hget_size_boundary(I);\
+    { uint32_t s= hget_list_size(I); \
+      if (s!=(L).s) \
+      QUIT("List sizes at 0x%x and " SIZE_F " do not match 0x%x != 0x%x",node_pos+1,hpos-hstart-I-1,(L).s,s);}
+	/*:146*/	/*311:*/
+	#line 6389 "format.w"
+
+#define HGET_ERROR  QUIT("HGET overrun in section %d at " SIZE_F "\n",section_no,hpos-hstart)
 #define HEND   ((hpos<=hend)?0:(HGET_ERROR,0))
 
 #define HGET8      ((hpos<hend)?*(hpos++):(HGET_ERROR,0))
@@ -18,8 +114,8 @@
 #define HGET24(X) ((X)= (hpos[0]<<16)+(hpos[1]<<8)+hpos[2],hpos+= 3,HEND)
 #define HGET32(X) ((X)= (hpos[0]<<24)+(hpos[1]<<16)+(hpos[2]<<8)+hpos[3],hpos+= 4,HEND)
 #define HGETTAG(A) A= HGET8,DBGTAG(A,hpos-1)
-	/*:295*/	/*319:*/
-	#line 6839 "format.w"
+	/*:311*/	/*335:*/
+	#line 7000 "format.w"
 
 #define HGET_SIZE(I) \
   if ((I)&b100) { \
@@ -42,102 +138,29 @@
   HGET16(i); HGET_SIZE(I); HGET_STRING(file_name); \
   hset_entry(&(E),i,s,xs,file_name); \
 }
-	/*:319*/
-	#line 9421 "format.w"
+	/*:335*/	/*454:*/
+	#line 9262 "format.w"
 
-	/*1:*/
-	#line 318 "format.w"
+#define HBACK(X) ((hpos-(X)<hstart)?(QUIT("HTEG underflow\n"),NULL):(hpos-= (X)))
 
-typedef struct{uint32_t c;uint8_t f;}glyph_t;
-	/*:1*/	/*111:*/
-	#line 2118 "format.w"
+#define HTEG8     (HBACK(1),hpos[0])
+#define HTEG16(X) (HBACK(2),(X)= (hpos[0]<<8)+hpos[1])
+#define HTEG24(X) (HBACK(3),(X)= (hpos[0]<<16)+(hpos[1]<<8)+hpos[2])
+#define HTEG32(X) (HBACK(4),(X)= (hpos[0]<<24)+(hpos[1]<<16)+(hpos[2]<<8)+hpos[3])
+#define HTEGTAG(X) X= HTEG8,DBGTAG(X,hpos)
+	/*:454*/
+	#line 9989 "format.w"
 
-typedef struct{
-dimen_t h,d,w;
-}rule_t;
-	/*:111*/	/*130:*/
-	#line 2548 "format.w"
-
-typedef struct{
-kind_t k;
-uint32_t p;
-uint32_t s;
-}list_t;
-	/*:130*/	/*138:*/
-	#line 2967 "format.w"
-
-typedef enum{txt_font= 0x00,txt_global= 0x08,txt_local= 0x11,
-txt_cc= 0x1D,txt_node= 0x1E,txt_hyphen= 0x1F,
-txt_glue= 0x20,txt_ignore= 0xFB}txt_t;
-	/*:138*/	/*149:*/
-	#line 3234 "format.w"
-
-typedef struct{kind_t k;int n;}ref_t;
-	/*:149*/	/*150:*/
-	#line 3264 "format.w"
-
-typedef struct{dimen_t h,d,w,a;float32_t r;int8_t s,o;list_t l;}box_t;
-	/*:150*/	/*164:*/
-	#line 3617 "format.w"
-
-typedef struct{
-bool x;
-xdimen_t d;
-}kern_t;
-	/*:164*/	/*185:*/
-	#line 3899 "format.w"
-
-typedef struct{uint8_t f;list_t l;}lig_t;
-	/*:185*/	/*193:*/
-	#line 4016 "format.w"
-typedef struct hyphen_t{bool x;list_t p,q;uint8_t r;}hyphen_t;	/*:193*/	/*228:*/
-	#line 4514 "format.w"
-
-typedef struct{
-uint16_t n;
-dimen_t w,h;
-stretch_t p,m;
-}image_t;
-	/*:228*/	/*237:*/
-	#line 4755 "format.w"
-
-typedef enum{l_ref16= b001,l_nested= b010,l_public= b100,
-l_defined= 0x10,l_used= 0x20,l_pos= 0x40}l_flags_t;
-typedef
-struct{l_flags_t i;uint32_t pos;
-uint8_t where;
-int next;
-uint32_t pos0;uint8_t f;
-char*n;uint8_t major,minor;
-}label_t;
-
-	/*:237*/	/*275:*/
-	#line 5933 "format.w"
-
-typedef
-struct{uint8_t pg;uint32_t pos;bool on;int link;}range_pos_t;
-	/*:275*/
-	#line 9422 "format.w"
-
-	/*309:*/
-	#line 6628 "format.w"
-
-typedef struct{
-uint64_t pos;
-uint32_t size,xsize;
-uint16_t section_no;
-char*file_name;
-uint8_t*buffer;
-uint32_t bsize;
-}entry_t;
-	/*:309*/
-	#line 9423 "format.w"
 
 extern entry_t*dir;
 extern uint16_t section_no,max_section_no;
 extern uint8_t*hpos,*hstart,*hend,*hpos0;
+extern uint64_t hin_size,hin_time;
+extern uint8_t*hin_addr;
 
-extern uint64_t hget_map(void);
+extern label_t*labels;
+extern char*hin_name;
+extern bool hget_map(void);
 extern void hget_unmap(void);
 
 extern void new_directory(uint32_t entries);
@@ -151,4 +174,17 @@ extern void hclear_dir(void);
 extern bool hcheck_banner(char*magic);
 
 extern void hget_max_definitions(void);
-	/*:463*/
+extern uint32_t hget_utf8(void);
+extern void hget_size_boundary(info_t info);
+extern uint32_t hget_list_size(info_t info);
+extern void hget_list(list_t*l);
+extern uint32_t hget_utf8(void);
+extern float32_t hget_float32(void);
+extern float32_t hteg_float32(void);
+extern void hteg_size_boundary(info_t info);
+extern uint32_t hteg_list_size(info_t info);
+extern void hteg_list(list_t*l);
+extern void hff_hpos(void);
+extern uint32_t hff_list_pos,hff_list_size;
+extern uint8_t hff_tag;
+	/*:505*/

@@ -46,7 +46,7 @@ import javax.microedition.khronos.opengles.GL10;
 public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener {
     private static String TAG = "HINTVIEWView";
     private static final boolean DEBUG = false;
-    private static double xdpi, ydpi;
+    public static double xdpi, ydpi;
     public static double scale = 1.0;
     private static int width, height;
     protected Renderer fileRenderer;
@@ -111,7 +111,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         boolean s = scaleGestureDetector.onTouchEvent(motionEvent);
         boolean t = touchGestureDetector.onTouchEvent(motionEvent);
         //Log.d(TAG, "onTouch: s: " + scaleGestureDetector.isInProgress() + ", t: " + t);
-        return t || scaleGestureDetector.isInProgress();
+        return s || t || scaleGestureDetector.isInProgress();
     }
 
     public double getScale() {
