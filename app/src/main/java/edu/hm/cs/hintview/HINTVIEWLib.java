@@ -20,7 +20,7 @@ public class HINTVIEWLib {
 
     public static native void change(int width, int height, double xdpi, double ydpi);
 
-    public static native void singleTap(double x, double y, double xdpi, double ydpi);
+    public static native boolean singleTap(double x, double y, double xdpi, double ydpi);
 
     public static native void draw();
 

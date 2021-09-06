@@ -68,7 +68,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_begin(JNIEnv *env, jclass obj, jint fileDesc
 JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, jint height,
                                            jdouble xdpi, jdouble ydpi);
-JNIEXPORT void JNICALL
+JNIEXPORT jboolean JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_singleTap(JNIEnv *env, jclass obj, jdouble x, jdouble y,
                                            jdouble xdpi, jdouble ydpi);
 JNIEXPORT void JNICALL
@@ -157,16 +157,17 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, 
     }HINT_CATCH("resize");
 }
 
-extern "C" JNIEXPORT void JNICALL
+extern "C" JNIEXPORT jboolean JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_singleTap(JNIEnv *env, jclass obj, jdouble x, jdouble y,
                                            jdouble xdpi, jdouble ydpi) {
+    int link;
     LOGI("hint_find_link(x=%f y=%f xdpi=%f ydpi=%f))\n", x, y, xdpi, ydpi);
     HINT_TRY {
-        int link;
         link=hint_find_link(round((x*0x10000)*72.27/xdpi),
-                    round((y*0x10000)*72.27/ydpi));
+                    round((y*0x10000)*72.27/ydpi),3*ONE);
         if (link>=0) hint_link_page(link);
     } HINT_CATCH("singleTap");
+    return link>=0;
 }
 
 

@@ -51,12 +51,17 @@ public class TouchGestureHandler extends GestureDetector.SimpleOnGestureListener
     public boolean onDown(MotionEvent e) {
         return super.onDown(e);
     }
+
     @Override
     public boolean onSingleTapUp(MotionEvent e)
-    { float x=e.getX(0);
+    { super.onSingleTapUp(e);
+      float x=e.getX(0);
       float y=e.getY(0);
-      HINTVIEWLib.singleTap(x,y,view.scale*view.xdpi,view.scale*view.ydpi);
-      view.requestRender();
-      return true;
+      if (HINTVIEWLib.singleTap(x,y,view.scale*view.xdpi,view.scale*view.ydpi)) {
+          view.requestRender();
+          view.performClick();
+          return true;
+      }
+      return false;
     }
 }

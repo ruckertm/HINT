@@ -27,8 +27,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 2485 ${}$}
-\def\lastdate{${}$Date: 2021-08-19 19:37:13 +0200 (Thu, 19 Aug 2021) ${}$}
+\def\lastrevision{${}$Revision: 2503 ${}$}
+\def\lastdate{${}$Date: 2021-09-06 11:57:26 +0200 (Mon, 06 Sep 2021) ${}$}
 
 \input titlepage.tex
 
@@ -5380,9 +5380,12 @@ search might be needed. If the links in the array are sorted
 by increasing top boundaries, the search can stop early if the
 y coordinate is above the top coordinate of a link; all following
 links will have an equal or even larger top boundary.
-If there is a chain indices of links sorted by the bottom boundaries,
+If there is a chain of indices of links sorted by the bottom boundaries,
 the search along the bottom boundaries can also terminate
 early. Together this should limit the search to a short stretch of links.
+
+The | precission| parameter allows to find links if their distance from
+the given coordinates is smaller than the given |precission|.
 
 The following function returns a index into the |hint_links|
 array or $-1$ if no link is at the given position.
@@ -5390,35 +5393,57 @@ array or $-1$ if no link is at the given position.
 To speed up processing, it remembers the last hit.
 
 @<render functions@>=
-int hint_find_link(scaled x, scaled y)
+static scaled hlink_distance(scaled x,scaled y, hint_link_t *t)
+{ scaled d, dx=0, dy=0;
+  d = t->top-y;
+  if (d>0) dy=d;
+  else
+  { d= y-t->bottom;
+    if (d>0) dy=d;
+  }
+  d = x-t->right;
+  if (d>0) dx=d;
+  else
+  { d= t->left-x;
+    if (d>0) dx=d;
+  }
+  if (dx>dy) return dx;
+  else return dy;
+
+}
+int hint_find_link(scaled x, scaled y,scaled precission)
 { static int last_hit=-1;
   int i;
   hint_link_t *t;
   if (max_link<0) return -1;
-  if (last_hit<0 || last_hit>max_link) last_hit=0;
+  if (last_hit<0 || last_hit>max_link) last_hit=max_link/2;
   i=last_hit;
   t=hint_links+i;
-  if (t->top<=y && t->bottom>=y && t->left<=x && t->right>=x)
+  if (hlink_distance(x,y,t)<=precission)
     return i;
-  else if (y<t->top)
+  else if (y<t->top) /* search up */
   { while (i>0)
     { i--;
       t=hint_links+i;
-      if (t->top<=y && t->bottom>=y && t->left<=x && t->right>=x)
+      if(hlink_distance(x,y,t)<=precission)
       { last_hit=i;  return i; }
     }
     return -1;
   }
-  else
+  else /* search all */
   { int k;
+    scaled d, min_d=precission;
+    int min_i=-1;
     for (k=0;k<=max_link;k++)
     { i=i+1;
       if (i>max_link) i=0;
       t=hint_links+i;
-      if (t->top<=y && t->bottom>=y && t->left<=x && t->right>=x)
-      { last_hit=i;  return i; }
+      d=hlink_distance(x,y,t);
+      if (d<min_d)
+      { min_d=d; min_i=i;}
     }
-    return -1;
+    last_hit=min_i;
+    return last_hit;
   }
 }
 @
@@ -5443,7 +5468,7 @@ As a shortcut, it can call this function:
 
 Here is a summary of the above functions:
 @<\HINT\ |extern|@>=
-extern int hint_find_link(scaled x, scaled y);
+extern int hint_find_link(scaled x, scaled y,scaled precission);
 extern uint64_t hint_link_page(int i);
 @
 

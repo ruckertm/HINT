@@ -40,9 +40,9 @@
 
 
 \def\setrevision$#1: #2 ${\gdef\lastrevision{#2}}
-\setrevision$Revision: 2487 $
+\setrevision$Revision: 2502 $
 \def\setdate$#1(#2) ${\gdef\lastdate{#2}}
-\setdate$Date: 2021-08-20 19:10:53 +0200 (Fri, 20 Aug 2021) $
+\setdate$Date: 2021-09-03 18:12:10 +0200 (Fri, 03 Sep 2021) $
 
 \null
 

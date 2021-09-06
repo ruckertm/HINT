@@ -1,5 +1,5 @@
 /*367:*/
-#line 7286 "hint.w"
+#line 7311 "hint.w"
 
 #include "basetypes.h"
 #include <string.h> 
@@ -230,7 +230,7 @@ hget_list_pointer();
   label_has_name(p)= 0;\
   tail_append(p);}
 /*:193*/
-#line 7298 "hint.w"
+#line 7323 "hint.w"
 
 /*84:*/
 #line 1298 "hint.w"
@@ -424,7 +424,7 @@ if ((I)&b100) hteg_xdimen_node(); else hget_xdimen_ref(HTEG8);
   label_has_name(p)= 0;\
   tail_append(p);}
 /*:194*/
-#line 7299 "hint.w"
+#line 7324 "hint.w"
 
 
 /*21:*/
@@ -455,7 +455,7 @@ typedef struct param_def_t{
 struct param_def_t*next;
 param_t p;}param_def_t;
 /*:37*/
-#line 7301 "hint.w"
+#line 7326 "hint.w"
 
 
 
@@ -565,12 +565,12 @@ int page_v,page_h,offset_v,offset_h;
 hint_link_t*hint_links= NULL;
 int max_link= -1;
 /*:296*//*354:*/
-#line 6987 "hint.w"
+#line 7012 "hint.w"
 
 jmp_buf error_exit;
 char herror_string[MAX_HERROR];
 /*:354*/
-#line 7304 "hint.w"
+#line 7329 "hint.w"
 
 /*3:*/
 #line 196 "hint.w"
@@ -617,7 +617,7 @@ static pointer hteg_list_pointer(void);
 
 static scaled hget_xdimen_node(void);
 /*:124*/
-#line 7305 "hint.w"
+#line 7330 "hint.w"
 
 /*9:*/
 #line 253 "hint.w"
@@ -2039,7 +2039,7 @@ trv_string[trv_string_size]= 0;
 return trv_string;
 }
 /*:267*//*364:*/
-#line 7215 "hint.w"
+#line 7240 "hint.w"
 
 static pointer leaks[1<<16]= {0};
 
@@ -2080,7 +2080,7 @@ fprintf(stderr,"ERROR:leak final: p=%d, s=%d\n",i,leaks[i]);
 #endif
 }
 /*:364*/
-#line 7306 "hint.w"
+#line 7331 "hint.w"
 
 /*1:*/
 #line 111 "hint.w"
@@ -2615,7 +2615,7 @@ QUIT("Text in paragraph not yet implemented");
 return null;
 }
 /*:160*/
-#line 7307 "hint.w"
+#line 7332 "hint.w"
 
 /*80:*/
 #line 1240 "hint.w"
@@ -2977,7 +2977,7 @@ line_break_params= save_lbp;
 }
 
 /*:170*/
-#line 7308 "hint.w"
+#line 7333 "hint.w"
 
 
 /*18:*/
@@ -3774,7 +3774,7 @@ p= link(p);
 }
 }
 /*:265*/
-#line 7310 "hint.w"
+#line 7335 "hint.w"
 
 
 /*:367*/

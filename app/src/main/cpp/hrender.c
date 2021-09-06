@@ -1,5 +1,5 @@
 /*369:*/
-#line 7344 "hint.w"
+#line 7369 "hint.w"
 
 #include "basetypes.h"
 #include "error.h"
@@ -13,15 +13,15 @@
 #include "hint.h"
 
 /*305:*/
-#line 5527 "hint.w"
+#line 5552 "hint.w"
 
 extern struct font_s*hget_font(unsigned char f);
 /*:305*//*317:*/
-#line 5867 "hint.w"
+#line 5892 "hint.w"
 
 extern void render_char(int x,int y,struct font_s*f,uint32_t cc,uint8_t s);
 /*:317*/
-#line 7356 "hint.w"
+#line 7381 "hint.w"
 
 
 /*253:*/
@@ -59,7 +59,7 @@ static int m_style;
 
 static int cur_link= -1;
 /*:291*//*320:*/
-#line 5909 "hint.w"
+#line 5934 "hint.w"
 
 static scaled cur_h,cur_v;
 static scaled rule_ht,rule_dp,rule_wd;
@@ -67,7 +67,7 @@ static int cur_f;
 static struct font_s*cur_fp;
 static uint8_t cur_style= 0;
 /*:320*/
-#line 7358 "hint.w"
+#line 7383 "hint.w"
 
 /*236:*/
 #line 4075 "hint.w"
@@ -632,41 +632,63 @@ else
 t->bottom= v;
 }
 /*:297*//*298:*/
-#line 5392 "hint.w"
+#line 5395 "hint.w"
 
-int hint_find_link(scaled x,scaled y)
+static scaled hlink_distance(scaled x,scaled y,hint_link_t*t)
+{scaled d,dx= 0,dy= 0;
+d= t->top-y;
+if(d> 0)dy= d;
+else
+{d= y-t->bottom;
+if(d> 0)dy= d;
+}
+d= x-t->right;
+if(d> 0)dx= d;
+else
+{d= t->left-x;
+if(d> 0)dx= d;
+}
+if(dx> dy)return dx;
+else return dy;
+
+}
+int hint_find_link(scaled x,scaled y,scaled precission)
 {static int last_hit= -1;
 int i;
 hint_link_t*t;
 if(max_link<0)return-1;
-if(last_hit<0||last_hit> max_link)last_hit= 0;
+if(last_hit<0||last_hit> max_link)last_hit= max_link/2;
 i= last_hit;
 t= hint_links+i;
-if(t->top<=y&&t->bottom>=y&&t->left<=x&&t->right>=x)
+if(hlink_distance(x,y,t)<=precission)
 return i;
 else if(y<t->top)
 {while(i> 0)
 {i--;
 t= hint_links+i;
-if(t->top<=y&&t->bottom>=y&&t->left<=x&&t->right>=x)
+if(hlink_distance(x,y,t)<=precission)
 {last_hit= i;return i;}
 }
 return-1;
 }
 else
 {int k;
+scaled d,min_d= precission;
+int min_i= -1;
 for(k= 0;k<=max_link;k++)
 {i= i+1;
 if(i> max_link)i= 0;
 t= hint_links+i;
-if(t->top<=y&&t->bottom>=y&&t->left<=x&&t->right>=x)
-{last_hit= i;return i;}
+d= hlink_distance(x,y,t);
+if(d<min_d)
+{min_d= d;min_i= i;}
 }
-return-1;
+last_hit= min_i;
+return last_hit;
 }
 }
 /*:298*//*299:*/
-#line 5430 "hint.w"
+#line 5455 "hint.w"
 
 uint64_t hint_link_page(int i)
 {uint64_t h;
@@ -680,14 +702,14 @@ else if(w==LABEL_MID)return hint_page_top(h);
 else return hint_page_get();
 }
 /*:299*//*318:*/
-#line 5874 "hint.w"
+#line 5899 "hint.w"
 
 static void render_rule(int x,int y,int w,int h)
 {if(w> 0&&h> 0)
 nativeRule(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h));
 }
 /*:318*//*319:*/
-#line 5885 "hint.w"
+#line 5910 "hint.w"
 
 void render_image(int x,int y,int w,int h,uint32_t n)
 {
@@ -698,7 +720,7 @@ nativeImage(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),hstart,hend);
 hpos= spos;hstart= sstart;hend= send;
 }
 /*:319*//*321:*/
-#line 5917 "hint.w"
+#line 5942 "hint.w"
 
 static void vlist_render(pointer this_box);
 
@@ -741,7 +763,7 @@ local_link= cur_link;
 cur_link= -1;
 }
 /*:294*/
-#line 5950 "hint.w"
+#line 5975 "hint.w"
 
 while(p!=null)
 {
@@ -774,7 +796,7 @@ m_d= m_get();
 m_d--;
 }
 /*:285*/
-#line 5965 "hint.w"
+#line 5990 "hint.w"
 
 cur_style|= m_style;
 }
@@ -836,7 +858,7 @@ else
 c_ignore= false;
 }
 /*:287*/
-#line 6013 "hint.w"
+#line 6038 "hint.w"
 
 else/*292:*/
 #line 5266 "hint.w"
@@ -852,7 +874,7 @@ end_new_link(local_link,this_box,cur_h,cur_v);
 local_link= -1;
 }
 /*:292*/
-#line 6014 "hint.w"
+#line 6039 "hint.w"
 
 else if(subtype(p)==image_node)
 {scaled h,w;
@@ -978,7 +1000,7 @@ q= link(q);
 }
 }
 /*:286*/
-#line 6107 "hint.w"
+#line 6132 "hint.w"
 
 goto render_c;
 default:;
@@ -1012,7 +1034,7 @@ if(local_link>=0)
 cur_link= local_link;
 }
 /*:293*/
-#line 6132 "hint.w"
+#line 6157 "hint.w"
 
 }
 
@@ -1182,14 +1204,14 @@ p= link(p);
 }
 
 /*:321*//*322:*/
-#line 6307 "hint.w"
+#line 6332 "hint.w"
 
 uint64_t hint_blank(void)
 {nativeBlank();
 return 0;
 }
 /*:322*//*323:*/
-#line 6316 "hint.w"
+#line 6341 "hint.w"
 
 
 void hint_render(void)
@@ -1204,7 +1226,7 @@ cur_link= -1;max_link= -1;
 
 m_ptr= 0;m_d= 0;m_style= MARK_BIT;c_ignore= false;cur_style= 0;
 /*:284*/
-#line 6325 "hint.w"
+#line 6350 "hint.w"
 
 if(type(streams[0].p)==vlist_node)
 vlist_render(streams[0].p);
@@ -1212,6 +1234,6 @@ else
 hlist_render(streams[0].p);
 }
 /*:323*/
-#line 7359 "hint.w"
+#line 7384 "hint.w"
 
 /*:369*/

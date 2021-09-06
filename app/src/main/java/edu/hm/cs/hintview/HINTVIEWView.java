@@ -109,9 +109,10 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
         boolean s = scaleGestureDetector.onTouchEvent(motionEvent);
+        if (scaleGestureDetector.isInProgress()) return true;
         boolean t = touchGestureDetector.onTouchEvent(motionEvent);
-        //Log.d(TAG, "onTouch: s: " + scaleGestureDetector.isInProgress() + ", t: " + t);
-        return s || t || scaleGestureDetector.isInProgress();
+
+        return t;
     }
 
     public double getScale() {
