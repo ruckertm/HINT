@@ -35,7 +35,7 @@ import java.io.IOException;
 
 
 public class HINTVIEWActivity extends AppCompatActivity {
-    private static String TAG = "HINTVIEWActivity";
+    private static final String TAG = "HINTVIEWActivity";
     private HINTVIEWView mView;
     private static Toolbar toolbar;
     private SharedPreferences sharedPref;
@@ -107,7 +107,8 @@ public class HINTVIEWActivity extends AppCompatActivity {
         });
 
        //Log.w(TAG, "onCreate URI= " + fileUriStr);
-        if (fileUriStr == null) openFileChooser();
+        if (fileUriStr == null)
+            openFileChooser();
     }
 
     public static void hideToolbar(View view, boolean toolbarVisible) {
@@ -129,14 +130,14 @@ public class HINTVIEWActivity extends AppCompatActivity {
     }
 
     void setToolbar(boolean darkMode) {
-        int toolbar_color = mView.getContext().getResources().getColor(R.color.toolbar_color);
-        int text_color = mView.getContext().getResources().getColor(R.color.foreground_color);
+        int toolbar_color = mView.getContext().getResources().getColor(R.color.toolbar_color, null);
+        int text_color = mView.getContext().getResources().getColor(R.color.foreground_color, null);
         int nightModeFlags = mView.getContext().getResources().getConfiguration().uiMode &
                 Configuration.UI_MODE_NIGHT_MASK;
 
         if (darkMode && (nightModeFlags == Configuration.UI_MODE_NIGHT_NO)) {
-            toolbar_color = mView.getContext().getResources().getColor(R.color.toolbar_dark_color);
-            text_color = mView.getContext().getResources().getColor(R.color.foreground_dark_color);
+            toolbar_color = mView.getContext().getResources().getColor(R.color.toolbar_dark_color, null);
+            text_color = mView.getContext().getResources().getColor(R.color.foreground_dark_color, null);
         }
 
         toolbar.setBackgroundColor(toolbar_color);
@@ -242,7 +243,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
                 //    }
                 //});
                 dialog.setContentView(R.layout.about);
-                Button dialogButton = (Button) dialog.findViewById(R.id.OKbutton);
+                Button dialogButton = dialog.findViewById(R.id.OKbutton);
                 dialogButton.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -305,7 +306,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
                 //no permissions after restart of the device
                 openFileChooser();
             } catch (IOException e) {
-               //Log.e(TAG,"Exception in openFileChoser");
+               //Log.e(TAG,"Exception in openFileChooser");
             }
         }
     }

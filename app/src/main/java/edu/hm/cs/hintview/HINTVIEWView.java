@@ -353,9 +353,10 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         public void onSurfaceChanged(GL10 gl, int w, int h) {
             width = w;
             height = h;
-            HINTVIEWLib.setMode(darkMode);
-            HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi);
-            render_OK();
+            // already in onDrawFrame
+            //HINTVIEWLib.setMode(darkMode);
+            //HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi);
+            //render_OK();
         }
 
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {

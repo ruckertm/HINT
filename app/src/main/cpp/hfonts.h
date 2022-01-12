@@ -1,18 +1,18 @@
-/*370:*/
-#line 7389 "hint.w"
+/*374:*/
+#line 7592 "hint.w"
 
 #ifndef _HFONTS_H
 #define _HFONTS_H
 
-/*301:*/
-#line 5491 "hint.w"
+/*306:*/
+#line 5694 "hint.w"
 
-typedef enum{no_format,pk_format,ft_format}font_format_t;
-/*:301*//*302:*/
-#line 5503 "hint.w"
+typedef enum{no_format,pk_format,ft_format}FontFormat;
+/*:306*//*307:*/
+#line 5706 "hint.w"
 
-/*334:*/
-#line 6478 "hint.w"
+/*338:*/
+#line 6679 "hint.w"
 
 
 typedef struct
@@ -20,21 +20,21 @@ typedef struct
 unsigned int cs;
 double ds;
 unsigned char id;
-}pk_t;
-/*:334*//*346:*/
-#line 6809 "hint.w"
+}PKfont;
+/*:338*//*350:*/
+#line 7010 "hint.w"
 
 typedef struct
 {FT_Face face;
-}ft_t;
-/*:346*//*347:*/
-#line 6816 "hint.w"
+}FTfont;
+/*:350*//*351:*/
+#line 7017 "hint.w"
 
 typedef struct
 {int dummy;
-}ftg_t;
-/*:347*/
-#line 5504 "hint.w"
+}FTglyph;
+/*:351*/
+#line 5707 "hint.w"
 
 
 typedef struct font_s{
@@ -43,45 +43,41 @@ unsigned char*font_data;
 int data_size;
 double s;
 double hpxs,vpxs;
-/*307:*/
-#line 5591 "hint.w"
+/*312:*/
+#line 5794 "hint.w"
 
 struct gcache_s**g0;
 struct gcache_s***g1;
 struct gcache_s****g2;
 struct gcache_s*****g3;
 
-/*:307*/
-#line 5512 "hint.w"
+/*:312*/
+#line 5715 "hint.w"
 
-font_format_t ff;
-union{pk_t pk;ft_t tt;};
-}font_t;
-/*:302*//*308:*/
-#line 5603 "hint.w"
+FontFormat ff;
+union{PKfont pk;FTfont tt;};
+}Font;
+/*:307*//*317:*/
+#line 6006 "hint.w"
 
-typedef struct gcache_s gcache_t;
-/*:308*//*313:*/
-#line 5807 "hint.w"
-
-/*335:*/
-#line 6491 "hint.w"
+/*339:*/
+#line 6692 "hint.w"
 
 typedef struct
 {unsigned char flag;
 unsigned char*encoding;
-}pkg_t;
-/*:335*//*337:*/
-#line 6518 "hint.w"
+}PKglyph;
+/*:339*//*341:*/
+#line 6719 "hint.w"
 
 typedef struct{
 int j;
 int r;
 int f;
 unsigned char*data;
-}pk_parse_t;
-/*:337*/
-#line 5808 "hint.w"
+}PKparse;
+/*:341*/
+#line 6007 "hint.w"
 
 
 struct gcache_s{
@@ -89,16 +85,17 @@ int w,h;
 int hoff,voff;
 unsigned char*bits;
 unsigned int GLtexture;
-font_format_t ff;
+FontFormat ff;
 union{
-pkg_t pk;
-ftg_t tt;
+PKglyph pk;
+FTglyph tt;
 };
 };
-/*:313*/
-#line 7393 "hint.w"
+typedef struct gcache_s Gcache;
+/*:317*/
+#line 7596 "hint.w"
 
 
 
 #endif
-/*:370*/
+/*:374*/

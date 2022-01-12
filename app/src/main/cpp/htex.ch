@@ -22,8 +22,8 @@ static void initialize(void) /*this procedure gets things started properly*/
 #include <math.h>
 
 #include "error.h"
-#include "hformat.h"
-#include "hget.h"
+#include "format.h"
+#include "get.h"
 #include "htex.h"
 #include "hint.h"
 @<Selected global variables@>@;
@@ -52,8 +52,8 @@ static void initialize(void) /*this procedure gets things started properly*/
 #include <math.h>
 #include "basetypes.h"
 #include "error.h"
-#include "hformat.h"
-#include "hget.h"
+#include "format.h"
+#include "get.h"
 #include "htex.h"
 #include "hint.h"
 
@@ -126,6 +126,23 @@ static void print_int(int @!n) /*prints an integer in decimal form*/
       else {@+print_lc_hex(k/16);print_lc_hex(k%16); }
     }
     else print_char(k)
+@z
+
+@x
+@p static void print_current_string(void) /*prints a yet-unmade string*/
+{@+pool_pointer j; /*points to current character code*/
+j=str_start[str_ptr];
+while (j < pool_ptr)
+  {@+print_char(so(str_pool[j]));incr(j);
+  }
+}
+@y
+@ @(hprint.c@>=
+static void print_current_string(void) /*prints a yet-unmade string*/
+{@+int i;
+   for(i=0;i<depth_level;i++) @+
+     print_char('.');
+}
 @z
 
 @x
@@ -530,7 +547,6 @@ static void print_xdimen(pointer p)
   if (xdimen_vfactor(p)!=0)
   { print_char('+');print_scaled(xdimen_vfactor(p));print("*vsize");}
 }
-extern void print_baseline_skip(int i);
 @z
 
 @x
@@ -558,12 +574,6 @@ static void show_node_list(int @!p) /*prints a node list symbolically*/
 if (cur_length > depth_threshold)
 @y
 if (depth_level > depth_threshold)
-@z
-
-@x
-  {@+print_ln();print_current_string(); /*display the nesting history*/
-@y
-  {@+print_ln();print_current_indent;
 @z
 
 @x
@@ -641,7 +651,7 @@ fast_delete_glue_ref(p)
 @(htex.c@>=
 void delete_glue_ref(pointer @!p) /*|p| points to a glue specification*/
 fast_delete_glue_ref(p)
-void delete_xdimen_ref(pointer @!p) /*|p| points to a xdimen specification*/
+static void delete_xdimen_ref(pointer @!p) /*|p| points to a xdimen specification*/
 {@+if (xdimen_ref_count(p)==null) free_node(p, xdimen_node_size);
   else decr(xdimen_ref_count(p));
 }
@@ -2072,7 +2082,8 @@ if (g2 > 0) { tail_append(new_glue(pointer_def[glue_kind][g2]));store_map(tail, 
 @y
 @d open_ext(A) link(A+2) /*string number of file extension for |open_name|*/  @#
 
-@d par_node         6 /*|subtype| that records the change of a parameter*/
+@d hitex_ext        language_node+1
+@d par_node         hitex_ext /*|subtype| that records the change of a parameter*/
 @d par_node_size 3 /* number of memory words in a |par_node| */
 @d par_type(A) type(A+1) /* type of parameter */
 @d int_type   0 /* type of an |int_par| node */
@@ -2081,14 +2092,14 @@ if (g2 > 0) { tail_append(new_glue(pointer_def[glue_kind][g2]));store_map(tail, 
 @d par_number(A) subtype(A+1) /* the parameter number */
 @d par_value(A)  mem[A+2] /* the parameter value */@#
 
-@d graf_node        7 /*|subtype|  that records a paragraph*/
+@d graf_node        hitex_ext+1 /*|subtype|  that records a paragraph*/
 @d graf_node_size 5 /* number of memory words in a |graf_node| */
 @d graf_penalty(A)  mem[A+1].i /* the final penalty */
 @d graf_extent(A)   link(A+3) /* the extent */@#
 @d graf_params(A)   info(A+4) /* list of parameter nodes */
 @d graf_list(A)     link(A+4) /* list of content nodes */
 
-@d disp_node           8 /*|subtype| that records a math display*/
+@d disp_node           hitex_ext+2 /*|subtype| that records a math display*/
 @d disp_node_size    3 /* number of memory words in a |disp_node| */
 @d display_left(A)    type(A+1) /* 1=left 0=right */
 @d display_no_bs(A)    subtype(A+1) /* |prev_depth==ignore_depth| */
@@ -2096,11 +2107,11 @@ if (g2 > 0) { tail_append(new_glue(pointer_def[glue_kind][g2]));store_map(tail, 
 @d display_formula(A)  link(A+2) /* formula list */
 @d display_eqno(A)     info(A+2) /* box with equation number */@#
 
-@d baseline_node    9  /*|subtype| that records a |baseline_skip| */
+@d baseline_node    hitex_ext+3  /*|subtype| that records a |baseline_skip| */
 @d baseline_node_size small_node_size /* This is 2; we will convert baseline nodes to glue nodes */
 @d baseline_node_no(A) mem[A+1].i /* baseline reference */@#
 
-@d image_node    10 /*|subtype| that records an image */
+@d image_node    hitex_ext+4 /*|subtype| that records an image */
 @d image_node_size 9  /* width, depth, height, |shift_amount| like a hbox */
 @d image_width(A)  width(A)  /*width of image */
 @d image_height(A) height(A) /*height of image */
@@ -2114,15 +2125,15 @@ if (g2 > 0) { tail_append(new_glue(pointer_def[glue_kind][g2]));store_map(tail, 
 @d image_area(A)   info(A+8) /*string number of file area */
 @d image_ext(A)    link(A+8) /*string number of file extension */@#
 
-@d hpack_node         12 /* a hlist that needs to go to hpack */
-@d vpack_node         13 /* a vlist that needs to go to vpackage */
+@d hpack_node         hitex_ext+5 /* a hlist that needs to go to hpack */
+@d vpack_node         hitex_ext+6 /* a vlist that needs to go to vpackage */
 @d pack_node_size       box_node_size /* a box node up to |list_ptr|*/
 @d pack_m(A)  type(A+list_offset) /* either additional or exactly */
 @d pack_limit(A)        mem[(A)+1+list_offset].sc /* depth limit in |vpack| */
 @d pack_extent(A) link(A+2+list_offset) /* extent */@#
 
-@d hset_node         14  /* represents a hlist that needs |glue_set| */
-@d vset_node         15  /* represents a vlist that needs |glue_set| */
+@d hset_node         hitex_ext+7  /* represents a hlist that needs |glue_set| */
+@d vset_node         hitex_ext+8  /* represents a vlist that needs |glue_set| */
 @d set_node_size     box_node_size /* up to |list_ptr| like a box node */
 @d set_stretch_order glue_sign
 @d set_shrink_order  glue_order
@@ -2130,7 +2141,7 @@ if (g2 > 0) { tail_append(new_glue(pointer_def[glue_kind][g2]));store_map(tail, 
 @d set_extent(A)     pack_extent(A) /* extent */
 @d set_shrink(A)     mem[(A)+3+list_offset].sc @#
 
-@d align_node          16 /* represents an alignment */
+@d align_node          hitex_ext+9 /* represents an alignment */
 @d align_node_size     4
 @d align_extent(A)     link(A+2) /* the extent of the alignment */
 @d align_m(A)          type(A+2) /* either additional or exactly */
@@ -2138,7 +2149,7 @@ if (g2 > 0) { tail_append(new_glue(pointer_def[glue_kind][g2]));store_map(tail, 
 @d align_preamble(A)   info(A+3) /* the preamble */
 @d align_list(A)       link(A+3) /* the unset rows/columns */
 
-@d setpage_node       17 /* represents a page template */
+@d setpage_node       hitex_ext+10 /* represents a page template */
 @d setpage_node_size  6
 @d setpage_name(A)    link(A+1)
 @d setpage_number(A)  type(A+1) /* the \HINT/ number */
@@ -2151,7 +2162,7 @@ if (g2 > 0) { tail_append(new_glue(pointer_def[glue_kind][g2]));store_map(tail, 
 @d setpage_list(A)    info(A+5) /* the template itself */
 @d setpage_streams(A) link(A+5)   /* list of stream definitions */
 
-@d setstream_node         18 /* represents a stream definition */
+@d setstream_node         hitex_ext+11 /* represents a stream definition */
 @d setstream_node_size    6
 @d setstream_number(A)    type(A+1)
 @d setstream_insertion(A) subtype(A+1)
@@ -2166,38 +2177,38 @@ if (g2 > 0) { tail_append(new_glue(pointer_def[glue_kind][g2]));store_map(tail, 
 @d setstream_before(A)    info(A+5)
 @d setstream_after(A)     link(A+5)
 
-@d stream_node     19 /* represents a stream insertion point */
+@d stream_node     hitex_ext+12 /* represents a stream insertion point */
 @d stream_node_size 2
 @d stream_number(A)   type(A+1)
 @d stream_insertion(A) subtype(A+1)
 
-@d stream_after_node  20 /* never allocated */
-@d stream_before_node 21 /* never allocated */
+@d stream_after_node  hitex_ext+13 /* never allocated */
+@d stream_before_node hitex_ext+14 /* never allocated */
 
-@d xdimen_node 22
+@d xdimen_node hitex_ext+15
 @d xdimen_node_size    4
 @d xdimen_ref_count(A) link(A)
 @d xdimen_width(A)     mem[A+1].sc
 @d xdimen_hfactor(A)   mem[A+2].sc
 @d xdimen_vfactor(A)   mem[A+3].sc
 
-@d ignore_node 23 /* ignored used to attach extra information */
+@d ignore_node hitex_ext+16 /* ignored used to attach extra information */
 @d ignore_node_size small_node_size /* same as |disc_node| */
 @d ignore_info(A)    type(A+1)
 @d ignore_list(A)    link(A+1)
 
-@d label_node 24 /* represents a link to a another location */
+@d label_node hitex_ext+17 /* represents a link to a another location */
 @d label_node_size 2
 @d label_has_name(A)  type(A+1) /* 1 for a name , 0 for a number */
 @d label_where(A)  subtype(A+1) /* 1 for top, 2 for bot, 3 for mid */
 @d label_ptr(A) link(A+1) /* for a name the token list or the number */
 @d label_ref(A) link(A+1) /*alternatively the label number */
 
-@d start_link_node 25 /* represents a link to a another location */
-@d end_link_node 26 /* represents a link to a another location */
+@d start_link_node hitex_ext+18 /* represents a link to a another location */
+@d end_link_node hitex_ext+19 /* represents a link to a another location */
 @d link_node_size 2 /* second word like a |label_node| */
 
-@d outline_node 27 /* represents an outline item */
+@d outline_node hitex_ext+20 /* represents an outline item */
 @d outline_node_size 4 /* second word like a |label_node| */
 @d outline_ptr(A)   link(A+2) /* text to be displayed */
 @d outline_depth(A) mem[A+3].i /* depth of sub items */
@@ -2242,11 +2253,11 @@ case vpack_node:
 case hset_node:
 case vset_node:
 case align_node: @+break;@#
-case image_node: break; /* see section~\secref{imageext}, page~\pageref{imageext} */
-case label_node: /* see section~\secref{linkext}, page~\pageref{linkext} */
+case image_node: break;
+case label_node:
 case outline_node:
 case start_link_node: case end_link_node: @+break;@#
-case setpage_node: break; /* see section~\secref{pageext}, page~\pageref{pageext} */
+case setpage_node: break;
 case stream_node:
 case setstream_node:
 case stream_before_node:
@@ -2288,11 +2299,12 @@ case par_node: print_esc("parameter ");
   print_char(':');print_int(par_value(p).i);
   break;
 case graf_node: print_esc("paragraf(");
+  print_xdimen(graf_extent(p));
+  print(", ");
   print_int(graf_penalty(p));
   print_char(')');
   node_list_display(graf_params(p));
   node_list_display(graf_list(p));
-  print_xdimen(graf_extent(p));
   break;
 case disp_node: print_esc("display ");
   node_list_display(display_eqno(p));
@@ -2356,6 +2368,21 @@ case start_link_node:
   break;
 case end_link_node:
   print_esc("endlink ");
+  break;
+case label_node:
+  print_esc("dest ");
+  print_label(p);
+  if (label_where(p)==1) print("top");
+  else if (label_where(p)==2) print("bot");
+  else if (label_where(p)==3) print("mid");
+  else print("undefined");
+  break;
+case outline_node:
+  print_esc("outline");
+  print_label(p);
+  print(" depth "); print_int(outline_depth(p));
+  if (outline_ptr(p)==null) print("{}"); else
+  { print_ln();print_current_string();node_list_display(outline_ptr(p));}
   break;
 case stream_node:
   print_esc("stream");print_int(stream_insertion(p));
@@ -2583,17 +2610,9 @@ if (subtype(p)==image_node)
 @z
 
 @x
-switch (subtype(p)) {
-case open_node: case write_node: case close_node: @<Do some work that has been queued
-up for \.{\\write}@>@;@+break;
 case special_node: special_out(p);@+break;
-case language_node: do_nothing;@+break;
-default:confusion("ext4");
-@:this can't happen ext4}{\quad ext4@>
-}
 @y
-if (subtype(p)==open_node||subtype(p)==write_node||subtype(p)==close_node)
-@<Do some work that has been queued up for \.{\\write}@>@;
+case special_node: do_nothing;@+break;
 @z
 
 @x

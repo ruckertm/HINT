@@ -18,7 +18,7 @@
 
 #include <jni.h>
 #include <android/log.h>
-
+#include <string.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <sys/stat.h>
@@ -31,8 +31,8 @@ extern "C" {
 #include <android/bitmap.h>
 #include "basetypes.h"
 #include "error.h"
-#include "hformat.h"
-#include "hget.h"
+#include "format.h"
+#include "get.h"
 #include "hint.h"
 #include "hrender.h"
 #include "rendernative.h"
@@ -142,8 +142,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_begin(JNIEnv *env, jclass obj, jint fileDesc
      fd=fileDescriptor;
      HINT_TRY {
         hint_end();
-        hint_clear_fonts(true);
-        hint_begin();
+        if (!hint_begin()) strcpy(herror_string,"ERROR: This is not a version 1.3 HINT file");
     }HINT_CATCH("begin");
 }
 
@@ -152,7 +151,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, 
                                            jdouble xdpi, jdouble ydpi) {
     LOGI("hint_resize(width=%d height=%d xdpi=%f ydpi=%f))\n", width, height, xdpi, ydpi);
     HINT_TRY {
-    hint_resize(width, height, xdpi);
+    hint_resize(width, height, xdpi,ydpi);
     hint_page();
     }HINT_CATCH("resize");
 }
@@ -174,7 +173,9 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_singleTap(JNIEnv *env, jclass obj, jdouble x
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_draw(JNIEnv *env, jclass obj) {
     LOGI("hint_render\n");
-    HINT_TRY hint_render();HINT_CATCH("render");
+    HINT_TRY
+    hint_render();
+    HINT_CATCH("render");
 }
 
 #if 0
@@ -235,13 +236,13 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_zoom(JNIEnv *env, jclass obj) {
     extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_next(JNIEnv *env, jclass obj) {
     LOGI("hint_next_page\n");
-    HINT_TRY hint_next_page();HINT_CATCH("next");
+    HINT_TRY hint_page_next();HINT_CATCH("next");
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_prev(JNIEnv *env, jclass obj) {
     LOGI("hint_prev_page\n");
-    HINT_TRY hint_prev_page();HINT_CATCH("prev");
+    HINT_TRY hint_page_prev();HINT_CATCH("prev");
 }
 
 extern "C" JNIEXPORT jlong JNICALL
@@ -263,14 +264,13 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_setPos(JNIEnv *env, jclass obj, jlong pos) {
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_setMode(JNIEnv *env, jclass obj, jboolean mode) {
-    if (mode) nativeSetDark(true);
-    else nativeSetDark(false);
+    nativeSetDark(mode);
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_home(JNIEnv *env, jclass obj) {
     // go to home page
     LOGI("hint_home_page()\n");
-    HINT_TRY hint_home_page();HINT_CATCH("home page");
+    HINT_TRY hint_page_home();HINT_CATCH("home page");
 }
 

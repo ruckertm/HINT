@@ -59,9 +59,9 @@ add_library(hintview SHARED
         rendergl.cpp
         stb_image.cpp
         hfonts.c
-        hformat.c
-        hget.c
+        tables.c
         htex.c
+        get.c
         hrender.c
         hint.c
         )

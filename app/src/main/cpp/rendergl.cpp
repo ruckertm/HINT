@@ -33,8 +33,6 @@ extern "C" {
 
 
 #define min(X, Y) ((X)<(Y)?(X):(Y))
-#define DARK_MODE 1
-#define LIGHT_MODE 0
 
 #define  LOG_TAG    "glrender"
 #define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
@@ -199,7 +197,7 @@ extern "C" void nativeInit(void) {
     glUseProgram(gProgram);
 
     mkRuleTexture();
-    hint_clear_fonts(false);
+    hint_clear_fonts(true);
 #if 0
     GLfloat mv[4];
     glGetFloatv(GL_MAX_VIEWPORT_DIMS,mv);
@@ -219,21 +217,21 @@ extern "C" void nativeInit(void) {
     LOGI("nativeInit done\n");
 }
 
-static GLfloat curfr, curfg, curfb;
+static GLfloat curfr=0.0f, curfg=0.0f, curfb=0.0f;
 static uint8_t last_style=0;
 static void nativeSetColors(GLfloat fr, GLfloat fg, GLfloat fb, GLfloat br, GLfloat bg, GLfloat bb)
 /* set foreground and background rgb colors */
 {
     glClearColor(br, bg, bb, 1.0f);
     curfr=fr; curfg=fg; curfb=fb;
-    glUniform4f(ourColorLocation, fr, fg, fb, 0.0f);
+    glUniform4f(ourColorLocation, fr, fg, fb, 1.0f);
 }
 
 extern "C" void nativeSetDark(int dark) {
     LOGI("SetDark %d GL Graphics\n", dark);
 
     if (dark) {
-        nativeSetColors(1.0f, 1.0f, 0.9f, 0.0f, 0.0f, 0.1f);
+        nativeSetColors(1.0f, 1.0f, 0.95f, 0.0f, 0.0f, 0.05f);
     } else {
         nativeSetColors(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
     }
@@ -242,7 +240,7 @@ extern "C" void nativeSetDark(int dark) {
 static int cur_h=600, cur_v=800;
 static float pt_h=600.0, pt_v=800.0;
 
-extern "C" void nativeSetSize(int px_h, int px_v, double dpi)
+extern "C" void nativeSetSize(int px_h, int px_v, double xdpi, double ydpi)
 /* Given the size of the output area px_h,px_v in pixel and the resolution in dpi,
    make sure the projection is set up properly.
  */
@@ -250,8 +248,8 @@ extern "C" void nativeSetSize(int px_h, int px_v, double dpi)
     int ourProjectionLocation;
 
     /* convert pixel to point */
-    pt_h = px_h * 72.27 / dpi;
-    pt_v = px_v * 72.27 / dpi;
+    pt_h = px_h * 72.27 / xdpi;
+    pt_v = px_v * 72.27 / ydpi;
     /* convert point to scaled point*/
     page_h = round(pt_h * (1 << 16));
     page_v = round(pt_v * (1 << 16));
@@ -280,7 +278,7 @@ extern "C" void nativeSetSize(int px_h, int px_v, double dpi)
 }
 
 
-static void GLtexture(gcache_t *g) {
+static void GLtexture(Gcache *g) {
     unsigned GLtex;
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     checkGlError("glPixelStorei");
@@ -319,7 +317,7 @@ void nativeSetFreeType(struct gcache_s*g)
 {GLtexture(g);}
 
 
-void nativeFreeGlyph(gcache_t *g)
+void nativeFreeGlyph(Gcache *g)
 /* Free resources associated with g. */
 {
     if (g->GLtexture != 0) {
@@ -353,13 +351,13 @@ extern "C" void  nativeGlyph(double x,double dx,double y,double dy,double w,doub
     checkGlError("glVertexAttribPointer");
     if (s!=last_style)
     { if (s&FOCUS_BIT)
-            glUniform4f(ourColorLocation, 0.0f, 1.0f, 0.0f, 0.0f);
+            glUniform4f(ourColorLocation, 0.0f, 1.0f, 0.0f, 1.0f);
         else if (s&MARK_BIT)
-            glUniform4f(ourColorLocation, 1.0f, 0.0f, 0.0f, 0.0f);
+            glUniform4f(ourColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
         else if (s&LINK_BIT)
-            glUniform4f(ourColorLocation, 0.0f, 0.0f, 1.0f, 0.0f);
+            glUniform4f(ourColorLocation, 0.0f, 0.0f, 1.0f, 1.0f);
         else
-           glUniform4f(ourColorLocation, curfr, curfg,curfb, 0.0f);
+           glUniform4f(ourColorLocation, curfr, curfg,curfb, 1.0f);
         last_style=s;
     }
     glDrawArrays(GL_TRIANGLES, 0, 6);

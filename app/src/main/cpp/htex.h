@@ -1,5 +1,5 @@
-/*1409:*/
-#line 2605 "htex.ch"
+/*1410:*/
+#line 2624 "htex.ch"
 
 #define banner "This is TeX, Version 3.141592653 (HINT)" \
 
@@ -1586,7 +1586,8 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define open_area(A) info(A+2) 
 #define open_ext(A) link(A+2)  \
 
-#define par_node 6
+#define hitex_ext language_node+1
+#define par_node hitex_ext
 #define par_node_size 3
 #define par_type(A) type(A+1) 
 #define int_type 0
@@ -1595,14 +1596,14 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define par_number(A) subtype(A+1) 
 #define par_value(A) mem[A+2] \
 
-#define graf_node 7
+#define graf_node hitex_ext+1
 #define graf_node_size 5
 #define graf_penalty(A) mem[A+1].i
 #define graf_extent(A) link(A+3) 
 #define graf_params(A) info(A+4) 
 #define graf_list(A) link(A+4)  \
 
-#define disp_node 8
+#define disp_node hitex_ext+2
 #define disp_node_size 3
 #define display_left(A) type(A+1) 
 #define display_no_bs(A) subtype(A+1) 
@@ -1610,11 +1611,11 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define display_formula(A) link(A+2) 
 #define display_eqno(A) info(A+2)  \
 
-#define baseline_node 9
+#define baseline_node hitex_ext+3
 #define baseline_node_size small_node_size
 #define baseline_node_no(A) mem[A+1].i \
 
-#define image_node 10
+#define image_node hitex_ext+4
 #define image_node_size 9
 #define image_width(A) width(A) 
 #define image_height(A) height(A) 
@@ -1628,15 +1629,15 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define image_area(A) info(A+8) 
 #define image_ext(A) link(A+8)  \
 
-#define hpack_node 12
-#define vpack_node 13
+#define hpack_node hitex_ext+5
+#define vpack_node hitex_ext+6
 #define pack_node_size box_node_size
 #define pack_m(A) type(A+list_offset) 
 #define pack_limit(A) mem[(A) +1+list_offset].sc
 #define pack_extent(A) link(A+2+list_offset)  \
 
-#define hset_node 14
-#define vset_node 15
+#define hset_node hitex_ext+7
+#define vset_node hitex_ext+8
 #define set_node_size box_node_size
 #define set_stretch_order glue_sign
 #define set_shrink_order glue_order
@@ -1644,7 +1645,7 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define set_extent(A) pack_extent(A) 
 #define set_shrink(A) mem[(A) +3+list_offset].sc \
 
-#define align_node 16
+#define align_node hitex_ext+9
 #define align_node_size 4
 #define align_extent(A) link(A+2) 
 #define align_m(A) type(A+2) 
@@ -1652,7 +1653,7 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define align_preamble(A) info(A+3) 
 #define align_list(A) link(A+3)  \
 
-#define setpage_node 17
+#define setpage_node hitex_ext+10
 #define setpage_node_size 6
 #define setpage_name(A) link(A+1) 
 #define setpage_number(A) type(A+1) 
@@ -1665,7 +1666,7 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define setpage_list(A) info(A+5) 
 #define setpage_streams(A) link(A+5)  \
 
-#define setstream_node 18
+#define setstream_node hitex_ext+11
 #define setstream_node_size 6
 #define setstream_number(A) type(A+1) 
 #define setstream_insertion(A) subtype(A+1) 
@@ -1680,38 +1681,38 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define setstream_before(A) info(A+5) 
 #define setstream_after(A) link(A+5)  \
 
-#define stream_node 19
+#define stream_node hitex_ext+12
 #define stream_node_size 2
 #define stream_number(A) type(A+1) 
 #define stream_insertion(A) subtype(A+1)  \
 
-#define stream_after_node 20
-#define stream_before_node 21 \
+#define stream_after_node hitex_ext+13
+#define stream_before_node hitex_ext+14 \
 
-#define xdimen_node 22
+#define xdimen_node hitex_ext+15
 #define xdimen_node_size 4
 #define xdimen_ref_count(A) link(A) 
 #define xdimen_width(A) mem[A+1].sc
 #define xdimen_hfactor(A) mem[A+2].sc
 #define xdimen_vfactor(A) mem[A+3].sc \
 
-#define ignore_node 23
+#define ignore_node hitex_ext+16
 #define ignore_node_size small_node_size
 #define ignore_info(A) type(A+1) 
 #define ignore_list(A) link(A+1)  \
 
-#define label_node 24
+#define label_node hitex_ext+17
 #define label_node_size 2
 #define label_has_name(A) type(A+1) 
 #define label_where(A) subtype(A+1) 
 #define label_ptr(A) link(A+1) 
 #define label_ref(A) link(A+1)  \
 
-#define start_link_node 25
-#define end_link_node 26
+#define start_link_node hitex_ext+18
+#define end_link_node hitex_ext+19
 #define link_node_size 2 \
 
-#define outline_node 27
+#define outline_node hitex_ext+20
 #define outline_node_size 4
 #define outline_ptr(A) link(A+2) 
 #define outline_depth(A) mem[A+3].i \
@@ -1725,7 +1726,7 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define end_write_token cs_token_flag+end_write \
 
 
-#line 2606 "htex.ch"
+#line 2625 "htex.ch"
 
 enum{/*11:*/
 #line 355 "btex.w"
@@ -1769,7 +1770,7 @@ file_name_size= 1024,
 empty_string= 256
 
 /*:11*/
-#line 2607 "htex.ch"
+#line 2626 "htex.ch"
 };
 /*18:*/
 #line 495 "btex.w"
@@ -1790,14 +1791,14 @@ typedef int32_t pool_pointer;
 typedef int16_t str_number;
 typedef uint8_t packed_ASCII_code;
 
-/*:38*//*103:*/
+/*:38*//*104:*/
 #line 2126 "btex.w"
 
 typedef int scaled;
 typedef int32_t nonnegative_integer;
 typedef int8_t small_number;
 
-/*:103*//*112:*/
+/*:104*//*113:*/
 #line 2320 "btex.w"
 
 #if __SIZEOF_FLOAT__==4
@@ -1807,7 +1808,7 @@ typedef float float32_t;
 #endif
 typedef float glue_ratio;
 
-/*:112*//*116:*/
+/*:113*//*117:*/
 #line 2429 "btex.w"
 
 typedef uint8_t quarterword;
@@ -1835,17 +1836,17 @@ four_quarters qqqq;
 };}memory_word;
 typedef struct{FILE*f;memory_word d;}word_file;
 
-/*:116*//*154:*/
+/*:117*//*155:*/
 #line 3152 "btex.w"
 
 typedef int8_t glue_ord;
 
-/*:154*//*220:*/
+/*:155*//*221:*/
 #line 4309 "btex.w"
 
 typedef struct{int16_t mode_field;
 pointer head_field,tail_field;
-#line 688 "htex.ch"
+#line 698 "htex.ch"
 int pg_field;
 pointer bs_field,ls_field;
 scaled lsl_field;
@@ -1858,12 +1859,12 @@ uint32_t np_field;
 memory_word aux_field;
 }list_state_record;
 
-/*:220*//*278:*/
+/*:221*//*279:*/
 #line 5881 "btex.w"
 
 typedef int8_t group_code;
 
-/*:278*//*309:*/
+/*:279*//*310:*/
 #line 6457 "btex.w"
 
 typedef struct{
@@ -1871,29 +1872,29 @@ quarterword state_field,index_field;
 halfword start_field,loc_field,limit_field,name_field;
 }in_state_record;
 
-/*:309*//*557:*/
+/*:310*//*558:*/
 #line 10727 "btex.w"
 
 typedef uint8_t internal_font_number;
 typedef uint16_t font_index;
 
-/*:557*//*604:*/
+/*:558*//*605:*/
 #line 11900 "btex.w"
 
 typedef int8_t dvi_index;
 
-/*:604*//*943:*/
+/*:605*//*944:*/
 #line 18120 "btex.w"
 
 typedef uint16_t trie_pointer;
 
-/*:943*//*948:*/
+/*:944*//*949:*/
 #line 18186 "btex.w"
 
 typedef int16_t hyph_pointer;
 
-/*:948*/
-#line 2608 "htex.ch"
+/*:949*/
+#line 2627 "htex.ch"
 
 extern void list_init(void);
 extern void hpack_page(void);
@@ -1921,7 +1922,7 @@ extern int*const char_base;
 extern int*const width_base;
 extern memory_word font_info[];
 extern scaled*const font_size;
-#line 2622 "htex.ch"
+#line 2641 "htex.ch"
 extern char**const font_name;
 extern void hclear_fonts(void);
 extern void read_font_info(int f,char*nom,scaled s);
@@ -1932,7 +1933,7 @@ extern pointer lo_mem_max;
 extern pointer hi_mem_min;
 extern memory_word*const mem;
 extern pointer just_box;
-#line 2630 "htex.ch"
+#line 2649 "htex.ch"
 extern void append_to_vlist(pointer b,uint32_t offset);
 #line 25035 "btex.w"
 extern pointer adjust_tail;
@@ -1953,5 +1954,5 @@ extern int nest_ptr;
 extern void pop_nest(void);
 extern void push_nest(void);
 extern void delete_glue_ref(pointer p);
-#line 2636 "htex.ch"
-void line_break(int final_widow_penalty,pointer par_ptr);/*:1409*/
+#line 2655 "htex.ch"
+void line_break(int final_widow_penalty,pointer par_ptr);/*:1410*/

@@ -1,8 +1,10 @@
-	/*501:*/
-	#line 9832 "format.w"
+	/*503:*/
+	#line 9953 "format.w"
 
 #ifndef __BASETYPES_H__
 #define __BASETYPES_H__
+#define _POSIX_C_SOURCE 200809L
+#define _XOPEN_SOURCE 600
 #include <stdlib.h>
 #include <stdio.h>
 #ifndef _STDLIB_H
@@ -22,7 +24,6 @@
 #define false (!true)
 #define __SIZEOF_FLOAT__ 4
 #define __SIZEOF_DOUBLE__ 8
-#define INT32_MAX              (2147483647)
 #define PRIx64 "I64x"
 #pragma  warning( disable : 4244 4996 4127)
 #else
@@ -43,4 +44,4 @@ typedef double float64_t;
 #error  float64 type must have size 8
 #endif
 #endif
-	/*:501*/
+	/*:503*/
