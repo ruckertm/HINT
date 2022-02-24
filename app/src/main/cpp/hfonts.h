@@ -1,18 +1,18 @@
-/*374:*/
-#line 7592 "hint.w"
+/*375:*/
+#line 7598 "hint.w"
 
 #ifndef _HFONTS_H
 #define _HFONTS_H
 
 /*306:*/
-#line 5694 "hint.w"
+#line 5722 "hint.w"
 
 typedef enum{no_format,pk_format,ft_format}FontFormat;
 /*:306*//*307:*/
-#line 5706 "hint.w"
+#line 5734 "hint.w"
 
-/*338:*/
-#line 6679 "hint.w"
+/*339:*/
+#line 6681 "hint.w"
 
 
 typedef struct
@@ -21,20 +21,20 @@ unsigned int cs;
 double ds;
 unsigned char id;
 }PKfont;
-/*:338*//*350:*/
-#line 7010 "hint.w"
+/*:339*//*351:*/
+#line 7012 "hint.w"
 
 typedef struct
 {FT_Face face;
 }FTfont;
-/*:350*//*351:*/
-#line 7017 "hint.w"
+/*:351*//*352:*/
+#line 7019 "hint.w"
 
 typedef struct
 {int dummy;
 }FTglyph;
-/*:351*/
-#line 5707 "hint.w"
+/*:352*/
+#line 5735 "hint.w"
 
 
 typedef struct font_s{
@@ -43,32 +43,32 @@ unsigned char*font_data;
 int data_size;
 double s;
 double hpxs,vpxs;
-/*312:*/
-#line 5794 "hint.w"
+/*313:*/
+#line 5829 "hint.w"
 
 struct gcache_s**g0;
 struct gcache_s***g1;
 struct gcache_s****g2;
 struct gcache_s*****g3;
 
-/*:312*/
-#line 5715 "hint.w"
+/*:313*/
+#line 5743 "hint.w"
 
 FontFormat ff;
 union{PKfont pk;FTfont tt;};
 }Font;
-/*:307*//*317:*/
-#line 6006 "hint.w"
+/*:307*//*318:*/
+#line 6041 "hint.w"
 
-/*339:*/
-#line 6692 "hint.w"
+/*340:*/
+#line 6694 "hint.w"
 
 typedef struct
 {unsigned char flag;
 unsigned char*encoding;
 }PKglyph;
-/*:339*//*341:*/
-#line 6719 "hint.w"
+/*:340*//*342:*/
+#line 6721 "hint.w"
 
 typedef struct{
 int j;
@@ -76,8 +76,8 @@ int r;
 int f;
 unsigned char*data;
 }PKparse;
-/*:341*/
-#line 6007 "hint.w"
+/*:342*/
+#line 6042 "hint.w"
 
 
 struct gcache_s{
@@ -92,10 +92,10 @@ FTglyph tt;
 };
 };
 typedef struct gcache_s Gcache;
-/*:317*/
-#line 7596 "hint.w"
+/*:318*/
+#line 7602 "hint.w"
 
 
 
 #endif
-/*:374*/
+/*:375*/

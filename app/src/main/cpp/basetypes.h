@@ -1,10 +1,8 @@
-	/*503:*/
-	#line 9953 "format.w"
+	/*511:*/
+	#line 10402 "format.w"
 
 #ifndef __BASETYPES_H__
 #define __BASETYPES_H__
-#define _POSIX_C_SOURCE 200809L
-#define _XOPEN_SOURCE 600
 #include <stdlib.h>
 #include <stdio.h>
 #ifndef _STDLIB_H
@@ -43,5 +41,7 @@ typedef double float64_t;
 #if __SIZEOF_DOUBLE__!=8
 #error  float64 type must have size 8
 #endif
+#define HINT_VERSION 1
+#define HINT_SUB_VERSION 4
 #endif
-	/*:503*/
+	/*:511*/

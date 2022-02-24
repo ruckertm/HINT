@@ -27,8 +27,8 @@
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 2637 ${}$}
-\def\lastdate{${}$Date: 2022-01-11 15:05:20 +0100 (Tue, 11 Jan 2022) ${}$}
+\def\lastrevision{${}$Revision: 2693 ${}$}
+\def\lastdate{${}$Date: 2022-02-23 16:30:43 +0100 (Wed, 23 Feb 2022) ${}$}
 
 \input titlepage.tex
 
@@ -671,15 +671,28 @@ ParamDef *hget_param_list_ref(uint8_t n)
 @
 
 Finaly, here are two functions that set and restore global parameters
-based on a parameter list.
-Parameter lists are actually not nested, because every parameter list records
-the differences of the parameter settings compared to the settings in the
-definition section. Still there are situations where we want to combine two
-parameter settings. The parameters for displayed equations and for line breaking
-of a paragraph are disjoint sets. Since displayed equations are embedded in paragraphs,
-we want to set and restore the parameter settings for the displayed equation
-without affecting the settings for line breaking. To do so, we use the special kind value |0xFF|
-to record the boundary between two sets of parameters on the |par_save| stack.
+based on a parameter list.  Parameter lists are actually not nested,
+because every parameter list records the differences of the parameter
+settings compared to the settings in the definition section. Still
+there are situations where we want to combine two parameter
+settings. The parameters for displayed equations and for line breaking
+of a paragraph are disjoint sets. Since displayed equations are
+embedded in paragraphs, we want to set and restore the parameter
+settings for the displayed equation without affecting the settings for
+line breaking. To do so, we use the special kind value |0xFF| to
+record the boundary between two sets of parameters on the |par_save|
+stack.
+
+There are two cases to distinguish: If the parameter list is
+given by a reference to the definition section, we have to increase
+the reference counts for glues. If the parameter list is given explicitely,
+the newly created glue nodes already have the correct reference count.
+Currently, we do neither increase reference counts nor decrease them
+after use. This means that glues might get deallocated while still
+set as a global parameter and that glues on an explicit parameter list
+are never deallocated after use and hence cause a memory leak.
+Fortunately, up to now, parameter lists allocated by hitex
+are most probably predefined; still this needs to be fixed.
 
 @<\HINT\ auxiliar functions@>=
 #define MAX_SAVE 100
@@ -979,16 +992,6 @@ Now comes the top level function to fill a template:
 @<\HINT\ functions@>=
 void hfill_page_template(void)
 { pointer p;
-#if 0
-     print_str("\npage_head:\n");
-     show_box(link(page_head));
-     print_str("\nstream 0:\n");
-     show_box(streams[0].p);
-     print_str("\nstream 1:\n");
-     show_box(streams[1].p);
-     print_str("\ncontributions:\n");
-     show_box(link(contrib_head));
-#endif
   if (cur_page->t!=0)
   {
     uint8_t *spos=hpos, *sstart=hstart, *send=hend;
@@ -997,11 +1000,12 @@ void hfill_page_template(void)
     p=hget_list_pointer();
     hpos=spos,hstart=sstart,hend=send;
     if (streams[0].p!=null) flush_node_list(streams[0].p);
-    streams[0].p=streams[0].t=null;
-    streams[0].p=vpackage(p,page_v,exactly,page_max_depth);
   }
   else
-  houtput_template0();
+  { p =streams[0].p;
+  }
+  streams[0].p=streams[0].t=null;
+  houtput_template(p);
   hmark_page();
 }
 @
@@ -3071,26 +3075,17 @@ and counting up. We partly reverse this process here by mapping the
 stream number $n$ to the insertion number $255-n$.
 
 We start with a function to set fields of the insertion node from a
-parameter list. There are two cases to distinguish: If the parameter list is
-given by a reference to the definition section, we have to increase
-the reference counts for glues. If the parameter list is given explicitely,
-the newly created glue nodes already have the correct reference count.
-The function parameter  |f| is set to |true| in the latter case.
+parameter list. 
 
 @<\HINT\ auxiliar functions@>=
-static void hset_stream_params(pointer p,bool f, ParamDef *q)
-{ ParamDef *r;
-  pointer s;
-  while (q!=null)
-  { r=q;
-    if (q->p.k==int_kind && q->p.n==floating_penalty_no) float_cost(p)=q->p.v;
-    else if (q->p.k==dimen_kind && q->p.n==split_max_depth_no) depth(p)=(scaled)q->p.v;
-    else if (q->p.k==glue_kind && q->p.n==split_top_skip_no)  
-    { split_top_ptr(p)=(pointer)q->p.v; if (!f) add_glue_ref(split_top_ptr(p)); }
-    else QUIT("Unexpected parameter in stream");
-    q=q->next;
-    if (f) free(r);
-  }
+static void hset_stream_params(pointer p, ParamDef *q)
+{ pointer s;
+  hset_param_list(q);
+  float_cost(p)=integer_def[floating_penalty_no];
+  depth(p)=dimen_def[split_max_depth_no];
+  split_top_ptr(p)= pointer_def[glue_kind][split_top_skip_no];
+  add_glue_ref(split_top_ptr(p));
+  hrestore_param_list();
   s =vpack(ins_ptr(p),natural);
   height(p)=height(s)+depth(s);
   ins_ptr(p)=list_ptr(s);
@@ -3106,7 +3101,7 @@ static void hset_stream_params(pointer p,bool f, ParamDef *q)
   subtype(p)=HGET8;@+RNG("Stream",subtype(p),1,254); \
   if ((I)&b010) q=hget_param_list_node(); else q=hget_param_list_ref(HGET8); \
   ins_ptr(p)=hget_list_pointer(); \
-  if ((I)&b010) hset_stream_params(p,true,q); else hset_stream_params(p,false,q);\
+  hset_stream_params(p,q); \
   tail_append(p);}
 @
 
@@ -3114,8 +3109,8 @@ static void hset_stream_params(pointer p,bool f, ParamDef *q)
 #define @[HTEG_STREAM(I)@] @/\
 {pointer p=get_node(ins_node_size); type(p)=ins_node;\
  ins_ptr(p)=hteg_list_pointer();\
- if ((I)&b010) {ParamDef *q=hteg_param_list_node();  hset_stream_params(p,true,q);}\
- else {ParamDef *q=hget_param_list_ref(HTEG8);  hset_stream_params(p,false,q);}\
+ if ((I)&b010) {ParamDef *q=hteg_param_list_node();  hset_stream_params(p,q);}\
+ else {ParamDef *q=hget_param_list_ref(HTEG8);  hset_stream_params(p,q);}\
  subtype(p)=HTEG8;@+RNG("Stream",subtype(p),1,254);\
  tail_append(p);}
 @
@@ -3133,32 +3128,52 @@ case TAG(stream_kind,b010): HTEG_STREAM(b010); @+ break;
 \subsection{Images}
 @<GET macros@>=
 #define @[HGET_IMAGE(I)@] @/\
-{ @+pointer p;\
-  p=get_node(image_node_size);  type(p)=whatsit_node; subtype(p)=image_node;\
-  HGET16(image_no(p));RNG("Section number",image_no(p),3,max_section_no);  \
-  if (I&b010) {@+HGET32(image_width(p)); @+HGET32(image_height(p));@+} \
-  else image_width(p)=image_height(p)=0;\
-  if (I&b001) {HGET_STRETCH(image_stretch(p),image_stretch_order(p)); \
-               HGET_STRETCH(image_shrink(p),image_shrink_order(p));@+}\
-  else { image_stretch(p)=image_shrink(p)=0;image_stretch_order(p)=image_shrink_order(p)=normal;@+}\
-  tail_append(p);}
+{@+pointer p; float32_t a=0.0; scaled w,h;\
+p=get_node(image_node_size);  type(p)=whatsit_node; subtype(p)=image_node;\
+HGET16(image_no(p));RNG("Section number",image_no(p),3,max_section_no);  \
+if ((I)&b100) { a=hget_float32();\
+  if ((I)==b111) {w=hget_xdimen_node();h=hget_xdimen_node();}\
+  else if ((I)==b110) {h=hget_xdimen_ref(HGET8);w=hget_xdimen_node();}\
+  else if ((I)==b101) {w=hget_xdimen_ref(HGET8);h=hget_xdimen_node();}\
+  else  {w=hget_xdimen_ref(HGET8);h=hget_xdimen_ref(HGET8);}\
+  if (a!=0.0) { if (h==0) h=round(w/a); else if (w==0) w=round(h*a);\
+  else if (w>round(h*a)) w=round(h*a); else if (h>round(w/a)) h=round(w/a);}}\
+else if((I)==b011) {HGET32(w);HGET32(h);} \
+else if((I)==b010) { a=hget_float32(); HGET32(w); h=round(w/a);}\
+else if((I)==b001){ a=hget_float32(); HGET32(h); w=round(h*a);}\
+if (w==0 || h==0) QUIT("Incomplete dimensions in image %d",image_no(p));\
+image_width(p)=w; image_height(p)=h;\
+image_alt(p)=hget_list_pointer();\
+tail_append(p);}
 @
 
 @<TEG macros@>=
 #define @[HTEG_IMAGE(I)@] @/\
-{ @+pointer p;\
-  p=get_node(image_node_size);  type(p)=whatsit_node; subtype(p)=image_node;\
-  if (I&b001) {HTEG_STRETCH(image_shrink(p),image_shrink_order(p));\
-               HTEG_STRETCH(image_stretch(p),image_stretch_order(p)); @+}\
-  else { image_stretch(p)=image_shrink(p)=0;image_stretch_order(p)=image_shrink_order(p)=normal;@+}\
-  if (I&b010) {@+@+HTEG32(image_height(p)); HTEG32(image_width(p)); @+} \
-  else image_width(p)=image_height(p)=0;\
-  HTEG16(image_no(p));RNG("Section number",image_no(p),3,max_section_no);  \
-  tail_append(p);}
+{ @+pointer p; float32_t a=0.0; scaled w,h;\
+p=get_node(image_node_size);  type(p)=whatsit_node; subtype(p)=image_node;\
+image_alt(p)=hteg_list_pointer();\
+if ((I)&b100) {\
+  if ((I)==b111) {h=hteg_xdimen_node();w=hteg_xdimen_node();}\
+  else if ((I)==b110) {w=hteg_xdimen_node();h=hget_xdimen_ref(HTEG8);}\
+  else if ((I)==b101) {h=hteg_xdimen_node();w=hget_xdimen_ref(HTEG8);}\
+  else  {h=hget_xdimen_ref(HTEG8);w=hget_xdimen_ref(HTEG8);}\
+  a=hteg_float32();\
+  if (a!=0.0) { if (h==0) h=round(w/a); else if (w==0) w=round(h*a);\
+  else if (w>round(h*a)) w=round(h*a); else if (h>round(w/a)) h=round(w/a); }}\
+else if((I)==b011) {HTEG32(h);HTEG32(w);} \
+else if((I)==b010) {  HTEG32(w); a=hteg_float32(); h=round(w/a);}\
+else if((I)==b001){ HTEG32(h); a=hteg_float32();  w=round(h*a);}\
+HTEG16(image_no(p));RNG("Section number",image_no(p),3,max_section_no);  \
+if (w==0 || h==0) QUIT("Incomplete dimensions in image %d",image_no(p));\
+image_width(p)=w; image_height(p)=h;\
+tail_append(p);}
 @
 
 @<cases to get content@>=
 case TAG(image_kind,b000): @+ hget_image_ref(HGET8); @+break;
+case TAG(image_kind,b001): @+ HGET_IMAGE(b001);@+break;
+case TAG(image_kind,b010): @+ HGET_IMAGE(b010);@+break;
+case TAG(image_kind,b011): @+ HGET_IMAGE(b011);@+break;
 case TAG(image_kind,b100): @+ HGET_IMAGE(b100);@+break;
 case TAG(image_kind,b101): @+ HGET_IMAGE(b101);@+break;
 case TAG(image_kind,b110): @+ HGET_IMAGE(b110);@+break;
@@ -3166,6 +3181,9 @@ case TAG(image_kind,b111): @+ HGET_IMAGE(b111);@+break;
 @
 @<cases to teg content@>=
 case TAG(image_kind,b000): @+ hget_image_ref(HTEG8); @+break;
+case TAG(image_kind,b001): @+ HTEG_IMAGE(b001);@+break;
+case TAG(image_kind,b010): @+ HTEG_IMAGE(b010);@+break;
+case TAG(image_kind,b011): @+ HTEG_IMAGE(b011);@+break;
 case TAG(image_kind,b100): @+ HTEG_IMAGE(b100);@+break;
 case TAG(image_kind,b101): @+ HTEG_IMAGE(b101);@+break;
 case TAG(image_kind,b110): @+ HTEG_IMAGE(b110);@+break;
@@ -3941,6 +3959,7 @@ void hloc_set(uint64_t h)
 void hloc_set_next(pointer p)
 { @+int i=cur_loc;
   uint64_t h=hlocation(p); 
+  if (h==page_loc[cur_loc]) return;
 
   NEXT_PAGE(i);
   if (i==hi_loc) /* allocation needed */
@@ -4046,6 +4065,8 @@ int hint_begin(void)
   { hint_unmap(); return 0; }
   hget_directory();
   hget_definition_section();
+  page_v=hvsize=dimen_def[vsize_dimen_no];
+  page_h=hhsize=dimen_def[hsize_dimen_no];
   hget_content_section();
   leak_clear();
   clear_map();
@@ -4101,16 +4122,18 @@ double xdpi=600.0, ydpi=600.0;
 
 @<render functions@>=
 void hint_resize(int px_h, int px_v, double x_dpi, double y_dpi)
-{ static int old_px_h=0, old_px_v=0;
-  static double old_xdpi=0.0, old_ydpi=0.0;
+{ 
 #if 0
   /* this optimization causes the android viewer to display a blank page
      after opening a new file. To be investigated!
   */
-  if (old_px_h==px_h && old_px_v==px_v && old_xdpi==x_dpi && old_ydpi==y_dpi)
+  static int old_px_h=0, old_px_v=0;
+  static double old_xdpi=0.0, old_ydpi=0.0;
+   if (old_px_h==px_h && old_px_v==px_v && old_xdpi==x_dpi && old_ydpi==y_dpi)
     return;
+  old_px_h=px_h; old_px_v=px_v; old_xdpi=x_dpi; old_ydpi=y_dpi;
 #endif
-  old_px_h=px_h; old_px_v=px_v; old_xdpi=xdpi=x_dpi; old_ydpi=ydpi=y_dpi;
+  xdpi=x_dpi; ydpi=y_dpi;
   nativeSetSize(px_h, px_v, xdpi, ydpi);
   hloc_clear();
   hflush_contribution_list(); hpage_init();
@@ -4273,6 +4296,8 @@ until the margin becomes zero for a page that is merely 1 inch wide.
      if (hhsize>page_h) hhsize=page_h;
      hvsize=round((double)(page_v-cur_page->v.w)/(double)cur_page->v.v);
      if (hvsize>page_v) hvsize=page_v;
+     offset_h = (page_h-hhsize)/2;
+     offset_v = (page_v-hvsize)/2;
    }
 }
 @
@@ -4280,18 +4305,21 @@ until the margin becomes zero for a page that is merely 1 inch wide.
 
 
 @
-A more sophisticated page composition can be achived with page templates.
-Here is the build-in page template number 0 which attaches the margins just computed
-to the box constructed by the page builder.
+A more sophisticated page composition can be achived with page
+templates.  Here is the build-in page template number 0 which attaches
+the margins just computed to the box constructed by the page builder.
 
 @<\HINT\ auxiliar functions@>=
-static void houtput_template0(void)
-{ pointer p,q,r;
- if (streams[0].p==null) return;
-  p=streams[0].p; streams[0].p=null;
+static void houtput_template(pointer p)
+{ pointer q,r;
+ if (p==null) return;
   p=vpackage(p,hvsize,exactly,page_max_depth);
-  r=new_kern(offset_v);
-  link(r)=p;
+  if (offset_v!=0)
+  { r=new_kern(offset_v);
+    link(r)=p;
+  }
+  else
+    r=p;
   q=new_null_box();
   type(q)=vlist_node;
   width(q)=width(p)+offset_h;
@@ -5777,6 +5805,13 @@ void hint_clear_fonts(bool rm)
 }
 @
 
+We need a dummy version for our test programs.
+@<test functions@>=
+void hint_clear_fonts(bool rm)
+{return; }
+@
+
+
 
 
 
@@ -6105,9 +6140,10 @@ static void render_rule(int x, int y, int w, int h)
 @
 
 \subsection{Images}
-When we need to render an image, we should not bother the native renderer with finding the
-image data in segment |n| of the \HINT\ file. Instead we pass a pointer to the first byte and a pointer
-past the last byte. We also pass the position and size as we did for rules.
+When we need to render an image, we should not bother the native
+renderer with finding the image data in segment |n| of the \HINT\
+file. Instead we pass a pointer to the first byte and a pointer past
+the last byte. We also pass the position and size as we did for rules.
 @<render functions@>=
 void render_image(int x, int y, int w, int h, uint32_t n)
 { 
@@ -6242,23 +6278,6 @@ render_c:
        { scaled h,w;
          w=image_width(p);
          h=image_height(p);
-         if(g_sign!=normal)
-         { if(g_sign==stretching)
-           { if(image_stretch_order(p)==g_order)
-             { vet_glue((double)(glue_set(this_box))*image_stretch(p));
-               w=w+round(glue_temp);
-	     }
-	   }
-           else if(image_shrink_order(p)==g_order)
-           { vet_glue((double)(glue_set(this_box))*image_shrink(p));
-             w=w-round(glue_temp);
-           }
-         }
-         if (w!=image_width(p))
-         { double f;
-           f=(double)w/(double)image_width(p);
-           h=round((double)h*f);
-         }
          render_image(cur_h, cur_v, w, h,image_no(p));
          cur_h= cur_h+w; 
        }
@@ -6413,26 +6432,9 @@ while(p!=null)
 		{ scaled h,w;
 		  w=image_width(p);
 		  h=image_height(p);
-		  if(g_sign!=normal)
-	      { if(g_sign==stretching)
-	        { if(image_stretch_order(p)==g_order)
-	          { vet_glue((double)(glue_set(this_box))*image_stretch(p));
-       		    h=h+round(glue_temp);
-	          }
-	        }
-	        else if(image_shrink_order(p)==g_order)
-	        { vet_glue((double)(glue_set(this_box))*image_shrink(p));
-	          h=h-round(glue_temp);
-	        }
-	      }
-		  if (h!=image_height(p))
-		  { double f;
-		    f=(double)h/(double)image_height(p);
-		    w=round((double)w*f);
-		  }
 		  cur_v= cur_v+h; 
   		  render_image(cur_h, cur_v, w, h,image_no(p));
-		  }
+		}
         break;
       case glue_node:
 	  { pointer g= glue_ptr(p);rule_ht= width(g)-cur_g;
@@ -7250,15 +7252,13 @@ extern int page_h, page_v;
 @<test functions@>@;
 
 int main(int argc, char *argv[])
-{ char *stem_name=NULL;
+{ char *stem_name=NULL, *prog_name=argv[0];
   int stem_length=0;
   bool option_log=false;
   HINT_TRY {
     @<process the command line@>@;
     @<open the log file@>@;
-    hint_begin();
-    page_v=hvsize=dimen_def[vsize_dimen_no];
-    page_h=hhsize=dimen_def[hsize_dimen_no];
+    if(!hint_begin()) goto explain_usage;
     while (hint_forward())
       @<show the page@>@;
     hint_end();
@@ -7315,7 +7315,7 @@ The |usage| function explains command line\index{command line}
 parameters and options\index{option}\index{debugging}.
 @<explain usage@>=
   fprintf(stderr,
-  "Usage: %s [options] filename.hnt\n",argv[0]);@/
+  "Usage: %s [options] filename.hnt\n",prog_name);@/
   fprintf(stderr,
   "Options:\n"@/
   "\t -l     \t redirect stdout to a log file\n");@/
@@ -7323,11 +7323,17 @@ parameters and options\index{option}\index{debugging}.
 fprintf(stderr,"\t -d XXX \t hexadecimal value. OR together these values:\n");@/
 fprintf(stderr,"\t\t\t XX=%03X   basic debugging\n", DBGBASIC);@/
 fprintf(stderr,"\t\t\t XX=%03X   tag debugging\n", DBGTAGS);@/
+fprintf(stdout,"\t\t\t XX=%03X   node debugging\n",DBGNODE);@/
 fprintf(stderr,"\t\t\t XX=%03X   definition debugging\n", DBGDEF);@/
 fprintf(stderr,"\t\t\t XX=%03X   directory debugging\n", DBGDIR);@/
 fprintf(stderr,"\t\t\t XX=%03X   range debugging\n",DBGRANGE);@/
 fprintf(stderr,"\t\t\t XX=%03X   compression debugging\n", DBGCOMPRESS);@/
 fprintf(stderr,"\t\t\t XX=%03X   buffer debugging\n", DBGBUFFER);@/
+fprintf(stdout,"\t\t\t XX=%03X   TeX debugging\n", DBGTEX);@/
+fprintf(stdout,"\t\t\t XX=%03X   Page debugging\n", DBGPAGE);@/
+fprintf(stdout,"\t\t\t XX=%03X   Font debugging\n", DBGFONT);@/
+fprintf(stdout,"\t\t\t XX=%03X   Render debugging\n", DBGRENDER);@/
+fprintf(stdout,"\t\t\t XX=%03X   Label debugging\n", DBGLABEL);@/
 #endif
 @
 
@@ -7412,13 +7418,13 @@ The following code  is similar to the code for the {\tt skip} program described 
 @<test functions@>@;
 
 int main(int argc, char *argv[])
-{ char *stem_name=NULL;
+{ char *stem_name=NULL, *prog_name=argv[0];
   int stem_length=0;
   bool option_log=false;
   HINT_TRY {
     @<process the command line@>@;
     @<open the log file@>@;
-    hint_begin();
+    if(!hint_begin()) goto explain_usage;
     hpos=hend;
     while (hint_backward()) continue;
     hint_end();
