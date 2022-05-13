@@ -4,11 +4,6 @@ cmake_minimum_required(VERSION 3.4.1)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -Wno-dangling-else -Wno-format")
 set(CFLAGS "${CFLAGS} -g -Wno-dangling-else -Wno-format")
 
-# Import the CMakeLists.txt for the glm library
-add_subdirectory(glm) # if your CMakeLists is at '../cpp'
-#add_subdirectory(../src/main/cpp/glm) # if your CMakeLists is at '../app'
-
-
 # The logging library
 find_library( # Defines the name of the path variable that stores the
         # location of the NDK library.
@@ -56,7 +51,7 @@ add_library(freetype STATIC ${FT_SRCS})
 # the HINT library
 add_library(hintview SHARED
         gl_code.cpp
-        rendergl.cpp
+        rendergl.c
         stb_image.cpp
         hfonts.c
         tables.c

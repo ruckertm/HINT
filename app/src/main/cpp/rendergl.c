@@ -12,24 +12,17 @@
 #include <stdlib.h>
 #include <math.h>
 
-#if 0
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#endif
 
-extern "C" {
+
 #include "error.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include "basetypes.h"
 #include "hint.h"
 #include "hfonts.h"
 #include "hrender.h"
 #include "rendernative.h"
 #include "stb_image.h"
-
-};
 
 
 #define min(X, Y) ((X)<(Y)?(X):(Y))
@@ -53,7 +46,7 @@ static GLuint gProgram;
 static GLuint gvPositionHandle;
 static GLuint ourColorLocation, isImageLocation;
 
-auto gVertexShader =
+const char *gVertexShader =
         "#version 100\n"
         "attribute vec4 vPosition;\n"
         "varying vec2 TexCoord;\n"
@@ -63,7 +56,7 @@ auto gVertexShader =
         "  TexCoord=vec2(vPosition.z,vPosition.w);\n"
         "}\n";
 
-auto gFragmentShader =
+const char *gFragmentShader =
         "precision mediump float;\n"
         "varying vec2 TexCoord;\n"
         "uniform sampler2D ourTexture;\n"
@@ -170,7 +163,7 @@ static void mkRuleTexture() { /* the texture used for rules */
 }
 
 
-extern "C" void nativeInit(void) {
+extern void nativeInit(void) {
     LOGI("nativeInit GL Graphics\n");
 
     printGLString("Version", GL_VERSION);
@@ -227,7 +220,7 @@ static void nativeSetColors(GLfloat fr, GLfloat fg, GLfloat fb, GLfloat br, GLfl
     glUniform4f(ourColorLocation, fr, fg, fb, 1.0f);
 }
 
-extern "C" void nativeSetDark(int dark) {
+extern void nativeSetDark(int dark) {
     LOGI("SetDark %d GL Graphics\n", dark);
 
     if (dark) {
@@ -240,7 +233,7 @@ extern "C" void nativeSetDark(int dark) {
 static int cur_h=600, cur_v=800;
 static float pt_h=600.0, pt_v=800.0;
 
-extern "C" void nativeSetSize(int px_h, int px_v, double xdpi, double ydpi)
+extern void nativeSetSize(int px_h, int px_v, double xdpi, double ydpi)
 /* Given the size of the output area px_h,px_v in pixel and the resolution in dpi,
    make sure the projection is set up properly.
  */
@@ -258,10 +251,6 @@ extern "C" void nativeSetSize(int px_h, int px_v, double xdpi, double ydpi)
 
     // GL Coordinates are in points
     ourProjectionLocation = glGetUniformLocation(gProgram, "projection");
-#if 0
-    glm::mat4 projection = glm::ortho(0.0f, pt_h, pt_v, 0.0f);
-    glUniformMatrix4fv(ourProjectionLocation, 1, 0, glm::value_ptr(projection));
-#else
     GLfloat MVP[4][4]= {{0}};
     MVP[0][0]=2.0/pt_h; // x: scale to -1 to +1
     MVP[1][1]=-2.0/pt_v; // y: scale to 1 to -1
@@ -271,7 +260,6 @@ extern "C" void nativeSetSize(int px_h, int px_v, double xdpi, double ydpi)
     MVP[3][2]=0.0f; // don't care
     MVP[3][3]=1.0f; // w: identity
     glUniformMatrix4fv(ourProjectionLocation, 1, 0, &MVP[0][0]);
-#endif
     glViewport(0, 0, px_h, px_v);
     cur_h=px_h;
     cur_v=px_v;
@@ -325,7 +313,7 @@ void nativeFreeGlyph(Gcache *g)
         g->GLtexture = 0;
     }
 }
-extern "C" void  nativeGlyph(double x,double dx,double y,double dy,double w,double h,struct gcache_s*g,uint8_t s)
+extern void  nativeGlyph(double x,double dx,double y,double dy,double w,double h,struct gcache_s*g,uint8_t s)
 /* Using GL to render a character texture
    Coordinates in points, origin bottom left, x and w right, y and h up
    x,y position
@@ -365,7 +353,7 @@ extern "C" void  nativeGlyph(double x,double dx,double y,double dy,double w,doub
 }
 
 
-extern "C" void nativeRule(double x, double y, double w, double h)
+extern void nativeRule(double x, double y, double w, double h)
 /* Using GL to render a rule (a black rectangle)
    Coordinates in points, origin bottom left, x and w right, y and h up
    x,y position
@@ -388,7 +376,7 @@ extern "C" void nativeRule(double x, double y, double w, double h)
 }
 
 
-extern "C" void
+extern void
 nativeImage(double x, double y, double w, double h, unsigned char *b, unsigned char *e)
 /* new image loading function using stb_image.h as image loader.
  It follows the example of https://learnopengl.com/Getting-started/Textures
@@ -436,11 +424,11 @@ nativeImage(double x, double y, double w, double h, unsigned char *b, unsigned c
         glUniform1i(isImageLocation, 0);
         stbi_image_free(data);
     } else {
-        LOGI("Can not read image %p", *b);
+        LOGI("Can not read image %p", b);
     }
 }
 
-extern "C" void nativeBlank(void) {
+extern void nativeBlank(void) {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 }
 
@@ -452,7 +440,7 @@ static GLuint GLzoom=0;
 static GLfloat zoom_w, zoom_h;
 static unsigned int fbo;
 
-extern "C" void glZoomFB(void)
+extern void glZoomFB(void)
 {
     glGenFramebuffers(1, &fbo); // create framebuffer object
     checkGlError("glGenFramebuffers");
@@ -476,7 +464,7 @@ extern "C" void glZoomFB(void)
         LOGE("ERROR::FRAMEBUFFER:: Framebuffer is not complete!\n");
 }
 
-extern "C" void glSetZoomTexture(void)
+extern void glSetZoomTexture(void)
 {   LOGI("GL Set Zoom Texture\n");
     glGenTextures(1, &GLzoom);
     glBindTexture(GL_TEXTURE_2D, GLzoom);
