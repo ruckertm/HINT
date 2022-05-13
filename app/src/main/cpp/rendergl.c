@@ -71,31 +71,31 @@ static void checkGlError(const char *op)
 #endif
 
 static GLuint gvPositionHandle;
-static GLuint ProgramID, RuleID, GammaID, FGcolorID, IsImageID;
+static GLuint ProgramID, MatrixID, RuleID, GammaID, FGcolorID, IsImageID, ImageID=0;
 
 static const char *VertexShader =
         "#version 100\n"
         "attribute vec4 vPosition;\n"
-        "varying vec2 TexCoord;\n"
-        "uniform mat4 projection;\n"
+        "varying vec2 UV;\n"
+        "uniform mat4 MVP;\n"
         "void main() {\n"
-        "  gl_Position = projection*vec4(vPosition.x,vPosition.y,1.0,1.0);\n"
-        "  TexCoord=vec2(vPosition.z,vPosition.w);\n"
+        "  gl_Position = MVP*vec4(vPosition.x,vPosition.y,1.0,1.0);\n"
+        "  UV=vec2(vPosition.z,vPosition.w);\n"
         "}\n";
 
 static const char *FragmentShader =
         "precision mediump float;\n"
-        "varying vec2 TexCoord;\n"
+        "varying vec2 UV;\n"
         "uniform sampler2D theTexture;\n"
         "uniform vec3 FGcolor;\n"
         "uniform float Gamma;\n"
         "uniform int isImage;\n"
         "void main() {\n"
         "  if(isImage==0) { \n"
-        "     gl_FragColor.a = pow(texture2D(theTexture,TexCoord).a,Gamma);\n"
+        "     gl_FragColor.a = pow(texture2D(theTexture,UV).a,Gamma);\n"
         "     gl_FragColor.rgb = FGcolor;\n"
         "  } else {\n"
-        "     gl_FragColor = vec4(texture2D(theTexture,TexCoord));\n"
+        "     gl_FragColor = vec4(texture2D(theTexture,UV));\n"
         "  } \n"
         "}\n";
 
@@ -162,7 +162,11 @@ static void createProgram(void)
     glDeleteShader(fragmentID);
 }
 
-
+static GLfloat MVP[4][4]={
+  {0.5, 0.0, 0.0, 0.0 }, // x scale
+  {0.0, 0.5, 0.0, 0.0 }, // y scale
+  {0.0, 0.0, 0.0, 0.0 }, // z scale
+  {0.0, 0.0, 0.0, 1.0 }}; // translation x, y, z
 
 static void mkRuleTexture() { /* the texture used for rules */
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -208,11 +212,12 @@ extern void nativeInit(void) {
     glEnableVertexAttribArray(gvPositionHandle);
     checkGlError("glEnableVertexAttribArray");
 
+    MatrixID = glGetUniformLocation(ProgramID, "MVP");
     FGcolorID = glGetUniformLocation(ProgramID, "FGcolor");
     GammaID  = glGetUniformLocation(ProgramID, "Gamma");
     IsImageID = glGetUniformLocation(ProgramID, "isImage");
 
-    //int ourProjectionLocation = glGetUniformLocation(ProgramID, "projection");
+    //int MatrixID = glGetUniformLocation(ProgramID, "MVP");
     glUseProgram(ProgramID);
 
     glUniform1f(GammaID, 1.0f/2.2f);
@@ -284,19 +289,15 @@ extern void nativeSetDark(int dark) {
     }
 }
 
-static int cur_h=600, cur_v=800;
 static float pt_h=600.0, pt_v=800.0;
 
-extern void nativeSetSize(int px_h, int px_v, double xdpi, double ydpi)
+void nativeSetSize(int px_h, int px_v, double x_dpi, double y_dpi)
 /* Given the size of the output area px_h,px_v in pixel and the resolution in dpi,
    make sure the projection is set up properly.
  */
-{
-    int ourProjectionLocation;
-
-    /* convert pixel to point */
-    pt_h = px_h * 72.27 / xdpi;
-    pt_v = px_v * 72.27 / ydpi;
+{    /* convert pixel to point */
+    pt_h = px_h * 72.27 / x_dpi;
+    pt_v = px_v * 72.27 / y_dpi;
     /* convert point to scaled point*/
     page_h = round(pt_h * (1 << 16));
     page_v = round(pt_v * (1 << 16));
@@ -304,21 +305,107 @@ extern void nativeSetSize(int px_h, int px_v, double xdpi, double ydpi)
     LOGI("native SetSize to %f pt x %f pt (%d px x %d px)", pt_h, pt_v, px_h, px_v);
 
     // GL Coordinates are in points
-    ourProjectionLocation = glGetUniformLocation(ProgramID, "projection");
-    GLfloat MVP[4][4]= {{0}};
     MVP[0][0]=2.0/pt_h; // x: scale to -1 to +1
     MVP[1][1]=-2.0/pt_v; // y: scale to 1 to -1
-    MVP[2][2]=0.0f; // z: don't care
+    //MVP[2][2]=0.0f; // z: don't care
     MVP[3][0]=-1.0f; // x position: left
     MVP[3][1]=1.0f; // y position: up
-    MVP[3][2]=0.0f; // don't care
-    MVP[3][3]=1.0f; // w: identity
-    glUniformMatrix4fv(ourProjectionLocation, 1, 0, &MVP[0][0]);
+    //MVP[3][2]=0.0f; // don't care
+    //MVP[3][3]=1.0f; // w: identity
+    glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
     glViewport(0, 0, px_h, px_v);
-    cur_h=px_h;
-    cur_v=px_v;
+ }
+
+extern void nativeRule(double x, double y, double w, double h)
+/* Using GL to render a rule (a black rectangle)
+   Coordinates in points, origin bottom left, x and w right, y and h up
+   x,y position
+   w,h width and height
+  */
+{ //LOGI("Rendering rule at (%f,%f) sized %fx%f",x/SPf,y/SPf,w/SPf,h/SPf);
+    GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
+                       (GLfloat) x, (GLfloat) (y - h), 0.0f, 0.0f,
+                       (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
+                       (GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
+                       (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
+                       (GLfloat) (x + w), (GLfloat) y, 1.0f, 1.0f
+    };
+    glBindTexture(GL_TEXTURE_2D, RuleID);
+    checkGlError("glBindTexture RuleID");
+    glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
+    checkGlError("glVertexAttribPointer");
+    glDrawArrays(GL_TRIANGLES, 0, 2*3);
+    checkGlError("glDrawArrays");
 }
 
+void nativeImage(double x, double y, double w, double h, unsigned char *b, unsigned char *e)
+/* render the image found between *b and *e at x,y with size w,h.
+   x, y, w, h are given in point
+*/
+{ static unsigned char *last_b=NULL;
+  int width, height, nrChannels;
+  unsigned char *data;
+  static unsigned char grey[4]={0,0,0,0x80};
+
+  if (b!=last_b)
+  { if (ImageID != 0)
+    { glDeleteTextures(1, &ImageID);
+      ImageID = 0;
+    }
+    last_b=b;
+    data = stbi_load_from_memory(b, (int) (e - b), &width, &height, &nrChannels, 0);
+    if (data == NULL)
+    { LOG("Unable to display image\n");
+      data=grey; width=height=1; nrChannels=4;
+    }
+    LOGI("image width=%d, height=%d nrChannels=%d\n", width, height, nrChannels);
+
+
+    glGenTextures(1, &ImageID);
+    // "Bind" the newly created texture : all future texture functions will modify this texture
+    glBindTexture(GL_TEXTURE_2D, ImageID);
+    checkGlError("glBindTexture ImageID");
+
+      // Give the image to OpenGL
+    GLenum format = GL_RGB;
+    if (nrChannels == 4) {
+        format = GL_RGBA;
+    } else if (nrChannels == 3) {
+        format = GL_RGB;
+    } else if (nrChannels == 1) {
+        format = GL_ALPHA;
+    }
+    LOGI("image format=%d\n", format);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    checkGlError("glTexImage2D");
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  }
+  else
+  {  glBindTexture(GL_TEXTURE_2D, ImageID);
+     checkGlError("glBindTexture old ImageID");
+  }
+
+
+  GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
+                           (GLfloat) x, (GLfloat) (y - h), 0.0f, 0.0f,
+                           (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
+                           (GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
+                           (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
+                           (GLfloat) (x + w), (GLfloat) y, 1.0f, 1.0f
+        };
+
+        glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
+        checkGlError("glVertexAttribPointer");
+        // make sure that image is always rendered in correct colors
+        glUniform1i(IsImageID, 1);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        checkGlError("glDrawArrays");
+        glUniform1i(IsImageID, 0);
+        stbi_image_free(data);
+
+}
 
 static void GLtexture(Gcache *g) {
     unsigned GLtex;
@@ -407,78 +494,6 @@ extern void  nativeGlyph(double x,double dx,double y,double dy,double w,double h
 }
 
 
-extern void nativeRule(double x, double y, double w, double h)
-/* Using GL to render a rule (a black rectangle)
-   Coordinates in points, origin bottom left, x and w right, y and h up
-   x,y position
-   w,h width and height
-  */
-{ //LOGI("Rendering rule at (%f,%f) sized %fx%f",x/SPf,y/SPf,w/SPf,h/SPf);
-    GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
-                       (GLfloat) x, (GLfloat) (y - h), 0.0f, 0.0f,
-                       (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
-                       (GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
-                       (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
-                       (GLfloat) (x + w), (GLfloat) y, 1.0f, 1.0f
-    };
-    glBindTexture(GL_TEXTURE_2D, RuleID);
-    checkGlError("glBindTexture");
-    glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
-    checkGlError("glVertexAttribPointer");
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    checkGlError("glDrawArrays");
-}
 
 
-extern void
-nativeImage(double x, double y, double w, double h, unsigned char *b, unsigned char *e)
-/* new image loading function using stb_image.h as image loader.
- It follows the example of https://learnopengl.com/Getting-started/Textures
- */
-{
-    int width, height, nrChannels;
-    unsigned char *data = stbi_load_from_memory(b, (int) (e - b), &width, &height, &nrChannels, 0);
-    if (data) {
-        LOGI("image width=%d, height=%d nrChannels=%d\n", width, height, nrChannels);
-
-        GLuint textureID;
-        glGenTextures(1, &textureID);
-        // "Bind" the newly created texture : all future texture functions will modify this texture
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        // Give the image to OpenGL
-        GLenum format = GL_RGB;
-        if (nrChannels == 4) {
-            format = GL_RGBA;
-        } else if (nrChannels == 3) {
-            format = GL_RGB;
-        } else if (nrChannels == 1) {
-            format = GL_ALPHA;
-        }
-        LOGI("image format=%d\n", format);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        checkGlError("glTexImage2D");
-        glGenerateMipmap(GL_TEXTURE_2D);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-        GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
-                           (GLfloat) x, (GLfloat) (y - h), 0.0f, 0.0f,
-                           (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
-                           (GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
-                           (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
-                           (GLfloat) (x + w), (GLfloat) y, 1.0f, 1.0f
-        };
-
-        glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
-        checkGlError("glVertexAttribPointer");
-        // make sure that image is always rendered in correct colors
-        glUniform1i(IsImageID, 1);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        checkGlError("glDrawArrays");
-        glUniform1i(IsImageID, 0);
-        stbi_image_free(data);
-    } else {
-        LOGI("Can not read image %p", b);
-    }
-}
 
