@@ -52,7 +52,6 @@ add_library(freetype STATIC ${FT_SRCS})
 add_library(hintview SHARED
         gl_code.cpp
         rendergl.c
-        stb_image.cpp
         hfonts.c
         tables.c
         htex.c

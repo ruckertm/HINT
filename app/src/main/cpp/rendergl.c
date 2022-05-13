@@ -1,32 +1,52 @@
+/* This file is part of HINT
+ * Copyright 2017-2021 Martin Ruckert, Hochschule Muenchen, Lothstrasse 64, 80336 Muenchen
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+ * OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * Except as contained in this notice, the name of the copyright holders shall
+ * not be used in advertising or otherwise to promote the sale, use or other
+ * dealings in this Software without prior written authorization from the
+ * copyright holders.
+ */
 
 // OpenGL ES 2.0 code
 
 #include <jni.h>
 #include <android/log.h>
-
-
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-
-
-
+#include "basetypes.h"
 #include "error.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include "basetypes.h"
 #include "hint.h"
 #include "hfonts.h"
 #include "hrender.h"
 #include "rendernative.h"
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 
-#define min(X, Y) ((X)<(Y)?(X):(Y))
 
+
+#ifdef DEBUG
 #define  LOG_TAG    "glrender"
 #define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 #define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
@@ -36,17 +56,24 @@ static void printGLString(const char *name, GLenum s) {
     LOGI("GL %s = %s\n", name, v);
 }
 
-static void checkGlError(const char *op) {
-    for (GLint error = glGetError(); error; error = glGetError()) {
-        LOGE("after %s() glError (0x%x)\n", op, error);
-    }
+static void checkGlError(const char *op)
+{ GLint error;
+  while( (error= glGetError())!= GL_NO_ERROR)
+	  LOGE("OGL Error after %s: 0x%x\n", op, error);
 }
+#else
+#define  LOG_TAG    "glrender"
+#define  LOGI(...)  (void)0
+#define  LOGE(...)  (void)0
 
-static GLuint gProgram;
+#define printGLString(N,S)	(void)0
+#define checkGlError(OP)	(void)0
+#endif
+
 static GLuint gvPositionHandle;
-static GLuint ourColorLocation, isImageLocation;
+static GLuint ProgramID, RuleID, GammaID, FGcolorID, IsImageID;
 
-const char *gVertexShader =
+static const char *VertexShader =
         "#version 100\n"
         "attribute vec4 vPosition;\n"
         "varying vec2 TexCoord;\n"
@@ -56,92 +83,91 @@ const char *gVertexShader =
         "  TexCoord=vec2(vPosition.z,vPosition.w);\n"
         "}\n";
 
-const char *gFragmentShader =
+static const char *FragmentShader =
         "precision mediump float;\n"
         "varying vec2 TexCoord;\n"
-        "uniform sampler2D ourTexture;\n"
-        "uniform vec4 ourColor;\n"
+        "uniform sampler2D theTexture;\n"
+        "uniform vec3 FGcolor;\n"
+        "uniform float Gamma;\n"
         "uniform int isImage;\n"
         "void main() {\n"
         "  if(isImage==0) { \n"
-        "     gl_FragColor.a = texture2D(ourTexture,TexCoord).a;\n"
-        "     gl_FragColor.rgb = ourColor.rgb;\n"
+        "     gl_FragColor.a = pow(texture2D(theTexture,TexCoord).a,Gamma);\n"
+        "     gl_FragColor.rgb = FGcolor;\n"
         "  } else {\n"
-        "     gl_FragColor = vec4(texture2D(ourTexture,TexCoord));\n"
+        "     gl_FragColor = vec4(texture2D(theTexture,TexCoord));\n"
         "  } \n"
         "}\n";
 
 static GLuint loadShader(GLenum shaderType, const char *pSource) {
-    GLuint shader = glCreateShader(shaderType);
-    if (shader) {
-        glShaderSource(shader, 1, &pSource, NULL);
-        glCompileShader(shader);
-        GLint compiled = 0;
-        glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
-        if (!compiled) {
+    GLuint shaderID;
+    GLint result = 0;
+    shaderID = glCreateShader(shaderType);
+    if (shaderID) {
+        glShaderSource(shaderID, 1, &pSource, NULL);
+        glCompileShader(shaderID);
+        glGetShaderiv(shaderID, GL_COMPILE_STATUS, &result);
+        if (!result) {
             GLint infoLen = 0;
-            glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
+            glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &infoLen);
             if (infoLen) {
                 char *buf = (char *) malloc(infoLen);
                 if (buf) {
-                    glGetShaderInfoLog(shader, infoLen, NULL, buf);
+                    glGetShaderInfoLog(shaderID, infoLen, NULL, buf);
                     LOGE("Could not compile shader %d:\n%s\n",
                          shaderType, buf);
                     free(buf);
                 }
-                glDeleteShader(shader);
-                shader = 0;
+                glDeleteShader(shaderID);
+                shaderID = 0;
             }
         }
     }
-    return shader;
+    return shaderID;
 }
 
-static GLuint createProgram(const char *pVertexSource, const char *pFragmentSource) {
-    GLuint vertexShader = loadShader(GL_VERTEX_SHADER, pVertexSource);
-    if (!vertexShader) {
-        return 0;
-    }
+static void createProgram(void)
+{ GLuint vertexID = loadShader(GL_VERTEX_SHADER, VertexShader);
+  GLuint fragmentID = loadShader(GL_FRAGMENT_SHADER, FragmentShader);
+  GLint result = GL_FALSE;
 
-    GLuint pixelShader = loadShader(GL_FRAGMENT_SHADER, pFragmentSource);
-    if (!pixelShader) {
-        return 0;
-    }
+    if (!vertexID || !fragmentID) return;
 
-    GLuint program = glCreateProgram();
-    if (program) {
-        glAttachShader(program, vertexShader);
+    ProgramID = glCreateProgram();
+    if (ProgramID) {
+        glAttachShader(ProgramID, vertexID);
         checkGlError("glAttachShader");
-        glAttachShader(program, pixelShader);
+        glAttachShader(ProgramID, fragmentID);
         checkGlError("glAttachShader");
-        glLinkProgram(program);
-        GLint linkStatus = GL_FALSE;
-        glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
-        if (linkStatus != GL_TRUE) {
+        glLinkProgram(ProgramID);
+        glGetProgramiv(ProgramID, GL_LINK_STATUS, &result);
+        if (!result) {
             GLint bufLength = 0;
-            glGetProgramiv(program, GL_INFO_LOG_LENGTH, &bufLength);
+            glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &bufLength);
             if (bufLength) {
                 char *buf = (char *) malloc(bufLength);
                 if (buf) {
-                    glGetProgramInfoLog(program, bufLength, NULL, buf);
+                    glGetProgramInfoLog(ProgramID, bufLength, NULL, buf);
                     LOGE("Could not link program:\n%s\n", buf);
                     free(buf);
                 }
             }
-            glDeleteProgram(program);
-            program = 0;
+            glDeleteProgram(ProgramID);
+            ProgramID = 0;
         }
+        glDetachShader(ProgramID, vertexID);
+        glDetachShader(ProgramID, fragmentID);
     }
-    return program;
+    glDeleteShader(vertexID);
+    glDeleteShader(fragmentID);
 }
 
 
-static GLuint RuleTexture;
 
 static void mkRuleTexture() { /* the texture used for rules */
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glGenTextures(1, &RuleTexture);
-    glBindTexture(GL_TEXTURE_2D, RuleTexture);
+    glGenTextures(1, &RuleID);
+    glBindTexture(GL_TEXTURE_2D, RuleID);
     uint8_t buffer[1];
     buffer[0] = 0xFF;
     glTexImage2D(
@@ -171,44 +197,69 @@ extern void nativeInit(void) {
     printGLString("Renderer", GL_RENDERER);
     printGLString("Extensions", GL_EXTENSIONS);
 
-    gProgram = createProgram(gVertexShader, gFragmentShader);
-    if (!gProgram) {
+    createProgram();
+    if (!ProgramID) {
         LOGE("Could not create program.");
         return;
     }
-    gvPositionHandle = glGetAttribLocation(gProgram, "vPosition");
+    gvPositionHandle = glGetAttribLocation(ProgramID, "vPosition");
     checkGlError("glGetAttribLocation");
-    //LOGI("glGetAttribLocation(\"vPosition\") = %d\n", gvPositionHandle);
 
     glEnableVertexAttribArray(gvPositionHandle);
     checkGlError("glEnableVertexAttribArray");
 
-    ourColorLocation = glGetUniformLocation(gProgram, "ourColor");
-    isImageLocation = glGetUniformLocation(gProgram, "isImage");
+    FGcolorID = glGetUniformLocation(ProgramID, "FGcolor");
+    GammaID  = glGetUniformLocation(ProgramID, "Gamma");
+    IsImageID = glGetUniformLocation(ProgramID, "isImage");
 
-    //int ourProjectionLocation = glGetUniformLocation(gProgram, "projection");
-    glUseProgram(gProgram);
+    //int ourProjectionLocation = glGetUniformLocation(ProgramID, "projection");
+    glUseProgram(ProgramID);
 
-    mkRuleTexture();
-    hint_clear_fonts(true);
-#if 0
-    GLfloat mv[4];
-    glGetFloatv(GL_MAX_VIEWPORT_DIMS,mv);
-    LOGI("maxviewport(%f, %f)", mv[0], mv[1]);
-    glGetFloatv(GL_VIEWPORT,mv);
-    LOGI("viewport(%f, %f)", mv[2], mv[3]);
-    SurfaceTexture.
-#endif
-    //glViewport(0,0,1920,1080); // seems unnecessary mv[2]==1920 and mv[3]==1080
+    glUniform1f(GammaID, 1.0f/2.2f);
+    glUniform1i(IsImageID, 0);
+    glUniform3f(FGcolorID, 0.0, 0.0, 0.0); // black as default foreground
+    glClearColor(1.0f, 1.0f, 1.0f, 0.0f); // white as default background
+
 
     glEnable(GL_BLEND);
     checkGlError("glEnable BLEND");
-
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     checkGlError("glBlendFunc");
-
+#if 0
+    // not in EGL
+    glEnable(GL_MULTISAMPLE);
+    checkGlError("GL_MULTISAMPLE");
+    glEnable(GL_FRAMEBUFFER_SRGB);
+    checkGlError("GL_FRAMEBUFFER_SRGB");
+#endif
+    hint_clear_fonts(true);
+    mkRuleTexture();
     LOGI("nativeInit done\n");
 }
+
+// Unused ?
+#if 0
+void nativeClear(void)
+{ glDeleteBuffers(1, &xybuffer);
+    glDeleteBuffers(1, &uvbuffer);
+    glDeleteProgram(ProgramID);
+    glDeleteTextures(1, &RuleID);
+    if (ImageID != 0) {
+        glDeleteTextures(1, &ImageID);
+        ImageID = 0;
+    }
+}
+#endif
+
+void nativeBlank(void) {
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void nativeSetGamma(double gamma)
+{ glUniform1f(GammaID, 1.0/gamma);
+    checkGlError("glsetgamma");
+}
+
 
 static GLfloat curfr=0.0f, curfg=0.0f, curfb=0.0f;
 static uint8_t last_style=0;
@@ -217,8 +268,11 @@ static void nativeSetColors(GLfloat fr, GLfloat fg, GLfloat fb, GLfloat br, GLfl
 {
     glClearColor(br, bg, bb, 1.0f);
     curfr=fr; curfg=fg; curfb=fb;
-    glUniform4f(ourColorLocation, fr, fg, fb, 1.0f);
+    glUniform3f(FGcolorID, fr, fg, fb);
+    last_style=0;
 }
+
+static int dark_mode;
 
 extern void nativeSetDark(int dark) {
     LOGI("SetDark %d GL Graphics\n", dark);
@@ -250,7 +304,7 @@ extern void nativeSetSize(int px_h, int px_v, double xdpi, double ydpi)
     LOGI("native SetSize to %f pt x %f pt (%d px x %d px)", pt_h, pt_v, px_h, px_v);
 
     // GL Coordinates are in points
-    ourProjectionLocation = glGetUniformLocation(gProgram, "projection");
+    ourProjectionLocation = glGetUniformLocation(ProgramID, "projection");
     GLfloat MVP[4][4]= {{0}};
     MVP[0][0]=2.0/pt_h; // x: scale to -1 to +1
     MVP[1][1]=-2.0/pt_v; // y: scale to 1 to -1
@@ -339,13 +393,13 @@ extern void  nativeGlyph(double x,double dx,double y,double dy,double w,double h
     checkGlError("glVertexAttribPointer");
     if (s!=last_style)
     { if (s&FOCUS_BIT)
-            glUniform4f(ourColorLocation, 0.0f, 1.0f, 0.0f, 1.0f);
+            glUniform3f(FGcolorID, 0.0f, 1.0f, 0.0f);
         else if (s&MARK_BIT)
-            glUniform4f(ourColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
+            glUniform3f(FGcolorID, 1.0f, 0.0f, 0.0f);
         else if (s&LINK_BIT)
-            glUniform4f(ourColorLocation, 0.0f, 0.0f, 1.0f, 1.0f);
+            glUniform3f(FGcolorID, 0.0f, 0.0f, 1.0f);
         else
-           glUniform4f(ourColorLocation, curfr, curfg,curfb, 1.0f);
+           glUniform3f(FGcolorID, curfr, curfg,curfb);
         last_style=s;
     }
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -367,7 +421,7 @@ extern void nativeRule(double x, double y, double w, double h)
                        (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
                        (GLfloat) (x + w), (GLfloat) y, 1.0f, 1.0f
     };
-    glBindTexture(GL_TEXTURE_2D, RuleTexture);
+    glBindTexture(GL_TEXTURE_2D, RuleID);
     checkGlError("glBindTexture");
     glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
     checkGlError("glVertexAttribPointer");
@@ -418,160 +472,13 @@ nativeImage(double x, double y, double w, double h, unsigned char *b, unsigned c
         glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
         checkGlError("glVertexAttribPointer");
         // make sure that image is always rendered in correct colors
-        glUniform1i(isImageLocation, 1);
+        glUniform1i(IsImageID, 1);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         checkGlError("glDrawArrays");
-        glUniform1i(isImageLocation, 0);
+        glUniform1i(IsImageID, 0);
         stbi_image_free(data);
     } else {
         LOGI("Can not read image %p", b);
     }
 }
 
-extern void nativeBlank(void) {
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-}
-
-
-
-/* ZOOMING */
-
-static GLuint GLzoom=0;
-static GLfloat zoom_w, zoom_h;
-static unsigned int fbo;
-
-extern void glZoomFB(void)
-{
-    glGenFramebuffers(1, &fbo); // create framebuffer object
-    checkGlError("glGenFramebuffers");
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo); // bind it
-    checkGlError("glBindFramebuffer");
-
-    // attach to framebuffer
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, GLzoom, 0);
-
-    // we skip the attachment of depth and stencil attachments
-#if 0
-    unsigned int rbo;
-    glGenRenderbuffers(1, &rbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo)
-#endif
-    // check for completeness
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        LOGE("ERROR::FRAMEBUFFER:: Framebuffer is not complete!\n");
-}
-
-extern void glSetZoomTexture(void)
-{   LOGI("GL Set Zoom Texture\n");
-    glGenTextures(1, &GLzoom);
-    glBindTexture(GL_TEXTURE_2D, GLzoom);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, cur_h, cur_v, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    LOGI("GL Set Zoom Texture done\n");
-}
-
-#if 0
-/* used for classic zoom removed in release 1.1 */
-extern "C" void glZoomBegin(void) {
-
-    LOGI("GL Zoom Begin\n");
-
-    // creating the texture attachment
-    glSetZoomTexture();
-    LOGI("GL Zoom Begin after Zoom Texture\n");
-    glZoomFB();
-
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    glViewport(0, 0, cur_h, cur_v);
-    zoom_h=pt_v;
-    zoom_w=pt_h;
-
-    HINT_TRY hint_render();
-    glBindFramebuffer(GL_FRAMEBUFFER, 0); // unbind
-    checkGlError("glBindFramebuffer");
-    glDeleteFramebuffers(1, &fbo); // delete
-    checkGlError("glDeleteFramebuffers");
-
-    LOGI("GL Zoom Begin done\n");
-
-}
-
-extern "C" void glZoomEnd(void) {
-    LOGI("GL Zoom End\n");
-    glDeleteTextures(1, &GLzoom);
-    GLzoom=0;
-}
-
-extern "C" void glZoom(void) {
-    LOGI("GL Zooming scale=%f \n",1.0);
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT); // blank the canvas
-    GLfloat x = 0.0;
-    GLfloat y = 00.0;
-    GLfloat w = zoom_w;
-    GLfloat h = zoom_h;
-    GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
-                       (GLfloat) x, (GLfloat) (y + h), 0.0f, 0.0f,
-                       (GLfloat) (x + w), (GLfloat) (y + h), 1.0f, 0.0f,
-                       (GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
-                       (GLfloat) (x + w), (GLfloat) (y + h), 1.0f, 0.0f,
-                       (GLfloat) (x + w), (GLfloat) y, 1.0f, 1.0f
-    };
-
-    glBindTexture(GL_TEXTURE_2D, GLzoom);
-    checkGlError("glBindTexture");
-    glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
-    checkGlError("glVertexAttribPointer");
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    checkGlError("glDrawArrays");
-}
-#endif
-
-#if 0
-/* used in printing, removed for release 1.1 */
-extern "C" void glDrawBitmap(uint32_t width, uint32_t height, uint32_t stride, void* pixels)
-{ int x,y;
-    LOGI("GL Draw Bitmap\n");
-    /* Now fill the bitmap */
-    for (y=0; y < height; y++)
-    { uint8_t *line = (uint8_t *)pixels+y*stride;
-        for (x=y;x<width; x++) {
-            line[x * 4 + 3] = 0x80; // Alpha
-            line[4 * x + 1] = 0xff;
-        }
-    }
-
-    // creating the texture attachment
-    glSetZoomTexture();
-    glZoomFB();
-
-    nativeSetDark(false);
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    glViewport(0, 0, width, height);
-
-    HINT_TRY {
-        hint_resize(width,height,300.0);
-        hint_render();
-    }
-
-    glReadPixels(0,0,width,height,GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-    checkGlError("glReadPixels");
-
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0); // unbind
-    checkGlError("glBindFramebuffer");
-    glDeleteFramebuffers(1, &fbo); // delete
-    checkGlError("glDeleteFramebuffers");
-    glDeleteTextures(1, &GLzoom);
-    GLzoom=0;
-    LOGI("GL Draw Bitmap done\n");
-
-}
-#endif
