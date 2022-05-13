@@ -72,7 +72,7 @@ static void checkGlError(const char *op)
 
 static GLuint gvPositionHandle;
 static GLuint ProgramID, MatrixID, RuleID, GammaID, FGcolorID, IsImageID, ImageID=0;
-
+static unsigned char *ImagePtr=NULL;
 static const char *VertexShader =
         "#version 100\n"
         "attribute vec4 vPosition;\n"
@@ -239,6 +239,8 @@ extern void nativeInit(void) {
 #endif
     hint_clear_fonts(true);
     mkRuleTexture();
+    ImageID=0;
+    ImagePtr=NULL;
     LOGI("nativeInit done\n");
 }
 
@@ -251,7 +253,7 @@ void nativeClear(void)
     glDeleteTextures(1, &RuleID);
     if (ImageID != 0) {
         glDeleteTextures(1, &ImageID);
-        ImageID = 0;
+        ImageID = 0; ImagePtr=NULL;
     }
 }
 #endif
@@ -342,17 +344,17 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
 /* render the image found between *b and *e at x,y with size w,h.
    x, y, w, h are given in point
 */
-{ static unsigned char *last_b=NULL;
+{
   int width, height, nrChannels;
   unsigned char *data;
   static unsigned char grey[4]={0,0,0,0x80};
 
-  if (b!=last_b)
+  if (b!=ImagePtr||ImageID==0)
   { if (ImageID != 0)
     { glDeleteTextures(1, &ImageID);
       ImageID = 0;
     }
-    last_b=b;
+    ImagePtr=b;
     data = stbi_load_from_memory(b, (int) (e - b), &width, &height, &nrChannels, 0);
     if (data == NULL)
     { LOG("Unable to display image\n");
@@ -408,12 +410,12 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
 }
 
 static void GLtexture(Gcache *g) {
-    unsigned GLtex;
+    unsigned texID;
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     checkGlError("glPixelStorei");
-    glGenTextures(1, &GLtex);
+    glGenTextures(1, &texID);
     checkGlError("glGenTextures");
-    glBindTexture(GL_TEXTURE_2D, GLtex);
+    glBindTexture(GL_TEXTURE_2D, texID);
     checkGlError("glBindTexture");
     /* the first element in g->bits corresponds to the lower left pixel,
      * the last element in g->bits to the upper right pixel. */
@@ -435,7 +437,7 @@ static void GLtexture(Gcache *g) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    g->GLtexture = GLtex;
+    g->GLtexture = texID;
     //MESSAGE("Generated GL texture %d",g->GLtexture);
 }
 
@@ -454,18 +456,31 @@ void nativeFreeGlyph(Gcache *g)
         g->GLtexture = 0;
     }
 }
+
+int round_to_pixel=1; /* makes sense only if using the native dpi, if using a multiple its of not much use*/
+double pixel_size_threshold= 72.27/150; /*round to pixel only if pixel size in pt is below threshold*/
 extern void  nativeGlyph(double x,double dx,double y,double dy,double w,double h,struct gcache_s*g,uint8_t s)
-/* Using GL to render a character texture
-   Coordinates in points, origin bottom left, x and w right, y and h up
-   x,y position
-   w,h width and height
-   s style bits
-  */
+/* given glyph g, display g at position x,y in size w,h. x, y, w, h are given in point */
 { //LOGI("Rendering texture %i at (%f,%f) sized %fx%f",GLtexture,x/SPf,y/SPf,w/SPf,h/SPf);
-    x=x-dx;
-    y=y-dy;
     if (g->GLtexture == 0)
         GLtexture(g);
+    x=x-dx;
+    y=y-dy;
+    if (round_to_pixel)
+    { double pxs;
+        pxs = 72.27/xdpi; /* pixel size in point */
+        if (pxs>=pixel_size_threshold)
+        { x=x/pxs;
+            x=floor(x+0.5);
+            x=x*pxs;
+        }
+        pxs = 72.27/ydpi; /* pixel size in point */
+        if (pxs>=pixel_size_threshold)
+        { y=y/pxs;
+            y=floor(y+0.5);
+            y=y*pxs;
+        }
+    }
 
     GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 0.0f,
                        (GLfloat) x, (GLfloat) (y + h), 0.0f, 1.0f,
@@ -476,7 +491,7 @@ extern void  nativeGlyph(double x,double dx,double y,double dy,double w,double h
     };
     glBindTexture(GL_TEXTURE_2D, g->GLtexture);
     checkGlError("glBindTexture");
-    glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
+    glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), gQuad);
     checkGlError("glVertexAttribPointer");
     if (s!=last_style)
     { if (s&FOCUS_BIT)
@@ -493,7 +508,13 @@ extern void  nativeGlyph(double x,double dx,double y,double dy,double w,double h
     checkGlError("glDrawArrays");
 }
 
-
-
+#if 0 /* not used by Android */
+void nativeFreeGlyph(struct gcache_s*g)
+{    if (g->GLtexture != 0) {
+        glDeleteTextures(1, &(g->GLtexture)); // probably not needed
+        g->GLtexture = 0;
+    }
+}
+#endif
 
 
