@@ -1,41 +1,56 @@
 % This file is part of HINT
-% Copyright 2017 Martin Ruckert
-% 
-% HINT is free software: you can redistribute it and/or modify
-% it under the terms of the GNU General Public License as published by
-% the Free Software Foundation, either version 3 of the License, or
-% (at your option) any later version.
-% 
-% HINT is distributed in the hope that it will be useful,
-% but WITHOUT ANY WARRANTY; without even the implied warranty of
-% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-% GNU General Public License for more details.
-% 
-% You should have received a copy of the GNU General Public License
-% along with HINT.  If not, see <http://www.gnu.org/licenses/>.
-%  
-% Martin Ruckert, Hochschule Muenchen, Lothstrasse 64, 80336 Muenchen
-% 
-\input ../hint.sty
-\input ../changefile.sty
+% Copyright 2017-2021 Martin Ruckert, Hochschule Muenchen, Lothstrasse 64, 80336 Muenchen
+%
+% Permission is hereby granted, free of charge, to any person obtaining a copy
+% of this software and associated documentation files (the "Software"), to deal
+% in the Software without restriction, including without limitation the rights
+% to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+% copies of the Software, and to permit persons to whom the Software is
+% furnished to do so, subject to the following conditions:
+%
+% The above copyright notice and this permission notice shall be
+% included in all copies or substantial portions of the Software.
+%
+% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+% IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+% FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+% COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+% WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+% OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+% THE SOFTWARE.
+%
+% Except as contained in this notice, the name of the copyright holders shall
+% not be used in advertising or otherwise to promote the sale, use or other
+% dealings in this Software without prior written authorization from the
+% copyright holders.
+
+\input btxmac.tex
+\input hintmac.tex
+\input changefile.sty
 \input epsf.tex
 
 @i symbols.w
+
+@
+
 \makeindex
 \maketoc
-
+%\makecode
 %\makefigindex
 \titletrue
 
-\def\lastrevision{${}$Revision: 2693 ${}$}
-\def\lastdate{${}$Date: 2022-02-23 16:30:43 +0100 (Wed, 23 Feb 2022) ${}$}
+
+\def\setrevision$#1: #2 ${\gdef\lastrevision{#2}}
+\setrevision$Revision: 2751 $
+\def\setdate$#1(#2) ${\gdef\lastdate{#2}}
+\setdate$Date: 2022-07-13 17:29:50 +0200 (Wed, 13 Jul 2022) $
+
+\null
 
 \input titlepage.tex
 
 
 \frontmatter
-
-@
 
 \plainsection{Preface}
 To be written
@@ -1085,12 +1100,16 @@ void hget_outline_or_label_def(Info i, int n)
 @
 
 @<get |where| and |pos| from label |n|@>=
-   where=labels[n].where;
+if (labels==NULL || n>max_ref[label_kind])
+{ where= LABEL_TOP; pos=0; }
+else
+{   where=labels[n].where;
 #if 1   
    pos=((uint64_t)labels[n].pos<<32)+@|(labels[n].pos-labels[n].pos0);
 #else
    pos=((uint64_t)labels[n].pos0<<32); /* offsets still dont work in all cases and need fixing */
 #endif
+}
 @
 
 
@@ -3289,7 +3308,7 @@ extern int32_t*integer_def;
 @
 
 
-\subsection{Printing}
+\subsection{Diagnostic Output}
 
 \changestyle{hprint.tex}
 
@@ -4065,8 +4084,8 @@ int hint_begin(void)
   { hint_unmap(); return 0; }
   hget_directory();
   hget_definition_section();
-  page_v=hvsize=dimen_def[vsize_dimen_no];
-  page_h=hhsize=dimen_def[hsize_dimen_no];
+  hvsize=dimen_def[vsize_dimen_no];
+  hhsize=dimen_def[hsize_dimen_no];
   hget_content_section();
   leak_clear();
   clear_map();
@@ -4404,6 +4423,7 @@ uint64_t hint_page_home(void)
 {@+ uint64_t pos;
   uint8_t where;
   int n=zero_label_no;
+  if (hin_addr==NULL) return 0;
   @<get |where| and |pos| from label |n|@>@;
   @<render the page at |pos| using |where| and return@>@; 
 }
@@ -4785,7 +4805,7 @@ As a shortcut, it can call this function:
  uint64_t hint_outline_page(int i)
 {@+ uint64_t pos;
   uint8_t where;
-  if (i<0||i>max_outline) return  hint_page_get();
+  if (i<0||i>max_outline|| hint_outlines==NULL) return  hint_page_get();
   pos=hint_outlines[i].pos;
   where=hint_outlines[i].where;
   @<render the page at |pos| using |where| and return@>@; 
@@ -4988,8 +5008,10 @@ char *hlist_to_string(pointer p)
 Searching starts in the user interface with defining a string to
 search for.
 The variable |m_str| points to the given string and |m_length| is
-its length. Further, we keep track of the number of characters,
+its length. Further, |m_chars| keeps track of the number of characters,
 not counting the spaces, in the search string for reasons explained below.
+The |hint_set_mark| function can be used to initialize these variables
+from a mark string |m| with length |s|.
 
 @<render variables@>=
 static char *m_str;
@@ -5023,10 +5045,10 @@ if (m_length>0)
 }
 @
 
-In its simplest form, searching is the highlighting of all
-matching strings on the current page. The highlighting itself is the
+In its simplest form, searching is the marking of all
+matching strings on the current page. The marking itself is the
 responsibility of the graphical user interface.  The backend just needs
-to indicate which glyphs must be highlighted.  For this
+to indicate which glyphs must be marked.  For this
 purpose, every call to |nativeGlyph| passes a style parameter.
 For searching, two style bits are defined: |MARK_BIT| and |FOCUS_BIT|.
 @<render definitions@>=
@@ -5040,27 +5062,30 @@ current page that belong to a character string matching |m| of length
 |s|.  If |m==NULL|, the |MARK_BIT| will be zero for all glyphs.  The
 ``focus'' can be associated with one occurence of the marked string;
 its glyphs will have the |FOCUS_BIT| set.
-To set or to move the focus, two functions are available: |hint_next_mark| and
-|hint_prev_mark|.
+To set or to move the focus, two functions are available: 
+|hint_next_mark| and |hint_prev_mark|.
 |hint_next_mark| moves the focus to the next occurence, or to the
 first one if currently no focus is set. If necessary,
 the current page will move forward to contain another occurrence;
 |hint_prev_mark| works the same way but searches in backward
 direction.  |hint_next_mark| and |hint_prev_mark| will return |true|
 if a new occurence was found and return |false| otherwise.
+Note that both functions might change the current page even if no new
+matching occurrence was found.
 
-Marking will require two passes over the current page: the first pass is triggered by
-calling the |hint_set_mark| function. It will traverse the current page and find all
-occurrences of the given string. The second pass is the rendering pass by the function
-|hint_render|.
 
-To implement these functions, we need a data structure
-to store these occurencies:
-we store the distances beween two occurences
-in an array. If there is no next occurrence, we store $\infty$.
-To keep the storage of these distances compact,
-we use a variable length encoding, and we limit the total size of such encodings
-assuming that it is of no use to have thousands of highlighted words on a single page.
+Marking will require two passes over the current page: the first pass
+is triggered by calling the |hint_set_mark| function. It will traverse
+the current page and find all occurrences of the given string. The
+second pass is the rendering pass by the function |hint_render|.
+
+The implementations of these functions need a data structure
+to store these occurencies.
+The array |m_dist| stores the distance to the next occurence.
+If there is no next occurrence, the value $\infty$ is stored.
+To keep the storage of distances compact,
+a variable length encoding is used. The array limits the total size of such encodings
+assuming that it is of no use to have thousands of marked words on a single page.
 
 @<render variables@>=
 #define MAX_M_DIST 512
@@ -5068,7 +5093,7 @@ static uint8_t m_dist[MAX_M_DIST+5]; /* space for a final 5 byte number and $\in
 static int m_ptr, m_max; 
 @
 
-For the variable length encoding, we use the following convention:
+For the variable length encoding, the following convention is used:
 The single byte |0xFF| means $\infty$.
 Else if the most significant bit is set, the distance is given by
 the remaining 7 bits.
@@ -5078,34 +5103,42 @@ the number contained in the following bytes.
 
 Using this convention, $\infty$ and all distances $0\le d < |0x7F|$
 can be stored in a single byte. The first distance that needs two byte
-is |0x7F| it is stored as |0x00 0x7F| because setting the
-most significant bit of |0x7F| would give |0xFF| which means
+is |0x7F|. It is stored as |0x00 0xFF| because setting the
+most significant bit of |0x7F| gives |0xFF| which as a single byte is the encoding of
 $\infty$.
 With two byte, values up to $2^{14}$  can be stored. This should be sufficient
-for most cases because a) with such large distances there can't be 
-many occurrences
-on a single page, and b) the current implementation uses 16 bit pointers
+for most cases because 
+a) with such large distances there can't be many occurrences
+on a single page, and 
+b) the current implementation uses 16 bit pointers
 and that gives a strict upper bound on the number of characters.
+All multibyte encodings start with a sequence of bytes that have a zeros as most significant bits
+and terminate with a byte that has a one as most significant bit.
 Because the \HINT\ file format limits the content section to $2^{32}$ byte
 a 5 byte encoding is sufficient for any distance that could occur in any \HINT\ file.
 
 Here are the functions, to manipulate the |m_dist| array.
 The variable |m_ptr| points to the current position in the |m_dist|
-array, the variable |m_max| points the the last entry in |m_dist|.
+array, the variable |m_max| points to the last entry in |m_dist|.
 When reading the |m_dist| array, we can assume that the last entry in the 
 |m_dist| array is $\infty$.
 |m_put| writes distance |d| at position |m_ptr|; |m_get| reads and
 returns the distance at position |m_ptr|; both advance |m_ptr|.
+
+@<render variables@>=
+static int m_ptr, m_max; 
+@
+
 @<render functions@>=
 static void m_put(uint32_t d) /* write into |m_dist| */
 {@+ if (m_ptr<MAX_M_DIST)
-  { if (d==0xFF)
+  { if (d==HINT_NO_POS) 
       m_dist[m_max=m_ptr]=0xFF;
    else if (d<0x7F)
       m_dist[m_ptr++]=0x80+d;
-    else
-    { if (d<(1<<14))
-      {
+   else
+   { if (d<(1<<14))
+     {
         two_byte:     
         m_dist[m_ptr++]=d>>7;
         m_dist[m_ptr++]=0x80+(d&0x7F);
@@ -5172,7 +5205,6 @@ static uint32_t m_d;
 static void next_m_char(uint32_t c)
 {
 reconsider:
-  
   if (m_state==0 && c!=m_str[0])
   { if (c!=' ')   
       m_d++;
@@ -5202,6 +5234,7 @@ After all the characters from the traversal did match the
 characters in |m_str|. So we try matching |m_str| against |m_str+i|,
 moving |i| forward as far as necessary. Then we jump back to
 the beginning of the matching routine to reconsider matching |c|.
+
 @<end of matching prefix@>=
   { int i=0,j=0;
     do {
@@ -5214,82 +5247,12 @@ the beginning of the matching routine to reconsider matching |c|.
   }
 @
 
-
-@<render functions@>=
-#if 0
-static void next_m_space(void)
-{ if (m_state==0 && m_str[0]==' ')
-  { m_state=-1; m_spaces=1; }
-  else if (m_state>=0 && m_str[m_state]==' ')
-  { if (m_state==0) m_spaces=0;
-    m_state++; m_spaces++;
-    if (m_state==m_length)
-    { m_put(m_d);
-      m_d=0;
-      m_state=0;
-    }
-    else
-      m_state=-m_state;
-  }
-  else if (m_state>0)
-  { m_d=m_d+m_state-m_spaces; m_state=0;}
-}
-#endif
-@
-
-
-@<render functions@>=
-#if 0
-static void vlist_mark(pointer p);
-static void hlist_mark(pointer p)
-{ while(p!=null)
-  { if(is_char_node(p)&&!m_ignore) next_m_char(character(p));
-    else switch (type(p))
-    { case hlist_node: if(list_ptr(p)!=null) hlist_mark(list_ptr(p)); break;
-      case vlist_node:  if(list_ptr(p)!=null) vlist_mark(list_ptr(p)); break;
-      case ligature_node:
-      { pointer q=lig_ptr(p);
-        while (q!=null)
-        { if (!m_ignore) next_m_char(character(q)); q=link(q);
-        }
-      }
-      break;
-      case glue_node: if (!m_ignore) next_m_space(); break;
-      case whatsit_node:
-        if (subtype(p)==ignore_node)
-        { if (ignore_info(p)==1)
-          { hlist_mark(ignore_list(p));
-            m_ignore=1;
-          }
-          else
-            m_ignore=0;          
-        }
-        break;
-      default: break;
-    }
-    p= link(p);
-  }
-}
-
-static void vlist_mark(pointer p)
-{ while(p!=null)
-  { switch (type(p))
-    { case hlist_node: if(list_ptr(p)!=null) hlist_mark(list_ptr(p));  
-         if (!m_ignore) next_m_space(); break;
-      case vlist_node:  if(list_ptr(p)!=null) vlist_mark(list_ptr(p)); break;
-      default: break;
-    }
-    p= link(p);
-  }
-}
-#endif
-@
+After these preparations, we are ready to traverse the current page.
 
 @<render variables@>=
 static int m_focus;
-static uint64_t m_page;
+static uint64_t m_page; /* the position of the page currently marked */
 @
-After these preparations, we are ready to traverse the current page.
 
 @<render functions@>=
 void hmark_page(void)
@@ -5308,7 +5271,7 @@ void hmark_page(void)
     else
        trv_hlist(list_ptr(streams[0].p));
   }
-  m_put(0xFF); /* $\infty$ */
+  m_put(HINT_NO_POS); /* $\infty$ */
   if (m_focus>=m_max) m_focus=0;
 }
 @
@@ -5404,7 +5367,7 @@ Because the |ignore_list| may contain boxes, traversing it
 is inherently recursive and we start with a function that
 traverses a list of nodes accounting for |m_style| changes
 but without rendering them. We assume that the |ignore_list|
-consist (recursively!) entirely of character, kern, box, rule, and ligature nodes.
+consists (recursively!) entirely of character, kern, box, rule, and ligature nodes.
 
 @<render functions@>=
 void c_ignore_list(pointer p)
@@ -5540,7 +5503,7 @@ If |max_links| is negative, no links are available.
 typedef struct { 
 uint64_t pos;  
 uint8_t where; 
-int top, bottom, left, right;
+scaled top, bottom, left, right;
 } hint_Link;
 extern hint_Link *hint_links;
 extern int max_link;
@@ -5618,7 +5581,7 @@ early. Together this should limit the search to a short stretch of links.
 The | precission| parameter allows to find links if their distance from
 the given coordinates is smaller than the given |precission|.
 
-The following function returns a index into the |hint_links|
+The following function returns an index into the |hint_links|
 array or $-1$ if no link is at the given position.
 
 To speed up processing, it remembers the last hit.
@@ -5642,6 +5605,7 @@ static scaled hlink_distance(scaled x,scaled y, hint_Link *t)
   else return dy;
 
 }
+
 int hint_find_link(scaled x, scaled y,scaled precission)
 { static int last_hit=-1;
   int i;
@@ -5710,6 +5674,47 @@ operating system and its API encapsulating the device. Never the less, there
 are some functions that can be shared accross many different operating systems
 or at least can serve as a starting point for implementing operating system specific
 versions.
+
+Most systems, for example, will need some code to initialize and to finalize
+the rendering infrastructure. The system depenent functions will be implemented
+in as |nativeInit| and |nativeClear|. To have a consistent interface accross
+different graphical user interfaces. These are reexported as |hint_render_on|
+and |hint_render_off|.
+
+@<render functions@>=
+void hint_render_on(void)
+{ nativeInit();
+}
+
+void hint_render_off(void)
+{ nativeClear();
+}
+@
+
+Similar functions that are just forwarded are |nativeSetDark|
+and |nativeSetGamma|
+
+@<render functions@>=
+void hint_dark(int dark)
+{ nativeSetDark(dark);
+}
+void hint_gamma(double gamma)
+{ nativeSetGamma(gamma);
+}
+@
+
+Prototypes of the three functions just defined are contained in
+the {\tt hrender.h} file where as the prototypes of the 
+``native'' functions are part of {\tt rendernative.h}. The latter
+file contains requirements: functions that need to be implemented
+but are not defined here. Most implementations will avoid the
+inclusion of  {\tt rendernative.h} because it will need other include files,
+notably  {\tt hfonts.h} which defines the interface to the font cache.
+In contrast, {\tt hrender.h} has almost no dependencies and avoids
+cluttering the global name space by using the |hint_|\dots prefix.
+
+
+
 
 \subsection{Fonts}
 The \HINT\ file format supports four different types of fonts:
@@ -6158,7 +6163,18 @@ void render_image(int x, int y, int w, int h, uint32_t n)
 
 
 \subsection{Pages}
-Now at last, we can render pages. Two mutualy recursive procedures,
+Let's start with the most simple case: an empty page. We simply forward this
+task to the native rendering engine. The native renderer is not part of this
+document, but its reponsibilities are listed in section~\secref{native}.
+
+@<render functions@>=
+uint64_t hint_blank(void)
+{ nativeBlank();
+  return 0;
+}
+@
+
+Now at last, we render pages. Two mutualy recursive procedures,
 rendering vertical and horizontal lists, will accomplish the
 rendering. The functions are more or less modifications of \TeX's
 functions that write DVI files. They share a few global static
@@ -6527,17 +6543,6 @@ move_past:
 
 @
 
-\subsection{Pages}
-Let's start with the most simple case: an empty page. We simply forward this
-task to the native rendering engine. The native renderer is not part of this
-document, but its reponsibilities are listed in section~\secref{native}.
-
-@<render functions@>=
-uint64_t hint_blank(void)
-{ nativeBlank();
-  return 0;
-}
-@
 
 We conclude this section with the function that must be called after the page builder has finished
 the page: the |hint_render| function.
@@ -6558,13 +6563,57 @@ void hint_render(void)
 }
 @
 
+\subsection{Printing}\label{printing}
+To print the content of a \HINT/ file, it is necessary to convert
+the horizontal or vertical boxes representing the pages into a format
+that can be understood by the printer driver. Future versions of this
+document may, for example, contain a procedure to convert such boxes
+to PostScript code in the same way as {\tt dvips} does it.
+
+For now only a simpler approach is available: Two replacements
+for |hint_render_on| and |hint_render_off| that sets things up
+in such a way that the rendering will end up in a memory framebuffer
+instead of on screen. And a third function, that transfers the
+content of the framebuffer to a byte array.
+Usually operating systems provide means to turn the byte array
+into some form of image or canvas, that can be sent to the printer
+driver. This method of printing produces large amount of data
+and is not recommended when printing to a file (use one of the
+many \TeX\ engines that produce pdf output if you need souch files),
+but it provides a convenient way of obtaining paper copies of a few
+pages.
+
+@<render functions@>=
+int hint_print_on(int w, int h, unsigned char *bits)
+{ return nativePrintStart(w, h,bits);
+}
+
+int hint_print_off(void)
+{ return nativePrintEnd();
+}
+
+int hint_print(unsigned char *bits)
+{ return nativePrint(bits);
+}
+@
+
+
+
+
+
 \section{Native Rendering}\label{native}
 The {\tt rendernative.h} header file lists all functions that the native renderer must implement.
 
 To initialize the renderer call |nativeInit|. To release all resorces allocated call |nativeClear|.
+If the rendering is supposed to go to memory (see section~\secref{printing}) instead of the screen, use |nativePrintStart|
+and |nativePrintEnd|. To transfer the memory content to a given byte array use |nativePrint| 
+
 @<native rendering definitions@>=
 extern void nativeInit(void); 
 extern void nativeClear(void);
+extern int nativePrintStart(int w, int h,unsigned char *bits);
+extern int nativePrintEnd(void);
+extern int nativePrint(unsigned char *bits);
 @
 
 
@@ -6574,8 +6623,10 @@ extern void nativeSetSize(int px_h, int px_v, double xdpi, double ydpi);
 @ 
 
 The native renderer may implement an optional procedure to switch between dark and light mode.
+The other procedure may change the $\gamma$-value.
 @<native rendering definitions@>=
 extern void nativeSetDark(int dark);
+extern void nativeSetGamma(double gamma);
 @
 
 To  render an empty page call |nativeBlank|.
@@ -7259,6 +7310,8 @@ int main(int argc, char *argv[])
     @<process the command line@>@;
     @<open the log file@>@;
     if(!hint_begin()) goto explain_usage;
+    page_h=hhsize;
+    page_v=hvsize;
     while (hint_forward())
       @<show the page@>@;
     hint_end();
@@ -7570,7 +7623,13 @@ extern bool hint_prev_mark(void);
 extern bool hint_next_mark(void);
 extern double hint_get_fpos(void);
 extern uint64_t hint_set_fpos(double fpos);
-
+extern void hint_render_on(void);
+extern void hint_render_off(void);
+extern void hint_dark(int dark);
+extern void hint_gamma(double gamma);
+extern int hint_print_on(int w, int h, unsigned char *bits);
+extern int hint_print_off(void);
+extern int hint_print(unsigned char *bits);
 #endif 
 @
 

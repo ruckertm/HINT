@@ -1,5 +1,5 @@
 	/*511:*/
-	#line 10402 "format.w"
+	#line 10416 "format.w"
 
 #ifndef __BASETYPES_H__
 #define __BASETYPES_H__
