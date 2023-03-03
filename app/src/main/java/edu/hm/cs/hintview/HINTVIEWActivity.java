@@ -1,10 +1,10 @@
 
 package edu.hm.cs.hintview;
 
-import android.app.SearchManager;
+//import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.DialogInterface;
+//import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.Handler;
 
 //import android.util.Log;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -23,7 +24,7 @@ import android.view.WindowInsets;
 import android.app.Dialog;
 import android.widget.Button;
 import android.view.View.OnClickListener;
-import android.widget.TextView;
+//import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -75,7 +76,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
         mView.init();
         try {
             mView.setFile(fileUriStr, filePos);
-        } catch (java.lang.SecurityException e) {
+        } catch (SecurityException e) {
             openFileChooser();
         }
         mView.setScale(scale);
@@ -130,14 +131,14 @@ public class HINTVIEWActivity extends AppCompatActivity {
     }
 
     void setToolbar(boolean darkMode) {
-        int toolbar_color = mView.getContext().getResources().getColor(R.color.toolbar_color, null);
-        int text_color = mView.getContext().getResources().getColor(R.color.foreground_color, null);
+        int toolbar_color = mView.getContext().getResources().getColor(R.color.toolbar_color);
+        int text_color = mView.getContext().getResources().getColor(R.color.foreground_color);
         int nightModeFlags = mView.getContext().getResources().getConfiguration().uiMode &
                 Configuration.UI_MODE_NIGHT_MASK;
 
         if (darkMode && (nightModeFlags == Configuration.UI_MODE_NIGHT_NO)) {
-            toolbar_color = mView.getContext().getResources().getColor(R.color.toolbar_dark_color, null);
-            text_color = mView.getContext().getResources().getColor(R.color.foreground_dark_color, null);
+            toolbar_color = mView.getContext().getResources().getColor(R.color.toolbar_dark_color);
+            text_color = mView.getContext().getResources().getColor(R.color.foreground_dark_color);
         }
 
         toolbar.setBackgroundColor(toolbar_color);
@@ -273,6 +274,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
             case R.id.scaleOne:
                 //Log.d(TAG, "scale one");
                 mView.setScale(1.0);
+                mView.clearFonts =true;
                 mView.requestRender();
                 return true;
             default:

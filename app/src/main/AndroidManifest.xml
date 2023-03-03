@@ -9,6 +9,7 @@
         android:icon="@mipmap/hintview"
         android:label="@string/hintview_activity">
         <activity
+            android:exported="true"
             android:name="edu.hm.cs.hintview.HINTVIEWActivity"
             android:launchMode="singleTask"
             android:theme="@style/Hintview">

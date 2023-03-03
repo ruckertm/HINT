@@ -44,8 +44,6 @@
 #include "stb_image.h"
 
 
-
-
 #ifdef DEBUG
 #define  LOG_TAG    "glrender"
 #define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
@@ -70,9 +68,10 @@ static void checkGlError(const char *op)
 #define checkGlError(OP)	(void)0
 #endif
 
+#define MAX_INFOLOG 512
 static GLuint gvPositionHandle;
 static GLuint ProgramID, MatrixID, RuleID, GammaID, FGcolorID, IsImageID, ImageID=0;
-static unsigned char *ImagePtr=NULL;
+static unsigned char *last_b=NULL;
 static const char *VertexShader =
         "#version 100\n"
         "attribute vec4 vPosition;\n"
@@ -127,42 +126,45 @@ static GLuint loadShader(GLenum shaderType, const char *pSource) {
 }
 
 static void createProgram(void)
-{ GLuint vertexID = loadShader(GL_VERTEX_SHADER, VertexShader);
-  GLuint fragmentID = loadShader(GL_FRAGMENT_SHADER, FragmentShader);
-  GLint result = GL_FALSE;
+{ GLuint vertexID=loadShader(GL_VERTEX_SHADER,VertexShader);
+  GLuint fragmentID=loadShader(GL_FRAGMENT_SHADER,FragmentShader);
+  GLint result=GL_FALSE;
 
-    if (!vertexID || !fragmentID) return;
+  if (!vertexID  || !fragmentID) return;
 
-    ProgramID = glCreateProgram();
-    if (ProgramID) {
-        glAttachShader(ProgramID, vertexID);
-        checkGlError("glAttachShader");
-        glAttachShader(ProgramID, fragmentID);
-        checkGlError("glAttachShader");
-        glLinkProgram(ProgramID);
-        glGetProgramiv(ProgramID, GL_LINK_STATUS, &result);
-        if (!result) {
-            GLint bufLength = 0;
-            glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &bufLength);
-            if (bufLength) {
-                char *buf = (char *) malloc(bufLength);
-                if (buf) {
-                    glGetProgramInfoLog(ProgramID, bufLength, NULL, buf);
-                    LOGE("Could not link program:\n%s\n", buf);
-                    free(buf);
-                }
-            }
-            glDeleteProgram(ProgramID);
-            ProgramID = 0;
-        }
-        glDetachShader(ProgramID, vertexID);
-        glDetachShader(ProgramID, fragmentID);
+  /* Create, linking, and check the program */
+  ProgramID = glCreateProgram();
+  if (ProgramID) {
+    glAttachShader(ProgramID, vertexID);
+    checkGlError("glAttachShader");
+    glAttachShader(ProgramID, fragmentID);
+    checkGlError("glAttachShader");
+    glLinkProgram(ProgramID);
+    glGetProgramiv(ProgramID, GL_LINK_STATUS, &result);
+    if (!result)
+    {     GLint bufLength = 0;
+          glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &bufLength);
+          if (bufLength) {
+              char *buf = (char *) malloc(bufLength);
+              if (buf) {
+                  glGetProgramInfoLog(ProgramID, bufLength, NULL, buf);
+                  LOGE("Could not link program:\n%s\n", buf);
+                  free(buf);
+              }
+          }
+      glDeleteProgram(ProgramID);
+      ProgramID = 0;
     }
-    glDeleteShader(vertexID);
-    glDeleteShader(fragmentID);
+    glDetachShader(ProgramID, vertexID);
+    glDetachShader(ProgramID, fragmentID);
+  }
+  glDeleteShader(vertexID);
+  glDeleteShader(fragmentID);
+  //LOG("createProgram Done\n");
 }
 
-static GLfloat MVP[4][4]={
+/* the 4x4 Model-View-Projection Matrix */
+static GLfloat MVP[4][4] = {
   {0.5, 0.0, 0.0, 0.0 }, // x scale
   {0.0, 0.5, 0.0, 0.0 }, // y scale
   {0.0, 0.0, 0.0, 0.0 }, // z scale
@@ -240,52 +242,48 @@ extern void nativeInit(void) {
     hint_clear_fonts(true);
     mkRuleTexture();
     ImageID=0;
-    ImagePtr=NULL;
-    LOGI("nativeInit done\n");
+    last_b=NULL;
+    //LOGI("nativeInit done\n");
 }
 
-// Unused ?
+
 #if 0
 void nativeClear(void)
 { glDeleteBuffers(1, &xybuffer);
-    glDeleteBuffers(1, &uvbuffer);
-    glDeleteProgram(ProgramID);
-    glDeleteTextures(1, &RuleID);
-    if (ImageID != 0) {
+  glDeleteBuffers(1, &uvbuffer);
+  glDeleteProgram(ProgramID);
+  glDeleteTextures(1, &RuleID);
+  if (ImageID != 0) {
         glDeleteTextures(1, &ImageID);
-        ImageID = 0; ImagePtr=NULL;
-    }
+        ImageID = 0; last_b=NULL;
+  }
 }
 #endif
 
-void nativeBlank(void) {
-    glClear(GL_COLOR_BUFFER_BIT);
+void nativeBlank(void)
+{ glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void nativeSetGamma(double gamma)
 { glUniform1f(GammaID, 1.0/gamma);
-    checkGlError("glsetgamma");
+  checkGlError("glsetgamma");
 }
-
 
 static GLfloat curfr=0.0f, curfg=0.0f, curfb=0.0f;
 static uint8_t last_style=0;
 static void nativeSetColors(GLfloat fr, GLfloat fg, GLfloat fb, GLfloat br, GLfloat bg, GLfloat bb)
 /* set foreground and background rgb colors */
 {
-    glClearColor(br, bg, bb, 1.0f);
-    curfr=fr; curfg=fg; curfb=fb;
-    glUniform3f(FGcolorID, fr, fg, fb);
-    last_style=0;
+  glClearColor(br, bg, bb, 1.0f);
+  curfr=fr; curfg=fg; curfb=fb;
+  glUniform3f(FGcolorID, fr, fg, fb);
+  last_style=0;
 }
 
-static int dark_mode;
 
-extern void nativeSetDark(int dark) {
-    LOGI("SetDark %d GL Graphics\n", dark);
-
-    if (dark) {
-        nativeSetColors(1.0f, 1.0f, 0.95f, 0.0f, 0.0f, 0.05f);
+void nativeSetDark(int on)
+{   if (on) {
+        nativeSetColors(1.0f, 1.0f, 0.99f, 0.0f, 0.0f, 0.01f);
     } else {
         nativeSetColors(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
     }
@@ -346,15 +344,17 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
 */
 {
   int width, height, nrChannels;
-  unsigned char *data;
-  static unsigned char grey[4]={0,0,0,0x80};
 
-  if (b!=ImagePtr||ImageID==0)
-  { if (ImageID != 0)
+
+
+  if (b!=last_b||ImageID==0)
+  { unsigned char *data;
+    static unsigned char grey[4]={0,0x80,0x80,0x80};
+    if (ImageID != 0)
     { glDeleteTextures(1, &ImageID);
       ImageID = 0;
     }
-    ImagePtr=b;
+    last_b=b;
     data = stbi_load_from_memory(b, (int) (e - b), &width, &height, &nrChannels, 0);
     if (data == NULL)
     { LOG("Unable to display image\n");
@@ -380,6 +380,8 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
     LOGI("image format=%d\n", format);
     glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
     checkGlError("glTexImage2D");
+    if (data!=grey)
+        stbi_image_free(data);
     glGenerateMipmap(GL_TEXTURE_2D);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -400,14 +402,12 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
 
         glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
         checkGlError("glVertexAttribPointer");
-        // make sure that image is always rendered in correct colors
+       // make sure that image is always rendered in correct colors
         glUniform1i(IsImageID, 1);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         checkGlError("glDrawArrays");
         glUniform1i(IsImageID, 0);
-        stbi_image_free(data);
-
-}
+ }
 
 static void GLtexture(Gcache *g) {
     unsigned texID;
@@ -507,6 +507,15 @@ extern void  nativeGlyph(double x,double dx,double y,double dy,double w,double h
     glDrawArrays(GL_TRIANGLES, 0, 6);
     checkGlError("glDrawArrays");
 }
+
+void nativeClear(void)
+{ }
+int nativePrintStart(int w, int h,unsigned char *bits)
+{ return 0; }
+int nativePrintEnd(void)
+{ return 0; }
+int nativePrint(unsigned char *bits)
+{ return 0; }
 
 #if 0 /* not used by Android */
 void nativeFreeGlyph(struct gcache_s*g)

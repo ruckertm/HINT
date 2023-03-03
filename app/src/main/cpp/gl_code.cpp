@@ -39,12 +39,6 @@ extern "C" {
 
 // Functions from rendergl.c
 #if 0
-/Ü used for classic zoom removed in release 1.1 */
-extern void glZoomBegin(void);
-extern void glZoom(void);
-extern void glZoomEnd(void);
-#endif
-#if 0
 /* used for prining never got it working */
 extern void glDrawBitmap(uint32_t width, uint32_t height, uint32_t stride, void *pixel);
 #endif
@@ -87,18 +81,18 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_error(JNIEnv *env, jclass obj);
 JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_zoomBegin(JNIEnv *env, jclass obj);
 JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_zoomEnd(JNIEnv *env, jclass obj);
+Java_edu_hm_cs_hintview_HINTVIEWLib_clearFonts(JNIEnv *env, jclass obj);
 JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_zoom(JNIEnv *env, jclass obj);
 };
 
 
-//char herror_string[MAX_HERROR];
-//jmp_buf error_exit;
+//char hint_error_string[MAX_HERROR];
+//jmp_buf hint_error_exit;
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_error(JNIEnv *env, jclass obj) {
-    if (herror_string[0]!=0) return (*env).NewStringUTF(herror_string);
+    if (hint_error_string[0]!=0) return (*env).NewStringUTF(hint_error_string);
     else return nullptr;
 }
 
@@ -142,7 +136,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_begin(JNIEnv *env, jclass obj, jint fileDesc
      fd=fileDescriptor;
      HINT_TRY {
         hint_end();
-        if (!hint_begin()) strcpy(herror_string,"ERROR: This is not a version 1.3 HINT file");
+        if (!hint_begin()) strcpy(hint_error_string,"ERROR: This is not a version " HINT_VERSION_STRING " HINT file");
     }HINT_CATCH("begin");
 }
 
@@ -220,11 +214,6 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_zoomBegin(JNIEnv *env, jclass obj) {
     glZoomBegin();
 }
 
-extern "C" JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_zoomEnd(JNIEnv *env, jclass obj) {
-    LOGI("Zoom End\n");
-    glZoomEnd();
-}
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_zoom(JNIEnv *env, jclass obj) {
@@ -232,6 +221,14 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_zoom(JNIEnv *env, jclass obj) {
     glZoom();
 }
 #endif
+
+/* used to rerender fonts after zooming */
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_clearFonts(JNIEnv *env, jclass obj) {
+    LOGI("Clear fonts\n");
+    hint_clear_fonts(true);
+}
+
 
     extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_next(JNIEnv *env, jclass obj) {

@@ -41,9 +41,9 @@
 
 
 \def\setrevision$#1: #2 ${\gdef\lastrevision{#2}}
-\setrevision$Revision: 2751 $
+\setrevision$Revision: 2839 $
 \def\setdate$#1(#2) ${\gdef\lastdate{#2}}
-\setdate$Date: 2022-07-13 17:29:50 +0200 (Wed, 13 Jul 2022) $
+\setdate$Date: 2023-02-13 13:12:47 +0100 (Mon, 13 Feb 2023) $
 
 \null
 
@@ -833,7 +833,7 @@ We put a stream definition into avariable of type |StreamDef|.
 typedef struct {
   Xdimen x; /* maximum height */
   int f; /* factor */
-  int p, n, r; /* prefered and next stream: split ratio */
+  int p, n, r; /* preferred and next stream: split ratio */
   pointer b, a; /* before and after list */
   Xdimen w; /* width */
   pointer g; /* top skip glue */
@@ -1188,13 +1188,25 @@ HGETTAG(a);
 
 @<read and check the end byte |z|@>=
 HGETTAG(z);@+
-if (a!=z)
-  QUIT(@["Tag mismatch [%s,%d]!=[%s,%d] at 0x%x to " SIZE_F "\n"@],@|
-    NAME(a),INFO(a),NAME(z),INFO(z),@|node_pos, hpos-hstart-1);
+if (a!=z) tag_mismatch(a,z,node_pos, hpos-hstart-1);
 @
+
 The identifier |node_pos| is defined as a macro; it denotes a field on
 the current list record containig the position of the tag of the node
 currently processed.
+
+The |tag_mismatch| function is defined as follows:
+@<\HINT\ auxiliar  functions@>=
+static void tag_mismatch(uint8_t a, uint8_t z, uint32_t a_pos, uint32_t z_pos)
+{   QUIT(@["Tag mismatch [%s,%d]!=[%s,%d] at 0x%x to 0x%x\n"@],@|
+    NAME(a),INFO(a),NAME(z),INFO(z),@|a_pos, z_pos);
+}
+@
+
+@<\HINT\ declarations@>=
+static void tag_mismatch(uint8_t a, uint8_t z, uint32_t a_pos, uint32_t z_pos);
+@
+
 
 
 The |hget_node| function gets the next node from the input based on the tag byte |a|
@@ -1249,10 +1261,7 @@ The next macros read and check start and end byte.
 
 @<read and check the start byte |a|@>=
   a=HTEG8,DBGTAG(a,hpos);
-  if (z!=a) 
-    QUIT(@["Tag mismatch [%s,%d]!=[%s,%d] at " SIZE_F " to 0x%x\n"@],@|
-         NAME(a),INFO(a),NAME(z),INFO(z),hpos-hstart,node_pos);
-
+  if (z!=a) tag_mismatch(a,z,hpos-hstart,node_pos);
 @
 
 We conclude the section with the equivalents of |hget_node| and |hget_content|.
@@ -1356,13 +1365,16 @@ static scaled hget_xdimen(Info i)
   return  xdimen(&x);
  }
  
+static void tag_expected(uint8_t b, uint8_t a, uint32_t a_pos)
+{ QUIT("%s expected at 0x%x got [%s,%d]",NAME(b),a_pos,NAME(a),INFO(a));
+}
+
 static scaled hget_xdimen_node(void)
 { @+scaled x=0;
   @<read the start byte |a|@>@;
   if (KIND(a)==xdimen_kind)
     x=hget_xdimen(INFO(a));
-  else
-     QUIT("Extent expected at 0x%x got %s",node_pos,NAME(a));
+  else tag_expected(TAG(xdimen_kind,0),a,node_pos);
   @<read and check the end byte |z|@>@;
   return x;
 }
@@ -1371,12 +1383,9 @@ static void hget_xdimen_def_node(Xdimen *x)
 { @<read the start byte |a|@>@;
   if (KIND(a)==xdimen_kind)
     hget_xdimen_def(INFO(a),x);
-  else
-     QUIT("Extent expected at 0x%x got %s",node_pos,NAME(a));
+  else  tag_expected(TAG(xdimen_kind,0),a,node_pos);
   @<read and check the end byte |z|@>@;
 }
-
-
 @
 
 @<\HINT\ auxiliar  functions@>=
@@ -1394,8 +1403,8 @@ scaled hteg_xdimen(uint8_t a)
     case TAG(xdimen_kind,b111): HTEG_XDIMEN(b111,x);@+break;
     default:
      x.w=0;x.h=x.v=0.0;
-     QUIT("Extent expected got [%s,%d]",NAME(a),INFO(a));
-  }
+     tag_expected(TAG(xdimen_kind,0),a,node_pos);
+   }
   return  xdimen(&x);
  }
 
@@ -1405,7 +1414,7 @@ scaled hteg_xdimen_node(void)
   if (KIND(z)==xdimen_kind)
     x=hteg_xdimen(z);
   else
-     QUIT("Extent expected at 0x%x got %s",node_pos,NAME(z));
+     tag_expected(TAG(xdimen_kind,0),z,node_pos);
   @<read and check the start byte |a|@>@;
   return x;
 }
@@ -1548,7 +1557,7 @@ pointer hget_rule_node(void)
 { @+ pointer q=null;
   @<read the start byte |a|@>@;
   if (KIND(a)==rule_kind) { HGET_RULE(INFO(a));q=p;}
-  else  QUIT("Rule expected at 0x%x got %s",node_pos,NAME(a));
+  else  tag_expected(TAG(rule_kind,0),a,node_pos); 
   @<read and check the end byte |z|@>@;
   return q;
 }
@@ -1559,7 +1568,7 @@ static pointer hteg_rule_node(void)
 { @+ pointer q=null;
   @<read the end byte |z|@>@;
   if (KIND(z)==rule_kind) { HTEG_RULE(INFO(z));q=p;}
-  else  QUIT("Rule expected at 0x%x got %s",node_pos,NAME(z));
+  else  tag_expected(TAG(rule_kind,0),z,node_pos);
   @<read and check the start byte |a|@>@;
   return q;
 }
@@ -1688,16 +1697,6 @@ the construction of lists and to add boxes to the ``current list''.
 
 For now, we use \TeX's features:
 
-
-@<GET macros@>=
-#define @[IS_LIST(X)@]  (KIND(X)==list_kind || @/\
-        KIND(X)==text_kind  ||@| KIND(X)==param_kind)
-@
-@<TEG macros@>=
-#define @[IS_LIST(X)@]  (KIND(X)==list_kind || @/\
-        KIND(X)==text_kind  ||@| KIND(X)==param_kind)
-@
-
 @<\HINT\ auxiliar functions@>=
 static pointer hget_node_list(uint32_t s)
 { @+ uint8_t *list_end=hpos+s;
@@ -1715,56 +1714,66 @@ static pointer hget_node_list(uint32_t s)
 
 static pointer hget_text_list(uint32_t s);
 static pointer hget_list_pointer(void)
-{ @+if (!IS_LIST(*hpos)) return null;
-  else
-  {@+pointer p=null;
-    uint32_t s, t;
-    @<read the start byte |a|@>@;
-    s=hget_list_size(INFO(a)); 
-    hget_size_boundary(INFO(a));
-    if (KIND(a)==list_kind)
-      p=hget_node_list(s);
-    else if (KIND(a)==text_kind)
-      p=hget_text_list(s);
-    hget_size_boundary(INFO(a));
-    t=hget_list_size(INFO(a)); 
-    if (t!=s) 
-     QUIT("List sizes at 0x%x and " SIZE_F " do not match 0x%x != 0x%x",node_pos+1,hpos-hstart-s-1,s,t);
+{@+pointer p=null;
+  uint32_t s, t;
+  if (KIND(*hpos)==list_kind)
+  { @<read the start byte |a|@>@;
+    if ((INFO(a)&b011)==0) 
+       HGET8; /* the empty list */
+    else
+    { s=hget_list_size(INFO(a)); 
+      hget_size_boundary(INFO(a));
+      if ((INFO(a)&b100)==0)
+        p=hget_node_list(s);
+      else
+        p=hget_text_list(s);
+      hget_size_boundary(INFO(a));
+      t=hget_list_size(INFO(a)); 
+      if (t!=s) 
+        QUIT("List sizes at 0x%x and " SIZE_F " do not match 0x%x != 0x%x",
+          node_pos+1,hpos-hstart-s-1,s,t);
+    }
     @<read and check the end byte |z|@>@;
-   return p;
   }
+  return p;
 }
 @
 
-When we need to parse a list backwards that is part of a node. We still want the resulting list
-in forward order. The simplest way to do this, is moving to the beginning of the list and then
-parsing it in forward order.
+When we need to parse a list backwards that is part of a node. We
+still want the resulting list in forward order. The simplest way to do
+this, is moving to the beginning of the list and then parsing it in
+forward order.
 
 @<\HINT\ auxiliar functions@>=
 
-static void hskip_list()
-{ if (IS_LIST(*hpos))
-  { uint32_t s;
+static void hskip_list(void)
+{ if (KIND(*hpos)==list_kind ||KIND(*hpos)==param_kind  )
+  { Info i;
     uint8_t a;
     HGETTAG(a);
-    s=hget_list_size(INFO(a)); 
-    if (s>0)
-      hpos = hpos + (1+ s + 1+ (INFO(a)-1) +1); /*(boundary tag)+s+(boundary tag)+size+tag*/
+    i=INFO(a)&0x3;
+    if (i==0) hpos=hpos+2; /* reference+tag */
     else
-      hpos = hpos+1;  
+    { uint32_t s=hget_list_size(INFO(a));
+      if (i==3) i=4; /* number of bytes for size */
+      hpos = hpos + (1 + s + 1 + i + 1); 
+    }
   }
 }
 
-static void hskip_list_back()
-{ uint8_t z; 
-  uint32_t s;
-  if (!IS_LIST(*(hpos-1))) return;
-  z=HTEG8;
-  s=hteg_list_size(INFO(z)); 
-  if (s>0)
-    hpos = hpos - (1+ s + 1+ (INFO(z)-1) +1); /*boundary tag+s+boundary tag+size+tag*/
-  else
-    hpos = hpos-1;  
+static void hskip_list_back(void)
+{ if (KIND(*(hpos-1))==list_kind || KIND(*(hpos-1))==param_kind)
+  { Info i;
+    uint8_t z; 
+    z=HTEG8;
+    i=INFO(z)&0x3;
+    if (i==0) hpos=hpos-2;
+    else
+    { uint32_t s=hteg_list_size(INFO(z)); 
+      if (i==3) i=4;
+      hpos = hpos - (1+ s + 1+ i + 1); /*boundary tag+s+boundary tag+size+tag*/
+    }
+  }
 }
 
 pointer hteg_list_pointer(void)
@@ -1922,7 +1931,7 @@ case TAG(vbox_kind,b111): @+{pointer p;@+HTEG_BOX(b111);@+type(p)=vlist_node;@+h
 @<get functions@>=
 pointer hget_hbox_node(void)
 { @+  @<read the start byte |a|@>@;
-   if (KIND(a)!=hbox_kind) QUIT("Hbox expected at 0x%x got %s",node_pos,NAME(a));
+   if (KIND(a)!=hbox_kind)  tag_expected(TAG(hbox_kind,0),a,node_pos);
    { @+pointer p;
     HGET_BOX(INFO(a));@/
     @<read and check the end byte |z|@>@;
@@ -1934,7 +1943,7 @@ pointer hget_hbox_node(void)
 pointer hget_vbox_node(void)
 {@+
   @<read the start byte |a|@>@;
-  if (KIND(a)!=vbox_kind) QUIT("Vbox expected at 0x%x got %s",node_pos,NAME(a));
+  if (KIND(a)!=vbox_kind)  tag_expected(TAG(vbox_kind,0),a,node_pos);
   {@+pointer p;
   HGET_BOX(INFO(a));@/
   @<read and check the end byte |z|@>@;
@@ -1947,7 +1956,7 @@ pointer hget_vbox_node(void)
 @<\HINT\ auxiliar functions@>=
 static pointer hteg_hbox_node(void)
 { @+  @<read the end byte |z|@>@;
-   if (KIND(z)!=hbox_kind) QUIT("Hbox expected at 0x%x got %s",node_pos,NAME(z));
+   if (KIND(z)!=hbox_kind)  tag_expected(TAG(hbox_kind,0),z,node_pos);
    { @+pointer p;@+
     HTEG_BOX(INFO(z));@/
     @<read and check the start byte |a|@>@;
@@ -1956,7 +1965,7 @@ static pointer hteg_hbox_node(void)
 }
 static pointer hteg_vbox_node(void)
 { @+  @<read the end byte |z|@>@;
-   if (KIND(z)!=vbox_kind) QUIT("Vbox expected at 0x%x got %s",node_pos,NAME(z));
+   if (KIND(z)!=vbox_kind)  tag_expected(TAG(vbox_kind,0),z,node_pos);
    { @+pointer p;@+
     HTEG_BOX(INFO(z));@/
     @<read and check the start byte |a|@>@;
@@ -2039,8 +2048,7 @@ case TAG(vset_kind,b111): @+{@+pointer p;HTEG_SET(b111); @+vset(p,sto,st,sho,sh,
 @
 
 The function |hset| computes |glue_set(p)| of a hlist node
-depending on the available stretch, shrink, and the target width |x|;
-the function |vset| does the equivalent for vlist nodes.
+depending on the available stretch, shrink, and the target width |x|.
 @<\HINT\ auxiliar functions@>=
 static void hset(pointer p,@/
           uint8_t sto, scaled st,uint8_t sho,scaled sh, scaled w)
@@ -2074,16 +2082,24 @@ static void hset(pointer p,@/
       glue_set(p)=1.0;
   }
 }
+@
 
+The function |vset| does the equivalent for vlist nodes.
+If the depth value is |MAX_DIMEN+1|, |vset| will also reset 
+height and depth to move the reference point to the top of the
+vertical list. If the first item in the vertical list is a box
+or a rule, the reference point will be the baseline of that box
+or rule; otherwise the reference point will be the exact top of
+the vertical list.
 
-
+@<\HINT\ auxiliar functions@>=
 
 void vset(pointer p, uint8_t sto, scaled st,
 					uint8_t sho,scaled sh, scaled h)
 { @+scaled x;
   type(p)=vlist_node;
   x =height(p); /* natural height adjusted such that depth <= limit */ 
-  height(p)=h;
+  height(p)=h; /* target height */
   x = h-x; /*now |x| is the excess to be made up*/ 
   if (x==0)
     { glue_sign(p)= normal; glue_order(p)= normal;
@@ -2107,6 +2123,16 @@ void vset(pointer p, uint8_t sto, scaled st,
 	  glue_set(p)=0.0;@+
 	}
   }
+  if (depth(p)==MAX_DIMEN+1)
+  { if (list_ptr(p)!=null && (type(list_ptr(p))==hlist_node || type(list_ptr(p))==vlist_node || type(list_ptr(p))==rule_node))
+    { h = height(list_ptr(p));
+      depth(p)=height(p) -h;
+      height(p)=h;
+    }
+    else
+    {depth(p)=depth(p)+height(p); height(p)=0; }
+    DBG(DBGTEX,"vset top node adjusted height=%f depth=%f\n",height(p)/(double)ONE, depth(p)/(double)ONE);
+  }
 }
 @
 
@@ -2121,7 +2147,8 @@ need to traverse the content list before we can set the glue.
  if (K==vpack_kind) HGET32(d); \
  if ((I)&b100) x= hget_xdimen_node();  else x=hget_xdimen_ref(HGET8);\
  p=hget_list_pointer(); \
- if (K==vpack_kind) p=vpackage(p,x,m,d); else p=hpack(p,x,m);\
+ if (K==vpack_kind) { if (d<=MAX_DIMEN && d>=-MAX_DIMEN) p=vpackage(p,x,m,d); else p=vtop(p,x,m,d); } \
+ else p=hpack(p,x,m);\
  shift_amount(p)=s;\
  happend_to_vlist(p);@+}
 @
@@ -2135,7 +2162,8 @@ need to traverse the content list before we can set the glue.
  if ((I)&b010) HTEG32(s);\
  if ((I)&b001) m=additional; else m=exactly; \
  node_pos=hpos-hstart-1;\
- if (K==vpack_kind) p=vpackage(p,x,m,d); else p=hpack(p,x,m);\
+ if (K==vpack_kind)  { if (d<=MAX_DIMEN && d>=-MAX_DIMEN) p=vpackage(p,x,m,d); else p=vtop(p,x,m,d); } \
+ else p=hpack(p,x,m);\
  hprepend_to_vlist(p);@+} 
 @
 
@@ -2176,6 +2204,22 @@ case TAG(vpack_kind,b001): @+HTEG_PACK(vpack_kind,b001);@+break;
 case TAG(vpack_kind,b011): @+HTEG_PACK(vpack_kind,b011);@+break;
 case TAG(vpack_kind,b101): @+HTEG_PACK(vpack_kind,b101);@+break;
 case TAG(vpack_kind,b111): @+HTEG_PACK(vpack_kind,b111);@+break;
+@
+
+@<\HINT\ auxiliar functions@>=
+static pointer vtop(pointer @!p, scaled @!h, small_number @!m, scaled d)
+{ d=d^0x40000000;
+  p=vpackage(p,h,m,d);
+  if (list_ptr(p)!=null && (type(list_ptr(p))==hlist_node || type(list_ptr(p))==vlist_node || type(list_ptr(p))==rule_node))
+  { h = height(list_ptr(p));
+    depth(p)=depth(p)+height(p) -h;
+    height(p)=h;
+  }
+  else
+  { depth(p)=depth(p)+height(p); height(p)=0; }
+  DBG(DBGTEX,"vpack top node adjusted height=%f depth=%f\n",height(p)/(double)ONE, depth(p)/(double)ONE);
+  return p;
+}
 @
 
 \subsection{Kerns}
@@ -2431,7 +2475,7 @@ case TAG(disc_kind,b111): @+{@+HTEG_DISC(b111);@+tail_append(p);@+} @+break;
 static pointer hget_disc_node(void)
 {  @+@<read the start byte |a|@>@;
    if (KIND(a)!=disc_kind || INFO(a)==b000) 
-      QUIT("Hyphen expected at 0x%x got %s,%d",node_pos,NAME(a),INFO(a));
+     tag_expected(TAG(disc_kind,1),a,node_pos);
    { @+
    HGET_DISC(INFO(a));
    @<read and check the end byte |z|@>@;
@@ -2444,7 +2488,7 @@ static pointer hget_disc_node(void)
 pointer hteg_disc_node(void)
 {  @+@<read the end byte |z|@>@;
    if (KIND(z)!=disc_kind || INFO(z)==b000) 
-      QUIT("Hyphen expected at 0x%x got %s,%d",node_pos,NAME(z),INFO(z));
+     tag_expected(TAG(disc_kind,1),z,node_pos); 
    { @+
    HTEG_DISC(INFO(z));
    @<read and check the start byte |a|@>@;
@@ -2529,7 +2573,7 @@ static void transplant_pre_break_list(void)
 }
 
 
-static void hprune_unwanted_nodes(void)
+void hprune_unwanted_nodes(void)
 { @+pointer q, r=head;
   while (true)@+{@+q=link(r);
   if (q==null) goto done;
@@ -2543,6 +2587,9 @@ done: if (r!=head)
   link(head)=q;
   } 
 } 
+@
+@<\HINT\ |extern|@>=
+extern void hprune_unwanted_nodes(void);
 @
 
 Because paragraphs can be broken accross pages, we need to obtain
@@ -2568,179 +2615,121 @@ the initial or the final part of it.
 
 
 We start with processing the entire paragraph.
+Reading the node list inside the paragraph is similar to
+what the function |hget_list_pointer| will do, but in addition
+we store the position of horizontal nodes.
 
 @<\HINT\ auxiliar functions@>=
 pointer hget_paragraph_all(scaled x)
-{ @+
-  uint32_t s, t;
-  uint8_t a,z; /* the start and the end byte*/
-  if (!IS_LIST(*hpos)) return null;
-  HGETTAG(a);
-  s=hget_list_size(INFO(a));
-  hget_size_boundary(INFO(a)); 
-  if (KIND(a)==list_kind)
-  { uint8_t *list_end=hpos+s;
-    cur_list.hs_field=x;
-    push_nest();
-  cur_list.bs_pos=NULL;
-#if 0
-    if (offset>0) hpos=hstart+node_pos1+offset;
-#endif
-    while (hpos<list_end)
-    { hget_content();
-      if (nest_ptr==1) 
-      { pointer p=tail;
-         if (p!=head && !is_char_node(p) && 
-         (type(p)==glue_node || type(p)==kern_node || type(p)==penalty_node 
-         || type(p)==disc_node || type(p)==math_node))
-           store_map(p,node_pos,0); /* we store the position of horizontal 
-                                      nodes and compute the offset of vertical nodes later */
+{@+uint8_t *to;
+  @<prepare for reading the paragraph list@>@;
+  to = list_end;
+  @<read the paragraph list@>@;
+  @<finalize reading the  the paragraph list@>@;
+  return par_ptr;
+}
+
+@ Befor we scan the content of a paragraph, 
+we check for a non empty list, get its size,
+start a new nesting level, and set its horizontal size.
+
+@<prepare for reading the paragraph list@>=
+  pointer par_ptr=null;
+  if (KIND(*hpos)==list_kind)
+  { uint32_t s, t;
+    @<read the start byte |a|@>@;
+    if ((INFO(a)&b011)==0) 
+      HGET8; /* the empty list */
+    else if (INFO(a)&b100)
+      QUIT("Text in paragraph not yet implemented");
+    else
+    { @+uint8_t *list_end;
+      s=hget_list_size(INFO(a));
+      hget_size_boundary(INFO(a)); 
+      list_end=hpos+s;
+      cur_list.hs_field=x;
+      push_nest();
+      cur_list.bs_pos=NULL;
+
+@ Then we read the paragraph list and handle its end.
+
+@<read the paragraph list@>=
+      while (hpos<to)
+      { hget_content();
+        if (nest_ptr==1) 
+        { pointer p=tail;
+           if (p!=head && !is_char_node(p) && 
+           (type(p)==glue_node || type(p)==kern_node || type(p)==penalty_node 
+           || type(p)==disc_node || type(p)==math_node))
+             store_map(p,node_pos,0); 
+        }
       }
+
+@ It remains to take the new list out of the nest and check the end byte.
+
+@<finalize reading the  the paragraph list@>=
+      if (head!=tail) 
+      { par_ptr=link(head);
+        store_map(par_ptr,node_pos,0); 
+        if (needs_bs) 
+          QUIT("Unexpected trailing baseline node");
+      }
+      pop_nest();      
     }
     hget_size_boundary(INFO(a));
     t=hget_list_size(INFO(a)); 
     if (t!=s) 
-      QUIT("List sizes at 0x%x and " SIZE_F " do not match 0x%x != 0x%x",node_pos+1,hpos-hstart-s-1,s,t);
+      QUIT("List sizes at 0x%x and " SIZE_F " do not match 0x%x != 0x%x",
+        node_pos+1,hpos-hstart-s-1,s,t);
     @<read and check the end byte |z|@>@;
-#if 0    
-    if (offset>0 && link(head)!=null && !is_char_node(link(head)))
-    { if (type(link(head))==disc_node)
-        transplant_post_break_list();
-      else
-        hprune_unwanted_nodes(); 
-    }
-#endif
-    if (needs_bs) 
-      QUIT("Unexpected trailing baseline node");
-    if (head==tail) 
-    {  pop_nest(); /*null paragraphs are ignored*/
-       return null;
-    }
-    else
-    { pointer par_ptr=link(head);
-      pop_nest();      
-      store_map(par_ptr,node_pos,0); 
-      return par_ptr;
-    }
   }
-  else 
-    QUIT("Text in paragraph not yet implemented");
-  return null;
-}
-@
-Next we look at retrieving the final part staring at a given position inside the paragraph.
-We examine the start of the node list and replace a hyphen node by its post break list.
+
+
+
+@ Next we look at retrieving the final part staring at a 
+given position |from| inside the paragraph.
+We examine the start of the node list and replace a 
+hyphen node by its post break list.
 Otherwise we remove unwanted space from the beginning of the list.
 
 @<\HINT\ auxiliar functions@>=
 pointer hget_paragraph_final(scaled x, uint8_t *from)
-{ @+
-  uint32_t s, t;
-  uint8_t a,z; /* the start and the end byte*/
-  if (!IS_LIST(*hpos)) return null;
-  HGETTAG(a);
-  s=hget_list_size(INFO(a));
-  hget_size_boundary(INFO(a)); 
-  if (KIND(a)==list_kind)
-  { uint8_t *list_end=hpos+s;
-    cur_list.hs_field=x;
-    push_nest();
-  cur_list.bs_pos=NULL;
-    hpos=from;
-    while (hpos<list_end)
-    { hget_content();
-      if (nest_ptr==1) 
-      { pointer p=tail;
-         if (p!=head && !is_char_node(p) && 
-         (type(p)==glue_node || type(p)==kern_node || type(p)==penalty_node || type(p)==disc_node || type(p)==math_node))
-           store_map(p,node_pos,0); /* we store the position of horizontal nodes and compute the offset of vertical nodes later */
-      }
-    }
-    hget_size_boundary(INFO(a));
-    t=hget_list_size(INFO(a)); 
-    if (t!=s) 
-      QUIT("List sizes at 0x%x and " SIZE_F " do not match 0x%x != 0x%x",node_pos+1,hpos-hstart-s-1,s,t);
-    @<read and check the end byte |z|@>@;
-    if (link(head)!=null && !is_char_node(link(head)))
-    { if (type(link(head))==disc_node)
-        transplant_post_break_list();
-      else
-        hprune_unwanted_nodes(); 
-    }
-    if (needs_bs) 
-      QUIT("Unexpected trailing baseline node");
-    if (head==tail) 
-    {  pop_nest(); /*null paragraphs are ignored*/
-       return null;
-    }
+{@+uint8_t *to;
+  @<prepare for reading the paragraph list@>@;
+  hpos=from; to=list_end;
+  @<read the paragraph list@>@;
+  if (link(head)!=null && !is_char_node(link(head)))
+  { if (type(link(head))==disc_node)
+      transplant_post_break_list();
     else
-    { pointer par_ptr=link(head);
-      pop_nest();      
-      store_map(par_ptr,node_pos,0); 
-      return par_ptr;
-    }
+      hprune_unwanted_nodes(); 
   }
-  else 
-    QUIT("Text in paragraph not yet implemented");
-  return null;
+  @<finalize reading the  the paragraph list@>@;
+  return par_ptr;
 }
 @
 
-Getting the initial part of a paragraph is even simpler.
+Getting the initial part of a paragraph again needs some small modifications
+to take care of ending an incomplete paragraph.
+
 @<get functions@>=
 pointer hget_paragraph_initial(scaled x, uint8_t *to)
-{ @+
-  uint8_t *node_start;
-  uint32_t s, t;
-  uint8_t a,z; /* the start and the end byte*/
-  node_start=hpos;
-  HGETTAG(a);
-  if (!IS_LIST(a)) 
-  { hpos=node_start; return null; }
-  s=hget_list_size(INFO(a));
-  hget_size_boundary(INFO(a)); 
-  if (KIND(a)==list_kind)
-  { uint8_t *list_end=hpos+s;  if (to>list_end) { LOG("Value of to greater than list_end"); to=list_end; }
-    cur_list.hs_field=x;
-    push_nest();
-    cur_list.bs_pos=NULL;   
-    while (hpos<to)
-    { hget_content();
-      if (nest_ptr==1) 
-      { pointer p=tail;
-         if (p!=head && !is_char_node(p) && 
-         (type(p)==glue_node || type(p)==kern_node || type(p)==penalty_node || type(p)==disc_node || type(p)==math_node))
-           store_map(p,node_pos,0); /* we store the position of horizontal nodes and compute the offset of vertical nodes later */
-      }
+{ @+@<prepare for reading the paragraph list@>@;
+    if (to>list_end) 
+    { LOG("Value of to greater than list_end"); 
+      to=list_end;
     }
+    @<read the paragraph list@>@;
     if (KIND(*to)==disc_kind)
     { hget_content();
       store_map(tail,node_pos,0); 
       transplant_pre_break_list();
     }
-    hpos=list_end;
-    hget_size_boundary(INFO(a));
-    t=hget_list_size(INFO(a)); 
-    if (t!=s) 
-      QUIT("List sizes at 0x%x and " SIZE_F " do not match 0x%x != 0x%x",node_pos+1,hpos-hstart-s-1,s,t);
-    @<read and check the end byte |z|@>@;
-    if (needs_bs) 
-      QUIT("Unexpected trailing baseline node");
-    if (head==tail) 
-    {  pop_nest(); /*null paragraphs are ignored*/
-       return null;
-    }
-    else
-    { pointer par_ptr=link(head);
+    if (head!=tail)
       @<add the node that terminates an incomplete paragraph@>@;
-      pop_nest();      
-      store_map(par_ptr,node_pos,0); 
-      return par_ptr;
-    }
-  }
-  else 
-    QUIT("Text in paragraph not yet implemented");
-  return null;
+    hpos=list_end;
+    @<finalize reading the  the paragraph list@>@;
+  return par_ptr;
 }
 @
 
@@ -2752,13 +2741,14 @@ after that initial part of the paragraph. How to do that nicely is an
 open question. Here, we just add a penalty and a zero glue.
 
 @<add the node that terminates an incomplete paragraph@>=
-  if (is_char_node(tail)) tail_append(new_penalty(inf_penalty))@;
+{ if (is_char_node(tail)) tail_append(new_penalty(inf_penalty))@;
   else if (type(tail)!=glue_node) tail_append(new_penalty(inf_penalty))@;
   else
   {@+type(tail)=penalty_node;delete_glue_ref(glue_ptr(tail));
      flush_node_list(leader_ptr(tail));penalty(tail)=inf_penalty;
   }
   tail_append(new_glue(zero_glue));
+}
 @
 
 
@@ -2824,8 +2814,9 @@ void hget_par_node(uint32_t offset)
 { @+ scaled x=0;
   ParamDef *q;
   @<read the start byte |a|@>@;
-  if (KIND(a)!=par_kind)
-    QUIT("Paragrap expected found tag [%s,%d] at " SIZE_F "\n",NAME(a),INFO(a),hpos-hstart);
+  node_pos=(hpos-hstart)-1;
+   if (KIND(a)!=par_kind)
+    tag_expected(TAG(par_kind,0),a,node_pos);
   node_pos=(hpos-hstart)-1;
   if (INFO(a)==b100) q=hget_param_list_ref(HGET8);
   if (INFO(a)&b100) x=hget_xdimen_node(); else x=hget_xdimen_ref(HGET8);
@@ -3956,7 +3947,9 @@ void hloc_set(uint64_t h)
   if (page_loc[cur_loc]==h) return;
   for (i=lo_loc,NEXT_PAGE(i); i!=hi_loc; NEXT_PAGE(i))
    if (page_loc[i]==h)
-   { cur_loc=i; return;}
+   { cur_loc=i;
+     DBG(DBGPAGE,"loc_set: %d < %d < %d\n",lo_loc,cur_loc,hi_loc); 
+     return;}
   page_loc[cur_loc]=h;
   hloc_clear();
   DBG(DBGPAGE,"loc_set: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
@@ -4570,24 +4563,30 @@ uint64_t  hint_page_bottom(uint64_t h)
 }
 @
 
-A function to build a page centered around a given position completes the set of
-page building functions.
-If the given position is a top level node, it is the first possible candidate
-for the beginning of the new page.
-If it is inside a toplevel paragraph, we put the whole paragraph
-on the contribution list and determine a first candidate based on this paragraph.
-then we move backwards trying to find an even better position, moving further
-material to the contribution list.
-Once the ``best'' position is found, we render the page in forward mode.
+A function to build a page centered around a given position completes
+the set of page building functions.
+If the given position points to a top level node, this node is a
+candidate for the beginning of the new page.
+If the position is inside a toplevel paragraph, we process the whole
+paragraph and put it line by line on the contribution list. One of the
+nodes on the contribution list will then contain the given
+position. This node, called the target node, must be shown on the
+page.
+If the whole paragraph fits on the page, one possibility is to start
+the page with the paragraph but we may improve the page
+by adding material to the top of the page.
+More complications arrise if that is not the case.  
+Once the ``best'' starting point of the page is found, the
+page is rendered in forward mode.
 
 @<render functions@>=
 uint64_t  hint_page_middle(uint64_t l)
-{ uint32_t pos, pos0, offset;
-  pointer p,tp=null;
-  scaled h=0,d=0, ht=0, hp, dp;
+{ uint32_t target_pos, pos0, offset;
+  pointer p;
+  scaled h=0,d=0, hp, dp, target_dist=0, break_dist=0;
   int pi=0;
   if (hin_addr==NULL) return 0;
-  pos=LOC_POS(l);
+  target_pos=LOC_POS(l);
   offset=LOC_OFF(l);
   pos0=LOC_POS0(l);
   if (hstart+pos0+offset>=hend)
@@ -4595,15 +4594,12 @@ uint64_t  hint_page_middle(uint64_t l)
   hflush_contribution_list();
   hpos=hstart+pos0;
   hget_content();
-  p=link(contrib_head);
+
   if (offset>0)
-  { @<if the page must start inside the paragraph, modify the contribution list and go to |found|@>@;
-  }
-  else if (p!=null && type(p)==penalty_node)
-    pi=penalty(p);
+    @<if the page must start inside the paragraph, modify the contribution list and go to |found|@>@;
   @<try to improve the page break by adding material to the top of the page@>@;
 found:
-  hloc_set(PAGE_LOC(pos0,offset));
+  hloc_set(PAGE_LOC(pos0,offset)); 
   if (!hint_forward()) return hint_page_top(0);
   forward_mode=true;
   backward_mode=false;
@@ -4611,35 +4607,75 @@ found:
 }
 @
 
-To determine if the page must start inside the paragraph, we determine the
-natural distance from up to the line that contains the target offset.
-If this distance is below the desired page height, the beginning of the
-paragraph is a feasible page break. Otherwise, we find out if the end of
-the paragraph is a feasible page break and if so determine the line that
-should start the page. If both alternatives fail, we determine the line
-about half a page up from the target line and start there.
+To determine if the page must start inside the paragraph, we determine
+the natural distance |target_dist| from the top of the paragraph to
+the bottom of node |target_q|, the node that links to the target node.
+Then we determine the distance |break_dist| from this point down to
+the first feasible page break.  If
+|target_dist|+|break_dist| is smaller than the page height, the
+beginning of the paragraph is a good page break. Otherwise if
+|break_dist| is smaller than the page height, we remove nodes from the
+contribution list until the remaining nodes will fit on the page.  We
+then try to improve the page break by removing more nodes until the
+target node is close to the middle of the page. If all fails, we start
+the page with the target node.
 
-@<if the page must start inside the paragraph, modify the contribution list and go to |found|@>=
-{ while (p!=null)
-  { @<compute height, depth, and penalty of |p|@>@;
-    h += d+hp;
-    d=dp;
-    if (pi<=0 && tp==null)
-    { uint32_t t=LOC_POS(hlocation(p));
-      if (t>pos)
-      { tp=p; ht=h;
-        break;
-      }
-    }
-    p=link(p);
-  }
-  if (tp==null) ht=h;
-  if (ht>=hvsize)
-  { @<remove enough lines from the contribution list to make the target fit nicely on the page@>@;
+@<if the page must start inside the paragraph, 
+  modify the contribution list and go to |found|@>=
+{ pointer q, target_q;
+  @<determine |target_q|, |target_dist|, and |break_dist|@>@;
+  if (target_dist+break_dist<=hvsize)
+    offset=0;
+  else
+  { if (break_dist>=hvsize)
+       q=target_q;
+    else
+      @<set |q| to the last line that must be removed from the 
+        contribution list to make the target fit nicely on the page@>@;
+    @<remove all nodes up to |q| from the contribution list@>@;
     goto found;
   }
 }
 @
+
+@<determine |target_q|, |target_dist|, and |break_dist|@>=
+  target_q=null;
+  q=contrib_head; p=link(q);
+  h=d=target_dist=break_dist=0;  
+  while (p!=null)
+  { pointer qq;
+    @<compute height, depth, and penalty of |p|@>@;
+    qq=q;
+    q=p;
+    p=link(p);
+    if (target_q!=null)
+    { if (pi<=0)
+        break;
+    }
+    else if (p==null || LOC_POS(hlocation(p))>target_pos)
+    { target_q=qq;
+      target_dist=h+d;
+      h=d=0;
+    }
+    h += d+hp;
+    d=dp;
+  }
+  if (target_q==null)
+  {  target_dist=h; break_dist=0; }
+  else
+    break_dist=h;
+@
+
+
+ @<remove all nodes up to |q| from the contribution list@>=
+ { p=link(q);
+   offset=LOC_OFF(hlocation(p));
+   link(q)=null;
+   flush_node_list(link(contrib_head));
+   link(contrib_head)=p;
+ }
+@
+
 
 When traversing the contribution list, either in upward or downward direction,
 we are inserted in the height, the depth, and the penalties of the contributions.
@@ -4669,30 +4705,30 @@ A positive value for |pi| indicates an unwanted page break.
     }
 @
 
-If the distance |ht| of the target line from the beginning of the paragraph
-is greater or equal to the page size, we remove lines from the beginning of
-the paragraph until the distance to the target line is about half the page size.
+Next we consider the case that |break_dist| is smaller than the page size. So there
+is a feasible end of page after the target node.
+While |target_dist|+|break_dist| is greater than the page size, we remove lines from the beginning of
+the paragraph until |target_dist| gets as close to half the page size as possible.
 
-@<remove enough lines from the contribution list to make the target fit nicely on the page@>=
- pointer q=contrib_head;
- scaled dh=ht-hvsize/2;
- p = link(contrib_head);
- h=d=0;
- while (p!=null)
+@<set |q| to the last line that must be removed from the contribution 
+  list to make the target fit nicely on the page@>=
+{ scaled dh;
+  dh=target_dist + break_dist -hvsize;
+  if (target_dist-dh > hvsize/2) 
+    dh = target_dist-hvsize/2;
+  q=contrib_head;
+  p = link(q);
+  d = 0;
+  while (p!=null && q!=target_q && dh>0)
  { @<compute height, depth, and penalty of |p|@>@;
-    h= h+d+hp;
-    d=dp;
-   if (pi<=0 && h>=dh) break;
+   dh= dh-hp-d;
+   d=dp;
    q=p;
    p=link(p);
  }
- if (p!=null)
- { offset=LOC_OFF(hlocation(p));
-   link(q)=null;
-   flush_node_list(link(contrib_head));
-   link(contrib_head)=p;
- }
+}
 @
+
 
 Sometimes the target is in a small paragraph just below a section heading or another
 good point to start a page. In these situations, the page can be improved by adding
@@ -4703,19 +4739,22 @@ material above the target.
   pointer t_save=tail;
   uint8_t *hpos_save=hpos;
   pointer best_p=null;
-  int best_pi=pi;
-  link(contrib_head)=null; p=tail=contrib_head;
+  int best_pi=0;
+  link(contrib_head)=null; tail=contrib_head;
   hpos=hstart+pos0;
-  h=ht;
-  while (h<(hvsize/4*3))
-  { while (link(p)==null && hpos>0)
+  h=target_dist+break_dist;
+  d=0;
+  p=tail;
+  while (h<hvsize)
+  { while (link(p)==null && hpos>hstart)
       hteg_content();
-    if (link(p)==null)
-      break;
-    else
-      p=link(p);
+    if (link(p)==null) break;
+    p=link(p);
     @<compute height, depth, and penalty of |p|@>@;
-    h = h+dp+hp;
+    if (hpos==hstart) pi=eject_penalty;
+    if (h+hp+d> hvsize) 
+      break;
+    h = h+d+hp; d=dp;
     if (pi< best_pi)
     { best_pi=pi;
       best_p=p;
@@ -4725,6 +4764,7 @@ material above the target.
   if (best_p==null)
   { flush_node_list(link(contrib_head));
     hpos=hstart+pos0;
+    offset=0;
   }
   else
   { p=link(contrib_head);
@@ -7211,20 +7251,20 @@ for the Windows and the Android system.
 #include <stdio.h>
 #include <setjmp.h>
 #define MAX_HERROR 1024
-extern char herror_string[MAX_HERROR];
+extern char hint_error_string[MAX_HERROR];
 extern FILE *hlog;
 extern void hint_end(void);
-extern jmp_buf error_exit;
+extern jmp_buf hint_error_exit;
 
 #ifdef _MSC_VER /* MS Visual Studio C */
 #define snprintf(S,N,F,...) _snprintf(S,N,F,__VA_ARGS__)
 #ifndef _CONSOLE
 #pragma warning(disable : 4996)
-extern void hmessage(char *title, char *format, ...);
-#define MESSAGE(...)  hmessage("HINT",__VA_ARGS__)
+extern void hint_message(char *title, char *format, ...);
+#define MESSAGE(...)  hint_message("HINT",__VA_ARGS__)
 
-extern int herror(char *title, char *msg);
-#define ERROR_MESSAGE  herror("HINT ERROR",herror_string)
+extern int hint_error(char *title, char *msg);
+#define ERROR_MESSAGE  hint_error("HINT ERROR",hint_error_string)
 #endif
 #endif
 
@@ -7233,7 +7273,7 @@ extern int herror(char *title, char *msg);
 
 #define LOG(...)      __android_log_print(ANDROID_LOG_DEBUG,__FILE__,__VA_ARGS__)
 #define MESSAGE(...)  __android_log_print(ANDROID_LOG_INFO,__FILE__, __VA_ARGS__)
-#define ERROR_MESSAGE __android_log_print(ANDROID_LOG_ERROR,__FILE__,"ERROR: %s\n", herror_string)
+#define ERROR_MESSAGE __android_log_print(ANDROID_LOG_ERROR,__FILE__,"ERROR: %s\n", hint_error_string)
 
 #endif
 
@@ -7246,17 +7286,17 @@ extern int herror(char *title, char *msg);
 #endif
 
 #ifndef ERROR_MESSAGE
-#define ERROR_MESSAGE        fprintf(stderr,"ERROR: %s\n",herror_string)   
+#define ERROR_MESSAGE        fprintf(stderr,"ERROR: %s\n",hint_error_string)   
 #endif
 
 #ifndef QUIT
-#define QUIT(...)    (snprintf(herror_string,MAX_HERROR-1,__VA_ARGS__),\
-                     ERROR_MESSAGE,hint_end(),longjmp(error_exit,1))
+#define QUIT(...)    (snprintf(hint_error_string,MAX_HERROR-1,__VA_ARGS__),\
+                     ERROR_MESSAGE,hint_end(),longjmp(hint_error_exit,1))
 #endif
 
 
 #ifndef HINT_TRY
-#define HINT_TRY if ((herror_string[0]=0,setjmp(error_exit)==0))
+#define HINT_TRY if ((hint_error_string[0]=0,setjmp(hint_error_exit)==0))
 #endif
 
 #endif
@@ -7265,8 +7305,8 @@ extern int herror(char *title, char *msg);
 
 The following variables are required for the error handling: 
 @<\HINT\ variables@>=
-jmp_buf error_exit;
-char herror_string[MAX_HERROR];
+jmp_buf hint_error_exit;
+char hint_error_string[MAX_HERROR];
 @
 
 \section{Testing \HINT}\label{testing}

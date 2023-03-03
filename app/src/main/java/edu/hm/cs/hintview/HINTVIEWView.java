@@ -19,7 +19,6 @@ package edu.hm.cs.hintview;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.ParcelFileDescriptor;
@@ -44,14 +43,14 @@ import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.opengles.GL10;
 
 public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener {
-    private static String TAG = "HINTVIEWView";
-    private static final boolean DEBUG = false;
+    //private static final String TAG = "HINTVIEWView";
+    //private static final boolean DEBUG = false;
     public static double xdpi, ydpi;
     public static double scale = 1.0;
     private static int width, height;
     protected Renderer fileRenderer;
     private static boolean darkMode = false;
-    protected static boolean ZoomOn = false, ZoomOff = false, Zooming = false;
+    protected static boolean ZoomOn = false, clearFonts = false, Zooming = false;
     protected static boolean Page_next = false, Page_prev = false;
     private GestureDetector touchGestureDetector;
     private ScaleGestureDetector scaleGestureDetector;
@@ -108,11 +107,9 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
-        boolean s = scaleGestureDetector.onTouchEvent(motionEvent);
+        scaleGestureDetector.onTouchEvent(motionEvent);
         if (scaleGestureDetector.isInProgress()) return true;
-        boolean t = touchGestureDetector.onTouchEvent(motionEvent);
-
-        return t;
+        return touchGestureDetector.onTouchEvent(motionEvent);
     }
 
     public double getScale() {
@@ -122,6 +119,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
     public void setScale(double s) {
         scale = s;
         if (scale < 0.1) scale = 0.1;
+        if (scale > 4.0) scale = 4.0;
     }
 
     public boolean getMode() {
@@ -173,8 +171,8 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
          * We use a minimum size of 4 bits for red/green/blue, but will
          * perform actual matching in chooseConfig() below.
          */
-        private static int EGL_OPENGL_ES2_BIT = 4;
-        private static int[] s_configAttribs2 =
+        private static final int EGL_OPENGL_ES2_BIT = 4;
+        private static final int[] s_configAttribs2 =
                 {
                         EGL10.EGL_RED_SIZE, 4,
                         EGL10.EGL_GREEN_SIZE, 4,
@@ -251,14 +249,14 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         protected int mAlphaSize;
         protected int mDepthSize;
         protected int mStencilSize;
-        private int[] mValue = new int[1];
+        private final int[] mValue = new int[1];
     }
 
 
 
 
     protected static class Renderer implements GLSurfaceView.Renderer {
-        private HINTVIEWView view;
+        private final HINTVIEWView view;
         private final Context context;
         private String fileUriStr;
         private String ErrorMsg;
@@ -303,6 +301,8 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
                     //bc it got already closed in the cpp code
                     //Log.w(TAG, "setFile " + fileUriStr + " at " + Long.toHexString(pos));
                     Uri fileURI = Uri.parse(fileUriStr);
+                    // The following will produce an error during debugging if the executable has changed between
+                    // storing the fileUri and using it after a restart.
                     ParcelFileDescriptor pfd = context.getContentResolver().openFileDescriptor(fileURI, "r");
                     int fd = pfd.detachFd();
                     //Log.w(TAG, "setFile fd = " + fd);
@@ -336,6 +336,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
 
             HINTVIEWLib.setMode(darkMode);
             HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi); /* needed for zooming */
+            if (clearFonts) { clearFonts =false; HINTVIEWLib.clearFonts(); }
             if (HINTVIEWView.Page_prev) {
                 HINTVIEWLib.prev();
                 HINTVIEWView.Page_prev = false;

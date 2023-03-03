@@ -10,11 +10,10 @@
     <string name="open_file">Open Document…</string>
     <string name="home_page">To home page</string>
     <string name="scale_one">Zoom to 100%</string>
-    <string name="zoom_mode">TeX Zoom</string>
-    <string name="hint_version">HINT Version 1.4</string>
-    <string name="viewer_version">Viewer Version 1.3</string>
+    <string name="hint_version">HINT Version 2.0</string>
+    <string name="viewer_version">Viewer Version 2.0</string>
     <string name="about">About &#8230;</string>
     <string name="hint_icon">HINT Icon</string>
-    <string name="error_icon">Error Icon</string>
+
 </resources>
 

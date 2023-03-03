@@ -36,10 +36,13 @@ public class HINTVIEWLib {
 
     public static native void home();
 
-    public static native void zoomBegin();
+    // removed because classic zoom was removed
+    //public static native void zoomBegin();
+    //public static native void zoom();
 
-    public static native void zoomEnd();
+    // needed to rerender fonts after zooming
+    public static native void clearFonts();
 
-    public static native void zoom();
+
 
 }
