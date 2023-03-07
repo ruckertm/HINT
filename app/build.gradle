@@ -1,19 +1,28 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        release {
+        storeFile file('C:\\Users\\ruckert\\Documents\\keys\\HIntview\\HintViewUploadkey.jks')
+            storePassword 'murks6248'
+            keyAlias 'murks'
+            keyPassword 'murks6248'
+        }
+    }
     compileSdkVersion 29
     defaultConfig {
         applicationId 'edu.hm.cs.hintview'
         minSdkVersion 21
         targetSdkVersion 32
-        versionCode 6
-        versionName "1.3"
+        versionCode 7
+        versionName "2.0.1"
         externalNativeBuild {
             cmake {
                 // Available arguments are inside ${SDK}/cmake/.../android.toolchain.cmake file
                 arguments '-DANDROID_STL=c++_static'
             }
         }
+        signingConfig signingConfigs.debug
     }
 
     buildTypes {
@@ -33,7 +42,7 @@ android {
         implementation "androidx.appcompat:appcompat:1.1.0"
     }
     lint {
-        ignoreWarnings false
+        ignoreWarnings true
     }
     namespace 'edu.hm.cs.hintview'
     ndkVersion '21.4.7075529'

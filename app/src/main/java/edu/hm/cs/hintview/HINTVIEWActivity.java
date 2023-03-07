@@ -24,6 +24,8 @@ import android.view.WindowInsets;
 import android.app.Dialog;
 import android.widget.Button;
 import android.view.View.OnClickListener;
+import android.widget.TextView;
+import android.text.method.LinkMovementMethod;
 //import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -251,6 +253,8 @@ public class HINTVIEWActivity extends AppCompatActivity {
                         dialog.dismiss();
                     }
                 });
+                TextView linkTextView = dialog.findViewById(R.id.textView4);
+                linkTextView.setMovementMethod(LinkMovementMethod.getInstance());
                 dialog.show();
             }
              return true;
