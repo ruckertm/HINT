@@ -1,0 +1,37 @@
+\documentclass[10pt]{article}
+\usepackage{iftex}
+
+\begin{document}
+%% works with \topinsert \endinsert 
+%% but not yet with \begin{figure}[t] \end{figure}
+
+This document has a figure.
+
+%\begin{figure}[t]
+\topinsert
+  \vbox to 1in {\hrule
+    \vfill
+    \hbox{A Figure}
+    \vfill
+    \hrule}
+  \caption{The Figure.}
+\endinsert
+%\end{figure}
+
+And another figure.
+
+%\begin{figure}[t]
+\topinsert
+  \vbox to 1in {\hrule
+    \vfill
+    \hbox{An other Figure}
+    \vfill
+    \hrule}
+  \caption{The second Figure.}
+\endinsert
+%\end{figure}
+
+\vfill
+
+\end{document}
+

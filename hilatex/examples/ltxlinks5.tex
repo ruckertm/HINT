@@ -1,0 +1,65 @@
+\documentclass[10pt]{article}
+\usepackage{iftex}
+\ifhint
+% requires hhitex.def to be found by kpathseach
+\usepackage[customdriver=hhitex]{hyperref}
+\else
+\usepackage{hyperref}
+\fi
+
+\begin{document}
+
+\newpage
+This is a pretty lenthy paragraph that might not fit
+in its entirety on the same page as equation~\ref{firsteq}
+and equation~\ref{secondeq} that come at the end of it.
+On the following pages is equation~\ref{lasteq}.
+This is a pretty lenthy paragraph that might not fit
+in its entirety on the same page as the two formulas
+that come at the end of it.
+This is a pretty lenthy paragraph that might not fit
+in its entirety on the same page as the two formulas
+that come at the end of it.
+This is a pretty lenthy paragraph that might not fit
+in its entirety on the same page as the two formulas
+that come at the end of it.
+This is a pretty lenthy paragraph that might not fit
+in its entirety on the same page as the two formulas
+that come at the end of it.
+This is a pretty lenthy paragraph that might not fit
+in its entirety on the same page as the two formulas
+that come at the end of it.
+This is a pretty lenthy paragraph that might not fit
+in its entirety on the same page as the two formulas
+that come at the end of it.
+This is a pretty lenthy paragraph that might not fit
+in its entirety on the same page as the two formulas
+that come at the end of it.
+And here are two silly equations:
+\begin{equation}
+\sum_{i\to\infty}{1 \over i^2}\label{firsteq}
+\end{equation}
+and
+\makeatletter
+\c@equation=7
+\makeatletter
+\begin{equation}
+\sum_{i= 1}^\infty{1 \over i^2}.\label{secondeq}
+\end{equation}
+Which concludes the paragraph.
+
+\newpage
+The start of the last page is here.
+
+\penalty -100
+
+And the last equation is: 
+
+\begin{equation}
+\sum_{k= 1}^\infty{1 \over k*k}\label{lasteq}
+\end{equation}
+
+And this is the end of the document.
+
+\end{document}
+

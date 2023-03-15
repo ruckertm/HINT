@@ -1,0 +1,21 @@
+\begin{thebibliography}{1}
+
+\bibitem{DK:texbook}
+D.~E. Knuth, {\em The \TeX\ book}.
+\newblock Computers \& Typesetting, Volume~A, Addison-Wesley Publishing
+  Company, 1984.
+
+\bibitem{DK:tex}
+D.~E. Knuth, {\em \TeX: The Program}.
+\newblock Computers \& Typesetting, Volume~B, Addison-Wesley, 1986.
+
+\bibitem{DK:mfb}
+D.~E. Knuth, {\em Computers \& Typesetting, The METAFONT book}.
+\newblock Addison-Wesley, 1986.
+
+\bibitem{DK:lp}
+D.~E. Knuth, {\em Literate Programming}.
+\newblock CSLI Lecture Notes Number 27, Stanford, CA: Center for the Study of
+  Language and Information, 1992.
+
+\end{thebibliography}

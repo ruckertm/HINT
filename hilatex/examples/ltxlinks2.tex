@@ -1,0 +1,38 @@
+\documentclass[10pt]{article}
+\usepackage{iftex}
+\ifhint
+% requires hhitex.def to be found by kpathseach
+\usepackage[customdriver=hhitex]{hyperref}
+\else
+\usepackage{hyperref}
+\fi
+
+\begin{document}
+%% Section labels
+
+% Hint viewers have a Home button.
+% It navigates to a position that is a good place to start navigation.
+% This is, if available the table of contents.
+\ifhint\HINTdest name {HINT.home}\fi
+\tableofcontents
+
+% The sections generate an outline entry. Can we also have an outline
+% entry for the table of contents?
+
+
+\newpage
+\section{One}
+\label{one}
+This is section one.
+For more see \autoref{two}.
+\newpage
+\section{Two}
+\label{two}
+This is section two.
+\newpage
+\subsection{Three of Two}
+\label{three}
+This is a subsection of section two.
+
+\end{document}
+

@@ -1,0 +1,53 @@
+\documentclass[10pt]{article}
+\usepackage{iftex}
+\ifhint
+% requires hhitex.def to be found by kpathseach
+\usepackage[customdriver=hhitex]{hyperref}
+\else
+\usepackage{hyperref}
+\fi
+
+\begin{document}
+\listoffigures
+
+%% figures with other options than [h] e.g top or bottom dont work yet
+
+\newpage
+Here and on the following pages, you can see Figure~\ref{firstfig},
+the Figure~\ref{secondfig} and finaly Figure~\ref{lastfig}.
+
+\begin{figure}[h]
+  \vbox to 1in {\hrule
+    \vfill
+    \hbox{First TOP Figure}
+    \vfill
+    \hrule}
+  \caption{First Figure.}
+  \label{firstfig}
+\end{figure}
+\begin{figure}[h]
+  \vbox to 1in {\hrule
+    \vfill
+    \hbox{Second TOP/HERE Figure}
+    \vfill
+    \hrule}
+  \caption{Second Figure at the Top in the Middle or on the bottom of the Page.}
+  \label{secondfig}
+\end{figure}
+
+\newpage
+The start of page 3.
+
+\begin{figure}[h]
+  \vbox to 1in {\hrule
+    \vfill
+    \hbox{Third Figure}
+    \vfill
+    \hrule}
+  \caption{Third Figure.}
+  \label{lastfig}
+\end{figure}
+\vfill
+
+\end{document}
+
