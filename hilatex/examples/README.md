@@ -6,13 +6,12 @@ Files named plain*.tex (plain TeX files)
 are processed by tex, pdftex, or hitex. 
 They illustrate or test various features. For example
 plainlinks1.tex is the most simple program to test links.
-The number preceeding the .tex enumerate the examples for
+The number preceding the .tex enumerate the examples for
 the same feature in increasing complexity.
 
-For each plain*.tex file the is a ltx*.tex file trying to
-achive the same result using LaTeX syntax. These files
+For each plain*.tex file there is a ltx*.tex file trying to
+achieve the same result using LaTeX syntax. These files
 must be processed by latex, pdflatex, or hilatex.
-
 
 ### plainlinks1.tex ltxlinks1.tex
 The first page contains three clickable links to the next three pages
@@ -25,12 +24,12 @@ be changed so that both files work for both engines.
 This example tests sections and subsections, a table of content and outlines.
 
 ### ltxlinks3.tex ltxlink3.bib ltxlinks3.bbl
-This example tests bibliograpy links. The file ltxlinks3.bbl can be generated using bibtex.
+This example tests bibliography links. The file ltxlinks3.bbl can be generated using bibtex.
 
 ### ltxlinks4.tex
 This example test links to figures. There are still some problems:
-Figures work only whit Placement = h (here).
-Floats dont work (see next example).
+Figures work only with placement = h (here).
+Floats don't work (see next example).
 
 The caption is not centered on the page and captions are not broken into
 multiple lines if the space on the page requires it. In the list of figures,
@@ -39,7 +38,8 @@ captions are broken into several lines.
 ### ltxlinks5.tex
 This example tests links to displayed equations and with it the
 generation of pages that start in the middle of a paragraph.
-The current algorithm works quite well in most circumstances,
+The current algorithm of hintview to find a "good" page 
+works quite well in most circumstances,
 but there is still room for improvement.
 
 ### ltxfloat1.tex
@@ -59,9 +59,9 @@ This example tries to do floats, but hilatex does generate LaTeX errors.
 
 ### Outlines that contain non ASCII characters like in "München".
 
-### Outlines that contain special contructs like \TeX or \LaTeX or $\sum_{i\to\infty} a_i$.
+### Outlines that contain special constructs like \TeX or \LaTeX or $\sum_{i\to\infty} a_i$.
 
-### Outlines with no consecutive depth levels
+### Outlines with no consecutive depth levels.
 
 ## Authors
 Martin Ruckert, Karl Berry
