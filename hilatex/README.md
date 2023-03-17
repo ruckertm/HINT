@@ -22,18 +22,18 @@ through the various App Stores or on the HintView home page:
 http://hint.userweb.mwn.de/hint/hintview.html 
 
 ## Directories
+base - for supplemental tex files that should go to the TeX Live
+distribution in directory texlive/20XX/texmf-dist/tex/hitex/base/
+
 doc - for documentation
 
 examples - for examples used as test cases
 
-base - for supplemental tex files that should go to the TeX Live
-distribution in directory texlive/20XX/texmf-dist/tex/hitex/base/
+format - for format files
 
 win32 - for WIN32 executables
 
 linux - for linux binaries
-
-format - for format files
 
 ## Roadmap
 The repository will target first the hyperref package of LaTeX with
