@@ -1,0 +1,12 @@
+examples/*.log
+examples/*.pdf
+examples/*.dvi
+examples/*.hnt
+examples/*.aux
+examples/*.out
+examples/*.fls
+examples/*.toc
+examples/*.blg
+examples/*.lof
+*~
+\#*\#
