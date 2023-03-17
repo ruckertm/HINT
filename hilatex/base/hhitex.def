@@ -46,10 +46,10 @@
       \the\Hy@abspage<<#1>>%
     }%
   }%
-  \RequirePackage{atveryend}[2009/12/07]%
-  \AtVeryEndDocument{%
-    \HyPL@SetPageLabels
-  }%
+%  \RequirePackage{atveryend}[2009/12/07]%
+%  \AtVeryEndDocument{%
+%    \HyPL@SetPageLabels
+%  }%
 \fi
 \begingroup\expandafter\expandafter\expandafter\endgroup
 \expandafter\ifx\csname pdf@escapestring\endcsname\relax
