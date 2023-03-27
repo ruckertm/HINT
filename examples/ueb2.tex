@@ -1,0 +1,109 @@
+% ueb1.tex 
+% 99-10-20
+
+\documentclass[12pt]{article}
+\usepackage{german}
+%\usepackage{makeidx}
+%\usepackage{bussproofs}
+%\usepackage{amsmath}
+\def\binom#1#2{\left({#1\atop #2}\right)}
+
+%\usepackage{amssymb}
+%\usepackage{amsfonts}
+%\usepackage{pc}
+\setlength{\textwidth}{16cm}
+\setlength{\textheight}{23cm}
+\setlength{\topmargin}{0cm}
+\setlength{\oddsidemargin}{0cm}
+\setlength{\evensidemargin}{0cm}
+
+\def\N{\mathbb{N}}
+\def\data{\textsc{Data}}
+\def\expr{\textsc{Expr}}
+\def\factiter{\texttt{fact{-}iter}}
+\def\name{\langle name\rangle}
+\def\natseg{\hbox{\sf nat{-}seg}}
+\def\squaresum{\texttt{square{-}sum}}
+\def\rmel{\texttt{rm{-}el}}
+\def\val{\textsc{Val}}
+\def\var{\textsc{Var}}
+\def\vs{v\!s}
+
+\input size.tex
+\textwidth=320pt
+\textheight=400pt
+
+%\tracingall
+\begin{document}
+\pretolerance=1000
+\tolerance=2000
+\emergencystretch=16pt
+\thispagestyle{empty}
+
+\noindent
+\hbox{\parindent 0pt\vbox{\advance\hsize -4em\raggedright
+Mathematisches Institut der Universit\"at M\"unchen\par
+H.~Schwichtenberg, M.~Ruckert}\hfil\vbox{\hsize=4em\raggedleft
+WS 2001\par
+Blatt 2}}
+
+\vskip 1cm plus 1cm minus 1cm
+\begin{center}
+\textbf{\"Ubungen zum Ferienkurs Nichtnumerisches Programmieren (Scheme)}
+\end{center}
+\vskip 1cm plus 1cm minus 1cm
+\noindent
+\textbf{Aufgabe 5.}
+F\"ur die durch geschachtelte Rekursion definierte Funktion
+\begin{verbatim}
+(define (ackermann x y)
+  (cond ((= y 0) 0)
+        ((= x 0) (* 2 y))
+        ((= y 1) 2)
+        (else (ackermann 
+                (- x 1)
+                (ackermann x (- y 1))))))
+\end{verbatim}
+berechne man {\tt (ackermann 1 10)}, {\tt (ackermann 2 4)} und
+{\tt (ackermann 3 3)}.  Man verfolge den Ablauf der Rechnung mittels
+{\tt (trace ackermann)}.  Ferner gebe man \"ubliche mathematische 
+Definitionen f\"ur die Funktionen $f_i(y):=f(i,y)$ f\"ur $i=0,1,2$.
+
+
+\bigskip\noindent\textbf{Aufgabe 6.}
+Die Zahlen $\binom{n}{k}$ hei{\ss}en Bi\-no\-mial\-koeffi\-zien\-ten.
+F\"ur $1\le k\le n$ gilt
+%
+$$\binom{n}{k}=\binom{n-1}{k-1}+\binom{n-1}{k}.$$
+
+Schreiben Sie eine Funktion {\tt (binom n k)} zur Berechnung
+der Binomialkoeffizienten.
+
+
+
+
+\bigskip\noindent\textbf{Aufgabe 7.}
+Man definiere eine Funktion {\tt (integral f a b n)},
+die eine $n$-te N"aherung $$ 1/n\sum_{i=0}^{n-1}\cdot f(a+(b-a)i/n)$$
+des Integrals  "uber $f$ von $a$ bis $b$ berechnet.
+
+Experimentieren sie mit rationalen Funktionen $f$, etwa
+{\tt (define (f x) (/ 1 x))} und beobachten Sie die Unterschiede
+zwischen
+\begin{verse}
+ {\tt (integral f 1 2 100)} und \\
+ {\tt (integral f 1.0 2.0 100)}
+\end{verse}
+ bez"uglich Ergebniss, Genauigkeit
+und Laufzeit.
+
+
+\bigskip\noindent\textbf{Aufgabe 8.}
+Funktionen mit Parametern lassen sich in Scheme leicht
+realisieren. Betrachten wir z.B. die Funktion $g_r: x \mapsto rx^2+1$.
+Schreiben Sie, unter Verwendung von \verb/lambda/, eine Funktion \verb/g/,
+so da"s der Aufruf von \verb/(g 3)/ als Wert die
+entsprechende Funktion $g_3$ liefert. Versuchen Sie auch 
+sich genau klar zu machen, was und wie
+der Ausdruck {\tt (integral (g (sqrt 2)) 1 2 100)} berechnet.
+\end{document}

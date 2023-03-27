@@ -1,0 +1,262 @@
+\let\MFmanual=\!
+
+\input manmac.tex
+
+\input size.tex
+
+\pagewidth=\hsize \pageheight=\vsize \def\onepageout#1{\shipout\vbox{ % here we define one page of output
+    \offinterlineskip % butt the boxes together
+%    \vbox to 3pc{ % this part goes on top of the 44pc pages
+%      \iftitle % the next is used for title pages
+%        \global\titlefalse % reset the titlepage switch
+%        \setcornerrules % for camera alignment
+%      \else\ifodd\pageno \rightheadline\else\leftheadline\fi\fi
+%      \vfill} % this completes the \vbox to 3pc
+    \vbox to \pageheight{
+      \ifvoid\margin\else % marginal info is present
+        \rlap{\kern31pc\vbox to\z@{\kern4pt\box\margin \vss}}\fi
+      #1 % now insert the main information
+      \ifvoid\footins\else % footnote info is present
+        \vskip\skip\footins \kern-3pt
+        \hrule height\ruleht width\pagewidth \kern-\ruleht \kern3pt
+        \unvbox\footins\fi
+      \boxmaxdepth=\maxdepth
+      } % this completes the \vbox to \pageheight
+    }
+  \advancepageno}
+
+\proofmodefalse
+
+\ifproofmode\message{Proof mode is on!}\fi
+\titlepage
+\def\rhead{Preface}
+\vbox to 8pc{
+\rightline{\titlefont Preface}\vss}
+%{\topskip 9pc % this makes equal sinkage throughout the Preface
+\vskip-\parskip
+\tenpoint
+\noindent\hang\hangafter-2
+\smash{\lower12pt\hbox to 0pt{\hskip-\hangindent\cmman G\hfill}}\hskip-16pt
+{\sc ENERATION} {\sc OF} {\sc LETTERFORMS} \strut by mathematical means
+was first tried in the fifteenth century; it became popular in the
+sixteenth and seventeenth centuries; and it was abandoned (for good
+reasons) during the eighteenth century. Perhaps the twentieth century
+will turn out to be the right time for this idea to make a comeback,
+now that mathematics has advanced and computers are able to
+do the calculations.
+
+%} % end of the special \topskip
+
+Modern printing equipment based on raster lines---in which metal ``type''
+has been replaced by purely combinatorial patterns of zeroes and ones
+that specify the desired position of ink in a discrete way---makes
+mathematics and computer science increasingly relevant to printing.
+We now have the ability to give a completely precise definition of letter
+shapes that will produce essentially equivalent results on all raster-based
+machines. Moreover, the shapes can be defined in terms of variable
+parameters; computers can ``draw'' new fonts of characters
+in seconds, making it possible for designers to perform valuable experiments
+that were previously unthinkable.
+
+\MF\ is a system for the design of alphabets suited to raster-based
+devices that print or display text. The characters that you are reading
+were all designed with \MF\!, in a completely precise way; and they
+were developed rather hastily by the author of the system, who is a rank
+amateur at such things. It seems clear that further work with \MF\ has
+the potential of producing typefaces of real ^{beauty}. This manual has
+been written for people who would like to help advance the art of
+mathematical type design.
+
+A top-notch designer of typefaces needs to have an unusually good eye
+and a highly developed sensitivity to the nuances of shapes.
+A top-notch user of computer languages needs to have an unusual
+talent for abstract reasoning and a highly developed ability to
+express intuitive ideas in formal terms. Very few people have both
+of these unusual combinations of skills; hence the best products of
+\MF\ will probably be collaborative efforts between two
+people who complement each other's abilities. Indeed, this situation
+isn't very different from the way types have been created for many
+generations, except that the r\^ole of ``punch-cutter'' is now being
+played by skilled computer specialists instead of by skilled
+metalworkers.
+
+A \MF\ user writes a ``program'' for each letter or symbol of a typeface.
+These programs are different from ordinary computer programs,
+because they are essentially {\sl declarative\/} rather than imperative.
+In the \MF\ language you explain where the major components of a
+desired shape are to be located, and how they relate to each other,
+but you don't have to work out the details of exactly where the lines
+cross, etc.; the computer takes over the work of solving equations as it
+deduces the consequences of your specifications. One of the advantages of
+\MF\ is that it provides a discipline according to which the principles
+of a particular alphabet design can be stated precisely. The underlying
+intelligence does not remain hidden in the mind of the designer; it is
+spelled out in the programs. Thus consistency can readily be obtained
+where consistency is desirable, and a font can readily be extended to
+new symbols that are compatible with the existing ones.
+
+It would be nice if a system like \MF\ were to simplify the task of type
+design to the point where beautiful new alphabets could be created in a
+few hours. This, alas, is impossible; an enormous amount of subtlety lies
+behind the seemingly simple letter shapes that we see every day, and the
+designers of high-quality typefaces have done their work so well that we
+don't notice the underlying complexity.  One of the disadvantages of \MF\
+is that a person can easily use it to produce poor alphabets, cheaply and
+in great quantity. Let us hope that such experiments will have educational
+value as they reveal why the subtle tricks of the trade are important, but
+let us also hope that they will not cause bad workmanship to proliferate.
+Anybody can now produce a book in which all of the type is home-made, but
+a person or team of persons should expect to spend a year or more on the
+project if the type is actually supposed to look right. \MF\ won't put
+today's type designers out of work; on the contrary, it will tend to make
+them heroes and heroines, as more and more people come to appreciate their
+skills.
+
+Although there is no royal road to type design, there are some things that
+can, in fact, be done well with \MF\ in an afternoon. Geometric designs
+are rather easy; and it doesn't take long to make modifications to letters
+or symbols that have previously been expressed in \MF\ form. Thus,
+although comparatively few users of \MF\ will have the courage to do an
+entire alphabet from scratch, there will be many who will enjoy
+customizing someone else's design.
+
+This book is not a text about mathematics or about computers. But if
+you know the rudiments of those subjects (namely, contemporary high school
+mathematics, together with the knowledge of how to use the text
+editing or word processing facilities on your computing machine),
+you should be able to use \MF\ with little difficulty after reading
+what follows. Some parts of the exposition in the text are more obscure
+than others, however, since the author has tried to satisfy experienced
+\MF ers as well as beginners and casual users with a single manual.
+Therefore a special symbol has been used to warn about esoterica: When you
+see the sign
+$$\vbox{\hbox{\dbend}\vskip 11pt}$$
+at the beginning of a paragraph, watch out for a ``^{dangerous bend}''
+in the train of thought---don't read such a paragraph unless you need to.
+You will be able to use \MF\ reasonably well, even to design characters like
+the dangerous-bend symbol itself, without reading the fine print in such
+advanced sections.
+
+Some of the paragraphs in this manual are so far out that they are rated
+$$\vcenter{\hbox{\dbend\kern1pt\dbend}\vskip 11pt}\;;$$
+everything that was said about single dangerous-bend signs goes double
+for these. You should probably have at least a month's experience with
+\MF\ before you attempt to fathom such doubly dangerous depths
+of the system; in fact, most people will never need to know \MF\
+in this much detail, even if they use it every day. After all, it's
+possible to fry an egg without knowing anything about biochemistry.
+Yet the whole story is here in case you're curious. \ (About \MF\!, not eggs.)
+
+The reason for such different levels of complexity is that people change
+as they grow accustomed to any powerful tool. When you first try to use
+\MF\!, you'll find that some parts of it are very easy, while other things
+will take some getting used to. At first you'll probably try to control
+the shapes too rigidly, by overspecifying data that has been copied from
+some other medium.  But later, after you have begun to get a feeling for
+what the machine can do well, you'll be a different person, and you'll be
+willing to let \MF\ help contribute to your designs as they are being
+developed. As you gain more and more experience working with this unusual
+apprentice, your perspective will continue to change and you will
+run into different sorts of challenges.  That's the way it is with any
+powerful tool: There's always more to learn, and there are always better
+ways to do what you've done before.  At every stage in the development
+you'll want a slightly different sort of manual.  You may even want to
+write one yourself.  By paying attention to the dangerous bend signs in
+this book you'll be better able to focus on the level that interests you
+at a particular time.
+
+Computer system manuals usually make dull reading, but take heart:
+This one contains {\sc ^{JOKES}} every once in a while. You might actually
+enjoy reading it. \ (However, most of the jokes can only be appreciated
+properly if you understand a technical point that is being made---so
+read {\sl carefully}.)
+
+Another noteworthy characteristic of this book is that it doesn't
+always tell the ^{truth}. When certain concepts of \MF\ are introduced
+informally, general rules will be stated; afterwards you will find that the
+rules aren't strictly true. In general, the later chapters contain more
+reliable information than the earlier ones do. The author feels that this
+technique of deliberate lying will actually make it easier for you to
+learn the ideas. Once you understand a simple but false rule, it will not
+be hard to supplement that rule with its exceptions.
+
+In order to help you internalize what you're reading,
+{\sc ^{EXERCISES}} are sprinkled through this manual. It is generally intended
+that every reader should try every exercise, except for questions that appear
+in the ``dangerous bend'' areas. If you can't solve a problem, you
+can always look up the answer.
+But please, try first to solve it by yourself; then you'll learn more
+and you'll learn faster. Furthermore, if you think you do know the solution,
+you should turn to Appendix~A and check it out, just to make sure.
+
+\bigskip
+\hrule
+\line{\vrule\hss\vbox{\medskip\ninepoint
+\leftskip=\parindent \rightskip=\parindent
+\noindent\strut W{\sc ARNING}: Type design can be hazardous to your other
+interests.  Once you get hooked, you will develop intense feelings about
+letterforms; the medium will intrude on the messages that you read. And you
+will perpetually be thinking of improvements to the fonts that you see
+everywhere, especially those of your own design.
+\strut\medskip}\hss\vrule}
+\hrule
+
+\bigskip
+
+The \MF\ language described here has very little in common with the
+author's previous attempt at a language for alphabet design, because
+five years of experience with the old system has made it clear that a
+completely different approach is preferable. Both languages have
+been called \MF; but henceforth the old language should be called
+\MF\kern.05em79, and its use should rapidly fade away. Let's keep the name
+\MF\ for the language described here, since it is so much better, and
+since it will never change again. ^^{MF79}
+
+I wish to thank the hundreds of people who have helped me to formulate
+this ``definitive edition'' of \MF\!, based on their experiences with
+preliminary versions of the system.  In particular, John ^{Hobby}
+discovered many of the algorithms that have made the new language
+possible. My work at Stanford has been generously supported by the
+^{National Science Foundation}, the ^{Office of Naval Research}, the ^{IBM
+Corporation}, and the ^{System Development Foundation}. I also wish to
+thank the ^{American Mathematical Society} for its encouragement and for
+publishing the {\sl ^{TUGboat}\/} newsletter (see Appendix~J\null).
+Above all, I deeply thank my wife, Jill, for the inspiration, ^^{Knuth, Jill}
+understanding, comfort, and support she has given me for more than
+25~years, especially during the eight years that I have been
+working intensively on mathematical typography.
+
+\medskip
+\line{{\sl Stanford, California}\hfil--- D. E. K.}^^{Knuth, Don}
+\line{\sl September 1985\hfil}
+
+%} % end of the special \topskip
+%\endchapter
+
+\vfill
+It is hoped that Divine Justice may find
+some suitable affliction for the malefactors
+who invent variations upon the alphabet of our fathers.~.\thinspace.\thinspace.
+The type-founder, worthy mechanic, has asserted himself
+with an overshadowing individuality,
+defacing with his monstrous creations and revivals
+every publication in the land.
+\author AMBROSE ^{BIERCE}, {\sl The Opinionator.~Alphab\^etes\/} %
+  (1911) % vol 10 of his collected works, p69
+  % probably written originally in 1898 or 1899
+
+\vskip 4cm
+\goodbreak
+\vskip -4cm
+\bigskip
+~
+\vfil
+
+Can the new process yield a result that, say,
+a Club of Bibliophiles would recognise as a work of art
+comparable to the choice books they have in their cabinets?
+\author STANLEY ^{MORISON}, {\sl Typographic Design in Relation to
+  Photographic Composition\/} (1958) % pp 4--5
+
+
+\end

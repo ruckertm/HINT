@@ -1,0 +1,33 @@
+\input size.tex
+\tracingpages=1
+\parskip=0pt
+\parindent=0pt
+\baselineskip=0pt
+\lineskip=0pt
+\lineskiplimit=0pt
+\def\vcm#1#2{\vbox to 10 mm{%
+  \hbox to 100mm{\hbox to 10mm{\vrule height 7mm depth 3mm width 0mm\hfill#1\hfill}\kern-10mm\hfill#2\hfill}\vfill
+  \hrule width 12pt height 0.4pt depth 0pt\kern-0.4pt}}
+
+
+\vbox
+{\nointerlineskip\hsize=100mm
+\hbox{%
+\hbox to 10mm{\strut\vrule\hfill1\hfill}%
+\hbox to 10mm{\strut\vrule\hfill2\hfill}%
+\hbox to 10mm{\strut\vrule\hfill3\hfill}%
+\hbox to 10mm{\strut\vrule\hfill4\hfill}%
+\hbox to 10mm{\strut\vrule\hfill5\hfill}%
+\hbox to 10mm{\strut\vrule\hfill6\hfill}%
+\hbox to 10mm{\strut\vrule\hfill7\hfill}%
+\hbox to 10mm{\strut\vrule\hfill8\hfill}%
+\hbox to 10mm{\strut\vrule\hfill9\hfill}%
+\hbox to 10mm{\strut\vrule\hfill10\hfill\vrule}%
+}%
+\hrule width 100mm
+\vrule height 100mm depth 0mm
+\vbox{\vcm{1}{}\vcm{2}{}\vcm{3}{}\vcm{4}{}\vcm{5}{Two rulers each {\bf exactly} 100mm long}\vcm{6}{}\vcm{7}{}\vcm{8}{}\vcm{9}{}\vcm{10}{}}
+}
+\vfill
+\eject
+\end

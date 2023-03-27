@@ -1,0 +1,36 @@
+\input size.tex
+\tracingoutput=1
+\newdimen\lefttext
+\lefttext=0.5\hsize
+\advance\lefttext by -12pt
+\vbox{%
+\hbox to \hsize{%
+\hskip 8pt plus 4pt minus 4pt%
+\HINTimage=Loewe.jpg width 0.45\hsize height 0.9\vsize
+\hskip 8pt plus 4pt minus 4pt%
+\vrule
+\hskip 6pt
+\vbox{
+\hsize=\lefttext
+\parskip=0pt
+\parindent=0pt
+\hangindent=4.5\baselineskip
+\hangafter=-4
+\hbox to 0pt{\vbox to 0pt{\HINTimage=Head.jpg \vss}\hss}
+Here we have some text that describes the picture to the left.
+It is the title picture of my most recent book {\it WEB to cweb}
+with the subtitle
+{\it Converting \TeX\ from WEB to cweb}.
+
+\parskip 6pt plus 3pt minus 3pt
+\parindent=4.5\baselineskip
+The insert in the previous paragraph shows a detail: the lions head.
+
+\bigskip
+}%
+\hskip 6pt
+}
+\hrule}
+\vfill
+\eject
+\end
