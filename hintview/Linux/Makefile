@@ -21,7 +21,7 @@ $(error "Valid values for WITH_GTK are 0, 2 or 3")
 endif
 
 CC = gcc
-CFLAGS = -g -O0 -ggdb -DDEBUG -Wall
+CFLAGS = -g -O0 -ggdb -DDEBUG -Wall -I../backend
 LDFLAGS = -g -Og
 #GL_DEFINES = -DGLEW_STATIC -DTW_NO_DIRECT3D -DTW_NO_LIB_PRAGMA -DTW_STATIC -D_CRT_SECURE_NO_WARNINGS
 
@@ -54,19 +54,19 @@ all: hintview
 main.o: main.c
 	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
 
-hint.o: hint.c
+hint.o: ../backend/hint.c
 	$(CC) $(CFLAGS) -Wno-unused-but-set-variable -o $@ -c $<
 
-htex.o: htex.c
+htex.o: ../backend/htex.c
 	$(CC) $(CFLAGS) -Wno-parentheses -Wno-unused-but-set-variable -Wno-maybe-uninitialized -o $@ -c $<
 
 renderOGL.o: renderOGL.c
 	$(CC) $(FT_INCLUDES) $(CFLAGS) -o $@ -c $<
 
-hfonts.o: hfonts.c
+hfonts.o: ../backend/hfonts.c
 	$(CC) $(CFLAGS) $(FT_INCLUDES) -o $@ -c $<
 
-%.o: %.c 
+%.o: ../backend/%.c 
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 hintview: $(OBJ)
@@ -76,9 +76,6 @@ SRC= $(OBJ:.o=.c) $(HFILES) main.h stb_image.h Makefile CMakeLists.txt
 DIST_SRC = $(SRC:%=src/%)
 DIST_MAN = man/hintview.1
 
-hintview.tgz: $(VIEWFILES)
-	tar -c -C .. --transform 's,^,hintview/,' -z -f $@ $(DIST_SRC) $(DIST_MAN) CMakeLists.txt
-
 BINDIR=/usr/local/bin
 MANDIR=/usr/local/man
 
@@ -87,33 +84,7 @@ install: hintview
 	install -t $(BINDIR) --mode=755 hintview
 	install -t $(MANDIR)/man1 --mode=644 ../man/hintview.1
 
-
-.PHONY: www
-www: hintview hintview.tgz
-	cp hintview hintview.tgz ../man/hintview.1 ../../www/linux/
-
-
-VIEWFILES=hint.c tables.c htex.c hfonts.c get.c hrender.c \
-	hint.h htex.h format.h get.h \
-	basetypes.h error.h hrender.h rendernative.h hfonts.h \
-        format.w hint.w htex.ch btex.w
-
-$(VIEWFILES): viewfiles
-	cp ../../hint/$@ .
-
-viewfiles:
-	$(MAKE) -C ../../hint viewlinux || true
-	touch viewfiles
-
-
 .PHONY: clean
 clean:
 	rm -f *.o *~ *.dvi *.log *.aux
-	rm -f hintview hintview.tgz
-	$(MAKE) -C ../../hint viewlinux || true
 
-.PHONY: distclean
-distclean:
-	rm -f *.o *~ *.dvi *.log *.aux
-	rm -f hintview hintview.tgz
-	rm -f $(VIEWFILES)
