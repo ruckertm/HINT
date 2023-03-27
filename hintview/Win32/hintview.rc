@@ -1,0 +1,265 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU MENUEX 
+BEGIN
+    POPUP "&File",                          65535,MFT_STRING,MFS_ENABLED
+    BEGIN
+        MENUITEM "&Open ...",                   ID_FILE_OPEN,MFT_STRING,MFS_ENABLED
+        MENUITEM "&Close",                      ID_FILE_CLOSE,MFT_STRING,MFS_ENABLED
+        MENUITEM "&Autoreload",                 ID_FILE_AUTORELOAD,MFT_STRING,MFS_ENABLED
+        MENUITEM "&Save Image ...",             ID_FILE_SAVE_IMAGE,MFT_STRING,MFS_ENABLED
+        MENUITEM "Page Set&up ...",             ID_FILE_PAGE_SETUP,MFT_STRING,MFS_ENABLED
+        MENUITEM "&Print ...",                  ID_FILE_PRINT,MFT_STRING,MFS_ENABLED
+        MENUITEM "&Exit",                       ID_APP_EXIT,MFT_STRING,MFS_ENABLED
+    END
+    POPUP "&Options",                       65535,MFT_STRING,MFS_ENABLED
+    BEGIN
+        MENUITEM "&Zoom  100%",                 ID_OPTIONS_ZOOM_100,MFT_STRING,MFS_ENABLED
+        MENUITEM "&Night mode",                 ID_OPTIONS_NIGHT,MFT_STRING,MFS_ENABLED
+        MENUITEM "&Settings ...",               ID_OPTIONS_SETTINGS,MFT_STRING,MFS_ENABLED
+    END
+    MENUITEM "&Go To",                      0,MFT_STRING,MFS_ENABLED
+    POPUP "Help",                           65535,MFT_STRING | MFT_RIGHTJUSTIFY,MFS_ENABLED
+    BEGIN
+        MENUITEM "About",                       ID_APP_ABOUT,MFT_STRING,MFS_ENABLED
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_SETTINGS DIALOGEX 0, 0, 407, 139
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Settings"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,350,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,350,24,50,14
+    EDITTEXT        IDC_PX,70,7,40,14,ES_AUTOHSCROLL
+    RTEXT           "Pixels horizontal:",IDC_STATIC,7,9,55,8
+    EDITTEXT        IDC_PY,70,23,40,14,ES_AUTOHSCROLL
+    RTEXT           "Pixels vertical:",IDC_STATIC,7,25,55,8
+    RTEXT           "Device dpi x/y:",IDC_STATIC,7,41,55,8
+    EDITTEXT        IDC_XDPI,70,39,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_YDPI,113,39,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_HSIZE,250,23,40,14,ES_AUTOHSCROLL
+    RTEXT           "hsize:",IDC_STATIC,187,25,55,8
+    EDITTEXT        IDC_VSIZE,250,38,40,14,ES_AUTOHSCROLL
+    RTEXT           "vsize:",IDC_STATIC,187,40,55,8
+    LTEXT           "mm",IDC_HUNIT,295,25,12,8
+    LTEXT           "mm",IDC_VUNIT,295,40,12,8
+    COMBOBOX        IDC_UNITS,250,7,39,70,CBS_DROPDOWNLIST | WS_TABSTOP
+    LTEXT           "Units:",IDC_STATIC,222,11,20,8
+    EDITTEXT        IDC_ESSIZE,249,118,40,14,ES_AUTOHSCROLL
+    RTEXT           "Emergency stretch:",IDC_STATIC,143,87,98,8
+    EDITTEXT        IDC_TOLERANCE,249,54,40,14,ES_AUTOHSCROLL
+    RTEXT           "Tolerance:",IDC_STATIC,171,56,69,8
+    EDITTEXT        IDC_PRETOLERANCE,249,70,40,14,ES_AUTOHSCROLL
+    RTEXT           "Pretolerance:",IDC_STATIC,183,71,57,8
+    LTEXT           "mm",IDC_ESUNIT,293,89,12,8
+    CONTROL         "Round to Pixel:",IDC_ROUND_TO_PIXEL,"Button",BS_AUTO3STATE | BS_LEFTTEXT | WS_TABSTOP,15,55,65,10
+    EDITTEXT        IDC_PXSIZE,68,67,40,14,ES_AUTOHSCROLL
+    RTEXT           "Threshold:",IDC_STATIC,28,70,36,8
+    LTEXT           "mm",IDC_TUNIT,112,68,12,8
+    EDITTEXT        IDC_EDIT_GAMMA,67,97,37,13,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN_GAMMA,"msctls_updown32",UDS_ALIGNRIGHT | UDS_ARROWKEYS,105,97,11,14
+    LTEXT           "/pixel",IDC_STATIC,124,68,18,8
+    LTEXT           "Gamma:",IDC_STATIC,37,98,27,8
+    CONTROL         "v:",IDC_ROUND_TO_PIXEL_V,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,115,54,23,10
+    CONTROL         "h:",IDC_ROUND_TO_PIXEL_H,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,85,55,23,10
+    CONTROL         "Nearest:",IDC_TO_NEAREST,"Button",BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,35,84,44,10
+END
+
+IDD_ABOUT DIALOGEX 0, 0, 185, 95
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "About"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,65,70,50,14
+    CTEXT           "HintView",IDC_STATIC,0,10,185,8
+    CTEXT           "Version x.y",IDC_VERSION,0,25,185,8
+    CTEXT           "© Martin Ruckert 2021",IDC_STATIC,0,50,185,8
+    ICON            IDI_ICON,IDC_STATIC,146,6,20,20,SS_CENTERIMAGE
+    CTEXT           "HINT Format Version x.y",IDC_HINT_VERSION,0,37,185,8
+END
+
+IDD_SEARCH DIALOGEX 0, 0, 160, 26
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Search"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_SEARCH,24,7,112,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "<",IDC_SEARCH_PREV,7,7,16,12
+    PUSHBUTTON      ">",IDC_SEARCH_NEXT,137,7,16,12
+END
+
+IDD_OUTLINE DIALOGEX 0, 0, 189, 94
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Outline"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_OUTLINE,"SysTreeView32",TVS_HASBUTTONS | TVS_LINESATROOT | TVS_DISABLEDRAGDROP | TVS_NOTOOLTIPS | WS_TABSTOP,44,7,105,80,WS_EX_TRANSPARENT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_SETTINGS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 400
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 132
+    END
+
+    IDD_SEARCH, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 153
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 19
+    END
+
+    IDD_OUTLINE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 182
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 87
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_SETTINGS DLGINIT
+BEGIN
+    IDC_UNITS, 0x403, 3, 0
+0x6d6d, "\000" 
+    IDC_UNITS, 0x403, 3, 0
+0x6e69, "\000" 
+    IDC_UNITS, 0x403, 3, 0
+0x7470, "\000" 
+    IDC_UNITS, 0x403, 3, 0
+0x6370, "\000" 
+    0
+END
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON                ICON                    "HintView.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_LOGO48              BITMAP                  "Logo48.bmp"
+IDB_TOOLBAR             BITMAP                  "toolbar.bmp"
+IDB_BFACE_A             BITMAP                  "ButtonFace36x36xA.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_ACCELERATOR ACCELERATORS 
+BEGIN
+    "A",            ID_KEY_AUTORELOAD,      VIRTKEY, CONTROL, NOINVERT
+    VK_F1,          ID_KEY_HELP,            VIRTKEY, NOINVERT
+    VK_HOME,        ID_KEY_HOME,            VIRTKEY, NOINVERT
+    VK_APPS,        ID_KEY_MENU,            VIRTKEY, NOINVERT
+    "N",            ID_KEY_NIGHT,           VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_KEY_OUTLINE,         VIRTKEY, CONTROL, NOINVERT
+    VK_NEXT,        ID_KEY_PAGE_NEXT,       VIRTKEY, NOINVERT
+    VK_PRIOR,       ID_KEY_PAGE_PREV,       VIRTKEY, NOINVERT
+    "Q",            ID_KEY_QUIT,            VIRTKEY, CONTROL, NOINVERT
+    "R",            ID_KEY_RELOAD,          VIRTKEY, CONTROL, NOINVERT
+    "F",            ID_KEY_SEARCH,          VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_KEY_SETTINGS,        VIRTKEY, CONTROL, NOINVERT
+    "Z",            ID_KEY_ZOOM,            VIRTKEY, CONTROL, NOINVERT
+    "H",            ID_KEY_HOME,            VIRTKEY, CONTROL, NOINVERT
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
