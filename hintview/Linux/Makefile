@@ -87,4 +87,6 @@ install: hintview
 .PHONY: clean
 clean:
 	rm -f *.o *~ *.dvi *.log *.aux
+	rm -f hintview
+
 
