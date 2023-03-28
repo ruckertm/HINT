@@ -1,0 +1,31 @@
+\input size.tex
+
+\chardef\BS='134
+
+Here you see three boxes in the first line using {\tt \BS vtop}  aligning
+the boxes on the baseline of the top line and in the
+second line using {\tt \BS vbox} aligning the boxes on the baseline of the bottom line.
+The first box has a height that is equla to 0.1 of the vertical window size;
+the next box contains three short paragraphs and its width is 0.3 of the horizontal window size; the last box has the same width and contains two paragraphs.
+The edges of the boxes are marked by vertical lines and they are separated by a fill glue.
+
+
+\hbox to \hsize{
+\vrule\vtop to 0.1\vsize{\hbox{Hello}\vss\hbox{world.}}\vrule\hfill
+\vrule\vtop{\hsize=0.3\hsize And\par another\par ugly box.}\vrule\hfill
+\vrule\vtop{\hsize=0.3\hsize All ugly\par boxes alinged on the top line of the box.}\vrule
+}
+
+\vskip 12pt
+
+\hbox to \hsize{
+\vrule\vbox to 0.1\vsize{\hbox{Hello}\vss\hbox{world.}}\vrule
+\hfill
+\vrule\vbox{\hsize=0.3\hsize And\par another\par ugly box.}\vrule
+\hfill
+\vrule\vbox{\hsize=0.3\hsize All\par boxes alinged on the last line of the box.}\vrule
+}
+
+\vfil
+\end
+

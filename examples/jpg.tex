@@ -1,0 +1,35 @@
+\input size.tex
+\input ifhint.tex
+
+\def\makeatletter{\catcode`\@=11\relax}
+\def\makeatother{\catcode`\@=12\relax}
+
+\makeatletter
+  \message{\the\language\ number}
+  \let\l@german=\lang@german
+ % \language=\lang@german
+  \showhyphens{Umgehungsstrasse}
+\makeatother
+
+\input german.sty
+\selectlanguage{german}
+
+\parskip=0pt
+\parindent=0pt
+\hangindent=4.5\baselineskip
+\hangafter=-4
+\hbox to 0pt{\vbox to 0pt{\ifhint\HINTimage=A.jpg height 48pt\else A\fi \vss}\hss}  n\-fangs\-buch\-sta\-ben wurden in fr"uheren Zeiten
+oft als Initialen ausgeschm"uckt. Dabei wurde von den Schreibern ein hohes Ma"s  an Kunstfertigkeit
+erwartet. Nicht immer bestand die Initiale einfach nur aus dem kunstfertig gezeichneten Buchstaben.
+Oft wurden kleine Szenen gemalt, die den nachfolgenden Text illustrierten.
+
+\parskip 6pt plus 3pt minus 3pt
+\parindent=4.5\baselineskip
+In der heutigen Zeit wird f"ur die Initialen meist nur ein Grossbuchstabe aus einer
+verf"ugbaren Schmuckschrift oder einfach nur ein vergr"o"serter Buchstabe aus der auch
+im Text verwendeten Hauptschrift genommen.
+
+
+\vfill
+\eject
+\end

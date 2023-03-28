@@ -1,0 +1,91 @@
+\documentclass{article}      % Specifies the document class
+\input size.tex
+\input ifhint.tex
+\ifhint
+\input hiltxpage.tex
+\def\caption#1{\noindent\leftskip=0pt plus 60pt\rightskip=\leftskip
+  \parfillskip=0pt\relax Figure:~#1\par\smallskip}
+%\def\centering{\leftskip=0pt plus 60pt\rightskip=\leftskip
+%  \parfillskip=0pt\parindent=0pt\noindent}
+\else
+\usepackage{graphicx}
+\usepackage{bmpsize}
+\fi
+
+\title{Implementing Insertions} 
+\author{Martin Ruckert}
+\date{February 25, 2022} 
+
+\pagestyle{empty}
+
+\begin{document}
+
+%\tracingall  
+\maketitle           
+       
+This is an example document, that test various ``insertions''.
+Insertions in \TeX\ are parts of a document that can move from
+one page to the next if on the present page is not enough
+space\footnote{For example this footnote might move to the
+next page if there is not enough space on the current page for
+all of it.\par
+It might even be split across a page boundary if there is some
+space left on the current page but not enough to contain the
+footnote in its entire length.} left. Typical examples of insertions
+are illustrations, figures, or tables. 
+But even footnotes\footnote{Like this one.} are ``movable'' parts of a page.
+
+
+A typical example of an insertion is seen in Figure 1.
+In \LaTeX\ the figure uses this code:
+\begin{verbatim}
+  \begin{figure}[t]
+  \centering
+  \caption{The letter A.}
+  \includegraphics[height=2in]{A.jpg}
+  \end{figure}
+\end{verbatim}
+while in Hi\TeX\ the following code has a similar effect:
+\begin{verbatim}
+  \topinsert % \topinsert ... \endinsert
+  \leftskip=0pt plus 200fil %centering
+  \rightskip=\leftskip %centering
+  \parfillskip=0pt\parindent=0pt %centering
+  Figure 1: The letter A.\par % caption
+  \smallskip
+  \leavevmode\HINTimage=A.jpg width 0.9\hsize height 2in\par
+  \endinsert
+\end{verbatim}
+
+\ifhint
+  \topinsert % \topinsert ... \endinsert
+  \leftskip=0pt plus 200pt\rightskip=\leftskip %centering
+  \parfillskip=0pt\parindent=0pt              %centering
+   Figure 1: The letter A.\par % caption
+   \smallskip
+   \leavevmode\HINTimage=A.jpg width 0.9\hsize height 2in\par
+  \endinsert
+\else
+  \begin{figure}[t]
+  \centering
+  \caption{The letter A.}
+  \includegraphics[height=2in]{A.jpg}
+  \end{figure}
+\fi
+Every insertion belongs to an insertion class identified by a
+small number. For example footnotes belong to class \the\footins,
+which is defined in the \LaTeX\ code.
+The handling of foats in \LaTeX\ is much more complicated, so the
+file {\tt hiltxpage.tex} which is included in this file defines
+\verb/\topins/ separately\ifhint~(class \the\topins)\fi.
+In Hi\TeX, a float is then bracketed between \verb/\topinsert/ and \verb/\endinsert/
+and contains vertical mode material. To achive centering,
+we use a stretchable \verb/\leftskip/ and \verb/\rightskip/,
+go into horizontal mode enter a caption and conclude with a \verb/\par/
+This will center the caption and allows it to be broken into several lines
+if necessary. A \verb/\smallskip/ separates it from the image.
+Because images can be inserted in vertical mode as well as in
+horizontal mode, we have to leave the vertical mode before adding
+the image and finish the image line again with a \verb/\par/ to center
+the image below the caption.
+\end{document}

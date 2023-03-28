@@ -1,0 +1,1488 @@
+%% File ``gerdoc.tex'', V. 2.5e <1998-07-08>
+%%
+%% Copyright (C) 1992, 1995-1997 by B.Raichle and DANTE e.V.
+%% Copyright (C) 1998 by B.Raichle
+%%                               All rights reserved.
+%%
+%%
+%% "Anderungen:
+%% -- Erste Fassung: Tagungsbericht (ca. 3 Seiten) --
+%% <87/11/27> Hubert Partl
+%%     Bericht "uber die Einigung auf einen "`Minimal Subset von
+%%     einheitlichen deutschen \TeX-Befehlen"' auf dem 6. Treffen der
+%%     deutschen \TeX-Interessenten in M"unster (Oktober 1987).
+%% <90/04/??> Hubert Partl
+%%     Korrektur \selectlanguage statt \setlanguage, f"ur v2.3
+%% <92/04/12> br
+%%     erste Erweiterungen und Erg"anzungen des Berichts mit einer
+%%     kurzen Installationsanleitung und den "Anderungen im
+%%     German-Style, f"ur v2.4a
+%% --- Neufassung: Benutzerhandbuch (ca. 20-22 Seiten) --
+%% <95/01/01> br
+%%     komplett "uberarbeitete, restrukturierte und stark erweiterte
+%%     Version mit ausf"uhrlicherer Benutzungs- und Installations-
+%%     anleitung, f"ur v2.5a 
+%% <95/01/20> br
+%%     vier(!) kleinere Korrekturen, f"ur v2.5b
+%% <96/05/01> br
+%%     "uberarbeitete und korrigierte Version mit Neuerungen aus v2.5c
+%% <97/05/01> br
+%%     "uberarbeitete Version mit einigen Umformulierungen und
+%%     Erg"anzungen, au"serdem Verweis auf neuere Pakete, fuer v2.5d
+%% <1998-07-08> Walter Schmidt
+%%     Dokument in gerdoc.tex umbenannt, f"ur v2.5e.
+%%     Informationen zur neuen Rechtschreibung (Paket ngerman) erg"anzt.
+%%     F"ur den Begriff `Style-Option' nun `Paket' oder `Makropaket' verwendet.
+%%     In Kap.1 auf die Umschaltung der Trennmuster hingewiesen.
+%%     Bessere Erkl"arung des Befehls "= .
+%%     Erg"anzung: Tieferlegen der Umlaut-Punkte betrifft nur OT1-Fonts.
+%%     Kap. 2.2.5 ausf"uhrlicher und (hoffentlich) verst"andlicher gemacht.
+%%     Installationsanleitung komplett "uberarbeitet.
+%%     Das Beispiel `Laden nur einer einzigen Trennmusterdatei' entfernt.
+%%     Internet-Adressen aktualisiert.
+%%     *** Dank an H.Oberdiek (Freiburg) und P.Zimmermann (Eichst"att)
+%%     f"ur viele Hinweise auf Schreib- und Formulierungsfehler! ***
+%%
+\ifx\documentclass\undefined  % LaTeX2e?
+  \documentstyle[11pt,a4,german]{article}
+\else
+  \NeedsTeXFormat{LaTeX2e}
+  \documentclass[11pt,a4paper]{article}
+  \usepackage{german}
+  \addtolength{\textheight}{7\baselineskip}
+  \addtolength{\topmargin}{-5\baselineskip}
+  %%\usepackage[T1]{fontenc}
+\fi
+
+\title{Kurzbeschreibung\\
+{\tt german.sty} und {\tt ngerman.sty} (Version~2.5)}
+
+\author{Bernd Raichle}
+
+\date{8.~Juli 1998\\ (f"ur die Version~2.5e)}
+
+\ifx\LaTeXe\undefined
+  \newcommand{\pLaTeXe}{%
+    \mbox{\LaTeX\kern.15em\(2_{\textstyle\varepsilon}\)}}
+  \newcommand{\LaTeXe}{\protect\pLaTeXe}\fi
+\ifx\emergencystretch\undefined \else
+  \setlength{\emergencystretch}{1em}\fi
+\newenvironment{beispiel}{%
+  \begin{quote}\small \begin{tabbing}%
+  {\tt 1234Merci bien12!1234}\quad \=ergibt:\qquad\=\kill
+}{\end{tabbing}\end{quote}}
+\renewcommand\labelitemi{\(\triangleright\)}
+\renewcommand\labelitemii{\(\diamond\)}
+\renewcommand\labelitemiii{\(\circ\)}
+\newcommand\CS[1]{{\tt\symbol{`\\}#1}}
+\hyphenation{Datei-name Datei-namen}
+\makeatletter
+\def\ps@firstpage{\let\@mkboth\@gobbletwo
+     \let\@oddhead\@empty\def\@oddfoot{\reset@font%
+     \makebox[0pt][l]{{\footnotesize \copyright{} 1998 B.~Raichle}}
+     \hfil\thepage\hfil}
+     \let\@evenhead\@empty\let\@evenfoot\@oddfoot}
+\makeatother
+
+\begin{document}
+\maketitle
+\thispagestyle{firstpage}
+
+\begin{abstract}
+  Beim 6.~Treffen der deutschen \TeX-""Interessenten in M"unster
+  (Oktober 1987) wurde Einigung "uber ein "`Minimal Subset von
+  einheitlichen deutschen \TeX-Befeh\-len"' erzielt, das seitdem an
+  allen Installationen von \TeX\ und \LaTeX\ als Makropaket
+  "`german"' zur Ver"-f"u"-gung stehen und f"ur Texte in deutscher
+  Sprache verwendet werden soll.  Damit wird erreicht, da"s alle
+  \TeX- und \LaTeX-Dokumente, die diese Befehle enthalten, problemlos
+  von einem Rechner zum anderen "uber"-tragen werden k"onnen.
+  In der Zwischenzeit wurde das Makropaket "`ngerman"' erg"anzt,
+  das die neue Rechtschreibung unterst"utzt.
+\end{abstract}
+
+\tableofcontents
+
+\section{Allgemeines}
+
+Die Makropakete "`german"' und "`ngerman"' dienen mehreren Zwecken:
+\begin{itemize}\tolerance=2000
+\item Sie aktivieren die der deutschen Sprache zugeordneten 
+  Silbentrennmuster.
+\item Der deutsche Schriftsatz weist einige Besonderheiten auf, die
+  in \TeX{} durch neue Makros und verschiedene "Anderungen
+  unterst"utzt und dem Benutzer angeboten werden k"onnen.  Beispiele
+  sind die Makros f"ur die unterschiedlichen
+  Anf"uhrungszeichen und die "Anderung des Umlautmakros f"ur 
+  OT1-codierte Schriften.
+\item Zur Vereinfachung und Standardisierung der Eingabe von Umlauten
+  und des Buchstabens~"s wird die Kurznotation~\verb:"x: f"ur
+  Rechner einge"-f"uhrt, die die Eingabe dieser Zeichen nicht direkt
+  erlauben.  Heutzutage unter"-st"utzen die meisten Rechnersysteme die
+  direkte Eingabe und Anzeige von Umlauten, jedoch ist die
+  Kurznotation weiterhin als Quasi-Standard zum Austausch von \TeX-
+  und \LaTeX-Dokumenten sinnvoll und f"ur deutschsprachige Texte weit
+  verbreitet.
+\item Das Umschalten zwischen den Sprachen Deutsch, Englisch und
+  Franz"osisch wird rudiment"ar unterst"utzt.
+\end{itemize}
+
+Je nachdem, ob ein deutschsprachiger Text in alter oder neuer
+Rechtschreibung verfa"st ist, m"ussen  f"ur \TeX{} unterschiedliche
+Silbentrennmuster benutzt werden; au"serdem werden bestimmte Makros
+nur f"ur Sonderf"alle der "`alten"' Silbentrennung ben"otigt.  Dies
+wird ber"ucksichtigt, indem f"ur die alte Rechtschreibung das Paket
+"`german"', f"ur die neue aber das Paket "`ngerman"' zur Verf"ugung
+steht. Wo im Folgenden von "`german"' die Rede ist, sind {\em beide}
+Pakete gemeint; auf Unterschiede wird explizit hingewiesen.
+
+
+\section{Verwendung}
+
+\subsection{Laden der Makropakete je nach Rechtschreibung}
+
+Je nachdem, ob ein deutschsprachiger Text nach der traditionellen
+oder der "`neuen"' Rechtschreibung verfa"st ist, mu"s entweder das
+Paket "`german"' oder das Paket "`ngerman"' benutzt werden.
+
+\paragraph{\LaTeX:} Mit \LaTeX\ (genauer: \LaTeXe) wird das
+Makropaket mit
+\begin{quote}
+  \verb:\usepackage{german}:
+\end{quote}
+oder
+\begin{quote}
+  \verb:\usepackage{ngerman}:
+\end{quote}
+%nach der Deklaration der Dokumentenklasse mit \verb:\documentclass:
+geladen.  Momentan haben die Pakete keine eigenen Optionen und
+werten auch keine Dokumenten"-klassen"-optionen aus.
+
+\paragraph{\LaTeX~2.09:} Mit der alten \LaTeX-Version oder im
+\LaTeX~2.09-Kompatibi\-li\-t"ats"-modus von \LaTeXe{} wird das Paket
+als Style-Option innerhalb des optionalen Arguments des
+\verb:\documentstyle:-Befehls, beispielsweise mit
+\begin{quote}
+  \verb:\documentstyle[11pt,german]{article}:
+\end{quote}
+angegeben.
+
+\paragraph{Plain-\protect\TeX:} Unter Plain-\TeX\ wird das
+Paket als gew"ohnliche Makro"-datei mit dem \TeX-Befehl
+\begin{quote}
+  \verb:\input german.sty:
+\end{quote}
+dazugeladen.
+
+
+\subsection{Befehle}
+
+Der beim 6.~Treffen der deutschen \TeX-Interessenten in M"unster
+festgelegte Befehlssatz wurde nach"-tr"aglich um einige Befehle
+erweitert.  Diese Erweiterungen werden zur Kenntlichmachung in der
+folgenden Liste mit einem~\(\dagger\) versehen.
+
+
+\subsubsection{Umlaute, Tremata und der Buchstabe "s}
+
+\begin{itemize}
+\item \verb:\"a: ergibt ein "`a"' mit einem Trema. Das Paket
+  "`german"' definiert dieses Makro so um, da"s bei Verwendung von
+  OT1-codierten   Schriften   die Umlautpunkte etwas
+  nach unten verschoben werden (Original: {\originalTeX \"a}, mit
+  "`german"': \"a).
+\item \verb:"a: als Kurzform f"ur \verb:\"a: (Umlaute, wie~"a) --
+  ebenso f"ur die Vokale o und~u und die entsprechenden Gro"sbuchstaben.
+\item \verb:"e: und \verb:"i: f"ur ein e und i mit Trema.
+\item \verb:"s: als Kurzform f"ur \verb:\ss: (scharfes~s:~"s),
+  \verb:"S:\(^\dagger\) ergibt "`SS"', \verb:"z:\(^\dagger\) und
+  \verb:"Z:\(^\dagger\) kann f"ur~\ss\ bzw.\ SZ verwendet werden,
+  falls man Mi"sverst"andnisse bei der Verwendung in
+  gro"sgeschriebenen W"ortern vermeiden m"ochte.
+\end{itemize}
+
+\paragraph{Verwendungsbeispiele}
+\begin{beispiel}
+\verb:sch"on:  \> ergibt: \> sch"on \\
+\verb:sch\"on: \> ergibt: \>
+   sch\"on (statt: {\originalTeX sch\"on})\\[3pt]
+\verb:Citro"en: \> ergibt: \> Citro"en \\[3pt]
+\verb:Stra"se Ma"ze: \> ergibt: \> Stra"se Ma"ze \\
+\verb:STRA"SE MA"ZE: \> ergibt: \> STRA"SE MA"ZE \\
+\end{beispiel}
+
+\paragraph{Anmerkungen:}
+Die Befehle f"ur Umlaute und scharfes~s sind so definiert, da"s auch
+in Silben {\em vor\/} und {\em nach\/} dem Befehl die automatische
+Silbentrennung funktioniert. Dabei kann \TeX\ jedoch nicht mehr alle
+oder eventuell falsche Trennstellen finden (Beispiel: {\tt"ubert-ra-gen} 
+statt {\tt "uber-tra-gen}).  Diese fehlerhaften Trennungen treten bei
+der Verwendung von {\tt T1}-kodierten Schriften, wie beispielsweise
+den {\tt EC}-Schriften, die man unter \LaTeXe{} ohne gro"se
+Anpassungen verwenden kann, nicht auf.  \TeX{}s Trennalgorithmus kann
+Trennstellen prinzip"-bedingt nicht 100\%ig fehlerfrei finden.
+Deshalb erhalten Sie, unabh"angig von der verwendeten Schrift, immer
+einige, wenn auch nur sehr wenige fehlerhafte Wort"-trennungen.
+
+
+\subsubsection{Zusammentreffen von drei gleichen Konsonanten und
+  \protect\mbox{"`ck"'} bei Silbentrennung} 
+
+\begin{itemize}
+\item \verb:"ck: f"ur \mbox{"`ck"'}, das als \mbox{"`k-k"'} getrennt
+  wird.
+\item \verb:"ff: f"ur \mbox{"`ff"'}, das als \mbox{"`ff-f"'} getrennt
+  wird -- auch f"ur die anderen relevanten Konsonanten l, m, n, p, r
+  und~t.
+\end{itemize}
+%
+Diese Befehle sind nur mit der alten Rechtschreibung
+notwendig.
+  Regel~\(204\) der "`Richtlinien zur Rechtschreibung~\ldots"'~\cite{Duden} 
+  bestimmte: {\it Treffen bei
+  Wortbildungen drei gleiche Konsonanten zusammen, dann setzt man nur
+  zwei, wenn ein Vokal folgt.  Bei Silbentrennung tritt der dritte
+  Konsonant wieder ein.} {\it \mbox{ck} wird\/} nach Regel~\(179\) {\it
+  bei der Silbentrennung in \mbox{k-k} aufgel"ost.}
+
+\paragraph{Verwendungsbeispiele:}
+\begin{beispiel}
+\verb:Dru"cker:  \> ergibt: \> Drucker bzw.\ Druk-ker \\
+\verb:Ro"lladen: \> ergibt: \> Rolladen bzw.\ Roll-laden \\
+\verb:Bettuch:   \> ergibt: \> Bettuch bzw.\ Bet-tuch \\
+\verb:Be"ttuch:  \> ergibt: \> Bettuch bzw.\ Bett-tuch \\
+\end{beispiel}
+
+\paragraph{Anmerkungen:}
+Da man diese besonderen F"alle der Silbentrennung nur durch den
+\TeX-Befehl \verb:\discretionary: als Trennausnahmen realisieren kann,
+wird dadurch die Trennung in den restlichen Wortteilen und die
+Ligaturbildung um diese Konsonanten beeinflu"st.
+
+\paragraph{Neue Rechtschreibung:}
+Mit der neuen Rechtschreibung wird
+das "`ck"' nicht mehr in \mbox{"`k-k"' } getrennt,
+und Dreifachkonsonanten werden immer ausgeschrieben.
+Im Paket "`ngerman"' haben diese Befehle deshalb eine ge"anderte Funktion.
+Sollten sie hier irrt"umlich benutzt werden, dann wird diejenige
+Ausgabe erzeugt, die offensichtlich gemeint ist, also ein "`ck"' mit
+einer Trennstelle davor oder die drei Konsonanten; eine entsprechende
+Warnung wird ausgegeben.
+
+
+\subsubsection{Anf"uhrungszeichen}
+
+\begin{itemize}
+\item \verb:"`: oder \verb:\glqq: f"ur untere und \verb:"': oder
+  \verb:\grqq: f"ur obere "`deutsche An\-f"uh\-rungs"-zeichen"'
+  (\glqq G"anse"-f"u"schen\grqq).
+\item \verb:\glq: f"ur untere und \verb:\grq: f"ur obere \glq
+  halbierte An\-f"uh\-rungs"-zeichen\grq{} (bitte Anmerkungen zur
+  Verwendung beachten!).
+\item \verb:"<: oder \verb:\flqq: f"ur linke und \verb:">: oder
+  \verb:\frqq: f"ur rechte "<An\-f"uh\-rungs"-zeichen"> in der
+  franz"osischen Form (\flqq\,guillemets\,\frqq).
+\item \verb:\flq: f"ur linke und \verb:\frq: f"ur rechte \flq
+  halbierte An\-f"uh\-rungs"-zeichen\frq\ in der franz"osischen Form,
+\item \verb:\dq: zum Ausdrucken des Doublequote-Zeichens~(\verb:":).
+\end{itemize}
+%
+In~\cite{Duden} findet man: {\it Im deutschen Schriftsatz werden
+  vornehmlich die An"-f"uhrungszeichen "`\ldots"' und ">\ldots"<
+  angewendet.  Die franz"osische Form "<\,\ldots\,"> ist im Deutschen
+  weniger gebr"auchlich; in der Schweiz hat sie sich f"ur den
+  Antiquasatz eingeb"urgert.} Die Regeln~\(10\)ff erg"anzen diese
+  Aussagen durch: {\it Eine Anf"uhrung in einer Anf"uhrung wird durch
+  halbe Anf"uhrungszeichen deutlich gemacht.}  In franz"osischen
+  Texten ist hinter dem "offnenden und vor dem schlie"senden ein
+  zus"atzlicher Leerraum einzuf"ugen und es werden keine halben
+  Anf"uhrungszeichen verwendet.
+
+\paragraph{Verwendungsbeispiele:}
+\begin{beispiel}
+\verb:"`Ja, bitte!"': \> ergibt: \> "`Ja, bitte!"' \\[3pt]
+\verb:"`Sag' doch nicht immer \glq Ja, bitte!{}\grq!"': \\
+  \> ergibt: \>
+     "`Sag' doch nicht immer \glq Ja, bitte!{}\grq!"' \\[3pt]
+\verb:">Ja, bitte!"<: \> ergibt: \> ">Ja, bitte!"< \\[3pt]
+\verb:">Sag' doch nicht immer \frq Ja, bitte!\flq!"<: \\
+  \> ergibt: \>
+     ">Sag' doch nicht immer \frq Ja, bitte!\flq!"< \\[3pt]
+\verb:"<\,Merci bien\,!\,">: \> ergibt: \> "<\,Merci bien\,!\,"> \\
+\end{beispiel}
+
+\paragraph{Anmerkungen:}
+Folgt \verb:\grq: auf ein Ausrufe- oder Fragezeichen, so sollte man
+zwischen diesen beiden Zeichen, wie im Beispiel gezeigt, ein leeres
+Klammerpaar~\verb:{}: oder \verb:{\kern0pt}: einf"ugen, um die
+Ligaturen~\verb:!`:~(!`) bzw.~\verb:?`:~(?`) zu verhindern, die sonst
+bei Verwendung von T1-kodierten Schriften gebildet w"urden.
+
+F"ur die Realisierung der Anf"uhrungszeichen existiert keine L"osung,
+die uneingeschr"ankt f"ur alle Schriften verwendbar w"are.  Bei der
+momentanen Realisierung ist zu beachten, da"s bei Verwendung von
+nicht-{\tt T1}-kodierten Schriften kein {\it Kerning\/} zwischen den
+An\-f"uh\-rungs"-zeichen und den anderen Zeichen einge"-f"ugt wird.
+Bei einigen Buch\-staben-Anf"uhrungs\-zeichen-Kombi"-nationen k"onnen
+daher zu gro"-"se bzw.\ zu kleine Ab"-st"an"-de auftreten (Beispiel:
+\mbox{"`\kern0ptV} statt~\mbox{"`\negthinspace V}).
+
+Relativ h"aufig ist in Dokumenten folgender Fehler zu beobachten:
+Statt mit Hilfe von \verb:"`: und \verb:"': die Anf"uhrungszeichen
+"`\ldots"' bzw.\ mit \verb:``: und \verb:'': die im
+englischsprachigen Raum gebr"auchlichen Anf"uhrungszeichen ``\ldots''
+zu erzeugen, wird einfach der direkt auf der Tastatur zu findende
+Double\-quote~\verb:": verwendet, der das falsche Ergebnis ''\ldots''
+erzeugt.  Dieser Fehler ist leider in vielen mit \LaTeX\ erstellten
+deutschsprachigen Texte zu beobachten, obwohl das Fehlen der unteren,
+"offnenden Anf"uhrungszeichen auf"|fallen m"u"ste!  Bei Verwendung
+des Pakets "`german"' mit der dann ge"anderten Bedeutung des
+Double\-quote kann dies au"serdem zu verschiedenen Fehlermeldungen
+f"uhren.
+
+Ben"otigt man das Double\-quote-Zeichen, so mu"s man mit dem Paket
+"`german"' die Befehle \verb:\dq: oder~\verb:\verb+"+: verwenden. Aus
+Kompatibilit"ats"-gr"unden mit alten Versionen des Makropakets wird
+auch noch~\verb:"{}: unter"-st"utzt.
+
+
+\subsubsection{Trennhilfen f"ur die automatische Silbentrennung}
+
+\begin{itemize}
+\item \verb:\-: f"ur eine Silbentrennstelle, wobei vor und nach
+  dieser Trennstelle die Silbentrennung unter"-dr"uckt wird (dies ist
+  der Original"-befehl in \TeX{} zur Kennzeichnung von Trennstellen).
+\item \verb:"-: f"ur eine Silbentrennstelle an der angegebenen
+  Stelle; "ahnlich wie mit \verb:\-:, jedoch bleibt die automatische
+  Silbentrennung vor und nach dieser Trennstelle erhalten.  Im
+  Unterschied zu \verb:\-: kann man mit \verb:"-: eine Trennstelle
+  ein"-f"ugen und alle weiteren Trennstellen werden von \TeX\ selbst
+  bestimmt, solange man dies nicht unterdr"uckt.
+\item \verb:"": f"ur eine Silbentrennstelle an der angegebenen
+  Stelle, an der im Fall einer Trennung {\it kein\/} Bindestrich
+  hinzugef"ugt wird.
+\item \verb:"|: zur Verhinderung von Ligaturen, "ahnlich wie
+  \verb:"-:, jedoch wird zu"-s"atzlich ein kleiner Zwischenraum zur
+  besseren Trennung der Einzelzeichen einer Ligatur eingef"ugt.
+%\item \verb:\allowhyphens: dient zum Einf"ugen einer Wortfuge, wobei
+%  an dieser Stellen {\it keine\/} Silbentrennstelle eingef"ugt wird,
+%  aber die automatische Silbentrennung vor und nach dieser Stelle
+%  weiterhin erhalten bleibt.
+\item \verb:-: f"ur einen Bindestrich (Divis) bei Zusammensetzungen
+  von W"ortern und Wort"-abk"urzungen; \TeX\ erlaubt eine Trennung
+  nach dem Bindestrich und trennt nie automatisch in den Wortteilen
+  vor und nach dem Bindestrich.
+\item \verb:"~:\(^\dagger\) f"ur einen Bindestrich, an dem nicht
+  getrennt wird.
+\item \verb:"=:\(^\dagger\) f"ur einen Bindestrich, an dem die
+  Trennung erlaubt ist; au"serdem darf vor und nach dieser Stelle
+  automatisch getrennt werden.
+\end{itemize}
+
+\paragraph{Verwendungsbeispiele:}\hspace{0pt plus 1em} Die m"oglichen
+Silbentrennstellen sind in den Beispielen durch das Zeichen~\(|\)
+gekennzeichnet.
+\begin{beispiel}
+\verb:Auf"|lage: \> ergibt: \> Auf\(|\)la\(|\)ge \\
+                 \> \> (formatiert: Auf"|lage statt Auflage) \\[3pt]
+
+\verb:"ubertragen:   \> ergibt:
+              \> "ubert\(|\)ra\(|\)gen (falsche Trennstelle) \\
+\verb:"uber\-tragen: \> ergibt: \> "uber\(|\)tragen \\
+\verb:"uber"-tragen: \> ergibt: \> "uber\(|\)tra\(|\)gen \\[3pt]
+
+\verb:bergauf und -ab:  \> ergibt:
+               \> berg\(|\)auf und -\(|\)ab (falsche Trennstelle)\\
+\verb:bergauf und "~ab: \> ergibt: \> berg\(|\)auf und "~ab \\
+\verb:I-Punkt:          \> ergibt:
+               \> I-\(|\)Punkt (schlechte Trennstelle)\\
+\verb:I"~Punkt:         \> ergibt: \> I"~Punkt \\
+\verb:Arbeiter"=Unfall: \> ergibt:
+   \> Ar\(|\)bei\(|\)ter-\(|\)Un\(|\)fall\(|\)ver\(|\)si\(|\)che\(|\)rungs- \\
+\verb:versicherungsgesetz: \>      \> ge\(|\)setz \\
+\end{beispiel}
+
+\pagebreak[0]
+\paragraph{Tips:}
+\begin{itemize}
+\item Bei zusammengesetzten W"ortern, die falsche Trennstellen
+  aufweisen, sollte man zuerst die Trennhilfe~\verb:"-: in die
+  Wortfuge der Zusammensetzung ein"-f"ugen und nochmals testen, ob
+  danach richtig getrennt wird, bevor man weitere Trennhilfen
+  ein"-f"ugt.
+  \begin{beispiel}
+    \verb:"ubertragen:   \> ergibt: \> "ubert\(|\)ra\(|\)gen \\
+    \verb:"uber"-tragen: \> ergibt: \> "uber\(|\)tra\(|\)gen \\
+    \verb:Bedienoberfl"ache: \> ergibt:
+                         \> Be\(|\)dieno\(|\)ber\(|\)fl"ache \\
+    \verb:Bedien"-oberfl"ache: \> ergibt:
+                         \> Be\(|\)di\(|\)en\(|\)ober\(|\)fl"ache \\
+    \verb:Be\-dien"-oberfl"ache: \> ergibt:
+                         \> Be\(|\)dien\(|\)ober\(|\)fl"ache \\
+  \end{beispiel}
+\item Bei der Verwendung von Bindestrichen zur Er"-g"anzung ("`bergauf
+  und \mbox{-ab}"', "`\mbox{ein-}, zwei- oder dreimal"'), vor
+  Schr"ag"-strichen ("`\mbox{Ein-}\slash Aus\-gang"') und Klammern
+  ("`Prim"ar-\mbox{(Haupt-)}""Strom"') sollte man mit den Befehlen
+  \verb:\mbox:, \verb:"": und \verb:"~: vor den Satzzeichen die
+  Trennung unterbinden und eventuell nach den Satzzeichen wieder
+  erlauben.
+  \begin{beispiel}
+    \verb:bergauf und -ab:        \> ergibt:
+                                  \> berg\(|\)auf und -\(|\)ab \\
+    \verb:bergauf und \mbox{-ab}: \> ergibt:
+                                  \> berg\(|\)auf und -ab \\
+    \verb:bergauf und "~ab:       \> ergibt:
+                                  \> berg\(|\)auf und -ab \\
+    \verb:Ein-/Ausgang:          \> ergibt: \> Ein-\(|\)/Ausgang \\
+    \verb:\mbox{Ein-}/""Ausgang: \> ergibt: \> Ein-/\(|\)Aus\(|\)gang \\
+    \verb:Ein"~/""Ausgang:       \> ergibt: \> Ein-/\(|\)Aus\(|\)gang \\
+  \end{beispiel}
+\item Der Befehl~\verb:"=: erlaubt
+  in den mit dem Bindestrich verbundenen
+  Wortteilen auch nahe am Bindestrich liegende Trennstellen,
+  die oft h"a"slich oder gar sinnwidrig sind. Zusammengesetzte W"orter sollten
+  normalerweise ohne Bindestrich geschrieben werden.  
+  Wenn der  Bindestrich dennoch zur Vermeidung von Mi"sverst"andnissen 
+  n"otig ist, oder um das Schriftbild "ubersichtlicher zu machen,
+  und man neben der Trennung am
+  Bindestrich weitere Trennstellen erlauben will, sollte man mit
+  \verb:\-: und \verb:"-: wenige, wohl"-"uber"-legte Trennhilfen
+  ein"-f"ugen.
+  \begin{beispiel}
+\verb:Arbeiter-Unfall:     \> ergibt: \> Arbeiter-\(|\) \\
+\verb:versicherungsgesetz: \>         \> Unfallversicherungsgesetz \\
+\verb:Arbeiter"=Unfall: \> ergibt:
+                   \> Ar\(|\)bei\(|\)ter-\(|\)Un\(|\)fall\(|\) \\
+\verb:versicherungsgesetz: \>
+                   \> ver\(|\)si\(|\)che\(|\)rungs\(|\)ge\(|\)setz \\
+\verb:Arbeiter-Unfall"-: \> ergibt:
+                   \> Arbeiter-\(|\)Unfall\(|\) \\
+\verb:versicherungsgesetz: \>
+                   \> ver\(|\)si\(|\)che\(|\)rungs\(|\)ge\(|\)setz \\
+  \end{beispiel}
+  Der Befehl~\verb:"=: ist also vorzugsweise in automatisch
+  erstellten oder konvertierten Texten zu verwenden, wo
+  manuelle Trennhilfen nicht verf"ugbar sind.
+\end{itemize}
+
+
+%\subsubsection{Erstellen deutschsprachiger Dokumente und Einbinden
+%  von deutschsprachigen Texten in fremdsprachige Dokumente}
+\subsubsection{Befehle zur Sprachauswahl}
+
+\begin{itemize}
+\item \verb:\selectlanguage{:\mbox{\(\langle\)\it
+  Sprache\/\(\rangle\)}\verb:}: aktiviert
+  die der Sprache zugeordneten Trennmuster (siehe
+  auch~\ref{sec:languageundef}, S.~\pageref{sec:languageundef})
+  und schaltet  zwischen deutschen,
+  "oster"-reichischen, englischen, amerikanischen und franz"osischen
+  Datumsangaben und "Uber"-schriften um.
+  F"ur~\mbox{\(\langle\)\it Sprache\/\(\rangle\)} ist einer der
+  folgenden Namen zu verwenden: 
+  \begin{itemize}
+    \item Mit dem Paket "`german"':\\
+      \verb:german:, \verb:austrian:, 
+      \verb:english:, \verb:USenglish: oder \verb:french:
+    \item Mit dem Paket "`ngerman"':\\
+      \verb:ngerman:, \verb:naustrian:,
+      \verb:english:, \verb:USenglish: oder \verb:french:.
+ \end{itemize}
+\item \verb:\germanTeX: zum Einschalten der deutschen \TeX-Befehle.
+  Dieser Befehl aktiviert alle \verb:"x:-Befehle, "andert das
+  \verb:\"x:-Makro, setzt durch einen Aufruf von
+  \CS{select\-language} die traditionellen deutschen Trennmuster in Kraft
+  und "andert die
+  Datumsangabe und "Uberschriften.  {\em Dieser Befehl ist nur im Paket
+  "`german"' definiert.}
+\item \verb:\ngermanTeX:\(^\dagger\) dito, aber aktiviert die 
+  "`neuen"' deutschen Trennmuster.
+  {\em Dieser Befehl ist nur im Paket "`ngerman"' definiert.}
+\item \verb:\originalTeX: zum Zur"uckschalten auf Original-\TeX\ bzw.\ 
+  \mbox{-\LaTeX}: deaktiviert alle durch \verb:\germanTeX: oder 
+  \verb:\ngermanTeX: eingeschalteten  Befehle.
+\end{itemize}
+Zu jeder Sprache geh"oren ein spezifisches Datumsformat und
+eigene, in den
+\LaTeX-Klassen bzw.\ \mbox{-Styles}\footnote{Anpa"sbare Klassen bzw.
+  Styles sind seit Dezember~1991 Bestandteil der offiziellen
+  \LaTeX-Verteilung.}   verwendete "Uber"-schriften:
+\begin{quote}\small
+\day=1 \month=1 \year=1995 % Beispieldatum (J\"anner!)
+\begin{tabular}{@{}lll@{}}
+\mbox{\(\langle\)\it Sprache\/\(\rangle\)}&
+\verb:\today:&\verb:\chaptername:\\[3pt]
+\verb:german:, \verb:ngerman: & \selectlanguage{german}\today
+              & \selectlanguage{german}\chaptername \\
+\verb:austrian:, \verb:naustrian: & \selectlanguage{austrian}\today
+                & \selectlanguage{austrian}\chaptername \\
+\verb:english: & \selectlanguage{english}\today
+               & \selectlanguage{english}\chaptername \\
+\verb:USenglish:& \selectlanguage{USenglish}\today
+                & \selectlanguage{USenglish}\chaptername \\
+\verb:french: & \selectlanguage{french}\today
+              & \selectlanguage{french}\chaptername
+\end{tabular}
+\end{quote}
+
+\paragraph{Voreinstellung:}
+Nach dem Laden des Pakets "`german"' oder "`ngerman"' wird implizit
+der Befehl \verb:\germanTeX: bzw. \verb:\ngermanTeX :ausgef"uhrt, 
+so da"s ohne weiteres Zutun
+von Seiten des Anwenders die Sprache
+\verb:german: bzw. \verb:ngerman: als Voreinstellung aktiviert wird.
+
+\paragraph{Verwendung:}
+
+\CS{selectlanguage} 
+%ist nicht dazu geeignet, innerhalb eines
+%Dokuments zwischen mehreren Sprachen umzuschalten.  Mit ihm bestimmt
+%man die "`Haupt\-sprache"' des Dokuments, deshalb sollte dieser
+ist prim"ar dazu bestimmt, die "`Hauptsprache"' eines Dokuments einzustellen.
+%deshalb sollte der Befehl nur ein einziges Mal in einem Dokument in der Pr"a"-ambel
+%verwendet werden. Dadurch 
+So k"onnen die Befehle aus dem Paket
+"`german"' auch innerhalb eines fremdsprachigen Dokuments benutzt
+werden:
+\begin{quote}\small
+\begin{verbatim}
+\NeedsTeXFormat{latex2e}
+\documentclass{article}
+\usepackage{german}
+%\germanTeX  % nicht notwendig, wird durch das Laden von
+             % `german' implizit aufgerufen
+\selectlanguage{USenglish}
+\begin{document}
+An english text with some german words, e.g., "Au"serung.
+\end{document}
+\end{verbatim}
+\end{quote}
+Benutzt man \CS{selectlanguage} zum Umschalten der Sprache
+{\em innerhalb} eines Textes, etwa f"ur fremdsprachige Zitate,
+dann ist zu beachten, da"s das Umschalten der "Uberschriften und der Datumsdarstellung
+unerw"unschte Nebenwirkungen haben kann, z.\,B. wenn das aktuelle Datum in der
+Fu"szeile erscheinen soll.\footnote{Eine zuk"unftige Version des Pakets "`german"'
+wird vsl. zus"atzliche und angemessenere Befehle f"ur mehrsprachige Dokumente
+zur Verf"ugung stellen.}
+
+Die Befehle \CS{originalTeX} und \CS{(n)germanTeX} dienen vor allem dazu,
+f"ur einen Teil eines Dokuments das Verhalten des originalen, englischsprachigen
+\LaTeX\ herzustellen, wenn dies aus Gr"unden der Kompatibilit"at mit 
+anderer Software notwendig werden sollte.  H"aufig gen"ugen dazu aber die Befehle
+\CS{mdqoff} und \CS{mdqon}, siehe Tab.~\ref{tab:cmds}, die nur die \verb:"x:-Makros
+aus- und einschalten.
+
+
+\begin{table}
+\setlength{\partopsep}{0pt}
+\begin{center}
+\rule[.3\baselineskip]{.3\textwidth}{.1pt}
+\renewcommand{\arraystretch}{1.1}
+%\setlength{\tabcolsep}{.5\tabcolsep}
+\begin{tabular}[b]{ll@{}}
+\multicolumn{2}{@{\strut}l}{\it
+  Befehle mit aktivem Doublequote:}\\[4pt]
+\verb:"a:, \verb:"A:, \verb:"o:, \verb:"O:, \verb:"u:, \verb:"U:
+  & Umlaute: "a, "A, "o, "O, "u, "U \\
+\verb:"s:, \verb:"S:, \verb:"z:, \verb:"Z:
+  & Buchstaben: "s, "S, "z und "Z \\ 
+\verb:"e:, \verb:"E:, \verb:"i:, \verb:"I:
+  & Buchstaben mit Trema: "e, "E, "i, "I \\[3pt]
+\verb:"c:, \verb:"C: & ck \(\rightarrow\) k-k \\
+\verb:"f:, \verb:"l:, \verb:"m:, \verb:"n:,
+  \verb:"p:, \verb:"r:, \verb:"t:,\\
+\verb:"F:, \verb:"L:, \verb:"M:, \verb:"N:,
+  \verb:"P:, \verb:"R:, \verb:"T:
+  & ausfallender dritter Konsonant \\[3pt]
+\verb:"`:, \verb:"': & "` "' \\
+\verb:">:, \verb:"<: & "> "< \\[3pt]
+\verb:"-:, \verb:"|:, \verb:"": & Trennhilfen \\
+\verb:"~:, \verb:"=: & Bindestriche mit besonderem Verhalten \\[5pt]
+\multicolumn{2}{p{.95\textwidth}}{%
+  Alle anderen {\tt\string"x}-Befehle, die mit keiner Bedeutung
+  belegt sind, erzeugen eine Fehlermeldung, um auf eine fehlerhafte
+  Eingabe hinzuweisen.}\\ 
+ \\
+\multicolumn{2}{@{}l}{\it Befehle mit ge"andertem Verhalten:}\\[4pt]
+\verb:\": & Umlautmakro mit tieferem Akzentzeichen, \\
+          & ohne Unterdr"uckung der Silbentrennung \\
+ \\[-3pt]
+\multicolumn{2}{@{}l}{\it Befehle f"ur Anf"uhrungszeichen:}\\[4pt]
+\CS{glqq}, \CS{grqq}, \CS{glq}, \CS{grq}
+  & Anf"uhrungszeichen: \glqq\ \grqq\ \glq\ \grq \\
+\CS{flqq}, \CS{frqq}, \CS{flq}, \CS{frq}
+  & dto., franz"osische Form: \flqq\ \frqq\ \flq\ \frq \\[3pt]
+\CS{dq} & Doublequote-Zeichen: \dq \\
+ \\
+\multicolumn{2}{@{}l}{\it Befehle zur Sprachumschaltung:}\\[4pt]
+\CS{selectlanguage} & Trennmuster u. "Uberschriften wechseln\\
+\CS{originalTeX}
+  & deaktiviere  deutsche \TeX-Befehle \\
+\CS{germanTeX} (nur mit "`german"')
+  & aktiviere  deutsche \TeX-Befehle \\
+\CS{ngermanTeX} (nur mit "`ngerman"')
+  & aktiviere  deutsche \TeX-Befehle \\
+ \\
+\multicolumn{2}{@{}l}{\it Obsolete Befehle:
+  (Nicht mehr verwenden!)}\\[4pt]
+\CS{3}, \CS{ck}
+  & alte Form von \ss\ und ck\,\(\rightarrow\)\,k-k\\
+\CS{setlanguage}   & ersetzt durch \CS{selectlanguage}\\
+ \\
+\multicolumn{2}{@{}l}{\it Low-Level-Befehle:}\\[4pt]
+\CS{allowhyphens} & k"unstliche, nicht trennbare Wortfuge \\
+\CS{mdqoff}, \CS{mdqon}
+  & (de-)aktiviere Doublequote-Befehle
+\end{tabular}
+\rule{.3\textwidth}{.1pt}
+\end{center}
+\caption{Befehls"ubersicht}
+  \label{tab:cmds}
+\end{table}
+
+
+\subsection{Beschr"ankungen und bekannte Fehler}\label{sec:fehler}
+
+\paragraph{Double\-quote-Mechanismus:}
+Da "`german"' das Double\-quote-Zeichen aktiviert und dessen
+urspr"ungliche Bedeutung "andert, k"onnen Probleme mit anderen
+Makropaketen und fremden Dokumenten auftreten:
+\begin{itemize}
+\item Ganzzahlige Konstanten k"onnen in \TeX\ auch in hexadezimaler
+  Notation mit einem voranstehenden Double\-quote eingegeben werden
+  (Beispiel: \verb:"FF: f"ur die Dezimalzahl~255).  Beginnt die
+  Hexadezimalzahl mit einer Ziffer, so sollten mit neueren Versionen
+  des Pakets "`german"' keine Probleme auftreten.  Beginnt die
+  Zahl stattdessen mit einem Buchstaben \mbox{A--F}, so tritt durch
+  die ge"-"anderte Bedeutung des Double\-quote meist der Fehler "`{\tt
+  Missing number, treated as zero}"' auf.
+
+  Abhilfe: Hexadezimalzahlen, die mit einem Buchstaben beginnen, die
+  Ziffer~\(0\) voranstellen -- statt \verb:"FF: sollte man demnach
+  \verb:"0FF: verwenden.  Eine andere M"oglichkeit besteht darin, den
+  Double\-quote mit Hilfe des \TeX-Primitivs \CS{string} (Bsp:
+  \verb:\string"FF:) oder mit einem vorangestellten \CS{original\-TeX}
+  bzw.\ \CS{mdqoff} zu deaktivieren.
+\item Leerschritte nach einem aktivierten Double\-quote werden
+  ignoriert, d.\,h.\ sowohl \verb:" a: als auch~\verb:"a: erzeugen
+  dasselbe Ergebnis.  Da dies eine Eigenschaft von \TeX\ selbst ist,
+  kann es nicht ohne andere Nachteile verhindert werden.
+\item Nach einem aktivierten Double\-quote sollten keine geschweiften
+  Klammern folgen.  Sowohl die Kombination mit einer "offnenden
+  Klammer~\verb:"{: als auch mit einer schlie"senden Klammer~\verb:"}:
+  f"uhrt zu Fehlern.
+\end{itemize}
+%
+Treten die in den letzten beiden Punkten beschriebenen Fehler auf,
+ist dies meist auf die falsche Eingabe von An"-f"uh\-rungs"-zeichen
+zur"uckzuf"uhren.  An"-f"uh\-rungs"-zeichen sind als
+\verb:"`:\ldots\verb:"': (bzw.\ als \verb:``:\ldots\verb:'':)
+einzugeben, die Verwendung eines einfachen Double\-quote f"uhrt zu
+falschen Ergebnissen!
+
+\paragraph{OT1-kodierte Schriften:}
+Bei Verwendung von Schriften in der Kodierung~{\tt OT1}, z.\,B.\ der
+CM-Familie, gibt es zu"-s"atzlich folgende
+Einschr"ankungen:
+%
+\begin{itemize}
+\item Es werden nicht alle oder falsche Silbentrennstellen in W"ortern
+  mit Umlauten gefunden, insbesondere wird nicht direkt am Umlaut
+  getrennt.  Hier mu"s man bei Bedarf mit dem Befehl~\verb:"-:
+  nachhelfen.
+\item Da \TeX\ mit Hilfe der Makros im Paket "`german"' die
+  Umlaute und die An"-f"uh\-rungs"-zeichen aus mehreren Zeichen
+  aufbauen mu"s, findet {\it kein\/} Kerning und {\it keine\/}
+  Ligaturbildung mit den umgebenden Zeichen statt.  Dies f"allt
+  insbesondere bei den Kombinationen \mbox{"`\kern0pt V},
+  \mbox{"`\kern0pt W} und \mbox{f\kern0pt "'} auf und wird bei
+  schr"ag"-gestellten Schriften noch ver"-st"arkt.  Eine Abhilfe ist
+  auf Makroebene nur sehr schwer realisierbar, so da"s man von Hand
+  mit den Befehlen \CS{neg\-thin\-space} und~\CS{/} f"ur korrektere
+  Ab"-st"ande sorgen mu"s.
+\item Die Anf"uhrungszeichen in der franz"osischen Form "> und~"<
+  k"onnten, auch vom Aussehen, verbessert werden.  Au"serdem wird nach
+  diesen An"-f"uh\-rungs"-zeichen nicht umbrochen, selbst wenn ein
+  Wortzwischenraum folgen sollte.
+\item Die Typewriter-Schriften {\tt cmtt} 
+%  besitzen keine Ligatur f"ur
+%  die doppelten An"-f"uhrungszeichen ({\tt`\kern0pt`} statt~`` und
+%  {\tt'\kern0pt'} statt~''), 
+%  sondern nur ein Zeichen f"ur den 
+  enthalten keine deutschen Anf"uhrungszeichen, sondern nur den einfachen
+  Double\-quote~{\tt\dq}.  Daher er"-h"alt man mit \LaTeXe{} f"ur die
+  Eingabe \verb:"`..."': das unerwartete Ergebnis~"`\mbox{\tt
+  \begingroup\setbox2=\hbox{,}\setbox0=\hbox{\char34}%
+  \setbox0=\hbox{\dimen0=\ht0\advance\dimen0-\ht2\lower\dimen0\box0}%
+  \ht0=\ht2\dp0=\dp2\box0\endgroup...\char92}"'.
+
+  Wer dies vermeiden will, mu"s die \LaTeXe-Deklarationen f"ur die
+  beiden Symbole \CS{text\-quote\-dblleft} und
+  \CS{text\-quote\-dblright} f"ur die OT1-Kodierung entsprechend
+  "andern.
+\end{itemize}
+
+\paragraph{T1-kodierte Schriften:}
+Die meisten der f"ur OT1-kodierte Schriften genannten Einschr"ankungen
+existieren f"ur Schriften in der Kodierung~{\tt T1}, wie
+beispielsweise die EC-Schrift\-familie, nicht, da diese Schriften
+Umlaute und An"-f"uhrungszeichen enthalten.  F"ur T1-kodierte
+Schriften existiert nur die Einschr"ankung, da"s man bei Verwendung
+des halben schlie"senden An"-f"uhrungszeichens~\CS{grq} ein leeres
+Klammerpaar~\verb:{}: oder \verb:{\kern0pt}: ein"-f"ugen mu"s, wenn
+\CS{grq} auf ein Ausrufe- oder Fragezeichen folgt.  Andernfalls
+er"-h"alt man sonst die Ligatur~\verb:!`:~(!`) bzw.~\verb:?`:~(?`).
+
+\paragraph{PostScript-Schriften:}
+Zur Einbindung dieser Schriften in \TeX{} und \LaTeX{} existieren
+unterschiedliche Versionen, wobei neuere Versionen die Verwendung von
+Post\-Script-Schriften sowohl in der Kodierung~{\tt OT1} als auch in
+der Kodierung~{\tt T1} und seit Anfang~1997 auch in der Kodierung~{\tt
+TS1} der Text-Companion-Schriften erlauben.  F"ur die jeweilige
+Kodierung gelten die zuvor aufgez"ahlten Einschr"ankungen.
+
+Verwendet man mit \LaTeXe{} eine zu alte Version der Einbindung, so
+erh"alt man mit dem Paket "`german"' fehlerhafte Akzent- und
+Anf"uhrungszeichen.  Bitte probieren Sie mit folgendem Testdokument
+aus, ob sie ein zu altes Paket zur Verwendung von
+Post\-Script-Schriften installiert haben. (Hinweis: Das Testdokument
+verwendet  "`german"' {\it nicht}, da der Test nur von
+der verwendeten Einbindung der Post\-Script-Schriften abh"angt.)
+%
+\begin{quote}\small
+\begin{verbatim}
+\NeedsTeXFormat{LaTeX2e}
+\documentclass{article}
+\renewcommand\rmdefault{ptm}% oder: \usepackage{times}
+\begin{document}
+Test: \"a \"A \ss.
+\end{document}
+\end{verbatim}
+\end{quote}
+%
+Erhalten Sie fehlerhafte Umlaute oder kein scharfes~s, so besorgen Sie
+sich bitte eine neuere Version des Post\-Script-Schrift\-pakets und
+installieren Sie die darin enthaltenen \mbox{{\sc tfm}-}, \mbox{{\sc
+vf}-}, \mbox{{\sc tex}-}, {\sc fd}- und {\sc map}-Dateien nach
+Anleitung.
+
+\paragraph{\LaTeXe{} (1.~Dezember~1994 und neuer):}
+\LaTeXe{} benutzt als Standard"-schrift"-auswahlschema die
+Version~\(2\) des~\mbox{NFSS}, das den neuen Schriftparameter
+\CS{font\-encoding} zur Verf"ugung stellt.  Dadurch k"onnen
+sehr einfach Schriften in unterschiedlicher Kodierung verwendet
+werden.  So kann jetzt innerhalb eines Dokuments beliebig zwischen
+{\tt OT1}- und {\tt T1}-kodierten Schriften gewechselt werden.
+
+Sollen Schriften in anderen Kodierungen verwendet werden, so m"ussen
+nur die entsprechenden \LaTeXe-Deklarationen f"ur diese Kodierung mit
+den Anweisungen \CS{Declare\-Text}\ldots{} durchgef"uhrt werden, damit
+"`german"' die Lettern dieser Schrift korrekt verwenden kann.
+
+\paragraph{\LaTeXe{} (1.~Juni~1994):}
+Da die erste "offentliche \LaTeXe-Version die Verwendung von Schriften
+in unterschiedlicher Kodierung nur unvoll"-st"andig erlaubt, wird sie
+von "`german"' nicht mehr unter"-st"utzt.  Ein \mbox{Update} auf die
+neueste \LaTeXe-Version ist auf alle F"alle ratsam!
+
+\paragraph{\LaTeX~2.09:}
+Mit der mittlerweile veralteten \LaTeX-Version k"on\-nen andere als
+die Schriften der Computer-Modern-Familie nur mit relativ gro"sen
+Aufwand integriert werden.  Die von den Entwicklern nicht mehr
+gewartete Version~\(1\) des Schrift"-auswahlschemas~\mbox{NFSS}
+erleichtert dies zwar, jedoch unterst"utzt diese Version die
+Einbindung von Schriften in anderen Kodierungen noch nicht.
+
+Die Style-Option "`german"' unterst"utzt daher mit \LaTeX~2.09 nur
+Schriften in der Kodierung~{\tt OT1}.  Sollen Schriften mit einer
+anderen Kodierung verwendet werden, so m"us\-sen die Makros \verb:\":,
+\verb:\ss:, \verb:\flqq:,\,\ldots\,\verb:\grq: entsprechend
+ge"-"andert werden.  Weitere "Anderungen, insbesondere am
+Double\-quote-Mechanismus, sind nicht notwendig.
+
+\paragraph{Plain-\protect\TeX:} Hier gilt das zuvor f"ur \LaTeX~2.09
+Gesagte.  Es ist geplant, \mbox{NFSS} Version~\(2\) auch f"ur
+Plain-\TeX\ verf"ugbar zu machen, so da"s man auch die unter \LaTeXe{}
+verf"ugbaren Vorteile nutzen kann.  Leider ist der Zeitpunkt der
+Fertigstellung nicht absehbar.
+
+
+\subsection{Wohin melde ich Fehler?}
+
+Wenn Sie einen Fehler in dieser Version 2.5e 
+der Makropakete "`german"' oder "`ngerman"' gefunden haben
+oder Vorschl"age zu deren Verbesserung haben, schreiben Sie bitte an
+\begin{quote}
+  Bernd Raichle\\
+  Stettener Str. 73\\
+  73732 Esslingen-W"aldenbronn\\
+  Germany\\[.5ex]
+  E-Mail: {\tt raichle@Informatik.Uni-Stuttgart.DE}
+\end{quote}
+oder an
+\begin{quote}
+ DANTE, Deutschsprachige Anwendervereinigung
+        \TeX\ e.V\negthinspace. \\
+ Betreuung "`german.sty"' \\
+ Postfach 10\,18\,40 \\
+ 69008 Heidelberg \\
+ Germany\\[.5ex]
+ E-Mail: {\tt german@dante.de}
+\end{quote}
+Ein Kontakt per {\it electronic mail\/} wird bevorzugt.
+
+Der Fehlermeldung sollten Sie die komplette Eingabedatei beilegen, mit
+der dieser Fehler erzeugt werden kann.  In Ihrem eigenen Interesse
+sollte diese Eingabedatei m"og"-lichst klein sein und nur die wirklich
+zur Reproduktion des Fehlers notwendigen Klassen, Pakete, Styles,
+Style-Optionen und Makrodateien laden.  Andernfalls gestaltet sich die
+Fehlersuche zu aufwendig und/oder es fehlen verwendete Makrodateien,
+um den Fehler nachvollziehen zu k"onnen.  F"ugen Sie auch die
+Protokolldatei f"ur diese Eingabedatei mit an, da diese weitere
+Hinweise auf die verwendeten Makros enth"alt.  Um die Protokolldatei
+klein zu halten, brechen Sie bitte bei einem Fehler \TeX{} bzw.\
+\LaTeX{} mit~{\tt x} und nicht mit~{\tt q} ab.
+
+Bevor Sie einen Fehler melden, vergewissern Sie sich bitte, da"s der
+Fehler tats"achlich durch das Makropaket "`german"' und nicht durch
+eine fehlerhafte Eingabe Ihrerseits oder einen Folgefehler eines zuvor
+aufgetretenen Fehlers verursacht wird.  Sehen Sie bitte auch in der
+Protokolldatei nach, ob diese eventuell Hinweise auf die Fehlerursache
+gibt.  Sehr h"aufig gibt es Fehler in Zusammenhang mit Konstanten in
+hexadezimaler Schreibweise, die zur Fehlermeldung "`{\tt Missing
+number, treated as zero}"' f"uhren.  Dieser "`Fehler"' ist bekannt und
+ist in dieser Anleitung in Abschnitt~\ref{sec:fehler}
+% auf Seite~\pageref{sec:fehler} 
+beschrieben.
+
+
+% \condbreak{.2\textheight} -- bedingtes \newpage
+\vspace{0pt plus.2\textheight}
+\pagebreak[3]
+\vspace{0pt plus-.2\textheight}
+
+\section{Installation}
+
+F"ur die Benutzung der Pakete "`german"' und "`ngerman"' ben"otigen
+Sie folgende Dateien:
+%
+\begin{enumerate}\sloppy
+\item {\tt german.sty} und {\tt ngerman.sty}, die Makropakete selbst;
+\item {\tt ghyph31.tex}, die deutschen Trennmuster
+  f"ur die alte Rechtschreibung (nur mit  {\tt german.sty}) in
+  der z.\,Z.\ aktuellen Version~3.1a vom 13.~Februar 1994;\\
+  {\em Vorsicht\/}: Auf der CD TeX\,Live\,3 hei"st diese Datei
+  {\tt dehyphen.tex};
+\item {\tt gnhyph01.tex}, die deutschen Trennmuster
+  f"ur die neue Recht\-schreibung (nur mit {\tt ngerman.sty});
+\item wahlweise weitere Dateien mit Trennmustern f"ur andere
+  Sprachen;
+\item evtl. {\tt hyphxmpl.cfg}, eine Beispieldatei f"ur die
+  Konfiguration der Trennmuster.
+\end{enumerate}
+
+
+\subsection{Vorbereitungen f"ur Benutzer}\label{sec:benutzerinit}
+
+Als gew"ohnlicher \TeX- bzw.\ \LaTeX-Benutzer m"ussen Sie nur daf"ur
+sorgen, da"s die Dateien {\tt german.sty} und {\tt ngerman.sty}
+in der neuesten Version vorhanden sind und geladen werden k"onnen.  
+Dazu sind diese Dateien einfach in ein Verzeichnis zu kopieren, 
+in dem \TeX{} nach Makrodateien sucht.
+
+Erscheint beim Laden des Makropakets die
+Meldung\label{sec:languageundef}
+%
+\begin{quote}\small
+\verb:\language number for German undefined, default 255 used.:
+\end{quote}
+%
+so haben Sie die deutschen Trennmuster nicht korrekt installiert und
+erhalten eventuell fehlerhafte Trennungen, oder es wird nicht
+getrennt. Wie Sie die Trennmuster installieren m"ussen, erfahren Sie
+im n"achsten Abschnitt.
+
+M"oglicherweise hat Ihre Plain-\TeX- oder \LaTeX-Version eines der
+Makropakete  "`german"' oder "`ngerman"' bereits vorgeladen,
+d.\,h., Sie m"ussen es nicht explizit als \LaTeXe-Paket bzw.\ als
+Style-Option deklarieren oder die Makro\-datei laden.  Sie sollten
+dies dennoch {\it nicht\/} ausnutzen: Wenn Sie Ihre Dokumente
+weitergeben wollen, vermeiden Sie dadurch un"-n"otige Probleme und
+R"uck"-fragen. Am besten "andern Sie Ihre Installation so ab, da"s
+"`german"' {\it nicht\/} vorgeladen wird, da Sie mit einem
+vorgeladenen Makropaket  zu anderen \TeX-Installationen i.\,d.\,R.
+inkompatibel sind.
+
+\subsection{Vorbereitungen f"ur \protect\TeX-Administratoren}
+
+Damit Sie die Pakete "`german"' und "`ngerman"' den \TeX-Benutzern zur
+Ver"-f"ugung stellen, m"ussen diese, falls noch nicht getan,
+% ausgepackt und
+installiert werden.  Au"serdem m"ussen Sie alle Format"-dateien
+mit den deutschen Trennmustern so erstellen, da"s die Makropakete
+erkennen k"onnen, wie auf diese Trennmuster umgeschaltet wird.
+Andernfalls wird nicht mehr oder falsch getrennt!
+
+\subsubsection{Installation der Makropakete}
+
+
+Die Dateien {\tt german.sty} und {\tt ngerman.sty}, sollten Sie in
+ein Verzeichnis kopieren, in dem \TeX\ nach Makrodateien sucht (Bsp:
+{\tt{}.../texmf/""tex/""generic/""german/}).  "Altere
+Versionen dieser Dateien in weiteren Verzeichnissen, die
+\TeX\ durchsucht, sollten Sie l"oschen.
+
+Bitte lesen Sie nun den n"achsten Abschnitt, da es sehr
+wahrscheinlich ist, da"s die Trennmuster in Ihren bisher
+verwendeten Formatdateien nicht korrekt oder nicht
+vollst"andig  installiert wurden.  Ist dies der Fall, wird in
+allen Dokumenten, die diese Pakete verwenden, nicht mehr
+automatisch getrennt!
+
+\subsubsection{Installation der Trennmuster}
+
+\TeX\ kann ab Version~3.0 in einer einzigen Formatdatei 
+mehrere verschiedene Trennmuster halten.
+%,so da"s mehrsprachige Dokumente mit korrekter Trennung m"oglich sind.  
+Zur Auswahl der Trennmuster einer
+Sprache dient eine ganze Zahl von 0--255, die der Sprache beim Installieren der
+Trennmuster zugeordnet worden sein mu"s.
+
+Beim Laden eines Satzes von Trennmustern w"ahrend der Installation
+(Ini\TeX-Lauf) erfolgt die Zuordnung der Trennmuster zu einer
+Sprache durch Zuweisung der f"ur diese Sprache ge"-w"ahlten Zahl an
+das spezielle \TeX-Register \CS{language}.  Ebenso werden sp"ater beim
+"Uber"-setzen eines Dokuments die zu verwendenden Trennmuster durch
+Zuweisung der Zahl an \CS{language} wieder aktiviert.  Achtung: Weist
+man \CS{language} beim "Uber"-setzen eines Dokuments einen Wert zu,
+f"ur den Ini\TeX{} keine Trennmuster geladen hatte, so findet {\it keine\/}
+automatische Silbentrennung statt.
+
+Wie werden nun die Nummern von 0--255 an die einzelnen Sprachen
+vergeben?  Als Quasi-Standard f"ur die Vergabe der Nummern hat sich
+mittlerweile das im {\it
+  Babel-System\/}~\cite{Braams91,Goossens94a,Goossens94b} verwendete
+Schema herausgebildet.
+Dabei wird jede Sprache deklariert und an diese eine Nummer in
+aufsteigender Folge von~0 an vergeben.  Wichtig dabei ist, da"s die
+jeweils zugeordnete Nummer in einer {\it control sequence\/}
+\mbox{\CS{l@}\(\langle\)Sprache\(\rangle\)} abgespeichert wird.
+So kann man sp"ater auf die Sprache unter ihrem Namen
+zugreifen, also ohne die Nummer explizit angeben zu m"ussen.
+
+Der Code zum Laden der Trennmuster und zum Zuordnen der Sprachnamen
+befindet sich in einer Makrodatei, die f"ur das
+aktuelle \LaTeXe{} beispielsweise {\tt hyphen.cfg} hei"st.
+Sie mu"s normalerweise neu erstellt oder zumindest angepa"st werden, 
+um festzulegen, welche Sprachen unterst"utzt werden sollen.
+
+Mit dem Babel-Paket wird eine besondere Version dieser Datei
+ausgeliefert, die die Information "uber die zu ladenden Sprachen einer
+weiteren Konfigurationsdatei {\tt language.dat} entnimmt, die ihrerseits 
+einfacher aufgebaut und leichter zu bearbeiten ist.  
+
+Unabh"angig davon, welche
+der beiden Methoden zur Konfiguration benutzt wird, kann das damit erzeugte
+Format sowohl mit Babel als auch mit dem Paket "`german"' benutzt werden.
+Die Version 3.6h des Babel-Pakets selbst 
+kennt allerdings noch keine Option f"ur "`Deutsch mit neuer Rechtschreibung"'.
+
+Gehen Sie zum Konfigurieren der Sprachunterst"utzung wie folgt vor:
+
+\paragraph{Schritt 1\protect\(^*\protect\):}
+Sie verwenden den Konfigurationsmechanismus des Babel-Pakets;
+dies ist standardm"a"sig z.\,B. mit teTeX oder dem Web2c-\TeX{} der
+CD TeX\,Live der Fall.
+In diesem Fall m"ussen in der Konfigurationsdatei {\tt language.dat}
+die folgenden Zeilen (neben evtl. weiteren) eingetragen sein:
+\begin{quote}\small
+\begin{verbatim}
+  german     ghyph31.tex
+  ngerman    gnhyph01.tex                   
+\end{verbatim}
+\end{quote}
+Damit wird die Zuordnung von Sprachnamen und Trenn\-muster\-dateien
+festgelegt.
+Evtl. fehlende Eintr"age sind am Ende der Datei zu erg"anzen.
+(Mit der TeX\,Live-CD ist der Dateiname {\tt ghyph31.tex} 
+durch {\tt dehyphen.tex} zu ersetzen.)
+
+%Bitte beachten Sie, da"s innerhalb eines Dokuments nur 
+%{\em entweder} die vom Babel-Paket
+%zur Verf"ugung gestellten Sprachanpassungen (einschl. "`german"') 
+%{\em oder} das Paket "`german"' benutzt werden sollen;
+%ihre gleichzeitige Verwendung kann zu Problemen f"uhren!
+
+"Uberspringen Sie
+nun  die Schritte 1 und 2. Falls in Ihrem \TeX-System {\em nicht} der
+Babel-Mechanismus zur Konfiguration der Trennmuster benutzt wird,
+dann lesen Sie bitte weiter:
+
+\paragraph{Schritt 1:}
+Sie ben"otigen zum Laden der Trennmusterdateien f"ur verschiedene
+Sprachen eine Makrodatei, die (leider) je nach verwendetem
+Format einen unterschiedlichen Dateinamen besitzt.  Den Namen dieser
+Datei k"onnen Sie der Tabelle in Schritt~\(2\) entnehmen, die Datei
+selbst sollte folgenden Inhalt haben:
+%
+\begin{quote}\small
+\begin{verbatim}
+%% Konfigurationsdatei -- Trennmuster: `hyphen.cfg'
+\message{== Loading hyphenation patterns:}
+
+%% american english
+\chardef\l@USenglish=\language
+%% british english als "Dialekt"
+\chardef\l@english=\l@USenglish
+\input hyphen
+
+%% german
+\newlanguage\l@german \language=\l@german
+%% oesterreichisch als "Dialekt":
+\chardef\l@austrian=\l@german
+\input ghyph31
+
+%% new german
+\newlanguage\l@ngerman \language=\l@ngerman
+%% oesterreichisch (neu) als "Dialekt"
+\chardef\l@naustrian=\l@ngerman
+\input gnhyph01
+
+%% weitere Sprachen nach folgendem Schema:
+% \newlanguage\l@SPRACHE \language=\l@SPRACHE
+% \chardef\l@DIALEKT=\l@SPRACHE
+% \input SPRACHhyphen
+
+%% Default-Trennmuster: USenglish
+\language=\l@USenglish \lefthyphenmin=2 \righthyphenmin=3
+\message{done.}
+\endinput
+\end{verbatim}
+\end{quote}
+%
+In dem gezeigten Beispiel werden die
+US-eng\-li\-schen Trennmuster, die "`alten"' und die "`neuen"'
+deutschen  Trennmuster geladen, wobei f"ur die britisch-englische und
+f"ur die "oster"-reichische "`Sprache"' Synonyme deklariert werden.
+Eine Datei mit genau diesem Inhalt wird unter dem Namen 
+\begin{quote}
+  {\tt hyphxmpl.cfg}   
+\end{quote}
+zusammen mit dem Makropaket "`german"' verteilt.
+Wollen Sie f"ur weitere Sprachen Trennmuster laden,
+%-- beispielsweise existieren solche f"ur britisch-englische Silbentrennung -- 
+sollten
+Sie in der Lage sein, die dazu notwendigen Zeilen anhand des
+auskommentierten Schemas im gezeigten Beispiel zu
+vervoll"-st"andigen.  
+
+Es ist wichtig, da"s Sie die beiden Parameter \CS{left\-hyphen\-min}
+und \CS{right\-hyphen\-min}, die die Mindest"-l"ange der nicht
+trennbaren Wortpr"afixe und \mbox{-suffixe} angeben, am Ende der Datei
+mit passenden Werten f"ur diejenige Sprache 
+vorbesetzen, mit der \TeX{} startet.  Ansonsten erhalten Sie eventuell
+Trennungen, bei denen einzelne Zeichen am Wortanfang oder \mbox{-ende}
+abgetrennt werden.  Es ist jedoch {\em nicht\/} notwendig, diese
+beiden Parameter f"ur jede zu ladende Trennmusterdatei zu setzen, da
+\TeX\ die Parameterwerte sowieso nicht mit den Trennmustern abspeichert.
+
+
+\paragraph{Schritt 2:}
+Entscheiden Sie sich, f"ur welches \TeX-Format Sie eine neue
+Formatdatei erstellen wollen.  Je nach zu erzeugendem Format hat die
+in Schritt~\(1\) gezeigte Konfigurationsdatei einen anderen Namen:
+%
+\begin{quote}
+\begin{tabular}{@{}ll@{}}
+\qquad {\it Format} & {\it Dateiname} \\[3pt]
+\LaTeXe{} (ab 1.~Dezember 1994) & {\tt hyphen.cfg}\\
+\LaTeXe{} (1.~Juni 1994)        & {\tt lthyphen.cfg} \\
+\LaTeX 2.09 (ab Dezember 1991)  & {\tt lhyphen.tex} \\
+\LaTeX 2.09 (vor Dezember 1991) & {\tt hyphen.tex} \\
+Plain-\TeX                      & {\tt hyphen.tex}
+\end{tabular}
+\end{quote}
+%
+Geben Sie der in Schritt~\(1\) erstellten Datei (oder dem
+Beispiel {\tt hyphxmpl.cfg}) den entsprechenden
+Dateinamen aus dieser Tabelle.
+
+{\it Zu Plain-\TeX{} und den "alteren \LaTeX-Versionen:\/} Da die
+US-englischen Trennmuster, die als Mindestausstattung jeder
+Installation beiliegen, den selben von Donald E.\ Knuth vergebenen
+Namen {\tt hyphen.tex} haben, m"us\-sen Sie diese Trennmusterdatei
+f"ur Plain-\TeX\ und die "alteren \LaTeX~2.09-Versionen in {\tt
+ushyphen.tex} umbenennen, um Namens"-kollisionen zu vermeiden.
+Vergessen Sie in diesem Fall nicht, auch in der Konfigurationsdatei 
+den Namen {\tt hyphen.tex} durch {\tt ushyphen.tex} zu ersetzen!
+
+\paragraph{Schritt 3:}
+Bevor Sie nun mit Ini\TeX\ eine Formatdatei erstellen, sollten Sie
+sich vergewissern, da"s Ihre \TeX-Version gen"ugend Platz f"ur die
+Trennmuster reserviert.  
+
+Um beispielsweise die amerikanischen und die beiden deutschen
+Trennmusterdateien zu laden, ben"otigen Sie einen "`Trie"'-Wert, der
+mindestens  \(21547\) {\tt trie\_size} und \(625\) {\tt
+trie\_op\_size} Platz bietet.  Wollen Sie Trennmuster f"ur weitere
+Sprachen, wie beispielsweise britisches Englisch, dazuladen, m"ussen
+diese Werte er"-h"oht werden.   Vergessen Sie sp"ater nicht, da"s Sie
+auch bei der "Uber"-setzung der Dokumente entsprechend mehr Platz
+f"ur die Trennmuster be"-n"otigen.  
+
+Ob Sie diese Werte in Ihrer \TeX-Installation "andern m"ussen, und
+wenn ja, wie, entnehmen Sie bitte der zugeh"origen
+Dokumentation.  
+H"aufig kann man die
+Gr"o"se der Trennmustertabelle "uber Umgebungsvariablen, spezielle
+Konfigurationsdateien oder Optionen in der Kommandozeile festlegen.
+
+Mit emTeX beispielsweise mu"s die Voreinstellung f"ur {\tt trie\_size}
+"uber die Option {\tt -mt} erh"oht werden, wenn die o.\,g. drei
+Trennmusterdateien gleichzeitig verf"ugbar sein sollen:
+\begin{quote}
+   \begin{tabular}{ll}
+   Format erzeugen: & {\tt -mt27000} \\
+   \TeX-Lauf:  & {\tt -mt23000}
+   \end{tabular}
+\end{quote}
+
+
+\paragraph{Schritt 4:}
+Erzeugen Sie durch Aufruf von Ini\TeX\  aus der Datei, die die Makros
+f"ur das \TeX-Format, z.\,B. \LaTeX, ent"-h"alt, die Formatdatei.  
+%
+\iffalse
+Zum Beispiel wird die \LaTeXe-Formatdatei unter {\sc Unix} durch den
+Aufruf
+%
+\begin{quote}\small
+  \verb:initex latex.ltx:
+\end{quote}
+%
+erzeugt.  
+\fi
+% Unix ist kein gutes Beispiel, weil ausgerechnet das verbreitete
+% teTeX ein Konfigurationsskript hat, so dass IniTeX normalerweise
+% nie manuell aufgerufen werden muss.
+%
+Genaueres dar"uber, wie Sie  eine Formatdatei erstellen, entnehmen
+Sie bitte der zu Ihrem \TeX-System geh"orenden Beschreibung.
+
+W"ahrend Ini\TeX\ abl"auft,
+sollten Sie darauf achten, da"s auch die oben
+angegebene Konfigurationsdatei und die Trennmusterdateien eingelesen
+werden.  Wenn dies nicht geschieht, haben Sie einen falschen Namen
+f"ur die Konfigurationsdatei ge"-w"ahlt.  "Uber"-pr"ufen Sie nochmals
+den Dateinamen und ziehen Sie die Format"-dokumentation zu Rate.
+
+Bricht Ini\TeX\ beim Laden der Trennmusterdateien mit der
+Fehlermeldung
+%
+\begin{quote}\small
+  {\tt \TeX\ capacity exceeded, sorry
+  [pattern memory=}{\it x}{\tt ]}
+\end{quote}
+%
+ab, so haben Sie {\tt trie\_size} zu klein gew"ahlt, bei
+%
+\begin{quote}\small
+  {\tt \TeX\ capacity exceeded, sorry
+  [pattern memory ops=}{\it x}{\tt ]}
+\end{quote}
+%
+wurde {\tt trie\_op\_size} zu klein gew"ahlt.  Falls dies bei Ihrer
+\TeX-Implemen"-tierung m"og"-lich ist, sollten Sie in diesen F"allen
+die Tabellen entsprechend ver"-gr"o"sern (siehe Schritt~3).
+Ansonsten k"onnen Sie nicht alle in Ihrer Konfigurationsdatei
+angegebenen Trennmusterdateien in einer einzigen Formatdatei
+verwenden.
+
+\paragraph{Schritt~5:}
+Wenn alles ohne Probleme durchlief, sollte zum Schlu"s eine Datei mit
+Endung~{\tt .fmt} und eine Protokolldatei mit Endung~{\tt .log}
+erstellt worden sein.  Kopieren Sie beide Dateien in das Verzeichnis,
+wo Ihre \TeX-Implementierung nach Formatdateien sucht, falls
+dieser Schritt nicht automatisch erfolgt. Die Protokolldatei sollten
+Sie nicht l"oschen, da Sie anhand dieser Datei noch Monate sp"ater
+nachvollziehen k"onnen, wie Sie diese Formatdatei erstellt haben.
+
+Als Kontrolle, welche Trennmuster f"ur welche Sprachen geladen wurden,
+k"onnen Sie das Ende der Protokolldatei betrachten.  Sie sollten beim
+Erstellen eines \LaTeXe-Formates ungef"ahr folgende Zeilen erhalten:
+%
+\begin{quote}\small
+\begin{verbatim}
+This is emTeX (tex386), Version 3.14159 [4b] (INITEX) ...
+**latex.ltx
+(latex.ltx (texsys.cfg)
+...
+(e:/texmf/tex/latex/local/hyphen.cfg
+== Loading hyphenation patterns:
+(e:/texmf/tex/generic/hyphen/hyphen.tex)
+\l@german=\language1
+
+(e:/texmf/tex/generic/hyphen/ghyph31.tex
+German Hyphenation Patterns `ghyphen' Version 3.1a <94/02/13>)
+\l@ngerman=\language2
+
+(e:/texmf/tex/generic/hyphen/gnhyph01.tex
+New German Hyphenation Patterns `gnhyph01' Rev. 22) done.)
+...
+Beginning to dump on file latex.fmt
+...
+14 hyphenation exceptions
+Hyphenation trie of length 21547 has 625 ops out of 750
+  237 for language 2
+  207 for language 1
+  181 for language 0
+No pages of output.
+\end{verbatim}
+\end{quote}
+%
+Wie Sie in der vorletzten und den vorhergehenden Zeilen sehen, enth"alt die
+Formatdatei Trennmuster f"ur drei Sprachen, denen die Nummern \(0\)
+bis~\(2\) zugewiesen wurden.  Zusammen be"-n"o"-tigen Sie
+\(\mbox{\tt trie\_size}=21547\) und \(\mbox{\tt trie\_op\_size}=625\)
+von \(750\)~vorhandenen Pl"atzen im "`Trie"'-Bereich.  Au"serdem
+wurden mit \CS{hyphenation} zus"atzlich \(14\)~Trennungsausnahmen
+geladen. Laden Sie andere Trennmuster, unterscheiden sich Ihre Werte
+nat"urlich von den hier gezeigten Werten.
+
+\vspace{\baselineskip}
+
+In der Konfigurationsdatei, in der die Trennmuster geladen werden,
+werden die den Sprachen zugeordneten Nummern in den {\it control
+sequences\/} \mbox{\CS{l@}\(\langle\)Sprache\(\rangle\)}
+abgespeichert.  Wird sp"ater beim "Uber"-setzen eines Dokuments auf
+eine Sprache gewechselt, f"ur die keine {\it control sequence\/}
+definiert wurde, so verwenden die Pakete "`german"' und "`ngerman"' die
+folgenden Default-Werte:
+%
+\begin{quote}\small
+\begin{tabular}{@{}lcl@{}}
+\multicolumn{1}{@{}c}{\it Sprache~}&\it Wert&\it oder,
+  falls gesetzt, Wert der Sprache\\[3pt]
+ \tt USenglish & 255 & \tt english\\
+ \tt english   & 255 & \tt USenglish\\
+ \tt german    & 255 & \tt austrian\\
+ \tt austrian  & 255 & \tt german\\
+ \tt ngerman    & 255 & \tt naustrian\\
+ \tt naustrian  & 255 & \tt ngerman\\
+ \tt french    & 255
+\end{tabular}
+\end{quote}
+%
+In "alteren Versionen der Style-Option "`german"' wurden den Sprachen
+Werte zwischen \(0\) und~\(5\) zugewiesen.  Ab Version~2.5a wird der
+Wert~\(255\) verwendet, um die Trennung f"ur alle undefinierten Sprachen
+zu unterbinden.  Dies funktioniert in den meisten F"allen, da im
+allgemeinen f"ur den Wert~\(255\) keine Trennmuster geladen werden.
+
+
+\section{Sonstiges}
+
+\subsection{Geschichtliches}
+
+Die Style-Option "`german"', die das Erstellen deutschsprachiger
+Texte mit \TeX\ vereinfacht, wurde von Dr.\ H.\ Partl (Technische
+Universit"at Wien) realisiert und zusammengestellt.  Sie war als
+"`rasche L"osung"' entstanden, die den Vorteil hat, da"s sie keine
+"Anderungen an der \TeX-Software, den Schriftdateien und den
+Trennmustern erfordert, sondern direkt auf die Originalversion von
+\TeX\ aufgesetzt werden kann~\cite{Partl87,Partl88}.  Diese "`rasche
+L"osung"' hat sich be"-w"ahrt und besitzt heutzutage ein weites
+Verbreitungsgebiet im deutschsprachigen Raum und dar"uberhinaus.
+
+Folgende Personen haben durch Ideen und Code-Beispiele zum Erfolg der
+Style-Option "`german"' beigetragen (die Liste erhebt keinen Anspruch
+auf Voll"-st"andigkeit): W.~Appelt, F.~Hommes und andere
+(Gesellschaft f"ur Mathematik und Datenverarbeitung St.~Augustin),
+T.~Hofmann ({\sc Ciba-Geigy} Basel), N.~Schwarz (Universit"at
+Bochum), J.~Schrod (TH Darmstadt), D.~Armbruster (Universit"at
+Stuttgart), R.~Sch\"opf (Universit"at Mainz, Universit"at Heidelberg,
+Zuse-Zentrum f"ur Informationsverarbeitung Berlin), F.~Mittelbach
+(Universit"at Mainz, EDS R"usselsheim), J.~Knappen (Universit"at
+Mainz), P.~Breitenlohner (Max-Planck-Institut M\"unchen),
+H.~Oberdiek (Universit"at Freiburg) und viele
+andere.
+
+F"ur die Anpassung an die  neue Rechtschreibung
+war  W.~Schmidt verantwortlich.
+
+Seit Version~2.3e vom 31.~Juli 1991 werden die Pakete "`german"' und "`ngerman"'
+von B.~Raichle (Universit"at Stuttgart) gepflegt und weiterentwickelt.
+
+
+
+\subsection{Verf"ugbarkeit der Makropakete}
+
+Die Makropakete "`german"' und "`ngerman"' kann man, wie fast jede andere
+\TeX-Soft\-ware, vom {\it Comprehensive \TeX\ Archive Network}, kurz
+\mbox{CTAN}, erhalten.  Dieses Netzwerk besteht z.\,Z.\ aus den 
+ftp-Servern {\tt ftp.dante.de}, {\tt ftp.tex.ac.uk} und {\tt ctan.tug.org}, 
+wobei auf
+jedem dieser Ser\-ver der gleiche Inhalt zu finden ist.
+\mbox{CTAN} dient als sogenannter "`Back\-bone"', d.\,h.\ das
+komplette Archiv oder Teile davon werden von diesen Servern auf vielen
+weiteren Ser\-ver "`gespiegelt"' vorgehalten, so da"s Sie die f"ur Sie
+g"unstigste Zugriffs"-m"oglichkeit w"ahlen k"onnen.  Au"serdem ist der
+Inhalt von \mbox{CTAN} von mehreren Anbietern auch auf CD-ROM
+er"-h"altlich.
+
+Die Pakete, die zugeh"orige Dokumentation und die
+deutschen Trennmuster finden Sie auf \mbox{CTAN} in den
+Verzeichnissen
+\begin{quote}
+\begin{verbatim}
+tex-archive/language/german/
+tex-archive/language/hyphenation/
+\end{verbatim}
+\end{quote}
+
+Die Mitgliedschaft in DANTE~e.V\negthinspace.\ bietet eine weitere
+M"og"-lichkeit an die \TeX-Soft\-ware
+und viele Kontakte zu anderen \TeX-Anwendern zu gelangen.
+Informationen "uber DANTE~e.V\negthinspace.\ erhalten Sie von
+%
+\begin{quote}
+ DANTE, Deutschsprachige Anwendervereinigung
+        \TeX\ e.V\negthinspace. \\
+ Postfach 10\,18\,40 \\
+ 69008 Heidelberg \\
+ Federal Republic of Germany\\[4pt]
+ Tel.: +49 6221 2\,97\,66\\
+ Fax: +49 6221 16\,79\,06\\
+ E-Mail: {\tt dante@dante.de}\\[4pt]
+ {\sc www}: {\tt http://www.dante.de/}\\
+ ftp: {\tt ftp://ftp.dante.de/tex-archive/usergrps/dante/}
+\end{quote}
+
+
+\subsection{\protect\TeX~2.x vs.\ \protect\TeX~3.x und die
+  Style-Option "`german"'}
+
+Seit Oktober~1987 ist \TeX\ in der Version~\(3.x\) verf"ugbar.  Da
+diese Version gegen"-"uber \TeX~\(2.x\) einige Erweiterungen besitzt,
+soll hier kurz auf die wichtigsten "Anderungen in der Style-Option
+"`german"' eingegangen werden.
+
+\TeX\ Version~3 f"uhrte neue {\it control sequences\/} f"ur neue
+Primitive und interne Register ein.  Darunter f"allt das in "alteren
+Versionen der Style-Option "`german"' verwendete Makro
+\CS{set\-language}, das ab Version~2.3 in \CS{select\-language}
+umbenannt wurde.  Da \CS{set\-language} ein \TeX~3-Primitiv ist und
+deshalb keine auf"-w"arts"-kompatible Definition angeboten werden
+kann, mu"s in "alteren Texten der alte Makroname durch den neuen Namen
+ersetzt werden.
+
+Zu \TeX{}s internen Registern kamen u.\,a.\ \CS{language},
+\CS{left\-hyphen\-min} und \CS{right\-hyphen\-min} hinzu, um
+Trennmuster f"ur mehr als eine Sprache unter"-st"utzen zu k"on\-nen.
+Diese drei Register bestimmen die zu verwendenden Trennmuster und die
+Mindest"-l"an"-ge der nicht trennbaren Wort"-pr"a"-fixe und
+\mbox{-suffixe}.  Der "`normale"' \TeX-Benutzer sollte diese Register
+zum Wechsel der Trennmuster nie direkt "andern, sondern sollte dazu
+das \CS{select\-language}-Makro verwenden.  Ab Version~2.4a der
+Style-Option "`german"' werden f"ur die Sprachen {\tt german} und
+{\tt austrian} zu"-s"atzlich \CS{french\-spacing} und die Werte f"ur
+\CS{left\-hyphen\-min} und \CS{right\-hyphen\-min} auf zwei gesetzt.
+
+
+\subsection{"Anderungen seit Version~2.0 (Oktober 1987)}
+
+Zus"atzlich zu den in fr"uheren Abschnitten erw"ahnten "Anderungen
+kommen folgende hinzu:
+
+\begin{itemize}\tolerance=9999\hbadness=2500
+\item In Versionen vor~2.2 fehlen die Befehle \verb:"S:, \verb:"CK:,
+  \verb:"FF: f"ur Gro"sbuchstaben und die entsprechenden Befehle f"ur
+  die Konsonanten L, M, N, P und~T.
+\item In Versionen bis~2.2 gab es die undokumentierten Makros
+  \CS{original\-@dospecials} und \CS{original\-@sanitize}, die die
+  urspr"unglichen Definitionen von \CS{do\-special} und \CS{@sanitize}
+  enthielten, und \CS{german\-@dospecials}, \CS{german\-@sanitize},
+  die zu"-s"atzlich das Double\-quote~(\verb:":) enthielten. Diese
+  Makros werden von einigen "`fremden"' Makros benutzt, obwohl sie
+  undokumentiert und nur zur internen Verwendung bestimmt waren.
+\item Bis Version~2.3e wurden bei Verwendung von~\verb:"|: zur
+  Verhinderung von Ligaturen keine weiteren Trennstellen im Wort
+  gefunden.
+\item Ab Version~2.3e werden die etwas tieferen Umlautakzente durch
+  ein ge"-"an"-der"-tes Makro erzeugt, das schneller ist und zu
+  kleineren \verb:dvi:-Dateien f"uhrt.  Au"serdem werden jetzt bis auf
+  die Z"ah\-ler"-allokationen alle Definitionen und Zuweisungen lokal
+  aus\-ge\-f"uhrt.
+\item In Version~2.4a wurden durch zu"-s"atzliche \CS{/}-Anweisungen
+  "Uberschneidungen der "offnenden An"-f"uh\-rungs"-zeichen mit
+  nachfolgenden Zeichen bei Verwendung der
+  Com\-pu\-ter-Modern-Schriften f"ur viele F"alle verhindert.
+  Undefinierte \verb:"x:-Befehle f"uhren jetzt zu einer Fehlermeldung
+  -- dies f"uhrt oft dazu, da"s viele einfache Tippfehler schon beim
+  "Ubersetzen aufgedeckt werden.  Die Befehle \verb:"z:, \verb:"Z:,
+  \verb:"~: und \verb:"=: kamen neu dazu.
+\item Version~2.5a ent"-h"alt Anpassungen an \LaTeXe{} zur Verwendung
+  von Schriften mit Kodierung {\tt OT1} und~{\tt T1}.  Die Befehle
+  \verb:"r: und~\verb:"R: kamen hinzu.  Die Defaults f"ur
+  "`undefinierte"' Sprachen sind jetzt~\(255\) mit entsprechenden
+  Warnungen, um die Benutzer zu zwingen, beim Laden der Trennmuster
+  gleich die verwendete \CS{language}-Nummer zu sichern (z.\,B.\ mit
+  dem Babel-System oder einer von Hand geschriebenen
+  Konfigurationsdatei).  Intern wurden, neben der Verwendung von {\it
+  docstrip}, kleinere Optimierungen ausgef"uhrt.
+\item Bis Version~2.5b wird bei \verb:"ff: die ff-Ligatur verhindert,
+  obwohl diese bei Ausfall des dritten~"`\mbox{f}"' stehen sollte.
+  Diese "Anderung ab Version~2.5c kann zu gering"-f"ugig anderen
+  Trennungen im direkt auf \verb:"ff: folgenden Wortteil f"uhren.
+\item Version~2.5c f"ugt das explizite Kerning der oberen deutschen
+  Anf"uhrungszeichen~"' f"ur T1-kodierte Schriften nicht mehr ein, da
+  die EC-Schriften (und die DC-Schriften ab Version~1.2 als deren
+  Testversion) diese Anf"uhrungszeichen etwas weiter nach links
+  plazieren, so da"s es sonst zu "Uber"-schneidungen kommt.
+\item Version~2.5d erlaubt bei T1-kodierten Schriften das dort
+  notwendige Kerning der Anf"uhrungszeichen sowohl bei \CS{glqq},
+  \CS{grqq}, \CS{flqq} und \CS{frqq} als auch bei \verb:"`:,
+  \verb:"':, \verb:"<: und~\verb:">:.
+\item Mit Version~2.5e wird zus"atzlich das Paket "`ngerman"'
+  eingef"uhrt.  Die Implementierung des undokumentierten Befehls
+  \verb:\iflanguage: wird dahingehend ge"andert, da"s in seinen
+  "`then"'- und  "`else"'"~Argumenten auch Makros verwendet werden k"onnen, 
+  deren Parameter erst  hinter dem \verb:\iflanguage:-Befehl folgen.
+  Das erm"oglicht Konstrukte wie 
+  \verb:Sto\iflanguage{german}{"}{f}ffetzen:.
+\end{itemize}
+
+
+
+\begin{thebibliography}{99}\tolerance=2000\hbadness=2000
+\bibitem[Duden, Bd.~1]{Duden} {\sc Duden},
+  Rechtschreibung der deutschen Sprache und der
+  Fremd"-w"orter.  Hrsg.\ von der {\sc Duden}-Redaktion.
+  Auf der Grundlage der amtlichen Rechtschreibregeln. 
+  Mannheim; Wien; Z"urich: Bibliographisches Institut,
+  19.~Auf"|lage, 1986.
+\bibitem[Partl87]{Partl87} Hubert Partl,
+  {\it Ein "`Minimal Subset"' f"ur einheitliche deutsche
+    \TeX-Befehle}, Vortrag und Diskussion beim 6.~Treffen der
+  deutschen \TeX-""Interessenten in M"unster (1987).
+  Anm.: ver"offentlicht in einer Datei namens {\tt germdoc.tex},
+  mittlerweile ersetzt durch das  Ihnen vorliegende
+  Dokument "`Kurzbeschreibung -- {\tt (n)german.sty}"'.
+\bibitem[Partl88]{Partl88} Hubert Partl,
+  German \TeX, {\em TUGboat\/} 9(1):70--72, 1988.
+\bibitem[Braams91]{Braams91} Johannes Braams,
+  Babel, a multilingual style-option system for use with \LaTeX's
+  standard document styles,
+  {\it TUGboat\/} 12(2):291--301, Juni 1991.
+\bibitem[Goossens94a]{Goossens94a} Michel Goossens, Frank Mittelbach und
+  Alexander Samarin, {\it The \LaTeX\ Companion},
+  Addison-Wesley, Reading, 2.~Auf"|lage, 1994.
+\bibitem[Goossens94b]{Goossens94b} Michel Goossens, Frank Mittelbach und
+  Alexander Samarin, {\it Der \LaTeX-Begleiter},
+  Addison-Wesley, Bonn, 1.~Auf"|lage, 1994.
+  Anm.: "uber"-arbeitete, deutsche "Uber"-setzung
+  von~\cite{Goossens94a}.
+\end{thebibliography}
+
+\end{document}
