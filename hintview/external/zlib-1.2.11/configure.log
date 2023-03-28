@@ -1,0 +1,15 @@
+--------------------
+./configure
+Thu Feb 28 11:25:50 CEST 2019
+Checking for gcc...
+=== ztest2340.c ===
+extern int getchar();
+int hello() {return getchar();}
+===
+gcc -c ztest2340.c
+... using gcc
+Please use win32/Makefile.gcc instead.
+** ./configure aborting.
+--------------------
+
+

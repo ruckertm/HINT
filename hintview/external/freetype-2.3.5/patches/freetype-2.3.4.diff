@@ -1,0 +1,280 @@
+diff -ipuwr -x config.log -x config.status -x config.cache -x '*.Po' -x '*.pot' -x '*.bak' -x '*.orig' -x '*.rej' -x '*.new' -x '*~' -x '*.o' -x '*.exe' -x patches -x '*.dll' -x'*.la' -x res -x debian -x '*.log' -x '*.lib' -x'*.a' -x .libs -x'*.def' -x'*.uu' -x'*.rc' -x'*.ico' -x'*.lo' freetype-2.3.4-orig/builds/freetype.mk freetype-2.3.4/builds/freetype.mk
+--- freetype-2.3.4-orig/builds/freetype.mk	2006-12-09 19:03:28.000000000 +0100
++++ freetype-2.3.4/builds/freetype.mk	2007-06-25 21:24:01.718750000 +0200
+@@ -94,6 +94,7 @@ SRC_DIR := $(TOP_DIR)/src
+ # `./src/base'.
+ #
+ BASE_DIR := $(SRC_DIR)/base
++RES_DIR:= $(TOP_DIR)/resource
+ 
+ # Other derived directories.
+ #
+@@ -198,6 +199,21 @@ $(FTSYS_OBJ): $(FTSYS_SRC) $(FREETYPE_H)
+ 	$(FT_COMPILE) $T$(subst /,$(COMPILER_SEP),$@ $<)
+ 
+ 
++# ftdllversion component
++#
++FTDLL_SRC = $(RES_DIR)/freetype-dllversion.c
++FTDLL_OBJ = $(OBJ_DIR)/freetype-dllversion.$O
++FTRES_SRC = $(RES_DIR)/freetype-dll-res.rc
++FTRES_OBJ = $(OBJ_DIR)/freetype-dll-res.$O
++
++OBJECTS_LIST += $(FTDLL_OBJ) $(FTRES_OBJ)
++
++$(FTDLL_OBJ): $(FTDLL_SRC)
++	$(FT_COMPILE) $T$(subst /,$(COMPILER_SEP),$@ $<)
++
++$(FTRES_OBJ): $(FTRES_SRC)
++	$(RCTOOL_COMPILE) $< $@
++	
+ # ftdebug component
+ #
+ FTDEBUG_SRC ?= $(BASE_DIR)/ftdebug.c
+@@ -266,6 +282,14 @@ dll: $(PROJECT_LIBRARY) exported_symbols
+ .c.$O:
+ 	$(FT_COMPILE) $T$(subst /,$(COMPILER_SEP),$@ $<)
+ 
++# Rule to make compiled resource (Windows)
++.rc.o:
++	windres --include-dir $(resdir) -i $< -o $@
++RCTOOL = rctool.sh
++RCTOOL_COMPILE = RCTOOL
++.rc.lo:
++	$(RCTOOL_COMPILE) $<
++
+ 
+ ifneq ($(findstring refdoc,$(MAKECMDGOALS)),)
+   # poor man's `sed' emulation with make's built-in string functions
+diff -ipuwr -x config.log -x config.status -x config.cache -x '*.Po' -x '*.pot' -x '*.bak' -x '*.orig' -x '*.rej' -x '*.new' -x '*~' -x '*.o' -x '*.exe' -x patches -x '*.dll' -x'*.la' -x res -x debian -x '*.log' -x '*.lib' -x'*.a' -x .libs -x'*.def' -x'*.uu' -x'*.rc' -x'*.ico' -x'*.lo' freetype-2.3.4-orig/builds/unix/freetype-config.in freetype-2.3.4/builds/unix/freetype-config.in
+--- freetype-2.3.4-orig/builds/unix/freetype-config.in	2006-10-12 06:51:08.000000000 +0200
++++ freetype-2.3.4/builds/unix/freetype-config.in	2007-06-24 23:40:49.062500000 +0200
+@@ -141,7 +141,7 @@ if test "$echo_libs" = "yes" ; then
+   if test "$enable_shared" = "yes" ; then
+     eval "rpath=\"$hardcode_libdir_flag_spec\""
+   fi
+-  libs="-lfreetype @LIBZ@ @FT2_EXTRA_LIBS@"
++  libs="-lfreetype @LIBZ@ @FT2_EXTRA_LIBS@ @LIBS@ "
+   if test "$libdir" != "/usr/lib" && test "$libdir" != "/usr/lib64"; then
+     echo -L$libdir $rpath $libs
+   else
+diff -ipuwr -x config.log -x config.status -x config.cache -x '*.Po' -x '*.pot' -x '*.bak' -x '*.orig' -x '*.rej' -x '*.new' -x '*~' -x '*.o' -x '*.exe' -x patches -x '*.dll' -x'*.la' -x res -x debian -x '*.log' -x '*.lib' -x'*.a' -x .libs -x'*.def' -x'*.uu' -x'*.rc' -x'*.ico' -x'*.lo' freetype-2.3.4-orig/builds/unix/unix-def.in freetype-2.3.4/builds/unix/unix-def.in
+--- freetype-2.3.4-orig/builds/unix/unix-def.in	2006-12-09 18:52:52.000000000 +0100
++++ freetype-2.3.4/builds/unix/unix-def.in	2007-06-23 17:11:05.656250000 +0200
+@@ -13,7 +13,7 @@
+ # fully.
+ 
+ 
+-TOP_DIR := $(shell cd $(TOP_DIR); pwd)
++TOP_DIR := $(shell cd $(TOP_DIR); cygpath -m $(pwd))
+ 
+ DELETE    := @RMF@
+ DELDIR    := @RMDIR@
+diff -ipuwr -x config.log -x config.status -x config.cache -x '*.Po' -x '*.pot' -x '*.bak' -x '*.orig' -x '*.rej' -x '*.new' -x '*~' -x '*.o' -x '*.exe' -x patches -x '*.dll' -x'*.la' -x res -x debian -x '*.log' -x '*.lib' -x'*.a' -x .libs -x'*.def' -x'*.uu' -x'*.rc' -x'*.ico' -x'*.lo' freetype-2.3.4-orig/builds/win32/win32-def.mk freetype-2.3.4/builds/win32/win32-def.mk
+--- freetype-2.3.4-orig/builds/win32/win32-def.mk	2006-12-09 18:53:57.000000000 +0100
++++ freetype-2.3.4/builds/win32/win32-def.mk	2007-06-18 00:52:45.781250000 +0200
+@@ -13,9 +13,9 @@
+ # fully.
+ 
+ 
+-DELETE    := del
+-CAT       := type
+-SEP       := $(strip \ )
++DELETE    := rm -f
++CAT       := cat
++SEP       := $(strip / )
+ BUILD_DIR := $(TOP_DIR)/builds/win32
+ PLATFORM  := win32
+ 
+diff -ipuwr -x config.log -x config.status -x config.cache -x '*.Po' -x '*.pot' -x '*.bak' -x '*.orig' -x '*.rej' -x '*.new' -x '*~' -x '*.o' -x '*.exe' -x patches -x '*.dll' -x'*.la' -x res -x debian -x '*.log' -x '*.lib' -x'*.a' -x .libs -x'*.def' -x'*.uu' -x'*.rc' -x'*.ico' -x'*.lo' freetype-2.3.4-orig/include/freetype/config/ftoption.h freetype-2.3.4/include/freetype/config/ftoption.h
+--- freetype-2.3.4-orig/include/freetype/config/ftoption.h	2007-01-05 16:18:45.000000000 +0100
++++ freetype-2.3.4/include/freetype/config/ftoption.h	2007-06-26 21:53:03.139623700 +0200
+@@ -92,7 +92,7 @@ FT_BEGIN_HEADER
+   /* This is done to allow FreeType clients to run unmodified, forcing     */
+   /* them to display normal gray-level anti-aliased glyphs.                */
+   /*                                                                       */
+-/* #define FT_CONFIG_OPTION_SUBPIXEL_RENDERING */
++#define FT_CONFIG_OPTION_SUBPIXEL_RENDERING
+ 
+ 
+   /*************************************************************************/
+@@ -206,6 +206,32 @@ FT_BEGIN_HEADER
+   /*                                                                       */
+ /* #define  FT_EXPORT(x)       extern x */
+ /* #define  FT_EXPORT_DEF(x)   x */
++#ifndef __GNUC__
++# define __DLL_IMPORT__  __declspec(dllimport)
++# define __DLL_EXPORT__  __declspec(dllexport)
++#else
++# define __DLL_IMPORT__  __attribute__((dllimport)) extern
++# define __DLL_EXPORT__  __attribute__((dllexport)) extern
++#endif 
++
++#if (defined __WIN32__) || (defined _WIN32)
++# ifdef BUILD_FREETYPE2_DLL
++#  define FREETYPE2_DLL_IMPEXP     __DLL_EXPORT__
++# elif defined(FREETYPE2_STATIC)
++#  define FREETYPE2_DLL_IMPEXP      
++# elif defined (USE_FREETYPE2_DLL)
++#  define FREETYPE2_DLL_IMPEXP     __DLL_IMPORT__
++# elif defined (USE_FREETYPE2_STATIC)
++#  define FREETYPE2_DLL_IMPEXP      
++# else /* assume USE_FREETYPE2_DLL */
++#  define FREETYPE2_DLL_IMPEXP     __DLL_IMPORT__
++# endif
++#else /* __WIN32__ */
++# define FREETYPE2_DLL_IMPEXP  
++#endif
++ 
++#define FT_EXPORT(x)    FREETYPE2_DLL_IMPEXP x
++#define FT_BASE(x)      FREETYPE2_DLL_IMPEXP x
+ 
+ 
+   /*************************************************************************/
+@@ -605,7 +631,7 @@ FT_BEGIN_HEADER
+    * is recommended to disable the macro since it reduces the library's code
+    * size and activates a few memory-saving optimizations as well.
+    */
+-#define FT_CONFIG_OPTION_OLD_INTERNALS
++/* #define FT_CONFIG_OPTION_OLD_INTERNALS */
+ 
+ 
+   /*
+diff -ipuwr -x config.log -x config.status -x config.cache -x '*.Po' -x '*.pot' -x '*.bak' -x '*.orig' -x '*.rej' -x '*.new' -x '*~' -x '*.o' -x '*.exe' -x patches -x '*.dll' -x'*.la' -x res -x debian -x '*.log' -x '*.lib' -x'*.a' -x .libs -x'*.def' -x'*.uu' -x'*.rc' -x'*.ico' -x'*.lo' freetype-2.3.4-orig/modules.cfg freetype-2.3.4/modules.cfg
+--- freetype-2.3.4-orig/modules.cfg	2007-01-31 05:51:06.000000000 +0100
++++ freetype-2.3.4/modules.cfg	2007-06-26 21:58:59.327123700 +0200
+@@ -110,7 +110,7 @@ RASTER_MODULES += smooth
+ AUX_MODULES += cache
+ 
+ # TrueType GX/AAT table validation.  Needs ftgxval.c below.
+-# AUX_MODULES += gxvalid
++AUX_MODULES += gxvalid
+ 
+ # Support for streams compressed with gzip (files with suffix .gz).
+ #
+@@ -124,7 +124,7 @@ AUX_MODULES += lzw
+ 
+ # OpenType table validation.  Needs ftotval.c below.
+ #
+-# AUX_MODULES += otvalid
++AUX_MODULES += otvalid
+ 
+ # Auxiliary PostScript driver component to share common code.
+ #
+diff -ipuwr -x config.log -x config.status -x config.cache -x '*.Po' -x '*.pot' -x '*.bak' -x '*.orig' -x '*.rej' -x '*.new' -x '*~' -x '*.o' -x '*.exe' -x patches -x '*.dll' -x'*.la' -x res -x debian -x '*.log' -x '*.lib' -x'*.a' -x .libs -x'*.def' -x'*.uu' -x'*.rc' -x'*.ico' -x'*.lo' freetype-2.3.4-orig/src/base/ftlcdfil.c freetype-2.3.4/src/base/ftlcdfil.c
+--- freetype-2.3.4-orig/src/base/ftlcdfil.c	2006-12-19 14:34:02.000000000 +0100
++++ freetype-2.3.4/src/base/ftlcdfil.c	2007-06-25 20:16:15.781250000 +0200
+@@ -266,7 +266,7 @@
+ #endif /* USE_LEGACY */
+ 
+ 
+-  FT_EXPORT( FT_Error )
++  FT_EXPORT_DEF( FT_Error )
+   FT_Library_SetLcdFilter( FT_Library     library,
+                            FT_LcdFilter   filter )
+   {
+@@ -335,7 +335,7 @@
+ 
+ #else /* !FT_CONFIG_OPTION_SUBPIXEL_RENDERING */
+ 
+-  FT_EXPORT( FT_Error )
++  FT_EXPORT_DEF( FT_Error )
+   FT_Library_SetLcdFilter( FT_Library    library,
+                            FT_LcdFilter  filter )
+   {
+diff -ipuwr -x config.log -x config.status -x config.cache -x '*.Po' -x '*.pot' -x '*.bak' -x '*.orig' -x '*.rej' -x '*.new' -x '*~' -x '*.o' -x '*.exe' -x patches -x '*.dll' -x'*.la' -x res -x debian -x '*.log' -x '*.lib' -x'*.a' -x .libs -x'*.def' -x'*.uu' -x'*.rc' -x'*.ico' -x'*.lo' freetype-2.3.4-orig/src/base/ftotval.c freetype-2.3.4/src/base/ftotval.c
+--- freetype-2.3.4-orig/src/base/ftotval.c	2006-06-25 08:05:15.000000000 +0200
++++ freetype-2.3.4/src/base/ftotval.c	2007-06-24 23:42:36.640625000 +0200
+@@ -18,6 +18,7 @@
+ #include <ft2build.h>
+ #include FT_INTERNAL_OBJECTS_H
+ #include FT_SERVICE_OPENTYPE_VALIDATE_H
++#include FT_OPENTYPE_VALIDATE_H
+ 
+ 
+   /* documentation is in ftotval.h */
+diff -ipuwr -x config.log -x config.status -x config.cache -x '*.Po' -x '*.pot' -x '*.bak' -x '*.orig' -x '*.rej' -x '*.new' -x '*~' -x '*.o' -x '*.exe' -x patches -x '*.dll' -x'*.la' -x res -x debian -x '*.log' -x '*.lib' -x'*.a' -x .libs -x'*.def' -x'*.uu' -x'*.rc' -x'*.ico' -x'*.lo' freetype-2.3.4-orig/src/base/ftsynth.c freetype-2.3.4/src/base/ftsynth.c
+--- freetype-2.3.4-orig/src/base/ftsynth.c	2006-11-07 09:38:57.000000000 +0100
++++ freetype-2.3.4/src/base/ftsynth.c	2007-06-26 21:55:40.530248700 +0200
+@@ -108,7 +108,7 @@
+ 
+     /* some reasonable strength */
+     xstr = FT_MulFix( face->units_per_EM,
+-                      face->size->metrics.y_scale ) / 24;
++                      face->size->metrics.y_scale ) / 35;
+     ystr = xstr;
+ 
+     if ( slot->format == FT_GLYPH_FORMAT_OUTLINE )
+diff -ipuwr -x config.log -x config.status -x config.cache -x '*.Po' -x '*.pot' -x '*.bak' -x '*.orig' -x '*.rej' -x '*.new' -x '*~' -x '*.o' -x '*.exe' -x patches -x '*.dll' -x'*.la' -x res -x debian -x '*.log' -x '*.lib' -x'*.a' -x .libs -x'*.def' -x'*.uu' -x'*.rc' -x'*.ico' -x'*.lo' freetype-2.3.4-orig/src/psaux/psobjs.c freetype-2.3.4/src/psaux/psobjs.c
+--- freetype-2.3.4-orig/src/psaux/psobjs.c	2007-01-26 22:19:30.000000000 +0100
++++ freetype-2.3.4/src/psaux/psobjs.c	2007-06-26 22:00:46.498998700 +0200
+@@ -175,6 +175,11 @@
+       return PSaux_Err_Invalid_Argument;
+     }
+ 
++    if ( length < 0 ) {
++      FT_ERROR(( "ps_table_add: invalid length\n" ));
++      return PSaux_Err_Invalid_Argument;
++    }
++
+     /* grow the base block if needed */
+     if ( table->cursor + length > table->capacity )
+     {
+diff -ipuwr -x config.log -x config.status -x config.cache -x '*.Po' -x '*.pot' -x '*.bak' -x '*.orig' -x '*.rej' -x '*.new' -x '*~' -x '*.o' -x '*.exe' -x patches -x '*.dll' -x'*.la' -x res -x debian -x '*.log' -x '*.lib' -x'*.a' -x .libs -x'*.def' -x'*.uu' -x'*.rc' -x'*.ico' -x'*.lo' freetype-2.3.4-orig/src/truetype/ttgload.c freetype-2.3.4/src/truetype/ttgload.c
+--- freetype-2.3.4-orig/src/truetype/ttgload.c	2007-04-09 10:25:09.000000000 +0200
++++ freetype-2.3.4/src/truetype/ttgload.c	2007-06-26 21:56:53.561498700 +0200
+@@ -271,7 +271,11 @@
+ 
+     n_points = 0;
+     if ( n_contours > 0 )
++    {
+       n_points = cont[-1] + 1;
++      if ( n_points < 0 )
++        goto Invalid_Outline;
++    }
+ 
+     /* note that we will add four phantom points later */
+     error = FT_GLYPHLOADER_CHECK_POINTS( gloader, n_points + 4, 0 );
+@@ -682,7 +686,7 @@
+     FT_GlyphLoader  gloader = loader->gloader;
+     FT_Error        error   = TT_Err_Ok;
+     FT_Outline*     outline;
+-    FT_UInt         n_points;
++    FT_Int          n_points;
+ 
+ 
+     outline  = &gloader->current.outline;
+@@ -709,7 +713,7 @@
+       /* Deltas apply to the unscaled data. */
+       FT_Vector*  deltas;
+       FT_Memory   memory = loader->face->memory;
+-      FT_UInt     i;
++      FT_Int      i;
+ 
+ 
+       error = TT_Vary_Get_Glyph_Deltas( (TT_Face)(loader->face),
+@@ -1378,7 +1382,14 @@
+         FT_UInt      num_base_subgs = gloader->base.num_subglyphs;
+ 
+         FT_Stream    old_stream     = loader->stream;
++        TT_GraphicsState  saved_GS;
++	FT_Bool      GS_saved = FALSE;
+ 
++	if ( loader->exec != NULL )
++	{
++	  saved_GS = loader->exec->GS;
++	  GS_saved = TRUE;
++	}
+ 
+         FT_GlyphLoader_Add( gloader );
+ 
+@@ -1387,6 +1398,9 @@
+         {
+           FT_Vector  pp[4];
+ 
++          /* reinitialize graphics state */
++	  if ( GS_saved == TRUE )
++            loader->exec->GS = saved_GS;
+ 
+           /* Each time we call load_truetype_glyph in this loop, the   */
+           /* value of `gloader.base.subglyphs' can change due to table */
