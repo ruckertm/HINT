@@ -1,7 +1,7 @@
 ## HINT
 Sources and Documentation for Viewing HINT files under Linux.
 
-This implementation of a viewing application is the simples of all
+This implementation of a viewing application is the simplest of all
 the viewing applications presented on this site. It can be used
 as a starting point for your own application.
 
