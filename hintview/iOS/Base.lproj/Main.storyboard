@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
+        <capability name="Image references" minToolsVersion="12.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--View Controller-->
+        <scene sceneID="tne-QT-ifu">
+            <objects>
+                <viewController id="BYZ-38-t0r" customClass="ViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="HPE-1q-bzy"/>
+                        <viewControllerLayoutGuide type="bottom" id="dOL-pc-2jU"/>
+                    </layoutGuides>
+                    <view key="view" multipleTouchEnabled="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" layoutMarginsFollowReadableWidth="YES" id="8bC-Xf-vdC" customClass="GLKView">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <toolbar opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" alpha="0.59999999999999998" contentMode="bottom" preservesSuperviewLayoutMargins="YES" layoutMarginsFollowReadableWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="lsF-OA-dfU">
+                                <rect key="frame" x="0.0" y="836" width="414" height="50"/>
+                                <rect key="contentStretch" x="1" y="1" width="1" height="1"/>
+                                <edgeInsets key="layoutMargins" top="8" left="8" bottom="8" right="8"/>
+                                <items>
+                                    <barButtonItem width="20" style="plain" systemItem="fixedSpace" id="ZUg-t4-zAp"/>
+                                    <barButtonItem title="Home" style="plain" id="ztR-sK-fXm">
+                                        <imageReference key="image" image="house" catalog="system" symbolScale="large"/>
+                                        <connections>
+                                            <action selector="theHome:" destination="BYZ-38-t0r" id="rtK-SL-rRw"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="20" style="plain" systemItem="fixedSpace" id="lyk-Yy-Qse"/>
+                                    <barButtonItem style="plain" id="gaS-rp-Csa" userLabel="Open">
+                                        <imageReference key="image" image="doc" catalog="system" symbolScale="large"/>
+                                        <connections>
+                                            <action selector="theOpenButton:" destination="BYZ-38-t0r" id="cwj-cK-o1z"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="20" style="plain" systemItem="fixedSpace" id="yU2-1C-idF"/>
+                                    <barButtonItem title="Zoom1" id="zP8-U0-Gg5">
+                                        <imageReference key="image" image="1.magnifyingglass" catalog="system" symbolScale="large"/>
+                                        <connections>
+                                            <action selector="theZoom1:" destination="BYZ-38-t0r" id="sdJ-r7-OZt"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="20" style="plain" systemItem="fixedSpace" id="vAE-ht-mCH"/>
+                                    <barButtonItem style="plain" id="3Pu-bv-r1f" userLabel="Day">
+                                        <imageReference key="image" image="sun.max" catalog="system" symbolScale="large"/>
+                                        <connections>
+                                            <action selector="theDarkButton:" destination="BYZ-38-t0r" id="mxp-gO-V5d"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="20" style="plain" systemItem="fixedSpace" id="apd-AA-Y95"/>
+                                    <barButtonItem title="Search" id="NRI-yO-Ug8" userLabel="Search">
+                                        <imageReference key="image" image="magnifyingglass" catalog="system" symbolScale="large"/>
+                                        <connections>
+                                            <action selector="theSearchButton:" destination="BYZ-38-t0r" id="Jcf-qd-OSQ"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="upr-fH-DxO"/>
+                                    <barButtonItem style="plain" id="wzC-Ur-qxx" userLabel="Menu">
+                                        <imageReference key="image" image="ellipsis.circle" catalog="system" symbolScale="large"/>
+                                        <connections>
+                                            <action selector="theMenuButton:" destination="BYZ-38-t0r" id="oZJ-YF-f4y"/>
+                                        </connections>
+                                    </barButtonItem>
+                                </items>
+                                <color key="tintColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <toolbarAppearance key="standardAppearance">
+                                    <barButtonItemAppearance key="buttonAppearance">
+                                        <barButtonItemStateAppearance key="normal"/>
+                                        <barButtonItemStateAppearance key="highlighted"/>
+                                        <barButtonItemStateAppearance key="disabled"/>
+                                        <barButtonItemStateAppearance key="focused"/>
+                                    </barButtonItemAppearance>
+                                </toolbarAppearance>
+                            </toolbar>
+                            <searchBar hidden="YES" clearsContextBeforeDrawing="NO" contentMode="redraw" fixedFrame="YES" showsCancelButton="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BOd-m8-eqM">
+                                <rect key="frame" x="0.0" y="37" width="414" height="51"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                <textInputTraits key="textInputTraits"/>
+                                <scopeButtonTitles>
+                                    <string>Title</string>
+                                    <string>Title</string>
+                                    <string>Title</string>
+                                </scopeButtonTitles>
+                            </searchBar>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <gestureRecognizers/>
+                        <constraints>
+                            <constraint firstItem="lsF-OA-dfU" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="7ft-KN-Bfv"/>
+                            <constraint firstItem="lsF-OA-dfU" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="bottom" constant="-60" id="GFS-dC-z7J"/>
+                            <constraint firstItem="lsF-OA-dfU" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailing" id="KqH-To-suF"/>
+                            <constraint firstItem="lsF-OA-dfU" firstAttribute="bottom" secondItem="8bC-Xf-vdC" secondAttribute="bottom" constant="-10" id="eaU-Km-AYt"/>
+                        </constraints>
+                        <connections>
+                            <outletCollection property="gestureRecognizers" destination="0Nn-J9-l6t" appends="YES" id="xnG-Up-q6G"/>
+                            <outletCollection property="gestureRecognizers" destination="4PT-83-wc6" appends="YES" id="zgC-JA-O0x"/>
+                            <outletCollection property="gestureRecognizers" destination="1yG-i4-nzS" appends="YES" id="ojG-b6-H0a"/>
+                            <outletCollection property="gestureRecognizers" destination="W75-VK-sHY" appends="YES" id="FwQ-1u-BBq"/>
+                            <outletCollection property="gestureRecognizers" destination="nyu-DL-DvC" appends="YES" id="kdY-2u-t3F"/>
+                            <outletCollection property="gestureRecognizers" destination="YTO-DJ-mo1" appends="YES" id="ubL-Xo-Y9j"/>
+                        </connections>
+                    </view>
+                    <toolbarItems/>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
+                    <connections>
+                        <outlet property="theSearchBar" destination="BOd-m8-eqM" id="Pgr-DN-bPp"/>
+                        <outlet property="theToolbar" destination="lsF-OA-dfU" id="S0C-Ee-8b2"/>
+                        <outlet property="theView" destination="8bC-Xf-vdC" id="A3u-Yu-mXU"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+                <tapGestureRecognizer id="0Nn-J9-l6t">
+                    <connections>
+                        <action selector="theTap:" destination="BYZ-38-t0r" id="OUQ-CN-2Ub"/>
+                    </connections>
+                </tapGestureRecognizer>
+                <swipeGestureRecognizer direction="left" id="4PT-83-wc6">
+                    <connections>
+                        <action selector="theNextPage:" destination="BYZ-38-t0r" id="rMh-he-gBH"/>
+                    </connections>
+                </swipeGestureRecognizer>
+                <swipeGestureRecognizer direction="right" id="1yG-i4-nzS">
+                    <connections>
+                        <action selector="thePrevPage:" destination="BYZ-38-t0r" id="jes-H1-vFg"/>
+                    </connections>
+                </swipeGestureRecognizer>
+                <swipeGestureRecognizer direction="down" id="nyu-DL-DvC">
+                    <connections>
+                        <action selector="theDownSwipe:" destination="BYZ-38-t0r" id="HDZ-Yc-RsG"/>
+                    </connections>
+                </swipeGestureRecognizer>
+                <swipeGestureRecognizer direction="up" id="YTO-DJ-mo1">
+                    <connections>
+                        <action selector="theUpSwipe:" destination="BYZ-38-t0r" id="Nav-NG-A2c"/>
+                    </connections>
+                </swipeGestureRecognizer>
+                <pinchGestureRecognizer id="W75-VK-sHY">
+                    <connections>
+                        <action selector="theScale:" destination="BYZ-38-t0r" id="Pmo-ep-xRu"/>
+                    </connections>
+                </pinchGestureRecognizer>
+            </objects>
+            <point key="canvasLocation" x="-13.043478260869566" y="51.5625"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="1.magnifyingglass" catalog="system" width="128" height="115"/>
+        <image name="doc" catalog="system" width="115" height="128"/>
+        <image name="ellipsis.circle" catalog="system" width="128" height="121"/>
+        <image name="house" catalog="system" width="128" height="106"/>
+        <image name="magnifyingglass" catalog="system" width="128" height="115"/>
+        <image name="sun.max" catalog="system" width="128" height="124"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
