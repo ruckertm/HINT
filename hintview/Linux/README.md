@@ -1,5 +1,9 @@
 ## HINT
-Sources and Documentation for Viewing HINT files under Linux
+Sources and Documentation for Viewing HINT files under Linux.
+
+This implementation of a viewing application is the simples of all
+the viewing applications presented on this site. It can be used
+as a starting point for your own application.
 
 ### Makefile
 Controls the making of the hintview application.
