@@ -58,6 +58,7 @@ static void checkGlError(const char *op)
 
 #define MAX_INFOLOG 512
 static 	GLuint ProgramID, MatrixID, RuleID, GammaID, FGcolorID, IsImageID, ImageID=0;
+static unsigned char *last_b=NULL;
 
 #define xyID 0
 #define uvID 1
@@ -151,19 +152,23 @@ static void createProgram(void)
 
   /* Create, linking, and check the program */
   ProgramID = glCreateProgram();
-  glAttachShader(ProgramID, vertexID);
-  glAttachShader(ProgramID, fragmentID);
-  glLinkProgram(ProgramID);
-  glGetProgramiv(ProgramID, GL_LINK_STATUS, &result);
-  if (!result)
-  { char InfoLog[MAX_INFOLOG];
-    glGetProgramInfoLog(ProgramID, MAX_INFOLOG, NULL, InfoLog);
-    QUIT("Error linking shader program: %s\n", InfoLog);
+  if (ProgramID) {
+    glAttachShader(ProgramID, vertexID);
+    checkGlError("glAttachShader");
+    glAttachShader(ProgramID, fragmentID);
+    checkGlError("glAttachShader");
+    glLinkProgram(ProgramID);
+    glGetProgramiv(ProgramID, GL_LINK_STATUS, &result);
+    if (!result)
+    { char InfoLog[MAX_INFOLOG];
+      glGetProgramInfoLog(ProgramID, MAX_INFOLOG, NULL, InfoLog);
+      glDeleteProgram(ProgramID);
+      ProgramID = 0;
+      QUIT("Error linking shader program: %s\n", InfoLog);
+    }
+    glDetachShader(ProgramID, vertexID);
+    glDetachShader(ProgramID, fragmentID);
   }
-	
-  glDetachShader(ProgramID, vertexID);
-  glDetachShader(ProgramID, fragmentID);
-	
   glDeleteShader(vertexID);
   glDeleteShader(fragmentID);
   //LOG("createProgram Done\n");
@@ -310,6 +315,7 @@ void nativeInit(void)
   hint_clear_fonts(true);
   mkRuleTexture();
   ImageID=0;
+  last_b=NULL;
   //LOG("nativeInit Done\n");
 }
 
@@ -321,8 +327,8 @@ void nativeClear(void)
   glDeleteTextures(1, &RuleID);
   if (ImageID != 0) {
         glDeleteTextures(1, &ImageID);
-        ImageID = 0;
-   }
+        ImageID = 0; last_b=NULL;
+  }
 }
 
 void nativeBlank(void)
@@ -413,7 +419,6 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
    x, y, w, h are given in point
 */
 {
-  static unsigned char *last_b=NULL;
   GLenum format, internal_format;
   int width, height, nrChannels;
   if (b!=last_b||ImageID==0)
