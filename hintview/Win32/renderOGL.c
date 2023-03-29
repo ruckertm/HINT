@@ -163,10 +163,9 @@ static void createProgram(void)
     if (!result)
     { char InfoLog[MAX_INFOLOG];
       glGetProgramInfoLog(ProgramID, MAX_INFOLOG, NULL, InfoLog);
-      QUIT("Error linking shader program: %s\n", InfoLog);
- 
       glDeleteProgram(ProgramID);
       ProgramID = 0;
+      QUIT("Error linking shader program: %s\n", InfoLog);
     }
     glDetachShader(ProgramID, vertexID);
     glDetachShader(ProgramID, fragmentID);
@@ -357,21 +356,21 @@ static void nativeSetColors(GLfloat fr, GLfloat fg, GLfloat fb, GLfloat br, GLfl
 void nativeSetDark(int on)
 {   if (on) {
         nativeSetColors(
-			GetRValue(FG_NIGHT)/255.0f, 
-			GetGValue(FG_NIGHT)/255.0f, 
-			GetBValue(FG_NIGHT)/255.0f, 
-			GetRValue(BG_NIGHT)/255.0f, 
-			GetGValue(BG_NIGHT)/255.0f, 
-			GetBValue(BG_NIGHT)/255.0f);
+			GET_R(FG_NIGHT)/255.0f, 
+			GET_G(FG_NIGHT)/255.0f, 
+			GET_B(FG_NIGHT)/255.0f, 
+			GET_R(BG_NIGHT)/255.0f, 
+			GET_G(BG_NIGHT)/255.0f, 
+			GET_B(BG_NIGHT)/255.0f);
     } else {
         nativeSetColors(
-			GetRValue(FG_DAY)/255.0f, 
-			GetGValue(FG_DAY)/255.0f, 
-			GetBValue(FG_DAY)/255.0f, 
-			GetRValue(BG_DAY)/255.0f, 
-			GetGValue(BG_DAY)/255.0f, 
-			GetBValue(BG_DAY)/255.0f);
-    }
+			GET_R(FG_DAY)/255.0f, 
+			GET_G(FG_DAY)/255.0f, 
+			GET_B(FG_DAY)/255.0f, 
+			GET_R(BG_DAY)/255.0f, 
+			GET_G(BG_DAY)/255.0f, 
+			GET_B(BG_DAY)/255.0f);
+     }
 }
 
 static float pt_h=600.0, pt_v=800.0;
