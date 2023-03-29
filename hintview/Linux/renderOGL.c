@@ -46,7 +46,7 @@ static void printGLString(const char *name, GLenum s) {
     LOG("GL %s = %s\n", name, v);
 }
 
-static void checkGlError(const char *op) 
+static void checkGlError(const char *op)
 { GLint error;
   while( (error= glGetError())!= GL_NO_ERROR)
 	  MESSAGE("OGL Error after %s: 0x%x\n", op, error);
@@ -145,7 +145,7 @@ static GLuint loadShader(GLenum type, char const *source)
 static void createProgram(void)
 { GLuint vertexID=loadShader(GL_VERTEX_SHADER,VertexShader);
   GLuint fragmentID=loadShader(GL_FRAGMENT_SHADER,FragmentShader);
-  GLint result =GL_FALSE;
+  GLint result=GL_FALSE;
 
   if (!vertexID  || !fragmentID) return;
 
@@ -319,7 +319,7 @@ void nativeClear(void)
   glDeleteBuffers(1, &uvbuffer);
   glDeleteProgram(ProgramID);
   glDeleteTextures(1, &RuleID);
-   if (ImageID != 0) {
+  if (ImageID != 0) {
         glDeleteTextures(1, &ImageID);
         ImageID = 0;
    }
@@ -327,7 +327,6 @@ void nativeClear(void)
 
 void nativeBlank(void)
 { glClear(GL_COLOR_BUFFER_BIT);
-  //LOG("nativeBlank Done\n");
 }
 
 void nativeSetGamma(double gamma)
@@ -417,15 +416,12 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
   static unsigned char *last_b=NULL;
   GLenum format, internal_format;
   int width, height, nrChannels;
-
-
-
   if (b!=last_b||ImageID==0)
   { unsigned char *data;
     static unsigned char grey[4]={0,0x80,0x80,0x80};
-    if (ImageID != 0)
-    { glDeleteTextures(1, &ImageID);
-      ImageID = 0;
+    if (ImageID != 0) {
+        glDeleteTextures(1, &ImageID);
+        ImageID = 0;
     }
     last_b=b;
     data = stbi_load_from_memory(b, (int) (e - b), &width, &height, &nrChannels, 0);

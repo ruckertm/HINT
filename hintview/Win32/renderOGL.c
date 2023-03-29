@@ -425,7 +425,7 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
   int width, height, nrChannels;
   if (b!=last_b||ImageID==0)
   { unsigned char *data;
-    static unsigned char grey[4]={0,0,0,0x80};
+    static unsigned char grey[4]={0,0x80,0x80,0x80};
     if (ImageID != 0) {
         glDeleteTextures(1, &ImageID);
         ImageID = 0;
