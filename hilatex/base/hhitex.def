@@ -37,6 +37,7 @@
   [2022-09-22 v7.00t %
   Hyperref driver for hiTeX]
 
+\chardef\Hy@VersionChecked=1 % prevent hyperref from checking the version.
 
 \ifHy@pdfpagelabels
   \def\HyPL@StorePageLabel#1{%
