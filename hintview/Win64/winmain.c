@@ -1,7 +1,7 @@
 #include <windows.h>			/* must include this before GL/gl.h */
 #include <commctrl.h>
 #include <wingdi.h>
-#include <afxres.h>
+//include <afxres.h>
 #include <stdio.h>
 #include <math.h>
 #include "resource.h"
@@ -436,7 +436,7 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			HINT_TRY {resize_page(); show_page(); }
 		  }
 		  return 0;
-      case ID_APP_EXIT:
+      case IDM_EXIT:
         PostMessage(hMainWnd,WM_CLOSE,0,0);
   	    return 0;
 	  case ID_KEY_MENU: /* system menu */
@@ -691,7 +691,7 @@ WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst,
 #else
 	hlog=stderr;
 #endif 
-
+	SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
 	if (!InitInstance (hCurrentInst)) return FALSE;
 	InitGLextensions(); 
 

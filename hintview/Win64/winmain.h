@@ -31,7 +31,7 @@ extern uint64_t pos;
 extern double scale, dpi_x, dpi_y; /* universal scale factor between TeX sizes and client sizes */
 extern int dark;
 extern int autoreload;
-#define round(X)     ((int)((X)>=0.0?floor((X)+0.5):ceil((X)-0.5)))
+//define round(X)     ((int)((X)>=0.0?floor((X)+0.5):ceil((X)-0.5)))
 
 #define WM_GAMMA WM_USER
 

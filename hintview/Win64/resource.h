@@ -43,6 +43,8 @@
 #define IDC_ROUND_TO_PIXEL_H            1028
 #define IDC_ROUND_TO_NEAREST            1029
 #define IDC_TO_NEAREST                  1029
+#define IDM_EXIT                        105
+#define IDM_ABOUT                       104
 #define ID_FILE_SAVE_IMAGE              40001
 #define ID_OPTIONS_ZOOM_100             40002
 #define ID_OPTIONS_NIGHT                40003
@@ -66,13 +68,17 @@
 #define ID_KEY_STOP_AUTORELOAD          40022
 #define ID_FILE_AUTORELOAD              40023
 #define ID_KEY_QUIT                     40024
-
+#define ID_FILE_OPEN					40025
+#define ID_FILE_CLOSE					40026
+#define ID_FILE_PAGE_SETUP				40027
+#define ID_FILE_PRINT					40028
+#define IDC_STATIC						-1
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        121
-#define _APS_NEXT_COMMAND_VALUE         40027
+#define _APS_NEXT_COMMAND_VALUE         40029
 #define _APS_NEXT_CONTROL_VALUE         1028
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
