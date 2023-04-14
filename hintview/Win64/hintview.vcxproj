@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <ProjectGuid>{0D024AAB-7BEB-49ED-9638-368FBA5D54C8}</ProjectGuid>
+    <RootNamespace>hintview</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>NotSet</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>17.0.33516.290</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\backend;..\external\glew-1.13.0\include;..\external\freetype-2.3.5\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG;_WINDOWS;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <CompileAs>CompileAsC</CompileAs>
+      <ErrorReporting>None</ErrorReporting>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/NODEFAULTLIB:MSVCRTD.LIB %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>comctl32.lib;freetype235MT_D.lib;zlibd.lib;opengl32.lib;msimg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ShowProgress>NotSet</ShowProgress>
+      <AdditionalLibraryDirectories>..\external\freetype-2.3.5\objs;..\external\zlib-1.2.11;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\backend;..\external\glew-1.13.0\include;..\external\zlib-1.2.11;..\external\freetype-2.3.5\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling />
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>CompileAsC</CompileAs>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>/NODEFAULTLIB:MSVCRT.LIB %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>comctl32.lib;freetype235MT.lib;zlib.lib;opengl32.lib;msimg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ShowProgress>NotSet</ShowProgress>
+      <AdditionalLibraryDirectories>..\external\freetype-2.3.5\objs;..\external\zlib-1.2.11;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>MSVCRTD;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\backend\get.c" />
+    <ClCompile Include="..\backend\hfonts.c" />
+    <ClCompile Include="..\backend\hint.c" />
+    <ClCompile Include="..\backend\hrender.c" />
+    <ClCompile Include="..\backend\htex.c" />
+    <ClCompile Include="..\backend\tables.c" />
+    <ClCompile Include="..\external\glew-1.13.0\src\glew.c" />
+    <ClCompile Include="button.c" />
+    <ClCompile Include="glcontext.c" />
+    <ClCompile Include="outline.c" />
+    <ClCompile Include="print.c" />
+    <ClCompile Include="renderOGL.c" />
+    <ClCompile Include="saveimage.c" />
+    <ClCompile Include="search.c" />
+    <ClCompile Include="settings.c" />
+    <ClCompile Include="winmain.c" />
+    <ClCompile Include="winreg.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\backend\basetypes.h" />
+    <ClInclude Include="..\backend\format.h" />
+    <ClInclude Include="..\backend\hfonts.h" />
+    <ClInclude Include="..\backend\hint.h" />
+    <ClInclude Include="..\backend\hrender.h" />
+    <ClInclude Include="..\backend\htex.h" />
+    <ClInclude Include="..\backend\rendernative.h" />
+    <ClInclude Include="button.h" />
+    <ClInclude Include="error.h" />
+    <ClInclude Include="glcontext.h" />
+    <ClInclude Include="outline.h" />
+    <ClInclude Include="print.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="saveimage.h" />
+    <ClInclude Include="search.h" />
+    <ClInclude Include="settings.h" />
+    <ClInclude Include="winmain.h" />
+    <ClInclude Include="winreg.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="ButtonFace36x36xA.bmp" />
+    <Image Include="HintView.ico" />
+    <Image Include="Logo48.bmp" />
+    <Image Include="toolbar.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="hintview.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\backend\btex.w" />
+    <None Include="..\backend\format.w" />
+    <None Include="..\backend\hint.w" />
+    <None Include="..\backend\htex.ch" />
+    <None Include="..\backend\htex.w" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
