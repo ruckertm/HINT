@@ -1,0 +1,26 @@
+
+%% Testing for engine alternatively \input iftex
+\newif\ifhint
+
+% HINT
+\ifx\HINTversion\undefined
+  \hintfalse
+\else 
+  \hinttrue
+\fi
+
+
+%% images
+
+\hbox{\HINTimage = A.jpg }% needs a space to terminate the name
+\hbox{\HINTimage A.jpg }% needs a space to terminate the name
+\hbox{\HINTimage = A.jpg\relax} %\relax terminates
+\hbox{\HINTimage = "A.jpg" } % needs a terminating space or \relax if quoted
+\hbox{\HINTimage = {A.jpg}} % no space if given as general text
+\hbox{\HINTimage{A.jpg}}
+\hbox{\HINTimage = {./A.jpg}}
+\hbox{\HINTimage = ./A.jpg\relax}
+
+\bye
+
+
