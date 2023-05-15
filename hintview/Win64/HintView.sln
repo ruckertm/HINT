@@ -4,10 +4,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hintview", "hintview.vcxproj", "{0D024AAB-7BEB-49ED-9638-368FBA5D54C8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{42592055-B824-43D6-87FA-D3CCCD3D6A21} = {42592055-B824-43D6-87FA-D3CCCD3D6A21}
+		{8D93CA3D-7980-453D-842F-E329906FC189} = {8D93CA3D-7980-453D-842F-E329906FC189}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "zlib\zlib.vcxproj", "{42592055-B824-43D6-87FA-D3CCCD3D6A21}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "freetype", "freetype\freetype.vcxproj", "{8D93CA3D-7980-453D-842F-E329906FC189}"
+	ProjectSection(ProjectDependencies) = postProject
+		{42592055-B824-43D6-87FA-D3CCCD3D6A21} = {42592055-B824-43D6-87FA-D3CCCD3D6A21}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
