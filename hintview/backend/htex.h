@@ -1802,9 +1802,11 @@ typedef int8_t small_number;
 #if __SIZEOF_FLOAT__==4
 typedef float float32_t;
 #else
+#line 2421 "htex.w"
 #error  float type must have size 4
 #endif
-typedef float glue_ratio;
+#line 2423 "htex.w"
+ typedef float glue_ratio;
 
 /*:113*//*117:*/
 #line 2526 "htex.w"

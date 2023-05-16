@@ -38,7 +38,7 @@ static PBITMAPINFO CreateBitmapInfoStruct(HBITMAP hBmp)
      if (cClrBits < 24) 
          pbmi = (PBITMAPINFO) LocalAlloc(LPTR, 
                     sizeof(BITMAPINFOHEADER) + 
-                    sizeof(RGBQUAD) * (1<< cClrBits)); 
+                    sizeof(RGBQUAD) * ((SIZE_T)1<< cClrBits)); 
 
      // There is no RGBQUAD array for these formats: 24-bit-per-pixel or 32-bit-per-pixel 
 
