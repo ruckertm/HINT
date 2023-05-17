@@ -9,7 +9,7 @@
 /* the following code uses the article "Storing an Image" from https://msdn.microsoft.com/ */
 static PBITMAPINFO CreateBitmapInfoStruct(HBITMAP hBmp)
 { 
-    BITMAP bmp; 
+    BITMAP bmp = { 0 };
     PBITMAPINFO pbmi; 
     WORD    cClrBits; 
 
@@ -80,10 +80,10 @@ static PBITMAPINFO CreateBitmapInfoStruct(HBITMAP hBmp)
 static int CreateBMPFile(LPTSTR pszFile,  HBITMAP hBMP, HDC hDC) 
  { 
     HANDLE hf;                 // file handle  
-    BITMAPFILEHEADER hdr;       // bitmap file-header  
+    BITMAPFILEHEADER hdr = { 0 };       // bitmap file-header  
     PBITMAPINFOHEADER pbih;     // bitmap info-header  
     LPBYTE lpBits;              // memory pointer  
-    DWORD dwTmp; 
+    DWORD dwTmp=0; 
 	int ok=1;
     PBITMAPINFO pbi;
 	
