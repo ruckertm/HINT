@@ -42,7 +42,7 @@
       \def\Gin@llx{0}\let\Gin@lly\Gin@llx
       \Gin@defaultbp\Gin@urx{\wd\@tempboxa}% = 0...
       \Gin@defaultbp\Gin@ury{\ht\@tempboxa}% = 0...
-      \def\Gin@urx{72}\let\Gin@ury\Gin@urx
+      %\def\Gin@urx{72}\let\Gin@ury\Gin@urx
       \Gin@nat@height\Gin@ury bp
       \Gin@nat@width\Gin@urx bp
       }
