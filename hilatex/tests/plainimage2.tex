@@ -1,5 +1,7 @@
 \input ifhint
 
+% run with hitex or pdftex to compare
+
 \ifhint
 \setbox0=\hbox{\HINTimage{A.jpg}}
 \else
@@ -44,13 +46,6 @@
 \showthe\wd0
 \showthe\ht0
 \box0
-
-
-
-%\includegraphics[width=5cm]{example-image.jpg}
-%\includegraphics[height=48pt]{A.jpg}
-%\includegraphics[width=60pt]{A.jpg}
-%\includegraphics[scale=0.5]{A.jpg}
 
 
 \bye
