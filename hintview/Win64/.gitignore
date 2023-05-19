@@ -1,6 +1,7 @@
 *~
 \#*\#
 *.ncb
+*.aps
 *.user
 Debug/
 Release/

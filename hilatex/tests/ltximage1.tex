@@ -1,0 +1,22 @@
+\documentclass[10pt]{article}
+\usepackage{iftex}
+%\ifhint
+% requires hhitex.def to be found by kpathseach
+%\usepackage[customdriver=hitex]{graphics}
+%\else
+\usepackage{graphicx}
+%\fi
+
+\begin{document}
+
+\includegraphics{A.jpg}
+
+\includegraphics[width=5cm]{example-image.jpg}
+
+\includegraphics[height=48pt]{A.jpg}
+\includegraphics[width=60pt]{A.jpg}
+
+\includegraphics[scale=0.5]{A.jpg}
+
+\end{document}
+

@@ -7,19 +7,16 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-//include "afxres.h"
-#define APSTUDIO_HIDDEN_SYMBOLS
-#include "windows.h"
-#undef APSTUDIO_HIDDEN_SYMBOLS
-
+#include "afxres.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -30,13 +27,16 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // remains consistent on all systems.
 IDI_ICON                ICON                    "HintView.ico"
 
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Bitmap
 //
 
 IDB_LOGO48              BITMAP                  "Logo48.bmp"
+
 IDB_TOOLBAR             BITMAP                  "toolbar.bmp"
+
 IDB_BFACE_A             BITMAP                  "ButtonFace36x36xA.bmp"
 
 
@@ -45,7 +45,7 @@ IDB_BFACE_A             BITMAP                  "ButtonFace36x36xA.bmp"
 // Menu
 //
 
-IDR_MENU MENUEX 
+IDR_MENU MENUEX
 BEGIN
     POPUP "&File",                          65535,MFT_STRING,MFS_ENABLED
     BEGIN
@@ -146,7 +146,7 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFR
 CAPTION "Outline"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    CONTROL         "",IDC_OUTLINE,"SysTreeView32",TVS_HASBUTTONS | TVS_LINESATROOT | TVS_DISABLEDRAGDROP | TVS_NOTOOLTIPS | WS_TABSTOP,44,7,105,80,WS_EX_TRANSPARENT
+    CONTROL         "",IDC_OUTLINE,"SysTreeView32",TVS_HASBUTTONS | TVS_LINESATROOT | TVS_DISABLEDRAGDROP | TVS_NOTOOLTIPS | WS_HSCROLL | WS_TABSTOP,44,7,105,56,WS_EX_TRANSPARENT
 END
 
 
@@ -156,7 +156,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_SETTINGS, DIALOG
     BEGIN
@@ -164,6 +164,10 @@ BEGIN
         RIGHTMARGIN, 400
         TOPMARGIN, 7
         BOTTOMMARGIN, 132
+    END
+
+    IDD_ABOUT, DIALOG
+    BEGIN
     END
 
     IDD_SEARCH, DIALOG
@@ -179,7 +183,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 182
         TOPMARGIN, 7
-        BOTTOMMARGIN, 87
+        BOTTOMMARGIN, 63
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -228,13 +232,12 @@ END
 #endif    // APSTUDIO_INVOKED
 
 
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // Accelerator
 //
 
-IDR_ACCELERATOR ACCELERATORS 
+IDR_ACCELERATOR ACCELERATORS
 BEGIN
     "A",            ID_KEY_AUTORELOAD,      VIRTKEY, CONTROL, NOINVERT
     VK_F1,          ID_KEY_HELP,            VIRTKEY, NOINVERT
@@ -252,7 +255,18 @@ BEGIN
     "H",            ID_KEY_HOME,            VIRTKEY, CONTROL, NOINVERT
 END
 
-#endif    // English (U.S.) resources
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_OUTLINE AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -262,8 +276,7 @@ END
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
-
+
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 
