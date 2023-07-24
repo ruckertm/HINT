@@ -1,5 +1,5 @@
 	/*530:*/
-	#line 10941 "format.w"
+	#line 10972 "format.w"
 
 #include "basetypes.h"
 #include <string.h>
@@ -19,33 +19,33 @@
 Label*labels= NULL;
 int first_label= -1;
 	/*:252*/	/*309:*/
-	#line 6734 "format.w"
+	#line 6765 "format.w"
 
 RangePos*range_pos;
 int next_range= 1,max_range;
 int*page_on;
 	/*:309*/	/*320:*/
-	#line 6918 "format.w"
+	#line 6949 "format.w"
 
 char hbanner[MAX_BANNER+1];
 int hbanner_size= 0;
 	/*:320*/	/*327:*/
-	#line 7066 "format.w"
+	#line 7097 "format.w"
 
 uint8_t*hpos= NULL,*hstart= NULL,*hend= NULL,*hpos0= NULL;
 	/*:327*/	/*333:*/
-	#line 7147 "format.w"
+	#line 7178 "format.w"
 
 char*hin_name= NULL;
 uint64_t hin_size= 0;
 uint8_t*hin_addr= NULL;
 uint64_t hin_time= 0;
 	/*:333*/	/*389:*/
-	#line 8620 "format.w"
+	#line 8651 "format.w"
 
 char**hfont_name;
 	/*:389*/	/*431:*/
-	#line 9340 "format.w"
+	#line 9371 "format.w"
 
 unsigned int debugflags= DBGNONE;
 int option_utf8= false;
@@ -57,15 +57,15 @@ int option_compress= false;
 char*stem_name= NULL;
 int stem_length= 0;
 	/*:431*/	/*434:*/
-	#line 9474 "format.w"
+	#line 9505 "format.w"
 
 FILE*hin= NULL,*hout= NULL,*hlog= NULL;
 	/*:434*/
-	#line 10954 "format.w"
+	#line 10985 "format.w"
 
 
 	/*334:*/
-	#line 7154 "format.w"
+	#line 7185 "format.w"
 
 #ifndef USE_MMAP
 void hget_unmap(void)
@@ -159,10 +159,10 @@ return hin_size;
 #endif
 
 	/*:334*/
-	#line 10956 "format.w"
+	#line 10987 "format.w"
 
 	/*321:*/
-	#line 6923 "format.w"
+	#line 6954 "format.w"
 
 
 bool hcheck_banner(char*magic)
@@ -199,10 +199,10 @@ DBG(DBGDIR,"banner size=0x%x\n",hbanner_size);
 return true;
 }
 	/*:321*/
-	#line 10957 "format.w"
+	#line 10988 "format.w"
 
 	/*343:*/
-	#line 7487 "format.w"
+	#line 7518 "format.w"
 
 Entry*dir= NULL;
 uint16_t section_no,max_section_no;
@@ -214,7 +214,7 @@ ALLOCATE(dir,entries,Entry);
 dir[0].section_no= 0;dir[1].section_no= 1;dir[2].section_no= 2;
 }
 	/*:343*/	/*344:*/
-	#line 7500 "format.w"
+	#line 7531 "format.w"
 
 void hset_entry(Entry*e,uint16_t i,uint32_t size,uint32_t xsize,char*file_name)
 {e->section_no= i;
@@ -226,11 +226,11 @@ e->file_name= strdup(file_name);
 DBG(DBGDIR,"Creating entry %d: \"%s\" size=0x%x xsize=0x%x\n",i,file_name,size,xsize);
 }
 	/*:344*/
-	#line 10958 "format.w"
+	#line 10989 "format.w"
 
 
 	/*322:*/
-	#line 6967 "format.w"
+	#line 6998 "format.w"
 
 void hget_banner(void)
 {hbanner_size= 0;
@@ -242,7 +242,7 @@ if(c=='\n')break;
 hbanner[hbanner_size]= 0;
 }
 	/*:322*/	/*335:*/
-	#line 7259 "format.w"
+	#line 7290 "format.w"
 
 
 static void hdecompress(uint16_t n)
@@ -279,7 +279,7 @@ hpos0= hpos= hstart= buffer;
 hend= hstart+dir[n].xsize;
 }
 	/*:335*/	/*337:*/
-	#line 7347 "format.w"
+	#line 7378 "format.w"
 
 void hget_section(uint16_t n)
 {DBG(DBGDIR,"Reading section %d\n",n);
@@ -295,7 +295,7 @@ if(dir[n].xsize>0)hdecompress(n);
 }
 }
 	/*:337*/	/*354:*/
-	#line 7725 "format.w"
+	#line 7756 "format.w"
 
 void hget_entry(Entry*e)
 {	/*16:*/
@@ -306,7 +306,7 @@ uint32_t node_pos= hpos-hstart;
 if(hpos>=hend)QUIT("Attempt to read a start byte at the end of the section");
 HGETTAG(a);
 	/*:16*/
-	#line 7727 "format.w"
+	#line 7758 "format.w"
 
 DBG(DBGDIR,"Reading directory entry\n");
 switch(a)
@@ -328,11 +328,11 @@ if(a!=z)
 QUIT("Tag mismatch [%s,%d]!=[%s,%d] at 0x%x to "SIZE_F"\n",
 NAME(a),INFO(a),NAME(z),INFO(z),node_pos,hpos-hstart-1);
 	/*:17*/
-	#line 7740 "format.w"
+	#line 7771 "format.w"
 
 }
 	/*:354*/	/*355:*/
-	#line 7757 "format.w"
+	#line 7788 "format.w"
 
 static void hget_root(Entry*root)
 {DBG(DBGDIR,"Root entry at "SIZE_F"\n",hpos-hstart);
@@ -368,7 +368,7 @@ free(dir);dir= NULL;
 }
 
 	/*:355*/	/*373:*/
-	#line 8181 "format.w"
+	#line 8212 "format.w"
 
 void hget_max_definitions(void)
 {Kind k;
@@ -380,7 +380,7 @@ uint32_t node_pos= hpos-hstart;
 if(hpos>=hend)QUIT("Attempt to read a start byte at the end of the section");
 HGETTAG(a);
 	/*:16*/
-	#line 8184 "format.w"
+	#line 8215 "format.w"
 
 if(a!=TAG(list_kind,0))QUIT("Start of maximum list expected");
 for(k= 0;k<32;k++)max_ref[k]= max_default[k];max_outline= -1;
@@ -401,7 +401,7 @@ case TAG(outline_kind,b100):
 case TAG(outline_kind,b101):max_outline= n;
 DBG(DBGDEF|DBGLABEL,"max(outline) = %d\n",max_outline);break;
 	/*:246*/
-	#line 8196 "format.w"
+	#line 8227 "format.w"
 
 default:
 if(max_fixed[k]>max_default[k])
@@ -419,14 +419,14 @@ if(a!=z)
 QUIT("Tag mismatch [%s,%d]!=[%s,%d] at 0x%x to "SIZE_F"\n",
 NAME(a),INFO(a),NAME(z),INFO(z),node_pos,hpos-hstart-1);
 	/*:17*/
-	#line 8205 "format.w"
+	#line 8236 "format.w"
 
 }
 if(INFO(a)!=0)QUIT("End of maximum list with info %d",INFO(a));
 DBG(DBGDEF,"Getting Max Definitions END\n");
 }
 	/*:373*/
-	#line 10960 "format.w"
+	#line 10991 "format.w"
 
 	/*53:*/
 	#line 1239 "format.w"
@@ -516,10 +516,10 @@ DBG(DBGNODE,"Get list at 0x%x size=%u\n",l->p,l->s);
 }
 }
 	/*:146*/
-	#line 10961 "format.w"
+	#line 10992 "format.w"
 
 	/*447:*/
-	#line 9655 "format.w"
+	#line 9686 "format.w"
 
 uint32_t hff_list_pos= 0,hff_list_size= 0;
 Tag hff_tag;
@@ -539,7 +539,7 @@ return;
 }
 else if(hff_tag<=TAG(param_kind,7))
 	/*450:*/
-	#line 9725 "format.w"
+	#line 9756 "format.w"
 
 switch(INFO(hff_tag)&0x3){
 case 0:hff_list_pos= hpos-hstart+1;hff_list_size= 0;hpos= hpos+3;return;
@@ -549,12 +549,12 @@ case 3:hpos++;HGET32(hff_list_size);hff_list_pos= hpos-hstart+1;hpos= hpos+1+hff
 default:QUIT("List with unknown info [%s,%d] at "SIZE_F"\n",NAME(hff_tag),INFO(hff_tag),hpos-hstart);
 }
 	/*:450*/
-	#line 9673 "format.w"
+	#line 9704 "format.w"
 
 TAGERR(hff_tag);
 }
 	/*:447*/	/*478:*/
-	#line 10138 "format.w"
+	#line 10169 "format.w"
 
 float32_t hteg_float32(void)
 {union{float32_t d;uint32_t bits;}u;
@@ -562,7 +562,7 @@ HTEG32(u.bits);
 return u.d;
 }
 	/*:478*/	/*516:*/
-	#line 10578 "format.w"
+	#line 10609 "format.w"
 
 void hteg_size_boundary(Info info)
 {uint32_t n;
@@ -586,14 +586,14 @@ return n;
 
 void hteg_list(List*l)
 {	/*475:*/
-	#line 10110 "format.w"
+	#line 10141 "format.w"
 
 Tag a,z;
 uint32_t node_pos= hpos-hstart;
 if(hpos<=hstart)return;
 HTEGTAG(z);
 	/*:475*/
-	#line 10600 "format.w"
+	#line 10631 "format.w"
 
 if(KIND(z)!=list_kind&&KIND(z)!=param_kind)
 QUIT("List expected at 0x%x",(uint32_t)(hpos-hstart));
@@ -611,13 +611,13 @@ if(s!=l->s)QUIT("List sizes at "SIZE_F" and 0x%x do not match 0x%x != 0x%x",
 hpos-hstart,node_pos-1,s,l->s);
 }
 	/*476:*/
-	#line 10117 "format.w"
+	#line 10148 "format.w"
 
 HTEGTAG(a);
 if(a!=z)QUIT("Tag mismatch [%s,%d]!=[%s,%d] at "SIZE_F" to 0x%x\n",NAME(a),INFO(a),NAME(z),INFO(z),
 hpos-hstart,node_pos-1);
 	/*:476*/
-	#line 10616 "format.w"
+	#line 10647 "format.w"
 
 }
 
@@ -628,6 +628,6 @@ hteg_list(l);
 
 
 	/*:516*/
-	#line 10962 "format.w"
+	#line 10993 "format.w"
 
 	/*:530*/
