@@ -357,7 +357,8 @@ int command_line(int argc, char *argv[])
       { case '-':
 	    if (strcmp(argv[i]+2,"help")==0) return help();
 	    else if (strcmp(argv[i]+2,"version")==0)
-	      { fprintf(stdout,"hintview version %d.%d.%d\n", VERSION, REVISION, PATCHLEVEL);
+	      { fprintf(stdout,"hintview version %d.%d.%d\nHINT file format version %d.%d\n", 
+			VERSION, REVISION, PATCHLEVEL, HINT_VERSION, HINT_SUB_VERSION);
 	        return 0;
 	      }
 	    else
