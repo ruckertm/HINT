@@ -68,11 +68,7 @@
 #define ID_KEY_STOP_AUTORELOAD          40022
 #define ID_FILE_AUTORELOAD              40023
 #define ID_KEY_QUIT                     40024
-#define ID_FILE_OPEN					40025
-#define ID_FILE_CLOSE					40026
-#define ID_FILE_PAGE_SETUP				40027
-#define ID_FILE_PRINT					40028
-#define IDC_STATIC						-1
+
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
