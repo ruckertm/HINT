@@ -1,7 +1,7 @@
 #include <windows.h>			/* must include this before GL/gl.h */
 #include <commctrl.h>
 #include <wingdi.h>
-//include <afxres.h>
+#include <afxres.h>
 #include <stdio.h>
 #include <math.h>
 #include "resource.h"
@@ -691,6 +691,7 @@ WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst,
 #else
 	hlog=stderr;
 #endif 
+
 	SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
 	if (!InitInstance (hCurrentInst)) return FALSE;
 	InitGLextensions(); 
