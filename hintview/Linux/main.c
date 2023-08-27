@@ -528,6 +528,21 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
   }      
 }
 
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+  if (yoffset > 0.0)
+  {
+    pos=hint_page_prev();
+    hint_page();
+    clear_cursor();
+  } else if (yoffset < 0.0)
+  {
+    pos=hint_page_next();
+    hint_page();
+    clear_cursor();
+  }
+}
+
 void cursor_enter_callback(GLFWwindow* window, int entered)
 { if (entered && autoreload && new_file_time())
     reload_file();
@@ -573,6 +588,7 @@ int create_window(void)
   glfwSetKeyCallback(window, key_callback);
   glfwSetCursorEnterCallback(window,cursor_enter_callback);
   glfwSetMouseButtonCallback(window, mouse_button_callback);
+  glfwSetScrollCallback(window, scroll_callback);
   glfwSetCursorPosCallback(window, cursor_position_callback);
 
   glfwSetCursorPos(window, px_h/2, px_v/2);
