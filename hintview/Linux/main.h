@@ -30,7 +30,7 @@
 
 #define VERSION "Version 1.1"
 
-/* colors foreground and background for day and night mode */
+/* foreground, background, and link colors for day and night mode */
 #define RGB(R,G,B) (((((R)<<8)| G)<<8) | B)
 #define GET_R(C) (((C)>>16)&0xFF)
 #define GET_G(C) (((C)>>8)&0xFF)
