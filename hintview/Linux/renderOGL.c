@@ -341,12 +341,16 @@ void nativeSetGamma(double gamma)
 }
 
 static GLfloat curfr=0.0f, curfg=0.0f, curfb=0.0f;
+static GLfloat curlr=0.0f, curlg=0.0f, curlb=1.0f;
 static uint8_t last_style=0;
-static void nativeSetColors(GLfloat fr, GLfloat fg, GLfloat fb, GLfloat br, GLfloat bg, GLfloat bb)
+static void nativeSetColors(GLfloat fr, GLfloat fg, GLfloat fb,
+		GLfloat br, GLfloat bg, GLfloat bb,
+		GLfloat lr, GLfloat lg, GLfloat lb)
 /* set foreground and background rgb colors */
 {
   glClearColor(br, bg, bb, 1.0f);
   curfr=fr; curfg=fg; curfb=fb;
+  curlr=lr; curlg=lg; curlb=lb;
   glUniform3f(FGcolorID, fr, fg, fb);
   last_style=0;
 }
@@ -355,20 +359,26 @@ static void nativeSetColors(GLfloat fr, GLfloat fg, GLfloat fb, GLfloat br, GLfl
 void nativeSetDark(int on)
 {   if (on) {
         nativeSetColors(
-			GET_R(FG_NIGHT)/255.0f, 
-			GET_G(FG_NIGHT)/255.0f, 
-			GET_B(FG_NIGHT)/255.0f, 
-			GET_R(BG_NIGHT)/255.0f, 
-			GET_G(BG_NIGHT)/255.0f, 
-			GET_B(BG_NIGHT)/255.0f);
+			GET_R(FG_NIGHT)/255.0f,
+			GET_G(FG_NIGHT)/255.0f,
+			GET_B(FG_NIGHT)/255.0f,
+			GET_R(BG_NIGHT)/255.0f,
+			GET_G(BG_NIGHT)/255.0f,
+			GET_B(BG_NIGHT)/255.0f,
+			GET_R(LK_NIGHT)/255.0f,
+			GET_G(LK_NIGHT)/255.0f,
+			GET_B(LK_NIGHT)/255.0f);
     } else {
         nativeSetColors(
-			GET_R(FG_DAY)/255.0f, 
-			GET_G(FG_DAY)/255.0f, 
-			GET_B(FG_DAY)/255.0f, 
-			GET_R(BG_DAY)/255.0f, 
-			GET_G(BG_DAY)/255.0f, 
-			GET_B(BG_DAY)/255.0f);
+			GET_R(FG_DAY)/255.0f,
+			GET_G(FG_DAY)/255.0f,
+			GET_B(FG_DAY)/255.0f,
+			GET_R(BG_DAY)/255.0f,
+			GET_G(BG_DAY)/255.0f,
+			GET_B(BG_DAY)/255.0f,
+			GET_R(LK_DAY)/255.0f,
+			GET_G(LK_DAY)/255.0f,
+			GET_B(LK_DAY)/255.0f);
      }
 }
 
@@ -565,13 +575,13 @@ void nativeGlyph(double x, double dx, double y, double dy, double w, double h, s
     
 	if (s!=last_style)
 	{ if (s&FOCUS_BIT)
-	      glUniform3f(FGcolorID, 0.0, 1.0,0.0); 
+		glUniform3f(FGcolorID, 0.0, 1.0, 0.0);
 	  else if (s&MARK_BIT)
- 	      glUniform3f(FGcolorID, 1.0, 0.0,0.0); 
+		glUniform3f(FGcolorID, 1.0, 0.0, 0.0);
 	  else if (s&LINK_BIT)
- 	      glUniform3f(FGcolorID, 0.0, 0.0,1.0); 
+		glUniform3f(FGcolorID, curlr, curlg, curlb);
 	  else
-  	      glUniform3f(FGcolorID, curfr, curfg,curfb);
+		glUniform3f(FGcolorID, curfr, curfg, curfb);
 	  last_style=s;
 	}
     glBindBuffer(GL_ARRAY_BUFFER, xybuffer);
