@@ -346,7 +346,7 @@ static uint8_t last_style=0;
 static void nativeSetColors(GLfloat fr, GLfloat fg, GLfloat fb,
 		GLfloat br, GLfloat bg, GLfloat bb,
 		GLfloat lr, GLfloat lg, GLfloat lb)
-/* set foreground and background rgb colors */
+/* set foreground, background, and link rgb colors */
 {
   glClearColor(br, bg, bb, 1.0f);
   curfr=fr; curfg=fg; curfb=fb;
