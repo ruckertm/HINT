@@ -14,7 +14,7 @@ Requires:
 The Hintview program for Linux.
 
 %prep
-%setup -q
+%autosetup -c
 
 %build
 cd %{name}/Linux
