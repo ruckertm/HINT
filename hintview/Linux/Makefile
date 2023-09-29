@@ -81,6 +81,8 @@ MANDIR=/usr/local/man
 
 install: hintview
 	strip hintview
+	install -d $(DESTDIR)$(BINDIR)
+	install -d $(DESTDIR)$(MANDIR)/man1
 	install -t $(DESTDIR)$(BINDIR) --mode=755 hintview
 	install -t $(DESTDIR)$(MANDIR)/man1 --mode=644 hintview.1
 
