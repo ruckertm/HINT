@@ -7,8 +7,8 @@ License: GPLv3+
 URL: https://hint.userweb.mwn.de/hint/%{name}.html
 Source0: https://github.com/ruckertm/HINT/eleases/%{name}-%{version}.tar.gz
 
-BuildRequires:
-Requires:
+#BuildRequires:
+#Requires:
 
 %description
 The Hintview program for Linux.
@@ -21,6 +21,7 @@ cd %{name}/Linux
 make
 
 %install
+cd %{name}/Linux
 %make_install
 
 %files
