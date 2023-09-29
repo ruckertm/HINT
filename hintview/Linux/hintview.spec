@@ -30,9 +30,8 @@ strip hintview
 %{__install} -t %{buildroot}%{_mandir}/man1 --mode=644 hintview.1
 
 %files
-%license LICENSE
 %{_bindir}/%{name}
-%{_mandir}/man1/%{name}.1
+%{_mandir}/man1/%{name}.1.gz
 
 %changelog
 * Fri Sep 29 2023 Andreas Scherer <https://ascherer.github.io>
