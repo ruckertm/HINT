@@ -2,13 +2,23 @@ Name: hintview
 Version: 1.3.1
 Release: 1%{?dist}
 Summary: Hintview for Linux
-License: GPLv3+
+License: GPLv2.1
+Packager: Andreas Scherer <https://ascherer.github.io/>
 
 URL: https://hint.userweb.mwn.de/hint/%{name}.html
 Source0: https://github.com/ruckertm/HINT/eleases/%{name}-%{version}.tar.gz
 
-#BuildRequires:
-#Requires:
+%if "%{_vendor}" == "debbuild"
+BuildRequires: libegl-dev libegl1-mesa-dev libffi-dev
+BuildRequires: libgl-dev libgl1-mesa-dev libgles-dev
+BuildRequires: libglew-dev libglfw3-dev libglu1-mesa-dev
+BuildRequires: libglvnd-core-dev libglvnd-dev libglx-dev
+BuildRequires: libopengl-dev libvulkan-dev libwayland-bin
+BuildRequires: libwayland-dev libxcursor-dev libxext-dev
+BuildRequires: libxfixes-dev libxi-dev libxinerama-dev
+BuildRequires: libxrandr-dev libxrender-dev
+Requires: libglew2.2 libglfw3
+%endif
 
 %description
 The Hintview program for Linux.
