@@ -21,6 +21,9 @@ Without gtk+, the input file must be given on the command line.
 ### hintview.1
 The man page for hintview
 
+### hintview.spec
+Packaging script for use with `rpmbuild` and `debbuild`
+
 ### main.c and main.h
 A short main program
 
