@@ -37,6 +37,9 @@
 #include "hfonts.h"
 #include "hrender.h"
 #include "rendernative.h"
+#define STBI_ONLY_JPEG
+#define STBI_ONLY_PNG
+#define STBI_ONLY_BMP
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -436,15 +439,15 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
       data=grey; width=height=1; nrChannels=4;
     }
     //LOG("nativeImage %d chanels\n",nrChannels);	
-    internal_format=GL_SRGB;
+    internal_format=GL_SRGB_ALPHA;
     if (nrChannels == 4)
     { format = GL_RGBA; internal_format=GL_SRGB_ALPHA;}
     else if (nrChannels == 3) 
       format = GL_RGB;
     else if (nrChannels == 2) 
-      format = GL_RG;
+      format = GL_LUMINANCE_ALPHA;
     else
-      format = GL_RED;
+      format = GL_LUMINANCE;
     glGenTextures(1, &ImageID);
     glBindTexture(GL_TEXTURE_2D, ImageID);
     checkGlError("glBindTexture ImageID");
