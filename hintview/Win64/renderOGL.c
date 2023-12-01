@@ -439,15 +439,15 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
       data=grey; width=height=1; nrChannels=4;
     }
     //LOG("nativeImage %d chanels\n",nrChannels);	
-    internal_format=GL_SRGB_ALPHA;
+    internal_format = format = GL_RGB;
     if (nrChannels == 4)
-    { format = GL_RGBA; internal_format=GL_SRGB_ALPHA;}
+        internal_format = format = GL_RGBA; 
     else if (nrChannels == 3) 
-      format = GL_RGB;
+        internal_format = format = GL_RGB;
     else if (nrChannels == 2) 
-      format = GL_LUMINANCE_ALPHA;
+        internal_format = format = GL_LUMINANCE_ALPHA;
     else
-      format = GL_LUMINANCE;
+        internal_format = format = GL_LUMINANCE;
     glGenTextures(1, &ImageID);
     glBindTexture(GL_TEXTURE_2D, ImageID);
     checkGlError("glBindTexture ImageID");
