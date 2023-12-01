@@ -48,4 +48,5 @@ extern int hint_print_on(int w,int h,int bpr,int bpp,unsigned char*bits);
 extern int hint_print_off(void);
 extern int hint_print(unsigned char*bits);
 #endif
+#line 7668 "hint.w"
 /*:383*/

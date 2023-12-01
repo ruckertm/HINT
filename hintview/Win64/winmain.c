@@ -299,7 +299,7 @@ AboutDialogProc( HWND hDlg, UINT message, WPARAM wparam, LPARAM lparam )
   { case WM_INITDIALOG:
       SetDlgItemText(hDlg,IDC_VERSION,VERSION);
 	  { char format_version[100];
-	    _snprintf(format_version,99,"HINT Format Version %d.%d",HINT_VERSION, HINT_SUB_VERSION);
+	    _snprintf(format_version,99,"HINT Format Version %d.%d",HINT_VERSION, HINT_MINOR_VERSION);
          SetDlgItemText(hDlg,IDC_HINT_VERSION,format_version);
 	  }
       return TRUE;

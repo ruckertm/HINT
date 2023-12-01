@@ -896,6 +896,7 @@ if(range_def[i].f<=pos&&pos<range_def[i].t)return range_def[i].pg;
 return 0;
 }
 #endif
+#line 798 "hint.w"
 /*:48*//*54:*/
 #line 843 "hint.w"
 
@@ -1392,6 +1393,7 @@ QUIT("List sizes at "SIZE_F" and "SIZE_F" do not match 0x%x != 0x%x",list_start-
 return p;
 }
 #endif
+#line 1834 "hint.w"
 
 static ParamDef*hteg_param_list_node(void)
 {ParamDef*p;
@@ -2111,6 +2113,7 @@ int i;
 for(i= 0;i<0x10000;i++)
 leaks[i]= 0;
 #endif
+#line 7545 "hint.w"
 }
 
 void leak_in(pointer p,int s)
@@ -2120,6 +2123,7 @@ if(0!=leaks[p])
 fprintf(stderr,"ERROR leak in: p=%d, s in=%d, leaks[p]= %d != 0\n",p,s,leaks[p]);
 leaks[p]= s;
 #endif
+#line 7554 "hint.w"
 }
 
 void leak_out(pointer p,int s)
@@ -2129,6 +2133,7 @@ if(s!=leaks[p])
 fprintf(stderr,"ERROR: leak out: p=%d, s out=%d != %d = s in\n",p,s,leaks[p]);
 leaks[p]= 0;
 #endif
+#line 7563 "hint.w"
 }
 
 static void list_leaks(void)
@@ -2139,6 +2144,7 @@ for(i= 0;i<0x10000;i++)
 if(leaks[i]!=0)
 fprintf(stderr,"ERROR:leak final: p=%d, s=%d\n",i,leaks[i]);
 #endif
+#line 7573 "hint.w"
 }
 /*:379*/
 #line 7626 "hint.w"
@@ -2480,8 +2486,10 @@ else
 #if 1
 pos= ((uint64_t)labels[n].pos<<32)+(labels[n].pos-labels[n].pos0);
 #else
-pos= ((uint64_t)labels[n].pos0<<32);
+#line 1104 "hint.w"
+ pos= ((uint64_t)labels[n].pos0<<32);
 #endif
+#line 1106 "hint.w"
 }
 /*:71*/
 #line 1090 "hint.w"
@@ -2966,6 +2974,7 @@ if(nest_ptr==0&&tail!=head
 ||type(tail)==hlist_node||type(tail)==vlist_node
 ||type(tail)==kern_node)
 #endif
+#line 1289 "hint.w"
 )
 store_map(tail,node_pos,0);
 }

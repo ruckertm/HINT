@@ -310,7 +310,8 @@ if(g->bits!=NULL)return;
 #if 0
 DBG(DBGRENDER,"Unpacking glyph %c (0x%x)",g->cc,g->cc);
 #endif
-data= g->pk.encoding;
+#line 6958 "hint.w"
+ data= g->pk.encoding;
 i= 0;
 if((g->pk.flag&7)<4)
 {i= i+3;
@@ -394,6 +395,7 @@ pk->vpxs*= m;
 #if 0    
 pk->comment[csize]= 0;
 #endif
+#line 7044 "hint.w"
 }
 break;
 case PK_POST:break;
