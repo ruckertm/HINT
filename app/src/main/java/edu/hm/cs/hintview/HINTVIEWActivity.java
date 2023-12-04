@@ -304,6 +304,8 @@ public class HINTVIEWActivity extends AppCompatActivity {
             try {
                 //check if file is accessible
                 getContentResolver().openInputStream(data.getData()).close();
+                getContentResolver().takePersistableUriPermission(data.getData(), Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
                 mView.setFile(data.getData().toString(), 0);
             } catch (FileNotFoundException e) {
                 //Log.e(TAG, "", e);

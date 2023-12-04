@@ -1379,7 +1379,7 @@ by changing |wterm|, |wterm_ln|, and |wterm_cr| in this section.
 
 @<Basic printing procedures@>=
 #define @[put(F)@]    @[fwrite(&((F).d)@],@[sizeof((F).d),1,(F).f)@]@;
-#define @[get(F)@]    @[fread(&((F).d),sizeof((F).d),1,(F).f)@]
+#define @[get(F)@]    @[(void)fread(&((F).d),sizeof((F).d),1,(F).f)@]
 
 #define @[reset(F,N,M)@]   @[((F).f=fopen((char *)(N)+1,M),\
                                  (F).f!=NULL?get(F):0)@]
@@ -25483,17 +25483,23 @@ if (subtype(p)==image_node)
   x= x+image_width(p);
 }
 
-@ @<Let |d| be the width of the whatsit |p|@>=d=0
+@ @<Let |d| be the width of the whatsit |p|@>=
+d=((subtype(p)==image_node)?image_width(p):0)
 
 @ @d adv_past(A) {}
 
 @<Advance \(p)past a whatsit node in the \(l)|line_break| loop@>=@+
+if (subtype(cur_p)==image_node)act_width=act_width+image_width(cur_p);
 adv_past(cur_p)
 
 @ @<Advance \(p)past a whatsit node in the \(p)pre-hyphenation loop@>=@+
 adv_past(s)
 
 @ @<Prepare to move whatsit |p| to the current page, then |goto contribute|@>=
+if (subtype(p)==image_node)
+{@+page_total=page_total+page_depth+image_height(p);
+page_depth=0;
+}
 goto contribute
 
 @ @<Process whatsit |p| in |vert_break| loop, |goto not_found|@>=
@@ -25600,8 +25606,9 @@ static void out_what(pointer @!p)
 switch (subtype(p)) {
 case open_node: case write_node: case close_node: @<Do some work that has
 been queued up for \.{\\write}@>@;@+break;
-case special_node: do_nothing;@+break;
-case language_node: do_nothing;@+break;
+case special_node: case latespecial_node: special_out(p);@+break;
+case language_node:
+case save_pos_code: do_nothing;@+break;
 default:confusion("ext4");
 @:this can't happen ext4}{\quad ext4@>
 }

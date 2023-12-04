@@ -40,6 +40,9 @@
 #include "hfonts.h"
 #include "hrender.h"
 #include "rendernative.h"
+#define STBI_ONLY_JPEG
+#define STBI_ONLY_PNG
+#define STBI_ONLY_BMP
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -49,16 +52,18 @@
 #define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 #define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
 
-static void printGLString(const char *name, GLenum s) {
-    const char *v = (const char *) glGetString(s);
-    LOGI("GL %s = %s\n", name, v);
-}
-
 static void checkGlError(const char *op)
 { GLint error;
   while( (error= glGetError())!= GL_NO_ERROR)
 	  LOGE("OGL Error after %s: 0x%x\n", op, error);
 }
+static void printGLString(const char *name, GLenum s) {
+  const GLubyte *v;
+  v = glGetString(s);
+  checkGlError(name);
+  LOGI("GL %s= %s\n", name, v);
+}
+
 #else
 #define  LOG_TAG    "glrender"
 #define  LOGI(...)  (void)0
@@ -94,7 +99,8 @@ static const char *FragmentShader =
         "     gl_FragColor.a = pow(texture2D(theTexture,UV).a,Gamma);\n"
         "     gl_FragColor.rgb = FGcolor;\n"
         "  } else {\n"
-        "     gl_FragColor = vec4(texture2D(theTexture,UV));\n"
+        "     vec4 texColor = texture2D( theTexture, UV );\n"
+        "     gl_FragColor = texColor;\n"
         "  } \n"
         "}\n";
 
@@ -342,10 +348,8 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
 /* render the image found between *b and *e at x,y with size w,h.
    x, y, w, h are given in point
 */
-{
+{ GLenum format;
   int width, height, nrChannels;
-
-
 
   if (b!=last_b||ImageID==0)
   { unsigned char *data;
@@ -369,19 +373,23 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
     checkGlError("glBindTexture ImageID");
 
       // Give the image to OpenGL
-    GLenum format = GL_RGB;
-    if (nrChannels == 4) {
+    format = GL_RGBA;
+    if (nrChannels == 4)
         format = GL_RGBA;
-    } else if (nrChannels == 3) {
+    else if (nrChannels == 3)
         format = GL_RGB;
-    } else if (nrChannels == 1) {
-        format = GL_ALPHA;
-    }
+    else if (nrChannels == 2)
+        format = GL_LUMINANCE_ALPHA;
+    else if (nrChannels == 1)
+        format = GL_LUMINANCE;
     LOGI("image format=%d\n", format);
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0,
+                 format, GL_UNSIGNED_BYTE, data);
+    if (glGetError()!= GL_NO_ERROR)
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
+                 format, GL_UNSIGNED_BYTE, data);
     checkGlError("glTexImage2D");
-    if (data!=grey)
-        stbi_image_free(data);
+    if (data!=grey) stbi_image_free(data);
     glGenerateMipmap(GL_TEXTURE_2D);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -510,7 +518,7 @@ extern void  nativeGlyph(double x,double dx,double y,double dy,double w,double h
 
 void nativeClear(void)
 { }
-int nativePrintStart(int w, int h,unsigned char *bits)
+int nativePrintStart(int w, int h, int bpr, int bpp, unsigned char *bits)
 { return 0; }
 int nativePrintEnd(void)
 { return 0; }

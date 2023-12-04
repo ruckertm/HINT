@@ -39,12 +39,6 @@
 %\makefigindex
 \titletrue
 
-
-\def\setrevision$#1: #2 ${\gdef\lastrevision{#2}}
-\setrevision$Revision: 2839 $
-\def\setdate$#1(#2) ${\gdef\lastdate{#2}}
-\setdate$Date: 2023-02-13 13:12:47 +0100 (Mon, 13 Feb 2023) $
-
 \null
 
 \input titlepage.tex
@@ -3888,7 +3882,7 @@ void hloc_clear(void)
 
 bool hloc_next(void)
 { @+int i=cur_loc;
-  if (LOC_POS(page_loc[cur_loc])>=hend-hstart) 
+  if (hstart+LOC_POS(page_loc[cur_loc])>=hend) 
     return false;
   NEXT_PAGE(i);
   if (i==hi_loc) 
@@ -6624,8 +6618,8 @@ but it provides a convenient way of obtaining paper copies of a few
 pages.
 
 @<render functions@>=
-int hint_print_on(int w, int h, unsigned char *bits)
-{ return nativePrintStart(w, h,bits);
+int hint_print_on(int w, int h, int bpr, int bpp, unsigned char *bits)
+{ return nativePrintStart(w, h, bpr, bpp, bits);
 }
 
 int hint_print_off(void)
@@ -6651,7 +6645,7 @@ and |nativePrintEnd|. To transfer the memory content to a given byte array use |
 @<native rendering definitions@>=
 extern void nativeInit(void); 
 extern void nativeClear(void);
-extern int nativePrintStart(int w, int h,unsigned char *bits);
+extern int nativePrintStart(int w, int h, int bpr, int bpp, unsigned char *bits);
 extern int nativePrintEnd(void);
 extern int nativePrint(unsigned char *bits);
 @
@@ -7250,8 +7244,8 @@ for the Windows and the Android system.
 #include <stdlib.h>
 #include <stdio.h>
 #include <setjmp.h>
-#define MAX_HERROR 1024
-extern char hint_error_string[MAX_HERROR];
+#define MAX_HINT_ERROR 1024
+extern char hint_error_string[MAX_HINT_ERROR];
 extern FILE *hlog;
 extern void hint_end(void);
 extern jmp_buf hint_error_exit;
@@ -7290,7 +7284,7 @@ extern int hint_error(char *title, char *msg);
 #endif
 
 #ifndef QUIT
-#define QUIT(...)    (snprintf(hint_error_string,MAX_HERROR-1,__VA_ARGS__),\
+#define QUIT(...)    (snprintf(hint_error_string,MAX_HINT_ERROR-1,__VA_ARGS__),\
                      ERROR_MESSAGE,hint_end(),longjmp(hint_error_exit,1))
 #endif
 
@@ -7306,7 +7300,7 @@ extern int hint_error(char *title, char *msg);
 The following variables are required for the error handling: 
 @<\HINT\ variables@>=
 jmp_buf hint_error_exit;
-char hint_error_string[MAX_HERROR];
+char hint_error_string[MAX_HINT_ERROR];
 @
 
 \section{Testing \HINT}\label{testing}
@@ -7667,7 +7661,7 @@ extern void hint_render_on(void);
 extern void hint_render_off(void);
 extern void hint_dark(int dark);
 extern void hint_gamma(double gamma);
-extern int hint_print_on(int w, int h, unsigned char *bits);
+extern int hint_print_on(int w, int h,  int bpr, int bpp, unsigned char *bits);
 extern int hint_print_off(void);
 extern int hint_print(unsigned char *bits);
 #endif 
