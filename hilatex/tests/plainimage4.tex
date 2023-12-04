@@ -1,4 +1,11 @@
+\input ifhint
+
+% run with hitex or pdftex to compare
+\ifhint
 \def\img{\HINTimage=example-image-G8.png width 20pt height 10pt\relax}
+\else
+\def\img{\pdfximage width 20pt height 10pt {example-image-G8.png}\pdfrefximage\pdflastximage
+\fi
 
 This is a paragraph containing \img. The \img\ is inserted into
 the text, like here: \img, to test the linebreaking together with
