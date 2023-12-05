@@ -60,7 +60,10 @@ from several sources that have different license attached.
   different licenses attached.
 
 - The artwork in resources is again under an MIT/X11 license
-  as in the file LICENSE.
+  as in the file LICENSE, but with the additional restriction
+  that the use of the artwort is restricted to programs that
+  have the sole purpose of displaying HINT files. All other uses
+  require the written permission of the copyright holders.
 
 - Any files not covered by the above that do not explicitly
   contain a different license statement are under an MIT/X11
