@@ -31,23 +31,23 @@ from several sources that have different license attached.
 
 - the files in hintview/backend fall into several categories
 
--- stb_imgage.h is from the http://nothings.org/stb project
+  - stb_imgage.h is from the http://nothings.org/stb project
    and is in the public domain.
 
--- htex.w
+  - htex.w
    htex.w is a derived work from D. E. Knuths tex.web and
    contains the license from the original tex.web file.
 
--- htex.c htex.h
+  - htex.c htex.h
    The files htex.c and htex.h are generated from htex.w
    using the program ctangle and are considered to be under
    the same license as htex.w
 
--- format.w, hint.w,
+  - format.w, hint.w,
    these files are source files from the HINT project and
    contain an MIT/X11 license as in the file LICENSE.
 
--- Other files in hintview/backend
+  - Other files in hintview/backend
    All other files in hintview/backend are generated using
    the program ctangle from either format.w or hint.w and
    are considered to be under the same license as format.w or hint.w
