@@ -45,16 +45,20 @@
 
 
 #ifdef DEBUG
-static void printGLString(const char *name, GLenum s) {
-    const char *v = (const char *) glGetString(s);
-    LOG("GL %s = %s\n", name, v);
-}
 
 static void checkGlError(const char *op)
 { GLint error;
   while( (error= glGetError())!= GL_NO_ERROR)
 	  MESSAGE("OGL Error after %s: 0x%x\n", op, error);
 }
+
+static void printGLString(const char *name, GLenum s) {
+  const GLubyte *v;
+  v = glGetString(s);
+  checkGlError(name);
+  LOG("GL %s = %s\n", name, v);
+}
+
 #else
 #define printGLString(N,S)	(void)0
 #define checkGlError(OP)	(void)0
@@ -265,8 +269,9 @@ void nativeInit(void)
 
     /* Create the vertex array object (VAO) */
   glGenVertexArrays(1, &VertexArrayID);
+  checkGlError("glGenVertexArrays");
   glBindVertexArray(VertexArrayID);
-
+  checkGlError("glBindVertexArray");
   createProgram();
 
   MatrixID = glGetUniformLocation(ProgramID, "MVP");
@@ -423,7 +428,7 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
    x, y, w, h are given in point
 */
 {
-  GLenum format, internal_format;
+  GLenum format;
   int width, height, nrChannels;
   if (b!=last_b||ImageID==0)
   { unsigned char *data;
@@ -438,21 +443,24 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
     { LOG("Unable to display image\n");
       data=grey; width=height=1; nrChannels=4;
     }
-    //LOG("nativeImage %d chanels\n",nrChannels);	
-    internal_format = format = GL_RGB;
+    //LOG("nativeImage %d chanels\n",nrChannels);
+    format = GL_RGBA;
     if (nrChannels == 4)
-        internal_format = format = GL_RGBA; 
+        format = GL_RGBA; 
     else if (nrChannels == 3) 
-        internal_format = format = GL_RGB;
+        format = GL_RGB;
     else if (nrChannels == 2) 
-        internal_format = format = GL_LUMINANCE_ALPHA;
+        format = GL_LUMINANCE_ALPHA;
     else
-        internal_format = format = GL_LUMINANCE;
+        format = GL_LUMINANCE;
     glGenTextures(1, &ImageID);
     glBindTexture(GL_TEXTURE_2D, ImageID);
     checkGlError("glBindTexture ImageID");
-
-    glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0,
+		   format, GL_UNSIGNED_BYTE, data);
+    if (glGetError()!= GL_NO_ERROR)
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
+    		  format, GL_UNSIGNED_BYTE, data);
     checkGlError("glTexImage2D(image)");
     if (data!=grey) stbi_image_free(data);
     glGenerateMipmap(GL_TEXTURE_2D);
