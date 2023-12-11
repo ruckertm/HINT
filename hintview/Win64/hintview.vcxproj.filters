@@ -127,16 +127,16 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="ButtonFace36x36xA.bmp">
+    <Image Include="..\resources\logo\HintView.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="HintView.ico">
+    <Image Include="..\resources\logo\Logo48.bmp">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="Logo48.bmp">
+    <Image Include="..\resources\toolbar.bmp">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="toolbar.bmp">
+    <Image Include="..\resources\ButtonFace36x36xA.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
