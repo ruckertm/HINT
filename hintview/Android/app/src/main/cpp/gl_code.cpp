@@ -28,6 +28,7 @@
 
 
 extern "C" {
+#include <math.h>
 #include <android/bitmap.h>
 #include "basetypes.h"
 #include "error.h"
@@ -36,7 +37,7 @@ extern "C" {
 #include "hint.h"
 #include "hrender.h"
 #include "rendernative.h"
-
+#define round(X) ((int) ((X) >=0.0?floor((X) +0.5) :ceil((X) -0.5) ) )
 // Functions from rendergl.c
 #if 0
 /* used for prining never got it working */

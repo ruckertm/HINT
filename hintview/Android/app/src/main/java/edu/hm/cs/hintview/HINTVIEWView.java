@@ -17,6 +17,8 @@ package edu.hm.cs.hintview;
  */
 
 
+import static android.opengl.EGL15.EGL_CONTEXT_MAJOR_VERSION;
+
 import android.app.Dialog;
 import android.content.Context;
 import android.net.Uri;
@@ -138,7 +140,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
             //Log.w(TAG, "creating OpenGL ES 2.0 context");
             checkEglError("Before eglCreateContext", egl);
             int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
-            int[] attrib_list = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL10.EGL_NONE};
+            int[] attrib_list = {EGL_CONTEXT_MAJOR_VERSION, 2, EGL10.EGL_NONE};
             EGLContext egl_context = egl.eglCreateContext(display, eglConfig, EGL10.EGL_NO_CONTEXT, attrib_list);
             checkEglError("After eglCreateContext", egl);
             return egl_context;

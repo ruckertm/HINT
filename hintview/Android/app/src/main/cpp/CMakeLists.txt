@@ -16,6 +16,7 @@ find_library( # Defines the name of the path variable that stores the
 # the FreeType Library
 
 # include files
+include_directories("${PROJECT_SOURCE_DIR}/../../../../../backend")
 include_directories("${PROJECT_SOURCE_DIR}/include")
 include_directories("${PROJECT_SOURCE_DIR}/include/freetype")
 include_directories("${PROJECT_SOURCE_DIR}/include/freetype/config")
@@ -52,12 +53,12 @@ add_library(freetype STATIC ${FT_SRCS})
 add_library(hintview SHARED
         gl_code.cpp
         rendergl.c
-        hfonts.c
-        tables.c
-        htex.c
-        get.c
-        hrender.c
-        hint.c
+        ${PROJECT_SOURCE_DIR}/../../../../../backend/hfonts.c
+        ${PROJECT_SOURCE_DIR}/../../../../../backend/tables.c
+        ${PROJECT_SOURCE_DIR}/../../../../../backend/htex.c
+        ${PROJECT_SOURCE_DIR}/../../../../../backend/get.c
+        ${PROJECT_SOURCE_DIR}/../../../../../backend/hrender.c
+        ${PROJECT_SOURCE_DIR}/../../../../../backend/hint.c
         )
 target_compile_options(hintview PRIVATE -Wno-dangling-else)
 
