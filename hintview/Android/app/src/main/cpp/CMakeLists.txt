@@ -13,39 +13,41 @@ find_library( # Defines the name of the path variable that stores the
         # CMake needs to locate.
         log)
 
-# the FreeType Library
 
+set(TOP_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../../../../..")
+set(FREETYPE_SOURCE_DIR "${TOP_SOURCE_DIR}/external/freetype-2.3.5")
 # include files
-include_directories("${PROJECT_SOURCE_DIR}/../../../../../backend")
-include_directories("${PROJECT_SOURCE_DIR}/include")
-include_directories("${PROJECT_SOURCE_DIR}/include/freetype")
-include_directories("${PROJECT_SOURCE_DIR}/include/freetype/config")
+include_directories("${TOP_SOURCE_DIR}/backend")
+include_directories("${FREETYPE_SOURCE_DIR}/include")
+include_directories("${FREETYPE_SOURCE_DIR}/include/freetype")
+include_directories("${FREETYPE_SOURCE_DIR}/include/freetype/config")
 # compiler definitions
 add_definitions(-DFT2_BUILD_LIBRARY)
 add_definitions("-DFT_CONFIG_MODULES_H=<ftmodule.h>")
 
 # source files
+# the FreeType Library
 set(FT_SRCS
-        freetype/base/ftsystem.c
-        freetype/base/ftdebug.c
-        freetype/base/ftinit.c
-        freetype/base/ftbase.c
-        freetype/base/ftbbox.c
-        freetype/base/ftbitmap.c
-        freetype/base/ftgasp.c
-        freetype/base/ftglyph.c
-        freetype/base/ftmm.c
-        freetype/base/fttype1.c
-        freetype/truetype/truetype.c
-        freetype/type1/type1.c
-        freetype/cff/cff.c
-        freetype/cid/type1cid.c
-        freetype/sfnt/sfnt.c
-        freetype/pshinter/pshinter.c
-        freetype/raster/raster.c
-        freetype/smooth/smooth.c
-        freetype/psaux/psaux.c
-        freetype/psnames/psmodule.c)
+        ${FREETYPE_SOURCE_DIR}/src/base/ftsystem.c
+        ${FREETYPE_SOURCE_DIR}/src/base/ftdebug.c
+        ${FREETYPE_SOURCE_DIR}/src/base/ftinit.c
+        ${FREETYPE_SOURCE_DIR}/src/base/ftbase.c
+        ${FREETYPE_SOURCE_DIR}/src/base/ftbbox.c
+        ${FREETYPE_SOURCE_DIR}/src/base/ftbitmap.c
+        ${FREETYPE_SOURCE_DIR}/src/base/ftgasp.c
+        ${FREETYPE_SOURCE_DIR}/src/base/ftglyph.c
+        ${FREETYPE_SOURCE_DIR}/src/base/ftmm.c
+        ${FREETYPE_SOURCE_DIR}/src/base/fttype1.c
+        ${FREETYPE_SOURCE_DIR}/src/truetype/truetype.c
+        ${FREETYPE_SOURCE_DIR}/src/type1/type1.c
+        ${FREETYPE_SOURCE_DIR}/src/cff/cff.c
+        ${FREETYPE_SOURCE_DIR}/src/cid/type1cid.c
+        ${FREETYPE_SOURCE_DIR}/src/sfnt/sfnt.c
+        ${FREETYPE_SOURCE_DIR}/src/pshinter/pshinter.c
+        ${FREETYPE_SOURCE_DIR}/src/raster/raster.c
+        ${FREETYPE_SOURCE_DIR}/src/smooth/smooth.c
+        ${FREETYPE_SOURCE_DIR}/src/psaux/psaux.c
+        ${FREETYPE_SOURCE_DIR}/src/psnames/psmodule.c)
 
 add_library(freetype STATIC ${FT_SRCS})
 
