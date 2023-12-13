@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.Handler;
 
 //import android.util.Log;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -170,7 +171,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
     protected void onRestoreInstanceState(final Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
-        new Handler().postDelayed(new Runnable() {
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
                 final boolean toolbarVisible = savedInstanceState.getBoolean("toolbarVisible");
@@ -229,7 +230,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         super.onOptionsItemSelected(item);
-        new Handler().postDelayed(new Runnable() {
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
                 hideToolbar(mView, false);

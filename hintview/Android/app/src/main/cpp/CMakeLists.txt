@@ -50,6 +50,7 @@ set(FT_SRCS
         ${FREETYPE_SOURCE_DIR}/src/psnames/psmodule.c)
 
 add_library(freetype STATIC ${FT_SRCS})
+target_compile_options(freetype  PRIVATE -Wno-shift-negative-value -Wno-empty-body)
 
 # the HINT library
 add_library(hintview SHARED

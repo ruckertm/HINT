@@ -3,10 +3,10 @@ apply plugin: 'com.android.application'
 android {
     signingConfigs {
         release {
-        storeFile file('C:\\Users\\ruckert\\Documents\\keys\\HIntview\\HintViewUploadkey.jks')
-            storePassword 'murks6248'
-            keyAlias 'murks'
-            keyPassword 'murks6248'
+        storeFile file('C:\\somewhere\\HintViewUploadkey.jks')
+            storePassword 'some password'
+            keyAlias 'some alias'
+            keyPassword 'some password'
         }
     }
     compileSdk 33
