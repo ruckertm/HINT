@@ -33,7 +33,7 @@ bitmal in a series of round buttons to be displayed on top of the
 HINT document.
 
 ## Directories
-###logo
+### logo
 Contains various files with the HINT Logo in different sizes
 with and without the grey background.
 
