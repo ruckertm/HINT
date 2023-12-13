@@ -53,12 +53,12 @@ add_library(freetype STATIC ${FT_SRCS})
 add_library(hintview SHARED
         gl_code.cpp
         rendergl.c
-        ${PROJECT_SOURCE_DIR}/../../../../../backend/hfonts.c
-        ${PROJECT_SOURCE_DIR}/../../../../../backend/tables.c
-        ${PROJECT_SOURCE_DIR}/../../../../../backend/htex.c
-        ${PROJECT_SOURCE_DIR}/../../../../../backend/get.c
-        ${PROJECT_SOURCE_DIR}/../../../../../backend/hrender.c
-        ${PROJECT_SOURCE_DIR}/../../../../../backend/hint.c
+        hfonts.c
+        tables.c
+        htex.c
+        get.c
+        hrender.c
+        hint.c
         )
 target_compile_options(hintview PRIVATE -Wno-dangling-else)
 
