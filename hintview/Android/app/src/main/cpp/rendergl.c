@@ -57,6 +57,7 @@ static void checkGlError(const char *op)
   while( (error= glGetError())!= GL_NO_ERROR)
 	  LOGE("OGL Error after %s: 0x%x\n", op, error);
 }
+
 static void printGLString(const char *name, GLenum s) {
   const GLubyte *v;
   v = glGetString(s);
@@ -177,27 +178,20 @@ static GLfloat MVP[4][4] = {
   {0.0, 0.0, 0.0, 1.0 }}; // translation x, y, z
 
 static void mkRuleTexture() { /* the texture used for rules */
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glGenTextures(1, &RuleID);
-    glBindTexture(GL_TEXTURE_2D, RuleID);
-    uint8_t buffer[1];
-    buffer[0] = 0xFF;
-    glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_ALPHA,
-            1,
-            1,
-            0,
-            GL_ALPHA,
-            GL_UNSIGNED_BYTE,
-            buffer
-    );
-    // Set texture options
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  GLubyte rule[1][1][1]={{{0xFF}}};
+
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+  checkGlError("glPixelStorei");
+
+  glGenTextures(1, &RuleID);
+  glBindTexture(GL_TEXTURE_2D, RuleID);
+  checkGlError("glBindTexture RuleID");
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 1, 1, 0, GL_ALPHA, GL_UNSIGNED_BYTE, rule);
+  /* Set texture options */
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 
@@ -207,8 +201,7 @@ extern void nativeInit(void) {
     printGLString("Version", GL_VERSION);
     printGLString("Vendor", GL_VENDOR);
     printGLString("Renderer", GL_RENDERER);
-    printGLString("Extensions", GL_EXTENSIONS);
-
+ 
     createProgram();
     if (!ProgramID) {
         LOGE("Could not create program.");

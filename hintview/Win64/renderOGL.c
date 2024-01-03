@@ -265,7 +265,6 @@ void nativeInit(void)
   printGLString("Version", GL_VERSION);
   printGLString("Vendor", GL_VENDOR);
   printGLString("Renderer", GL_RENDERER);
-  printGLString("Extensions", GL_EXTENSIONS);
 
     /* Create the vertex array object (VAO) */
   glGenVertexArrays(1, &VertexArrayID);

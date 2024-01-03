@@ -201,7 +201,6 @@ void nativeInit(void) {
   //  printGLString("Version", GL_VERSION);
  //   printGLString("Vendor", GL_VENDOR);
  //   printGLString("Renderer", GL_RENDERER);
-//    printGLString("Extensions", GL_EXTENSIONS);
 
     gProgram = createProgram(gVertexShader, gFragmentShader);
     if (!gProgram) {

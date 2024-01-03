@@ -103,11 +103,11 @@ static const char FragmentShader[]=
 
   "void main()\n"
   "{ vec4 texColor = texture2D( theTexture, UV );\n"
-    "if (IsImage==1) color = texColor;\n"
-    "else\n"
-    "{ color.a = pow(texColor.r,Gamma);\n"
+    "if (IsImage==0) {\n"
+      "color.a = pow(texColor.r,Gamma);\n"
       "color.rgb = FGcolor;\n"
     "}\n"
+    "else color = texColor;\n"
   "}\n"
 ;
 
@@ -227,7 +227,7 @@ static void mkRuleTexture() /* the texture used for rules */
   rule[1][1][1]=0xFF; // green bottom right
 #endif
 	// Create one OpenGL texture
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // select byte alignment
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   checkGlError("glPixelStorei");
 
   glGenTextures(1, &RuleID);
@@ -250,7 +250,7 @@ static void mkRuleTexture() /* the texture used for rules */
 }
 
 
-void nativeInit(void)
+extern void nativeInit(void)
 { GLuint VertexArrayID;
   static int glewInitialized=0;
   /* Initialize GLEW */
