@@ -348,34 +348,24 @@ void nativeSetGamma(double gamma)
 }
 
 static GLfloat curfr=0.0f, curfg=0.0f, curfb=0.0f;
+static GLfloat curlr=0.0f, curlg=0.0f, curlb=1.0f;
 static uint8_t last_style=0;
-static void nativeSetColors(GLfloat fr, GLfloat fg, GLfloat fb, GLfloat br, GLfloat bg, GLfloat bb)
-/* set foreground and background rgb colors */
+static void nativeSetColors(uint32_t f, uint32_t b, uint32_t l)
+/* set foreground, background, and link rgb colors */
 {
-  glClearColor(br, bg, bb, 1.0f);
-  curfr=fr; curfg=fg; curfb=fb;
-  glUniform3f(FGcolorID, fr, fg, fb);
+  glClearColor(GET_R(b)/255.0f, GET_G(b)/255.0f, GET_B(b)/255.0f, 1.0f);
+  curfr=GET_R(f)/255.0f; curfg=GET_G(f)/255.0f; curfb=GET_B(f)/255.0f;
+  curlr=GET_R(l)/255.0f; curlg=GET_G(l)/255.0f; curlb=GET_B(l)/255.0f;
+  glUniform3f(FGcolorID, curfr, curfg, curfb);
   last_style=0;
 }
 
 
 void nativeSetDark(int on)
 {   if (on) {
-        nativeSetColors(
-			GET_R(FG_NIGHT)/255.0f, 
-			GET_G(FG_NIGHT)/255.0f, 
-			GET_B(FG_NIGHT)/255.0f, 
-			GET_R(BG_NIGHT)/255.0f, 
-			GET_G(BG_NIGHT)/255.0f, 
-			GET_B(BG_NIGHT)/255.0f);
+        nativeSetColors(FG_NIGHT, BG_NIGHT, LK_NIGHT);
     } else {
-        nativeSetColors(
-			GET_R(FG_DAY)/255.0f, 
-			GET_G(FG_DAY)/255.0f, 
-			GET_B(FG_DAY)/255.0f, 
-			GET_R(BG_DAY)/255.0f, 
-			GET_G(BG_DAY)/255.0f, 
-			GET_B(BG_DAY)/255.0f);
+        nativeSetColors(FG_DAY, BG_DAY, LK_DAY);
      }
 }
 
@@ -581,13 +571,13 @@ void nativeGlyph(double x, double dx, double y, double dy, double w, double h, s
     
 	if (s!=last_style)
 	{ if (s&FOCUS_BIT)
-	      glUniform3f(FGcolorID, 0.0, 1.0,0.0); 
+		glUniform3f(FGcolorID, 0.0, 1.0, 0.0);
 	  else if (s&MARK_BIT)
- 	      glUniform3f(FGcolorID, 1.0, 0.0,0.0); 
+		glUniform3f(FGcolorID, 1.0, 0.0, 0.0);
 	  else if (s&LINK_BIT)
- 	      glUniform3f(FGcolorID, 0.0, 0.0,1.0); 
+		glUniform3f(FGcolorID, curlr, curlg, curlb);
 	  else
-  	      glUniform3f(FGcolorID, curfr, curfg,curfb);
+		glUniform3f(FGcolorID, curfr, curfg, curfb);
 	  last_style=s;
 	}
     glBindBuffer(GL_ARRAY_BUFFER, xybuffer);
