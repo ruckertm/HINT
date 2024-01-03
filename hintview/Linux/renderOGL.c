@@ -458,7 +458,7 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
     glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0,
 		   format, GL_UNSIGNED_BYTE, data);
     if (glGetError()!= GL_NO_ERROR)
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0,
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
     		  format, GL_UNSIGNED_BYTE, data);
     checkGlError("glTexImage2D(image)");
     if (data!=grey) stbi_image_free(data);
