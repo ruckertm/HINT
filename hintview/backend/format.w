@@ -156,8 +156,8 @@ ISBN-13: 979-854992684-4\par
 First printing: August 2019\par
 Second edition: August 2021\par
 \medskip
-\def\lastrevision{Date: Fri Aug 18 13:19:29 2023}
-\lastrevision\par
+Last commit: \input lastcommit.tex
+\par
 }
 }
 \endgroup
@@ -587,9 +587,9 @@ DEF_KIND(v@&pack,v@&pack,24),@/
 DEF_KIND(s@&tream,s@&tream,25),@/
 DEF_KIND(p@&age,p@&age,26),@/
 DEF_KIND(l@&ink,l@&abel,27),@/
-DEF_KIND(u@&ndefined1,u@&ndefined1,28),@/
-DEF_KIND(u@&ndefined2,u@&ndefined2,29),@/
-DEF_KIND(u@&ndefined3,u@&ndefined3,30),@/
+DEF_KIND(c@&olor,c@&olor,28),@/
+DEF_KIND(u@&ndefined1,u@&ndefined1,29),@/
+DEF_KIND(u@&ndefined2,u@&ndefined2,30),@/
 DEF_KIND(p@&enalty, i@&nt,31)
 @t@>
 @
@@ -598,10 +598,12 @@ For a few kind-values we have
 alternative names; we will use them
 to express different intentions when using them.
 @<alternative kind names@>=
-font_kind=glyph_kind,int_kind=penalty_kind, unknown_kind=penalty_kind, dimen_kind=kern_kind, label_kind=link_kind, outline_kind=link_kind@/@t{}@>
+font_kind=glyph_kind,int_kind=penalty_kind, unknown_kind=penalty_kind,
+dimen_kind=kern_kind, label_kind=link_kind, outline_kind=link_kind@/@t{}@>
 @
 
-The info\index{info value} values can be used to represent numbers in the range 0 to 7; for an example
+The info\index{info value} values can be used to represent numbers
+in the range 0 to 7; for an example
 see the |hput_glyph| function later in this section.
 Mostly, however, the individual bits are used as flags indicating the presence
 or absence of immediate parameter values. If the info bit is set, it
@@ -5464,7 +5466,7 @@ A label node specifies the reference number and a placement.
 @<parsing rules@>=
 placement: TOP {$$=LABEL_TOP;} |  BOT {$$=LABEL_BOT;} |  MID {$$=LABEL_MID;} | {$$=LABEL_MID;};
 content_node: START LABEL REFERENCE placement END @|
-              {  hset_label($3,$4); @+}
+              {  hset_label($3,$4); @+};
 @
 
 
@@ -5919,40 +5921,250 @@ for (n=0;n<=max_outline;n++)
 @
 
 \subsection{Colors}
-Colors\index{color} are certainly one of the features you will find in the final \HINT\ file format.
-Here some remarks must suffice.
+This is the first draft of implementing color\index{color} specifications in
+a \HINT\ file.
 
-A \HINT\ viewer must be capable of rendering a page given just any valid
-position inside the content section. Therefore \HINT\ files are stateless;
-there is no need to search for preceding commands that might change a state
-variable.
-As a consequence, we can not just define a ``color change node''.
-Colors could be specified as an optional parameter of a glyph node, but the
-amount of data necessary would be considerable. In texts, on the other hand,
-a color change control code would be possible because we parse texts only in forward
-direction. The current font  would then become a current color and font.
+According to the initial philosophy of a \HINT\ file, a viewer must be
+capable of rendering a page given just any valid position inside the
+content section.  With the implementation of the viewers this very
+strong requirement was replaced by a weaker form: a viewer will
+require a 64 bit integer, that contains the 32 bit position of the
+page start in the top half and the distance to the enclosing top level
+node in the bottom half.  The page start position is valid only if it
+is the position of the start byte of a node.
 
-An attractive alternative would be colored fonts. 
-This would require an optional color argument for a font. 
-For example one could have a cmr10 font in black as
-font number 3, and the same cmr10 font in blue as font number 4. Having 256 different fonts,
-this is definitely a possibility because rarely you would need that many fonts 
-or that many colors. If necessary and desired, one could allow 16 bit font numbers
-of overcome the problem.
+The viewer will then compute a representation of the page by
+inspecting this top level node, skip to the beginning to the page
+inside this node, and then construct the page representation. Once the
+page representation is complete, it is inserted into a page template
+and then the whole representation is passed to the renderer.  The
+renderer will the display the page in top down left to right order.
+The situation is similar if a page needs to be rendered from with a
+given end of the page.  While we traverse the input nodes in backward
+order, the renderer will again travers the representation of the page
+in forward mode.
 
-Background colors could be associated with boxes as an optional parameter.
-In addition to the background color, a frame color and frame thickness
-for a box could be desirable. Because pages are using a page template there
-would be no need to an extra page color. The page color could simply be
-given as the color of the outer box in the template.
-Even for extended boxes such aditional parameters can be implemented.
+The newest generations of viewers can also render a page given any
+real number in the interval 0.0 to 1.0, where 0.0 corresponds to the
+start of the content section and 1.0 corresponds to the end of the
+content section. This is possible because searching for a node and its
+enclosing top level node is realy fast using the technique described
+in section\secref{fastforward}.
 
-Colored boxes, however, are not the perfect solution for highlighting text
-because boxes interfer with line breaking. Enclosing a phrase in a box just
-to give it a special background will make it impossible for the line breaking
-routine to insert line breaks. Therefore, paragraph nodes might benefit from
-a color change command for the background (and foreground) color.
+As a consequence of this relaxed requirement, it is very well possible
+to work with a color state. Color will not effect the position of
+glyphs or rules and so it is sufficient to process the color
+information when rendering the page. If the color state is local to
+the enclosing node, the page template will specify the "global" color
+schema and local color changes extend from top to bottom and from left
+to right.
 
+After these preliminaries let's turn our attention to the design of
+a suitable color concept.
+
+Colors come in sets. Before the present implementation of colors,
+we use a foreground color and a
+background color; then we had a special foreground color for links;
+and finaly the implementation of searching used special forground
+colors to mark matches and highlight the current search focus.  As if
+that was not sufficient, viewers could be switched to ``dark mode'' using
+a different forground and background color, and of course it was
+desirable to adjust the link, mark, and focus color as well.
+
+Of course, a document designer might want to indicate a link using a
+different background color instead or in combination with a special
+foreground color. Similar considerations apply to the colors used for
+searching.  By the way: the interaction of link color with mark or
+focus color was an open question; probably mixing the colors might be a
+good solution.  But there is another feature that sets links appart
+from the matching text in a search: The start and end of a link is
+already recorded in a \HINT\ file. So an automatic color change might
+be called for.
+
+So now, a color set consists of eight color pairs for normal, link,
+mark, and focus colors in day mode
+and four more color pairs for night mode;
+each pair specifying a background and a foreground color.
+Each color can be stored in four byte using the
+common RGBA color representation.
+A color pair fits into a 64 bit integer using the high bytes for the
+foreground and the low bytes for the background color.
+
+Currently a color set just supports two modes with four colors each;
+in future extensions it might be possible for 
+an author to invent color sets for winter or summer, fall or
+spring, or any other resonable or unreasonable purpose.
+
+We will allow
+up to 255 color sets that are stored in the definition section and are
+referenced in the content section by a single byte. The color set with
+reference number zero specifies the default colors (see
+section~\secref{colordefault}.
+The defaults can be overwritten but the background colors
+will all remain opaque.
+At the root of a page template, the default color set is selected.
+Inside a list, a color specification will extend up to the end of the
+list or up to the next color specification whatever occurs
+first. Inside a horizontal list, a background color will extend from
+top to bottom; inside a vertical list a background color will extend
+from the left edge to the right edge.
+
+Now we are ready for the implementation.
+
+@<hint basic types@>= 
+typedef uint32_t Color; /* RGBA */ 
+typedef Color ColorPair[2]; /* foreground, background */
+typedef ColorPair ColorSet[8]; 
+@
+
+
+\vbox{\readcode\vskip -\baselineskip\putcode}
+
+@s COLOR  symbol
+@s color symbol
+@s color_pair symbol
+@s color_quad symbol
+@s color_set symbol
+
+@<symbols@>=
+%token COLOR "color"
+%type color
+%type color_pair
+@
+
+@<scanning rules@>=
+::@=color@>              :<     return COLOR;    >:
+@
+
+Colors can be specified as a single number, preferably in hexadecimal
+notation, giving the red, green, blue, and alpha value in a single
+number. For example \.{0xFF0000FF} would be pure red,
+and \.{0x00FF0080} would be transparent green.
+Of course even decimal values can be used. A good example is the
+value \.{0} which is equivalent to but a bit shorter than \.{0x0} or
+\.{0x00000000} which describes a completely transparent black.
+It is invisible because the alpha value is zero. 
+
+Alternatively, colors can be given as a list of three or four numbers
+enclosed in pointed brackets \.{<} \dots \.{>}.
+If only three numbers are given, the color is opaque with an alpha
+value equivalent to \.{0xFF}. Using this format
+the same colors as before can be written \.{<0xFF 0 0>},
+\.{<0 0xFF 0 0x80>} and \.{<0 0 0 0>}.
+
+@<parsing rules@>=@/
+color: START UNSIGNED UNSIGNED UNSIGNED UNSIGNED END
+     { RNG("red",$2,0,0xFF); RNG("green",$3,0,0xFF);
+       RNG("blue",$4,0,0xFF); RNG("alpha",$5,0,0xFF);
+       HPUT8($2); HPUT8($3); HPUT8($4); HPUT8($5);
+     }
+     | START UNSIGNED UNSIGNED UNSIGNED END
+     { RNG("red",$2,0,0xFF); RNG("green",$3,0,0xFF);
+       RNG("blue",$4,0,0xFF);
+       HPUT8($2); HPUT8($3); HPUT8($4); HPUT8(0xFF);
+     };
+
+color: UNSIGNED { HPUT32($1); };
+@
+
+Colors are always specified in pairs: a foreground color folowed by
+background color enclosed in pointed brackets \.{<} \dots \.{>} as
+usual. For convenience, the background color can be omited if it is zero.
+
+@<parsing rules@>=@/
+color_pair: START color color END
+	  | START color END { HPUT32(0); };
+@
+
+
+A complete color set consists of eight color pairs
+organized in two |color_quads|:
+the first four pairs for normal, link, mark, and focus text
+for day mode are followed by the four pairs for night mode.
+The |color_quad| for night mode are optional; and within
+a |color_quad| all color pairs except the first one are
+optional.
+
+If a color pair is missing, it is replaced by the corresponding
+value from the default color set. If the default color set itself
+is redefined the colors corresponding to the missing color pair
+will not change. It is not possible to change the alpha values
+of the default background colors for normal text.
+So these two default background colors will always be opaque.
+They will be selected at the root of a page template and define,
+so to speak, the native paper color before printing anything on it.
+For convenience, in the long format, the special color value 0
+is equivalent to a missing value.
+
+To be open to future changes, color set definition will contain
+after the reference number the number of color pairs that follow.
+Currently this value is always eight.
+
+@<parsing rules@>=@/
+color_null: { HPUT32(0); HPUT32(0); };
+color_quad: START color_pair color_null color_null color_null END 
+          | START color_pair color_pair color_null color_null END
+          | START color_pair color_pair color_pair color_null END
+          | START color_pair color_pair color_pair color_pair END
+          ;
+	  
+color_set: color_quad color_quad;
+color_set: color_quad color_null color_null color_null color_null;
+
+def_node: start COLOR ref { HPUT8(8); } color_set END
+        { DEF($$,color_kind,$3); hput_tags($1,TAG(color_kind,b000));};
+@
+
+Compared to the definitions, the content nodes are pretty simple.
+
+@<parsing rules@>=
+content_node: start COLOR ref END {REF_RNG(color_kind,$3); hput_tags($1,TAG(color_kind,b000));};
+@
+
+\vbox{\writecode\vskip -\baselineskip\getcode}
+
+@<cases to get content@>=
+@t\1\kern1em@>
+case TAG(color_kind,b000):HGET_REF(color_kind); @+break;
+@
+
+@<get functions@>=
+void hwrite_color_pair(uint32_t f, uint32_t b)
+{hwritec('<');
+ if (f==0) hwritec('0'); else hwritef("0x%08X",f);
+ if (b!=0) hwritef(" 0x%08X",b);
+ hwritec('>');
+}
+
+void hget_color_quad(uint32_t node_pos, bool print)
+{ uint32_t c[8];
+  int i,k;
+  for (i=k=0;i<4;i++)
+  { HGET32(c[2*i]); HGET32(c[2*i+1]);
+    if (c[2*i]!=0 || c[2*i+1]!=0) k=i+1;
+  }
+  if (!print&&k==0) return;
+  if (k==0)
+   QUIT("Color definition must not be empty at 0x%x",node_pos);
+  hwrite_start();
+  for (i=0;i<k;i++)
+  { hwrite_color_pair(c[2*i],c[2*i+1]);
+    if (i < k-1) hwritec(' ');
+  }
+  hwrite_end();
+}
+@
+
+@<cases to get definitions for |color_kind|@>=
+ case b000:
+   { int k;
+     k=HGET8;
+     if (k!=8) 
+       QUIT("Definition %d of color set needs 8 color pairs only %d given\n",n,k);
+     hget_color_quad(node_pos,true); hget_color_quad(node_pos,false);
+   }
+   break;
+@
 
 \subsection{Rotation}
 When it comes to rotation, there is a big difference between printed books and
@@ -8174,7 +8386,8 @@ max_value: FONT UNSIGNED      { hset_max(font_kind,$2); }
          | STREAMDEF UNSIGNED { hset_max(stream_kind,$2); }
          | PAGE UNSIGNED      { hset_max(page_kind,$2); }
          | RANGE UNSIGNED     { hset_max(range_kind,$2); }
-         | LABEL UNSIGNED     { hset_max(label_kind,$2); };
+         | LABEL UNSIGNED     { hset_max(label_kind,$2); }
+         | COLOR UNSIGNED     { hset_max(color_kind,$2); };
 
 @
 
@@ -8360,6 +8573,7 @@ definition_bits[0][baseline_kind]=(1<<(MAX_BASELINE_DEFAULT+1))-1;
 definition_bits[0][page_kind]=(1<<(MAX_PAGE_DEFAULT+1))-1;
 definition_bits[0][stream_kind]=(1<<(MAX_STREAM_DEFAULT+1))-1;
 definition_bits[0][range_kind]=(1<<(MAX_RANGE_DEFAULT+1))-1;
+definition_bits[0][color_kind]=(1<<(MAX_COLOR_DEFAULT+1))-1;
 @
 
 \goodbreak
@@ -8432,6 +8646,13 @@ void hget_definition(int n, Tag a, uint32_t node_pos)
           QUIT("Info value of language definition must be zero");
         else
         { char *n; HGET_STRING(n);@+ hwrite_string(n); }
+        break;
+      case color_kind:
+        switch (INFO(a))
+        { @<cases to get definitions for |color_kind|@>@;
+	  default:
+	    QUIT("Undefined tag %d for color_kind definition at 0x%x",INFO(a),node_pos);
+        }
         break;
       default:
         hget_content(a); @+break;
@@ -9218,6 +9439,29 @@ max_default[param_kind]=MAX_LIST_DEFAULT;
 max_fixed[param_kind]=empty_list_no;
 @
 
+\subsection{Colors}\label{colordefault}
+@<default names@>=
+typedef enum {@+
+zero_color_no=0@+
+} Color_no;
+#define MAX_COLOR_DEFAULT zero_color_no
+@
+
+The default colors for day mode are
+black on white, blue on white, red on white, and green on white;
+in night mode the background becomes black, the normal text white,
+and the color of link, mark, and focus text become slightly lighter.
+
+@<define |color_defaults|@>=
+max_default[color_kind]=MAX_COLOR_DEFAULT;
+max_fixed[color_kind]=-1;
+printf("ColorSet color_defaults[MAX_COLOR_DEFAULT+1]="@|
+       "{{{0x000000FF,0xFFFFFFFF},"@|
+       "{0x0000EEFF,0xFFFFFFFF},{0xEE0000FF,0xFFFFFFFF},{0x00EE00FF,0xFFFFFFFF},"@|
+       "{0xFFFFFFFF,0x000000FF},"@|
+       "{0x1111FFFF,0x000000FF},{0xFF1111FF,0x000000FF},{0x11FF11FF,0x000000FF}"
+       "}};\n\n");
+@
 
 
 \section{Content Section}
@@ -10082,6 +10326,10 @@ hnode_size[TAG(stream_kind,b010)] = NODE_SIZE(1,2);
 hnode_size[TAG(stream_kind,b100)] = NODE_SIZE(1,0);
 @
 
+\subsection{Color Nodes}\index{color}
+@<initialize the  |hnode_size| array@>=
+hnode_size[TAG(color_kind,b000)] = NODE_SIZE(1,0);
+@
 
 \section{Reading Short Format Files Backwards}
 This section is not really part of the file format definition, but it
@@ -10833,6 +11081,7 @@ extern Xdimen xdimen_defaults[MAX_XDIMEN_DEFAULT+1];
 extern Glue glue_defaults[MAX_GLUE_DEFAULT+1];
 extern Baseline baseline_defaults[MAX_BASELINE_DEFAULT+1];
 extern Label label_defaults[MAX_LABEL_DEFAULT+1];
+extern ColorSet color_defaults[MAX_COLOR_DEFAULT+1];
 extern signed char hnode_size[0x100];
 extern uint8_t content_known[32];
 
@@ -10881,6 +11130,7 @@ int main(void)
   @<define stream defaults@>@;
   @<define range defaults@>@;
   @<define |label_defaults|@>@;
+  @<define |color_defaults|@>@;  
   @<print defaults@>@;
  
   @<initialize the  |hnode_size| array@>@;

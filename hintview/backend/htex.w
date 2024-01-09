@@ -1379,7 +1379,7 @@ by changing |wterm|, |wterm_ln|, and |wterm_cr| in this section.
 
 @<Basic printing procedures@>=
 #define @[put(F)@]    @[fwrite(&((F).d)@],@[sizeof((F).d),1,(F).f)@]@;
-#define @[get(F)@]    @[fread(&((F).d),sizeof((F).d),1,(F).f)@]
+#define @[get(F)@]    @[(void)fread(&((F).d),sizeof((F).d),1,(F).f)@]
 
 #define @[reset(F,N,M)@]   @[((F).f=fopen((char *)(N)+1,M),\
                                  (F).f!=NULL?get(F):0)@]
@@ -24986,6 +24986,9 @@ to hold the string numbers for name, area, and extension.
 @d outline_ptr(A)   link(A+2) /* text to be displayed */
 @d outline_depth(A) mem[A+3].i /* depth of sub items */
 
+@d color_node hitex_ext+21 /* represent a color set */
+@d color_node_size 2
+@d color_node_ref(A)  type(A+1) /* reference to the color set */
 
 @ The sixteen possible \.{\\write} streams are represented by the |write_file|
 array. The |j|th file is open if and only if |write_open[j]==true|. The last
@@ -25034,6 +25037,7 @@ case extension: switch (chr_code) {
   case close_node: print_esc("closeout");@+break;
   case special_node: print_esc("special");@+break;
   case image_node: print_esc("HINTimage");@+break;
+  case color_node: print_esc("HINTcolor");@+break;
   case start_link_node: print_esc("HINTstartlink");@+break;
   case end_link_node: print_esc("HINTendlink");@+break;
   case label_node: print_esc("HINTdest");@+break;
@@ -25085,6 +25089,7 @@ case hset_node:
 case vset_node:
 case align_node: @+break;@#
 case image_node: break;
+case color_node: break;
 case label_node:
 case outline_node:
 case start_link_node: case end_link_node: @+break;@#
@@ -25238,6 +25243,9 @@ case image_node:
   print("), section ");print_int(image_no(p));
   if (dir[image_no(p)].file_name!=NULL) {print(", "); print(dir[image_no(p)].file_name);}
   break;
+case color_node:
+  print_esc("HINTcolor(");print_int(color_node_ref(p));print_char(')');
+  break;
 case align_node:
   print_esc("align(");
   print(align_m(p)==exactly?"exactly ":"additional ");
@@ -25333,6 +25341,10 @@ case image_node:
     image_alt(r)=copy_node_list(image_alt(p));
     words=image_node_size-1;
     break;
+case color_node:
+    r=get_node(color_node_size);
+    words=color_node_size;
+    break;
 case align_node:
   {@+r=get_node(align_node_size);
      align_preamble(r)=copy_node_list(align_preamble(p));
@@ -25426,6 +25438,8 @@ case  hset_node: case  vset_node:
 case image_node:
   flush_node_list(image_alt(p));
   free_node(p,image_node_size);@+break;
+case color_node:
+  free_node(p,color_node_size);@+break;
 case align_node:
   delete_xdimen_ref(align_extent(p));
   flush_node_list(align_preamble(p));
