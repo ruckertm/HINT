@@ -1,5 +1,5 @@
 	/*542:*/
-	#line 11171 "format.w"
+	#line 11172 "format.w"
 
 	/*1:*/
 	#line 326 "format.w"
@@ -68,11 +68,11 @@ uint16_t r;
 typedef
 struct{uint8_t pg;uint32_t pos;bool on;int link;}RangePos;
 	/*:318*/	/*407:*/
-	#line 8993 "format.w"
+	#line 8994 "format.w"
 
 typedef struct{Kind k;int n;}Ref;
 	/*:407*/
-	#line 11172 "format.w"
+	#line 11173 "format.w"
 
 	/*352:*/
 	#line 7716 "format.w"
@@ -86,7 +86,7 @@ uint8_t*buffer;
 uint32_t bsize;
 }Entry;
 	/*:352*/
-	#line 11173 "format.w"
+	#line 11174 "format.w"
 
 	/*38:*/
 	#line 1075 "format.w"
@@ -141,7 +141,7 @@ uint32_t bsize;
   hset_entry(&(E),i,s,xs,file_name); \
 }
 	/*:363*/	/*490:*/
-	#line 10404 "format.w"
+	#line 10405 "format.w"
 
 #define HBACK(X) ((hpos-(X)<hstart)?(QUIT("HTEG underflow\n"),NULL):(hpos-= (X)))
 
@@ -151,7 +151,7 @@ uint32_t bsize;
 #define HTEG32(X) (HBACK(4),(X)= (hpos[0]<<24)+(hpos[1]<<16)+(hpos[2]<<8)+hpos[3])
 #define HTEGTAG(X) X= HTEG8,DBGTAG(X,hpos)
 	/*:490*/
-	#line 11174 "format.w"
+	#line 11175 "format.w"
 
 
 extern Entry*dir;

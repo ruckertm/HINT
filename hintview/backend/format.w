@@ -8440,10 +8440,11 @@ void hget_max_definitions(void)
     { @<cases of getting special maximum values@>@;
       default:
         if (max_fixed[k]>max_default[k]) 
-          QUIT("Maximum value for kind %s not supported",definition_name[k]);   
-        RNG("Maximum number",n,max_default[k],MAX_REF(k));
-        max_ref[k]=n;
-        DBG(DBGDEF,"max(%s) = %d\n",definition_name[k],max_ref[k]);
+          MESSAGE("Maximum value for kind %s not supported\n",definition_name[k]);        else
+        { RNG("Maximum number",n,max_default[k],MAX_REF(k));
+          max_ref[k]=n;
+          DBG(DBGDEF,"max(%s) = %d\n",definition_name[k],max_ref[k]);
+	}
         break;
     }
     @<read and check the end byte |z|@>@;

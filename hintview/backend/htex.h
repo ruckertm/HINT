@@ -1716,7 +1716,7 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define outline_depth(A) mem[A+3].i \
 
 #define color_node hitex_ext+21
-#define color_node_size 2
+#define color_node_size small_node_size
 #define color_node_ref(A) type(A+1)  \
 
 #define immediate_code 4

@@ -97,15 +97,17 @@ static const char FragmentShader[]=
   "out vec4 color;\n"
   /* Constants for the current triangles */
   "uniform sampler2D theTexture;\n"
-  "uniform vec3 FGcolor;\n"
+  "uniform vec4 FGcolor;\n"
   "uniform float Gamma;\n"
   "uniform int IsImage;\n"
 
   "void main()\n"
   "{ vec4 texColor = texture2D( theTexture, UV );\n"
     "if (IsImage==0) {\n"
-      "color.a = pow(texColor.r,Gamma);\n"
-      "color.rgb = FGcolor;\n"
+      "color.a = pow(texColor.r*FGcolor.a,Gamma);\n"
+      "color.r = FGcolor.r;\n"
+      "color.g = FGcolor.g;\n"
+      "color.b = FGcolor.b;\n"
     "}\n"
     "else color = texColor;\n"
   "}\n"
@@ -292,7 +294,7 @@ extern void nativeInit(void)
   glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
   glUniform1f(GammaID, 1.0f/2.2f);
   glUniform1i(IsImageID, 0);
-  glUniform3f(FGcolorID, 0.0, 0.0, 0.0); // black as default foreground
+  glUniform4f(FGcolorID, 0.0, 0.0, 0.0,1.0); // black as default foreground
   glClearColor(1.0f, 1.0f, 1.0f, 0.0f); // white as default background
 
    /* 1rst attribute buffer : XYs */
@@ -354,9 +356,29 @@ static void nativeSetColors(GLfloat fr, GLfloat fg, GLfloat fb, GLfloat br, GLfl
 {
   glClearColor(br, bg, bb, 1.0f);
   curfr=fr; curfg=fg; curfb=fb;
-  glUniform3f(FGcolorID, fr, fg, fb);
+  glUniform4f(FGcolorID, fr, fg, fb,1.0);
   last_style=0;
 }
+
+void nativeSetForeground(uint32_t fg, uint32_t bg)
+/* set foreground rgba colors */
+{ GLfloat r,g,b,a;
+  r=(bg>>24)/255.0f;
+  g=((bg>>16)&0xFF)/255.0f;
+  b=((bg>>8)&0xFF)/255.0f;
+  a=(bg&0xFF)/255.0f;
+  glClearColor(r, g, b, 1.0f);
+
+  r=(fg>>24)/255.0f;
+  g=((fg>>16)&0xFF)/255.0f;
+  b=((fg>>8)&0xFF)/255.0f;
+  a=(fg&0xFF)/255.0f;
+  
+  curfr=r; curfg=g; curfb=b;
+  glUniform4f(FGcolorID, r, g, b,a);
+
+}
+
 
 
 void nativeSetDark(int on)
@@ -581,13 +603,13 @@ void nativeGlyph(double x, double dx, double y, double dy, double w, double h, s
     
 	if (s!=last_style)
 	{ if (s&FOCUS_BIT)
-	      glUniform3f(FGcolorID, 0.0, 1.0,0.0); 
+	    glUniform4f(FGcolorID, 0.0, 1.0,0.0,1.0); 
 	  else if (s&MARK_BIT)
- 	      glUniform3f(FGcolorID, 1.0, 0.0,0.0); 
+	    glUniform4f(FGcolorID, 1.0, 0.0,0.0,1.0); 
 	  else if (s&LINK_BIT)
- 	      glUniform3f(FGcolorID, 0.0, 0.0,1.0); 
+	    glUniform4f(FGcolorID, 0.0, 0.0,1.0,1.0); 
 	  else
-  	      glUniform3f(FGcolorID, curfr, curfg,curfb);
+	    glUniform4f(FGcolorID, curfr, curfg,curfb,1.0);
 	  last_style=s;
 	}
     glBindBuffer(GL_ARRAY_BUFFER, xybuffer);

@@ -1,5 +1,5 @@
 	/*539:*/
-	#line 11064 "format.w"
+	#line 11065 "format.w"
 
 #ifndef _HFORMAT_H_
 #define _HFORMAT_H_
@@ -13,7 +13,7 @@
 
 #define MAX_REF(K) ((K)==label_kind?0xFFFF:0xFF)
 	/*:377*/	/*455:*/
-	#line 9853 "format.w"
+	#line 9854 "format.w"
 
 #ifdef WIN32
 #define SIZE_F "0x%tx"
@@ -32,10 +32,10 @@
 
 #define TAGERR(A) QUIT("Unknown tag [%s,%d] at " SIZE_F "\n",NAME(A),INFO(A),hpos-hstart)
 	/*:455*/
-	#line 11067 "format.w"
+	#line 11068 "format.w"
 
 	/*442:*/
-	#line 9592 "format.w"
+	#line 9593 "format.w"
 
 #define DBGNONE     0x0
 #define DBGBASIC    0x1
@@ -55,7 +55,7 @@
 #define DBGRENDER   0x4000
 #define DBGLABEL    0x8000
 	/*:442*/
-	#line 11068 "format.w"
+	#line 11069 "format.w"
 
 	/*13:*/
 	#line 646 "format.w"
@@ -103,13 +103,13 @@
 
 #define MAX_TAG_DISTANCE 32
 	/*:342*/	/*458:*/
-	#line 9918 "format.w"
+	#line 9919 "format.w"
 
 #define NODE_SIZE(H,T) ((T)==0?(H)+2:-4*((H)+1)+((T)-1))
 #define NODE_HEAD(N)   ((N)>0?(N)-2:-((N)>>2)-1)
 #define NODE_TAIL(N)   ((N)<0?((N)&0x3)+1:0)
 	/*:458*/
-	#line 11069 "format.w"
+	#line 11070 "format.w"
 
 	/*6:*/
 	#line 493 "format.w"
@@ -235,14 +235,14 @@ typedef uint32_t Color;
 typedef Color ColorPair[2];
 typedef ColorPair ColorSet[8];
 	/*:285*/	/*400:*/
-	#line 8876 "format.w"
+	#line 8877 "format.w"
 
 #define MAX_FONT_PARAMS 11
 	/*:400*/
-	#line 11070 "format.w"
+	#line 11071 "format.w"
 
 	/*413:*/
-	#line 9115 "format.w"
+	#line 9116 "format.w"
 
 typedef enum{
 zero_int_no= 0,
@@ -271,7 +271,7 @@ floating_penalty_no= 22
 }Int_no;
 #define MAX_INT_DEFAULT floating_penalty_no
 	/*:413*/	/*415:*/
-	#line 9188 "format.w"
+	#line 9189 "format.w"
 
 typedef enum{
 zero_dimen_no= 0,
@@ -287,7 +287,7 @@ math_quad_no= 9
 }Dimen_no;
 #define MAX_DIMEN_DEFAULT math_quad_no
 	/*:415*/	/*417:*/
-	#line 9233 "format.w"
+	#line 9234 "format.w"
 
 typedef enum{
 zero_xdimen_no= 0,
@@ -296,7 +296,7 @@ vsize_xdimen_no= 2
 }Xdimen_no;
 #define MAX_XDIMEN_DEFAULT vsize_xdimen_no
 	/*:417*/	/*419:*/
-	#line 9257 "format.w"
+	#line 9258 "format.w"
 
 typedef enum{
 zero_skip_no= 0,
@@ -317,56 +317,56 @@ par_fill_skip_no= 14
 }Glue_no;
 #define MAX_GLUE_DEFAULT par_fill_skip_no
 	/*:419*/	/*421:*/
-	#line 9343 "format.w"
+	#line 9344 "format.w"
 
 typedef enum{
 zero_baseline_no= 0
 }Baseline_no;
 #define MAX_BASELINE_DEFAULT zero_baseline_no
 	/*:421*/	/*423:*/
-	#line 9368 "format.w"
+	#line 9369 "format.w"
 
 typedef enum{
 zero_label_no= 0
 }Label_no;
 #define MAX_LABEL_DEFAULT zero_label_no
 	/*:423*/	/*425:*/
-	#line 9382 "format.w"
+	#line 9383 "format.w"
 
 typedef enum{
 zero_stream_no= 0
 }Stream_no;
 #define MAX_STREAM_DEFAULT zero_stream_no
 	/*:425*/	/*427:*/
-	#line 9398 "format.w"
+	#line 9399 "format.w"
 
 typedef enum{
 zero_page_no= 0
 }Page_no;
 #define MAX_PAGE_DEFAULT zero_page_no
 	/*:427*/	/*429:*/
-	#line 9415 "format.w"
+	#line 9416 "format.w"
 
 typedef enum{
 zero_range_no= 0
 }Range_no;
 #define MAX_RANGE_DEFAULT zero_range_no
 	/*:429*/	/*431:*/
-	#line 9428 "format.w"
+	#line 9429 "format.w"
 
 typedef enum{
 empty_list_no= 0
 }List_no;
 #define MAX_LIST_DEFAULT empty_list_no
 	/*:431*/	/*433:*/
-	#line 9443 "format.w"
+	#line 9444 "format.w"
 
 typedef enum{
 zero_color_no= 0
 }Color_no;
 #define MAX_COLOR_DEFAULT zero_color_no
 	/*:433*/
-	#line 11071 "format.w"
+	#line 11072 "format.w"
 
 
 extern const char*content_name[32];

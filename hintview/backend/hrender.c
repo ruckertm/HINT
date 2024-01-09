@@ -1,5 +1,5 @@
-/*390:*/
-#line 7730 "hint.w"
+/*393:*/
+#line 7778 "hint.w"
 
 #include "basetypes.h"
 #include "error.h"
@@ -12,73 +12,73 @@
 #include "htex.h"
 #include "hint.h"
 
-/*325:*/
-#line 5881 "hint.w"
+/*328:*/
+#line 5918 "hint.w"
 
 extern struct font_s*hget_font(unsigned char f);
-/*:325*//*337:*/
-#line 6226 "hint.w"
+/*:328*//*340:*/
+#line 6263 "hint.w"
 
 extern void render_char(int x,int y,struct font_s*f,uint32_t cc,uint8_t s);
-/*:337*/
-#line 7742 "hint.w"
+/*:340*/
+#line 7790 "hint.w"
 
 
-/*248:*/
-#line 4184 "hint.w"
+/*250:*/
+#line 4224 "hint.w"
 
 double xdpi= 600.0,ydpi= 600.0;
-/*:248*//*266:*/
-#line 4548 "hint.w"
+/*:250*//*268:*/
+#line 4588 "hint.w"
 
 static bool forward_mode= false,backward_mode= false;
-/*:266*//*287:*/
-#line 5109 "hint.w"
+/*:268*//*289:*/
+#line 5149 "hint.w"
 
 static char*m_str;
 static int m_length,m_chars;
-/*:287*//*291:*/
-#line 5183 "hint.w"
+/*:289*//*293:*/
+#line 5223 "hint.w"
 
 #define MAX_M_DIST 512
 static uint8_t m_dist[MAX_M_DIST+5];
 static int m_ptr,m_max;
-/*:291*//*292:*/
-#line 5221 "hint.w"
+/*:293*//*294:*/
+#line 5261 "hint.w"
 
 static int m_ptr,m_max;
-/*:292*//*295:*/
-#line 5292 "hint.w"
+/*:294*//*297:*/
+#line 5332 "hint.w"
 
 static int m_state,m_spaces;
 static uint32_t m_d;
-/*:295*//*298:*/
-#line 5345 "hint.w"
+/*:297*//*300:*/
+#line 5385 "hint.w"
 
 static int m_focus;
 static uint64_t m_page;
-/*:298*//*301:*/
-#line 5380 "hint.w"
+/*:300*//*303:*/
+#line 5420 "hint.w"
 
 static bool c_ignore;
 static int m_style;
-/*:301*//*309:*/
-#line 5549 "hint.w"
+/*:303*//*311:*/
+#line 5587 "hint.w"
 
 static int cur_link= -1;
-/*:309*//*341:*/
-#line 6280 "hint.w"
+/*:311*//*344:*/
+#line 6317 "hint.w"
 
 static scaled cur_h,cur_v;
 static scaled rule_ht,rule_dp,rule_wd;
 static int cur_f;
 static struct font_s*cur_fp;
 static uint8_t cur_style= 0;
-/*:341*/
-#line 7744 "hint.w"
+/*:344*/
+#line 7792 "hint.w"
 
-/*249:*/
-#line 4188 "hint.w"
+/*251:*/
+#line 4228 "hint.w"
 
 void hint_resize(int px_h,int px_v,double x_dpi,double y_dpi)
 {
@@ -99,8 +99,8 @@ hflush_contribution_list();hpage_init();
 forward_mode= false;
 backward_mode= false;
 }
-/*:249*//*260:*/
-#line 4412 "hint.w"
+/*:251*//*262:*/
+#line 4452 "hint.w"
 
 
 uint64_t hint_page_top(uint64_t h)
@@ -120,8 +120,8 @@ forward_mode= true;
 backward_mode= false;
 return h;
 }
-/*:260*//*261:*/
-#line 4435 "hint.w"
+/*:262*//*263:*/
+#line 4475 "hint.w"
 
 uint64_t hint_page_get(void)
 {
@@ -130,8 +130,8 @@ DBG(DBGPAGE,"page_get: %d : 0x%"PRIx64"\n",cur_loc,page_loc[cur_loc]);
 if(hin_addr==NULL)return 0;
 return page_loc[cur_loc];
 }
-/*:261*//*262:*/
-#line 4451 "hint.w"
+/*:263*//*264:*/
+#line 4491 "hint.w"
 
 uint64_t hint_page(void)
 {uint64_t i;
@@ -142,8 +142,8 @@ return i;
 else
 return hint_page_top(i);
 }
-/*:262*//*263:*/
-#line 4467 "hint.w"
+/*:264*//*265:*/
+#line 4507 "hint.w"
 
 uint64_t hint_page_home(void)
 {uint64_t pos;
@@ -151,7 +151,7 @@ uint8_t where;
 int n= zero_label_no;
 if(hin_addr==NULL)return 0;
 /*71:*/
-#line 1104 "hint.w"
+#line 1114 "hint.w"
 
 if(labels==NULL||n> max_ref[label_kind])
 {where= LABEL_TOP;pos= 0;}
@@ -164,21 +164,21 @@ pos= ((uint64_t)labels[n].pos0<<32);
 #endif
 }
 /*:71*/
-#line 4473 "hint.w"
+#line 4513 "hint.w"
 
-/*281:*/
-#line 4908 "hint.w"
+/*283:*/
+#line 4948 "hint.w"
 
 if(where==LABEL_TOP)return hint_page_top(pos);
 else if(where==LABEL_BOT)return hint_page_bottom(pos);
 else if(where==LABEL_MID)return hint_page_middle(pos);
 else return hint_page_get();
-/*:281*/
-#line 4474 "hint.w"
+/*:283*/
+#line 4514 "hint.w"
 
 }
-/*:263*//*264:*/
-#line 4495 "hint.w"
+/*:265*//*266:*/
+#line 4535 "hint.w"
 
 double hint_get_fpos(void)
 {
@@ -187,8 +187,8 @@ DBG(DBGPAGE,"get_fpos: %d : 0x%"PRIx64"\n",cur_loc,page_loc[cur_loc]);
 if(hin_addr==NULL)return 0.0;
 return(double)LOC_POS(page_loc[cur_loc])/(double)(hend-hstart);
 }
-/*:264*//*265:*/
-#line 4509 "hint.w"
+/*:266*//*267:*/
+#line 4549 "hint.w"
 
 uint64_t hint_set_fpos(double fpos)
 {uint32_t pos,pos0;
@@ -222,8 +222,8 @@ else
 pos= pos0= hpos-hstart;
 return hint_page_top(PAGE_LOC(pos0,pos-pos0));
 }
-/*:265*//*267:*/
-#line 4553 "hint.w"
+/*:267*//*269:*/
+#line 4593 "hint.w"
 
 uint64_t hint_page_next(void)
 {if(hin_addr==NULL)return 0;
@@ -239,8 +239,8 @@ else
 return hint_page();
 }
 }
-/*:267*//*268:*/
-#line 4578 "hint.w"
+/*:269*//*270:*/
+#line 4618 "hint.w"
 
 uint64_t hint_page_prev(void)
 {if(hin_addr==NULL)return 0;
@@ -257,8 +257,8 @@ return hint_page_get();
 else
 return hint_page_bottom(hint_page_get());
 }
-/*:268*//*269:*/
-#line 4604 "hint.w"
+/*:270*//*271:*/
+#line 4644 "hint.w"
 
 uint64_t hint_page_bottom(uint64_t h)
 {if(hin_addr==NULL)return 0;
@@ -272,8 +272,8 @@ backward_mode= true;
 forward_mode= false;
 return hint_page_get();
 }
-/*:269*//*270:*/
-#line 4635 "hint.w"
+/*:271*//*272:*/
+#line 4675 "hint.w"
 
 uint64_t hint_page_middle(uint64_t l)
 {uint32_t target_pos,pos0,offset;
@@ -291,20 +291,20 @@ hpos= hstart+pos0;
 hget_content();
 
 if(offset> 0)
-/*271:*/
-#line 4677 "hint.w"
+/*273:*/
+#line 4717 "hint.w"
 
 {pointer q,target_q;
-/*272:*/
-#line 4694 "hint.w"
+/*274:*/
+#line 4734 "hint.w"
 
 target_q= null;
 q= contrib_head;p= link(q);
 h= d= target_dist= break_dist= 0;
 while(p!=null)
 {pointer qq;
-/*274:*/
-#line 4738 "hint.w"
+/*276:*/
+#line 4778 "hint.w"
 
 switch(type(p))
 {case hlist_node:case vlist_node:case rule_node:
@@ -326,8 +326,8 @@ break;
 default:
 pi= hp= dp= 0;
 }
-/*:274*/
-#line 4700 "hint.w"
+/*:276*/
+#line 4740 "hint.w"
 
 qq= q;
 q= p;
@@ -348,8 +348,8 @@ if(target_q==null)
 {target_dist= h;break_dist= 0;}
 else
 break_dist= h;
-/*:272*/
-#line 4679 "hint.w"
+/*:274*/
+#line 4719 "hint.w"
 
 if(target_dist+break_dist<=hvsize)
 offset= 0;
@@ -357,8 +357,8 @@ else
 {if(break_dist>=hvsize)
 q= target_q;
 else
-/*275:*/
-#line 4767 "hint.w"
+/*277:*/
+#line 4807 "hint.w"
 
 {scaled dh;
 dh= target_dist+break_dist-hvsize;
@@ -368,8 +368,8 @@ q= contrib_head;
 p= link(q);
 d= 0;
 while(p!=null&&q!=target_q&&dh> 0)
-{/*274:*/
-#line 4738 "hint.w"
+{/*276:*/
+#line 4778 "hint.w"
 
 switch(type(p))
 {case hlist_node:case vlist_node:case rule_node:
@@ -391,8 +391,8 @@ break;
 default:
 pi= hp= dp= 0;
 }
-/*:274*/
-#line 4776 "hint.w"
+/*:276*/
+#line 4816 "hint.w"
 
 dh= dh-hp-d;
 d= dp;
@@ -400,11 +400,11 @@ q= p;
 p= link(p);
 }
 }
-/*:275*/
-#line 4687 "hint.w"
+/*:277*/
+#line 4727 "hint.w"
 
-/*273:*/
-#line 4723 "hint.w"
+/*275:*/
+#line 4763 "hint.w"
 
 {p= link(q);
 offset= LOC_OFF(hlocation(p));
@@ -412,17 +412,17 @@ link(q)= null;
 flush_node_list(link(contrib_head));
 link(contrib_head)= p;
 }
-/*:273*/
-#line 4688 "hint.w"
+/*:275*/
+#line 4728 "hint.w"
 
 goto found;
 }
 }
-/*:271*/
-#line 4652 "hint.w"
+/*:273*/
+#line 4692 "hint.w"
 
-/*276:*/
-#line 4790 "hint.w"
+/*278:*/
+#line 4830 "hint.w"
 
 {pointer h_save= link(contrib_head);
 pointer t_save= tail;
@@ -439,8 +439,8 @@ while(h<hvsize)
 hteg_content();
 if(link(p)==null)break;
 p= link(p);
-/*274:*/
-#line 4738 "hint.w"
+/*276:*/
+#line 4778 "hint.w"
 
 switch(type(p))
 {case hlist_node:case vlist_node:case rule_node:
@@ -462,8 +462,8 @@ break;
 default:
 pi= hp= dp= 0;
 }
-/*:274*/
-#line 4806 "hint.w"
+/*:276*/
+#line 4846 "hint.w"
 
 if(hpos==hstart)pi= eject_penalty;
 if(h+hp+d> hvsize)
@@ -497,8 +497,8 @@ if(t_save!=contrib_head)
 tail= t_save;
 hpos= hpos_save;
 }
-/*:276*/
-#line 4653 "hint.w"
+/*:278*/
+#line 4693 "hint.w"
 
 found:
 hloc_set(PAGE_LOC(pos0,offset));
@@ -507,8 +507,8 @@ forward_mode= true;
 backward_mode= false;
 return hint_page_get();
 }
-/*:270*//*280:*/
-#line 4897 "hint.w"
+/*:272*//*282:*/
+#line 4937 "hint.w"
 
 uint64_t hint_outline_page(int i)
 {uint64_t pos;
@@ -516,25 +516,25 @@ uint8_t where;
 if(i<0||i> max_outline||hint_outlines==NULL)return hint_page_get();
 pos= hint_outlines[i].pos;
 where= hint_outlines[i].where;
-/*281:*/
-#line 4908 "hint.w"
+/*283:*/
+#line 4948 "hint.w"
 
 if(where==LABEL_TOP)return hint_page_top(pos);
 else if(where==LABEL_BOT)return hint_page_bottom(pos);
 else if(where==LABEL_MID)return hint_page_middle(pos);
 else return hint_page_get();
-/*:281*/
-#line 4904 "hint.w"
+/*:283*/
+#line 4944 "hint.w"
 
 }
-/*:280*//*288:*/
-#line 5114 "hint.w"
+/*:282*//*290:*/
+#line 5154 "hint.w"
 
 void hint_set_mark(char*m,int s)
 {m_str= m;
 m_length= s;
-/*289:*/
-#line 5125 "hint.w"
+/*291:*/
+#line 5165 "hint.w"
 
 if(m_length> 0)
 {int i,j,k;
@@ -549,13 +549,13 @@ m_str[k]= 0;
 m_length= k;
 m_chars= m_length-j;
 }
-/*:289*/
-#line 5118 "hint.w"
+/*:291*/
+#line 5158 "hint.w"
 
 hmark_page();
 }
-/*:288*//*293:*/
-#line 5225 "hint.w"
+/*:290*//*295:*/
+#line 5265 "hint.w"
 
 static void m_put(uint32_t d)
 {if(m_ptr<MAX_M_DIST)
@@ -591,8 +591,8 @@ if(y&0x80)return(x<<7)+(y&0x7F);
 x= (x<<7)+y;
 }
 }
-/*:293*//*294:*/
-#line 5266 "hint.w"
+/*:295*//*296:*/
+#line 5306 "hint.w"
 
 static int m_next(int i)
 {while((0x80&m_dist[i])==0)i++;
@@ -606,8 +606,8 @@ i--;
 while(i> 0&&(0x80&m_dist[i-1])==0)i--;
 return i;
 }
-/*:294*//*296:*/
-#line 5297 "hint.w"
+/*:296*//*298:*/
+#line 5337 "hint.w"
 
 static void next_m_char(uint32_t c)
 {
@@ -626,8 +626,8 @@ m_state= 0;
 }
 }
 else
-/*297:*/
-#line 5331 "hint.w"
+/*299:*/
+#line 5371 "hint.w"
 
 {int i= 0,j= 0;
 do{
@@ -638,14 +638,14 @@ m_d= m_d+i-j;
 m_state= m_state-i;
 goto reconsider;
 }
-/*:297*/
-#line 5315 "hint.w"
+/*:299*/
+#line 5355 "hint.w"
 
 
 
 }
-/*:296*//*299:*/
-#line 5350 "hint.w"
+/*:298*//*301:*/
+#line 5390 "hint.w"
 
 void hmark_page(void)
 {if(streams==NULL||streams[0].p==null)return;
@@ -666,14 +666,14 @@ trv_hlist(list_ptr(streams[0].p));
 m_put(HINT_NO_POS);
 if(m_focus>=m_max)m_focus= 0;
 }
-/*:299*//*306:*/
-#line 5465 "hint.w"
+/*:301*//*308:*/
+#line 5503 "hint.w"
 
 void c_ignore_list(pointer p)
 {while(p!=null)
 {if(is_char_node(p))
-{/*303:*/
-#line 5405 "hint.w"
+{/*305:*/
+#line 5445 "hint.w"
 
 {while(m_d==0)
 {m_style^= MARK_BIT;
@@ -688,8 +688,8 @@ m_d= m_get();
 }
 m_d--;
 }
-/*:303*/
-#line 5469 "hint.w"
+/*:305*/
+#line 5507 "hint.w"
 
 cur_style|= m_style;
 }
@@ -700,8 +700,8 @@ case vlist_node:c_ignore_list(list_ptr(p));break;
 case ligature_node:
 {pointer q= lig_ptr(p);
 while(q!=null)
-{/*303:*/
-#line 5405 "hint.w"
+{/*305:*/
+#line 5445 "hint.w"
 
 {while(m_d==0)
 {m_style^= MARK_BIT;
@@ -716,8 +716,8 @@ m_d= m_get();
 }
 m_d--;
 }
-/*:303*/
-#line 5479 "hint.w"
+/*:305*/
+#line 5517 "hint.w"
 
 cur_style|= m_style;
 q= link(q);
@@ -729,8 +729,8 @@ break;
 p= link(p);
 }
 }
-/*:306*//*307:*/
-#line 5512 "hint.w"
+/*:308*//*309:*/
+#line 5550 "hint.w"
 
 bool hint_prev_mark(void)
 {m_focus= m_prev(m_focus);
@@ -750,8 +750,8 @@ m_focus= m_next(0);
 }
 return(m_focus!=0);
 }
-/*:307*//*315:*/
-#line 5613 "hint.w"
+/*:309*//*318:*/
+#line 5650 "hint.w"
 
 static int links_allocated= 0;
 void add_new_link(int n,pointer p,scaled h,scaled v)
@@ -772,7 +772,7 @@ REALLOCATE(hint_links,links_allocated,hint_Link);
 t= hint_links+max_link;
 REF_RNG(label_kind,n);
 /*71:*/
-#line 1104 "hint.w"
+#line 1114 "hint.w"
 
 if(labels==NULL||n> max_ref[label_kind])
 {where= LABEL_TOP;pos= 0;}
@@ -785,7 +785,7 @@ pos= ((uint64_t)labels[n].pos0<<32);
 #endif
 }
 /*:71*/
-#line 5632 "hint.w"
+#line 5669 "hint.w"
 
 t->where= where;
 t->pos= pos;
@@ -812,8 +812,8 @@ t->right= h;
 else
 t->bottom= v;
 }
-/*:315*//*316:*/
-#line 5682 "hint.w"
+/*:318*//*319:*/
+#line 5719 "hint.w"
 
 static scaled hlink_distance(scaled x,scaled y,hint_Link*t)
 {scaled d,dx= 0,dy= 0;
@@ -869,8 +869,8 @@ last_hit= min_i;
 return last_hit;
 }
 }
-/*:316*//*317:*/
-#line 5743 "hint.w"
+/*:319*//*320:*/
+#line 5780 "hint.w"
 
 uint64_t hint_link_page(int i)
 {uint64_t h;
@@ -883,8 +883,8 @@ else if(w==LABEL_BOT)return hint_page_bottom(h);
 else if(w==LABEL_MID)return hint_page_middle(h);
 else return hint_page_get();
 }
-/*:317*//*319:*/
-#line 5777 "hint.w"
+/*:320*//*322:*/
+#line 5814 "hint.w"
 
 void hint_render_on(void)
 {nativeInit();
@@ -893,8 +893,8 @@ void hint_render_on(void)
 void hint_render_off(void)
 {nativeClear();
 }
-/*:319*//*320:*/
-#line 5790 "hint.w"
+/*:322*//*323:*/
+#line 5827 "hint.w"
 
 void hint_dark(int dark)
 {nativeSetDark(dark);
@@ -902,15 +902,15 @@ void hint_dark(int dark)
 void hint_gamma(double gamma)
 {nativeSetGamma(gamma);
 }
-/*:320*//*338:*/
-#line 6233 "hint.w"
+/*:323*//*341:*/
+#line 6270 "hint.w"
 
 static void render_rule(int x,int y,int w,int h)
 {if(w> 0&&h> 0)
 nativeRule(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h));
 }
-/*:338*//*339:*/
-#line 6245 "hint.w"
+/*:341*//*342:*/
+#line 6282 "hint.w"
 
 void render_image(int x,int y,int w,int h,uint32_t n)
 {
@@ -920,15 +920,15 @@ hget_section(n);
 nativeImage(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),hstart,hend);
 hpos= spos;hstart= sstart;hend= send;
 }
-/*:339*//*340:*/
-#line 6263 "hint.w"
+/*:342*//*343:*/
+#line 6300 "hint.w"
 
 uint64_t hint_blank(void)
 {nativeBlank();
 return 0;
 }
-/*:340*//*342:*/
-#line 6288 "hint.w"
+/*:343*//*345:*/
+#line 6325 "hint.w"
 
 static void vlist_render(pointer this_box);
 
@@ -962,16 +962,16 @@ this_box,mem[this_box].i,p);
 #endif
 base_line= cur_v;
 left_edge= cur_h;
-/*312:*/
-#line 5579 "hint.w"
+/*315:*/
+#line 5616 "hint.w"
 
 if(cur_link>=0)
 {add_new_link(cur_link,this_box,cur_h,cur_v);
 local_link= cur_link;
 cur_link= -1;
 }
-/*:312*/
-#line 6321 "hint.w"
+/*:315*/
+#line 6358 "hint.w"
 
 while(p!=null)
 {
@@ -987,8 +987,8 @@ if(is_char_node(p))
 c= character(p);
 if(!c_ignore&&c!=' ')
 {cur_style= cur_style&~(MARK_BIT|FOCUS_BIT);
-/*303:*/
-#line 5405 "hint.w"
+/*305:*/
+#line 5445 "hint.w"
 
 {while(m_d==0)
 {m_style^= MARK_BIT;
@@ -1003,8 +1003,8 @@ m_d= m_get();
 }
 m_d--;
 }
-/*:303*/
-#line 6336 "hint.w"
+/*:305*/
+#line 6373 "hint.w"
 
 cur_style|= m_style;
 }
@@ -1053,43 +1053,52 @@ case rule_node:
 rule_ht= height(p);rule_dp= depth(p);rule_wd= width(p);
 goto fin_rule;
 case whatsit_node:
-/*305:*/
-#line 5442 "hint.w"
+switch(subtype(p))
+{case ignore_node:/*307:*/
+#line 5482 "hint.w"
 
-if(subtype(p)==ignore_node)
-{if(ignore_info(p)==1)
+if(ignore_info(p)==1)
 {cur_style= cur_style&~(MARK_BIT|FOCUS_BIT);
 c_ignore_list(ignore_list(p));
 c_ignore= true;
 }
 else
 c_ignore= false;
-}
-/*:305*/
-#line 6384 "hint.w"
+/*:307*/
+#line 6422 "hint.w"
+break;
+case start_link_node:/*312:*/
+#line 5591 "hint.w"
 
-else/*310:*/
-#line 5553 "hint.w"
-
-if(subtype(p)==start_link_node)
-{cur_style|= LINK_BIT;
+cur_style|= LINK_BIT;
 local_link= label_ref(p);
 add_new_link(local_link,this_box,cur_h,cur_v);
-}
-else if(subtype(p)==end_link_node)
-{cur_style&= ~LINK_BIT;
+/*:312*/
+#line 6423 "hint.w"
+break;
+case end_link_node:/*313:*/
+#line 5597 "hint.w"
+
+cur_style&= ~LINK_BIT;
 end_new_link(local_link,this_box,cur_h,cur_v);
 local_link= -1;
-}
-/*:310*/
-#line 6385 "hint.w"
-
-else if(subtype(p)==image_node)
+/*:313*/
+#line 6424 "hint.w"
+break;
+case image_node:
 {scaled h,w;
 w= image_width(p);
 h= image_height(p);
 render_image(cur_h,cur_v,w,h,image_no(p));
 cur_h= cur_h+w;
+}break;
+case color_node:
+{int i= color_node_ref(p);
+uint32_t f= color_def[i][0][0];
+uint32_t b= color_def[i][4][0];
+nativeSetForeground(f,b);
+}
+default:break;
 }
 break;
 case glue_node:
@@ -1159,16 +1168,16 @@ break;
 case ligature_node:
 f= font(lig_char(p));
 c= character(lig_char(p));
-/*304:*/
-#line 5424 "hint.w"
+/*306:*/
+#line 5464 "hint.w"
 
 if(!c_ignore)
 {pointer q;
 cur_style= cur_style&~(MARK_BIT|FOCUS_BIT);
 q= lig_ptr(p);
 while(q!=null)
-{/*303:*/
-#line 5405 "hint.w"
+{/*305:*/
+#line 5445 "hint.w"
 
 {while(m_d==0)
 {m_style^= MARK_BIT;
@@ -1183,15 +1192,15 @@ m_d= m_get();
 }
 m_d--;
 }
-/*:303*/
-#line 5430 "hint.w"
+/*:305*/
+#line 5470 "hint.w"
 
 cur_style|= m_style;
 q= link(q);
 }
 }
-/*:304*/
-#line 6461 "hint.w"
+/*:306*/
+#line 6508 "hint.w"
 
 goto render_c;
 default:;
@@ -1217,15 +1226,15 @@ QUIT("Undefined link in hlist mem[0x%x]=0x%x\n",p,mem[p].i);
 p= link(p);
 }
 }
-/*311:*/
-#line 5569 "hint.w"
+/*314:*/
+#line 5606 "hint.w"
 
 if(local_link>=0)
 {end_new_link(local_link,this_box,cur_h,cur_v);
 cur_link= local_link;
 }
-/*:311*/
-#line 6486 "hint.w"
+/*:314*/
+#line 6533 "hint.w"
 
 }
 
@@ -1377,8 +1386,8 @@ p= link(p);
 }
 }
 
-/*:342*//*343:*/
-#line 6642 "hint.w"
+/*:345*//*346:*/
+#line 6689 "hint.w"
 
 
 void hint_render(void)
@@ -1388,20 +1397,20 @@ cur_h= 0;
 cur_v= height(streams[0].p);
 cur_f= -1;cur_fp= NULL;
 cur_link= -1;max_link= -1;
-/*302:*/
-#line 5398 "hint.w"
+/*304:*/
+#line 5438 "hint.w"
 
 m_ptr= 0;m_d= 0;m_style= MARK_BIT;c_ignore= false;cur_style= 0;
-/*:302*/
-#line 6651 "hint.w"
+/*:304*/
+#line 6698 "hint.w"
 
 if(type(streams[0].p)==vlist_node)
 vlist_render(streams[0].p);
 else
 hlist_render(streams[0].p);
 }
-/*:343*//*344:*/
-#line 6679 "hint.w"
+/*:346*//*347:*/
+#line 6726 "hint.w"
 
 int hint_print_on(int w,int h,int bpr,int bpp,unsigned char*bits)
 {return nativePrintStart(w,h,bpr,bpp,bits);
@@ -1414,7 +1423,7 @@ int hint_print_off(void)
 int hint_print(unsigned char*bits)
 {return nativePrint(bits);
 }
-/*:344*/
-#line 7745 "hint.w"
+/*:347*/
+#line 7793 "hint.w"
 
-/*:390*/
+/*:393*/

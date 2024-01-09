@@ -1,5 +1,5 @@
 	/*543:*/
-	#line 11222 "format.w"
+	#line 11223 "format.w"
 
 #include "basetypes.h"
 #include <string.h>
@@ -41,11 +41,11 @@ uint64_t hin_size= 0;
 uint8_t*hin_addr= NULL;
 uint64_t hin_time= 0;
 	/*:343*/	/*399:*/
-	#line 8872 "format.w"
+	#line 8873 "format.w"
 
 char**hfont_name;
 	/*:399*/	/*443:*/
-	#line 9615 "format.w"
+	#line 9616 "format.w"
 
 unsigned int debugflags= DBGNONE;
 int option_utf8= false;
@@ -57,11 +57,11 @@ int option_compress= false;
 char*stem_name= NULL;
 int stem_length= 0;
 	/*:443*/	/*446:*/
-	#line 9749 "format.w"
+	#line 9750 "format.w"
 
 FILE*hin= NULL,*hout= NULL,*hlog= NULL;
 	/*:446*/
-	#line 11235 "format.w"
+	#line 11236 "format.w"
 
 
 	/*344:*/
@@ -159,7 +159,7 @@ return hin_size;
 #endif
 
 	/*:344*/
-	#line 11237 "format.w"
+	#line 11238 "format.w"
 
 	/*331:*/
 	#line 7166 "format.w"
@@ -199,7 +199,7 @@ DBG(DBGDIR,"banner size=0x%x\n",hbanner_size);
 return true;
 }
 	/*:331*/
-	#line 11238 "format.w"
+	#line 11239 "format.w"
 
 	/*353:*/
 	#line 7730 "format.w"
@@ -226,7 +226,7 @@ e->file_name= strdup(file_name);
 DBG(DBGDIR,"Creating entry %d: \"%s\" size=0x%x xsize=0x%x\n",i,file_name,size,xsize);
 }
 	/*:354*/
-	#line 11239 "format.w"
+	#line 11240 "format.w"
 
 
 	/*332:*/
@@ -405,10 +405,11 @@ DBG(DBGDEF|DBGLABEL,"max(outline) = %d\n",max_outline);break;
 
 default:
 if(max_fixed[k]>max_default[k])
-QUIT("Maximum value for kind %s not supported",definition_name[k]);
-RNG("Maximum number",n,max_default[k],MAX_REF(k));
+MESSAGE("Maximum value for kind %s not supported\n",definition_name[k]);else
+{RNG("Maximum number",n,max_default[k],MAX_REF(k));
 max_ref[k]= n;
 DBG(DBGDEF,"max(%s) = %d\n",definition_name[k],max_ref[k]);
+}
 break;
 }
 	/*17:*/
@@ -419,14 +420,14 @@ if(a!=z)
 QUIT("Tag mismatch [%s,%d]!=[%s,%d] at 0x%x to "SIZE_F"\n",
 NAME(a),INFO(a),NAME(z),INFO(z),node_pos,hpos-hstart-1);
 	/*:17*/
-	#line 8449 "format.w"
+	#line 8450 "format.w"
 
 }
 if(INFO(a)!=0)QUIT("End of maximum list with info %d",INFO(a));
 DBG(DBGDEF,"Getting Max Definitions END\n");
 }
 	/*:383*/
-	#line 11241 "format.w"
+	#line 11242 "format.w"
 
 	/*53:*/
 	#line 1241 "format.w"
@@ -516,10 +517,10 @@ DBG(DBGNODE,"Get list at 0x%x size=%u\n",l->p,l->s);
 }
 }
 	/*:146*/
-	#line 11242 "format.w"
+	#line 11243 "format.w"
 
 	/*459:*/
-	#line 9930 "format.w"
+	#line 9931 "format.w"
 
 uint32_t hff_list_pos= 0,hff_list_size= 0;
 Tag hff_tag;
@@ -539,7 +540,7 @@ return;
 }
 else if(hff_tag<=TAG(param_kind,7))
 	/*462:*/
-	#line 10000 "format.w"
+	#line 10001 "format.w"
 
 switch(INFO(hff_tag)&0x3){
 case 0:hff_list_pos= hpos-hstart+1;hff_list_size= 0;hpos= hpos+3;return;
@@ -549,12 +550,12 @@ case 3:hpos++;HGET32(hff_list_size);hff_list_pos= hpos-hstart+1;hpos= hpos+1+hff
 default:QUIT("List with unknown info [%s,%d] at "SIZE_F"\n",NAME(hff_tag),INFO(hff_tag),hpos-hstart);
 }
 	/*:462*/
-	#line 9948 "format.w"
+	#line 9949 "format.w"
 
 TAGERR(hff_tag);
 }
 	/*:459*/	/*491:*/
-	#line 10417 "format.w"
+	#line 10418 "format.w"
 
 float32_t hteg_float32(void)
 {union{float32_t d;uint32_t bits;}u;
@@ -562,7 +563,7 @@ HTEG32(u.bits);
 return u.d;
 }
 	/*:491*/	/*529:*/
-	#line 10857 "format.w"
+	#line 10858 "format.w"
 
 void hteg_size_boundary(Info info)
 {uint32_t n;
@@ -586,14 +587,14 @@ return n;
 
 void hteg_list(List*l)
 {	/*488:*/
-	#line 10389 "format.w"
+	#line 10390 "format.w"
 
 Tag a,z;
 uint32_t node_pos= hpos-hstart;
 if(hpos<=hstart)return;
 HTEGTAG(z);
 	/*:488*/
-	#line 10879 "format.w"
+	#line 10880 "format.w"
 
 if(KIND(z)!=list_kind&&KIND(z)!=param_kind)
 QUIT("List expected at 0x%x",(uint32_t)(hpos-hstart));
@@ -611,13 +612,13 @@ if(s!=l->s)QUIT("List sizes at "SIZE_F" and 0x%x do not match 0x%x != 0x%x",
 hpos-hstart,node_pos-1,s,l->s);
 }
 	/*489:*/
-	#line 10396 "format.w"
+	#line 10397 "format.w"
 
 HTEGTAG(a);
 if(a!=z)QUIT("Tag mismatch [%s,%d]!=[%s,%d] at "SIZE_F" to 0x%x\n",NAME(a),INFO(a),NAME(z),INFO(z),
 hpos-hstart,node_pos-1);
 	/*:489*/
-	#line 10895 "format.w"
+	#line 10896 "format.w"
 
 }
 
@@ -628,6 +629,6 @@ hteg_list(l);
 
 
 	/*:529*/
-	#line 11243 "format.w"
+	#line 11244 "format.w"
 
 	/*:543*/

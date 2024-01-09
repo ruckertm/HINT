@@ -127,8 +127,19 @@ void hget_def_node(void)
   int n;
   @<read the start byte |a|@>@;
   k=KIND(a);
+  if (k==unknown_kind && INFO(a)==b100)
+  {  hget_unknown_def();
+     @<read and check the end byte |z|@>@;
+     return;
+  }
   if (k==label_kind && (INFO(a)&b001)) HGET16(n);
-  else n=HGET8; 
+  else n=HGET8;
+  if (max_fixed[k]>max_default[k]) 
+  { MESSAGE("Definitions for kind %s not supported\n", definition_name[k]);
+    while (hpos<hend && *hpos!=a) hpos++;
+    @<read and check the end byte |z|@>@;
+    return;
+  }
   if (k!=range_kind) REF_RNG(k,n);
   DBG(DBGTAGS,"Defining %s %d\n", definition_name[KIND(a)],n);
   switch(KIND(a))
@@ -146,11 +157,9 @@ void hget_def_node(void)
     case color_kind: hget_color_def(INFO(a),n); break;
     default:  pointer_def[KIND(a)][n]=hget_definition(a); break;
   }
-  if (max_fixed[k]>max_default[k]) 
-    QUIT("Definitions for kind %s not supported", definition_name[k]);
   if(n>max_ref[k] || n <= max_fixed[k]) 
     QUIT("Definition %d for %s out of range [%d - %d]",@|
-        n, definition_name[k],max_fixed[k]+1,max_ref[k]);
+         n, definition_name[k],max_fixed[k]+1,max_ref[k]);
   @<read and check the end byte |z|@>@;
 }
 
@@ -219,6 +228,7 @@ static ParamDef *hget_param_list(uint8_t a);
 static void hget_range_def(uint8_t a, uint8_t pg);
 static void hget_page_def(uint8_t a, uint8_t n);
 static void hget_outline_or_label_def(Info i, int n);
+static void hget_unknown_def(void);
 static void hget_font_metrics();
 static void hget_color_def(uint8_t a, int n);
 static pointer hget_definition(uint8_t a);
@@ -1187,11 +1197,39 @@ static pointer hget_leaders_ref(uint8_t n)
 { @+REF_RNG(leaders_kind,n);
   return copy_node_list(pointer_def[leaders_kind][n]);
 }
-
-
-
-
 @
+
+\subsection{Unknown Extensions}
+@<get functions@>=
+static void hget_unknown_def(void)
+{ Tag t; signed char i;
+  t=HGET8;
+  i=HGET8;
+  if (i==0)
+    QUIT("Zero not allowed for unknown node size at 0x%x\n",(uint32_t)(hpos-hstart-2));
+  if (hnode_size[t]==0)
+  { hnode_size[t]=i;
+    DBG(DBGTAGS,"Defining node size %d,%d for tag 0x%x (%s)\n",NODE_HEAD(i),NODE_TAIL(i),t,content_name[KIND(t)]);
+  }
+}
+@
+
+The |hget_unknown| funktion tries to process a unknown node with the help of
+an entry in the |hnode_size| array. The definition section can be used to provide
+this extra information. If successful the function returns 1 else 0.
+
+@<get functions@>=
+int hget_unknown(Tag a)
+{ DBG(DBGTAGS,"Trying unknown tag 0x%x at 0x%x\n",a,(uint32_t)(hpos-hstart-1));
+  hpos--;
+  hff_hpos();
+  hpos--;
+  return 1;
+}
+@
+
+
+
 
 \section{Reading Content Nodes}
 The following section explains how to read the content section and convert
@@ -1265,7 +1303,9 @@ static void hget_node(uint8_t a)
   {@+ 
     @<cases to get content@>@;@t\1@>@/
     default:
-      TAGERR(a);@t\2@>@/
+      if (!hget_unknown(a))
+        TAGERR(a);
+      break;@t\2@>@/
   }
 }
 
@@ -4502,7 +4542,7 @@ return (double)LOC_POS(page_loc[cur_loc])@|/(double)(hend-hstart);
  }
 @
 
-To implement |hint_set_fpos| we use |hff_pos| to ``fast forward''
+To implement |hint_set_fpos| we use |hff_hpos| to ``fast forward''
 to the desired position. If this position is inside a paragraph,
 we compute the closest offset that is a possible line break.
 
@@ -5440,15 +5480,13 @@ it encounters the matching ignore node with |ignore_info(p)==0|.
 This is done by setting |c_ignore|.
 
 @<handle an ignore node@>=
-if (subtype(p)==ignore_node)
-{ if (ignore_info(p)==1)
-  { cur_style=cur_style&~(MARK_BIT|FOCUS_BIT);
-    c_ignore_list(ignore_list(p));
-    c_ignore=true;
-  }
-  else
-    c_ignore=false;
+if (ignore_info(p)==1)
+{ cur_style=cur_style&~(MARK_BIT|FOCUS_BIT);
+  c_ignore_list(ignore_list(p));
+  c_ignore=true;
 }
+else
+  c_ignore=false;
 @
 
 Instead of the ignored nodes, the renderer considers the characters
@@ -5550,17 +5588,16 @@ when a link starts and |end_new_link| when it ends.
 static int cur_link=-1;
 @
 
-@<handle a link node@>=
-if (subtype(p)==start_link_node)
-{ cur_style|=LINK_BIT;
-  local_link=label_ref(p);
-  add_new_link(local_link,this_box,cur_h,cur_v);
-}
-else if (subtype(p)==end_link_node)
-{  cur_style&=~LINK_BIT;
-   end_new_link(local_link,this_box,cur_h,cur_v);
-   local_link=-1;
-}
+@<handle a start link node@>=
+cur_style|=LINK_BIT;
+local_link=label_ref(p);
+add_new_link(local_link,this_box,cur_h,cur_v);
+@
+
+@<handle an end link node@>=
+cur_style&=~LINK_BIT;
+end_new_link(local_link,this_box,cur_h,cur_v);
+local_link=-1;
 @
 
 If at the end of a horizontal list |local_link| is |true| an additional
@@ -6381,14 +6418,24 @@ render_c:
        rule_ht= height(p);rule_dp= depth(p);rule_wd= width(p);
        goto fin_rule;
      case whatsit_node:
-       @<handle an ignore node@>@;
-       else @<handle a link node@>@;
-       else if (subtype(p)==image_node)
-       { scaled h,w;
-         w=image_width(p);
-         h=image_height(p);
-         render_image(cur_h, cur_v, w, h,image_no(p));
-         cur_h= cur_h+w; 
+       switch (subtype(p))
+       { case ignore_node: @<handle an ignore node@>@;break;
+         case start_link_node: @<handle a start link node@>@;break;
+         case end_link_node: @<handle an end link node@>@;break;
+         case image_node:
+         { scaled h,w;
+           w=image_width(p);
+           h=image_height(p);
+           render_image(cur_h, cur_v, w, h,image_no(p));
+           cur_h= cur_h+w; 
+         } break;
+	 case color_node:
+	   { int i =color_node_ref(p);
+	     uint32_t f = color_def[i][0][0];
+	     uint32_t b = color_def[i][4][0];
+	     nativeSetForeground(f,b);
+	   }
+         default: break;
        }
        break;
      case glue_node:
@@ -6720,6 +6767,7 @@ The other procedure may change the $\gamma$-value.
 @<native rendering definitions@>=
 extern void nativeSetDark(int dark);
 extern void nativeSetGamma(double gamma);
+extern void nativeSetColor(uint32_t fg, uint32_t bg);
 @
 
 To  render an empty page call |nativeBlank|.
@@ -7789,7 +7837,11 @@ the \HINT\ rendering functions.
 @(rendernative.h@>=
 #ifndef _RENDERNATIVE_H
 #define _RENDERNATIVE_H
-
+typedef uint32_t Color; /* RGBA */ 
+typedef Color ColorPair[2]; /* foreground, background */
+typedef ColorPair ColorSet[8]; 
+extern ColorSet *color_def; /* this is a shortcut to ColorSet */
+extern void nativeSetForeground(uint32_t f, uint32_t b); 
 @<native rendering definitions@>@;
 
 #endif 

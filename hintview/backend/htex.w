@@ -24987,7 +24987,7 @@ to hold the string numbers for name, area, and extension.
 @d outline_depth(A) mem[A+3].i /* depth of sub items */
 
 @d color_node hitex_ext+21 /* represent a color set */
-@d color_node_size 2
+@d color_node_size small_node_size
 @d color_node_ref(A)  type(A+1) /* reference to the color set */
 
 @ The sixteen possible \.{\\write} streams are represented by the |write_file|
