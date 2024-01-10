@@ -1,4 +1,4 @@
-% This file is part of HINT
+mo% This file is part of HINT
 % Copyright 2017-2021 Martin Ruckert, Hochschule Muenchen, Lothstrasse 64, 80336 Muenchen
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -6011,13 +6011,6 @@ from the left edge to the right edge.
 
 Now we are ready for the implementation.
 
-@<hint basic types@>= 
-typedef uint32_t Color; /* RGBA */ 
-typedef Color ColorPair[2]; /* foreground, background */
-typedef ColorPair ColorSet[8]; 
-@
-
-
 \vbox{\readcode\vskip -\baselineskip\putcode}
 
 @s COLOR  symbol
@@ -9452,15 +9445,25 @@ The default colors for day mode are
 black on white, blue on white, red on white, and green on white;
 in night mode the background becomes black, the normal text white,
 and the color of link, mark, and focus text become slightly lighter.
+We store the default color set using an byte array in RGBA format for colors;
+we combine a pair of colors for foreground and background in an array;
+we combine four pairs for normal, link, mark, and focus text in an array;
+and we define a color set as two such pairs, one for day and one for night mode
+to define the default colors.
+
 
 @<define |color_defaults|@>=
 max_default[color_kind]=MAX_COLOR_DEFAULT;
 max_fixed[color_kind]=-1;
-printf("ColorSet color_defaults[MAX_COLOR_DEFAULT+1]="@|
-       "{{{0x000000FF,0xFFFFFFFF},"@|
-       "{0x0000EEFF,0xFFFFFFFF},{0xEE0000FF,0xFFFFFFFF},{0x00EE00FF,0xFFFFFFFF},"@|
-       "{0xFFFFFFFF,0x000000FF},"@|
-       "{0x1111FFFF,0x000000FF},{0xFF1111FF,0x000000FF},{0x11FF11FF,0x000000FF}"
+printf("uint8_t  color_defaults[MAX_COLOR_DEFAULT+1][2][4][2][4]="@|
+       "{{{{{0,0,0,0xFF},{0xFF,0xFF,0xFF,0xFF}},"@|
+       "  {{0x00,0x00,0xEE,0xFF},{0xFF,0xFF,0xFF,0xFF}},"
+       "  {{0xEE,0x00,0x00,0xFF},{0xFF,0xFF,0xFF,0xFF}},"
+       "  {{0x00,0xEE,0x00,0xFF},{0xFF,0xFF,0xFF,0xFF}}},"@|
+       " {{{0xFF,0xFF,0xFF,0xFF},{0x00,0x00,0x00,0xFF}},"
+       "  {{0x11,0x11,0xFF,0xFF},{0x00,0x00,0x00,0xFF}},"
+       "  {{0xFF,0x11,0x11,0xFF},{0x00,0x00,0x00,0xFF}},"
+       "  {{0x11,0xFF,0x11,0xFF},{0x00,0x00,0x00,0xFF}}}"
        "}};\n\n");
 @
 
@@ -11082,7 +11085,7 @@ extern Xdimen xdimen_defaults[MAX_XDIMEN_DEFAULT+1];
 extern Glue glue_defaults[MAX_GLUE_DEFAULT+1];
 extern Baseline baseline_defaults[MAX_BASELINE_DEFAULT+1];
 extern Label label_defaults[MAX_LABEL_DEFAULT+1];
-extern ColorSet color_defaults[MAX_COLOR_DEFAULT+1];
+extern uint8_t  color_defaults[MAX_COLOR_DEFAULT+1][2][4][2][4];
 extern signed char hnode_size[0x100];
 extern uint8_t content_known[32];
 

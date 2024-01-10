@@ -604,6 +604,7 @@ int main(int argc, char *argv[])
     return 1;
    if (!create_window())
     return 1;
+  nativeSetColor(color_defaults);
   nativeSetDark(dark);
   hint_resize(px_h,px_v,scale*x_dpi,scale*y_dpi);
   if (!open_file(home))

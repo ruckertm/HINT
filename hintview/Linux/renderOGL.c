@@ -350,56 +350,35 @@ void nativeSetGamma(double gamma)
 }
 
 static GLfloat curfr=0.0f, curfg=0.0f, curfb=0.0f;
-static uint8_t last_style=0;
-static void nativeSetColors(GLfloat fr, GLfloat fg, GLfloat fb, GLfloat br, GLfloat bg, GLfloat bb)
+static uint8_t cur_style=0;
+static void nativeSetFgBg(GLfloat fr, GLfloat fg, GLfloat fb, GLfloat fa,
+		       GLfloat br, GLfloat bg, GLfloat bb, GLfloat ba)
 /* set foreground and background rgb colors */
 {
   glClearColor(br, bg, bb, 1.0f);
   curfr=fr; curfg=fg; curfb=fb;
-  glUniform4f(FGcolorID, fr, fg, fb,1.0);
-  last_style=0;
+  glUniform4f(FGcolorID, fr, fg, fb, fa);
+  cur_style=0;
 }
 
-void nativeSetForeground(uint32_t fg, uint32_t bg)
-/* set foreground rgba colors */
-{ GLfloat r,g,b,a;
-  r=(bg>>24)/255.0f;
-  g=((bg>>16)&0xFF)/255.0f;
-  b=((bg>>8)&0xFF)/255.0f;
-  a=(bg&0xFF)/255.0f;
-  glClearColor(r, g, b, 1.0f);
-
-  r=(fg>>24)/255.0f;
-  g=((fg>>16)&0xFF)/255.0f;
-  b=((fg>>8)&0xFF)/255.0f;
-  a=(fg&0xFF)/255.0f;
-  
-  curfr=r; curfg=g; curfb=b;
-  glUniform4f(FGcolorID, r, g, b,a);
-
-}
-
-
+static ColorSet *cur_colors;
+static int cur_mode;
 
 void nativeSetDark(int on)
-{   if (on) {
-        nativeSetColors(
-			GET_R(FG_NIGHT)/255.0f, 
-			GET_G(FG_NIGHT)/255.0f, 
-			GET_B(FG_NIGHT)/255.0f, 
-			GET_R(BG_NIGHT)/255.0f, 
-			GET_G(BG_NIGHT)/255.0f, 
-			GET_B(BG_NIGHT)/255.0f);
-    } else {
-        nativeSetColors(
-			GET_R(FG_DAY)/255.0f, 
-			GET_G(FG_DAY)/255.0f, 
-			GET_B(FG_DAY)/255.0f, 
-			GET_R(BG_DAY)/255.0f, 
-			GET_G(BG_DAY)/255.0f, 
-			GET_B(BG_DAY)/255.0f);
-     }
+{ uint8_t *fg, *bg;
+  cur_mode=on;
+  fg=cur_colors[0][on?1:0][cur_style][0];
+  bg=cur_colors[0][on?1:0][cur_style][1];
+  nativeSetFgBg(fg[0]/255.0f,fg[1]/255.0f,fg[2]/255.0f,fg[3]/255.0f,
+		bg[0]/255.0f,bg[1]/255.0f,bg[2]/255.0f,bg[3]/255.0f);
 }
+
+void nativeSetColor(ColorSet *cs)
+{ cur_colors=cs;
+  nativeSetDark(cur_mode);
+}
+
+
 
 static float pt_h=600.0, pt_v=800.0;
 
@@ -600,18 +579,18 @@ void nativeGlyph(double x, double dx, double y, double dy, double w, double h, s
 
     glBindTexture(GL_TEXTURE_2D, g->GLtexture);
     checkGlError("glBindTexture g->GLtexture");
-    
-	if (s!=last_style)
-	{ if (s&FOCUS_BIT)
-	    glUniform4f(FGcolorID, 0.0, 1.0,0.0,1.0); 
-	  else if (s&MARK_BIT)
-	    glUniform4f(FGcolorID, 1.0, 0.0,0.0,1.0); 
-	  else if (s&LINK_BIT)
-	    glUniform4f(FGcolorID, 0.0, 0.0,1.0,1.0); 
-	  else
-	    glUniform4f(FGcolorID, curfr, curfg,curfb,1.0);
-	  last_style=s;
-	}
+
+    { int new_style;
+      if (s&FOCUS_BIT) new_style=3;
+      else if (s&MARK_BIT) new_style=2;
+      else if (s&LINK_BIT) new_style=1;
+      else new_style=0;
+      if (new_style!=cur_style)
+      { cur_style=new_style;
+        nativeSetDark(cur_mode);
+      }
+    }
+
     glBindBuffer(GL_ARRAY_BUFFER, xybuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(xy), xy, GL_STREAM_DRAW);
     glDrawArrays(GL_TRIANGLES, 0, 2*3);

@@ -188,8 +188,7 @@ void hset_default_definitions(void)
     baseline_def[i].ls=hset_glue(&(baseline_defaults[i].ls));
     baseline_def[i].lsl=baseline_defaults[i].lsl;
   }
-  for (i=0; i<=MAX_COLOR_DEFAULT; i++)
-    memcpy(color_def+i,color_defaults+i,sizeof(ColorSet));
+  hset_default_colors();
 }
 
 void free_definitions(void)
@@ -1127,13 +1126,25 @@ else
 
 The function |hlist_to_string| is defined in section~\secref{listtraversal}.
 
-\subsubsection{Color}
+\subsection{Color}
+
+We use a data type that is similar to the data type of the default colors,
+except that we split the RGBA colors contained in a single 32 bit integer
+into an array of four byte. 
+
+@<native rendering definitions@>=
+typedef uint8_t ColorSet[2][4][2][4];
+extern ColorSet *color_def;
+@
+
+We define a dynamic array for color sets based on |max_ref[color_kind]|.
 
 @<\HINT\ variables@>=
-ColorSet *color_def;
+ColorSet *color_def=NULL;
 @
 
 @<allocate definitions@>=
+if (color_def!=NULL) free(color_def);
 ALLOCATE(color_def,max_ref[color_kind]+1, ColorSet);
 @
 
@@ -1141,23 +1152,47 @@ ALLOCATE(color_def,max_ref[color_kind]+1, ColorSet);
 free(color_def); color_def=NULL;
 @
 
-@<get functions@>=
-static void hget_color_def(uint8_t a, int n)
-{@+ if (INFO(a)==b000)
-  { int i,k;
-    k=HGET8;
-    if (k!=8) 
-      QUIT("Definition %d of color set needs 8 color pairs only %d given\n",n,k);
-    for (i=0;i<k;i++)
-    { HGET32(color_def[n][i][0]);HGET32(color_def[n][i][1]); }
-  }
-  else
-    QUIT("Color Definition with Info value %d!=000",n);
+Now we can copy the default color set to |color_def[0]|.
+
+@<\HINT\ auxiliar functions@>=
+void hset_default_colors(void)
+{ int i;
+  for (i=0; i<=MAX_COLOR_DEFAULT; i++)
+    memcpy(color_def[i],color_defaults[i],sizeof(ColorSet));
 }
 @
 
+When we read a color definition from the \HINT\ file,
+we make sure that the background of the default colors
+stays opaque, and replace any zero color with the
+respective default color.
 
+@<get functions@>=
+static void hget_color_def(uint8_t a, int i)
+{@+int j,k,l;
+  if (INFO(a)!=b000)
+    QUIT("Color Definition %d with Info value %d!=000",i,INFO(a));
+  k=HGET8;
+  if (k!=8) 
+    QUIT("Definition %d of color set needs 8 color pairs only %d given\n",i,k);
+  for (j=0; j<2; j++)
+  for (k=0; k<4; k++)
+  for (l=0; l<2; l++)
+  { uint32_t rgba;
+    uint8_t *c=color_def[i][j][k][l];
+    HGET32(rgba);
+    if (rgba==0)
+      memcpy(c,color_def[0][j][k][l],4);
+    else
+    { c[0] =rgba>>24;
+      c[1] =(rgba>>16)&0xFF;
+      c[2] =(rgba>>8)&0xFF;
+      if (i==0&& l==1) c[3]=0xFF; else c[3] =rgba&0xFF;
+    }
+  }
+}
 
+@
 
 
 \subsection{References}
@@ -6290,6 +6325,14 @@ void render_image(int x, int y, int w, int h, uint32_t n)
 }
 @
 
+\subsection{Colors}
+When a color node occurs on a page, we pass the pointer
+to the color set definition to the renderer using the
+|nativeSetColor| function.
+
+@<native rendering definitions@>=
+extern void nativeSetColor(ColorSet *cs);
+@
 
 
 \subsection{Pages}
@@ -6431,9 +6474,7 @@ render_c:
          } break;
 	 case color_node:
 	   { int i =color_node_ref(p);
-	     uint32_t f = color_def[i][0][0];
-	     uint32_t b = color_def[i][4][0];
-	     nativeSetForeground(f,b);
+	     nativeSetColor(color_def+i);
 	   }
          default: break;
        }
@@ -6767,7 +6808,6 @@ The other procedure may change the $\gamma$-value.
 @<native rendering definitions@>=
 extern void nativeSetDark(int dark);
 extern void nativeSetGamma(double gamma);
-extern void nativeSetColor(uint32_t fg, uint32_t bg);
 @
 
 To  render an empty page call |nativeBlank|.
@@ -7718,6 +7758,7 @@ typedef int scaled;
 #include "error.h"
 #include "format.h"
 #include "hrender.h"
+#include "rendernative.h"
 #include "get.h"
 #include "htex.h"
 #include "hint.h"
@@ -7837,13 +7878,7 @@ the \HINT\ rendering functions.
 @(rendernative.h@>=
 #ifndef _RENDERNATIVE_H
 #define _RENDERNATIVE_H
-typedef uint32_t Color; /* RGBA */ 
-typedef Color ColorPair[2]; /* foreground, background */
-typedef ColorPair ColorSet[8]; 
-extern ColorSet *color_def; /* this is a shortcut to ColorSet */
-extern void nativeSetForeground(uint32_t f, uint32_t b); 
 @<native rendering definitions@>@;
-
 #endif 
 @
 
