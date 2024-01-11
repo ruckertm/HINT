@@ -2815,7 +2815,9 @@ Otherwise we remove unwanted space from the beginning of the list.
 @<\HINT\ auxiliar functions@>=
 pointer hget_paragraph_final(scaled x, uint8_t *from)
 {@+uint8_t *to;
+  int par_color;
   @<prepare for reading the paragraph list@>@;
+  @<check for a color node in the initial section of the paragraph@>@;
   hpos=from; to=list_end;
   @<read the paragraph list@>@;
   if (link(head)!=null && !is_char_node(link(head)))
@@ -2825,9 +2827,37 @@ pointer hget_paragraph_final(scaled x, uint8_t *from)
       hprune_unwanted_nodes(); 
   }
   @<finalize reading the  the paragraph list@>@;
+  @<add a color node if necessary@>@;
   return par_ptr;
 }
 @
+
+In the initial paragraph there might be a color change, which might affect
+the color in the remaining paragraph. So we scan for it and set |par_color|
+acoordingly.
+
+@<check for a color node in the initial section of the paragraph@>=
+par_color=-1;
+while (hpos<from)
+{ if (hpos[0]==TAG(color_kind,b000)) par_color=hpos[1];
+  hff_hpos();
+}
+@
+
+If a color node was found we add a copy to the begin of the remaining
+paragraph.
+
+@<add a color node if necessary@>=
+if (par_ptr!=null && par_color>=0)
+{@+pointer p;
+  p=get_node(color_node_size);
+  type(p)=whatsit_node; subtype(p)=color_node;
+  color_node_ref(p)=par_color;
+  link(p)=par_ptr;
+  par_ptr=p;
+}
+@
+
 
 Getting the initial part of a paragraph again needs some small modifications
 to take care of ending an incomplete paragraph.
@@ -6356,6 +6386,7 @@ and |cur_v| contain the current horizontal and vertical position;
 |rule_ht|, |rule_dp|, and |rule_wd| contain the height, depth, and
 width of a rule that should be output next; |cur_f| and |cur_fp|
 contain the current font number and current font pointer.
+|cur_color| contains the current color set.
 
 @<render variables@>=
 static scaled cur_h, cur_v;
@@ -6363,6 +6394,7 @@ static scaled rule_ht, rule_dp, rule_wd;
 static int cur_f; 
 static struct font_s *cur_fp;
 static uint8_t cur_style=0;
+static int cur_color=0;
 @
 
 @<render functions@>=
@@ -6448,12 +6480,15 @@ render_c:
 #endif
        if(list_ptr(p)==null) cur_h= cur_h+width(p);
        else
-	   { cur_v= base_line+shift_amount(p);
+       { int cur_c=cur_color;
+         cur_v= base_line+shift_amount(p);
          edge= cur_h;
          if(type(p)==vlist_node) 
-			 vlist_render(p);
-		 else 
-			 hlist_render(p);
+           vlist_render(p);
+         else 
+           hlist_render(p);
+         if (cur_color!=cur_c)
+         { cur_color=cur_c; nativeSetColor(color_def+cur_color); }
          cur_h= edge+width(p);cur_v= base_line;
        }
        break;
@@ -6473,8 +6508,8 @@ render_c:
            cur_h= cur_h+w; 
          } break;
 	 case color_node:
-	   { int i =color_node_ref(p);
-	     nativeSetColor(color_def+i);
+	   { cur_color =color_node_ref(p);
+	     nativeSetColor(color_def+cur_color);
 	   }
          default: break;
        }
@@ -6523,17 +6558,20 @@ render_c:
           }
           while(cur_h+leader_wd<=edge)
 		  /*Output a leader box at |cur_h|,...*/
-          { cur_v= base_line+shift_amount(leader_box);
-		    h_save=cur_h;
-                    c_ignore=true;
-			if(type(leader_box)==vlist_node)
-				vlist_render(leader_box);
-			else 
-				hlist_render(leader_box);
-                     c_ignore=false;
-			cur_v= base_line;
-			cur_h= h_save+leader_wd+lx;
-		  }
+          { int cur_c=cur_color;
+	    cur_v= base_line+shift_amount(leader_box);
+	    h_save=cur_h;
+            c_ignore=true;
+	    if(type(leader_box)==vlist_node)
+	      vlist_render(leader_box);
+	    else 
+	      hlist_render(leader_box);
+            if (cur_color!=cur_c)
+            { cur_color=cur_c; nativeSetColor(color_def+cur_color); }
+            c_ignore=false;
+	    cur_v= base_line;
+	    cur_h= h_save+leader_wd+lx;
+	  }
           cur_h= edge-10;goto next_p;
         }
       }
@@ -6612,12 +6650,16 @@ while(p!=null)
                 p,mem[p].i,list_ptr(p));
 #endif                
         if(list_ptr(p)==null) cur_v= cur_v+height(p)+depth(p);
-	    else
-	    { cur_v= cur_v+height(p);save_v= cur_v;
+	else
+	{ int cur_c=cur_color;
+	  cur_v= cur_v+height(p);save_v= cur_v;
           cur_h= left_edge+shift_amount(p);
-          if(type(p)==vlist_node)vlist_render(p);
+          if(type(p)==vlist_node)
+	    vlist_render(p);
 	  else
-           hlist_render(p);
+            hlist_render(p);
+          if (cur_color!=cur_c)
+          { cur_color=cur_c; nativeSetColor(color_def+cur_color); }
           cur_v= save_v+depth(p);cur_h= left_edge;
         }
         break;
@@ -6675,13 +6717,16 @@ while(p!=null)
 		      }
 		    }
 		    while(cur_v+leader_ht<=edge)
-		    { cur_h= left_edge+shift_amount(leader_box);
+		    { int cur_c=cur_color;
+		      cur_h= left_edge+shift_amount(leader_box);
 		      cur_v= cur_v+height(leader_box);save_v= cur_v;
                       c_ignore=true;
 		      if (type(leader_box)==vlist_node) 
-				  vlist_render(leader_box);
-			  else 
-				  hlist_render(leader_box);
+		        vlist_render(leader_box);
+		      else 
+		        hlist_render(leader_box);
+		      if (cur_color!=cur_c)
+         	      { cur_color=cur_c; nativeSetColor(color_def+cur_color); }
                       c_ignore=false;
 		      cur_h= left_edge;
 		      cur_v= save_v-height(leader_box)+leader_ht+lx;
@@ -6730,7 +6775,9 @@ the page: the |hint_render| function.
 @<render functions@>=
 
 void hint_render(void)
-{  nativeBlank();
+{  cur_color=0;
+   nativeSetColor(color_def!=NULL?color_def:color_defaults);
+   nativeBlank();
    if (streams==NULL || streams[0].p==null) return;
    cur_h= 0;
    cur_v= height(streams[0].p);

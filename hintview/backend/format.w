@@ -1,4 +1,4 @@
-mo% This file is part of HINT
+% This file is part of HINT
 % Copyright 2017-2021 Martin Ruckert, Hochschule Muenchen, Lothstrasse 64, 80336 Muenchen
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy

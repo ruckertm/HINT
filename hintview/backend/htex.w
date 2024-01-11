@@ -16205,6 +16205,7 @@ line can be ascertained when it is necessary to decide whether to use
 @<Glob...@>=
 @ @<Selected global variables@>=
 pointer @!just_box; /*the |hlist_node| for the last line of the new paragraph*/
+int @!just_color; /* the color at the end of a packed hbox */
 
 @ Since |line_break| is a rather lengthy procedure---sort of a small world unto
 itself---we must build it up little by little, somewhat more cautiously
@@ -16218,7 +16219,7 @@ general outline.
 void line_break(int final_widow_penalty, pointer par_ptr)
 {@+ scaled x=cur_list.hs_field; /* the |hsize| for this paragraph */
 @<Local variables for line breaking@>@;
-set_line_break_params();
+set_line_break_params(); just_color=-1;
 @<Get ready to start line breaking@>;
 @<Find optimal breakpoints@>;
 @<Break the paragraph at the chosen breakpoints, justify the resulting lines
@@ -17464,6 +17465,13 @@ vertical list, together with associated penalties and other insertions@>;
 incr(cur_line);cur_p=next_break(cur_p);
 if (cur_p!=null) if (!post_disc_break)
   @<Prune unwanted nodes at the beginning of the next line@>;
+if (cur_p!=null && just_color>=0)
+{ q = get_node(color_node_size);
+  type(q)=whatsit_node; subtype(q)=color_node;
+  color_node_ref(q)=just_color;
+  link(q)=link(temp_head);
+  link(temp_head)=q;
+}
 }@+ while (!(cur_p==null));
 if ((cur_line!=best_line)||(link(temp_head)!=null))
   confusion("line breaking");
@@ -25496,6 +25504,8 @@ if (subtype(p)==image_node)
 {@+if (image_height(p)> h) h= image_height(p);
   x= x+image_width(p);
 }
+else if (subtype(p)==color_node)
+  just_color=color_node_ref(p);
 
 @ @<Let |d| be the width of the whatsit |p|@>=
 d=((subtype(p)==image_node)?image_width(p):0)

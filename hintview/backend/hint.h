@@ -1,5 +1,5 @@
-/*393:*/
-#line 7740 "hint.w"
+/*395:*/
+#line 7787 "hint.w"
 
 #ifndef _HINT_H_
 #define _HINT_H_
@@ -34,26 +34,26 @@ extern void hteg_content(void);
 #line 2711 "hint.w"
 
 extern void hprune_unwanted_nodes(void);
-/*:168*//*178:*/
-#line 2907 "hint.w"
+/*:168*//*180:*/
+#line 2937 "hint.w"
 
 extern void set_line_break_params(void);
-/*:178*//*180:*/
-#line 2948 "hint.w"
+/*:180*//*182:*/
+#line 2978 "hint.w"
 
 extern void hget_par_node(uint32_t offset);
-/*:180*//*185:*/
-#line 3048 "hint.w"
+/*:182*//*187:*/
+#line 3078 "hint.w"
 
 extern void hteg_par_node(uint32_t offset);
-/*:185*//*213:*/
-#line 3423 "hint.w"
+/*:187*//*215:*/
+#line 3453 "hint.w"
 
 extern pointer*pointer_def[32];
 extern scaled*dimen_def;
 extern int32_t*integer_def;
-/*:213*//*214:*/
-#line 3478 "hint.w"
+/*:215*//*216:*/
+#line 3508 "hint.w"
 
 extern Stream*streams;
 extern bool flush_pages(uint32_t pos);
@@ -61,60 +61,60 @@ extern pointer skip(uint8_t n);
 extern pointer*box_ptr(uint8_t n);
 extern int count(uint8_t n);
 extern scaled dimen(uint8_t n);
-/*:214*//*217:*/
-#line 3535 "hint.w"
+/*:216*//*219:*/
+#line 3565 "hint.w"
 
 extern void hpage_init(void);
-/*:217*//*219:*/
-#line 3552 "hint.w"
+/*:219*//*221:*/
+#line 3582 "hint.w"
 
 extern void hflush_contribution_list(void);
-/*:219*//*239:*/
-#line 3955 "hint.w"
+/*:221*//*241:*/
+#line 3985 "hint.w"
 
 #define HINT_NO_LOC 0xFFFFFFFFFFFFFFFF
 #define PAGE_LOC(POS0,OFF) (((uint64_t)((POS0)+(OFF))<<32) + (uint64_t)(OFF))
 #define LOC_POS(P) ((P)>>32) 
 #define LOC_OFF(P) ((P)&0xFFFFFFFF) 
 #define LOC_POS0(P) (LOC_POS(P)-LOC_OFF(P)) 
-/*:239*//*242:*/
-#line 3992 "hint.w"
+/*:241*//*244:*/
+#line 4022 "hint.w"
 
 extern uint64_t page_loc[];
 extern int cur_loc;
-/*:242*//*244:*/
-#line 4041 "hint.w"
+/*:244*//*246:*/
+#line 4071 "hint.w"
 
 extern void hloc_clear(void);
 extern bool hloc_next(void);
 extern bool hloc_prev(void);
 extern uint64_t hlocation(pointer p);
-/*:244*//*249:*/
-#line 4159 "hint.w"
+/*:246*//*251:*/
+#line 4189 "hint.w"
 
 extern void hloc_init(void);
 extern void store_map(pointer p,uint32_t pos,uint32_t offset);
 extern uint32_t hposition(pointer p);
 extern void hloc_set(uint64_t h);
 extern void hloc_set_next(pointer p);
-/*:249*//*251:*/
-#line 4230 "hint.w"
+/*:251*//*253:*/
+#line 4260 "hint.w"
 
 extern int hint_begin(void);
 extern void hint_end(void);
 extern bool hint_map(void);
 extern void hint_unmap(void);
-/*:251*//*256:*/
-#line 4354 "hint.w"
+/*:253*//*258:*/
+#line 4384 "hint.w"
 
 extern bool hint_forward(void);
 extern bool hint_backward(void);
-/*:256*//*259:*/
-#line 4385 "hint.w"
+/*:258*//*261:*/
+#line 4415 "hint.w"
 
 extern scaled hvsize,hhsize;
-/*:259*//*282:*/
-#line 4943 "hint.w"
+/*:261*//*284:*/
+#line 4973 "hint.w"
 
 typedef struct{
 uint64_t pos;
@@ -124,27 +124,27 @@ int p;
 char*title;
 }hint_Outline;
 extern hint_Outline*hint_outlines;
-/*:282*//*283:*/
-#line 4961 "hint.w"
+/*:284*//*285:*/
+#line 4991 "hint.w"
 
 #define LABEL_UNDEF 0
 #define LABEL_TOP 1
 #define LABEL_BOT 2
 #define LABEL_MID 3
-/*:283*//*287:*/
-#line 5020 "hint.w"
+/*:285*//*289:*/
+#line 5050 "hint.w"
 
 extern int hint_get_outline_max(void);
 extern hint_Outline*hint_get_outlines(void);
 extern uint64_t hint_outline_page(int i);
-/*:287*//*289:*/
-#line 5135 "hint.w"
+/*:289*//*291:*/
+#line 5165 "hint.w"
 
 extern void trv_init(void(*f)(uint32_t c));
 extern void trv_vlist(pointer p);
 extern void trv_hlist(pointer p);
-/*:289*//*318:*/
-#line 5667 "hint.w"
+/*:291*//*320:*/
+#line 5697 "hint.w"
 
 typedef struct{
 uint64_t pos;
@@ -153,19 +153,19 @@ scaled top,bottom,left,right;
 }hint_Link;
 extern hint_Link*hint_links;
 extern int max_link;
-/*:318*//*323:*/
-#line 5830 "hint.w"
+/*:320*//*325:*/
+#line 5860 "hint.w"
 
 extern int hint_find_link(scaled x,scaled y,scaled precission);
 extern uint64_t hint_link_page(int i);
-/*:323*//*392:*/
-#line 7723 "hint.w"
+/*:325*//*394:*/
+#line 7770 "hint.w"
 
 extern void leak_in(pointer p,int s);
 extern void leak_out(pointer p,int s);
-/*:392*/
-#line 7747 "hint.w"
+/*:394*/
+#line 7794 "hint.w"
 
 
 #endif
-/*:393*/
+/*:395*/

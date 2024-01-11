@@ -14,10 +14,12 @@ HINT 2.0 created by stretch
  <page 2>
  <color 2>
  <int 23>>
-<color *1
- <<<0x00 0xFF 0 0x80> <0x00 0x00 0xFF>> <<0x00 0xFF 0 0x80> <0xFF 0xFF 0xFF>>>>
-<color *2
- <<<0x00 0xFF 0 0x20> <0x00 0x00 0xFF>> <<0x00 0xFF 0 0x80> <0xFF 0xFF 0xFF>>>>
+<color *1 (transparent green, transparent red)
+ <<<0x00 0xFF 0 0x80>>> <<<0xFF 0 0 0x80>>>>  
+<color *2 (dark green,  light red)
+ <<<0x00 0x40 0>>> <<<0xFF 0xCC 0xCC>>>>  
+<color *0 (dark blue on light yellow, light yellow on dark blue)
+ <<<0x00 0x00 0x10> <0xFF 0xFF 0xCC>>> <<<0xFF 0xFF 0x88> <0 0 0x10>>>>
 <language *0 'unknown'>
 <font *0 'titlefont' 40pt 3 4
  <glue 0xC.AAApt plus 0x6.554Fpt minus 0x4.38E1pt>
@@ -96,14 +98,14 @@ HINT 2.0 created by stretch
 <language *0>
 <hbox 0x20.C71Dpt 0pt 0x76.D4EBpt 
  <
-  <color *0>
+  (<color *0>)
   <glyph 'A' *0 (tenrm)>
   <kern -20pt>
   <color *1>
   <glyph 'B' *0 (tenrm)>
   <color *0>
   <glyph 'A' *0 (tenrm)>
-  <color *2>
+ ( <color *2>)
   <kern -20pt>
   <glyph 'C' *0 (tenrm)>
   <glue *15>>>

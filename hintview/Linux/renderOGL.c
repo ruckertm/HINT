@@ -361,20 +361,20 @@ static void nativeSetFgBg(GLfloat fr, GLfloat fg, GLfloat fb, GLfloat fa,
   cur_style=0;
 }
 
-static ColorSet *cur_colors;
+static ColorSet *cur_colorset;
 static int cur_mode;
 
 void nativeSetDark(int on)
 { uint8_t *fg, *bg;
   cur_mode=on;
-  fg=cur_colors[0][on?1:0][cur_style][0];
-  bg=cur_colors[0][on?1:0][cur_style][1];
+  fg=cur_colorset[0][on?1:0][cur_style][0];
+  bg=cur_colorset[0][on?1:0][cur_style][1];
   nativeSetFgBg(fg[0]/255.0f,fg[1]/255.0f,fg[2]/255.0f,fg[3]/255.0f,
 		bg[0]/255.0f,bg[1]/255.0f,bg[2]/255.0f,bg[3]/255.0f);
 }
 
 void nativeSetColor(ColorSet *cs)
-{ cur_colors=cs;
+{ cur_colorset=cs;
   nativeSetDark(cur_mode);
 }
 
