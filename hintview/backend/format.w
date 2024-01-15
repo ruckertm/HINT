@@ -5296,8 +5296,8 @@ could be the following:
 
 We call content nodes that reference some position inside the content section 
 ``link'' nodes. The position that is referenced is called the destination of the link.
-Link nodes occur always in pairs of an ``on'' link 
-followed by a corresponding ``off'' link that both reference the same position
+Link nodes occur always in pairs of an ``start'' link 
+followed by a corresponding ``end'' link that both reference the same position
 %, the same nesting level, % not sure!
 and no other link nodes between them. 
 The content between the two will constitute the visible part of the link.
@@ -5388,10 +5388,11 @@ indexed by the  labels reference number.
 @<hint basic types@>=
 typedef struct 
 {@+ uint32_t pos; /* position */
+    uint32_t pos0; /* secondary position */
     uint8_t where; /* where on the rendered page */
     bool used; /* label used in a link or an outline */
     int next; /* reference in a linked list */
-    uint32_t pos0;@+ uint8_t f; /* secondary position */
+    uint8_t f; /* font, currently not used */
 } Label;
 @
 
@@ -5487,8 +5488,7 @@ void hset_label(int n,int w )
 @
 
 
-All that can be done by the above function
-is storing the data obtained in the |labels| array.
+The above function will simply store the data obtained in the |labels| array.
 The generation of the short format output is
 postponed until the entire content section has been parsed and
 the positions of all labels are known.
@@ -5682,7 +5682,7 @@ content section and resemble pretty much what we have seen for other
 content nodes. Let's look at them next.
 When reading a short format link node,
 we use again the |b001| info bit to indicate a 16 bit reference
-number to a label. The |b010| info bit indicates an ``on'' link.
+number to a label. The |b010| info bit indicates a ``start'' link.
 \gdef\subcodetitle{Links}
 \getcode
 @<get macros@>=

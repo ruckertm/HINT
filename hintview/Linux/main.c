@@ -616,7 +616,7 @@ int main(int argc, char *argv[])
       glfwWaitEvents();
     } // Check if the ESC key was pressed or the window was closed
     while(glfwWindowShouldClose(window) == 0 );
-  nativeClear();
+  //  nativeClear();
   glfwDestroyWindow(window); // part of glfwTerminate
   glfwTerminate();
   return 0;

@@ -17,7 +17,7 @@ HINT 2.0 created by stretch
 <color *1 (transparent green, transparent red)
  <<<0x00 0xFF 0 0x80>>> <<<0xFF 0 0 0x80>>>>  
 <color *2 (dark green,  light red)
- <<<0x00 0x40 0>>> <<<0xFF 0xCC 0xCC>>>>  
+ <<<0x00 0x20 0>>> <<<0xFF 0x80 0x80>>>>  
 <color *0 (dark blue on light yellow, light yellow on dark blue)
  <<<0x00 0x00 0x10> <0xFF 0xFF 0xCC>>> <<<0xFF 0xFF 0x88> <0 0 0x10>>>>
 <language *0 'unknown'>
@@ -105,7 +105,7 @@ HINT 2.0 created by stretch
   <glyph 'B' *0 (tenrm)>
   <color *0>
   <glyph 'A' *0 (tenrm)>
- ( <color *2>)
+  <color *2>
   <kern -20pt>
   <glyph 'C' *0 (tenrm)>
   <glue *15>>>

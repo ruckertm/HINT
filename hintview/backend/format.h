@@ -81,7 +81,7 @@
 
 #define HINT_NO_POS 0xFFFFFFFF
 	/*:244*/	/*251:*/
-	#line 5403 "format.w"
+	#line 5404 "format.w"
 
 #define LABEL_UNDEF 0
 #define LABEL_TOP 1
@@ -223,10 +223,11 @@ Dimen lsl;
 
 typedef struct
 {uint32_t pos;
+uint32_t pos0;
 uint8_t where;
 bool used;
 int next;
-uint32_t pos0;uint8_t f;
+uint8_t f;
 }Label;
 	/*:250*/	/*399:*/
 	#line 8870 "format.w"

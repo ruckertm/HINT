@@ -24982,8 +24982,8 @@ to hold the string numbers for name, area, and extension.
 @d label_node_size 2
 @d label_has_name(A)  type(A+1) /* 1 for a name , 0 for a number */
 @d label_where(A)  subtype(A+1) /* 1 for top, 2 for bot, 3 for mid */
-@d label_ptr(A) link(A+1) /* for a name the token list or the number */
-@d label_ref(A) link(A+1) /*alternatively the label number */
+@d label_ptr(A) link(A+1) /* hitex: a name (token list) or a number */
+@d label_ref(A) link(A+1) /* hintview: the label number */
 
 @d start_link_node hitex_ext+18 /* represents a link to a another location */
 @d end_link_node hitex_ext+19 /* represents a link to a another location */

@@ -14,7 +14,7 @@
 #include "get.h"
 
 	/*252:*/
-	#line 5410 "format.w"
+	#line 5411 "format.w"
 
 Label*labels= NULL;
 int first_label= -1;

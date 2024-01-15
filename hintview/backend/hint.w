@@ -231,6 +231,7 @@ static void hget_unknown_def(void);
 static void hget_font_metrics();
 static void hget_color_def(uint8_t a, int n);
 static pointer hget_definition(uint8_t a);
+static int hget_label_ref(void);
 @
 
 
@@ -1144,7 +1145,7 @@ ColorSet *color_def=NULL;
 @
 
 @<allocate definitions@>=
-if (color_def!=NULL) free(color_def);
+if (color_def!=NULL) { free(color_def); color_def=NULL; }
 ALLOCATE(color_def,max_ref[color_kind]+1, ColorSet);
 @
 
@@ -1157,8 +1158,15 @@ Now we can copy the default color set to |color_def[0]|.
 @<\HINT\ auxiliar functions@>=
 void hset_default_colors(void)
 { int i;
+  if (color_def==NULL)
+     QUIT("No color definitions allocated");
+  if (max_ref[color_kind]+1<sizeof(color_defaults)/sizeof(ColorSet))
+     QUIT("Not enough room for default colors");
+   if (max_ref[color_kind]<MAX_COLOR_DEFAULT)
+     QUIT("Too many default colors");
+     
   for (i=0; i<=MAX_COLOR_DEFAULT; i++)
-    memcpy(color_def[i],color_defaults[i],sizeof(ColorSet));
+    memcpy(color_def+i,color_defaults+i,sizeof(ColorSet));
 }
 @
 
@@ -2815,9 +2823,9 @@ Otherwise we remove unwanted space from the beginning of the list.
 @<\HINT\ auxiliar functions@>=
 pointer hget_paragraph_final(scaled x, uint8_t *from)
 {@+uint8_t *to;
-  int par_color;
+  int par_color,par_label_ref;
   @<prepare for reading the paragraph list@>@;
-  @<check for a color node in the initial section of the paragraph@>@;
+  @<check for a color change in the initial section of the paragraph@>@;
   hpos=from; to=list_end;
   @<read the paragraph list@>@;
   if (link(head)!=null && !is_char_node(link(head)))
@@ -2827,7 +2835,7 @@ pointer hget_paragraph_final(scaled x, uint8_t *from)
       hprune_unwanted_nodes(); 
   }
   @<finalize reading the  the paragraph list@>@;
-  @<add a color node if necessary@>@;
+  @<add a color change node if necessary@>@;
   return par_ptr;
 }
 @
@@ -2836,28 +2844,41 @@ In the initial paragraph there might be a color change, which might affect
 the color in the remaining paragraph. So we scan for it and set |par_color|
 acoordingly.
 
-@<check for a color node in the initial section of the paragraph@>=
-par_color=-1;
+@<check for a color change in the initial section of the paragraph@>=
+par_color=-1; par_label_ref=-1;
 while (hpos<from)
 { if (hpos[0]==TAG(color_kind,b000)) par_color=hpos[1];
+  else if (KIND(hpos[0])==link_kind)
+  { if (INFO(hpos[0]) & b010) par_label_ref=hget_label_ref();
+    else par_label_ref=-1;
+  }
   hff_hpos();
 }
 @
 
-If a color node was found we add a copy to the begin of the remaining
+If a color change was found we add a copy to the begin of the remaining
 paragraph.
 
-@<add a color node if necessary@>=
-if (par_ptr!=null && par_color>=0)
-{@+pointer p;
-  p=get_node(color_node_size);
-  type(p)=whatsit_node; subtype(p)=color_node;
-  color_node_ref(p)=par_color;
-  link(p)=par_ptr;
-  par_ptr=p;
+@<add a color change node if necessary@>=
+if (par_ptr!=null)
+{ if (par_color>=0)
+  {@+pointer p;
+    p=get_node(color_node_size);
+    type(p)=whatsit_node; subtype(p)=color_node;
+    color_node_ref(p)=par_color;
+    link(p)=par_ptr;
+    par_ptr=p;
+  }
+  if (par_label_ref>=0)
+  {@+pointer p;
+    p=get_node(link_node_size);  type(p)=whatsit_node;
+    subtype(p)=start_link_node; label_ref(p)=par_label_ref;
+    label_has_name(p)=0;
+    link(p)=par_ptr;
+    par_ptr=p;
+  }
 }
 @
-
 
 Getting the initial part of a paragraph again needs some small modifications
 to take care of ending an incomplete paragraph.
@@ -3359,6 +3380,25 @@ case TAG(color_kind,b000): @+ tail_append(hget_color_ref(HTEG8)); @+break;
 @
 
 \subsection{Links}
+
+Here are the cases for link nodes:
+
+@<cases to get content@>=
+case TAG(link_kind,b000): @+ HGET_LINK(b000); break;
+case TAG(link_kind,b001): @+ HGET_LINK(b001); break;
+case TAG(link_kind,b010): @+ HGET_LINK(b010); break;
+case TAG(link_kind,b011): @+ HGET_LINK(b011); break;
+@
+@<cases to teg content@>=
+case TAG(link_kind,b000): @+ HTEG_LINK(b000); break;
+case TAG(link_kind,b001): @+ HTEG_LINK(b001); break;
+case TAG(link_kind,b010): @+ HTEG_LINK(b010); break;
+case TAG(link_kind,b011): @+ HTEG_LINK(b011); break;
+@
+
+We use the following macros. Note that |label_has_name(p)| is
+set to zero, because the label names are not stored as token lists.
+
 @<GET macros@>=
 #define @[HGET_LINK(I)@] @/\
 { @+pointer p;\
@@ -3381,17 +3421,18 @@ case TAG(color_kind,b000): @+ tail_append(hget_color_ref(HTEG8)); @+break;
   tail_append(p);}
 @
 
-@<cases to get content@>=
-case TAG(link_kind,b000): @+ HGET_LINK(b000); break;
-case TAG(link_kind,b001): @+ HGET_LINK(b001); break;
-case TAG(link_kind,b010): @+ HGET_LINK(b010); break;
-case TAG(link_kind,b011): @+ HGET_LINK(b011); break;
-@
-@<cases to teg content@>=
-case TAG(link_kind,b000): @+ HTEG_LINK(b000); break;
-case TAG(link_kind,b001): @+ HTEG_LINK(b001); break;
-case TAG(link_kind,b010): @+ HTEG_LINK(b010); break;
-case TAG(link_kind,b011): @+ HTEG_LINK(b011); break;
+When links are lengthy texts, they may be broken accross line and
+page boundaries.
+In this case, the node starting the link needs to be replicated on
+the start of the new line or page.
+For this case we have the following function
+reading the reference to the label from a link node at |hpos|.
+
+@<\HINT\ auxiliar functions@>=
+static int hget_label_ref(void)
+{ if (INFO(hpos[0])&b001) return (hpos[1]<<8)+hpos[2];
+  else return hpos[1];
+}
 @
 
 \section{Routines from \TeX}
@@ -5688,8 +5729,8 @@ if (cur_link>=0)
 
 To enable the user interface to take action if a link is clicked or
 if the mouse moves over a link, the backend supplies
-the necessary information in the |hint_links| and |max_links| variables.
-|hint_links| is a dynamic array, indexed from 0 to |max_links|.
+the necessary information in the |hint_links| and |max_link| variables.
+|hint_links| is a dynamic array, indexed from 0 to |max_link|.
 If |max_links| is negative, no links are available.
 
 
@@ -5728,8 +5769,10 @@ void add_new_link(int n, pointer p, scaled h, scaled v)
      { links_allocated=links_allocated*1.4142136+0.5; /* $\sqrt 2$ */
         REALLOCATE(hint_links,links_allocated,hint_Link);
      }
+     DBG(DBGLABEL,"Links allocated %d\n",links_allocated);
   }
   t=hint_links+max_link;
+  DBG(DBGLABEL,"Link add %d\n",max_link);
   REF_RNG(label_kind,n);
   @<get |where| and |pos| from label |n|@>@;
   t->where=where;
@@ -5751,7 +5794,9 @@ void add_new_link(int n, pointer p, scaled h, scaled v)
 
 void end_new_link(int n, pointer p, scaled h, scaled v)
 { hint_Link *t;
+  if (max_link<0) return;
   t=hint_links+max_link;
+  DBG(DBGLABEL,"Link end %d\n",max_link);
   if (type(p)==hlist_node)
     t->right=h;
   else
@@ -5809,12 +5854,14 @@ int hint_find_link(scaled x, scaled y,scaled precission)
   if (last_hit<0 || last_hit>max_link) last_hit=max_link/2;
   i=last_hit;
   t=hint_links+i;
+  DBG(DBGLABEL,"Link find %d\n",max_link);
   if (hlink_distance(x,y,t)<=precission)
     return i;
   else if (y<t->top) /* search up */
   { while (i>0)
     { i--;
       t=hint_links+i;
+      DBG(DBGLABEL,"Link up %d\n",max_link);
       if(hlink_distance(x,y,t)<=precission)
       { last_hit=i;  return i; }
     }
@@ -5828,6 +5875,7 @@ int hint_find_link(scaled x, scaled y,scaled precission)
     { i=i+1;
       if (i>max_link) i=0;
       t=hint_links+i;
+      DBG(DBGLABEL,"Link scan %d\n",max_link);
       d=hlink_distance(x,y,t);
       if (d<min_d)
       { min_d=d; min_i=i;}
@@ -5847,6 +5895,7 @@ As a shortcut, it can call this function:
 {@+ uint64_t h;
   uint8_t w;
   if (i<0||i>max_link) return  hint_page_get();
+  DBG(DBGLABEL,"Link page %d\n",max_link);
   h=hint_links[i].pos;
   w=hint_links[i].where;
   if (w==LABEL_TOP) return hint_page_top(h);
@@ -6775,7 +6824,7 @@ the page: the |hint_render| function.
 @<render functions@>=
 
 void hint_render(void)
-{  cur_color=0;
+{  cur_color=color_def!=NULL?0:-1;
    nativeSetColor(color_def!=NULL?color_def:color_defaults);
    nativeBlank();
    if (streams==NULL || streams[0].p==null) return;
@@ -7814,7 +7863,6 @@ typedef int scaled;
 @<TEG macros@>@;
 
 @<\HINT\ types@>@;
-
 
 @<\HINT\ variables@>@;
 @<\HINT\ declarations@>@;

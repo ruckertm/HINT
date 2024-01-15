@@ -349,20 +349,18 @@ void nativeSetGamma(double gamma)
   checkGlError("glsetgamma");
 }
 
-static GLfloat curfr=0.0f, curfg=0.0f, curfb=0.0f;
-static uint8_t cur_style=0;
+
 static void nativeSetFgBg(GLfloat fr, GLfloat fg, GLfloat fb, GLfloat fa,
 		       GLfloat br, GLfloat bg, GLfloat bb, GLfloat ba)
 /* set foreground and background rgb colors */
 {
   glClearColor(br, bg, bb, 1.0f);
-  curfr=fr; curfg=fg; curfb=fb;
   glUniform4f(FGcolorID, fr, fg, fb, fa);
-  cur_style=0;
 }
 
 static ColorSet *cur_colorset;
 static int cur_mode;
+static uint8_t cur_style=0;
 
 void nativeSetDark(int on)
 { uint8_t *fg, *bg;
@@ -461,7 +459,7 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
     		  format, GL_UNSIGNED_BYTE, data);
     checkGlError("glTexImage2D(image)");
-    if (data!=grey) stbi_image_free(data);
+    if (data!=grey) { stbi_image_free(data); data=NULL; }
     glGenerateMipmap(GL_TEXTURE_2D);
     checkGlError("glGenerateMipmap(image)");
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
