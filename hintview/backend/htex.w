@@ -16206,6 +16206,7 @@ line can be ascertained when it is necessary to decide whether to use
 @ @<Selected global variables@>=
 pointer @!just_box; /*the |hlist_node| for the last line of the new paragraph*/
 int @!just_color; /* the color at the end of a packed hbox */
+int @!just_label; /* the label reference at the end of a packed hbox */
 
 @ Since |line_break| is a rather lengthy procedure---sort of a small world unto
 itself---we must build it up little by little, somewhat more cautiously
@@ -16219,7 +16220,7 @@ general outline.
 void line_break(int final_widow_penalty, pointer par_ptr)
 {@+ scaled x=cur_list.hs_field; /* the |hsize| for this paragraph */
 @<Local variables for line breaking@>@;
-set_line_break_params(); just_color=-1;
+set_line_break_params(); just_color=-1; just_label=-1;
 @<Get ready to start line breaking@>;
 @<Find optimal breakpoints@>;
 @<Break the paragraph at the chosen breakpoints, justify the resulting lines
@@ -17465,12 +17466,23 @@ vertical list, together with associated penalties and other insertions@>;
 incr(cur_line);cur_p=next_break(cur_p);
 if (cur_p!=null) if (!post_disc_break)
   @<Prune unwanted nodes at the beginning of the next line@>;
-if (cur_p!=null && just_color>=0)
-{ q = get_node(color_node_size);
-  type(q)=whatsit_node; subtype(q)=color_node;
-  color_node_ref(q)=just_color;
-  link(q)=link(temp_head);
-  link(temp_head)=q;
+if (cur_p!=null)
+{ if (just_color>=0)
+  { q = get_node(color_node_size);
+    type(q)=whatsit_node; subtype(q)=color_node;
+    color_node_ref(q)=just_color;
+    link(q)=link(temp_head);
+    link(temp_head)=q;
+  }
+  if (just_label>=0)
+  { q = get_node(link_node_size);
+    type(q)=whatsit_node; subtype(q)=start_link_node;
+    label_ref(q)=just_label;
+    label_has_name(q)=0;
+    link(q)=link(temp_head);
+    link(temp_head)=q;
+  }
+
 }
 }@+ while (!(cur_p==null));
 if ((cur_line!=best_line)||(link(temp_head)!=null))
@@ -25506,6 +25518,10 @@ if (subtype(p)==image_node)
 }
 else if (subtype(p)==color_node)
   just_color=color_node_ref(p);
+else if (subtype(p)==start_link_node)
+  just_label=label_ref(p);
+else if (subtype(p)==end_link_node)
+  just_label=-1;
 
 @ @<Let |d| be the width of the whatsit |p|@>=
 d=((subtype(p)==image_node)?image_width(p):0)

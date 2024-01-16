@@ -1158,13 +1158,6 @@ Now we can copy the default color set to |color_def[0]|.
 @<\HINT\ auxiliar functions@>=
 void hset_default_colors(void)
 { int i;
-  if (color_def==NULL)
-     QUIT("No color definitions allocated");
-  if (max_ref[color_kind]+1<sizeof(color_defaults)/sizeof(ColorSet))
-     QUIT("Not enough room for default colors");
-   if (max_ref[color_kind]<MAX_COLOR_DEFAULT)
-     QUIT("Too many default colors");
-     
   for (i=0; i<=MAX_COLOR_DEFAULT; i++)
     memcpy(color_def+i,color_defaults+i,sizeof(ColorSet));
 }
