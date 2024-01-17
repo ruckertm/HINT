@@ -39,9 +39,116 @@
 %\makefigindex
 \titletrue
 
+
+
 \null
 
-\input titlepage.tex
+\font\largetitlefont=cmssbx10 scaled\magstep4
+\font\Largetitlefont=cmssbx10 at 40pt
+\font\hugetitlefont=cmssbx10 at 48pt
+\font\smalltitlefontit=cmbxti10 scaled\magstep3
+\font\smalltitlefont=cmssbx10 scaled\magstep3
+
+%halftitle
+\def\raggedleft{\leftskip=0pt plus 5em\parfillskip=0pt
+\spaceskip=.3333em \xspaceskip=0.5em \emergencystretch=1em\relax
+\hyphenpenalty=1000\exhyphenpenalty=1000\pretolerance=10000\linepenalty=5000
+}
+\hbox{}
+\vskip 0pt plus 1fill
+{ \baselineskip=60pt
+  \hugetitlefont\hfill HINT\par
+  \Largetitlefont\raggedleft The Viewer\par
+}
+\vfill
+\eject
+% verso of half title
+\titletrue
+\null
+\vfill
+\eject
+
+% title
+\titletrue
+\hbox{}
+\vskip 1in
+{
+  \baselineskip=1cm\parindent=0pt
+  \leftline{\largetitlefont\raggedright HINT}
+  \vskip 0.5in
+  \leftline{\smalltitlefont The Viewer} 
+  \vskip 1.5in
+  \rightline{\it F\"ur Beatriz \hskip 2cm}
+  \vfill
+  \raggedright\baselineskip=12pt
+  {\bf MARTIN RUCKERT} \ {\it Munich University of Applied Sciences}\par
+  \bigskip
+  \leftline{First edition}
+  \bigskip
+%  \leftline{\bf Eigendruck im Selbstverlag}
+%  \bigskip
+}
+\eject
+
+% verso of title
+% copyright page (ii)
+\titletrue
+\begingroup
+\figrm
+\parindent=0pt
+%\null
+{\raggedright\advance\rightskip 3.5pc
+The author has taken care in the preparation of this book,
+but makes no expressed or implied warranty of any kind and assumes no
+responsibility for errors or omissions. No liability is assumed for
+incidental or consequential damages in connection with or arising out
+of the use of the information or programs contained herein.
+
+\bigskip
+{\figtt\obeylines\obeyspaces\baselineskip=11pt
+Ruckert, Martin.
+  HINT
+  Includes index.
+  ISBN 1-548-58234-4
+}
+\bigskip
+
+{\raggedright\advance\rightskip 3.5pc
+\def\:{\discretionary{}{}{}}
+Internet page  {\tt http:\://hint.\:userweb.\:mwn.\:de/\:hint/\:format.html}
+may contain current information about this book, downloadable software,
+and news. 
+
+\vfill
+Copyright $\copyright$ 2019 by Martin Ruckert
+\smallskip
+All rights reserved.
+Printed using CreateSpace.
+This publication is protected by copyright, and permission must be
+obtained prior to any prohibited reproduction, storage in
+a~retrieval system, or transmission in any form or by any means, electronic,
+mechanical, photocopying, recording, or likewise. 
+To obtain permission to use material from this work, please submit a written 
+request to Martin Ruckert, 
+Hochschule M\"unchen, 
+Fakult\"at f\"ur Informatik und Mathematik,
+Lothstrasse 64, 
+80335 M\"unchen, 
+Germany.
+\medskip
+{\tt ruckert\:@@cs.hm.edu}
+\medskip
+ISBN-10: 0-000-00000-0
+
+ISBN-13: 000-0000000000
+\medskip
+First printing, August 2019\par
+\medskip
+Last commit: \input lastcommit.tex
+\par
+}
+}
+\endgroup
 
 
 \frontmatter
@@ -1192,9 +1299,48 @@ static void hget_color_def(uint8_t a, int i)
     }
   }
 }
-
 @
 
+Currently the background color is set for the entire page
+from the normal text background color in |color_def[0]|.
+Changes in background color within the page are ignored.
+
+Because the background needs to be rendered before rendering glyphs, rules,
+and images, it is either necessary to know the extend of the color change
+before rendering the latter or it is necessary to postpone their actual
+rendering. Let us discuss both alternatives for the case of links in an
+horizontal box. The other cases are similar.
+
+Any color change caused by a link in an horizontal list
+is restricted to that list.
+It starts with a |start_link_node| and ends with an |end_link_node|.
+When the renderer encounters the |start_link_node| it knows
+the height and depth of the enclosing box, which is equal to the height
+and depth of the background change, but the width of the background change,
+which is equal to the distance to the |end_link_node| is still unknown.
+It is possible to traverse the node list up to the |end_list_node| and
+compute the position of the |end_list node| using the same method that
+the renderer uses to compute all positions. Computing the width of glue nodes
+requires the use of the |glue_ratio| of the enclosing box;
+all other width-calculations are quite simple.
+
+The more performant alternative is caching the information about which glyphs
+and rules to write at which locations in an array until the |end_link_node|
+is found. Then we can first render the background and
+after that pass the whole array in a single write operation
+to the graphic card. Writing a large chunk of information to the graphic
+card is usually faster than writing many small chunks of data.
+
+To summarize:
+The first method requires traversing the node list twice.
+The code is lengthy but it is just a simplified variation
+of the normal rendering procedure.
+The runtime overhead is small but not zero.
+The second method would even improve the performance, but
+requires a more complex code in the native rendering engine.
+Unless one is willing to implement the changes in the native
+renderer because of its better performance, the first method
+is probably the better alternative.
 
 \subsection{References}
 There are only a few functions that still need to be defined.
@@ -6404,6 +6550,7 @@ to the color set definition to the renderer using the
 
 @<native rendering definitions@>=
 extern void nativeSetColor(ColorSet *cs);
+extern void nativeBackground(double x, double y, double h, double w,int style);
 @
 
 
@@ -6441,7 +6588,7 @@ static int cur_color=0;
 
 @<render functions@>=
 static void vlist_render(pointer this_box);
-
+static scaled hcolor_distance(pointer p,uint8_t g_sign,glue_ord g_order,glue_ratio g_set);
 static void hlist_render(pointer this_box)
 { scaled base_line;
 scaled left_edge;
@@ -6550,8 +6697,15 @@ render_c:
            cur_h= cur_h+w; 
          } break;
 	 case color_node:
-	   { cur_color =color_node_ref(p);
+	   { scaled x,y,w,h;
+	     x=cur_h;
+	     y=cur_v+depth(this_box);
+	     w=hcolor_distance(link(p),g_sign,g_order,glue_set(this_box));
+	     h=height(this_box)+depth(this_box);
+	     cur_color =color_node_ref(p);
 	     nativeSetColor(color_def+cur_color);
+	     if (w>0 && h>0)
+	       nativeBackground(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),0);
 	   }
          default: break;
        }
@@ -6811,6 +6965,83 @@ move_past:
 
 @
 
+A simplified version of |hlist_render| is used to determine
+the distance to the next color change.
+
+@<render functions@>=
+static scaled hcolor_distance(pointer p,uint8_t g_sign,glue_ord g_order,glue_ratio g_set)
+{ scaled dist=0; /* the distance */
+  double cur_glue=0.0; /*glue seen so far*/
+  scaled cur_g=0;  /*rounded equivalent of |cur_glue| times the glue ratio*/
+  double glue_temp;  /*glue value before rounding*/
+  uint8_t f;
+  uint32_t c;
+while(p!=null)
+{ if(is_char_node(p))
+  { do
+    { f= font(p);
+      c= character(p);
+render_c:        
+      dist= dist+char_width(f, char_info(f, c));
+      p= link(p);
+    } while(is_char_node(p));
+  }
+  else
+  { switch(type(p)) 
+    { case hlist_node:
+      case vlist_node:
+      case rule_node:
+      case kern_node:
+      case math_node:
+        dist= dist+width(p);
+        break;
+      case ligature_node:
+        f= font(lig_char(p));
+        c= character(lig_char(p));
+        goto render_c;
+      case whatsit_node:
+        switch (subtype(p))
+        { case start_link_node: 
+          case end_link_node: 
+	  case color_node:
+	    return dist;
+          case image_node:
+            dist= dist+image_width(p);
+            break;
+          default: break;
+        }
+        break;
+      case glue_node:
+      { pointer g;
+        scaled wd;
+        g=glue_ptr(p);wd= width(g)-cur_g;
+        if(g_sign!=normal)
+        { if(g_sign==stretching)
+          { if(stretch_order(g)==g_order)
+            { cur_glue= cur_glue+stretch(g);
+              vet_glue(g_set*cur_glue);
+              cur_g= round(glue_temp);
+            }
+          }
+          else if(shrink_order(g)==g_order)
+          { cur_glue= cur_glue-shrink(g);
+            vet_glue(g_set*cur_glue);
+            cur_g= round(glue_temp);
+          }
+        }
+        wd= wd+cur_g;
+        dist= dist+wd;
+      }
+      break;
+      default:;
+    }
+    p= link(p);
+  }
+} /* end |while| */
+return dist;
+} /* end |hcolor_distance| */
+
+@
 
 We conclude this section with the function that must be called after the page builder has finished
 the page: the |hint_render| function.

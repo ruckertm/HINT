@@ -24,10 +24,11 @@ HINT 2.0 created by stretch
  <stream 2>
  <page 1>
  <color 2>>
-<color *1 (transparent green, transparent red)
- <<<0x00 0xFF 0 0x80>>> <<<0xFF 0 0 0x80>>>>  
-<color *2 (dark green,  light red)
- <<<0x00 0x10 0>>> <<<0xFF 0x40 0x40>>>>  
+<color *1 (transparent green/blue, transparent red/yellow)
+ <<<0x00 0xFF 0 0x80> <0x40 0x40 0xFF 0x80>>>
+ <<<0xFF 0 0 0x80> <0xFF 0xFF 0 0x80>>>>  
+<color *2 (dark green/grey,  light red/grey)
+ <<<0x00 0x40 0> <80 80 80>>> <<<0xFF 0x40 0x40>  <80 80 80>>>>  
 <color *0 (dark blue on light yellow, light yellow on dark blue)
  <<<0x00 0x00 0x10> <0xFF 0xFF 0xCC>>> <<<0xFF 0xFF 0x88> <0 0 0x10>>>>
 <language *0 'unknown'>
@@ -174,21 +175,27 @@ HINT 2.0 created by stretch
  <
   <hset 0x1B.C71Dpt 0pt 0x76.D4EBpt plus 1fil minus 1fil *1
    <
-    <color *1>
-    <glue *15>
+    
+    <color *2>
     <glyph 'P' *0 (titlefont)>
     <glyph 'r' *0 (titlefont)>
+    <glue *15>
+    <color *0>
+    <kern -10pt>
+    <color *1>
     <glyph 'e' *0 (titlefont)>
     <glyph 'f' *0 (titlefont)>
     <glyph 'a' *0 (titlefont)>
     <glyph 'c' *0 (titlefont)>
-    <glyph 'e' *0 (titlefont)>>>
+    <glyph 'e' *0 (titlefont)>
+    <kern -25pt>>>
   <glue *15>>>
 <glue *16>
 <glue *17>
 <baseline *1>
 <par *1 *1
  <1814
+  <color *2>
   <hbox 0pt 0pt 0pt
    <
     <hbox 0x12.F1C7pt 0pt 0pt shifted 12pt plus 0x10.8E3Cfill
@@ -235,6 +242,7 @@ HINT 2.0 created by stretch
   <glyph 'y' *3 (tenrm)>
   <glue *22>
   <color *1>
+  <rule 8.5pt 3.5pt 0pt>
   <glyph 'm' *3 (tenrm)>
   <glyph 'a' *3 (tenrm)>
   <glyph 't' *3 (tenrm)>
@@ -257,6 +265,7 @@ HINT 2.0 created by stretch
   <glyph 'a' *3 (tenrm)>
   <glyph 'n' *3 (tenrm)>
   <glyph 's' *3 (tenrm)>
+  <rule 8.5pt 3.5pt 0pt>
   <color *2>
   <glue *22>
   <glyph 'w' *3 (tenrm)>

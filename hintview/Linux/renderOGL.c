@@ -420,6 +420,15 @@ void nativeRule(double x, double y, double w, double h)
   //LOG("nativeRule %f@%f %fx%f Done\n",x,y,w,h);
 }
 
+void nativeBackground(double x, double y, double w, double h,int style)
+{ uint8_t *bg,*fg;
+  fg=cur_colorset[0][cur_mode?1:0][cur_style][0];
+  bg=cur_colorset[0][cur_mode?1:0][style][1];
+  glUniform4f(FGcolorID, bg[0]/255.0f,bg[1]/255.0f,bg[2]/255.0f,bg[3]/255.0f);
+  nativeRule(x,y,w,h);
+  glUniform4f(FGcolorID, fg[0]/255.0f,fg[1]/255.0f,fg[2]/255.0f,fg[3]/255.0f);
+}
+
 void nativeImage(double x, double y, double w, double h, unsigned char *b, unsigned char *e)
 /* render the image found between *b and *e at x,y with size w,h.
    x, y, w, h are given in point
