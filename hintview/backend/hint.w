@@ -6546,11 +6546,24 @@ void render_image(int x, int y, int w, int h, uint32_t n)
 \subsection{Colors}
 When a color node occurs on a page, we pass the pointer
 to the color set definition to the renderer using the
-|nativeSetColor| function.
+|nativeSetColor| function. Further the background might
+change, which requires a computation of the area of the change and
+a call to |nativeBackground|.
 
 @<native rendering definitions@>=
 extern void nativeSetColor(ColorSet *cs);
 extern void nativeBackground(double x, double y, double h, double w,int style);
+@
+
+@<handle a change in the background color@>=
+{ scaled x,y,w,h;
+  x=cur_h;
+  y=cur_v+depth(this_box);
+  w=hcolor_distance(link(p),g_sign,g_order,glue_set(this_box));
+  h=height(this_box)+depth(this_box);
+  if (w>0 && h>0)
+    nativeBackground(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),cur_style&LINK_BIT?1:0);
+}
 @
 
 
@@ -6687,8 +6700,14 @@ render_c:
      case whatsit_node:
        switch (subtype(p))
        { case ignore_node: @<handle an ignore node@>@;break;
-         case start_link_node: @<handle a start link node@>@;break;
-         case end_link_node: @<handle an end link node@>@;break;
+         case start_link_node:
+	   @<handle a start link node@>@;
+	   @<handle a change in the background color@>@;
+	   break;
+         case end_link_node:
+	   @<handle an end link node@>@;
+	   @<handle a change in the background color@>@;
+	   break;
          case image_node:
          { scaled h,w;
            w=image_width(p);
@@ -6697,16 +6716,10 @@ render_c:
            cur_h= cur_h+w; 
          } break;
 	 case color_node:
-	   { scaled x,y,w,h;
-	     x=cur_h;
-	     y=cur_v+depth(this_box);
-	     w=hcolor_distance(link(p),g_sign,g_order,glue_set(this_box));
-	     h=height(this_box)+depth(this_box);
-	     cur_color =color_node_ref(p);
-	     nativeSetColor(color_def+cur_color);
-	     if (w>0 && h>0)
-	       nativeBackground(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),0);
-	   }
+	   cur_color =color_node_ref(p);
+	   nativeSetColor(color_def+cur_color);
+           @<handle a change in the background color@>
+	   break;
          default: break;
        }
        break;

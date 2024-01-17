@@ -18,12 +18,12 @@ HINT 2.0 created by stretch
  <int 23>>
 <color *1 (transparent green/blue, transparent red/yellow)
  <<<0x00 0xFF 0 0x80> <0x40 0x40 0xFF 0x80>>>
- <<<0xFF 0 0 0x80> <0xFF 0xFF 0 0x80>>>>  
+ <<<0xFF 0 0 0x80> <0xFF 0xFF 0 0x80>> <<0xFF 0 0 0x80> <0xFF 0xFF 0 0xC0>>>>  
 <color *2 (dark green/grey,  light red/grey)
  <<<0x00 0x40 0> <80 80 80>>> <<<0xFF 0x40 0x40>  <80 80 80>>>>  
 <color *0 (dark blue on light yellow, light yellow on dark blue)
- <<<0x00 0x00 0x80> <0xFF 0xFF 0xCC>> <<0x00 0x00 0x80> <0xFF 0xFF 0x00>>>
- <<<0xFF 0xFF 0x88> <0 0 0x10>>>>
+ <<<0x00 0x00 0x40> <0xFF 0xFF 0xCC>> <<0x00 0x00 0x80> <0xFF 0xFF 0x00>>>
+ <<<0xFF 0xFF 0x80> <0 0 0x10>> <<0xFF 0xFF 0x00> <0xFF 0 0x10>>>>
 <language *0 'unknown'>
 <font *0 'tenrm' 10pt 3 4
  <glue 0x3.5555pt plus 0x1.AAAApt minus 0x1.1C72pt>
@@ -121,6 +121,7 @@ HINT 2.0 created by stretch
   <glyph 'o' *0 (tenrm)>
   <glue *15>
   <link *2 on>
+  <rule 8pt 3pt 0pt>
   <glyph 'n' *0 (tenrm)>
   <kern *10>
   <glyph 'u' *0 (tenrm)>
@@ -132,12 +133,16 @@ HINT 2.0 created by stretch
   <glyph 'e' *0 (tenrm)>
   <glyph 'r' *0 (tenrm)>
   <glue *15>
-  <hbox 0x6.71C7pt 0pt 0x5.0001pt
-   <
-    <glyph '2' *0 (tenrm)>>>
+  <hbox 0x6.71C7pt 0pt 0x8.0001pt
+   < <color *1>
+    <glyph '2' *0 (tenrm)>
+    <kern 3pt>>>
+  <kern 3pt>  
+  <rule 8pt 3pt 0pt>
   <link *2 off>
   <glyph '.' *0 (tenrm)>
   <glue *16>
+  <color *1>
   <glyph 'G' *0 (tenrm)>
   <glyph 'o' *0 (tenrm)>
   <glyph 't' *0 (tenrm)>
