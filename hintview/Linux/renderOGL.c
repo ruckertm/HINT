@@ -376,6 +376,13 @@ void nativeSetColor(ColorSet *cs)
   nativeSetDark(cur_mode);
 }
 
+void nativeSetStyle(int s)
+{ if (s!=cur_style)
+  { cur_style=s;
+    nativeSetDark(cur_mode);
+  }
+}
+
 
 
 static float pt_h=600.0, pt_v=800.0;
@@ -554,7 +561,7 @@ void nativeSetFreeType(struct gcache_s *g)
 
 int round_to_pixel=1; /* makes sense only if using the native dpi, if using a multiple its of not much use*/
 double pixel_size_threshold= 72.27/200; /*round to pixel only if pixel size in pt is above threshold*/
-void nativeGlyph(double x, double dx, double y, double dy, double w, double h, struct gcache_s *g, uint8_t s)
+void nativeGlyph(double x, double dx, double y, double dy, double w, double h, struct gcache_s *g, int s)
 /* given glyph g, display g at position x,y in size w,h. x, y, w, h are given in point */
 {  
 	if (g->GLtexture == 0)
@@ -587,16 +594,11 @@ void nativeGlyph(double x, double dx, double y, double dy, double w, double h, s
     glBindTexture(GL_TEXTURE_2D, g->GLtexture);
     checkGlError("glBindTexture g->GLtexture");
 
-    { int new_style;
-      if (s&FOCUS_BIT) new_style=3;
-      else if (s&MARK_BIT) new_style=2;
-      else if (s&LINK_BIT) new_style=1;
-      else new_style=0;
-      if (new_style!=cur_style)
-      { cur_style=new_style;
+
+      if (s!=cur_style)
+      { cur_style=s;
         nativeSetDark(cur_mode);
       }
-    }
 
     glBindBuffer(GL_ARRAY_BUFFER, xybuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(xy), xy, GL_STREAM_DRAW);
