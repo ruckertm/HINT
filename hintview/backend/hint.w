@@ -385,7 +385,7 @@ free(integer_def); integer_def=NULL;
 @
 
 @<\HINT\ auxiliar functions@>=
-static int32_t hget_integer_def(uint8_t a)
+static int32_t hget_integer_def(uint8_t a) 
 {@+ if (INFO(a)==1) {@+ int8_t n=HGET8; @+return n;@+}
   else  if (INFO(a)==2) {@+ int16_t n;@+ HGET16(n);@+ return n;@+}
   else if (INFO(a)==4) {@+int32_t n;@+ HGET32(n);@+ return n;@+}
@@ -6584,12 +6584,23 @@ extern void nativeSetStyle(int s);
 extern void nativeBackground(double x, double y, double h, double w,int style);
 @
 
-@<handle a change in the background color@>=
+@<handle a horizontal change in the background color@>=
 { scaled x,y,w,h;
   x=cur_h;
   y=cur_v+depth(this_box);
   w=hcolor_distance(link(p),g_sign,g_order,glue_set(this_box));
   h=height(this_box)+depth(this_box);
+  if (w>0 && h>0)
+    nativeBackground(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),style_bits&LINK_BIT?1:0);
+}
+@
+
+@<handle a vertical change in the background color@>=
+{ scaled x,y,w,h;
+  x=left_edge;
+  h=vcolor_distance(link(p),g_sign,g_order,glue_set(this_box));
+  y=cur_v+h;
+  w=width(this_box);
   if (w>0 && h>0)
     nativeBackground(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),style_bits&LINK_BIT?1:0);
 }
@@ -6631,6 +6642,7 @@ static int cur_color=0;
 @<render functions@>=
 static void vlist_render(pointer this_box);
 static scaled hcolor_distance(pointer p,uint8_t g_sign,glue_ord g_order,glue_ratio g_set);
+static scaled vcolor_distance(pointer p,uint8_t g_sign,glue_ord g_order,glue_ratio g_set);
 static void hlist_render(pointer this_box)
 { scaled base_line;
 scaled left_edge;
@@ -6732,12 +6744,12 @@ render_c:
          case start_link_node:
 	   @<handle a start link node@>@;
 	   nativeSetStyle(style_no());
-	   @<handle a change in the background color@>@;
+	   @<handle a horizontal change in the background color@>@;
 	   break;
          case end_link_node:
 	   @<handle an end link node@>@;
 	   nativeSetStyle(style_no());
-	   @<handle a change in the background color@>@;
+	   @<handle a horizontal change in the background color@>@;
 	   break;
          case image_node:
          { scaled h,w;
@@ -6749,7 +6761,7 @@ render_c:
 	 case color_node:
 	   cur_color =color_node_ref(p);
 	   nativeSetColor(color_def+cur_color);
-           @<handle a change in the background color@>
+           @<handle a horizontal change in the background color@>
 	   break;
          default: break;
        }
@@ -6867,7 +6879,7 @@ scaled edge;
 double glue_temp;
 double cur_glue;
 scaled cur_g;
-
+int local_link=-1;
 cur_g= 0;cur_glue= float_constant(0);
 g_order= glue_order(this_box);
 g_sign= glue_sign(this_box);p= list_ptr(this_box);
@@ -6907,13 +6919,32 @@ while(p!=null)
 	    rule_ht= height(p);rule_dp= depth(p);rule_wd= width(p);
         goto fin_rule;
       case whatsit_node:
-              if (subtype(p)==image_node)
-		{ scaled h,w;
-		  w=image_width(p);
-		  h=image_height(p);
-		  cur_v= cur_v+h; 
-  		  render_image(cur_h, cur_v, w, h,image_no(p));
-		}
+        switch (subtype(p))
+        { case start_link_node:
+	    @<handle a start link node@>@;
+	    nativeSetStyle(style_no());
+	    @<handle a vertical change in the background color@>@;
+	    break;
+          case end_link_node:
+	    @<handle an end link node@>@;
+	    nativeSetStyle(style_no());
+	    @<handle a vertical change in the background color@>@;
+	    break;
+	  case color_node:
+	    cur_color =color_node_ref(p);
+	    nativeSetColor(color_def+cur_color);
+            @<handle a vertical change in the background color@>
+	    break;
+          case image_node:
+          { scaled h,w;
+	    w=image_width(p);
+	    h=image_height(p);
+	    cur_v= cur_v+h; 
+  	    render_image(cur_h, cur_v, w, h, image_no(p));
+	  }
+          break;
+          default: break;
+        }
         break;
       case glue_node:
 	  { pointer g= glue_ptr(p);rule_ht= width(g)-cur_g;

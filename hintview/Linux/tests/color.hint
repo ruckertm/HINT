@@ -111,6 +111,21 @@ HINT 2.0 created by stretch
   <kern -20pt>
   <glyph 'C' *0 (tenrm)>
   <glue *15>>>
+  <rule 2pt 0pt _>
+<vbox 100pt 0pt 100pt
+ <
+  <color *1>
+  <rule 2pt 0pt _>
+  <kern 18pt>
+  <color *0>
+  <rule 2pt 0pt _>
+  <kern 28pt>
+  <color *2>
+  <kern 48pt>
+  <rule 2pt 0pt _>
+ >
+>
+<rule 2pt 0pt _>
 <glue *15>
 <penalty *23>
 >

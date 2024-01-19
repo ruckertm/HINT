@@ -594,11 +594,7 @@ void nativeGlyph(double x, double dx, double y, double dy, double w, double h, s
     glBindTexture(GL_TEXTURE_2D, g->GLtexture);
     checkGlError("glBindTexture g->GLtexture");
 
-
-      if (s!=cur_style)
-      { cur_style=s;
-        nativeSetDark(cur_mode);
-      }
+    nativeSetStyle(s);
 
     glBindBuffer(GL_ARRAY_BUFFER, xybuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(xy), xy, GL_STREAM_DRAW);

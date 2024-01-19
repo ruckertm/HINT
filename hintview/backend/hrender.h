@@ -1,5 +1,5 @@
-/*402:*/
-#line 8209 "hint.w"
+/*403:*/
+#line 8240 "hint.w"
 
 #ifndef _HRENDER_H
 #define _HRENDER_H
@@ -17,7 +17,7 @@
 
 #define SP2PT(X) ((X)/(double)(1<<16))
 /*:344*/
-#line 8212 "hint.w"
+#line 8243 "hint.w"
 
 
 extern int page_h,page_v;
@@ -48,4 +48,4 @@ extern int hint_print_on(int w,int h,int bpr,int bpp,unsigned char*bits);
 extern int hint_print_off(void);
 extern int hint_print(unsigned char*bits);
 #endif
-/*:402*/
+/*:403*/

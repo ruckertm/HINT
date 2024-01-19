@@ -1,5 +1,5 @@
-/*401:*/
-#line 8180 "hint.w"
+/*402:*/
+#line 8211 "hint.w"
 
 #include "basetypes.h"
 #include <string.h> 
@@ -235,7 +235,7 @@ tail_append(p);}
   label_has_name(p)= 0;\
   tail_append(p);}
 /*:214*/
-#line 8193 "hint.w"
+#line 8224 "hint.w"
 
 /*95:*/
 #line 1621 "hint.w"
@@ -434,7 +434,7 @@ tail_append(p);}
   label_has_name(p)= 0;\
   tail_append(p);}
 /*:215*/
-#line 8194 "hint.w"
+#line 8225 "hint.w"
 
 
 /*21:*/
@@ -465,7 +465,7 @@ typedef struct ParamDef{
 struct ParamDef*next;
 Param p;}ParamDef;
 /*:37*/
-#line 8196 "hint.w"
+#line 8227 "hint.w"
 
 
 /*2:*/
@@ -577,13 +577,13 @@ int page_v,page_h,offset_v,offset_h;
 
 hint_Link*hint_links= NULL;
 int max_link= -1;
-/*:323*//*388:*/
-#line 7875 "hint.w"
+/*:323*//*389:*/
+#line 7906 "hint.w"
 
 jmp_buf hint_error_exit;
 char hint_error_string[MAX_HINT_ERROR];
-/*:388*/
-#line 8198 "hint.w"
+/*:389*/
+#line 8229 "hint.w"
 
 /*3:*/
 #line 327 "hint.w"
@@ -629,7 +629,7 @@ static pointer hteg_list_pointer(void);
 
 static scaled hget_xdimen_node(void);
 /*:133*/
-#line 8199 "hint.w"
+#line 8230 "hint.w"
 
 /*9:*/
 #line 387 "hint.w"
@@ -2167,8 +2167,8 @@ trv_hlist(p);
 trv_string[trv_string_size]= 0;
 return trv_string;
 }
-/*:294*//*398:*/
-#line 8109 "hint.w"
+/*:294*//*399:*/
+#line 8140 "hint.w"
 
 static pointer leaks[1<<16]= {0};
 
@@ -2208,8 +2208,8 @@ if(leaks[i]!=0)
 fprintf(stderr,"ERROR:leak final: p=%d, s=%d\n",i,leaks[i]);
 #endif
 }
-/*:398*/
-#line 8200 "hint.w"
+/*:399*/
+#line 8231 "hint.w"
 
 /*1:*/
 #line 231 "hint.w"
@@ -2856,7 +2856,7 @@ if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
 return par_ptr;
 }
 /*:177*/
-#line 8201 "hint.w"
+#line 8232 "hint.w"
 
 /*91:*/
 #line 1563 "hint.w"
@@ -3217,7 +3217,7 @@ line_break_params= save_lbp;
 }
 
 /*:187*/
-#line 8202 "hint.w"
+#line 8233 "hint.w"
 
 
 /*18:*/
@@ -4016,7 +4016,7 @@ p= link(p);
 }
 }
 /*:292*/
-#line 8204 "hint.w"
+#line 8235 "hint.w"
 
 
-/*:401*/
+/*:402*/
