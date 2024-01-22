@@ -1,5 +1,5 @@
-	/*537:*/
-	#line 11015 "format.w"
+	/*538:*/
+	#line 11080 "format.w"
 
 #ifndef __BASETYPES_H__
 #define __BASETYPES_H__
@@ -47,4 +47,4 @@ typedef double float64_t;
 #define VERSION_AS_STR(X,Y) AS_STR(X) "." AS_STR(Y)
 #define HINT_VERSION_STRING VERSION_AS_STR(HINT_VERSION, HINT_MINOR_VERSION)
 #endif
-	/*:537*/
+	/*:538*/

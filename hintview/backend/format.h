@@ -1,19 +1,19 @@
-	/*538:*/
-	#line 11068 "format.w"
+	/*539:*/
+	#line 11133 "format.w"
 
 #ifndef _HFORMAT_H_
 #define _HFORMAT_H_
 	/*375:*/
-	#line 8325 "format.w"
+	#line 8378 "format.w"
 
 #define REF_RNG(K,N) if ((int)(N)>max_ref[K]) QUIT("Reference %d to %s out of range [0 - %d]",\
   (N),definition_name[K],max_ref[K])
 	/*:375*/	/*376:*/
-	#line 8339 "format.w"
+	#line 8392 "format.w"
 
 #define MAX_REF(K) ((K)==label_kind?0xFFFF:0xFF)
 	/*:376*/	/*454:*/
-	#line 9857 "format.w"
+	#line 9916 "format.w"
 
 #ifdef WIN32
 #define SIZE_F "0x%tx"
@@ -32,10 +32,10 @@
 
 #define TAGERR(A) QUIT("Unknown tag [%s,%d] at " SIZE_F "\n",NAME(A),INFO(A),hpos-hstart)
 	/*:454*/
-	#line 11071 "format.w"
+	#line 11136 "format.w"
 
 	/*441:*/
-	#line 9596 "format.w"
+	#line 9655 "format.w"
 
 #define DBGNONE     0x0
 #define DBGBASIC    0x1
@@ -55,7 +55,7 @@
 #define DBGRENDER   0x4000
 #define DBGLABEL    0x8000
 	/*:441*/
-	#line 11072 "format.w"
+	#line 11137 "format.w"
 
 	/*13:*/
 	#line 646 "format.w"
@@ -88,28 +88,28 @@
 #define LABEL_BOT 2
 #define LABEL_MID 3
 	/*:251*/	/*320:*/
-	#line 6981 "format.w"
+	#line 7034 "format.w"
 
 #define ALLOCATE(R,S,T) ((R)= (T *)calloc((S),sizeof(T)),\
         (((R)==NULL)?QUIT("Out of memory for " #R):0))
 #define REALLOCATE(R,S,T) ((R)= (T *)realloc((R),(S)*sizeof(T)),\
         (((R)==NULL)?QUIT("Out of memory for " #R):0))
 	/*:320*/	/*328:*/
-	#line 7146 "format.w"
+	#line 7199 "format.w"
 
 #define MAX_BANNER 256
 	/*:328*/	/*341:*/
-	#line 7357 "format.w"
+	#line 7410 "format.w"
 
 #define MAX_TAG_DISTANCE 32
 	/*:341*/	/*457:*/
-	#line 9922 "format.w"
+	#line 9981 "format.w"
 
 #define NODE_SIZE(H,T) ((T)==0?(H)+2:-4*((H)+1)+((T)-1))
 #define NODE_HEAD(N)   ((N)>0?(N)-2:-((N)>>2)-1)
 #define NODE_TAIL(N)   ((N)<0?((N)&0x3)+1:0)
 	/*:457*/
-	#line 11073 "format.w"
+	#line 11138 "format.w"
 
 	/*6:*/
 	#line 493 "format.w"
@@ -230,14 +230,14 @@ int next;
 uint8_t f;
 }Label;
 	/*:250*/	/*399:*/
-	#line 8870 "format.w"
+	#line 8923 "format.w"
 
 #define MAX_FONT_PARAMS 11
 	/*:399*/
-	#line 11074 "format.w"
+	#line 11139 "format.w"
 
 	/*412:*/
-	#line 9109 "format.w"
+	#line 9162 "format.w"
 
 typedef enum{
 zero_int_no= 0,
@@ -266,7 +266,7 @@ floating_penalty_no= 22
 }Int_no;
 #define MAX_INT_DEFAULT floating_penalty_no
 	/*:412*/	/*414:*/
-	#line 9182 "format.w"
+	#line 9235 "format.w"
 
 typedef enum{
 zero_dimen_no= 0,
@@ -282,7 +282,7 @@ math_quad_no= 9
 }Dimen_no;
 #define MAX_DIMEN_DEFAULT math_quad_no
 	/*:414*/	/*416:*/
-	#line 9227 "format.w"
+	#line 9280 "format.w"
 
 typedef enum{
 zero_xdimen_no= 0,
@@ -291,7 +291,7 @@ vsize_xdimen_no= 2
 }Xdimen_no;
 #define MAX_XDIMEN_DEFAULT vsize_xdimen_no
 	/*:416*/	/*418:*/
-	#line 9251 "format.w"
+	#line 9304 "format.w"
 
 typedef enum{
 zero_skip_no= 0,
@@ -312,56 +312,56 @@ par_fill_skip_no= 14
 }Glue_no;
 #define MAX_GLUE_DEFAULT par_fill_skip_no
 	/*:418*/	/*420:*/
-	#line 9337 "format.w"
+	#line 9390 "format.w"
 
 typedef enum{
 zero_baseline_no= 0
 }Baseline_no;
 #define MAX_BASELINE_DEFAULT zero_baseline_no
 	/*:420*/	/*422:*/
-	#line 9362 "format.w"
+	#line 9415 "format.w"
 
 typedef enum{
 zero_label_no= 0
 }Label_no;
 #define MAX_LABEL_DEFAULT zero_label_no
 	/*:422*/	/*424:*/
-	#line 9376 "format.w"
+	#line 9429 "format.w"
 
 typedef enum{
 zero_stream_no= 0
 }Stream_no;
 #define MAX_STREAM_DEFAULT zero_stream_no
 	/*:424*/	/*426:*/
-	#line 9392 "format.w"
+	#line 9445 "format.w"
 
 typedef enum{
 zero_page_no= 0
 }Page_no;
 #define MAX_PAGE_DEFAULT zero_page_no
 	/*:426*/	/*428:*/
-	#line 9409 "format.w"
+	#line 9462 "format.w"
 
 typedef enum{
 zero_range_no= 0
 }Range_no;
 #define MAX_RANGE_DEFAULT zero_range_no
 	/*:428*/	/*430:*/
-	#line 9422 "format.w"
+	#line 9475 "format.w"
 
 typedef enum{
 empty_list_no= 0
 }List_no;
 #define MAX_LIST_DEFAULT empty_list_no
 	/*:430*/	/*432:*/
-	#line 9437 "format.w"
+	#line 9490 "format.w"
 
 typedef enum{
-zero_color_no= 0
+zero_color_no= 0,link_color_no= 1
 }Color_no;
-#define MAX_COLOR_DEFAULT zero_color_no
+#define MAX_COLOR_DEFAULT link_color_no
 	/*:432*/
-	#line 11075 "format.w"
+	#line 11140 "format.w"
 
 
 extern const char*content_name[32];
@@ -375,9 +375,9 @@ extern Xdimen xdimen_defaults[MAX_XDIMEN_DEFAULT+1];
 extern Glue glue_defaults[MAX_GLUE_DEFAULT+1];
 extern Baseline baseline_defaults[MAX_BASELINE_DEFAULT+1];
 extern Label label_defaults[MAX_LABEL_DEFAULT+1];
-extern uint8_t color_defaults[MAX_COLOR_DEFAULT+1][2][4][2][4];
+extern uint8_t color_defaults[MAX_COLOR_DEFAULT+1][2][3][2][4];
 extern signed char hnode_size[0x100];
 extern uint8_t content_known[32];
 
 #endif
-	/*:538*/
+	/*:539*/

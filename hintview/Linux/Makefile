@@ -51,6 +51,13 @@ all: hintview
 %.c: %.w
 	echo running ctangle disabled
 
+-include .depend
+
+.depend: main.c  renderOGL.c 
+	$(CC) -I../backend -MM *.c  > $@ || true
+
+
+
 main.o: main.c
 	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
 

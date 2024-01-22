@@ -1,5 +1,5 @@
-/*388:*/
-#line 7846 "hint.w"
+/*387:*/
+#line 7834 "hint.w"
 
 #ifndef _ERROR_H
 #define _ERROR_H
@@ -56,4 +56,4 @@ extern int hint_error(char*title,char*msg);
 #endif
 
 #endif
-/*:388*/
+/*:387*/

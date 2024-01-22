@@ -5,25 +5,17 @@ HINT 2.0 created by stretch
 >
 <definitions
 <max
+ <xdimen 3>
  <font 0>
- <dimen 11>
+ <dimen 13>
  <glue 18>
- <disc 0>
+ <disc 1>
  <language 0>
  <baseline 2>
  <stream 2>
  <page 1>
  <label 3>
- <color 2>
  <int 23>>
-(<color *1 transparent green/blue, transparent red/yellow)
-( <<<0x00 0xFF 0 0x80> <0x40 0x40 0xFF 0x80>>>
-( <<<0xFF 0 0 0x80> <0xFF 0xFF 0 0x80>> <<0xFF 0 0 0x80> <0xFF 0xFF 0 0xC0>>>>  
-<color *2 (dark green/grey,  light red/grey)
- <<<0x00 0x40 0> <80 80 80>>> <<<0xFF 0x40 0x40>  <80 80 80>>>>  
-(<color *0 dark blue on light yellow, light yellow on dark blue)
-( <<<0x00 0x00 0x40> <0xFF 0xFF 0xCC>> <<0x00 0x00 0x80> <0xFF 0xFF 0x00>>>
-( <<<0xFF 0xFF 0x80> <0 0 0x10>> <<0xFF 0xFF 0x00> <0xFF 0 0x10>>>>
 <language *0 'unknown'>
 <font *0 'tenrm' 10pt 3 4
  <glue 0x3.5555pt plus 0x1.AAAApt minus 0x1.1C72pt>
@@ -32,8 +24,8 @@ HINT 2.0 created by stretch
    <glyph '-' *0 (tenrm)>>>>
 <int *1 +1000>
 <int *2 +2000>
-<int *17 +902>
-<int *18 +11>
+<int *17 +991>
+<int *18 +19>
 <int *19 +1>
 <int *20 +2024>
 <int *22 +0>
@@ -47,20 +39,26 @@ HINT 2.0 created by stretch
 <dimen *9 0xA.0001pt>
 <dimen *10 -0x0.471Dpt>
 <dimen *11 0x0.471Dpt>
+<dimen *12 5pt>
+<dimen *13 -0x0.D556pt>
+<xdimen *3 90pt>
 <glue *12 10pt>
 <glue *15 0x3.5555pt plus 0x1.AAAApt minus 0x1.1C72pt>
 <glue *16 0x4.71C7pt plus 0x4.FFFEpt minus 0x0.5EDpt>
 <glue *17 0pt plus 1fill>
 <glue *18 0pt plus 1pt>
 <baseline *1 0pt
- <glue 24pt>
+ <glue 12pt>
  <glue 1pt>>
 <baseline *2 0pt
- <glue 12pt>
+ <glue 24pt>
  <glue 1pt>>
 <disc *0 2
  <
   <glyph 'm' *0 (tenrm)>
+  <glyph '-' *0 (tenrm)>>>
+<disc *1
+ <
   <glyph '-' *0 (tenrm)>>>
 <page *1 'basic' 10
  <glue *12> 4pt
@@ -90,15 +88,13 @@ HINT 2.0 created by stretch
 <label *0 top>
 <language *0>
 <par *1 *0
- <289
+ <768
   <hbox 0pt 0pt 20pt <>>
   <glyph 'G' *0 (tenrm)>
   <glyph 'o' *0 (tenrm)>
   <glyph 't' *0 (tenrm)>
   <glyph 'o' *0 (tenrm)>
   <glue *15>
-  <link *1 on>
-  <color *1>
   <glyph 'n' *0 (tenrm)>
   <kern *10>
   <glyph 'u' *0 (tenrm)>
@@ -110,42 +106,40 @@ HINT 2.0 created by stretch
   <glyph 'e' *0 (tenrm)>
   <glyph 'r' *0 (tenrm)>
   <glue *15>
+  <link *1 on>
   <hbox 0x6.71C7pt 0pt 0x5.0001pt
    <
     <glyph '1' *0 (tenrm)>>>
-  <color *0>  
+  <glue *15>
   <link *1 off>
+  <kern ! *12>
+  <rule | | 5pt>
   <glyph '.' *0 (tenrm)>
   <glue *16>
-  <color *2>  
   <glyph 'G' *0 (tenrm)>
   <glyph 'o' *0 (tenrm)>
   <glyph 't' *0 (tenrm)>
   <glyph 'o' *0 (tenrm)>
+  <glue *15>
+  <glyph 'n' *0 (tenrm)>
+  <kern *10>
+  <glyph 'u' *0 (tenrm)>
+  <disc *0>
+  <glyph 'm' *0 (tenrm)>
+  <kern *10>
+  <glyph 'b' *0 (tenrm)>
+  <kern *11>
+  <glyph 'e' *0 (tenrm)>
+  <glyph 'r' *0 (tenrm)>
   <glue *15>
   <link *2 on>
-  <color *1>
-  <rule 8pt 3pt 0pt>
-  <glyph 'n' *0 (tenrm)>
-  <kern *10>
-  <glyph 'u' *0 (tenrm)>
-  <disc *0>
-  <glyph 'm' *0 (tenrm)>
-  <kern *10>
-  <glyph 'b' *0 (tenrm)>
-  <kern *11>
-  <glyph 'e' *0 (tenrm)>
-  <glyph 'r' *0 (tenrm)>
-  <glue *15>
-  <hbox 0x6.71C7pt 0pt 0x8.0001pt
+  <hbox 0x6.71C7pt 0pt 0x5.0001pt
    <
-    <color *2>  
-    <glyph '2' *0 (tenrm)>
-    <kern 3pt>>>
-  <kern 3pt>  
-  <rule 8pt 3pt 0pt>
-  <color *0>  
+    <glyph '2' *0 (tenrm)>>>
+  <glue *15>
   <link *2 off>
+  <kern ! *12>
+  <rule | | 5pt>
   <glyph '.' *0 (tenrm)>
   <glue *16>
   <glyph 'G' *0 (tenrm)>
@@ -153,8 +147,6 @@ HINT 2.0 created by stretch
   <glyph 't' *0 (tenrm)>
   <glyph 'o' *0 (tenrm)>
   <glue *15>
-  <link *3 on>
-  <color *1>
   <glyph 'n' *0 (tenrm)>
   <kern *10>
   <glyph 'u' *0 (tenrm)>
@@ -166,19 +158,123 @@ HINT 2.0 created by stretch
   <glyph 'e' *0 (tenrm)>
   <glyph 'r' *0 (tenrm)>
   <glue *15>
+  <link *3 on>
   <hbox 0x6.71C7pt 0pt 0x5.0001pt
    <
     <glyph '3' *0 (tenrm)>>>
-  <color *0>  
+  <glue *15>
   <link *3 off>
+  <kern ! *12>
+  <rule | | 5pt>
   <glyph '.' *0 (tenrm)>
+  <glue *16>
+  <vpack to *3
+   <425
+    <rule 0x0.6666pt 0pt _>
+    <glue *17>
+    <hbox 0pt 0pt 0x3.5555pt
+     <
+      <glue *15>
+      <link *2 on>>>
+    <glue *17>
+    <glue *18>
+    <baseline *1>
+    <par *1 *0
+     <
+      <hbox 0pt 0pt 20pt <>>
+      <glyph 'T' *0 (tenrm)>
+      <glyph 'h' *0 (tenrm)>
+      <glyph 'i' *0 (tenrm)>
+      <glyph 's' *0 (tenrm)>
+      <glue *15>
+      <glyph 'p' *0 (tenrm)>
+      <glyph 'a' *0 (tenrm)>
+      <glyph 'r' *0 (tenrm)>
+      <glyph 'a' *0 (tenrm)>
+      <disc *1>
+      <glyph 'g' *0 (tenrm)>
+      <glyph 'r' *0 (tenrm)>
+      <glyph 'a' *0 (tenrm)>
+      <glyph 'p' *0 (tenrm)>
+      <glyph 'h' *0 (tenrm)>
+      <glue *15>
+      <glyph 'g' *0 (tenrm)>
+      <glyph 'o' *0 (tenrm)>
+      <kern *11>
+      <glyph 'e' *0 (tenrm)>
+      <glyph 's' *0 (tenrm)>
+      <glue *15>
+      <glyph 't' *0 (tenrm)>
+      <glyph 'o' *0 (tenrm)>
+      <glue *15>
+      <glyph 'l' *0 (tenrm)>
+      <glyph 'a' *0 (tenrm)>
+      <disc *1>
+      <glyph 'b' *0 (tenrm)>
+      <kern *11>
+      <glyph 'e' *0 (tenrm)>
+      <glyph 'l' *0 (tenrm)>
+      <glue *15>
+      <glyph 'T' *0 (tenrm)>
+      <glyph 'w' *0 (tenrm)>
+      <kern *10>
+      <glyph 'o' *0 (tenrm)>
+      <glyph '.' *0 (tenrm)>
+      <penalty *10>
+      <glue *14>>>
+    <glue *17>
+    <rule 0x0.6666pt 0pt _>
+    <glue *17>
+    <glue *18>
+    <par *1 *0
+     <
+      <hbox 0pt 0pt 20pt <>>
+      <glyph 'M' *0 (tenrm)>
+      <glyph 'o' *0 (tenrm)>
+      <glyph 'r' *0 (tenrm)>
+      <glyph 'e' *0 (tenrm)>
+      <glue *15>
+      <glyph 'T' *0 (tenrm)>
+      <kern *13>
+      <glyph 'e' *0 (tenrm)>
+      <glyph 'x' *0 (tenrm)>
+      <glyph 't' *0 (tenrm)>
+      <glue *15>
+      <hbox 0x6.F1C7pt 0pt 0x29.6395pt
+       <
+        <ligature *0 12 "\C102\\C105\">
+        <glyph 'n' *0 (tenrm)>
+        <glyph 'a' *0 (tenrm)>
+        <glyph 'l' *0 (tenrm)>
+        <glue *15>
+        <glyph 'b' *0 (tenrm)>
+        <kern *11>
+        <glyph 'o' *0 (tenrm)>
+        <kern *10>
+        <glyph 'x' *0 (tenrm)>
+        <glue *15>
+        <link *2 off>>>
+      <penalty *10>
+      <glue *14>>>
+    <glue *17>
+    <rule 0x0.6666pt 0pt _>
+    <glue *17>
+    <glue *18>
+    <par *1 *0
+     <
+      <hbox 0pt 0pt 20pt <>>
+      <glyph 'E' *0 (tenrm)>
+      <glyph 'n' *0 (tenrm)>
+      <glyph 'd' *0 (tenrm)>
+      <penalty *10>
+      <glue *14>>>>>
   <penalty *10>
   <glue *14>>>
 <glue *17>
 <penalty *23>
 <label *1>
 <glue *18>
-<baseline *2>
+<baseline *1>
 <par *1 *0
  <
   <hbox 0pt 0pt 20pt <>>
@@ -192,7 +288,7 @@ HINT 2.0 created by stretch
 <penalty *23>
 <label *2>
 <glue *18>
-<baseline *2>
+<baseline *1>
 <par *1 *0
  <
   <hbox 0pt 0pt 20pt <>>
@@ -207,7 +303,7 @@ HINT 2.0 created by stretch
 <penalty *23>
 <label *3>
 <glue *18>
-<baseline *2>
+<baseline *1>
 <par *1 *0
  <
   <hbox 0pt 0pt 20pt <>>

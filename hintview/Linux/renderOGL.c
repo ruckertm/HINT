@@ -359,8 +359,7 @@ static void nativeSetFgBg(GLfloat fr, GLfloat fg, GLfloat fb, GLfloat fa,
 }
 
 static ColorSet *cur_colorset;
-static int cur_mode;
-static uint8_t cur_style=0;
+static int cur_fg=-1;
 
 void nativeSetDark(int on)
 { uint8_t *fg, *bg;
@@ -375,15 +374,6 @@ void nativeSetColor(ColorSet *cs)
 { cur_colorset=cs;
   nativeSetDark(cur_mode);
 }
-
-void nativeSetStyle(int s)
-{ if (s!=cur_style)
-  { cur_style=s;
-    nativeSetDark(cur_mode);
-  }
-}
-
-
 
 static float pt_h=600.0, pt_v=800.0;
 
@@ -427,10 +417,10 @@ void nativeRule(double x, double y, double w, double h)
   //LOG("nativeRule %f@%f %fx%f Done\n",x,y,w,h);
 }
 
-void nativeBackground(double x, double y, double w, double h,int style)
+void nativeBackground(double x, double y, double w, double h)
 { uint8_t *bg,*fg;
   fg=cur_colorset[0][cur_mode?1:0][cur_style][0];
-  bg=cur_colorset[0][cur_mode?1:0][style][1];
+  bg=cur_colorset[0][cur_mode?1:0][cur_style][1];
   glUniform4f(FGcolorID, bg[0]/255.0f,bg[1]/255.0f,bg[2]/255.0f,bg[3]/255.0f);
   nativeRule(x,y,w,h);
   glUniform4f(FGcolorID, fg[0]/255.0f,fg[1]/255.0f,fg[2]/255.0f,fg[3]/255.0f);
@@ -594,7 +584,7 @@ void nativeGlyph(double x, double dx, double y, double dy, double w, double h, s
     glBindTexture(GL_TEXTURE_2D, g->GLtexture);
     checkGlError("glBindTexture g->GLtexture");
 
-    nativeSetStyle(s);
+    nativeSetDark(cur_mode); /* overkill */
 
     glBindBuffer(GL_ARRAY_BUFFER, xybuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(xy), xy, GL_STREAM_DRAW);

@@ -1226,7 +1226,8 @@ else
 #if 1   
    pos=((uint64_t)labels[n].pos<<32)+@|(labels[n].pos-labels[n].pos0);
 #else
-   pos=((uint64_t)labels[n].pos0<<32); /* offsets still dont work in all cases and need fixing */
+   pos=((uint64_t)labels[n].pos0<<32);
+   /* offsets still dont work in all cases and need fixing */
 #endif
 }
 @
@@ -1238,25 +1239,18 @@ The function |hlist_to_string| is defined in section~\secref{listtraversal}.
 To store colors, we use the same data type that is used for the
 |color_defaults| and give it the name |ColorSet|.
 
-@<native rendering definitions@>=
-typedef uint8_t ColorSet[2][4][2][4];
+
+@<\HINT\ |extern|@>=
+typedef uint8_t ColorSet[2][3][2][4];
 extern ColorSet *color_def;
-@
-
-The render function needs to select from the style bits one of the four possible color styles.
-If the focus bit is set, we use style 3, else if the mark bit is set we use style 2,
-else if the link bit is set we use style 1 else we use style 0.
-The following function will do the conversion
-
-@<render functions@>=
-int style_no(void)
-{ return style_bits&FOCUS_BIT?3:style_bits&MARK_BIT?2:style_bits&LINK_BIT?1:0; }
+extern int cur_color, cur_mode, cur_style;
 @
 
 We define a dynamic array for color sets based on |max_ref[color_kind]|.
 
 @<\HINT\ variables@>=
 ColorSet *color_def=NULL;
+int cur_color=0, cur_mode=0, cur_style=0;
 @
 
 @<allocate definitions@>=
@@ -1299,10 +1293,10 @@ static void hget_color_def(uint8_t a, int i)
   if (INFO(a)!=b000)
     QUIT("Color Definition %d with Info value %d!=000",i,INFO(a));
   k=HGET8;
-  if (k!=8) 
-    QUIT("Definition %d of color set needs 8 color pairs only %d given\n",i,k);
+  if (k!=6) 
+    QUIT("Definition %d of color set needs 6 color pairs only %d given\n",i,k);
   for (j=0; j<2; j++)
-  for (k=0; k<4; k++)
+  for (k=0; k<3; k++)
   for (l=0; l<2; l++)
   { uint32_t rgba;
     uint8_t *c=color_def[i][j][k][l];
@@ -1313,7 +1307,7 @@ static void hget_color_def(uint8_t a, int i)
     { c[0] =rgba>>24;
       c[1] =(rgba>>16)&0xFF;
       c[2] =(rgba>>8)&0xFF;
-      if (i==0&& l==1) c[3]=0xFF; else c[3] =rgba&0xFF;
+      if (i==0 && l==1 && k==0 ) c[3]=0xFF; else c[3] =rgba&0xFF;
     }
   }
 }
@@ -1325,27 +1319,28 @@ If we render glyphs first and then render the background as a rectangle
 with an opaque color over it, the glyphes will just disappear under the
 background.
 There are several ways to approach this problem.
-Let us discuss both alternatives for the case of links in an
+Let us discuss the alternatives for the case of single colored word text in an
 horizontal box. The other cases are similar.
 
-Any color change caused by a link in an horizontal list
+Any color change caused in an horizontal list
 is restricted to that list.
-It starts with a |start_link_node| and ends with an |end_link_node|.
+It starts with a |color_node| and ends with a |color_node| (or the end of the list).
 
-When the renderer encounters the |start_link_node| it knows
+When the renderer encounters the |color_node| it knows
 the height and depth of the enclosing box, which is equal to the height
 and depth of the background change, but the width of the background change,
-which is equal to the distance to the |end_link_node|, is still unknown.
-It is possible to traverse the node list up to the |end_link_node| and
+which is equal to the distance between the first |color_node| and the next |color_node|
+is still unknown.
+It is possible to traverse the node list up to the next |color_node| and
 compute its position using the same method that
 the renderer uses to compute all positions. Computing the width of glue nodes
 requires the use of the |glue_ratio| of the enclosing box;
 all other width-calculations are quite simple. While computing the
-distance is not difficult, it is an unwanted overhead.
-Other more performant alternatives exist.
+distance is not difficult, it is an unwanted overhead, and
+other more performant alternatives exist.
 
 For example, it is possible to cache the information about which glyphs
-and rules to write at which locations in an array until the |end_link_node|
+and rules to write at which locations in an array until the next |color_node|
 is found. Then we can first render the background and
 after that pass the whole array in a single write operation
 to the graphic card. Writing a large chunk of information to the graphic
@@ -5684,12 +5679,12 @@ void hmark_page(void)
 {return; }
 @
 
-When the renderer traverses the page two more variables are needed.
+When the renderer traverses the page more variables are needed.
 @<render variables@>=
 static bool c_ignore;
-static int m_style;
 @
-|m_style| will have the |MARK_BIT| set while rendering a marked sequence
+
+|cur_style| will be non zero while rendering a marked sequence
 of characters and it will be zero while rendering non-marked
 characters. |c_ignore| will be |true| while rendering characters
 that were introduced by the pre- and post-lists of discretionary hyphens.
@@ -5698,47 +5693,46 @@ of marked or unmarked characters.
 |m_ptr| will point to the value in the |m_dist| array that we will need
 for the next stretch of unmarked characters
 
-At the start of the renderer, we set |m_ptr=m_d=0| and |m_style=MARK_BIT|.
+At the start of the renderer, we set |m_ptr=m_d=0| and |cur_style=1|.
 The renderer will then assume it is at the end of a marked sequence of glyphs,
 read the first entry from |m_dist| (which might be zero) and starts with
 the appropriate number of non-marked glyphs.
 
 @<initialize marking@>=
-m_ptr=0; m_d=0;m_style=MARK_BIT;c_ignore=false; style_bits=0;
+m_ptr=0; m_d=0; c_ignore=false; cur_style=1;
 @
 
 Whenever the renderer encounters a character, it will need to
-update |m_style|.
+update |cur_style|.
 
-@<update |m_style|@>=
+@<update |cur_style|@>=
 { while (m_d==0)
-  { m_style^=MARK_BIT;
-    if (m_style&MARK_BIT)
-    { if (m_ptr==m_focus) m_style|=FOCUS_BIT; else  m_style&=~FOCUS_BIT;
+  { cur_style=cur_style>0?0:1;
+    if (cur_style>0)
+    { if (m_ptr==m_focus) cur_style=2;
       m_d=m_chars;
     }
     else
-    { m_style&=~FOCUS_BIT;
       m_d=m_get();
-    }
   }
   m_d--;
 }
 @
 
 When rendering a ligature, we consider for the purpose of marking
-the characters that generated the ligature.
+the characters which generated the ligature.
 If any of these characters is marked, the whole ligature is marked.
 @<account for the characters that generated the ligature@>=
 if (!c_ignore)
 { pointer q;
-  style_bits=style_bits&~(MARK_BIT|FOCUS_BIT);
+  int s=cur_style;
   q=lig_ptr(p);
   while (q!=null)
-  { @<update |m_style|@>@;
-    style_bits|=m_style;
+  { @<update |cur_style|@>@;
+    if (cur_style>s) s=cur_style;
     q=link(q);
   }
+  cur_style= s;
 }
 @
 
@@ -5749,7 +5743,7 @@ This is done by setting |c_ignore|.
 
 @<handle an ignore node@>=
 if (ignore_info(p)==1)
-{ style_bits=style_bits&~(MARK_BIT|FOCUS_BIT);
+{ cur_style=0;
   c_ignore_list(ignore_list(p));
   c_ignore=true;
 }
@@ -5764,16 +5758,17 @@ we will mark the whole replacement if any part of the ignore
 list is marked.
 Because the |ignore_list| may contain boxes, traversing it
 is inherently recursive and we start with a function that
-traverses a list of nodes accounting for |m_style| changes
+traverses a list of nodes accounting for |cur_style| changes
 but without rendering them. We assume that the |ignore_list|
 consists (recursively!) entirely of character, kern, box, rule, and ligature nodes.
 
 @<render functions@>=
 void c_ignore_list(pointer p)
-{ while(p!=null)
+{ int s=cur_style;
+  while(p!=null)
   { if(is_char_node(p))
-    { @<update |m_style|@>@;
-      style_bits|=m_style;
+    { @<update |cur_style|@>@;
+      if (cur_style>s) s=cur_style;
     }
     else
     { switch(type(p)) 
@@ -5782,8 +5777,8 @@ void c_ignore_list(pointer p)
         case ligature_node:
         { pointer q=lig_ptr(p);
           while (q!=null)
-          { @<update |m_style|@>@;
-            style_bits|=m_style;
+          { @<update |cur_style|@>@;
+            if (cur_style>s) s=cur_style;
             q=link(q);
           }
         }
@@ -5792,6 +5787,7 @@ void c_ignore_list(pointer p)
     }
     p=link(p);
   }
+  cur_style=s;
 }
 @
 
@@ -5862,13 +5858,11 @@ static int cur_link=-1;
 @
 
 @<handle a start link node@>=
-style_bits|=LINK_BIT;
 local_link=label_ref(p);
 add_new_link(local_link,this_box,cur_h,cur_v);
 @
 
 @<handle an end link node@>=
-style_bits&=~LINK_BIT;
 end_new_link(local_link,this_box,cur_h,cur_v);
 local_link=-1;
 @
@@ -6580,29 +6574,30 @@ a call to |nativeBackground|.
 
 @<native rendering definitions@>=
 extern void nativeSetColor(ColorSet *cs);
-extern void nativeSetStyle(int s);
-extern void nativeBackground(double x, double y, double h, double w,int style);
+extern void nativeBackground(double x, double y, double h, double w);
 @
 
 @<handle a horizontal change in the background color@>=
+if (color_def[cur_color][cur_mode][cur_style][1][3]>0)
 { scaled x,y,w,h;
   x=cur_h;
   y=cur_v+depth(this_box);
   w=hcolor_distance(link(p),g_sign,g_order,glue_set(this_box));
   h=height(this_box)+depth(this_box);
   if (w>0 && h>0)
-    nativeBackground(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),style_bits&LINK_BIT?1:0);
+    nativeBackground(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h));
 }
 @
 
 @<handle a vertical change in the background color@>=
+if (color_def[cur_color][cur_mode][cur_style][1][3]>0)
 { scaled x,y,w,h;
   x=left_edge;
   h=vcolor_distance(link(p),g_sign,g_order,glue_set(this_box));
   y=cur_v+h;
   w=width(this_box);
   if (w>0 && h>0)
-    nativeBackground(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),style_bits&LINK_BIT?1:0);
+    nativeBackground(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h));
 }
 @
 
@@ -6628,21 +6623,22 @@ and |cur_v| contain the current horizontal and vertical position;
 |rule_ht|, |rule_dp|, and |rule_wd| contain the height, depth, and
 width of a rule that should be output next; |cur_f| and |cur_fp|
 contain the current font number and current font pointer.
-|cur_color| contains the current color set.
+|cur_color| contains the current color set;
+|cur_mode| and |cur_style| the current color mode and style.
 
 @<render variables@>=
 static scaled cur_h, cur_v;
 static scaled rule_ht, rule_dp, rule_wd; 
 static int cur_f; 
 static struct font_s *cur_fp;
-static uint8_t style_bits=0;
-static int cur_color=0;
 @
 
 @<render functions@>=
 static void vlist_render(pointer this_box);
-static scaled hcolor_distance(pointer p,uint8_t g_sign,glue_ord g_order,glue_ratio g_set);
-static scaled vcolor_distance(pointer p,uint8_t g_sign,glue_ord g_order,glue_ratio g_set);
+static scaled hcolor_distance(pointer p,
+    uint8_t g_sign,glue_ord g_order,glue_ratio g_set);
+static scaled vcolor_distance(pointer p,
+    uint8_t g_sign,glue_ord g_order,glue_ratio g_set);
 static void hlist_render(pointer this_box)
 { scaled base_line;
 scaled left_edge;
@@ -6687,9 +6683,7 @@ if(link(p)==0xffff)
     { f= font(p);
       c= character(p);
       if (!c_ignore && c!=' ')
-      { style_bits=style_bits&~(MARK_BIT|FOCUS_BIT);
-        @<update |m_style|@>@;
-        style_bits|=m_style;
+      { @<update |cur_style|@>@;
       }
 
 render_c:        
@@ -6703,7 +6697,7 @@ render_c:
         cur_fp=hget_font(f);
         cur_f= f;
       }
-      render_char(cur_h, cur_v, cur_fp,c,style_no());
+      render_char(cur_h, cur_v, cur_fp,c,cur_style);
       cur_h= cur_h+char_width(f, char_info(f, c));
 #ifdef DEBUG
       if(link(p)==0xffff)
@@ -6743,12 +6737,10 @@ render_c:
        { case ignore_node: @<handle an ignore node@>@;break;
          case start_link_node:
 	   @<handle a start link node@>@;
-	   nativeSetStyle(style_no());
 	   @<handle a horizontal change in the background color@>@;
 	   break;
          case end_link_node:
 	   @<handle an end link node@>@;
-	   nativeSetStyle(style_no());
 	   @<handle a horizontal change in the background color@>@;
 	   break;
          case image_node:
@@ -6759,8 +6751,8 @@ render_c:
            cur_h= cur_h+w; 
          } break;
 	 case color_node:
-	   cur_color =color_node_ref(p);
-	   nativeSetColor(color_def+cur_color);
+           cur_color = color_node_ref(p);
+           nativeSetColor(color_def+cur_color);
            @<handle a horizontal change in the background color@>
 	   break;
          default: break;
@@ -6922,13 +6914,9 @@ while(p!=null)
         switch (subtype(p))
         { case start_link_node:
 	    @<handle a start link node@>@;
-	    nativeSetStyle(style_no());
-	    @<handle a vertical change in the background color@>@;
 	    break;
           case end_link_node:
 	    @<handle an end link node@>@;
-	    nativeSetStyle(style_no());
-	    @<handle a vertical change in the background color@>@;
 	    break;
 	  case color_node:
 	    cur_color =color_node_ref(p);
@@ -8215,11 +8203,11 @@ typedef int scaled;
 #include <zlib.h>@#
 #include "error.h"
 #include "format.h"
+#include "hint.h"
 #include "hrender.h"
 #include "rendernative.h"
 #include "get.h"
 #include "htex.h"
-#include "hint.h"
 
 @<GET macros@>@;
 @<TEG macros@>@;
@@ -8280,10 +8268,10 @@ extern int hint_print(unsigned char *bits);
 #include <string.h>
 #include <math.h>
 #include "get.h"
+#include "hint.h"
 #include "hrender.h"
 #include "rendernative.h"
 #include "htex.h"
-#include "hint.h"
 
 @<font |extern|@>@;
 
@@ -8313,6 +8301,7 @@ extern int hint_print(unsigned char *bits);
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include "hfonts.h"
+#include "hint.h"
 #include "hrender.h"
 #include "rendernative.h"
 
