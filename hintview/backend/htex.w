@@ -17467,18 +17467,20 @@ incr(cur_line);cur_p=next_break(cur_p);
 if (cur_p!=null) if (!post_disc_break)
   @<Prune unwanted nodes at the beginning of the next line@>;
 if (cur_p!=null)
-{ if (just_color>=0)
-  { q = get_node(color_node_size);
-    type(q)=whatsit_node; subtype(q)=color_node;
-    color_node_ref(q)=just_color;
-    link(q)=link(temp_head);
-    link(temp_head)=q;
-  }
-  if (just_label>=0)
+{  if (just_label>=0)
   { q = get_node(link_node_size);
     type(q)=whatsit_node; subtype(q)=start_link_node;
     label_ref(q)=just_label;
     label_has_name(q)=0;
+    if (just_color>=0) link_color(q)=just_color;
+    else  link_color(q)=1; /* this should not happen*/
+    link(q)=link(temp_head);
+    link(temp_head)=q;
+  }
+  else if (just_color>=0)
+  { q = get_node(color_node_size);
+    type(q)=whatsit_node; subtype(q)=color_node;
+    color_node_ref(q)=just_color;
     link(q)=link(temp_head);
     link(temp_head)=q;
   }
@@ -25522,9 +25524,9 @@ if (subtype(p)==image_node)
 else if (subtype(p)==color_node)
   just_color=color_node_ref(p);
 else if (subtype(p)==start_link_node)
-  just_label=label_ref(p);
+{ just_label=label_ref(p); just_color=link_color(p); }
 else if (subtype(p)==end_link_node)
-  just_label=-1;
+{ just_label=-1; just_color=link_color(p); }
 
 @ @<Let |d| be the width of the whatsit |p|@>=
 d=((subtype(p)==image_node)?image_width(p):0)
