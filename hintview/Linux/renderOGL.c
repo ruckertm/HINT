@@ -295,7 +295,7 @@ extern void nativeInit(void)
   glUniform1f(GammaID, 1.0f/2.2f);
   glUniform1i(IsImageID, 0);
   glUniform4f(FGcolorID, 0.0, 0.0, 0.0,1.0); // black as default foreground
-  glClearColor(1.0f, 1.0f, 1.0f, 0.0f); // white as default background
+  glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // white as default background
 
    /* 1rst attribute buffer : XYs */
   glEnableVertexAttribArray(xyID);
@@ -340,40 +340,52 @@ void nativeClear(void)
   }
 }
 
-void nativeBlank(void)
-{ glClear(GL_COLOR_BUFFER_BIT);
-}
-
 void nativeSetGamma(double gamma)
 { glUniform1f(GammaID, 1.0/gamma);
   checkGlError("glsetgamma");
 }
 
+static ColorSet *cur_colorset=NULL;
+static uint8_t *cur_fg=NULL;
 
-static void nativeSetFgBg(GLfloat fr, GLfloat fg, GLfloat fb, GLfloat fa,
-		       GLfloat br, GLfloat bg, GLfloat bb, GLfloat ba)
-/* set foreground and background rgb colors */
-{
-  glClearColor(br, bg, bb, 1.0f);
-  glUniform4f(FGcolorID, fr, fg, fb, fa);
+static void nativeSetForeground(uint8_t *fg)
+/* set foreground rgba colors */
+{ if (fg!=cur_fg)
+  { cur_fg=fg;  
+    glUniform4f(FGcolorID, fg[0]/255.0f,fg[1]/255.0f,fg[2]/255.0f,fg[3]/255.0f);
+  }
 }
 
-static ColorSet *cur_colorset;
-static int cur_fg=-1;
+void nativeBackground(double x, double y, double w, double h)
+{ uint8_t *bg,*fg;
+  fg=cur_colorset[0][cur_mode][cur_style][0];
+  bg=cur_colorset[0][cur_mode][cur_style][1];
+  nativeSetForeground(bg);
+  nativeRule(x,y,w,h);
+  nativeSetForeground(fg);
+}
 
 void nativeSetDark(int on)
-{ uint8_t *fg, *bg;
-  cur_mode=on;
-  fg=cur_colorset[0][on?1:0][cur_style][0];
-  bg=cur_colorset[0][on?1:0][cur_style][1];
-  nativeSetFgBg(fg[0]/255.0f,fg[1]/255.0f,fg[2]/255.0f,fg[3]/255.0f,
-		bg[0]/255.0f,bg[1]/255.0f,bg[2]/255.0f,bg[3]/255.0f);
+{ uint8_t *fg;
+  cur_mode=on?1:0;
+  fg=cur_colorset[0][cur_mode][cur_style][0];
+  nativeSetForeground(fg);
 }
 
 void nativeSetColor(ColorSet *cs)
 { cur_colorset=cs;
   nativeSetDark(cur_mode);
 }
+
+void nativeBlank(void)
+{ uint8_t *bg;
+  if (cur_colorset==NULL)
+    QUIT("Calling nativeBlank without calling nativeSetColor");
+  bg=cur_colorset[0][cur_mode?1:0][0][1];
+  glClearColor(	bg[0]/255.0f,bg[1]/255.0f,bg[2]/255.0f,bg[3]/255.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+}
+
 
 static float pt_h=600.0, pt_v=800.0;
 
@@ -417,14 +429,6 @@ void nativeRule(double x, double y, double w, double h)
   //LOG("nativeRule %f@%f %fx%f Done\n",x,y,w,h);
 }
 
-void nativeBackground(double x, double y, double w, double h)
-{ uint8_t *bg,*fg;
-  fg=cur_colorset[0][cur_mode?1:0][cur_style][0];
-  bg=cur_colorset[0][cur_mode?1:0][cur_style][1];
-  glUniform4f(FGcolorID, bg[0]/255.0f,bg[1]/255.0f,bg[2]/255.0f,bg[3]/255.0f);
-  nativeRule(x,y,w,h);
-  glUniform4f(FGcolorID, fg[0]/255.0f,fg[1]/255.0f,fg[2]/255.0f,fg[3]/255.0f);
-}
 
 void nativeImage(double x, double y, double w, double h, unsigned char *b, unsigned char *e)
 /* render the image found between *b and *e at x,y with size w,h.
@@ -584,7 +588,7 @@ void nativeGlyph(double x, double dx, double y, double dy, double w, double h, s
     glBindTexture(GL_TEXTURE_2D, g->GLtexture);
     checkGlError("glBindTexture g->GLtexture");
 
-    nativeSetDark(cur_mode); /* overkill */
+    nativeSetForeground(cur_colorset[0][cur_mode][s][0]);
 
     glBindBuffer(GL_ARRAY_BUFFER, xybuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(xy), xy, GL_STREAM_DRAW);

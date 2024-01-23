@@ -1243,14 +1243,13 @@ To store colors, we use the same data type that is used for the
 @<\HINT\ |extern|@>=
 typedef uint8_t ColorSet[2][3][2][4];
 extern ColorSet *color_def;
-extern int cur_color, cur_mode, cur_style;
 @
 
 We define a dynamic array for color sets based on |max_ref[color_kind]|.
 
 @<\HINT\ variables@>=
 ColorSet *color_def=NULL;
-int cur_color=0, cur_mode=0, cur_style=0;
+
 @
 
 @<allocate definitions@>=
@@ -1279,9 +1278,7 @@ with the  background color for normal text in |color_def[0]|.
 
 All color definitions, including  |color_def[0]|, can be changed
 by the definitions in  the \HINT\ file.
-When we read a color definition from the \HINT\ file,
-we make sure that the background of the colors in |color_def[0]|
-stays opaque, and in all the other color sets, we replace a
+When we read a color definition from the \HINT\ file, we replace a
 color that is entirely zero---a kind of fully transparent black---with
 the respective color from  |color_def[0]|. If you realy need a fully
 transparent color, use any other fully transparent color, for example
@@ -1294,7 +1291,7 @@ static void hget_color_def(uint8_t a, int i)
     QUIT("Color Definition %d with Info value %d!=000",i,INFO(a));
   k=HGET8;
   if (k!=6) 
-    QUIT("Definition %d of color set needs 6 color pairs only %d given\n",i,k);
+    QUIT("Definition %d of color set needs 6 color pairs %d given\n",i,k);
   for (j=0; j<2; j++)
   for (k=0; k<3; k++)
   for (l=0; l<2; l++)
@@ -1307,7 +1304,7 @@ static void hget_color_def(uint8_t a, int i)
     { c[0] =rgba>>24;
       c[1] =(rgba>>16)&0xFF;
       c[2] =(rgba>>8)&0xFF;
-      if (i==0 && l==1 && k==0 ) c[3]=0xFF; else c[3] =rgba&0xFF;
+      c[3] =rgba&0xFF;
     }
   }
 }
@@ -5446,18 +5443,15 @@ matching strings on the current page. The marking itself is the
 responsibility of the graphical user interface.  The backend just needs
 to indicate which glyphs must be marked.  For this
 purpose, every call to |nativeGlyph| passes a style parameter.
-For searching, two style bits are defined: |MARK_BIT| and |FOCUS_BIT|.
-@<render definitions@>=
-#define MARK_BIT 0x1
-#define FOCUS_BIT 0x2
-@
+For searching, two styles are defined: |cur_style==1| for marked text
+and |cur_style==2| for focus text.
 
 Calling the function |hint_set_mark(char *m, int s)| will cause the
-|MARK_BIT| to be set in the style parameter for all glyphs on the
+style to be one for all glyphs on the
 current page that belong to a character string matching |m| of length
-|s|.  If |m==NULL|, the |MARK_BIT| will be zero for all glyphs.  The
+|s|.  If |m==NULL|, the style will be zero for all glyphs.  The
 ``focus'' can be associated with one occurence of the marked string;
-its glyphs will have the |FOCUS_BIT| set.
+its glyphs will use two as a style value.
 To set or to move the focus, two functions are available: 
 |hint_next_mark| and |hint_prev_mark|.
 |hint_next_mark| moves the focus to the next occurence, or to the
@@ -5693,13 +5687,11 @@ of marked or unmarked characters.
 |m_ptr| will point to the value in the |m_dist| array that we will need
 for the next stretch of unmarked characters
 
-At the start of the renderer, we set |m_ptr=m_d=0| and |cur_style=1|.
-The renderer will then assume it is at the end of a marked sequence of glyphs,
-read the first entry from |m_dist| (which might be zero) and starts with
-the appropriate number of non-marked glyphs.
+At the start of the renderer, we set |m_ptr=0| and |cur_style=0|;
+The distance |m_d| to the first marked glyph is set by calling |m_get()|.
 
 @<initialize marking@>=
-m_ptr=0; m_d=0; c_ignore=false; cur_style=1;
+m_ptr=0; m_d=m_get(); c_ignore=false; cur_style=0;
 @
 
 Whenever the renderer encounters a character, it will need to
@@ -5835,12 +5827,8 @@ bool hint_next_mark(void)
 \subsection{Links}\label{links}
 Internal links are part of the displayed document and can be activated to
 navigate to a different location in the document.
-Similar to marked characters, characters that belong to a link get
-a style bit set.
-@<render definitions@>=
-#define LINK_BIT 0x4
-@
-The renderer can switch the |LINK_BIT| on and off when it encounters a link node.
+Characters that belong to a link usualy get a different color.
+
 Because of line breaking, a link might be spread over multiple
 lines or even pages. To detect an unfinished link
 at the end of a horizontal list, the local variable |local_link| is used;
@@ -6514,7 +6502,8 @@ Most of the function deals with the conversion of \TeX's measuring system,
 that is scaled points stored as 32 bit integers,
 into a representation that is more convenient for non \TeX{nical} sytems,
 namely regular points stored as |double| values. The latter is used by
-the native rendering functions. Most of the conversion is done by the macro |SP2PT|.
+the native rendering functions.
+The conversion is done by the macro |SP2PT|.
 
 @<render definitions@>=
 #define SP2PT(X) ((X)/(double)(1<<16))
@@ -6577,6 +6566,10 @@ extern void nativeSetColor(ColorSet *cs);
 extern void nativeBackground(double x, double y, double h, double w);
 @
 
+@<render variables@>=
+int cur_color=0, cur_mode=0, cur_style=0;
+@
+
 @<handle a horizontal change in the background color@>=
 if (color_def[cur_color][cur_mode][cur_style][1][3]>0)
 { scaled x,y,w,h;
@@ -6609,7 +6602,8 @@ document, but its reponsibilities are listed in section~\secref{native}.
 
 @<render functions@>=
 uint64_t hint_blank(void)
-{ nativeBlank();
+{ nativeSetColor(color_def!=NULL?color_def:color_defaults);
+  nativeBlank();
   return 0;
 }
 @
@@ -7174,7 +7168,7 @@ the page: the |hint_render| function.
 @<render functions@>=
 
 void hint_render(void)
-{  cur_color=color_def!=NULL?0:-1;
+{  cur_color=0;
    nativeSetColor(color_def!=NULL?color_def:color_defaults);
    nativeBlank();
    if (streams==NULL || streams[0].p==null) return;
@@ -7256,7 +7250,8 @@ extern void nativeSetDark(int dark);
 extern void nativeSetGamma(double gamma);
 @
 
-To  render an empty page call |nativeBlank|.
+To  render an empty page make sure that |nativeSetColor| ist called to
+establish a valid color schema and then call |nativeBlank|.
 @<native rendering definitions@>=
 extern void nativeBlank(void); 
 @
@@ -8230,6 +8225,7 @@ typedef int scaled;
 #define _HRENDER_H
 @<render definitions@>@;
 
+extern int cur_mode, cur_style;
 extern int page_h, page_v;
 extern double xdpi, ydpi;
 extern uint64_t hint_blank(void);
