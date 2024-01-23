@@ -608,7 +608,7 @@ delete_glue_ref(split_top_ptr(p));
 free_node(p,ins_node_size);goto done;
 }
 case whatsit_node:/*1387:*/
-#line 25432 "htex.w"
+#line 25435 "htex.w"
 
 {switch(subtype(p)){
 case close_node:case language_node:free_node(p,small_node_size);break;
@@ -739,7 +739,7 @@ ins_ptr(r)= copy_node_list(ins_ptr(p));
 words= ins_node_size-1;
 }break;
 case whatsit_node:/*1386:*/
-#line 25310 "htex.w"
+#line 25313 "htex.w"
 
 switch(subtype(p)){
 case open_node:{r= get_node(open_node_size);words= open_node_size;
@@ -1368,7 +1368,7 @@ link(q)= p;p= q;
 #line 13133 "htex.w"
 break;
 case whatsit_node:/*1389:*/
-#line 25514 "htex.w"
+#line 25517 "htex.w"
 
 if(subtype(p)==image_node)
 {if(image_height(p)> h)h= image_height(p);
@@ -1539,7 +1539,7 @@ if(width(p)+s> w)w= width(p)+s;
 #line 13360 "htex.w"
 break;
 case whatsit_node:/*1388:*/
-#line 25508 "htex.w"
+#line 25511 "htex.w"
 
 if(subtype(p)==image_node)
 {if(image_width(p)> w)w= image_width(p);
@@ -2556,7 +2556,7 @@ cur_p= link(cur_p);
 switch(type(cur_p)){
 case hlist_node:case vlist_node:case rule_node:act_width= act_width+width(cur_p);break;
 case whatsit_node:/*1391:*/
-#line 25531 "htex.w"
+#line 25534 "htex.w"
 
 if(subtype(cur_p)==image_node)act_width= act_width+image_width(cur_p);
 adv_past(cur_p)
@@ -2860,7 +2860,7 @@ cur_height= cur_height+prev_dp+height(p);prev_dp= depth(p);
 goto not_found;
 }
 case whatsit_node:/*1394:*/
-#line 25545 "htex.w"
+#line 25548 "htex.w"
 
 goto not_found
 
@@ -3014,7 +3014,7 @@ goto contribute;
 #line 19727 "htex.w"
 break;
 case whatsit_node:/*1393:*/
-#line 25538 "htex.w"
+#line 25541 "htex.w"
 
 if(subtype(p)==image_node)
 {page_total= page_total+page_depth+image_height(p);
@@ -3479,7 +3479,7 @@ if(subtype(p)>=a_leaders)goto found;
 #line 22071 "htex.w"
 break;
 case whatsit_node:/*1390:*/
-#line 25526 "htex.w"
+#line 25529 "htex.w"
 
 d= ((subtype(p)==image_node)?image_width(p):0)
 

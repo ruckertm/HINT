@@ -339,6 +339,7 @@ static void hget_font_metrics();
 static void hget_color_def(uint8_t a, int n);
 static pointer hget_definition(uint8_t a);
 static int hget_label_ref(void);
+static int hget_link_color(void);
 @
 
 
@@ -3003,8 +3004,12 @@ par_color=-1; par_label_ref=-1;
 while (hpos<from)
 { if (hpos[0]==TAG(color_kind,b000)) par_color=hpos[1];
   else if (KIND(hpos[0])==link_kind)
-  { if (INFO(hpos[0]) & b010) par_label_ref=hget_label_ref();
-    else par_label_ref=-1;
+  { if (INFO(hpos[0]) & b010)
+    { par_label_ref=hget_label_ref();par_color=hget_link_color(); }
+    else
+    { par_color=hget_link_color();
+      par_label_ref=-1;
+    }
   }
   hff_hpos();
 }
@@ -3015,19 +3020,21 @@ paragraph.
 
 @<add a color change node if necessary@>=
 if (par_ptr!=null)
-{ if (par_color>=0)
-  {@+pointer p;
-    p=get_node(color_node_size);
-    type(p)=whatsit_node; subtype(p)=color_node;
-    color_node_ref(p)=par_color;
-    link(p)=par_ptr;
-    par_ptr=p;
-  }
-  if (par_label_ref>=0)
+{@+if (par_label_ref>=0)
   {@+pointer p;
     p=get_node(link_node_size);  type(p)=whatsit_node;
     subtype(p)=start_link_node; label_ref(p)=par_label_ref;
     label_has_name(p)=0;
+    link(p)=par_ptr;
+    if (par_color>=0) link_color(p)=par_color;
+    else link_color(p)=1; /* this should not happen */
+    par_ptr=p;
+  }
+  else if (par_color>=0)
+  {@+pointer p;
+    p=get_node(color_node_size);
+    type(p)=whatsit_node; subtype(p)=color_node;
+    color_node_ref(p)=par_color;
     link(p)=par_ptr;
     par_ptr=p;
   }
@@ -3542,12 +3549,20 @@ case TAG(link_kind,b000): @+ HGET_LINK(b000); break;
 case TAG(link_kind,b001): @+ HGET_LINK(b001); break;
 case TAG(link_kind,b010): @+ HGET_LINK(b010); break;
 case TAG(link_kind,b011): @+ HGET_LINK(b011); break;
+case TAG(link_kind,b100): @+ HGET_LINK(b100); break;
+case TAG(link_kind,b101): @+ HGET_LINK(b101); break;
+case TAG(link_kind,b110): @+ HGET_LINK(b110); break;
+case TAG(link_kind,b111): @+ HGET_LINK(b111); break;
 @
 @<cases to teg content@>=
 case TAG(link_kind,b000): @+ HTEG_LINK(b000); break;
 case TAG(link_kind,b001): @+ HTEG_LINK(b001); break;
 case TAG(link_kind,b010): @+ HTEG_LINK(b010); break;
 case TAG(link_kind,b011): @+ HTEG_LINK(b011); break;
+case TAG(link_kind,b100): @+ HTEG_LINK(b100); break;
+case TAG(link_kind,b101): @+ HTEG_LINK(b101); break;
+case TAG(link_kind,b110): @+ HTEG_LINK(b110); break;
+case TAG(link_kind,b111): @+ HTEG_LINK(b111); break;
 @
 
 We use the following macros. Note that |label_has_name(p)| is
@@ -3559,7 +3574,9 @@ set to zero, because the label names are not stored as token lists.
   p=get_node(link_node_size);  type(p)=whatsit_node;\
   if (I&b010) subtype(p)=start_link_node; else subtype(p)=end_link_node;\
   if (I&b001) HGET16(label_ref(p));@+ else label_ref(p)=HGET8; \
+  if (I&b100) link_color(p)=HGET8; else link_color(p)=(I&b010)?1:0;\
   RNG("label",label_ref(p),0,max_ref[label_kind]);\
+  RNG("label color",link_color(p),0,max_ref[color_kind]);\
   label_has_name(p)=0;\
   tail_append(p);}
 @
@@ -3569,8 +3586,10 @@ set to zero, because the label names are not stored as token lists.
 { @+pointer p;\
   p=get_node(link_node_size);  type(p)=whatsit_node;\
   if (I&b010) subtype(p)=start_link_node; else subtype(p)=end_link_node;\
+  if (I&b100) link_color(p)=HTEG8; else link_color(p)=(I&b010)?1:0;\
   if (I&b001) HTEG16(label_ref(p));@+ else label_ref(p)=HTEG8; \
   RNG("label",label_ref(p),0,max_ref[label_kind]);\
+  RNG("label color",link_color(p),0,max_ref[color_kind]);\
   label_has_name(p)=0;\
   tail_append(p);}
 @
@@ -3586,6 +3605,14 @@ reading the reference to the label from a link node at |hpos|.
 static int hget_label_ref(void)
 { if (INFO(hpos[0])&b001) return (hpos[1]<<8)+hpos[2];
   else return hpos[1];
+}
+static int hget_link_color(void)
+{ if (INFO(hpos[0]&b100))
+  { if (INFO(hpos[0]&b001)) return hpos[3];
+    else return hpos[2];
+  }
+  else
+  { if (INFO(hpos[0]&b010)) return 1; else return 0; }
 }
 @
 
@@ -6729,12 +6756,21 @@ render_c:
      case whatsit_node:
        switch (subtype(p))
        { case ignore_node: @<handle an ignore node@>@;break;
+ 	 case color_node:
+           cur_color = color_node_ref(p);
+           nativeSetColor(color_def+cur_color);
+           @<handle a horizontal change in the background color@>
+	   break;
          case start_link_node:
 	   @<handle a start link node@>@;
+           cur_color = link_color(p);
+           nativeSetColor(color_def+cur_color);
 	   @<handle a horizontal change in the background color@>@;
 	   break;
          case end_link_node:
 	   @<handle an end link node@>@;
+           cur_color = link_color(p);
+           nativeSetColor(color_def+cur_color);
 	   @<handle a horizontal change in the background color@>@;
 	   break;
          case image_node:
@@ -6744,11 +6780,6 @@ render_c:
            render_image(cur_h, cur_v, w, h,image_no(p));
            cur_h= cur_h+w; 
          } break;
-	 case color_node:
-           cur_color = color_node_ref(p);
-           nativeSetColor(color_def+cur_color);
-           @<handle a horizontal change in the background color@>
-	   break;
          default: break;
        }
        break;
@@ -6906,18 +6937,24 @@ while(p!=null)
         goto fin_rule;
       case whatsit_node:
         switch (subtype(p))
-        { case start_link_node:
-	    @<handle a start link node@>@;
-	    break;
-          case end_link_node:
-	    @<handle an end link node@>@;
-	    break;
-	  case color_node:
+        { case color_node:
 	    cur_color =color_node_ref(p);
 	    nativeSetColor(color_def+cur_color);
             @<handle a vertical change in the background color@>
 	    break;
-          case image_node:
+	  case start_link_node:
+	    @<handle a start link node@>@;
+	    cur_color = link_color(p);
+	    nativeSetColor(color_def+cur_color);
+            @<handle a vertical change in the background color@>
+	    break;
+          case end_link_node:
+	    @<handle an end link node@>@;
+	    cur_color = link_color(p);
+	    nativeSetColor(color_def+cur_color);
+            @<handle a vertical change in the background color@>
+	    break;
+         case image_node:
           { scaled h,w;
 	    w=image_width(p);
 	    h=image_height(p);

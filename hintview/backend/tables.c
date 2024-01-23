@@ -71,7 +71,7 @@ signed char hnode_size[0x100]= {
 -4*6+0,-4*6+0,-4*10+0,-4*10+0,-4*5+1,-4*5+1,-4*9+1,-4*9+1, /* vpack */
 -4*3+0,0,-4*2+1,0,3,0,0,0, /* stream */
 0,0,0,0,0,0,0,0, /* page */
-3,4,3,4,0,0,0,0, /* link */
+3,4,3,4,4,5,4,5, /* link */
 3,0,0,0,0,0,0,0, /* color */
 0,0,0,0,0,0,0,0, /* undefined1 */
 0,0,0,0,0,0,0,0, /* undefined2 */
@@ -106,7 +106,7 @@ uint8_t content_known[32]= {
 0xFF, /* vpack */
 0x15, /* stream */
 0x00, /* page */
-0x0F, /* link */
+0xFF, /* link */
 0x01, /* color */
 0x00, /* undefined1 */
 0x00, /* undefined2 */

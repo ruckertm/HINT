@@ -5683,11 +5683,18 @@ content nodes. Let's look at them next.
 When reading a short format link node,
 we use again the |b001| info bit to indicate a 16 bit reference
 number to a label. The |b010| info bit indicates a ``start'' link.
+To help a reader tell a link from ordinary text, links should be
+visualy different. This is supported in the \HINT\ file format
+by associating  different color schemes to links and ordinary texts.
+In the short format, the |b100| bit indicates that color set reference
+(see section~\secref{colors}) follows after the label reference.
 \gdef\subcodetitle{Links}
 \getcode
 @<get macros@>=
 #define @[HGET_LINK(I)@] @/\
-{ int n; if (I&b001) HGET16(n);@+ else n=HGET8; @+ hwrite_link(n,I&b010); @+}
+{ int n,c; if (I&b001) HGET16(n);@+ else n=HGET8;\
+  if (I&b100) c=HGET8; else c=(I&b010)?1:0;\
+  hwrite_link(n,c,I&b010); @+}
 @
 
 @<cases to get content@>=
@@ -5696,6 +5703,10 @@ case TAG(link_kind,b000): @+ HGET_LINK(b000);@+ break;
 case TAG(link_kind,b001): @+ HGET_LINK(b001);@+ break;
 case TAG(link_kind,b010): @+ HGET_LINK(b010);@+ break;
 case TAG(link_kind,b011): @+ HGET_LINK(b011);@+ break;
+case TAG(link_kind,b100): @+ HGET_LINK(b100);@+ break;
+case TAG(link_kind,b101): @+ HGET_LINK(b101);@+ break;
+case TAG(link_kind,b110): @+ HGET_LINK(b110);@+ break;
+case TAG(link_kind,b111): @+ HGET_LINK(b111);@+ break;
 @
 
 The function |hput_link| will insert the link in the output stream and return
@@ -5703,12 +5714,13 @@ the appropriate tag.
 
 \putcode
 @<put functions@>=
-Tag hput_link(int n, int on)
+Tag hput_link(int n, int c, int on)
 { Info i;
   REF_RNG(label_kind,n);
   labels[n].used=true;
   if (on) i=b010;@+ else i=b000;
   if (n>0xFF) { i|=b001; HPUT16(n);@+} @+else HPUT8(n);
+  if ((on && c!=1) ||(!on && c!=0)) { i|=b100; HPUT8(c); }
   return TAG(link_kind,i);
 }
 @
@@ -5724,18 +5736,22 @@ Tag hput_link(int n, int on)
 
 @<parsing rules@>=
 content_node:start LINK REFERENCE on_off END
-    {@+ hput_tags($1,hput_link($3,$4));@+ };
+    {@+ hput_tags($1,hput_link($3,$4?1:0,$4));@+ };
+content_node:start LINK REFERENCE on_off REFERENCE END
+    {@+ hput_tags($1,hput_link($3,$5,$4));@+ };
 @
 
 \writecode
 @<write functions@>=
-void hwrite_link(int n, uint8_t on)
+void hwrite_link(int n, int c, uint8_t on)
 { REF_RNG(label_kind,n);
   if (labels[n].where==LABEL_UNDEF)
     MESSAGE("WARNING: Link to an undefined label %d\n",n);
   hwrite_ref(n);
   if (on) hwritef(" on");
   else hwritef(" off");
+  if ((on && c!=1)||(!on && c!=0))
+  { REF_RNG(color_kind,c);  hwrite_ref(c); }
 }
 @
 
@@ -5920,7 +5936,7 @@ for (n=0;n<=max_outline;n++)
 }
 @
 
-\subsection{Colors}
+\subsection{Colors}\label{colors}
 This is the second draft of implementing color\index{color} specifications in
 a \HINT\ file.
 
@@ -10372,12 +10388,16 @@ hnode_size[TAG(image_kind,b111)] = NODE_SIZE(2+4,3);
 @
 
 \subsection{Links}\index{link}
-Links contain either a 2 byte or a 1 byte reference.
+Links contain either a 2 byte or a 1 byte reference and possibly a color reference.
 @<initialize the  |hnode_size| array@>=
 hnode_size[TAG(link_kind,b000)] = NODE_SIZE(1,0);
 hnode_size[TAG(link_kind,b001)] = NODE_SIZE(2,0);
 hnode_size[TAG(link_kind,b010)] = NODE_SIZE(1,0);
 hnode_size[TAG(link_kind,b011)] = NODE_SIZE(2,0);
+hnode_size[TAG(link_kind,b100)] = NODE_SIZE(2,0);
+hnode_size[TAG(link_kind,b101)] = NODE_SIZE(3,0);
+hnode_size[TAG(link_kind,b110)] = NODE_SIZE(2,0);
+hnode_size[TAG(link_kind,b111)] = NODE_SIZE(3,0);
 @
 
 \subsection{Streams}\index{stream}
@@ -10903,7 +10923,7 @@ case TAG(image_kind,b111): @+ HTEG_IMAGE(b111);@+break;
 \noindent
 @<skip macros@>=
 #define @[HTEG_LINK(I)@] @/\
-{ uint16_t n; if (I&b001) HTEG16(n);@+ else n=HTEG8; @+}
+{ uint16_t n;  if (I&b100) n=HTEG8; if (I&b001) HTEG16(n);@+ else n=HTEG8; @+}
 @
 
 @<cases to skip content@>=
@@ -10911,6 +10931,10 @@ case TAG(image_kind,b111): @+ HTEG_IMAGE(b111);@+break;
 case TAG(link_kind,b001): @+ HTEG_LINK(b001); @+break;
 case TAG(link_kind,b010): @+ HTEG_LINK(b010); @+break;
 case TAG(link_kind,b011): @+ HTEG_LINK(b011); @+break;
+case TAG(link_kind,b100): @+ HTEG_LINK(b100); @+break;
+case TAG(link_kind,b101): @+ HTEG_LINK(b101); @+break;
+case TAG(link_kind,b110): @+ HTEG_LINK(b110); @+break;
+case TAG(link_kind,b111): @+ HTEG_LINK(b111); @+break;
 @
 
 \subsection{Colors}
@@ -11345,7 +11369,7 @@ extern void hput_content_start(void);
 extern void hput_content_end(void);
 
 extern void hset_label(int n,int w);
-extern Tag hput_link(int n, int on);
+extern Tag hput_link(int n, int c, int on);
 extern void hset_outline(int m, int r, int d, uint32_t p);
 extern void hput_label_defs(void);
 

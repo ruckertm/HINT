@@ -1,14 +1,14 @@
 /*401:*/
-#line 8223 "hint.w"
+#line 8260 "hint.w"
 
 #ifndef _HRENDER_H
 #define _HRENDER_H
 /*341:*/
-#line 6508 "hint.w"
+#line 6535 "hint.w"
 
 #define SP2PT(X) ((X)/(double)(1<<16))
 /*:341*/
-#line 8226 "hint.w"
+#line 8263 "hint.w"
 
 
 extern int cur_mode,cur_style;

@@ -25000,6 +25000,7 @@ to hold the string numbers for name, area, and extension.
 @d start_link_node hitex_ext+18 /* represents a link to a another location */
 @d end_link_node hitex_ext+19 /* represents a link to a another location */
 @d link_node_size 2 /* second word like a |label_node| */
+@d link_color(A)  label_where(A) /* a color reference instead of where */
 
 @d outline_node hitex_ext+20 /* represents an outline item */
 @d outline_node_size 4 /* second word like a |label_node| */
@@ -25281,9 +25282,11 @@ case ignore_node:
 case start_link_node:
   print_esc("HINTstartlink ");
   print_label(p);
+  if (link_color(p)!=1) { print("color "); print_int(link_color(p)); }
   break;
 case end_link_node:
   print_esc("HINTendlink ");
+  if (link_color(p)!=0) { print("color "); print_int(link_color(p)); }
   break;
 case label_node:
   print_esc("HINTdest ");
