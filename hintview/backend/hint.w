@@ -4213,9 +4213,11 @@ This value is used to indicate that a variable contains no valid location.
 @
 
 @<\HINT\ auxiliar functions@>=
-
 uint64_t hlocation(pointer p)
-{ @+return PAGE_LOC(map[p],map[p+1]);@+
+{ @+ uint64_t h=PAGE_LOC(map[p],map[p+1]);
+   while (h==0 && link(p)!=null) /* search the list if necessary */
+   { p=link(p); h=PAGE_LOC(map[p],map[p+1]); }   
+   return h;
 }
 @  
 
