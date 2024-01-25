@@ -5709,7 +5709,8 @@ static bool c_ignore;
 
 |cur_style| will be non zero while rendering a marked sequence
 of characters and it will be zero while rendering non-marked
-characters. |c_ignore| will be |true| while rendering characters
+characters. |c_ignore| will be |true| while rendering characters that
+do not count for matching or non-matching characters, for example characters
 that were introduced by the pre- and post-lists of discretionary hyphens.
 |m_d| will contain the number of characters left in the current stretch
 of marked or unmarked characters.
@@ -5720,7 +5721,7 @@ At the start of the renderer, we set |m_ptr=0| and |cur_style=0|;
 The distance |m_d| to the first marked glyph is set by calling |m_get()|.
 
 @<initialize marking@>=
-m_ptr=0; m_d=m_get(); c_ignore=false; cur_style=0;
+m_ptr=0; m_d=m_get(); c_ignore=false; cur_style=next_style=0;
 @
 
 Whenever the renderer encounters a character, it will need to
@@ -5744,27 +5745,28 @@ When rendering a ligature, we consider for the purpose of marking
 the characters which generated the ligature.
 If any of these characters is marked, the whole ligature is marked.
 @<account for the characters that generated the ligature@>=
+
 if (!c_ignore)
 { pointer q;
-  int s=cur_style;
+  next_style=0;
   q=lig_ptr(p);
   while (q!=null)
   { @<update |cur_style|@>@;
-    if (cur_style>s) s=cur_style;
+    if (cur_style>next_style) next_style=cur_style;
     q=link(q);
   }
-  cur_style= s;
 }
 @
 
 When the renderer encounters an ignore node with |ignore_info(p)==1|
 it should ignore all the following characters until
 it encounters the matching ignore node with |ignore_info(p)==0|.
+Instead, it uses the characters in |ignore_list(p)|.
 This is done by setting |c_ignore|.
 
 @<handle an ignore node@>=
 if (ignore_info(p)==1)
-{ cur_style=0;
+{ next_style=0;
   c_ignore_list(ignore_list(p));
   c_ignore=true;
 }
@@ -5785,11 +5787,10 @@ consists (recursively!) entirely of character, kern, box, rule, and ligature nod
 
 @<render functions@>=
 void c_ignore_list(pointer p)
-{ int s=cur_style;
-  while(p!=null)
+{ while(p!=null)
   { if(is_char_node(p))
     { @<update |cur_style|@>@;
-      if (cur_style>s) s=cur_style;
+      if (cur_style>next_style) next_style=cur_style;
     }
     else
     { switch(type(p)) 
@@ -5799,7 +5800,7 @@ void c_ignore_list(pointer p)
         { pointer q=lig_ptr(p);
           while (q!=null)
           { @<update |cur_style|@>@;
-            if (cur_style>s) s=cur_style;
+            if (cur_style>next_style) next_style=cur_style;         
             q=link(q);
           }
         }
@@ -5808,7 +5809,6 @@ void c_ignore_list(pointer p)
     }
     p=link(p);
   }
-  cur_style=s;
 }
 @
 
@@ -6181,7 +6181,7 @@ static Font *fonts[0x100]={NULL};
 Given a font number |f| the following function returns a pointer to the 
 corresponding font structure, extracting the necessary information from the \HINT\ file if necessary.
 @<font functions@>=
-struct font_s *hget_font(unsigned char f)
+static struct font_s *hget_font(uint8_t f)
 { Font *fp;
   if (fonts[f]!=NULL) return fonts[f];
   DBG(DBGFONT,"Decoding new font %d\n",f);
@@ -6204,11 +6204,6 @@ struct font_s *hget_font(unsigned char f)
   fonts[f]=fp;
   return fonts[f];
 }
-@
-This function is used in the renderer, so it is exported and returns an
-opaque pointer type to the font structure.
-@<font |extern|@>=
-extern struct font_s *hget_font(unsigned char f);
 @
 
 To initialize the |fonts| table and remove all fonts form memory, the
@@ -6524,37 +6519,40 @@ Gcache *hget_glyph(Font *f, unsigned int cc)
 }
 @
 
-Rendering a glyph is the most complex rendering procedure. But with all the preparations,
-it boils down to a pretty short function to display a glyph, given by its charcter code |cc|,
-its font |f|, and its position and size  |x|, |y|, and |s| given as scaled points.
-Most of the function deals with the conversion of \TeX's measuring system,
-that is scaled points stored as 32 bit integers,
-into a representation that is more convenient for non \TeX{nical} sytems,
-namely regular points stored as |double| values. The latter is used by
-the native rendering functions.
+Rendering a glyph is the most complex rendering procedure. But with
+all the preparations, it boils down to a pretty short function to
+display a glyph, given by its charcter code |cc|, its font |f|, and
+its position and size |x|, |y|, and |s| given as scaled points.  Most
+of the function deals with the conversion of \TeX's measuring system,
+that is scaled points stored as 32 bit integers, into a representation
+that is more convenient for non \TeX{nical} sytems, namely regular
+points stored as |double| values. The latter is used by the native
+rendering functions.
 The conversion is done by the macro |SP2PT|.
 
 @<render definitions@>=
 #define SP2PT(X) ((X)/(double)(1<<16))
 @
 @<font functions@>=
-void render_char(int x, int y, struct font_s *f, uint32_t cc, int style)
+void render_char(int x, int y, uint8_t f, uint32_t cc, int style)
 
 { double w, h, dx, dy;
-  Gcache *g=hget_glyph(f,cc);
+  Font *fp=hget_font(f);
+  Gcache *g=hget_glyph(fp,cc);
   if (g==NULL) return;
 
-  dx=(double)g->hoff*f->hpxs;
-  dy=(double)g->voff*f->vpxs;@/
-  w =(double)g->w*f->hpxs;
-  h =(double)g->h*f->vpxs;
+  dx=(double)g->hoff*fp->hpxs;
+  dy=(double)g->voff*fp->vpxs;@/
+  w =(double)g->w*fp->hpxs;
+  h =(double)g->h*fp->vpxs;
   nativeGlyph(SP2PT(x),dx,SP2PT(y),dy,w,h,g,style);
 }
 
 @
 \goodbreak
-@<font |extern|@>=
-extern void render_char(int x, int y, struct font_s *f, uint32_t cc, uint8_t s);
+The above function is used in the rendering. So we export it.
+@<|extern| font functions@>=
+extern void render_char(int x, int y, uint8_t f, uint32_t cc, int s);
 @
 
 \subsection{Rules}
@@ -6596,7 +6594,7 @@ extern void nativeBackground(double x, double y, double h, double w);
 @
 
 @<render variables@>=
-int cur_color=0, cur_mode=0, cur_style=0;
+int cur_color=0, cur_mode=0, cur_style=0, next_style=0;
 @
 
 @<handle a horizontal change in the background color@>=
@@ -6644,16 +6642,13 @@ functions that write DVI files. They share a few global static
 variables that implement the current state of the renderer: |cur_h|
 and |cur_v| contain the current horizontal and vertical position;
 |rule_ht|, |rule_dp|, and |rule_wd| contain the height, depth, and
-width of a rule that should be output next; |cur_f| and |cur_fp|
-contain the current font number and current font pointer.
+width of a rule that should be output next.
 |cur_color| contains the current color set;
 |cur_mode| and |cur_style| the current color mode and style.
 
 @<render variables@>=
 static scaled cur_h, cur_v;
 static scaled rule_ht, rule_dp, rule_wd; 
-static int cur_f; 
-static struct font_s *cur_fp;
 @
 
 @<render functions@>=
@@ -6707,20 +6702,15 @@ if(link(p)==0xffff)
       c= character(p);
       if (!c_ignore && c!=' ')
       { @<update |cur_style|@>@;
+        next_style=cur_style;
       }
-
 render_c:        
-      if(f!=cur_f)
-      {
 #ifdef DEBUG
         if(f> max_ref[font_kind])
            QUIT("Undefined Font %d mem[0x%x]=0x%x\n",
                 f,p,mem[p].i);
 #endif
-        cur_fp=hget_font(f);
-        cur_f= f;
-      }
-      render_char(cur_h, cur_v, cur_fp,c,cur_style);
+      render_char(cur_h, cur_v, f,c,next_style);
       cur_h= cur_h+char_width(f, char_info(f, c));
 #ifdef DEBUG
       if(link(p)==0xffff)
@@ -7213,7 +7203,6 @@ void hint_render(void)
    if (streams==NULL || streams[0].p==null) return;
    cur_h= 0;
    cur_v= height(streams[0].p);
-   cur_f=-1;cur_fp=NULL;
    cur_link=-1; max_link=-1;
    @<initialize marking@>@;
    if(type(streams[0].p)==vlist_node)
@@ -7415,10 +7404,10 @@ and one to unpack a font when it is needed for the first time, we define four pr
 reading operations as macros.
 
 @<PK font functions@>=
-#define PK_READ_1_BYTE() (data[i++])
-#define PK_READ_2_BYTE() (k=PK_READ_1_BYTE(),k=k<<8,k=k+data[i++],k)
-#define PK_READ_3_BYTE() (k=PK_READ_2_BYTE(),k=k<<8,k=k+data[i++],k)
-#define PK_READ_4_BYTE() (k=PK_READ_3_BYTE(),k=k<<8,k=k+data[i++],k)
+#define PK_READ_1_BYTE() (pk_data[i++])
+#define PK_READ_2_BYTE() (k=PK_READ_1_BYTE(),k=k<<8,k=k+pk_data[i++],k)
+#define PK_READ_3_BYTE() (k=PK_READ_2_BYTE(),k=k<<8,k=k+pk_data[i++],k)
+#define PK_READ_4_BYTE() (k=PK_READ_3_BYTE(),k=k<<8,k=k+pk_data[i++],k)
 @
 
 Here is the function to unpack a single glyph. 
@@ -7432,17 +7421,17 @@ We store this state as a |PKparse|.
 
 @<definitions of format specific types@>=
 typedef struct {
-int j; /* position of next nybble in data */
+int j; /* position of next nybble in |pk_data| */
 int r; /* current repeat count */
 int f; /* dynamic f value */
-unsigned char *data; /* array of data bytes */
+unsigned char *pk_data; /* array of data bytes */
 } PKparse;
 @
 Given a parse state |P|, we read the next nybble
 with the following macro:
 
 @<PK font functions@>=
-#define read_nybble(P) ((P).j&1?((P).data[(P).j++>>1]&0xF):(((P).data[(P).j++>>1]>>4)&0xF))
+#define read_nybble(P) ((P).j&1?((P).pk_data[(P).j++>>1]&0xF):(((P).pk_data[(P).j++>>1]>>4)&0xF))
 @
 
 The pixel data stored in a PK file can be considered as a long sequence
@@ -7488,16 +7477,16 @@ static int packed_number(PKparse *p)
 
 Now here is the function, that reads a bitmap encoded using
 run counts and repeat counts.
-The |data| array contains the run counts and repeat counts for a bitmap of height |g->h| and
+The |pk_data| array contains the run counts and repeat counts for a bitmap of height |g->h| and
 width |g->w| as a top-down bitmap, where the first bit corresponds to the
 top left pixel and the last bit to the bottom right pixel.
 The function will produce a bottom-up bitmap with one byte per pixel
 to conform to the format that is used by the FreeType library.
-We traverse the |data| nybbles sequentially in top-down order.
+We traverse the |pk_data| nybbles sequentially in top-down order.
 The horizontal position |x| and the vertical position |y| in the
 target bitmap start at 0 and |g->h-1|.
 @<PK font functions@>=
-static void pk_runlength(Gcache *g, unsigned char *data) {
+static void pk_runlength(Gcache *g, unsigned char *pk_data) {
     PKparse p;
     int x, y; /* position in target bitmap */
     unsigned char *bits; /* target bitmap */
@@ -7508,7 +7497,7 @@ static void pk_runlength(Gcache *g, unsigned char *data) {
     p.j = 0; /* nybble position to start of data */
     p.r = 0; /* repeat count = 0 */
     p.f = g->pk.flag >> 4; /* dynamic f value */
-    p.data=data; /* data bytes */
+    p.pk_data=pk_data; /* data bytes */
     n = 0;
     if ((g->pk.flag >> 3) & 1) gray=0x00;
     else gray=0xff;
@@ -7539,17 +7528,17 @@ static void pk_runlength(Gcache *g, unsigned char *data) {
 @
 
 Very small bitmaps can be encoded simply using one bit per pixel.
-The |data| array contains a 1 bit per pixel bitmap of height |g->h| and
+The |pk_data| array contains a 1 bit per pixel bitmap of height |g->h| and
 width |g->w| as a top-down bitmap, where the first bit corresponds to the
 top left pixel and the last bit to the bottom right pixel.
 The function will produce a bottom-up bitmap with one byte per pixel
 to conform to the format that is used by the FreeType library.
-We traverse the |data| bits sequentially in top-down order
-using a |mask| to get the next bit and incrementing |data| when necessary.
+We traverse the |pk_data| bits sequentially in top-down order
+using a |mask| to get the next bit and incrementing |pk_data| when necessary.
 The horizontal position |x| and the vertical position |y| in the
 target bitmap start at 0 and |g->h-1|.
 @<PK font functions@>=
-static void pk_bitmap(Gcache *g, unsigned char *data) {
+static void pk_bitmap(Gcache *g, unsigned char *pk_data) {
     unsigned char *bits; /* 1 bit per pixel */
     int x, y; /* position in target bitmap */
     unsigned char mask; /* bitmask for the next bit */
@@ -7559,12 +7548,12 @@ static void pk_bitmap(Gcache *g, unsigned char *data) {
     mask=0x80;
     for (y=0; y<g->h; y++)
       for (x=0; x<g->w; x++)
-        { if (*data & mask)
+        { if (*pk_data & mask)
             bits[y*g->w+x] = 0x00; /* black */
           else
             bits[y*g->w+x] = 0xFF; /* white */
           mask=mask>>1;
-          if (mask==0) { data++; mask=0x80; }
+          if (mask==0) { pk_data++; mask=0x80; }
         }
 }
 @
@@ -7575,14 +7564,14 @@ unpacking functions just defined.
 
 static void pkunpack_glyph(Gcache *g)
 { int i,k;
-  unsigned char *data;
+  unsigned char *pk_data;
   if (g==NULL || g->pk.encoding==NULL) return; /* no glyph, no data */
   g->ff=pk_format;
   if (g->bits!=NULL) return; /* already unpacked */
 #if 0  
   DBG(DBGRENDER,"Unpacking glyph %c (0x%x)",g->cc,g->cc);
 #endif 
-  data=g->pk.encoding;
+  pk_data=g->pk.encoding;
   i=0;
   if ((g->pk.flag&7)<4)  /* short form */
   { i=i+3; /* skip the TeX font metrics */
@@ -7608,8 +7597,8 @@ static void pkunpack_glyph(Gcache *g)
 	g->hoff=(signed int)PK_READ_4_BYTE();
 	g->voff=(signed int)PK_READ_4_BYTE();
   }
-  if ((g->pk.flag>>4)==14) pk_bitmap(g,data+i);
-  else pk_runlength(g,data+i);
+  if ((g->pk.flag>>4)==14) pk_bitmap(g,pk_data+i);
+  else pk_runlength(g,pk_data+i);
   nativeSetPK(g);
 }
 @
@@ -7634,15 +7623,15 @@ static Gcache *hnew_glyph(Font *pk, unsigned int cc);
 
 
 int unpack_pk_file(Font *pk)
-/* scan |pk->data| and extract information. Do not unpack glyphs, these are unpacked on demand. */
+/* scan |pk->pk_data| and extract information. Do not unpack glyphs, these are unpacked on demand. */
 {   int i,j;
     unsigned int k;
 	unsigned char flag;
-	unsigned char *data;
-    data=pk->font_data;
+	unsigned char *pk_data;
+    pk_data=pk->font_data;
     i=0;
 	while (i< pk->data_size)
-	  switch(flag=data[i++])
+	  switch(flag=pk_data[i++])
 	{ case PK_XXX1: j=PK_READ_1_BYTE(); i=i+j; break;
 	  case PK_XXX2: j=PK_READ_2_BYTE(); i=i+j;  break;
 	  case PK_XXX3: j=PK_READ_3_BYTE(); i=i+j;  break;
@@ -7691,7 +7680,7 @@ int unpack_pk_file(Font *pk)
 		}
 		g = hnew_glyph(pk,cc);
 		g->pk.flag=flag;
-		g->pk.encoding=data+i;
+		g->pk.encoding=pk_data+i;
 		g->bits=NULL;
 		i=i+pl;
 	  }
@@ -8250,9 +8239,11 @@ typedef int scaled;
 
 @<\HINT\ variables@>@;
 @<\HINT\ declarations@>@;
+@<\HINT\ font access functions@>@;
 @<\HINT\ auxiliar functions@>@;
 @<get functions@>@;
 @<teg functions@>@;
+
 
 @<\HINT\ functions@>@;
 
@@ -8308,7 +8299,7 @@ extern int hint_print(unsigned char *bits);
 #include "rendernative.h"
 #include "htex.h"
 
-@<font |extern|@>@;
+@<|extern| font functions@>
 
 @<render variables@>@;
 @<render functions@>@;
@@ -8342,6 +8333,7 @@ extern int hint_print(unsigned char *bits);
 
 @<font variables@>@;
 @<\HINT\ font access functions@>@;
+@<|extern| font functions@>@;
 @<auxiliar font functions@>@;
 
 @<FreeType font functions@>@;

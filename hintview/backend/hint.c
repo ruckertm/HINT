@@ -1,5 +1,5 @@
-/*400:*/
-#line 8233 "hint.w"
+/*399:*/
+#line 8222 "hint.w"
 
 #include "basetypes.h"
 #include <string.h> 
@@ -237,7 +237,7 @@ tail_append(p);}
   label_has_name(p)= 0;\
   tail_append(p);}
 /*:213*/
-#line 8246 "hint.w"
+#line 8235 "hint.w"
 
 /*94:*/
 #line 1614 "hint.w"
@@ -438,7 +438,7 @@ tail_append(p);}
   label_has_name(p)= 0;\
   tail_append(p);}
 /*:214*/
-#line 8247 "hint.w"
+#line 8236 "hint.w"
 
 
 /*21:*/
@@ -469,7 +469,7 @@ typedef struct ParamDef{
 struct ParamDef*next;
 Param p;}ParamDef;
 /*:37*/
-#line 8249 "hint.w"
+#line 8238 "hint.w"
 
 
 /*2:*/
@@ -582,13 +582,13 @@ int page_v,page_h,offset_v,offset_h;
 
 hint_Link*hint_links= NULL;
 int max_link= -1;
-/*:320*//*387:*/
-#line 7928 "hint.w"
+/*:320*//*386:*/
+#line 7917 "hint.w"
 
 jmp_buf hint_error_exit;
 char hint_error_string[MAX_HINT_ERROR];
-/*:387*/
-#line 8251 "hint.w"
+/*:386*/
+#line 8240 "hint.w"
 
 /*3:*/
 #line 327 "hint.w"
@@ -635,7 +635,15 @@ static pointer hteg_list_pointer(void);
 
 static scaled hget_xdimen_node(void);
 /*:132*/
-#line 8252 "hint.w"
+#line 8241 "hint.w"
+
+/*35:*/
+#line 697 "hint.w"
+
+extern uint16_t hglyph_section(uint8_t f);
+extern int32_t font_at_size(uint8_t f);
+/*:35*/
+#line 8242 "hint.w"
 
 /*9:*/
 #line 388 "hint.w"
@@ -909,6 +917,7 @@ if(range_def[i].f<=pos&&pos<range_def[i].t)return range_def[i].pg;
 return 0;
 }
 #endif
+#line 924 "hint.w"
 /*:48*//*54:*/
 #line 969 "hint.w"
 
@@ -1419,6 +1428,7 @@ QUIT("List sizes at "SIZE_F" and "SIZE_F" do not match 0x%x != 0x%x",list_start-
 return p;
 }
 #endif
+#line 2123 "hint.w"
 
 static ParamDef*hteg_param_list_node(void)
 {ParamDef*p;
@@ -2189,8 +2199,8 @@ trv_hlist(p);
 trv_string[trv_string_size]= 0;
 return trv_string;
 }
-/*:293*//*397:*/
-#line 8162 "hint.w"
+/*:293*//*396:*/
+#line 8151 "hint.w"
 
 static pointer leaks[1<<16]= {0};
 
@@ -2201,6 +2211,7 @@ int i;
 for(i= 0;i<0x10000;i++)
 leaks[i]= 0;
 #endif
+#line 8161 "hint.w"
 }
 
 void leak_in(pointer p,int s)
@@ -2210,6 +2221,7 @@ if(0!=leaks[p])
 fprintf(stderr,"ERROR leak in: p=%d, s in=%d, leaks[p]= %d != 0\n",p,s,leaks[p]);
 leaks[p]= s;
 #endif
+#line 8170 "hint.w"
 }
 
 void leak_out(pointer p,int s)
@@ -2219,6 +2231,7 @@ if(s!=leaks[p])
 fprintf(stderr,"ERROR: leak out: p=%d, s out=%d != %d = s in\n",p,s,leaks[p]);
 leaks[p]= 0;
 #endif
+#line 8179 "hint.w"
 }
 
 static void list_leaks(void)
@@ -2229,9 +2242,10 @@ for(i= 0;i<0x10000;i++)
 if(leaks[i]!=0)
 fprintf(stderr,"ERROR:leak final: p=%d, s=%d\n",i,leaks[i]);
 #endif
+#line 8189 "hint.w"
 }
-/*:397*/
-#line 8253 "hint.w"
+/*:396*/
+#line 8243 "hint.w"
 
 /*1:*/
 #line 231 "hint.w"
@@ -2604,9 +2618,11 @@ else
 #if 1
 pos= ((uint64_t)labels[n].pos<<32)+(labels[n].pos-labels[n].pos0);
 #else
-pos= ((uint64_t)labels[n].pos0<<32);
+#line 1230 "hint.w"
+ pos= ((uint64_t)labels[n].pos0<<32);
 
 #endif
+#line 1233 "hint.w"
 }
 /*:71*/
 #line 1216 "hint.w"
@@ -2879,7 +2895,7 @@ if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
 return par_ptr;
 }
 /*:176*/
-#line 8254 "hint.w"
+#line 8244 "hint.w"
 
 /*90:*/
 #line 1556 "hint.w"
@@ -3149,6 +3165,7 @@ if(nest_ptr==0&&tail!=head
 ||type(tail)==hlist_node||type(tail)==vlist_node
 ||type(tail)==kern_node)
 #endif
+#line 1578 "hint.w"
 )
 store_map(tail,node_pos,0);
 }
@@ -3244,7 +3261,8 @@ line_break_params= save_lbp;
 }
 
 /*:186*/
-#line 8255 "hint.w"
+#line 8245 "hint.w"
+
 
 
 /*18:*/
@@ -4047,7 +4065,7 @@ p= link(p);
 }
 }
 /*:291*/
-#line 8257 "hint.w"
+#line 8248 "hint.w"
 
 
-/*:400*/
+/*:399*/
