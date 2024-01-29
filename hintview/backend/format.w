@@ -5608,7 +5608,7 @@ The |b010| bit indicates the presence of a secondary position for the label.
   if (i&b010) /* secondary position */
   { HGET32(t->pos0); t->f=HGET8;@+}
   else t->pos0=t->pos;
-  DBG(DBGLABEL,"Defining label %d at 0x%x\n",n,t->pos);
+  DBG(DBGLABEL,"Defining label %d at 0x%x/0x%x\n",n,t->pos0,t->pos);
 }
 @
 
@@ -5625,6 +5625,7 @@ Tag hput_label(int n, Label *l)
   HPUT8(l->where);
   if (l->pos!=l->pos0)
   { i|=b010; HPUT32(l->pos0); HPUT8(l->f); @+} 
+  DBG(DBGLABEL,"Defining label %d at 0x%x/0x%x\n",n,l->pos0,l->pos);
   return TAG(label_kind,i);
 }
 @
@@ -7855,30 +7856,31 @@ the original filenames can be reconstructed.
 @<compute a local |aux_name|@>=
 { char *path=dir[i].file_name;
   int path_length=(int)strlen(path);
-  int aux_length;
   @<determine whether |path| is absolute or relative@>@;
-  aux_length=stem_length+ext_length+path_length;
-  ALLOCATE(aux_name,aux_length+1,char);
-  strcpy(aux_name,stem_name);
-  strcpy(aux_name+stem_length,aux_ext[name_type]);
-  strcpy(aux_name+stem_length+ext_length,path);
   @<replace links to the parent directory@>@; 
   DBG(DBGDIR,"Replacing auxiliary file name:\n\t%s\n->\t%s\n",path,aux_name);
 }
 @
 
 @<determine whether |path| is absolute or relative@>=
+  int aux_length;
   enum {absolute=0, relative=1} name_type;
   char *aux_ext[2]={".abs/",".rel/"};
   int ext_length=5;
+  aux_length=stem_length+ext_length+path_length;
+  ALLOCATE(aux_name,aux_length+1,char);
+  strcpy(aux_name,stem_name);
   if (path[0]=='/')
   { name_type=absolute;
-    path++; path_length--;
+    strcpy(aux_name+stem_length,aux_ext[name_type]);
+    strcpy(aux_name+stem_length+ext_length,path+1);  
   }
   else if (path_length>3 && isalpha(path[0]) &&
            path[1]==':' && path[2]=='/')
   { name_type=absolute;
-    path[1]='_';
+    strcpy(aux_name+stem_length,aux_ext[name_type]);
+    strcpy(aux_name+stem_length+ext_length,path);
+    aux_name[stem_length+ext_length+1]='_';
   }      
   else
     name_type=relative;
@@ -7891,7 +7893,7 @@ file system, we replace links to the parent direcory ``{\tt ../}'' by
 
 @<replace links to the parent directory@>=
 { int k;
-  for (k=0; k<aux_length-3;k++) 
+  for (k=stem_length+ext_length; k<aux_length-3;k++) 
     if (aux_name[k]=='.'&& aux_name[k+1]=='.'&& aux_name[k+2]=='/')
     { aux_name[k]=aux_name[k+1]='_';k=k+2;}
 }
@@ -8199,7 +8201,7 @@ size, we need to determine the file.
         aux_names[i]=aux_name;
       else 
       { if (option_aux) QUIT("Unable to find file '%s'",aux_name); 
-        free(aux_name);
+        free(aux_name); aux_name=NULL;
       } 
     }
     if ((aux_names[i]==NULL && !option_aux) || option_global)
@@ -9436,7 +9438,7 @@ zero_label_no=0@+
 @
 @<define |label_defaults|@>=
 max_default[label_kind]=MAX_LABEL_DEFAULT;
-printf("Label label_defaults[MAX_LABEL_DEFAULT+1]="@|"{{0,LABEL_TOP,true,0,0,0}};\n\n");
+printf("Label label_defaults[MAX_LABEL_DEFAULT+1]="@|"{{0,0,LABEL_TOP,true,0,0}};\n\n");
 @
 
 
@@ -11143,7 +11145,7 @@ typedef double float64_t;
 #error  @=float64 type must have size 8@>
 #endif
 #define HINT_VERSION 2
-#define HINT_MINOR_VERSION 0
+#define HINT_MINOR_VERSION 1
 #define AS_STR(X) #X
 #define VERSION_AS_STR(X,Y) AS_STR(X) "." AS_STR(Y)
 #define HINT_VERSION_STRING VERSION_AS_STR(HINT_VERSION, HINT_MINOR_VERSION)

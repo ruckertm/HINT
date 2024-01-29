@@ -39,8 +39,8 @@
 #include <GLFW/glfw3.h>
 
 #define VERSION 1
-#define REVISION 3
-#define PATCHLEVEL 1
+#define REVISION 4
+#define PATCHLEVEL 0
 
 #include "error.h"
 #include "basetypes.h"

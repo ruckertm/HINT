@@ -1,19 +1,19 @@
 	/*539:*/
-	#line 11157 "format.w"
+	#line 11159 "format.w"
 
 #ifndef _HFORMAT_H_
 #define _HFORMAT_H_
 	/*375:*/
-	#line 8394 "format.w"
+	#line 8396 "format.w"
 
 #define REF_RNG(K,N) if ((int)(N)>max_ref[K]) QUIT("Reference %d to %s out of range [0 - %d]",\
   (N),definition_name[K],max_ref[K])
 	/*:375*/	/*376:*/
-	#line 8408 "format.w"
+	#line 8410 "format.w"
 
 #define MAX_REF(K) ((K)==label_kind?0xFFFF:0xFF)
 	/*:376*/	/*454:*/
-	#line 9932 "format.w"
+	#line 9934 "format.w"
 
 #ifdef WIN32
 #define SIZE_F "0x%tx"
@@ -32,10 +32,10 @@
 
 #define TAGERR(A) QUIT("Unknown tag [%s,%d] at " SIZE_F "\n",NAME(A),INFO(A),hpos-hstart)
 	/*:454*/
-	#line 11160 "format.w"
+	#line 11162 "format.w"
 
 	/*441:*/
-	#line 9671 "format.w"
+	#line 9673 "format.w"
 
 #define DBGNONE     0x0
 #define DBGBASIC    0x1
@@ -55,7 +55,7 @@
 #define DBGRENDER   0x4000
 #define DBGLABEL    0x8000
 	/*:441*/
-	#line 11161 "format.w"
+	#line 11163 "format.w"
 
 	/*13:*/
 	#line 646 "format.w"
@@ -88,28 +88,28 @@
 #define LABEL_BOT 2
 #define LABEL_MID 3
 	/*:251*/	/*320:*/
-	#line 7050 "format.w"
+	#line 7051 "format.w"
 
 #define ALLOCATE(R,S,T) ((R)= (T *)calloc((S),sizeof(T)),\
         (((R)==NULL)?QUIT("Out of memory for " #R):0))
 #define REALLOCATE(R,S,T) ((R)= (T *)realloc((R),(S)*sizeof(T)),\
         (((R)==NULL)?QUIT("Out of memory for " #R):0))
 	/*:320*/	/*328:*/
-	#line 7215 "format.w"
+	#line 7216 "format.w"
 
 #define MAX_BANNER 256
 	/*:328*/	/*341:*/
-	#line 7426 "format.w"
+	#line 7427 "format.w"
 
 #define MAX_TAG_DISTANCE 32
 	/*:341*/	/*457:*/
-	#line 9997 "format.w"
+	#line 9999 "format.w"
 
 #define NODE_SIZE(H,T) ((T)==0?(H)+2:-4*((H)+1)+((T)-1))
 #define NODE_HEAD(N)   ((N)>0?(N)-2:-((N)>>2)-1)
 #define NODE_TAIL(N)   ((N)<0?((N)&0x3)+1:0)
 	/*:457*/
-	#line 11162 "format.w"
+	#line 11164 "format.w"
 
 	/*6:*/
 	#line 493 "format.w"
@@ -230,14 +230,14 @@ int next;
 uint8_t f;
 }Label;
 	/*:250*/	/*399:*/
-	#line 8939 "format.w"
+	#line 8941 "format.w"
 
 #define MAX_FONT_PARAMS 11
 	/*:399*/
-	#line 11163 "format.w"
+	#line 11165 "format.w"
 
 	/*412:*/
-	#line 9178 "format.w"
+	#line 9180 "format.w"
 
 typedef enum{
 zero_int_no= 0,
@@ -266,7 +266,7 @@ floating_penalty_no= 22
 }Int_no;
 #define MAX_INT_DEFAULT floating_penalty_no
 	/*:412*/	/*414:*/
-	#line 9251 "format.w"
+	#line 9253 "format.w"
 
 typedef enum{
 zero_dimen_no= 0,
@@ -282,7 +282,7 @@ math_quad_no= 9
 }Dimen_no;
 #define MAX_DIMEN_DEFAULT math_quad_no
 	/*:414*/	/*416:*/
-	#line 9296 "format.w"
+	#line 9298 "format.w"
 
 typedef enum{
 zero_xdimen_no= 0,
@@ -291,7 +291,7 @@ vsize_xdimen_no= 2
 }Xdimen_no;
 #define MAX_XDIMEN_DEFAULT vsize_xdimen_no
 	/*:416*/	/*418:*/
-	#line 9320 "format.w"
+	#line 9322 "format.w"
 
 typedef enum{
 zero_skip_no= 0,
@@ -312,56 +312,56 @@ par_fill_skip_no= 14
 }Glue_no;
 #define MAX_GLUE_DEFAULT par_fill_skip_no
 	/*:418*/	/*420:*/
-	#line 9406 "format.w"
+	#line 9408 "format.w"
 
 typedef enum{
 zero_baseline_no= 0
 }Baseline_no;
 #define MAX_BASELINE_DEFAULT zero_baseline_no
 	/*:420*/	/*422:*/
-	#line 9431 "format.w"
+	#line 9433 "format.w"
 
 typedef enum{
 zero_label_no= 0
 }Label_no;
 #define MAX_LABEL_DEFAULT zero_label_no
 	/*:422*/	/*424:*/
-	#line 9445 "format.w"
+	#line 9447 "format.w"
 
 typedef enum{
 zero_stream_no= 0
 }Stream_no;
 #define MAX_STREAM_DEFAULT zero_stream_no
 	/*:424*/	/*426:*/
-	#line 9461 "format.w"
+	#line 9463 "format.w"
 
 typedef enum{
 zero_page_no= 0
 }Page_no;
 #define MAX_PAGE_DEFAULT zero_page_no
 	/*:426*/	/*428:*/
-	#line 9478 "format.w"
+	#line 9480 "format.w"
 
 typedef enum{
 zero_range_no= 0
 }Range_no;
 #define MAX_RANGE_DEFAULT zero_range_no
 	/*:428*/	/*430:*/
-	#line 9491 "format.w"
+	#line 9493 "format.w"
 
 typedef enum{
 empty_list_no= 0
 }List_no;
 #define MAX_LIST_DEFAULT empty_list_no
 	/*:430*/	/*432:*/
-	#line 9506 "format.w"
+	#line 9508 "format.w"
 
 typedef enum{
 zero_color_no= 0,link_color_no= 1
 }Color_no;
 #define MAX_COLOR_DEFAULT link_color_no
 	/*:432*/
-	#line 11164 "format.w"
+	#line 11166 "format.w"
 
 
 extern const char*content_name[32];

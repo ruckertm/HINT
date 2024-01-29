@@ -1,5 +1,5 @@
 	/*538:*/
-	#line 11104 "format.w"
+	#line 11106 "format.w"
 
 #ifndef __BASETYPES_H__
 #define __BASETYPES_H__
@@ -42,7 +42,7 @@ typedef double float64_t;
 #error  float64 type must have size 8
 #endif
 #define HINT_VERSION 2
-#define HINT_MINOR_VERSION 0
+#define HINT_MINOR_VERSION 1
 #define AS_STR(X) #X
 #define VERSION_AS_STR(X,Y) AS_STR(X) "." AS_STR(Y)
 #define HINT_VERSION_STRING VERSION_AS_STR(HINT_VERSION, HINT_MINOR_VERSION)
