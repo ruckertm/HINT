@@ -5687,14 +5687,17 @@ number to a label. The |b010| info bit indicates a ``start'' link.
 To help a reader tell a link from ordinary text, links should be
 visualy different. This is supported in the \HINT\ file format
 by associating  different color schemes to links and ordinary texts.
-In the short format, the |b100| bit indicates that color set reference
+In the short format, the |b100| bit indicates that a color set reference
 (see section~\secref{colors}) follows after the label reference.
+A color reference to 1 in the start node and to |0xFF| in the end node
+is the default and is omitted.
+
 \gdef\subcodetitle{Links}
 \getcode
 @<get macros@>=
 #define @[HGET_LINK(I)@] @/\
 { int n,c; if (I&b001) HGET16(n);@+ else n=HGET8;\
-  if (I&b100) c=HGET8; else c=(I&b010)?1:0;\
+  if (I&b100) c=HGET8; else c=(I&b010)?1:0xFF;\
   hwrite_link(n,c,I&b010); @+}
 @
 
@@ -5721,7 +5724,7 @@ Tag hput_link(int n, int c, int on)
   labels[n].used=true;
   if (on) i=b010;@+ else i=b000;
   if (n>0xFF) { i|=b001; HPUT16(n);@+} @+else HPUT8(n);
-  if ((on && c!=1) ||(!on && c!=0)) { i|=b100; HPUT8(c); }
+  if ((on && c!=1) ||(!on && c!=0xFF)) { i|=b100; HPUT8(c); }
   return TAG(link_kind,i);
 }
 @
@@ -5737,7 +5740,7 @@ Tag hput_link(int n, int c, int on)
 
 @<parsing rules@>=
 content_node:start LINK REFERENCE on_off END
-    {@+ hput_tags($1,hput_link($3,$4?1:0,$4));@+ };
+    {@+ hput_tags($1,hput_link($3,$4?1:0xFF,$4));@+ };
 content_node:start LINK REFERENCE on_off REFERENCE END
     {@+ hput_tags($1,hput_link($3,$5,$4));@+ };
 @
@@ -5751,7 +5754,7 @@ void hwrite_link(int n, int c, uint8_t on)
   hwrite_ref(n);
   if (on) hwritef(" on");
   else hwritef(" off");
-  if ((on && c!=1)||(!on && c!=0))
+  if ((on && c!=1)||(!on && c!=0xFF))
   { REF_RNG(color_kind,c);  hwrite_ref(c); }
 }
 @
@@ -5938,55 +5941,30 @@ for (n=0;n<=max_outline;n++)
 @
 
 \subsection{Colors}\label{colors}
-This is the second draft of implementing color\index{color} specifications in
+This is the third draft of implementing color\index{color} specifications in
 a \HINT\ file.
 
 According to the initial philosophy of a \HINT\ file, a viewer must be
-capable of rendering a page given just any valid position inside the
-content section.  With the implementation of the viewers this very
-strong requirement was replaced by a weaker form: a viewer will
-require a 64 bit integer, that contains the 32 bit position of the
-page start in the top half and the distance to the enclosing top level
-node in the bottom half.  The page start position is valid only if it
-is the position of the start byte of a node.
-
-The viewer will then compute a representation of the page by
-inspecting this top level node, skip to the beginning to the page
-inside this node, and then construct the page representation. Once the
-page representation is complete, it is inserted into a page template
-and then the whole representation is passed to the renderer.  The
-renderer will the display the page in top down left to right order.
-The situation is similar if a page needs to be rendered with a
-given end of the page.  While we traverse the input nodes in backward
-order, the renderer will again travers the representation of the page
-in forward mode.
-
-The newest generations of viewers can also render a page given any
-real number in the interval 0.0 to 1.0, where 0.0 corresponds to the
-start of the content section and 1.0 corresponds to the end of the
-content section. This is possible because searching for a node and its
-enclosing top level node is realy fast using the technique described
-in section~\secref{fastforward}.
-
-As a consequence of this relaxed requirement, it is very well possible
-to work with a color state. Color will not effect the position of
+capable of rendering a page given just any valid position in the
+content section without reading the entire file.  This makes it
+impossible to use global information; only the information that is
+localy available can be used.  Given a file position, the viewer will
+compute a representation of the page, insert it into a page template,
+and pass it to the renderer.  Color will not effect the position of
 glyphs or rules and so it is sufficient to process the color
-information when rendering the page. If the color state is local to
-the enclosing node, the page template will specify the "global" color
-schema and local color changes extend from top to bottom and from left
-to right.
+information when rendering the page.  The renderer will, however,
+render the page always from the top down and from left to right.  As a
+consequence of the rendering order, it is very well possible to work
+with a color state within the top level boxes.
 
-A seperate issue is the specification of color changes in the top level,
-vertical list of nodes. While vertical list contain no character nodes,
-the color specification might still affect the background colors not
-only inside of top level nodes but also of top level glue and kern
-nodes and the foreground color of top level rule nodes. Because we still
-want to avoid the search for color nodes on the top level,
-we can either disallow color nodes on the top level or restrict the
-scope of a top level color node to reach only to the next possible
-page break. The latter would imply that an application like Hi\TeX\
-must repeat a top level color node after every node that could be
-used as a page break.
+A separate issue is the specification of color changes on the top
+level.  While a vertical list contains no character nodes, a color
+specification might still affect the background color and the
+foreground color of rules.  Because we still want to avoid the search
+for color nodes on the top level, we restrict the scope of a color
+node on the top level.  It will extend only to the next possible page
+break and applications like Hi\TeX\ must repeat a top level color node
+after every node that could be used as a page break.
 
 % Some statisticts
 % format.hnt 4065407 1103094 byte (compressed), 31802 top level content nodes
@@ -6004,47 +5982,90 @@ used as a page break.
 % and include the color ref in the link node - which might be
 % a good idea.
 
+The nesting of boxes on a page together with the transparency of colors
+leads to the problem of stacking several layers of color one on top
+of the other.
+Here is an example: An outer box might specify blue as a background color
+and white as a forground color while  an inside box specifies a transparent
+grey background and a transparent black foreground.
+Then we expect text in the outer box to have white letters on blue background.
+Further we want to see the inner box casting a grey shadown on the blue
+background, resulting in a mix of blue and gray, with black letters on
+top of it that are not completely black but let the background shine through.
+
+To limit the complexity, the \HINT\ file format will allow this stacking
+of colors only when nesting boxes. But inside a box, there is at any position
+only one foreground and one background color; a color change inside a box
+will simply replace the current colors.
+
+If an application like Hi\TeX\ wants
+to implement nesting colors inside a box, it has to implement its own color
+stack and compute the necessary color mixtures.
+There is only one exception to this concept: When a new box starts,
+the current colors will be those of the enclosing box. These colors
+can be restored after a color change by using the \<color off> command.
+
+The limited complexity is necessary to simplifies the spliting of boxes, for example by
+the line breaking routine. Repeating the last color node
+before the split just after the split is sufficient.
+
+
+Inside a horizontal list, a background color will extend from
+top to bottom; inside a vertical list a background color will extend
+from the left edge to the right edge.
+If the document does not want to change the background color,
+a completely transparent color should be used.
+
+While the current implementation of searching does not use the
+background color, a color set will still specify background and foreground
+for all colors. This is simpler, easier to extend at a later time,
+and the overhead is small.
+
+
 After these preliminaries let's turn our attention to the design of
 a suitable color concept.
 
-Colors come in sets. Before the present implementation of colors,
-we used a foreground color and a
-background color; then we had a special foreground color for links;
-and finaly the implementation of searching used special forground
-colors to mark matches and highlight the current search focus.  As if
-that was not sufficient, viewers could be switched to ``dark mode'' using
-a different forground and background color, and of course it was
-desirable to adjust the link, mark, and focus color as well.
 
-In the future, a document designer might want to indicate a link using a
-different background color instead or in combination with a special
-foreground color. Similar considerations apply to the colors used for
-searching.  By the way: the interaction of link color with mark or
-focus color was an open question; probably mixing the colors might be a
-good solution.  But there is another feature that sets links appart
-from the matching text in a search: The start and end of a link is
-already recorded in a \HINT\ file. So an automatic color change might
-be called for.
+%Before the present implementation of colors,
+%we used a foreground color and a
+%background color; then we had a special foreground color for links;
+%and finaly the implementation of searching used special forground
+%colors to mark matches and highlight the current search focus.  As if
+%that was not sufficient, viewers could be switched to ``dark mode'' using
+%a different forground and background color, and of course it was
+%desirable to adjust the link, mark, and focus color as well.
+%
+%In the future, a document designer might want to indicate a link using a
+%different background color instead or in combination with a special
+%foreground color. Similar considerations apply to the colors used for
+%searching.  By the way: the interaction of link color with mark or
+%focus color was an open question; probably mixing the colors might be a
+%good solution.  But there is another feature that sets links appart
+%from the matching text in a search: The start and end of a link is
+%already recorded in a \HINT\ file. So an automatic color change might
+%be called for.
 
-In the first redesign, a color set consisted of eight color pairs for
-normal, link, mark, and focus colors in day mode
-and four more color pairs for night mode;
-each pair specifying a background and a foreground color.
+%In the first redesign, a color set consisted of eight color pairs for
+%normal, link, mark, and focus colors in day mode
+%and four more color pairs for night mode;
+%each pair specifying a background and a foreground color.
+%
+%It turned out that color switching using three bits in a status
+%byte was inconvenient. Further this solution was mixing two different
+%causes for a color change: The doument author's requests for a color
+%change and the user interface's requests for a color change either
+%by switching between day and night mode or by searching.
+%While switching beween day and night mode requires the author to
+%supply two complete color schemas, searching just needs to change
+%the color of glyphs according the the given color schema.
+%While the color change for links is always known from the document,
+%the color changes due to searching depend on text input at run time.
+%So mixing all that together was possibly not the best solution.
 
-It turned out that color switching using three bits in a status
-byte was inconvenient. Further this solution was mixing two different
-causes for a color change: The doument author's requests for a color
-change and the user interface's requests for a color change either
-by switching between day and night mode or by searching.
-While switching beween day and night mode requires the author to
-supply two complete color schemas, searching just needs to change
-the color of glyphs according the the given color schema.
-While the color change for links is always known from the document,
-the color changes due to searching depend on text input at run time.
-So mixing all that together was possibly not the best solution.
+%The new and second redesign tries to seperate the different concerns.
 
-The new and second redesign tries to seperate the different concerns.
-A color set now supports two modes: day and night mode.
+Colors come in sets.
+A color set supports two modes: day and night mode.
 In future extensions it might be possible for 
 an author to invent color sets for winter or summer, fall or
 spring, or any other resonable or unreasonable purpose.
@@ -6053,33 +6074,36 @@ one for normal text, one for marked text and one for in-focus text.
 The switching between different modes and different styles is
 left to the user interface.
 
+We store a color set as an array of 12 words. 
+The first 6 words are for day mode the next 6 byte are for night mode;
+For each mode we have three color pairs and each pair consists
+of a forgraound and a backgraund color each stored as an RGBA value.
+
+@<hint basic types@>=
+typedef uint32_t ColorSet[2*3*2];
+@
+To extract the various sub-arrays, we have the following macros:
+@<hint macros@>=
+#define DAY(C)   (C)
+#define NIGHT(C) ((C)+3*2)
+#define TEXT(C)  (C)
+#define HIGH(C)  ((C)+1*2)
+#define FOCUS(C)  ((C)+2*2)
+#define FG(C)    ((C)[0])
+#define BG(C)    ((C)[1])
+@
+
 We will allow up to 255 color sets that are stored in the definition
 section and are referenced in the content section by a single byte.
 The definition of different color sets and the switching between them
 is left to the document author.
 
 The color set with reference number zero specifies the default colors.
-The colors given in section~\secref{colordefault} can be overwritten
-but the background colors for normal text will remain opaque.
 At the root of a page template, the default color set is selected
 and the whole page is filled with the background color for normal text.
-If the document does not want to change the background color,
-a completely transparent color (but not transparent black) should
-be used.
 For links, by default the color set with number one is used.
-Section ~\secref{colordefault} specifies default values for this
-color set as well.
-
-Inside a list, a color specification will extend up to the end of the
-list or up to the next color specification whatever occurs first.
-Inside a horizontal list, a background color will extend from
-top to bottom; inside a vertical list a background color will extend
-from the left edge to the right edge.
-
-While the current implementation of searching does not use the
-background color, a color set will still specify background and foreground
-for all colors. This is simpler, easier to extend later, and the overhead
-is small.
+Section ~\secref{colordefault} specifies default values for both
+color sets; the default colors can be overwritten.
 
 Now we are ready for the implementation.
 
@@ -6107,40 +6131,58 @@ and \.{0x00FF0080} would be transparent green.
 Of course even decimal values can be used. A good example is the
 value \.{0} which is equivalent to but a bit shorter than \.{0x0} or
 \.{0x00000000} which describes a completely transparent black.
-It is invisible because the alpha value is zero.  We use this color
-value for an ``unspecified'' color.
+It is invisible because the alpha value is zero.
 
 Alternatively, colors can be given as a list of three or four numbers
 enclosed in pointed brackets \.{<} \dots \.{>}.
 If only three numbers are given, the color is opaque with an alpha
 value equivalent to \.{0xFF}. Using this format
 the same colors as before can be written \.{<0xFF 0 0>} (pure red),
-\.{<0 0xFF 0 0x80>} (transparent green) and \.{<0 0 0 0>} (unspecified).
+\.{<0 0xFF 0 0x80>} (transparent green) and \.{<0 0 0 0>} (transparent black).
+
+The parser will put the color definition into |colors_n|
+using the index |colors_i|. As we will see later, the |colors_n|
+array is initialized with the colors in |colors_0| which in turn
+is initialized from |color_defaults[0]|.
+|colors_0| can be changed but only if that change occurs before
+any other color definition.
+
+@<common variables@>=
+ColorSet colors_0, colors_n; /* default and current color set */
+int colors_i; /* current color */
+@
+
+@<initialize definitions@>=
+{ int i;
+  for (i=0;i<sizeof(ColorSet)/4;i++)
+    colors_0[i]=color_defaults[0][i];
+}
+@
 
 @<parsing rules@>=@/
 color: START UNSIGNED UNSIGNED UNSIGNED UNSIGNED END@|
      { RNG("red",$2,0,0xFF); RNG("green",$3,0,0xFF);
        RNG("blue",$4,0,0xFF); RNG("alpha",$5,0,0xFF);
-       HPUT8($2); HPUT8($3); HPUT8($4); HPUT8($5);
+       colors_n[colors_i++]=($2<<24)|($3<<16)|($4<<8)|$5;
      }
      | START UNSIGNED UNSIGNED UNSIGNED END@|
      { RNG("red",$2,0,0xFF); RNG("green",$3,0,0xFF);
        RNG("blue",$4,0,0xFF);
-       HPUT8($2); HPUT8($3); HPUT8($4); HPUT8(0xFF);
+       colors_n[colors_i++]=($2<<24)|($3<<16)|($4<<8)|0xFF;
      };
-
-color: UNSIGNED { HPUT32($1); };
+color: UNSIGNED { colors_n[colors_i++]=$1;};
 @
 
 Colors are always specified in pairs: a foreground color folowed by
 background color enclosed in pointed brackets \.{<} \dots \.{>} as
-usual. For convenience, the background color can be omited if it is zero.
+usual. For convenience, the background color can be omited;
+in this case a completely transparent background is assumed.
 
 @<parsing rules@>=@/
 color_pair: START color color END
-	  | START color END { HPUT32(0); };
+	  | START color END { colors_n[colors_i++]=0; };
+color_unset: { colors_i+=2;};	  
 @
-
 
 A complete color set consists of six color pairs
 organized in two |color_tripple|s:
@@ -6148,83 +6190,131 @@ the first three pairs for normal, mark, and focus text
 in day mode are followed by the three pairs in night mode.
 The |color_tripple| for night mode is optional; and within
 a |color_tripple| all color pairs except the first one are
-optional.
-
-If a color pair is unspecified, it is replaced by the corresponding
-value from the default color set number zero.
+optional. An omited color is replaced by the
+corresponding color from the color set zero. To make the replacement
+process more predictable, the specification of color set zero---if
+present---must come first.
 If the default color set itself is redefined, an unspecified
-collor will not change the default color.
-It is not possible to change the alpha values
-of the default background colors for normal text in color set zero.
-So these default background colors will always be opaque.
-They will be selected at the root of a page template and define,
-so to speak, the native paper color before printing anything on it.
+color will not change the default color.
 
-To be open to future changes, color set definition will contain
-after the reference number the number of color pairs that follow.
+To be open to future changes, color set definitions in the short format
+will contain after the reference number the number of color pairs that follow.
 Currently this value is always six.
 
+
 @<parsing rules@>=@/
-color_null: { HPUT32(0); HPUT32(0); };
-color_tripple: START color_pair color_null color_null END 
-          | START color_pair color_pair color_null END
+color_tripple: START color_pair color_unset color_unset END 
+          | START color_pair color_pair color_unset END
           | START color_pair color_pair color_pair END
           ;
 	  
 color_set: color_tripple color_tripple;
-color_set: color_tripple color_null color_null color_null;
+color_set: color_tripple color_unset color_unset color_unset;
 
-def_node: start COLOR ref { HPUT8(6); } color_set END
-        { DEF($$,color_kind,$3); hput_tags($1,TAG(color_kind,b000));};
+def_node: start COLOR ref { HPUT8(6); color_init(); } color_set END
+        { DEF($$,color_kind,$3); hput_tags($1,hput_color_set($3)); };
+@
+
+@<put functions@>=
+void color_init(void)
+{ int i;
+  for (i=0;i<sizeof(ColorSet)/4;i++) colors_n[i]=colors_0[i];
+  colors_i=0;
+}
+
+Tag hput_color_set(int n)
+{ static bool first_color=true;
+  int i;
+  if (n==0)
+  { if (first_color)
+      for (i=0;i<sizeof(ColorSet)/4;i++) colors_0[i]=colors_n[i];
+    else
+      QUIT("Redefinition of color set 0 must be the first color definition");
+  }
+  first_color=false;
+  HPUTX(sizeof(ColorSet)+1);
+  for (i=0;i<sizeof(ColorSet)/4;i++) HPUT32(colors_n[i]);
+  return TAG(color_kind,b000);
+}
+
 @
 
 Compared to the definitions, the content nodes are pretty simple.
+The special color number |0xFF| is reserved to indicate an 
+\<color off> node in the short format.
 
 @<parsing rules@>=
-content_node: start COLOR ref END {REF_RNG(color_kind,$3); hput_tags($1,TAG(color_kind,b000));};
+content_node: start COLOR ref END
+    {REF_RNG(color_kind,$3); hput_tags($1,TAG(color_kind,b000));};
+content_node: start COLOR OFF END
+    { HPUT8(0xFF); hput_tags($1,TAG(color_kind,b000));};
 @
 
 \vbox{\writecode\vskip -\baselineskip\getcode}
 
+We contine with the color content nodes:
 @<cases to get content@>=
 @t\1\kern1em@>
-case TAG(color_kind,b000):HGET_REF(color_kind); @+break;
+case TAG(color_kind,b000):
+  { uint8_t n=HGET8;@+
+    if (n==0xFF) hwritef(" off");
+    else { REF(color_kind,n); @+hwrite_ref(n);@+}
+  }
+  break;
 @
+
+And now we turn to the color definitions:
 
 @<get functions@>=
 void hwrite_color_pair(uint32_t f, uint32_t b)
-{hwritec('<');
- if (f==0) hwritec('0'); else hwritef("0x%08X",f);
- if (b!=0) hwritef(" 0x%08X",b);
- hwritec('>');
+{ hwritec('<');
+  if (f==0) hwritec('0'); else hwritef("0x%08X",f);
+  if (b!=0) hwritef(" 0x%08X",b);
+  hwritec('>');
 }
 
-void hget_color_tripple(uint32_t node_pos, bool print)
-{ uint32_t c[6];
-  int i,k;
-  for (i=k=0;i<3;i++)
-  { HGET32(c[2*i]); HGET32(c[2*i+1]);
-    if (c[2*i]!=0 || c[2*i+1]!=0) k=i+1;
+void hget_color_set(uint32_t node_pos, ColorSet cs)
+{ int i,m;
+  for (i=0;i<sizeof(ColorSet)/4;i++)
+    HGET32(cs[i]);
+  for(m=0;m<2;m++)  
+  { uint32_t *c, *d;
+    bool diff_high, diff_focus;
+    if (m==0)
+    { c=DAY(cs); d=DAY(color_defaults[0]); }
+    else
+    { c=NIGHT(cs); d=NIGHT(color_defaults[0]);
+      if (memcmp(c,d,sizeof(ColorSet)/2)==0)
+        return;
+    }
+    hwrite_start();
+    diff_high=FG(HIGH(c))!=FG(HIGH(d))|| BG(HIGH(c))!=BG(HIGH(d));
+    diff_focus=FG(FOCUS(c))!=FG(FOCUS(d))||BG(FOCUS(c))!=BG(FOCUS(d));
+    hwrite_color_pair(FG(TEXT(c)),BG(TEXT(c)));
+    if (diff_high || diff_focus)  
+    { hwritec(' '); hwrite_color_pair(FG(HIGH(c)),BG(HIGH(c)));}
+    if (diff_focus) 
+    { hwritec(' '); hwrite_color_pair(FG(FOCUS(c)),BG(FOCUS(c)));}
+    hwrite_end();
   }
-  if (!print&&k==0) return;
-  if (k==0)
-   QUIT("Color definition must not be empty at 0x%x",node_pos);
-  hwrite_start();
-  for (i=0;i<k;i++)
-  { hwrite_color_pair(c[2*i],c[2*i+1]);
-    if (i < k-1) hwritec(' ');
-  }
-  hwrite_end();
 }
 @
 
 @<cases to get definitions for |color_kind|@>=
  case b000:
    { int k;
+     ColorSet c;
+     static bool first_color=true;
      k=HGET8;
      if (k!=6) 
        QUIT("Definition %d of color set needs 6 color pairs only %d given\n",n,k);
-     hget_color_tripple(node_pos,true); hget_color_tripple(node_pos,false);
+     hget_color_set(node_pos,c);
+     if (n==0)
+     { if (!first_color)
+         QUIT("Definition of color set zero must be first");
+       memcpy(&color_defaults[0],&c,sizeof(ColorSet));
+     }
+     first_color=false;
    }
    break;
 @
@@ -8438,7 +8528,7 @@ max_value: FONT UNSIGNED      { hset_max(font_kind,$2); }
          | INTEGER UNSIGNED   { hset_max(int_kind,$2); }
          | DIMEN UNSIGNED     { hset_max(dimen_kind,$2); }
          | LIGATURE UNSIGNED  { hset_max(ligature_kind,$2); }
-         | DISC UNSIGNED    { hset_max(disc_kind,$2); }
+         | DISC UNSIGNED      { hset_max(disc_kind,$2); }
          | GLUE UNSIGNED      { hset_max(glue_kind,$2); }
          | LANGUAGE UNSIGNED  { hset_max(language_kind,$2); }
          | RULE UNSIGNED      { hset_max(rule_kind,$2); }
@@ -9528,19 +9618,19 @@ to define the default colors.
 @<define |color_defaults|@>=
 max_default[color_kind]=MAX_COLOR_DEFAULT;
 max_fixed[color_kind]=-1;
-printf("uint8_t  color_defaults[MAX_COLOR_DEFAULT+1][2][3][2][4]="@|
-       "{{{{{0x00,0x00,0x00,0xFF},{0xFF,0xFF,0xFF,0xFF}}," /* black on white */@|
-       "   {{0xEE,0x00,0x00,0xFF},{0x00,0x00,0x01,0x00}}," /* red */
-       "   {{0x00,0xEE,0x00,0xFF},{0x00,0x00,0x01,0x00}}}," /* green */@|
-       "  {{{0xFF,0xFF,0xFF,0xFF},{0x00,0x00,0x00,0xFF}}," /* white on black */
-       "   {{0xFF,0x11,0x11,0xFF},{0x00,0x00,0x01,0x00}}," /* red */
-       "   {{0x11,0xFF,0x11,0xFF},{0x00,0x00,0x01,0x00}}}}," /* green*/@| 
-       " {{{{0x00,0x00,0xEE,0xFF},{0x00,0x00,0x01,0x00}}," /* blue on white */
-       "   {{0xEE,0x00,0x00,0xFF},{0x00,0x00,0x01,0x00}}," /* red on white */
-       "   {{0x00,0xEE,0x00,0xFF},{0x00,0x00,0x01,0x00}}}," /* green on white */@| 
-       "  {{{0x11,0x11,0xFF,0xFF},{0x00,0x00,0x01,0x00}}," /* blue on black */
-       "   {{0xFF,0x11,0x11,0xFF},{0x00,0x00,0x01,0x00}}," /* red on black */
-       "   {{0x11,0xFF,0x11,0xFF},{0x00,0x00,0x01,0x00}}}" /* green on black */
+printf("ColorSet  color_defaults[MAX_COLOR_DEFAULT+1]=\n"@|
+       "{{0x000000FF, 0xFFFFFF00,\n" /* black on white */@|
+       "  0xEE0000FF, 0xFFFFFF00,\n" /* dark red */
+       "  0x00EE00FF, 0xFFFFFF00,\n" /* dark green */@|
+       "  0xFFFFFFFF, 0x00000000," /* white on black */
+       "  0xFF1111FF, 0x00000000,\n" /* light red */
+       "  0x11FF11FF, 0x00000000},\n" /* light green*/@| 
+       " {0x0000EEFF, 0xFFFFFF00,\n" /* dark blue on white */
+       "  0xEE0000FF, 0xFFFFFF00,\n" /* dark red on white */
+       "  0x00EE00FF, 0xFFFFFF00,\n" /* dark green on white */@| 
+       "  0x1111FFFF, 0x00000000,\n" /* light blue on black */
+       "  0xFF1111FF, 0x00000000,\n" /* light red on black */
+       "  0x11FF11FF, 0x00000000\n" /* light green on black */
        "}};\n\n");
 @
 
@@ -11176,7 +11266,7 @@ extern Xdimen xdimen_defaults[MAX_XDIMEN_DEFAULT+1];
 extern Glue glue_defaults[MAX_GLUE_DEFAULT+1];
 extern Baseline baseline_defaults[MAX_BASELINE_DEFAULT+1];
 extern Label label_defaults[MAX_LABEL_DEFAULT+1];
-extern uint8_t  color_defaults[MAX_COLOR_DEFAULT+1][2][3][2][4];
+extern ColorSet color_defaults[MAX_COLOR_DEFAULT+1];
 extern signed char hnode_size[0x100];
 extern uint8_t content_known[32];
 
@@ -11399,6 +11489,10 @@ extern Tag hput_disc(Disc *h);
 extern Info hput_span_count(uint32_t n);
 extern void hextract_image_dimens(int n, double *a, Dimen *w, Dimen *h);
 extern Info hput_image_spec(uint32_t n, float32_t a, uint32_t wr, Xdimen *w, uint32_t hr, Xdimen *h);
+extern int colors_i;
+extern ColorSet colors_0, colors_n;
+extern void color_init(void);
+extern Tag hput_color_set(int n);
 extern void hput_string(char *str);
 extern void hput_range(uint8_t pg, bool on);
 extern void hput_max_definitions(void);

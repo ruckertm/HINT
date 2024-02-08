@@ -266,7 +266,7 @@ HINT 2.0 created by stretch
   <glyph 'n' *3 (tenrm)>
   <glyph 's' *3 (tenrm)>
   <rule 8.5pt 3.5pt 0pt>
-  <color *2>
+  <color off>
   <glue *22>
   <glyph 'w' *3 (tenrm)>
   <kern *12>

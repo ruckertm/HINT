@@ -1242,7 +1242,7 @@ To store colors, we use the same data type that is used for the
 
 
 @<\HINT\ |extern|@>=
-typedef uint8_t ColorSet[2][3][2][4];
+typedef uint32_t ColorSet[12];
 extern ColorSet *color_def;
 @
 
@@ -1278,36 +1278,19 @@ Whenever a page is rendered, the rendering starts with the colors from
 with the  background color for normal text in |color_def[0]|.
 
 All color definitions, including  |color_def[0]|, can be changed
-by the definitions in  the \HINT\ file.
-When we read a color definition from the \HINT\ file, we replace a
-color that is entirely zero---a kind of fully transparent black---with
-the respective color from  |color_def[0]|. If you realy need a fully
-transparent color, use any other fully transparent color, for example
-white; it does not make a difference.
+by the definitions in  the \HINT\ file. If you change |color_def[0]|
+it should come first.
 
 @<get functions@>=
 static void hget_color_def(uint8_t a, int i)
-{@+int j,k,l;
+{@+int j,k;
   if (INFO(a)!=b000)
     QUIT("Color Definition %d with Info value %d!=000",i,INFO(a));
   k=HGET8;
   if (k!=6) 
     QUIT("Definition %d of color set needs 6 color pairs %d given\n",i,k);
-  for (j=0; j<2; j++)
-  for (k=0; k<3; k++)
-  for (l=0; l<2; l++)
-  { uint32_t rgba;
-    uint8_t *c=color_def[i][j][k][l];
-    HGET32(rgba);
-    if (rgba==0)
-      memcpy(c,color_def[0][j][k][l],4);
-    else
-    { c[0] =rgba>>24;
-      c[1] =(rgba>>16)&0xFF;
-      c[2] =(rgba>>8)&0xFF;
-      c[3] =rgba&0xFF;
-    }
-  }
+  for (j=0;j<6*2;j++)
+    HGET32(color_def[i][j]);
 }
 @
 
@@ -1378,10 +1361,13 @@ static pointer hget_image_ref(uint16_t n)
 
 static pointer hget_color_ref(uint8_t n) 
 {@+pointer p;
-  REF_RNG(color_kind,n);
   p=get_node(color_node_size);
-  type(p)=whatsit_node; subtype(p)=color_node;
-  color_node_ref(p)=n;
+  type(p)=whatsit_node;
+  if (n==0xFF) subtype(p)=end_color_node;
+  else
+  { subtype(p)=color_node; REF_RNG(color_kind,n);
+    color_node_ref(p)=n;
+  }
   return p;
 }
 
@@ -3574,9 +3560,10 @@ set to zero, because the label names are not stored as token lists.
   p=get_node(link_node_size);  type(p)=whatsit_node;\
   if (I&b010) subtype(p)=start_link_node; else subtype(p)=end_link_node;\
   if (I&b001) HGET16(label_ref(p));@+ else label_ref(p)=HGET8; \
-  if (I&b100) link_color(p)=HGET8; else link_color(p)=(I&b010)?1:0;\
+  if (I&b100) link_color(p)=HGET8; else link_color(p)=(I&b010)?1:0xFF;\
   RNG("label",label_ref(p),0,max_ref[label_kind]);\
-  RNG("label color",link_color(p),0,max_ref[color_kind]);\
+  if (link_color(p)!=0xFF)\
+    RNG("label color",link_color(p),0,max_ref[color_kind]);\
   label_has_name(p)=0;\
   tail_append(p);}
 @
@@ -3586,10 +3573,11 @@ set to zero, because the label names are not stored as token lists.
 { @+pointer p;\
   p=get_node(link_node_size);  type(p)=whatsit_node;\
   if (I&b010) subtype(p)=start_link_node; else subtype(p)=end_link_node;\
-  if (I&b100) link_color(p)=HTEG8; else link_color(p)=(I&b010)?1:0;\
+  if (I&b100) link_color(p)=HTEG8; else link_color(p)=(I&b010)?1:0xFF;\
   if (I&b001) HTEG16(label_ref(p));@+ else label_ref(p)=HTEG8; \
   RNG("label",label_ref(p),0,max_ref[label_kind]);\
-  RNG("label color",link_color(p),0,max_ref[color_kind]);\
+  if (link_color(p)!=0xFF)\
+    RNG("label color",link_color(p),0,max_ref[color_kind]);\
   label_has_name(p)=0;\
   tail_append(p);}
 @
@@ -3612,7 +3600,7 @@ static int hget_link_color(void)
     else return hpos[2];
   }
   else
-  { if (INFO(hpos[0]&b010)) return 1; else return 0; }
+  { if (INFO(hpos[0]&b010)) return 1; else return 0xFF; }
 }
 @
 
@@ -6595,10 +6583,35 @@ extern void nativeBackground(double x, double y, double h, double w);
 
 @<render variables@>=
 int cur_color=0, cur_mode=0, cur_style=0, next_style=0;
+pointer color_tos; /* color top of stack */
 @
 
+When the renderer encounters a |color_node| it pushes the node
+on the color stack:
+@<push the color stack@>=
+color_link(p)=color_tos; color_tos=p;
+cur_color=color_node_ref(p);
+cur_color_depth++;
+@
+
+When the renderer encounters an |end_color_node| it pops the
+color stack and restores the current color.
+@<pop the color stack@>=
+if (cur_color_depth>0)
+{ if (color_tos==null) cur_color=0;
+  else
+  { color_tos = color_link(color_tos);
+    if (color_tos==null) cur_color=0;
+    else cur_color=color_node_ref(color_tos);
+  }
+  cur_color_depth--;
+}
+@
+
+
+
 @<handle a horizontal change in the background color@>=
-if (color_def[cur_color][cur_mode][cur_style][1][3]>0)
+if ((color_def[cur_color][cur_mode*3+cur_style*2+1]&0xFF)>0)
 { scaled x,y,w,h;
   x=cur_h;
   y=cur_v+depth(this_box);
@@ -6610,7 +6623,7 @@ if (color_def[cur_color][cur_mode][cur_style][1][3]>0)
 @
 
 @<handle a vertical change in the background color@>=
-if (color_def[cur_color][cur_mode][cur_style][1][3]>0)
+if ((color_def[cur_color][cur_mode*3+cur_style*2+1]&0xFF)>0)
 { scaled x,y,w,h;
   x=left_edge;
   h=vcolor_distance(link(p),g_sign,g_order,glue_set(this_box));
@@ -6630,6 +6643,7 @@ document, but its reponsibilities are listed in section~\secref{native}.
 @<render functions@>=
 uint64_t hint_blank(void)
 { nativeSetColor(color_def!=NULL?color_def:color_defaults);
+  color_tos=null;
   nativeBlank();
   return 0;
 }
@@ -6671,6 +6685,7 @@ scaled edge;
 double glue_temp;
 double cur_glue;
 scaled cur_g;
+int cur_color_depth=0;
 int local_link=-1;
 uint8_t f;
 uint32_t c;
@@ -6731,12 +6746,14 @@ render_c:
        if(list_ptr(p)==null) cur_h= cur_h+width(p);
        else
        { int cur_c=cur_color;
+         pointer cur_tos=color_tos;
          cur_v= base_line+shift_amount(p);
          edge= cur_h;
          if(type(p)==vlist_node) 
            vlist_render(p);
          else 
            hlist_render(p);
+	 color_tos=cur_tos;  
          if (cur_color!=cur_c)
          { cur_color=cur_c; nativeSetColor(color_def+cur_color); }
          cur_h= edge+width(p);cur_v= base_line;
@@ -6749,9 +6766,15 @@ render_c:
        switch (subtype(p))
        { case ignore_node: @<handle an ignore node@>@;break;
  	 case color_node:
-           cur_color = color_node_ref(p);
+	   @<push the color stack@>@;
            nativeSetColor(color_def+cur_color);
-           @<handle a horizontal change in the background color@>
+           @<handle a horizontal change in the background color@>@;
+	   break;
+ 	 case end_color_node:
+	   @<pop the color stack@>
+           nativeSetColor(color_def+cur_color);
+	   if (cur_color_depth>0)
+             @<handle a horizontal change in the background color@>@;
 	   break;
          case start_link_node:
 	   @<handle a start link node@>@;
@@ -6820,6 +6843,7 @@ render_c:
           while(cur_h+leader_wd<=edge)
 		  /*Output a leader box at |cur_h|,...*/
           { int cur_c=cur_color;
+            pointer cur_tos=color_tos;
 	    cur_v= base_line+shift_amount(leader_box);
 	    h_save=cur_h;
             c_ignore=true;
@@ -6827,6 +6851,7 @@ render_c:
 	      vlist_render(leader_box);
 	    else 
 	      hlist_render(leader_box);
+            color_tos=cur_tos;  
             if (cur_color!=cur_c)
             { cur_color=cur_c; nativeSetColor(color_def+cur_color); }
             c_ignore=false;
@@ -6890,6 +6915,7 @@ double cur_glue;
 scaled cur_g;
 int local_link=-1;
 cur_g= 0;cur_glue= float_constant(0);
+int cur_color_depth=0;
 g_order= glue_order(this_box);
 g_sign= glue_sign(this_box);p= list_ptr(this_box);
 #ifdef DEBUG
@@ -6913,12 +6939,14 @@ while(p!=null)
         if(list_ptr(p)==null) cur_v= cur_v+height(p)+depth(p);
 	else
 	{ int cur_c=cur_color;
+          pointer cur_tos=color_tos;
 	  cur_v= cur_v+height(p);save_v= cur_v;
           cur_h= left_edge+shift_amount(p);
           if(type(p)==vlist_node)
 	    vlist_render(p);
 	  else
             hlist_render(p);
+ 	  color_tos=cur_tos;  
           if (cur_color!=cur_c)
           { cur_color=cur_c; nativeSetColor(color_def+cur_color); }
           cur_v= save_v+depth(p);cur_h= left_edge;
@@ -6930,9 +6958,15 @@ while(p!=null)
       case whatsit_node:
         switch (subtype(p))
         { case color_node:
-	    cur_color =color_node_ref(p);
+	    @<push the color stack@>@;
 	    nativeSetColor(color_def+cur_color);
-            @<handle a vertical change in the background color@>
+            @<handle a vertical change in the background color@>@;
+	    break;
+ 	  case end_color_node:
+	    @<pop the color stack@>
+            nativeSetColor(color_def+cur_color);
+	    if (cur_color_depth>0)
+              @<handle a vertical change in the background color@>@;
 	    break;
 	  case start_link_node:
 	    @<handle a start link node@>@;
@@ -7000,6 +7034,7 @@ while(p!=null)
 		    }
 		    while(cur_v+leader_ht<=edge)
 		    { int cur_c=cur_color;
+                      pointer cur_tos=color_tos;
 		      cur_h= left_edge+shift_amount(leader_box);
 		      cur_v= cur_v+height(leader_box);save_v= cur_v;
                       c_ignore=true;
@@ -7007,6 +7042,7 @@ while(p!=null)
 		        vlist_render(leader_box);
 		      else 
 		        hlist_render(leader_box);
+                      color_tos=cur_tos;  
 		      if (cur_color!=cur_c)
          	      { cur_color=cur_c; nativeSetColor(color_def+cur_color); }
                       c_ignore=false;
@@ -7090,6 +7126,7 @@ render_c:
         { case start_link_node: 
           case end_link_node: 
 	  case color_node:
+	  case end_color_node:
 	    return dist;
           case image_node:
             dist= dist+image_width(p);
@@ -7153,6 +7190,7 @@ while(p!=null)
         { case start_link_node: 
           case end_link_node: 
 	  case color_node:
+	  case end_color_node:
 	    return dist;
           case image_node:
             dist= dist+image_height(p);
@@ -7198,6 +7236,7 @@ the page: the |hint_render| function.
 
 void hint_render(void)
 {  cur_color=0;
+   color_tos=null;
    nativeSetColor(color_def!=NULL?color_def:color_defaults);
    nativeBlank();
    if (streams==NULL || streams[0].p==null) return;

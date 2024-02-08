@@ -1,4 +1,4 @@
-HINT 2.0 created by stretch
+HINT 2.1 created by stretch
 <directory 4
 <section 3 '/usr/local/texlive/2023/texmf-dist/fonts/tfm/public/cm/cmssdc10.tfm'
 >
@@ -12,16 +12,17 @@ HINT 2.0 created by stretch
  <baseline 1>
  <stream 2>
  <page 2>
- <color 2>
+ <color 3>
  <int 23>>
+<color *0 (dark blue on light yellow, light yellow on dark blue)
+ <<<0x00 0x00 0x10> <0xFF 0xFF 0xCC>>> <<<0xFF 0xFF 0x88> <0 0 0x10>>>>
 <color *1 (transparent green/blue, transparent red/yellow)
  <<<0x00 0xFF 0 0x80> <0x40 0x40 0xFF 0x80>>>
  <<<0xFF 0 0 0x80> <0xFF 0xFF 0 0x80>>>>  
 <color *2 (dark green/grey,  light red/grey)
  <<<0x00 0x40 0> <80 80 80>>> <<<0xFF 0x40 0x40>  <80 80 80>>>>  
-<color *0 (dark blue on light yellow, light yellow on dark blue)
- <<<0x00 0x00 0x10> <0xFF 0xFF 0xCC>>> <<<0xFF 0xFF 0x88> <0 0 0x10>>>>
-
+<color *3 (dark gray/mediumgrey,  medium gey/dark grey)
+ <<<0x40 0x40 40 0x80> <0x80 0x80 0x80 0x80>>> <<<0x80 0x80 0x80 0x80>  <0x40 0x40 0x40 0x80>>>>  
 <language *0 'unknown'>
 <font *0 'titlefont' 40pt 3 4
  <glue 0xC.AAApt plus 0x6.554Fpt minus 0x4.38E1pt>
@@ -50,9 +51,11 @@ HINT 2.0 created by stretch
  <glue 1pt>>
 <page *2 'plain' 20
  <glue *11> 4pt
- <xdimen 0pt+1v>
- <xdimen 0pt+1h>
+ <xdimen 10pt+1v>
+ <xdimen 10pt+1h>
  <
+  <color *3>
+  <rule 5pt 0pt 200pt>
   <stream *1>
   <stream *0>
   <stream *2>>
@@ -100,31 +103,44 @@ HINT 2.0 created by stretch
 <language *0>
 <hbox 0x20.C71Dpt 0pt 0x76.D4EBpt 
  <
-  (<color *0>)
+  <color *0>
   <glyph 'A' *0 (tenrm)>
   <kern -20pt>
   <color *1>
   <glyph 'B' *0 (tenrm)>
-  <color *0>
+  <color off>
   <glyph 'A' *0 (tenrm)>
   <color *2>
   <kern -20pt>
   <glyph 'C' *0 (tenrm)>
   <glue *15>>>
   <rule 2pt 0pt _>
-<vbox 100pt 0pt 100pt
+<kern 6pt>  
+<vbox 142pt 0pt 100pt shifted 30pt
  <
+  <rule 2pt 0pt _>
+  <kern 18pt>
   <color *1>
   <rule 2pt 0pt _>
   <kern 18pt>
   <color *0>
   <rule 2pt 0pt _>
-  <kern 28pt>
-  <color *2>
-  <kern 48pt>
+  <kern 18pt>
+  <color off>
   <rule 2pt 0pt _>
+  <kern 18pt>
+  <color off>
+  <rule 2pt 0pt _>
+  <kern 18pt>
+  <color off>
+  <rule 2pt 0pt _>
+  <kern 18 pt>
+  <color off>
+  <rule 2pt 0pt _>
+  <kern 18 pt>
  >
 >
+<kern 6pt>
 <rule 2pt 0pt _>
 <glue *15>
 <penalty *23>

@@ -13097,6 +13097,7 @@ glue_ord @!o; /*order of infinity*/
 internal_font_number @!f; /*the font in a |char_node|*/
 four_quarters @!i; /*font information about a |char_node|*/
 eight_bits @!hd; /*height and depth indices for a character*/
+pointer color_tos=null;
 r=get_node(box_node_size);type(r)=hlist_node;
 subtype(r)=min_quarterword;shift_amount(r)=0;
 q=r+list_offset;link(q)=p;@/
@@ -25010,8 +25011,10 @@ to hold the string numbers for name, area, and extension.
 @d outline_depth(A) mem[A+3].i /* depth of sub items */
 
 @d color_node hitex_ext+21 /* represent a color set */
+@d end_color_node hitex_ext+22 /* represent an end color set */
 @d color_node_size small_node_size
 @d color_node_ref(A)  type(A+1) /* reference to the color set */
+@d color_link(A)     link(A+1) /* pointer to the next color node */
 
 @ The sixteen possible \.{\\write} streams are represented by the |write_file|
 array. The |j|th file is open if and only if |write_open[j]==true|. The last
@@ -25061,6 +25064,7 @@ case extension: switch (chr_code) {
   case special_node: print_esc("special");@+break;
   case image_node: print_esc("HINTimage");@+break;
   case color_node: print_esc("HINTcolor");@+break;
+  case end_color_node: print_esc("HINTendcolor");@+break;
   case start_link_node: print_esc("HINTstartlink");@+break;
   case end_link_node: print_esc("HINTendlink");@+break;
   case label_node: print_esc("HINTdest");@+break;
@@ -25112,7 +25116,20 @@ case hset_node:
 case vset_node:
 case align_node: @+break;@#
 case image_node: break;
-case color_node: break;
+case color_node:
+    { uint8_t c[2][3][2][4];
+      new_whatsit(color_node,color_node_size);
+      scan_color_spec(c);
+      color_node_ref(tail)=next_color(&c);
+      color_link(tail)=null;
+    }
+    break;
+case end_color_node:
+    { new_whatsit(end_color_node,color_node_size);
+      color_node_ref(tail)=0;
+      color_link(tail)=null;
+    }
+    break;
 case label_node:
 case outline_node:
 case start_link_node: case end_link_node: @+break;@#
@@ -25267,7 +25284,10 @@ case image_node:
   if (dir[image_no(p)].file_name!=NULL) {print(", "); print(dir[image_no(p)].file_name);}
   break;
 case color_node:
-  print_esc("HINTcolor(");print_int(color_node_ref(p));print_char(')');
+  print_esc("HINTcolor ");print_int(color_node_ref(p));
+  break;
+case end_color_node:
+  print_esc("HINTendcolor ");
   break;
 case align_node:
   print_esc("align(");
@@ -25367,6 +25387,7 @@ case image_node:
     words=image_node_size-1;
     break;
 case color_node:
+case end_color_node:
     r=get_node(color_node_size);
     words=color_node_size;
     break;
@@ -25464,6 +25485,7 @@ case image_node:
   flush_node_list(image_alt(p));
   free_node(p,image_node_size);@+break;
 case color_node:
+case end_color_node:
   free_node(p,color_node_size);@+break;
 case align_node:
   delete_xdimen_ref(align_extent(p));
@@ -25522,7 +25544,16 @@ if (subtype(p)==image_node)
   x= x+image_width(p);
 }
 else if (subtype(p)==color_node)
-  just_color=color_node_ref(p);
+{  color_link(p)=color_tos; color_tos=p;
+   just_color=color_node_ref(p);
+}
+else if (subtype(p)==end_color_node)
+{ if (color_tos!=null)
+  { color_tos = color_link(color_tos);
+    if (color_tos==null) just_color=-1;
+    else just_color=color_node_ref(color_tos);
+  }
+}
 else if (subtype(p)==start_link_node)
 { just_label=label_ref(p); just_color=link_color(p); }
 else if (subtype(p)==end_link_node)
