@@ -13097,7 +13097,6 @@ glue_ord @!o; /*order of infinity*/
 internal_font_number @!f; /*the font in a |char_node|*/
 four_quarters @!i; /*font information about a |char_node|*/
 eight_bits @!hd; /*height and depth indices for a character*/
-pointer color_tos=null;
 r=get_node(box_node_size);type(r)=hlist_node;
 subtype(r)=min_quarterword;shift_amount(r)=0;
 q=r+list_offset;link(q)=p;@/
@@ -17474,7 +17473,7 @@ if (cur_p!=null)
     label_ref(q)=just_label;
     label_has_name(q)=0;
     if (just_color>=0) link_color(q)=just_color;
-    else  link_color(q)=1; /* this should not happen*/
+    else  link_color(q)=0xFF; /* this should not happen*/
     link(q)=link(temp_head);
     link(temp_head)=q;
   }
@@ -25117,16 +25116,16 @@ case vset_node:
 case align_node: @+break;@#
 case image_node: break;
 case color_node:
-    { uint8_t c[2][3][2][4];
+    { ColorSet c;
       new_whatsit(color_node,color_node_size);
       scan_color_spec(c);
-      color_node_ref(tail)=next_color(&c);
+      color_node_ref(tail)=next_colorset(c);
       color_link(tail)=null;
     }
     break;
 case end_color_node:
     { new_whatsit(end_color_node,color_node_size);
-      color_node_ref(tail)=0;
+      color_node_ref(tail)=0xFF;
       color_link(tail)=null;
     }
     break;
@@ -25544,20 +25543,17 @@ if (subtype(p)==image_node)
   x= x+image_width(p);
 }
 else if (subtype(p)==color_node)
-{  color_link(p)=color_tos; color_tos=p;
-   just_color=color_node_ref(p);
-}
+  just_color=color_node_ref(p);
 else if (subtype(p)==end_color_node)
-{ if (color_tos!=null)
-  { color_tos = color_link(color_tos);
-    if (color_tos==null) just_color=-1;
-    else just_color=color_node_ref(color_tos);
-  }
-}
+  just_color=-1;
 else if (subtype(p)==start_link_node)
-{ just_label=label_ref(p); just_color=link_color(p); }
+{ just_label=label_ref(p); just_color=link_color(p);
+  if (just_color==0xFF) just_color=-1;
+}
 else if (subtype(p)==end_link_node)
-{ just_label=-1; just_color=link_color(p); }
+{ just_label=-1; just_color=link_color(p);
+  if (just_color==0xFF) just_color=-1;
+}
 
 @ @<Let |d| be the width of the whatsit |p|@>=
 d=((subtype(p)==image_node)?image_width(p):0)

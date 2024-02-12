@@ -6084,11 +6084,12 @@ typedef uint32_t ColorSet[2*3*2];
 @
 To extract the various sub-arrays, we have the following macros:
 @<hint macros@>=
-#define DAY(C)   (C)
-#define NIGHT(C) ((C)+3*2)
-#define TEXT(C)  (C)
-#define HIGH(C)  ((C)+1*2)
-#define FOCUS(C)  ((C)+2*2)
+#define CURCOLOR(M,S,C) ((C)+6*(M)+2*(S))
+#define DAY(C)   CURCOLOR(0,0,C)
+#define NIGHT(C) CURCOLOR(1,0,C)
+#define TEXT(C)  CURCOLOR(0,0,C)
+#define HIGH(C)  CURCOLOR(0,1,C)
+#define FOCUS(C) CURCOLOR(0,2,C)
 #define FG(C)    ((C)[0])
 #define BG(C)    ((C)[1])
 @

@@ -363,8 +363,8 @@ static void nativeSetForeground(uint32_t fg)
 
 void nativeBackground(double x, double y, double w, double h)
 { uint32_t bg, fg;
-  fg=cur_colorset[0][cur_mode*3+cur_style*2];
-  bg=cur_colorset[0][cur_mode*3+cur_style*2+1];
+  fg=cur_colorset[0][cur_mode*6+cur_style*2];
+  bg=cur_colorset[0][cur_mode*6+cur_style*2+1];
   nativeSetForeground(bg);
   nativeRule(x,y,w,h);
   nativeSetForeground(fg);
@@ -373,7 +373,7 @@ void nativeBackground(double x, double y, double w, double h)
 void nativeSetDark(int on)
 { uint32_t fg;
   cur_mode=on?1:0;
-  fg=cur_colorset[0][cur_mode*3+cur_style*2];
+  fg=cur_colorset[0][cur_mode*6+cur_style*2];
   nativeSetForeground(fg);
 }
 
@@ -387,7 +387,7 @@ void nativeBlank(void)
   uint8_t r,g,b,a;
   if (cur_colorset==NULL)
     QUIT("Calling nativeBlank without calling nativeSetColor");
-  bg=cur_colorset[0][(cur_mode?6:0)+1];
+  bg=cur_colorset[0][cur_mode*6+1];
   a=bg&0xFF;bg=bg>>8;
   b=bg&0xFF;bg=bg>>8;
   g=bg&0xFF;bg=bg>>8;
@@ -598,7 +598,7 @@ void nativeGlyph(double x, double dx, double y, double dy, double w, double h, s
     glBindTexture(GL_TEXTURE_2D, g->GLtexture);
     checkGlError("glBindTexture g->GLtexture");
 
-    nativeSetForeground(cur_colorset[0][cur_mode*3+s*2]);
+    nativeSetForeground(cur_colorset[0][cur_mode*6+s*2]);
 
     glBindBuffer(GL_ARRAY_BUFFER, xybuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(xy), xy, GL_STREAM_DRAW);

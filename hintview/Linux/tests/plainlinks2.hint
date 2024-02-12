@@ -172,10 +172,10 @@ HINT 2.0 created by stretch
    <425
     <rule 0x0.6666pt 0pt _>
     <glue *17>
+    <link *2 on>
     <hbox 0pt 0pt 0x3.5555pt
      <
-      <glue *15>
-      <link *2 on>>>
+      <glue *15>>>
     <glue *17>
     <glue *18>
     <baseline *1>
@@ -252,10 +252,10 @@ HINT 2.0 created by stretch
         <glyph 'o' *0 (tenrm)>
         <kern *10>
         <glyph 'x' *0 (tenrm)>
-        <glue *15>
-        <link *2 off>>>
+        <glue *15>>>
       <penalty *10>
       <glue *14>>>
+    <link *2 off>
     <glue *17>
     <rule 0x0.6666pt 0pt _>
     <glue *17>

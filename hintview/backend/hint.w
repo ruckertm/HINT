@@ -1279,67 +1279,70 @@ with the  background color for normal text in |color_def[0]|.
 
 All color definitions, including  |color_def[0]|, can be changed
 by the definitions in  the \HINT\ file. If you change |color_def[0]|
-it should come first.
+it must come first.
 
 @<get functions@>=
 static void hget_color_def(uint8_t a, int i)
 {@+int j,k;
+  static bool first_color=true;
   if (INFO(a)!=b000)
     QUIT("Color Definition %d with Info value %d!=000",i,INFO(a));
   k=HGET8;
   if (k!=6) 
     QUIT("Definition %d of color set needs 6 color pairs %d given\n",i,k);
+  if (i==0 && !first_color)
+    QUIT("Definition of color 0 must come first");
+  first_color=false;  
   for (j=0;j<6*2;j++)
     HGET32(color_def[i][j]);
 }
 @
 
-Because glyphs, rules, and images must be rendered on top of the background,
-we have to consider the order in which we render things.
-If we render glyphs first and then render the background as a rectangle
-with an opaque color over it, the glyphes will just disappear under the
-background.
-There are several ways to approach this problem.
-Let us discuss the alternatives for the case of single colored word text in an
-horizontal box. The other cases are similar.
+Because glyphs, rules, and images must be rendered on top of the
+background, we have to consider the order in which we render things.
+If we render glyphs first and then render the background as a
+rectangle with an opaque color over it, the glyphes will just
+disappear under the background.  There are several ways to approach
+this problem.  Let us discuss the alternatives for the case of single
+colored word text in an horizontal box. The other cases are similar.
 
-Any color change caused in an horizontal list
-is restricted to that list.
-It starts with a |color_node| and ends with a |color_node| (or the end of the list).
+Any color change in an horizontal list is restricted to that list.  It
+is caused by a |color_node|, a |link_node|, an |end_color_node|, or an
+|end_link_node|. We exemplify the effects of such a color change
+considering a |color_node|.
 
-When the renderer encounters the |color_node| it knows
-the height and depth of the enclosing box, which is equal to the height
-and depth of the background change, but the width of the background change,
-which is equal to the distance between the first |color_node| and the next |color_node|
-is still unknown.
-It is possible to traverse the node list up to the next |color_node| and
-compute its position using the same method that
-the renderer uses to compute all positions. Computing the width of glue nodes
-requires the use of the |glue_ratio| of the enclosing box;
-all other width-calculations are quite simple. While computing the
-distance is not difficult, it is an unwanted overhead, and
-other more performant alternatives exist.
+When the renderer encounters the |color node| it knows the height and
+depth of the enclosing box, which is equal to the height and depth of
+the background change, but the width of the background change, which
+is equal to the distance between the first |color_node| and the next
+|color_node| is still unknown.  It is possible to traverse the node
+list up to the next |color_node| and compute its position using the
+same method that the renderer uses to compute all positions. Computing
+the width of glue nodes requires the use of the |glue_ratio| of the
+enclosing box; all other width-calculations are quite simple. While
+computing the distance is not difficult, it is an unwanted overhead,
+and other more performant alternatives exist.
 
-For example, it is possible to cache the information about which glyphs
-and rules to write at which locations in an array until the next |color_node|
-is found. Then we can first render the background and
-after that pass the whole array in a single write operation
-to the graphic card. Writing a large chunk of information to the graphic
-card is usually faster than writing many small chunks of data.
+For example, it is possible to cache the information about which
+glyphs and rules to write at which locations in an array until the
+next |color_node| is found. Then we can first render the background
+and after that pass the whole array in a single write operation to the
+graphic card. Writing a large chunk of information to the graphic card
+is usually faster than writing many small chunks of data.
 
 To summarize:
-The first method requires traversing the node list twice.
-The code is lengthy but it is just a simplified variation
-of the normal rendering procedure.
-The runtime overhead is small but not zero.
-The second method would even improve the performance, but
-requires a more complex code in the native rendering engine.
-Unless one is willing to implement the changes in the native
-renderer because of its better performance, the first method
-is probably the better alternative.
+The first method requires traversing the node list twice.  The code is
+lengthy but it is just a simplified variation of the normal rendering
+procedure.  The runtime overhead is small but not zero.  The second
+method would even improve the performance, but requires a more complex
+code in the native rendering engine.  Unless one is willing to
+implement the changes in the native renderer because of its better
+performance, the first method is probably the better alternative.
 
-% using the depth buffer on the graphics card did not work,
+% Using the depth buffer on the graphics card does not work,
 % because it would descard entire fragments and not just pixels.
+% Using the stencil buffer will not work because there is no
+% blending of forground and background alongh the outline of the glyph. 
 
 \subsection{References}
 There are only a few functions that still need to be defined.
@@ -1366,8 +1369,8 @@ static pointer hget_color_ref(uint8_t n)
   if (n==0xFF) subtype(p)=end_color_node;
   else
   { subtype(p)=color_node; REF_RNG(color_kind,n);
-    color_node_ref(p)=n;
   }
+  color_node_ref(p)=n;
   return p;
 }
 
@@ -2997,6 +3000,7 @@ while (hpos<from)
       par_label_ref=-1;
     }
   }
+  if (par_color==0xFF) par_color=-1;
   hff_hpos();
 }
 @
@@ -3013,7 +3017,7 @@ if (par_ptr!=null)
     label_has_name(p)=0;
     link(p)=par_ptr;
     if (par_color>=0) link_color(p)=par_color;
-    else link_color(p)=1; /* this should not happen */
+    else link_color(p)=0xFF; /* this should not happen */
     par_ptr=p;
   }
   else if (par_color>=0)
@@ -6583,35 +6587,11 @@ extern void nativeBackground(double x, double y, double h, double w);
 
 @<render variables@>=
 int cur_color=0, cur_mode=0, cur_style=0, next_style=0;
-pointer color_tos; /* color top of stack */
 @
-
-When the renderer encounters a |color_node| it pushes the node
-on the color stack:
-@<push the color stack@>=
-color_link(p)=color_tos; color_tos=p;
-cur_color=color_node_ref(p);
-cur_color_depth++;
-@
-
-When the renderer encounters an |end_color_node| it pops the
-color stack and restores the current color.
-@<pop the color stack@>=
-if (cur_color_depth>0)
-{ if (color_tos==null) cur_color=0;
-  else
-  { color_tos = color_link(color_tos);
-    if (color_tos==null) cur_color=0;
-    else cur_color=color_node_ref(color_tos);
-  }
-  cur_color_depth--;
-}
-@
-
-
 
 @<handle a horizontal change in the background color@>=
-if ((color_def[cur_color][cur_mode*3+cur_style*2+1]&0xFF)>0)
+if (cur_color!=list_color &&
+    (BG(CURCOLOR(cur_mode,cur_style,color_def[cur_color]))&0xFF)>0)
 { scaled x,y,w,h;
   x=cur_h;
   y=cur_v+depth(this_box);
@@ -6623,7 +6603,8 @@ if ((color_def[cur_color][cur_mode*3+cur_style*2+1]&0xFF)>0)
 @
 
 @<handle a vertical change in the background color@>=
-if ((color_def[cur_color][cur_mode*3+cur_style*2+1]&0xFF)>0)
+if (cur_color!=list_color &&
+    (BG(CURCOLOR(cur_mode,cur_style,color_def[cur_color]))&0xFF)>0)
 { scaled x,y,w,h;
   x=left_edge;
   h=vcolor_distance(link(p),g_sign,g_order,glue_set(this_box));
@@ -6643,7 +6624,6 @@ document, but its reponsibilities are listed in section~\secref{native}.
 @<render functions@>=
 uint64_t hint_blank(void)
 { nativeSetColor(color_def!=NULL?color_def:color_defaults);
-  color_tos=null;
   nativeBlank();
   return 0;
 }
@@ -6685,7 +6665,7 @@ scaled edge;
 double glue_temp;
 double cur_glue;
 scaled cur_g;
-int cur_color_depth=0;
+int list_color=cur_color;
 int local_link=-1;
 uint8_t f;
 uint32_t c;
@@ -6746,14 +6726,12 @@ render_c:
        if(list_ptr(p)==null) cur_h= cur_h+width(p);
        else
        { int cur_c=cur_color;
-         pointer cur_tos=color_tos;
          cur_v= base_line+shift_amount(p);
          edge= cur_h;
          if(type(p)==vlist_node) 
            vlist_render(p);
          else 
            hlist_render(p);
-	 color_tos=cur_tos;  
          if (cur_color!=cur_c)
          { cur_color=cur_c; nativeSetColor(color_def+cur_color); }
          cur_h= edge+width(p);cur_v= base_line;
@@ -6766,25 +6744,25 @@ render_c:
        switch (subtype(p))
        { case ignore_node: @<handle an ignore node@>@;break;
  	 case color_node:
-	   @<push the color stack@>@;
+ 	   cur_color=color_node_ref(p);
            nativeSetColor(color_def+cur_color);
            @<handle a horizontal change in the background color@>@;
 	   break;
  	 case end_color_node:
-	   @<pop the color stack@>
+	   cur_color=list_color;
            nativeSetColor(color_def+cur_color);
-	   if (cur_color_depth>0)
-             @<handle a horizontal change in the background color@>@;
 	   break;
          case start_link_node:
 	   @<handle a start link node@>@;
            cur_color = link_color(p);
+	   if (cur_color==0xFF) cur_color=list_color;
            nativeSetColor(color_def+cur_color);
 	   @<handle a horizontal change in the background color@>@;
 	   break;
          case end_link_node:
 	   @<handle an end link node@>@;
            cur_color = link_color(p);
+	   if (cur_color==0xFF) cur_color=list_color;
            nativeSetColor(color_def+cur_color);
 	   @<handle a horizontal change in the background color@>@;
 	   break;
@@ -6843,7 +6821,6 @@ render_c:
           while(cur_h+leader_wd<=edge)
 		  /*Output a leader box at |cur_h|,...*/
           { int cur_c=cur_color;
-            pointer cur_tos=color_tos;
 	    cur_v= base_line+shift_amount(leader_box);
 	    h_save=cur_h;
             c_ignore=true;
@@ -6851,7 +6828,6 @@ render_c:
 	      vlist_render(leader_box);
 	    else 
 	      hlist_render(leader_box);
-            color_tos=cur_tos;  
             if (cur_color!=cur_c)
             { cur_color=cur_c; nativeSetColor(color_def+cur_color); }
             c_ignore=false;
@@ -6915,7 +6891,7 @@ double cur_glue;
 scaled cur_g;
 int local_link=-1;
 cur_g= 0;cur_glue= float_constant(0);
-int cur_color_depth=0;
+int list_color=cur_color;
 g_order= glue_order(this_box);
 g_sign= glue_sign(this_box);p= list_ptr(this_box);
 #ifdef DEBUG
@@ -6939,14 +6915,12 @@ while(p!=null)
         if(list_ptr(p)==null) cur_v= cur_v+height(p)+depth(p);
 	else
 	{ int cur_c=cur_color;
-          pointer cur_tos=color_tos;
 	  cur_v= cur_v+height(p);save_v= cur_v;
           cur_h= left_edge+shift_amount(p);
           if(type(p)==vlist_node)
 	    vlist_render(p);
 	  else
             hlist_render(p);
- 	  color_tos=cur_tos;  
           if (cur_color!=cur_c)
           { cur_color=cur_c; nativeSetColor(color_def+cur_color); }
           cur_v= save_v+depth(p);cur_h= left_edge;
@@ -6958,25 +6932,25 @@ while(p!=null)
       case whatsit_node:
         switch (subtype(p))
         { case color_node:
-	    @<push the color stack@>@;
+ 	    cur_color=color_node_ref(p);
 	    nativeSetColor(color_def+cur_color);
             @<handle a vertical change in the background color@>@;
 	    break;
  	  case end_color_node:
-	    @<pop the color stack@>
+	    cur_color=list_color;
             nativeSetColor(color_def+cur_color);
-	    if (cur_color_depth>0)
-              @<handle a vertical change in the background color@>@;
 	    break;
 	  case start_link_node:
 	    @<handle a start link node@>@;
 	    cur_color = link_color(p);
+	    if (cur_color==0xFF) cur_color=list_color;
 	    nativeSetColor(color_def+cur_color);
             @<handle a vertical change in the background color@>
 	    break;
           case end_link_node:
 	    @<handle an end link node@>@;
 	    cur_color = link_color(p);
+	    if (cur_color==0xFF) cur_color=list_color;
 	    nativeSetColor(color_def+cur_color);
             @<handle a vertical change in the background color@>
 	    break;
@@ -7034,7 +7008,6 @@ while(p!=null)
 		    }
 		    while(cur_v+leader_ht<=edge)
 		    { int cur_c=cur_color;
-                      pointer cur_tos=color_tos;
 		      cur_h= left_edge+shift_amount(leader_box);
 		      cur_v= cur_v+height(leader_box);save_v= cur_v;
                       c_ignore=true;
@@ -7042,7 +7015,6 @@ while(p!=null)
 		        vlist_render(leader_box);
 		      else 
 		        hlist_render(leader_box);
-                      color_tos=cur_tos;  
 		      if (cur_color!=cur_c)
          	      { cur_color=cur_c; nativeSetColor(color_def+cur_color); }
                       c_ignore=false;
@@ -7236,7 +7208,6 @@ the page: the |hint_render| function.
 
 void hint_render(void)
 {  cur_color=0;
-   color_tos=null;
    nativeSetColor(color_def!=NULL?color_def:color_defaults);
    nativeBlank();
    if (streams==NULL || streams[0].p==null) return;
