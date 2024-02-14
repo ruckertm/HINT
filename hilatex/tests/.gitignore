@@ -1,4 +1,7 @@
 *.aux
+*.out
+*.toc
+*.lof
 *.dvi
 *.log
 *.hnt
