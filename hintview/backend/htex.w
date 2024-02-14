@@ -25009,8 +25009,11 @@ to hold the string numbers for name, area, and extension.
 @d outline_ptr(A)   link(A+2) /* text to be displayed */
 @d outline_depth(A) mem[A+3].i /* depth of sub items */
 
-@d color_node hitex_ext+21 /* represent a color set */
-@d end_color_node hitex_ext+22 /* represent an end color set */
+@d color_node hitex_ext+21 /* represent a color set node */
+@d end_color_node hitex_ext+22 /* represent an end color set node */
+@d default_color_node hitex_ext+23 /* set default colors*/
+@d link_color_node hitex_ext+24 /* set link colors */
+@d default_link_color_node hitex_ext+25 /* set default link colors */
 @d color_node_size small_node_size
 @d color_node_ref(A)  type(A+1) /* reference to the color set */
 @d color_link(A)     link(A+1) /* pointer to the next color node */
@@ -25064,6 +25067,9 @@ case extension: switch (chr_code) {
   case image_node: print_esc("HINTimage");@+break;
   case color_node: print_esc("HINTcolor");@+break;
   case end_color_node: print_esc("HINTendcolor");@+break;
+  case default_color_node: print_esc("HINTdefaultcolor");@+break;
+  case link_color_node: print_esc("HINTlinkcolor");@+break;
+  case default_link_color_node: print_esc("HINTdefaultlinkcolor");@+break;
   case start_link_node: print_esc("HINTstartlink");@+break;
   case end_link_node: print_esc("HINTendlink");@+break;
   case label_node: print_esc("HINTdest");@+break;
@@ -25114,13 +25120,67 @@ case vpack_node:
 case hset_node:
 case vset_node:
 case align_node: @+break;@#
-case image_node: break;
+case image_node:@/
+{@+ pointer p;
+  scan_optional_equals();
+  scan_file_name();
+  p=new_image_node(cur_name,cur_area,cur_ext);
+  loop {
+    if (scan_keyword("width"))
+    {@+scan_normal_dimen; image_xwidth(p)=new_xdimen(cur_val,cur_hfactor,cur_vfactor); }
+    else if (scan_keyword("height"))
+    {@+scan_normal_dimen; image_xheight(p)=new_xdimen(cur_val,cur_hfactor,cur_vfactor); }
+    else
+      break;
+  }
+  { scaled iw,ih;
+    double ia;
+    pointer r,q;
+    hextract_image_dimens(image_no(p),&ia,&iw,&ih);
+    image_aspect(p)=round(ia*ONE);
+    r=image_xwidth(p);
+    q=image_xheight(p);
+    if (r==null && q==null)
+    { if (iw>0)
+      { image_xwidth(p)=r=new_xdimen(iw,0,0);
+        image_xheight(p)=q=new_xdimen(ih,0,0);
+      }
+      else if (iw<0)
+      { MESSAGE("Unable to determine size of image %s; using 72dpi.\n",
+		dir[image_no(p)].file_name);
+	image_xwidth(p)=r=new_xdimen(-iw*ONE,0,0);
+        image_xheight(p)=q=new_xdimen(-ih*ONE,0,0);
+      }
+      else
+      { MESSAGE("Unable to determine size of image %s; using 100pt x 100pt\n",
+		dir[image_no(p)].file_name);
+ 	image_xwidth(p)=r=new_xdimen(100*ONE,0,0);
+        image_xheight(p)=q=new_xdimen(100*ONE,0,0);
+     }
+    }
+    else if (r!=null && q==null)
+      image_xheight(p)=q=new_xdimen(round(xdimen_width(r)/ia),
+	      round(xdimen_hfactor(r)/ia),round(xdimen_vfactor(r)/ia));
+    else if (r==null && q!=null)
+       image_xwidth(p)=r=new_xdimen(round(xdimen_width(q)*ia),
+ 	      round(xdimen_hfactor(q)*ia),round(xdimen_vfactor(q)*ia));
+  }
+  if (abs(mode)==vmode)
+  { prev_depth=ignore_depth; /* this could be deleted if baseline nodes treat
+                                images as boxes in the viewer */
+    append_to_vlist(p); /* image nodes have height, width, and depth like boxes */
+  }
+  else
+    tail_append(p);
+  break;
+}
 case color_node:
     { ColorSet c;
       new_whatsit(color_node,color_node_size);
-      scan_color_spec(c);
+      scan_color_spec(c,0);
       color_node_ref(tail)=next_colorset(c);
       color_link(tail)=null;
+      default_color_frozen=true;
     }
     break;
 case end_color_node:
@@ -25129,9 +25189,71 @@ case end_color_node:
       color_link(tail)=null;
     }
     break;
+case default_color_node:
+    if (default_color_frozen)
+    { print_err("You can not use \\HINTdefaultcolor after \\HINTcolor");
+      error();
+    }
+    else
+    { ColorSet c;
+      scan_color_spec(c,0);
+      colorset_copy(colors[0],c);
+    }
+    break;
+case link_color_node:
+    { ColorSet c;
+      scan_color_spec(c,1);
+      cur_link_color=next_colorset(c);
+      default_link_color_frozen=true;
+    }
+    break;
+case default_link_color_node:
+    if (default_link_color_frozen)
+    {@+print_err("You can not use \\HINTdefaultlinkcolor after \\HINTlinkcolor");      error();
+    }
+    else
+    { ColorSet c;
+      scan_color_spec(c,1);
+      colorset_copy(colors[1],c);
+    }
+    break;
+case start_link_node:
+  if (abs(mode) == vmode)
+    fatal_error("HINTstartlink cannot be used in vertical mode");
+  else
+  { new_whatsit(start_link_node,link_node_size);
+    scan_label(tail);
+    link_color(tail)=cur_link_color;
+  }
+  break;
+case end_link_node:
+  if (abs(mode) == vmode)
+    fatal_error("HINTendlink cannot be used in vertical mode");
+  else
+  { new_whatsit(end_link_node,link_node_size);
+    link_color(tail)=0xFF;
+  }
+  break;
 case label_node:
+  new_whatsit(label_node,label_node_size);
+    scan_destination(tail);
+    if (scan_keyword("top")) label_where(tail)=1;
+    else if (scan_keyword("bot")) label_where(tail)=2;
+    else label_where(tail)=3;
+    scan_spaces();
+  break;
 case outline_node:
-case start_link_node: case end_link_node: @+break;@#
+  new_whatsit(outline_node,outline_node_size);
+  scan_label(tail);
+  if (scan_keyword("depth"))
+  {  scan_int();
+     outline_depth(tail)= cur_val;
+  }
+  else outline_depth(tail)=0;
+  outline_ptr(tail)=null;
+  new_save_level(outline_group);scan_left_brace();
+  push_nest();mode=-hmode;prev_depth=ignore_depth;space_factor=1000;
+  break;
 case setpage_node: break;
 case stream_node:
 case setstream_node:

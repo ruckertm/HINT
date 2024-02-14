@@ -887,6 +887,7 @@ RangeDef *range_def;
 @
 @<allocate definitions@>=
 ALLOCATE(range_def, max_ref[range_kind]+1, RangeDef);
+max_range=-1;
 @
 
 @<free definitions@>=
@@ -895,22 +896,21 @@ free(range_def); range_def=NULL;
 
 @<\HINT\ auxiliar functions@>=
 static void hget_range_def(uint8_t a, uint8_t pg)
-{ static uint8_t n=0;
-  uint32_t f, t; 
+{ uint32_t f, t;
+  max_range++;
   REF_RNG(page_kind,pg);
-  REF_RNG(range_kind,n);
+  REF_RNG(range_kind,max_range);
   if (INFO(a)&b100) @+
   { @+ if (INFO(a)&b001) HGET32(f); @+else HGET16(f); @+}
   else f=0;
   if (INFO(a)&b010) @+
   { @+if (INFO(a)&b001) HGET32(t); @+else HGET16(t); @+}
   else t=HINT_NO_POS;
-  range_def[n].pg=pg;
-  range_def[n].f=f;
-  range_def[n].t=t;
+  range_def[max_range].pg=pg;
+  range_def[max_range].f=f;
+  range_def[max_range].t=t;
   DBG(DBGRANGE,"Range *%d from 0x%x\n",pg,f);
   DBG(DBGRANGE,"Range *%d to 0x%x\n",pg,t);
-  n++;
 }
 #if 0
 /* currently not used */
@@ -1250,12 +1250,13 @@ We define a dynamic array for color sets based on |max_ref[color_kind]|.
 
 @<\HINT\ variables@>=
 ColorSet *color_def=NULL;
-
+static bool first_color=true;
 @
 
 @<allocate definitions@>=
 if (color_def!=NULL) { free(color_def); color_def=NULL; }
 ALLOCATE(color_def,max_ref[color_kind]+1, ColorSet);
+first_color=true;
 @
 
 @<free definitions@>=
@@ -1284,7 +1285,6 @@ it must come first.
 @<get functions@>=
 static void hget_color_def(uint8_t a, int i)
 {@+int j,k;
-  static bool first_color=true;
   if (INFO(a)!=b000)
     QUIT("Color Definition %d with Info value %d!=000",i,INFO(a));
   k=HGET8;
@@ -4512,6 +4512,7 @@ void hint_resize(int px_h, int px_v, double x_dpi, double y_dpi)
 #if 0
   /* this optimization causes the android viewer to display a blank page
      after opening a new file. To be investigated!
+     using local static variables is discouraged.
   */
   static int old_px_h=0, old_px_v=0;
   static double old_xdpi=0.0, old_ydpi=0.0;
@@ -4664,7 +4665,7 @@ until the margin becomes zero for a page that is merely 1 inch wide.
 
 
 @<\HINT\ auxiliar functions@>=
- static void hset_margins(void)
+static void hset_margins(void)
 {  if (cur_page==&(page_def[0])) {
    offset_h=page_h/8- 0x48000;
    if (offset_h<0) offset_h=0;
@@ -6016,13 +6017,14 @@ static scaled hlink_distance(scaled x,scaled y, hint_Link *t)
 
 }
 
+static int last_hit_link=-1;
+
 int hint_find_link(scaled x, scaled y,scaled precission)
-{ static int last_hit=-1;
-  int i;
+{ int i;
   hint_Link *t;
   if (max_link<0) return -1;
-  if (last_hit<0 || last_hit>max_link) last_hit=max_link/2;
-  i=last_hit;
+  if (last_hit_link<0 || last_hit_link>max_link) last_hit_link=max_link/2;
+  i=last_hit_link;
   t=hint_links+i;
   DBG(DBGLABEL,"Link find %d\n",max_link);
   if (hlink_distance(x,y,t)<=precission)
@@ -6033,7 +6035,7 @@ int hint_find_link(scaled x, scaled y,scaled precission)
       t=hint_links+i;
       DBG(DBGLABEL,"Link up %d\n",max_link);
       if(hlink_distance(x,y,t)<=precission)
-      { last_hit=i;  return i; }
+      { last_hit_link=i;  return i; }
     }
     return -1;
   }
@@ -6050,8 +6052,8 @@ int hint_find_link(scaled x, scaled y,scaled precission)
       if (d<min_d)
       { min_d=d; min_i=i;}
     }
-    last_hit=min_i;
-    return last_hit;
+    last_hit_link=min_i;
+    return last_hit_link;
   }
 }
 @
@@ -7213,7 +7215,7 @@ void hint_render(void)
    if (streams==NULL || streams[0].p==null) return;
    cur_h= 0;
    cur_v= height(streams[0].p);
-   cur_link=-1; max_link=-1;
+   cur_link=-1; max_link=-1; last_hit_link=-1;
    @<initialize marking@>@;
    if(type(streams[0].p)==vlist_node)
      vlist_render(streams[0].p);

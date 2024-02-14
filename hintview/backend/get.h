@@ -174,6 +174,7 @@ extern void hget_entry(Entry*e);
 extern void hget_directory(void);
 extern void hclear_dir(void);
 extern bool hcheck_banner(char*magic);
+extern int max_range;
 
 extern void hget_max_definitions(void);
 extern uint32_t hget_utf8(void);

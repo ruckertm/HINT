@@ -1,5 +1,5 @@
 	/*548:*/
-	#line 11408 "format.w"
+	#line 11409 "format.w"
 
 #include "basetypes.h"
 #include <string.h>
@@ -66,7 +66,7 @@ int stem_length= 0;
 
 FILE*hin= NULL,*hout= NULL,*hlog= NULL;
 	/*:450*/
-	#line 11421 "format.w"
+	#line 11422 "format.w"
 
 
 	/*348:*/
@@ -164,7 +164,7 @@ return hin_size;
 #endif
 
 	/*:348*/
-	#line 11423 "format.w"
+	#line 11424 "format.w"
 
 	/*335:*/
 	#line 7320 "format.w"
@@ -204,7 +204,7 @@ DBG(DBGDIR,"banner size=0x%x\n",hbanner_size);
 return true;
 }
 	/*:335*/
-	#line 11424 "format.w"
+	#line 11425 "format.w"
 
 	/*357:*/
 	#line 7884 "format.w"
@@ -231,7 +231,7 @@ e->file_name= strdup(file_name);
 DBG(DBGDIR,"Creating entry %d: \"%s\" size=0x%x xsize=0x%x\n",i,file_name,size,xsize);
 }
 	/*:358*/
-	#line 11425 "format.w"
+	#line 11426 "format.w"
 
 
 	/*336:*/
@@ -432,7 +432,7 @@ if(INFO(a)!=0)QUIT("End of maximum list with info %d",INFO(a));
 DBG(DBGDEF,"Getting Max Definitions END\n");
 }
 	/*:387*/
-	#line 11427 "format.w"
+	#line 11428 "format.w"
 
 	/*53:*/
 	#line 1241 "format.w"
@@ -522,7 +522,7 @@ DBG(DBGNODE,"Get list at 0x%x size=%u\n",l->p,l->s);
 }
 }
 	/*:146*/
-	#line 11428 "format.w"
+	#line 11429 "format.w"
 
 	/*463:*/
 	#line 10102 "format.w"
@@ -634,6 +634,6 @@ hteg_list(l);
 
 
 	/*:534*/
-	#line 11429 "format.w"
+	#line 11430 "format.w"
 
 	/*:548*/

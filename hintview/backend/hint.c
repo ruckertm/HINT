@@ -1,5 +1,5 @@
 /*399:*/
-#line 8232 "hint.w"
+#line 8234 "hint.w"
 
 #include "basetypes.h"
 #include <string.h> 
@@ -238,7 +238,7 @@ tail_append(p);}
   label_has_name(p)= 0;\
   tail_append(p);}
 /*:213*/
-#line 8245 "hint.w"
+#line 8247 "hint.w"
 
 /*94:*/
 #line 1603 "hint.w"
@@ -440,7 +440,7 @@ tail_append(p);}
   label_has_name(p)= 0;\
   tail_append(p);}
 /*:214*/
-#line 8246 "hint.w"
+#line 8248 "hint.w"
 
 
 /*21:*/
@@ -471,7 +471,7 @@ typedef struct ParamDef{
 struct ParamDef*next;
 Param p;}ParamDef;
 /*:37*/
-#line 8248 "hint.w"
+#line 8250 "hint.w"
 
 
 /*2:*/
@@ -549,7 +549,7 @@ int outline_no= -1;
 #line 1251 "hint.w"
 
 ColorSet*color_def= NULL;
-
+static bool first_color= true;
 /*:73*//*178:*/
 #line 3097 "hint.w"
 
@@ -572,25 +572,25 @@ uint64_t page_loc[MAX_PAGE_POS];
 int cur_loc;
 static int lo_loc,hi_loc;
 /*:244*//*261:*/
-#line 4628 "hint.w"
+#line 4629 "hint.w"
 
 scaled hvsize,hhsize;
 /*:261*//*263:*/
-#line 4656 "hint.w"
+#line 4657 "hint.w"
 
 int page_v,page_h,offset_v,offset_h;
 /*:263*//*320:*/
-#line 5918 "hint.w"
+#line 5919 "hint.w"
 
 hint_Link*hint_links= NULL;
 int max_link= -1;
 /*:320*//*386:*/
-#line 7927 "hint.w"
+#line 7929 "hint.w"
 
 jmp_buf hint_error_exit;
 char hint_error_string[MAX_HINT_ERROR];
 /*:386*/
-#line 8250 "hint.w"
+#line 8252 "hint.w"
 
 /*3:*/
 #line 327 "hint.w"
@@ -637,7 +637,7 @@ static pointer hteg_list_pointer(void);
 
 static scaled hget_xdimen_node(void);
 /*:132*/
-#line 8251 "hint.w"
+#line 8253 "hint.w"
 
 /*35:*/
 #line 697 "hint.w"
@@ -645,7 +645,7 @@ static scaled hget_xdimen_node(void);
 extern uint16_t hglyph_section(uint8_t f);
 extern int32_t font_at_size(uint8_t f);
 /*:35*/
-#line 8252 "hint.w"
+#line 8254 "hint.w"
 
 /*9:*/
 #line 388 "hint.w"
@@ -890,25 +890,24 @@ else if(q->k==glue_kind)
 QUIT("Parameter save stack flow");
 }
 /*:43*//*48:*/
-#line 896 "hint.w"
+#line 897 "hint.w"
 
 static void hget_range_def(uint8_t a,uint8_t pg)
-{static uint8_t n= 0;
-uint32_t f,t;
+{uint32_t f,t;
+max_range++;
 REF_RNG(page_kind,pg);
-REF_RNG(range_kind,n);
+REF_RNG(range_kind,max_range);
 if(INFO(a)&b100)
 {if(INFO(a)&b001)HGET32(f);else HGET16(f);}
 else f= 0;
 if(INFO(a)&b010)
 {if(INFO(a)&b001)HGET32(t);else HGET16(t);}
 else t= HINT_NO_POS;
-range_def[n].pg= pg;
-range_def[n].f= f;
-range_def[n].t= t;
+range_def[max_range].pg= pg;
+range_def[max_range].f= f;
+range_def[max_range].t= t;
 DBG(DBGRANGE,"Range *%d from 0x%x\n",pg,f);
 DBG(DBGRANGE,"Range *%d to 0x%x\n",pg,t);
-n++;
 }
 #if 0
 
@@ -1002,7 +1001,7 @@ hskip_list();
 while(hget_stream_def(cur_page->s))continue;
 }
 /*:61*//*76:*/
-#line 1267 "hint.w"
+#line 1268 "hint.w"
 
 void hset_default_colors(void)
 {int i;
@@ -2129,7 +2128,7 @@ cur_loc= i;
 DBG(DBGPAGE,"loc_set_prev: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
 }
 /*:251*//*264:*/
-#line 4666 "hint.w"
+#line 4667 "hint.w"
 
 static void hset_margins(void)
 {if(cur_page==&(page_def[0])){
@@ -2154,7 +2153,7 @@ offset_v= (page_v-hvsize)/2;
 }
 }
 /*:264*//*266:*/
-#line 4698 "hint.w"
+#line 4699 "hint.w"
 
 static void houtput_template(pointer p)
 {pointer q,r;
@@ -2175,7 +2174,7 @@ shift_amount(p)+= offset_h;
 streams[0].p= q;
 }
 /*:266*//*293:*/
-#line 5392 "hint.w"
+#line 5393 "hint.w"
 
 static int trv_string_size= 0;
 static char trv_string[256];
@@ -2204,7 +2203,7 @@ trv_string[trv_string_size]= 0;
 return trv_string;
 }
 /*:293*//*396:*/
-#line 8161 "hint.w"
+#line 8163 "hint.w"
 
 static pointer leaks[1<<16]= {0};
 
@@ -2245,7 +2244,7 @@ fprintf(stderr,"ERROR:leak final: p=%d, s=%d\n",i,leaks[i]);
 #endif
 }
 /*:396*/
-#line 8253 "hint.w"
+#line 8255 "hint.w"
 
 /*1:*/
 #line 231 "hint.w"
@@ -2385,7 +2384,7 @@ free_param_list(param_def[i]);
 }
 free(param_def);param_def= NULL;
 /*:40*//*47:*/
-#line 892 "hint.w"
+#line 893 "hint.w"
 
 free(range_def);range_def= NULL;
 /*:47*//*52:*/
@@ -2412,7 +2411,7 @@ for(k= 0;k<=max_outline;k++)free(hint_outlines[k].title);
 free(hint_outlines);hint_outlines= NULL;outline_no= -1;
 max_outline= -1;
 /*:67*//*75:*/
-#line 1261 "hint.w"
+#line 1262 "hint.w"
 
 free(color_def);color_def= NULL;
 /*:75*/
@@ -2473,6 +2472,7 @@ ALLOCATE(param_def,max_ref[param_kind]+1,ParamDef*);
 #line 888 "hint.w"
 
 ALLOCATE(range_def,max_ref[range_kind]+1,RangeDef);
+max_range= -1;
 /*:46*//*51:*/
 #line 942 "hint.w"
 
@@ -2493,6 +2493,7 @@ ALLOCATE(hint_outlines,max_outline+1,hint_Outline);
 
 if(color_def!=NULL){free(color_def);color_def= NULL;}
 ALLOCATE(color_def,max_ref[color_kind]+1,ColorSet);
+first_color= true;
 /*:74*/
 #line 311 "hint.w"
 
@@ -2649,11 +2650,10 @@ DBG(DBGDEF,"Label 0x%x+0x%x where=%d font=%d\n",t->pos0,t->pos,t->where,t->f);
 
 }
 /*:68*//*77:*/
-#line 1284 "hint.w"
+#line 1285 "hint.w"
 
 static void hget_color_def(uint8_t a,int i)
 {int j,k;
-static bool first_color= true;
 if(INFO(a)!=b000)
 QUIT("Color Definition %d with Info value %d!=000",i,INFO(a));
 k= HGET8;
@@ -2884,7 +2884,7 @@ if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
 return par_ptr;
 }
 /*:176*/
-#line 8254 "hint.w"
+#line 8256 "hint.w"
 
 /*90:*/
 #line 1545 "hint.w"
@@ -3249,7 +3249,7 @@ line_break_params= save_lbp;
 }
 
 /*:186*/
-#line 8255 "hint.w"
+#line 8257 "hint.w"
 
 
 
@@ -3931,7 +3931,7 @@ list_leaks();
 hclear_dir();
 }
 /*:253*//*257:*/
-#line 4541 "hint.w"
+#line 4542 "hint.w"
 
 bool hint_forward(void)
 {hpage_init();
@@ -3945,7 +3945,7 @@ if(hbuild_page())return true;
 return false;
 }
 /*:257*//*258:*/
-#line 4582 "hint.w"
+#line 4583 "hint.w"
 
 bool hint_backward(void)
 {hpage_init();
@@ -3959,7 +3959,7 @@ if(hbuild_page_up())return true;
 return false;
 }
 /*:258*//*260:*/
-#line 4610 "hint.w"
+#line 4611 "hint.w"
 
 bool flush_pages(uint32_t pos)
 {pointer p= link(head);
@@ -3976,18 +3976,18 @@ store_map(tail,pos,0);
 return false;
 }
 /*:260*//*284:*/
-#line 5176 "hint.w"
+#line 5177 "hint.w"
 
 int hint_get_outline_max(void)
 {return max_outline;}
 /*:284*//*289:*/
-#line 5256 "hint.w"
+#line 5257 "hint.w"
 
 hint_Outline*hint_get_outlines(void)
 {return hint_outlines;
 }
 /*:289*//*291:*/
-#line 5315 "hint.w"
+#line 5316 "hint.w"
 
 static bool trv_ignore= false;
 static bool trv_skip_space= false;
@@ -4053,7 +4053,7 @@ p= link(p);
 }
 }
 /*:291*/
-#line 8258 "hint.w"
+#line 8260 "hint.w"
 
 
 /*:399*/

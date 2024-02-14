@@ -11379,6 +11379,7 @@ extern void hget_entry(Entry *e);
 extern void hget_directory(void);
 extern void hclear_dir(void);
 extern bool hcheck_banner(char *magic);
+extern int max_range;
 
 extern void hget_max_definitions(void);
 extern uint32_t hget_utf8(void);
@@ -11444,6 +11445,7 @@ extern uint16_t section_no,  max_section_no;
 extern uint8_t *hpos, *hstart, *hend, *hpos0;
 extern int next_range;
 extern RangePos *range_pos;
+extern int next_range, max_range;
 extern int *page_on; 
 extern Label *labels;
 extern int first_label;
