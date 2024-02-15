@@ -6087,7 +6087,6 @@ To extract the various sub-arrays, we have the following macros:
 #define CURCOLOR(M,S,C) ((C)+6*(M)+2*(S))
 #define DAY(C)   CURCOLOR(0,0,C)
 #define NIGHT(C) CURCOLOR(1,0,C)
-#define TEXT(C)  CURCOLOR(0,0,C)
 #define HIGH(C)  CURCOLOR(0,1,C)
 #define FOCUS(C) CURCOLOR(0,2,C)
 #define FG(C)    ((C)[0])
@@ -6282,7 +6281,7 @@ void hget_color_set(uint32_t node_pos, ColorSet cs)
   { uint32_t *c, *d;
     bool diff_high, diff_focus;
     if (m==0)
-    { c=DAY(cs); d=DAY(color_defaults[0]); }
+    { c=cs; d=color_defaults[0]; }
     else
     { c=NIGHT(cs); d=NIGHT(color_defaults[0]);
       if (memcmp(c,d,sizeof(ColorSet)/2)==0)
@@ -6291,7 +6290,7 @@ void hget_color_set(uint32_t node_pos, ColorSet cs)
     hwrite_start();
     diff_high=FG(HIGH(c))!=FG(HIGH(d))|| BG(HIGH(c))!=BG(HIGH(d));
     diff_focus=FG(FOCUS(c))!=FG(FOCUS(d))||BG(FOCUS(c))!=BG(FOCUS(d));
-    hwrite_color_pair(FG(TEXT(c)),BG(TEXT(c)));
+    hwrite_color_pair(FG(c),BG(c));
     if (diff_high || diff_focus)  
     { hwritec(' '); hwrite_color_pair(FG(HIGH(c)),BG(HIGH(c)));}
     if (diff_focus) 

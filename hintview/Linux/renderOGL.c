@@ -252,7 +252,7 @@ static void mkRuleTexture() /* the texture used for rules */
 }
 
 
-extern void nativeInit(void)
+void nativeInit(void)
 { GLuint VertexArrayID;
   static int glewInitialized=0;
   /* Initialize GLEW */

@@ -1,19 +1,19 @@
 	/*544:*/
-	#line 11250 "format.w"
+	#line 11249 "format.w"
 
 #ifndef _HFORMAT_H_
 #define _HFORMAT_H_
 	/*380:*/
-	#line 8487 "format.w"
+	#line 8486 "format.w"
 
 #define REF_RNG(K,N) if ((int)(N)>max_ref[K]) QUIT("Reference %d to %s out of range [0 - %d]",\
   (N),definition_name[K],max_ref[K])
 	/*:380*/	/*381:*/
-	#line 8501 "format.w"
+	#line 8500 "format.w"
 
 #define MAX_REF(K) ((K)==label_kind?0xFFFF:0xFF)
 	/*:381*/	/*459:*/
-	#line 10025 "format.w"
+	#line 10024 "format.w"
 
 #ifdef WIN32
 #define SIZE_F "0x%tx"
@@ -32,10 +32,10 @@
 
 #define TAGERR(A) QUIT("Unknown tag [%s,%d] at " SIZE_F "\n",NAME(A),INFO(A),hpos-hstart)
 	/*:459*/
-	#line 11253 "format.w"
+	#line 11252 "format.w"
 
 	/*446:*/
-	#line 9764 "format.w"
+	#line 9763 "format.w"
 
 #define DBGNONE     0x0
 #define DBGBASIC    0x1
@@ -55,7 +55,7 @@
 #define DBGRENDER   0x4000
 #define DBGLABEL    0x8000
 	/*:446*/
-	#line 11254 "format.w"
+	#line 11253 "format.w"
 
 	/*13:*/
 	#line 646 "format.w"
@@ -93,34 +93,33 @@
 #define CURCOLOR(M,S,C) ((C)+6*(M)+2*(S))
 #define DAY(C)   CURCOLOR(0,0,C)
 #define NIGHT(C) CURCOLOR(1,0,C)
-#define TEXT(C)  CURCOLOR(0,0,C)
 #define HIGH(C)  CURCOLOR(0,1,C)
 #define FOCUS(C) CURCOLOR(0,2,C)
 #define FG(C)    ((C)[0])
 #define BG(C)    ((C)[1])
 	/*:286*/	/*325:*/
-	#line 7142 "format.w"
+	#line 7141 "format.w"
 
 #define ALLOCATE(R,S,T) ((R)= (T *)calloc((S),sizeof(T)),\
         (((R)==NULL)?QUIT("Out of memory for " #R):0))
 #define REALLOCATE(R,S,T) ((R)= (T *)realloc((R),(S)*sizeof(T)),\
         (((R)==NULL)?QUIT("Out of memory for " #R):0))
 	/*:325*/	/*333:*/
-	#line 7307 "format.w"
+	#line 7306 "format.w"
 
 #define MAX_BANNER 256
 	/*:333*/	/*346:*/
-	#line 7518 "format.w"
+	#line 7517 "format.w"
 
 #define MAX_TAG_DISTANCE 32
 	/*:346*/	/*462:*/
-	#line 10090 "format.w"
+	#line 10089 "format.w"
 
 #define NODE_SIZE(H,T) ((T)==0?(H)+2:-4*((H)+1)+((T)-1))
 #define NODE_HEAD(N)   ((N)>0?(N)-2:-((N)>>2)-1)
 #define NODE_TAIL(N)   ((N)<0?((N)&0x3)+1:0)
 	/*:462*/
-	#line 11255 "format.w"
+	#line 11254 "format.w"
 
 	/*6:*/
 	#line 493 "format.w"
@@ -245,14 +244,14 @@ uint8_t f;
 
 typedef uint32_t ColorSet[2*3*2];
 	/*:285*/	/*404:*/
-	#line 9032 "format.w"
+	#line 9031 "format.w"
 
 #define MAX_FONT_PARAMS 11
 	/*:404*/
-	#line 11256 "format.w"
+	#line 11255 "format.w"
 
 	/*417:*/
-	#line 9271 "format.w"
+	#line 9270 "format.w"
 
 typedef enum{
 zero_int_no= 0,
@@ -281,7 +280,7 @@ floating_penalty_no= 22
 }Int_no;
 #define MAX_INT_DEFAULT floating_penalty_no
 	/*:417*/	/*419:*/
-	#line 9344 "format.w"
+	#line 9343 "format.w"
 
 typedef enum{
 zero_dimen_no= 0,
@@ -297,7 +296,7 @@ math_quad_no= 9
 }Dimen_no;
 #define MAX_DIMEN_DEFAULT math_quad_no
 	/*:419*/	/*421:*/
-	#line 9389 "format.w"
+	#line 9388 "format.w"
 
 typedef enum{
 zero_xdimen_no= 0,
@@ -306,7 +305,7 @@ vsize_xdimen_no= 2
 }Xdimen_no;
 #define MAX_XDIMEN_DEFAULT vsize_xdimen_no
 	/*:421*/	/*423:*/
-	#line 9413 "format.w"
+	#line 9412 "format.w"
 
 typedef enum{
 zero_skip_no= 0,
@@ -327,56 +326,56 @@ par_fill_skip_no= 14
 }Glue_no;
 #define MAX_GLUE_DEFAULT par_fill_skip_no
 	/*:423*/	/*425:*/
-	#line 9499 "format.w"
+	#line 9498 "format.w"
 
 typedef enum{
 zero_baseline_no= 0
 }Baseline_no;
 #define MAX_BASELINE_DEFAULT zero_baseline_no
 	/*:425*/	/*427:*/
-	#line 9524 "format.w"
+	#line 9523 "format.w"
 
 typedef enum{
 zero_label_no= 0
 }Label_no;
 #define MAX_LABEL_DEFAULT zero_label_no
 	/*:427*/	/*429:*/
-	#line 9538 "format.w"
+	#line 9537 "format.w"
 
 typedef enum{
 zero_stream_no= 0
 }Stream_no;
 #define MAX_STREAM_DEFAULT zero_stream_no
 	/*:429*/	/*431:*/
-	#line 9554 "format.w"
+	#line 9553 "format.w"
 
 typedef enum{
 zero_page_no= 0
 }Page_no;
 #define MAX_PAGE_DEFAULT zero_page_no
 	/*:431*/	/*433:*/
-	#line 9571 "format.w"
+	#line 9570 "format.w"
 
 typedef enum{
 zero_range_no= 0
 }Range_no;
 #define MAX_RANGE_DEFAULT zero_range_no
 	/*:433*/	/*435:*/
-	#line 9584 "format.w"
+	#line 9583 "format.w"
 
 typedef enum{
 empty_list_no= 0
 }List_no;
 #define MAX_LIST_DEFAULT empty_list_no
 	/*:435*/	/*437:*/
-	#line 9599 "format.w"
+	#line 9598 "format.w"
 
 typedef enum{
 zero_color_no= 0,link_color_no= 1
 }Color_no;
 #define MAX_COLOR_DEFAULT link_color_no
 	/*:437*/
-	#line 11257 "format.w"
+	#line 11256 "format.w"
 
 
 extern const char*content_name[32];

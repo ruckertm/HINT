@@ -1240,11 +1240,13 @@ The function |hlist_to_string| is defined in section~\secref{listtraversal}.
 To store colors, we use the same data type that is used for the
 |color_defaults| and give it the name |ColorSet|.
 
-
 @<\HINT\ |extern|@>=
 typedef uint32_t ColorSet[12];
 extern ColorSet *color_def;
+extern ColorSet color_defaults[];
 @
+
+
 
 We define a dynamic array for color sets based on |max_ref[color_kind]|.
 
@@ -6112,7 +6114,8 @@ and |nativeSetGamma|
 
 @<render functions@>=
 void hint_dark(int dark)
-{ nativeSetDark(dark);
+{ nativeSetColor(color_def!=NULL?color_def:color_defaults);
+  nativeSetDark(dark);
 }
 void hint_gamma(double gamma)
 { nativeSetGamma(gamma);

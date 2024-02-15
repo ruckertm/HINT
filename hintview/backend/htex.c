@@ -16,6 +16,7 @@
 #ifdef STAT
 #include "hprint.h"
 #endif
+#line 280 "htex.w"
 /*120:*/
 #line 2590 "htex.w"
 
@@ -36,9 +37,11 @@ static int var_used,dyn_used;
 #define incr_dyn_used incr(dyn_used)
 #define decr_dyn_used decr(dyn_used)
 #else
+#line 2641 "htex.w"
 #define incr_dyn_used
 #define decr_dyn_used
 #endif
+#line 2644 "htex.w"
 
 /*:122*//*123:*/
 #line 2659 "htex.w"
@@ -188,6 +191,7 @@ void confusion(char*s)
 #line 282 "htex.w"
 
 #endif
+#line 284 "htex.w"
 
 /*:4*//*103:*/
 #line 2192 "htex.w"
@@ -283,6 +287,7 @@ link(p)= null;
 #ifdef STAT
 incr(dyn_used);
 #endif
+#line 2695 "htex.w"
 
 return p;
 }
@@ -299,6 +304,7 @@ do{q= r;r= link(r);
 #ifdef STAT
 decr(dyn_used);
 #endif
+#line 2735 "htex.w"
 }while(!(r==null));
 link(q)= avail;avail= p;
 }
@@ -385,6 +391,7 @@ found:link(r)= null;
 #ifdef STAT
 var_used= var_used+s;
 #endif
+#line 2798 "htex.w"
 
 leak_in(r,s);
 return r;
@@ -404,6 +411,7 @@ llink(rover)= p;rlink(q)= p;
 #ifdef STAT
 var_used= var_used-s;
 #endif
+#line 2872 "htex.w"
 
 }
 
@@ -1284,7 +1292,8 @@ pointer new_character(internal_font_number f,eight_bits c)
 if(font_bc[f]> c||font_ec[f]<c||!char_exists(char_info(f,qi(c))))
 DBG(DBGFONT,"Warning: Character 0x%0X in font %d does not exist\n",c,f);
 #endif
-p= get_avail();font(p)= f;character(p)= qi(c);
+#line 11494 "htex.w"
+ p= get_avail();font(p)= f;character(p)= qi(c);
 return p;
 }
 
@@ -1721,7 +1730,8 @@ bool artificial_demerits;
 #ifdef STAT
 pointer save_link;
 #endif
-scaled shortfall;
+#line 16555 "htex.w"
+ scaled shortfall;
 
 /*:849*/
 #line 16517 "htex.w"
@@ -1888,6 +1898,7 @@ link(q)= passive;passive= q;cur_break(q)= cur_p;
 #ifdef STAT
 incr(pass_number);serial(q)= pass_number;
 #endif
+#line 16811 "htex.w"
 
 prev_break(q)= best_place[fit_class];
 q= get_node(active_node_size);break_node(q)= passive;
@@ -1915,6 +1926,7 @@ else print_int(serial(prev_break(passive)));
 #line 16820 "htex.w"
 ;
 #endif
+#line 16822 "htex.w"
 
 }
 
@@ -2087,6 +2099,7 @@ if(artificial_demerits)print_char('*');else print_int(d);
 #line 17004 "htex.w"
 ;
 #endif
+#line 17006 "htex.w"
 
 d= d+total_demerits(r);
 
@@ -2157,6 +2170,7 @@ while(t> 0)
 #line 16533 "htex.w"
 ;
 #endif
+#line 16535 "htex.w"
 
 }
 
@@ -2427,6 +2441,7 @@ prev_graf= best_line-1;
 
 #ifdef INIT
 #endif
+#line 18612 "htex.w"
 
 /*:966*/
 #line 16218 "htex.w"
@@ -2520,6 +2535,7 @@ if(threshold>=0)
 if(tracing_paragraphs> 0)
 {print_nl("@firstpass");}
 #endif
+#line 17154 "htex.w"
 
 second_pass= false;final_pass= false;
 }
@@ -2527,6 +2543,7 @@ else{threshold= tolerance;second_pass= true;
 final_pass= (emergency_stretch<=0);
 #ifdef STAT
 #endif
+#line 17161 "htex.w"
 
 }
 loop{if(threshold> inf_bad)threshold= inf_bad;
@@ -2755,19 +2772,22 @@ if(!second_pass)
 #ifdef STAT
 if(tracing_paragraphs> 0)print_nl("@secondpass");
 #endif
-threshold= tolerance;second_pass= true;final_pass= (emergency_stretch<=0);
+#line 17180 "htex.w"
+ threshold= tolerance;second_pass= true;final_pass= (emergency_stretch<=0);
 }
 else{
 #ifdef STAT
 if(tracing_paragraphs> 0)
 print_nl("@emergencypass");
 #endif
-background[2]= background[2]+emergency_stretch;final_pass= true;
+#line 17187 "htex.w"
+ background[2]= background[2]+emergency_stretch;final_pass= true;
 }
 }
 done:
 #ifdef STAT
 #endif
+#line 17193 "htex.w"
 
 /*:885*/
 #line 16225 "htex.w"
@@ -2974,6 +2994,7 @@ print(", max depth=");print_scaled(page_max_depth);
 end_diagnostic(false);
 }
 #endif
+#line 19571 "htex.w"
 
 }
 
@@ -3096,6 +3117,7 @@ end_diagnostic(false);
 #line 19796 "htex.w"
 ;
 #endif
+#line 19798 "htex.w"
 
 if(c<=least_page_cost)
 {best_page_break= p;best_size= page_goal;
@@ -3257,6 +3279,7 @@ end_diagnostic(false);
 #line 19906 "htex.w"
 ;
 #endif
+#line 19908 "htex.w"
 
 if(count(n)!=1000)
 best_height_plus_depth= x_over_n(best_height_plus_depth,1000)*count(n);
@@ -3290,7 +3313,8 @@ show_box(streams[0].p);
 print_str("\nstream 1:\n");
 show_box(streams[1].p);
 #endif
-if(box(0)!=null)
+#line 20005 "htex.w"
+ if(box(0)!=null)
 {flush_node_list(box(0));box(0)= null;}
 insert_penalties= 0;
 save_split_top_skip= split_top_skip;
