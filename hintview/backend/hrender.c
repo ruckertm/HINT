@@ -89,8 +89,7 @@ if(old_px_h==px_h&&old_px_v==px_v&&old_xdpi==x_dpi&&old_ydpi==y_dpi)
 return;
 old_px_h= px_h;old_px_v= px_v;old_xdpi= x_dpi;old_ydpi= y_dpi;
 #endif
-#line 4525 "hint.w"
- xdpi= x_dpi;ydpi= y_dpi;
+xdpi= x_dpi;ydpi= y_dpi;
 nativeSetSize(px_h,px_v,xdpi,ydpi);
 hloc_clear();
 hflush_contribution_list();hpage_init();
@@ -114,8 +113,7 @@ hint_forward();
 #if 0
 show_box(streams[0].p);
 #endif
-#line 4751 "hint.w"
- forward_mode= true;
+forward_mode= true;
 backward_mode= false;
 return h;
 }
@@ -159,11 +157,9 @@ else
 #if 1
 pos= ((uint64_t)labels[n].pos<<32)+(labels[n].pos-labels[n].pos0);
 #else
-#line 1230 "hint.w"
- pos= ((uint64_t)labels[n].pos0<<32);
+pos= ((uint64_t)labels[n].pos0<<32);
 
 #endif
-#line 1233 "hint.w"
 }
 /*:71*/
 #line 4797 "hint.w"
@@ -781,11 +777,9 @@ else
 #if 1
 pos= ((uint64_t)labels[n].pos<<32)+(labels[n].pos-labels[n].pos0);
 #else
-#line 1230 "hint.w"
- pos= ((uint64_t)labels[n].pos0<<32);
+pos= ((uint64_t)labels[n].pos0<<32);
 
 #endif
-#line 1233 "hint.w"
 }
 /*:71*/
 #line 5950 "hint.w"
@@ -976,8 +970,7 @@ if(p==0xffff)
 QUIT("Undefined list pointer in hbox 0x%x-> mem[0x%x] -> 0x%x\n",
 this_box,mem[this_box].i,p);
 #endif
-#line 6688 "hint.w"
- base_line= cur_v;
+base_line= cur_v;
 left_edge= cur_h;
 /*318:*/
 #line 5895 "hint.w"
@@ -998,8 +991,7 @@ QUIT("Undefined pointer in hlist 0x%x\n",p);
 if(link(p)==0xffff)
 QUIT("Undefined link in hlist mem[0x%x]=0x%x\n",p,mem[p].i);
 #endif
-#line 6699 "hint.w"
- if(is_char_node(p))
+if(is_char_node(p))
 {do
 {f= font(p);
 c= character(p);
@@ -1029,15 +1021,13 @@ if(f> max_ref[font_kind])
 QUIT("Undefined Font %d mem[0x%x]=0x%x\n",
 f,p,mem[p].i);
 #endif
-#line 6713 "hint.w"
- render_char(cur_h,cur_v,f,c,next_style);
+render_char(cur_h,cur_v,f,c,next_style);
 cur_h= cur_h+char_width(f,char_info(f,c));
 #ifdef DEBUG
 if(link(p)==0xffff)
 QUIT("Undefined link in charlist mem[0x%x]=0x%x\n",p,mem[p].i);
 #endif
-#line 6719 "hint.w"
- p= link(p);
+p= link(p);
 }while(is_char_node(p));
 }
 else
@@ -1049,8 +1039,7 @@ if(list_ptr(p)==0xffff)
 QUIT("Undefined list pointer in hlist mem[0x%x] = 0x%x -> 0x%x\n",
 p,mem[p].i,list_ptr(p));
 #endif
-#line 6731 "hint.w"
- if(list_ptr(p)==null)cur_h= cur_h+width(p);
+if(list_ptr(p)==null)cur_h= cur_h+width(p);
 else
 {int cur_c= cur_color;
 cur_v= base_line+shift_amount(p);
@@ -1298,8 +1287,7 @@ next_p:
 if(link(p)==0xffff)
 QUIT("Undefined link in hlist mem[0x%x]=0x%x\n",p,mem[p].i);
 #endif
-#line 6876 "hint.w"
- p= link(p);
+p= link(p);
 }
 }
 /*317:*/
@@ -1339,8 +1327,7 @@ if(p==0xffff)
 QUIT("Undefined list pointer in vbox 0x%x-> mem[0x%x] -> 0x%x\n",
 this_box,mem[this_box].i,p);
 #endif
-#line 6907 "hint.w"
- left_edge= cur_h;cur_v= cur_v-height(this_box);
+left_edge= cur_h;cur_v= cur_v-height(this_box);
 top_edge= cur_v;
 while(p!=null)
 {if(is_char_node(p))DBG(DBGTEX,"Glyph in vertical list ignored");
@@ -1353,8 +1340,7 @@ if(list_ptr(p)==0xffff)
 QUIT("Undefined list pointer in vlist mem[0x%x] = 0x%x -> 0x%x\n",
 p,mem[p].i,list_ptr(p));
 #endif
-#line 6920 "hint.w"
- if(list_ptr(p)==null)cur_v= cur_v+height(p)+depth(p);
+if(list_ptr(p)==null)cur_v= cur_v+height(p)+depth(p);
 else
 {int cur_c= cur_color;
 cur_v= cur_v+height(p);save_v= cur_v;
@@ -1554,8 +1540,7 @@ QUIT("vertical node mem[0x%x] =0x%x ->linking to node 0x%x\n",
 p,mem[p].i,link(p));
 }
 #endif
-#line 7061 "hint.w"
- p= link(p);
+p= link(p);
 }
 }
 

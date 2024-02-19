@@ -174,5 +174,4 @@ extern void leak_out(pointer p,int s);
 
 
 #endif
-#line 8234 "hint.w"
 /*:398*/

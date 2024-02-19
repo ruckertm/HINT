@@ -19730,7 +19730,9 @@ contribute|@>@;@+break;
 case whatsit_node: @<Prepare to move whatsit |p| to the current page, then
 |goto contribute|@>;
 case glue_node: if (page_contents < box_there) goto done1;
-  else if (precedes_break(page_tail)) pi=0;
+  else if (precedes_break(page_tail) &&
+           !(type(page_tail)==whatsit_node && subtype(page_tail)==color_node))
+	 pi=0;
   else goto update_heights;@+break;
 case kern_node: if (page_contents < box_there) goto done1;
   else if (link(p)==null) return false;
