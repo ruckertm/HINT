@@ -153,7 +153,7 @@ Germany.
 %First printing: August 2019\par
 %Second edition: August 2021\par
 \medskip
-Last commit: \input lastcommit.tex
+%Last commit: \input lastcommit.tex
 \par
 }
 }
@@ -1913,21 +1913,21 @@ static char *every_name[]={@/ /* names for output, everypar, etc. */
 static const int sys_line_num=sizeof(line_name)/sizeof(*line_name);
 @
 
-\plainsection{References}
+%\plainsection{References}
 
-{\baselineskip=11pt
-\def\bfblrm{\small\rm}%
-\def\bblem{\small\it}%
-\bibliography{../hint}
-\bibliographystyle{plain}
-}
+%{\baselineskip=11pt
+%\def\bfblrm{\small\rm}%
+%\def\bblem{\small\it}%
+%\bibliography{../hint}
+%\bibliographystyle{plain}
+%}
 
-\plainsection{Index}
-{
-\def\_{{\tt \UL}} % underline in a string
-\catcode`\_=\active \let_=\_ % underline is a letter
-\input tprof.ind
-}
+%\plainsection{Index}
+%{
+%\def\_{{\tt \UL}} % underline in a string
+%\catcode`\_=\active \let_=\_ % underline is a letter
+%\input tprof.ind
+%}
 
 \write\cont{} % ensure that the contents file isn't empty
 %  \write\cont{\catcode `\noexpand\@=12\relax}   % \makeatother

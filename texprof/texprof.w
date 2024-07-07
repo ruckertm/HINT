@@ -31265,20 +31265,6 @@ if (profile_on)
 }
 
 
-@ The following code is currently not used, because input a line is pretty fast.
-
-@<Charge the time used here on |input_ln|@>=
-if (profile_on)
-{ @<record timing information@>@;
-  tmp_file_line=prof_file_line;
-  tmp_cmd=prof_cmd;
-  tmp_depth=prof_depth;
-  prof_file_line=FILE_LINE(system_file,system_input_ln);
-  prof_cmd=system_cmd;
-}
-
-
-
 @*1 Macro Calls. 
 Let's talk about collecting information about macro calls.
 Macro calls come in various flavours:
