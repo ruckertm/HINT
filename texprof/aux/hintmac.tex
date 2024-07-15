@@ -328,7 +328,9 @@
   \exhyphenpenalty 1000
   \codedest
   \global\ind=2 \1\ \unskip
-  \vadjust{\vtop to 0pt{\vss\hbox to \hsize{\hfill\tiny(\secstar)}\kern 0pt}}}
+%  removing the extra section number because it conflicts with comments 
+  \vadjust{\vtop to 0pt{\vss\hbox to \hsize{\hfill\tiny(\secstar)}\kern 0pt}}
+}
 
 % formating of C comments
 \def\C#1{\5\hfill$/\ast\,${\cmntfont #1}$\,\ast/$}

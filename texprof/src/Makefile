@@ -170,7 +170,7 @@ tprof.pdf tprof.aux: tprof.tex tprof.scn tprof.idx
 ### Cleaning up
 
 clean:
-	rm -f tprof.c texprof.c tprof.tex texprof.tex
+	rm -f tprof.tex texprof.tex
 	rm -f *.o texprof tprof
 	rm -f *.aux *.get *.put *.red *.wrt *.idx *.inx *.toc *.log *.scn
 	rm -f *.pdf *.dvi *.hnt
