@@ -70,19 +70,14 @@ all: install_bin install_fmt
 
 # produce tprof.c and texprof.c from the .w files with CTANGLE
 
-tprof.c: ../tprof.w
-	$(CTANGLE) ../tprof.w
+%.c: %.w
+	$(CTANGLE) $<
 
-texprof.c: ../texprof.w
-	$(CTANGLE) ../texprof.w
 
 # produce tprof.tex and texprof.tex from the .w files with CWEAVE
 
-tprof.tex tprof.scn tprof.idx: ../tprof.w
-	$(CWEAVE) ../tprof.w
-
-texprof.tex texprof.scn texprof.idx: ../texprof.w
-	$(CWEAVE) ../texprof.w
+%.tex %.scn %.idx: %.w
+	$(CWEAVE) $<
 
 
 ### Step 2: Compiling the c files
@@ -170,7 +165,7 @@ tprof.pdf tprof.aux: tprof.tex tprof.scn tprof.idx
 ### Cleaning up
 
 clean:
-	rm -f tprof.tex texprof.tex
+	rm -f tprof.tex texprof.tex tprof.c texprof.c
 	rm -f *.o texprof tprof
 	rm -f *.aux *.get *.put *.red *.wrt *.idx *.inx *.toc *.log *.scn
 	rm -f *.pdf *.dvi *.hnt
