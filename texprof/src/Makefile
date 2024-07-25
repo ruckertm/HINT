@@ -7,8 +7,6 @@
 # They might need modifications if you use them using other operating
 # systems or other tools.
 
-all: tprof texprof
-
 ### Tools
 
 ## The cweb system
@@ -64,7 +62,8 @@ KPSEWHICH=kpsewhich
 
 ### The top level targets
 
-all: install_bin install_fmt
+all: tprof texprof
+
 
 ### Building 
 

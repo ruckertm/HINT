@@ -1440,7 +1440,7 @@ The total number of outgoing and incoming edges can only be estimated.
 So a dynamic allocation is used.
 
 @<allocate arrays@>=
-edges_num=16;
+edges_num=16000;
 edges_count=1; /* zero element is a sentinel and a head */
 ALLOCATE(edges,edges_num);
 @
@@ -1449,7 +1449,13 @@ ALLOCATE(edges,edges_num);
 uint16_t new_edge(void)
 { if (edges_count<edges_num)
     return edges_count++;
-  REALLOC(edges,edges_count,edges_num);
+  { edges_num=edges_num*2; //1.4142136+0.5; /* $\sqrt 2$ */
+    edges=realloc(edges,(1+edges_num)*sizeof(*edges));
+    if (edges==NULL) error("Out of memory");
+    edges[edges_num].T=1234567;
+    memset(edges+edges_count,0,(edges_num-edges_count)*sizeof(*edges)); 
+  }
+//REALLOC(edges,edges_count,edges_num);
   return edges_count++;
 }
 @
@@ -1695,7 +1701,7 @@ The same marker is used later to separate the different sections of the file.
 
 @<functions@>=
 void check_file_marker(char *msg)
-{ char marker[8];
+{ static char marker[8];
   if (fread(marker,1,8,in)!=8)
      error("Unexpected end of input");
   if(strncmp(marker,FILE_MARKER,8)!=0)
