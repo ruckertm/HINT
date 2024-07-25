@@ -7,6 +7,8 @@
 # They might need modifications if you use them using other operating
 # systems or other tools.
 
+all: tprof texprof
+
 ### Tools
 
 ## The cweb system
@@ -18,7 +20,7 @@ CWEAVE=cweave
 
 # The C compiler
 CC=gcc
-CFLAGS= -O2 -DINIT -Wall -I.
+CFLAGS= -O0 -ggdb -DINIT -DDEBUG -Wall -I.
 # To suppress warnings when compiling texprof these additional flags
 # can be used
 TEXFLAGS= -Wno-unused-result -Wno-parentheses -Wno-maybe-uninitialized -Wno-unused-function -Wno-unused-variable

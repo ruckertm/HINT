@@ -20,3 +20,4 @@ tprof
 *.hnt
 *.tprof
 *~
+tests/
