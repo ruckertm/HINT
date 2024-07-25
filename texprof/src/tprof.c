@@ -30,7 +30,7 @@
 #define system_macro_pop_0 (system_cmd+6)  \
 
 /*1:*/
-#line 201 "../tprof.w"
+#line 201 "tprof.w"
 
 #include <stdlib.h> 
 #include <stdio.h> 
@@ -39,12 +39,12 @@
 #include <ctype.h> 
 #include <string.h> 
 /*2:*/
-#line 224 "../tprof.w"
+#line 224 "tprof.w"
 
 static char*input_file_name= NULL;
 static FILE*in= NULL;
 /*:2*//*6:*/
-#line 298 "../tprof.w"
+#line 298 "tprof.w"
 
 static unsigned int file_num,
 file_name_num,
@@ -53,13 +53,13 @@ macro_name_num,
 stamp_num,
 depth_num;
 /*:6*//*9:*/
-#line 332 "../tprof.w"
+#line 332 "tprof.w"
 
 static char**full_file_names,**file_names,*file_name_buffer;
 #define ALLOCATE(V,S) V =  calloc(S,sizeof(*V));\
                       if (V==NULL) error("Out of memory for " #V "[" #S "]");
 /*:9*//*12:*/
-#line 383 "../tprof.w"
+#line 383 "tprof.w"
 
 static char*macro_name_buffer,**macro_names;
 static uint16_t*macro_stack;
@@ -68,7 +68,7 @@ static struct map
 uint16_t m;
 }*macro_map;
 /*:12*//*16:*/
-#line 473 "../tprof.w"
+#line 473 "tprof.w"
 
 struct stamp{
 uint8_t c;
@@ -95,11 +95,11 @@ uint64_t s;
 int macro_def_num;
 int macro_def_count;
 /*:16*//*20:*/
-#line 583 "../tprof.w"
+#line 583 "tprof.w"
 
 bool opt_macro_id= false;
 /*:20*//*24:*/
-#line 614 "../tprof.w"
+#line 614 "tprof.w"
 
 uint64_t total_time;
 uint32_t total_num;
@@ -108,58 +108,58 @@ int*file_line;
 int*cmd_freq;
 int cur_depth;
 /*:24*//*30:*/
-#line 775 "../tprof.w"
+#line 775 "tprof.w"
 
 bool opt_raw= false;
 bool opt_raw_stack= false;
 bool opt_raw_num= false;
 /*:30*//*36:*/
-#line 839 "../tprof.w"
+#line 839 "tprof.w"
 
 bool opt_stack= false;
 /*:36*//*40:*/
-#line 878 "../tprof.w"
+#line 878 "tprof.w"
 
 bool opt_summary= true;
 /*:40*//*44:*/
-#line 909 "../tprof.w"
+#line 909 "tprof.w"
 
 bool opt_machine= false;
 /*:44*//*49:*/
-#line 958 "../tprof.w"
+#line 958 "tprof.w"
 
 bool opt_files= false;
 /*:49*//*53:*/
-#line 989 "../tprof.w"
+#line 989 "tprof.w"
 
 bool opt_cmd= false;
 /*:53*//*58:*/
-#line 1047 "../tprof.w"
+#line 1047 "tprof.w"
 
 bool opt_macro= false;
 /*:58*//*67:*/
-#line 1172 "../tprof.w"
+#line 1172 "tprof.w"
 
 int line_num= 0;
 /*:67*//*69:*/
-#line 1194 "../tprof.w"
+#line 1194 "tprof.w"
 
 static uint64_t*line_time= NULL;
 static int*line_freq= NULL;
 /*:69*//*71:*/
-#line 1231 "../tprof.w"
+#line 1231 "tprof.w"
 
 double percent_limit= 1.0;
 bool opt_lines= false;
 /*:71*//*76:*/
-#line 1298 "../tprof.w"
+#line 1298 "tprof.w"
 
 static uint64_t*tt_time;
 static int*tt_file,*tt_line;
 static int tt= 10+1,tt_count;;
 bool opt_top_ten;
 /*:76*//*83:*/
-#line 1430 "../tprof.w"
+#line 1430 "tprof.w"
 
 struct edge{
 uint16_t child,sibling;
@@ -168,11 +168,11 @@ uint64_t T,L,ts,Ts;
 }*edges;
 int edges_count,edges_num;
 /*:83*//*89:*/
-#line 1525 "../tprof.w"
+#line 1525 "tprof.w"
 
 bool opt_graph= false;
 /*:89*//*101:*/
-#line 1723 "../tprof.w"
+#line 1723 "tprof.w"
 
 static char*cmd_name[]= {
 "relax",
@@ -339,20 +339,20 @@ static char*every_name[]= {
 
 static const int sys_line_num= sizeof(line_name)/sizeof(*line_name);
 /*:101*/
-#line 208 "../tprof.w"
+#line 208 "tprof.w"
 
 /*98:*/
-#line 1675 "../tprof.w"
+#line 1675 "tprof.w"
 
 void error(char*msg)
 {fprintf(stderr,"ERROR: %s\n",msg);
 exit(1);
 }
 /*:98*/
-#line 209 "../tprof.w"
+#line 209 "tprof.w"
 
 /*5:*/
-#line 272 "../tprof.w"
+#line 272 "tprof.w"
 
 static uint8_t fget1(void)
 {unsigned char buf[1];
@@ -375,7 +375,7 @@ error("Unexpected end of input");
 return((((((uint32_t)buf[0]<<8)+buf[1])<<8)+buf[2])<<8)+buf[3];
 }
 /*:5*//*15:*/
-#line 445 "../tprof.w"
+#line 445 "tprof.w"
 
 void print_cs(int n)
 {if(n<hash_base)
@@ -396,7 +396,7 @@ else
 printf("\\%s",macro_names[n-hash_base]);
 }
 /*:15*//*18:*/
-#line 513 "../tprof.w"
+#line 513 "tprof.w"
 
 #define REALLOC(A,C,N) \
   { N= N*1.4142136+0.5; \
@@ -412,7 +412,7 @@ REALLOC(macro_defs,macro_def_count,macro_def_num);
 return macro_def_count++;
 }
 /*:18*//*19:*/
-#line 547 "../tprof.w"
+#line 547 "tprof.w"
 
 int get_macro_def(int f,int l,int c)
 {int m= macro_map[c].m;
@@ -443,14 +443,14 @@ macro_defs[m].link= 0;
 return m;
 }
 /*:19*//*23:*/
-#line 595 "../tprof.w"
+#line 595 "tprof.w"
 
 void print_macro(int i)
 {print_cs(macro_defs[i].n);
 if(opt_macro_id)printf(" [%d,%d]",macro_defs[i].f,macro_defs[i].l);
 }
 /*:23*//*47:*/
-#line 922 "../tprof.w"
+#line 922 "tprof.w"
 
 char*time_str(double t)
 {static char str[20];
@@ -469,7 +469,7 @@ snprintf(str,20,"  %7.2f s",t/1000000000.0);
 return str;
 }
 /*:47*//*48:*/
-#line 944 "../tprof.w"
+#line 944 "tprof.w"
 
 void print_fl(int f,int l)
 {if(f==system_file&&!opt_machine)
@@ -478,7 +478,7 @@ else
 printf("%4d\t%5d",f,l);
 }
 /*:48*//*64:*/
-#line 1108 "../tprof.w"
+#line 1108 "tprof.w"
 
 void sort_edges(uint16_t p)
 {int i,j,k;
@@ -502,7 +502,7 @@ edges[k].sibling= j;
 macro_defs[p].e= edges[0].sibling;
 }
 /*:64*//*66:*/
-#line 1138 "../tprof.w"
+#line 1138 "tprof.w"
 
 void sort_macros(void)
 {int i,k,j;
@@ -527,13 +527,13 @@ sort_edges(i);
 sorted= true;
 }
 /*:66*//*70:*/
-#line 1206 "../tprof.w"
+#line 1206 "tprof.w"
 
 void collect_line_time(void)
 {int i,cur_f= -1,cur_l= -1;
 if(line_time!=NULL)return;
 /*68:*/
-#line 1177 "../tprof.w"
+#line 1177 "tprof.w"
 
 line_num= 0;
 for(i= 0;i<file_num;i++)
@@ -543,20 +543,20 @@ line_num= line_num+fl+1;
 }
 file_line[file_num]= line_num;
 /*:68*/
-#line 1211 "../tprof.w"
+#line 1211 "tprof.w"
 
 ALLOCATE(line_time,line_num);
 ALLOCATE(line_freq,line_num);
 for(i= 0;i<stamp_num;i++)
 {/*35:*/
-#line 830 "../tprof.w"
+#line 830 "tprof.w"
 
 uint32_t t= stamps[i].t;
 uint16_t l= stamps[i].l;
 uint8_t f= stamps[i].f;
 uint8_t c= stamps[i].c;
 /*:35*/
-#line 1215 "../tprof.w"
+#line 1215 "tprof.w"
 
 if(c<=system_profile_off)
 {line_time[file_line[f]+l]+= t;
@@ -568,7 +568,7 @@ cur_f= f;cur_l= l;
 }
 }
 /*:70*//*85:*/
-#line 1448 "../tprof.w"
+#line 1448 "tprof.w"
 
 uint16_t new_edge(void)
 {if(edges_count<edges_num)
@@ -577,7 +577,7 @@ REALLOC(edges,edges_count,edges_num);
 return edges_count++;
 }
 /*:85*//*86:*/
-#line 1466 "../tprof.w"
+#line 1466 "tprof.w"
 
 void start_child(int p,int c)
 {uint16_t*e= &(macro_defs[p].e);
@@ -602,7 +602,7 @@ edges[*e].Ts+= edges[i].T;
 }
 }
 /*:86*//*87:*/
-#line 1495 "../tprof.w"
+#line 1495 "tprof.w"
 
 void end_child(int p,int c)
 {uint16_t e= macro_defs[p].e;
@@ -629,91 +629,91 @@ edges[e].T+= dt-dT;
 edges[e].a--;
 }
 /*:87*//*99:*/
-#line 1684 "../tprof.w"
+#line 1684 "tprof.w"
 
 void explain_usage(char*msg)
 {fprintf(stderr,"ERROR: %s\n",msg);
 fprintf(stderr,/*96:*/
-#line 1637 "../tprof.w"
+#line 1637 "tprof.w"
 
 "Use: "
 "tprof [-options] <input file>\n"
 "options:\n"
 /*32:*/
-#line 787 "../tprof.w"
+#line 787 "tprof.w"
 
 "-R    show the table of raw time stamps\n"
 /*:32*//*38:*/
-#line 847 "../tprof.w"
+#line 847 "tprof.w"
 
 "-S    show the table of macro stack changes\n"
 /*:38*//*42:*/
-#line 886 "../tprof.w"
+#line 886 "tprof.w"
 
 "-N    do not show the table of global information\n"
 /*:42*//*51:*/
-#line 966 "../tprof.w"
+#line 966 "tprof.w"
 
 "-F    show all files\n"
 /*:51*//*55:*/
-#line 997 "../tprof.w"
+#line 997 "tprof.w"
 
 "-C    show table of command summaries\n"
 /*:55*//*60:*/
-#line 1055 "../tprof.w"
+#line 1055 "tprof.w"
 
 "-M    show the table of all macros called\n"
 /*:60*//*73:*/
-#line 1248 "../tprof.w"
+#line 1248 "tprof.w"
 
 "-L    show the table of times per input line\n"
 /*:73*//*78:*/
-#line 1318 "../tprof.w"
+#line 1318 "tprof.w"
 
 "-T    show the table of the top 10 input lines\n"
 /*:78*//*91:*/
-#line 1533 "../tprof.w"
+#line 1533 "tprof.w"
 
 "-G    show the table of the  macro call graph\n"
 /*:91*//*94:*/
-#line 1616 "../tprof.w"
+#line 1616 "tprof.w"
 
 "-A    show all tables (equal to -TGFC) tables\n"
 /*:94*/
-#line 1641 "../tprof.w"
+#line 1641 "tprof.w"
 
 "\n"
 /*22:*/
-#line 591 "../tprof.w"
+#line 591 "tprof.w"
 
 "-i    add the macros file and line numbers after the macro name\n"
 /*:22*//*33:*/
-#line 789 "../tprof.w"
+#line 789 "tprof.w"
 
 "-s    show the changes of the macro stack\n"
 "-n    show the time stamp numbers\n"
 /*:33*//*46:*/
-#line 917 "../tprof.w"
+#line 917 "tprof.w"
 
 "-m    optimize output for machine readability\n"
 /*:46*//*74:*/
-#line 1250 "../tprof.w"
+#line 1250 "tprof.w"
 
 "-p<n> don't show information for items with cumulative time below <n> percent\n"
 /*:74*//*79:*/
-#line 1320 "../tprof.w"
+#line 1320 "tprof.w"
 
 "-t<n> replace 10 by n (2<=n<=100, default 10) for the top 10 input lines\n"
 /*:79*/
-#line 1643 "../tprof.w"
+#line 1643 "tprof.w"
 
 /*:96*/
-#line 1687 "../tprof.w"
+#line 1687 "tprof.w"
 );
 exit(1);
 }
 /*:99*//*100:*/
-#line 1696 "../tprof.w"
+#line 1696 "tprof.w"
 
 void check_file_marker(char*msg)
 {char marker[8];
@@ -723,13 +723,13 @@ if(strncmp(marker,FILE_MARKER,8)!=0)
 error(msg);
 }
 /*:100*/
-#line 210 "../tprof.w"
+#line 210 "tprof.w"
 
 
 int main(int argc,char*argv[])
 {int i,k;
 /*97:*/
-#line 1646 "../tprof.w"
+#line 1646 "tprof.w"
 
 i= 1;
 while(i<argc)
@@ -739,41 +739,41 @@ if(argv[i][0]=='-')
 while(*option!=0)
 {switch(*option)
 {/*21:*/
-#line 587 "../tprof.w"
+#line 587 "tprof.w"
 
 case'i':opt_macro_id= true;break;
 /*:21*//*31:*/
-#line 781 "../tprof.w"
+#line 781 "tprof.w"
 
 case'R':opt_raw= true;break;
 case's':opt_raw_stack= true;break;
 case'n':opt_raw_num= true;break;
 /*:31*//*37:*/
-#line 843 "../tprof.w"
+#line 843 "tprof.w"
 
 case'S':opt_stack= true;break;
 /*:37*//*41:*/
-#line 882 "../tprof.w"
+#line 882 "tprof.w"
 
 case'N':opt_summary= false;break;
 /*:41*//*45:*/
-#line 913 "../tprof.w"
+#line 913 "tprof.w"
 
 case'm':opt_machine= true;break;
 /*:45*//*50:*/
-#line 962 "../tprof.w"
+#line 962 "tprof.w"
 
 case'F':opt_files= true;break;
 /*:50*//*54:*/
-#line 993 "../tprof.w"
+#line 993 "tprof.w"
 
 case'C':opt_cmd= true;break;
 /*:54*//*59:*/
-#line 1051 "../tprof.w"
+#line 1051 "tprof.w"
 
 case'M':opt_macro= true;break;
 /*:59*//*72:*/
-#line 1236 "../tprof.w"
+#line 1236 "tprof.w"
 
 case'L':opt_lines= true;break;
 case'p':{char*endptr;
@@ -785,7 +785,7 @@ option= endptr-1;
 }
 break;
 /*:72*//*77:*/
-#line 1305 "../tprof.w"
+#line 1305 "tprof.w"
 
 case'T':opt_top_ten= true;break;
 case't':{char*endptr;
@@ -798,17 +798,17 @@ option= endptr-1;
 }
 break;
 /*:77*//*90:*/
-#line 1529 "../tprof.w"
+#line 1529 "tprof.w"
 
 case'G':opt_graph= true;break;
 /*:90*//*93:*/
-#line 1610 "../tprof.w"
+#line 1610 "tprof.w"
 
 case'A':opt_files= opt_summary= 
 opt_cmd= opt_top_ten= 
 opt_graph= true;break;
 /*:93*/
-#line 1654 "../tprof.w"
+#line 1654 "tprof.w"
 
 default:explain_usage("unknown option");
 }
@@ -822,10 +822,10 @@ explain_usage("multiple input files given");
 i++;
 }
 /*:97*/
-#line 214 "../tprof.w"
+#line 214 "tprof.w"
 
 /*3:*/
-#line 236 "../tprof.w"
+#line 236 "tprof.w"
 
 if(input_file_name==NULL)
 explain_usage("no input file given");
@@ -843,10 +843,10 @@ if(in==NULL)
 error("Unable to open input file");
 check_file_marker("The input file does not seem to contain TeX profile data");
 /*:3*//*4:*/
-#line 257 "../tprof.w"
+#line 257 "tprof.w"
 
 /*7:*/
-#line 307 "../tprof.w"
+#line 307 "tprof.w"
 
 file_num= fget2();
 file_name_num= fget2();
@@ -857,43 +857,43 @@ macro_num= fget2();
 macro_name_num= fget4();
 depth_num= fget2();
 /*:7*//*8:*/
-#line 321 "../tprof.w"
+#line 321 "tprof.w"
 
 /*10:*/
-#line 338 "../tprof.w"
+#line 338 "tprof.w"
 
 ALLOCATE(full_file_names,file_num);
 ALLOCATE(file_names,file_num);
 ALLOCATE(file_name_buffer,file_name_num);
 /*:10*//*13:*/
-#line 392 "../tprof.w"
+#line 392 "tprof.w"
 
 ALLOCATE(macro_names,macro_num);
 ALLOCATE(macro_name_buffer,macro_name_num);
 ALLOCATE(macro_map,undefined_control_sequence+every_eof_text+1);
 ALLOCATE(macro_stack,depth_num+1);
 /*:13*//*17:*/
-#line 506 "../tprof.w"
+#line 506 "tprof.w"
 
 ALLOCATE(stamps,stamp_num);
 macro_def_num= 16;
 macro_def_count= 1;
 ALLOCATE(macro_defs,macro_def_num);
 /*:17*//*84:*/
-#line 1442 "../tprof.w"
+#line 1442 "tprof.w"
 
 edges_num= 16;
 edges_count= 1;
 ALLOCATE(edges,edges_num);
 /*:84*/
-#line 322 "../tprof.w"
+#line 322 "tprof.w"
 
 /*:8*/
-#line 258 "../tprof.w"
+#line 258 "tprof.w"
 
 check_file_marker("Invalid size data");
 /*11:*/
-#line 360 "../tprof.w"
+#line 360 "tprof.w"
 
 i= k= 0;
 while(k<file_num)
@@ -906,11 +906,11 @@ if(c==DIR_SEPARATOR)file_names[k]= file_name_buffer+i;
 k++;
 }
 /*:11*/
-#line 260 "../tprof.w"
+#line 260 "tprof.w"
 
 check_file_marker("Invalid file names");
 /*14:*/
-#line 399 "../tprof.w"
+#line 399 "tprof.w"
 
 i= 0;k= 0;
 while(k<macro_num)
@@ -930,11 +930,11 @@ macro_map[undefined_control_sequence+i].m= 0;
 }
 
 /*:14*/
-#line 262 "../tprof.w"
+#line 262 "tprof.w"
 
 check_file_marker("Invalid macro names");
 /*26:*/
-#line 625 "../tprof.w"
+#line 625 "tprof.w"
 
 ALLOCATE(file_time,file_num);
 ALLOCATE(cmd_time,cmd_num);
@@ -949,7 +949,7 @@ macro_defs[0].a= 1;
 i= 0;
 {fget1();
 /*29:*/
-#line 739 "../tprof.w"
+#line 739 "tprof.w"
 
 int f= fget1();
 int l= fget2();
@@ -965,13 +965,13 @@ printf("[%d:%d<%d:",i,cur_depth,cur_depth+1);
 print_macro(m);
 printf("]\n");
 #endif
-#line 754 "../tprof.w"
+#line 754 "tprof.w"
  i++;
 /*:29*/
-#line 638 "../tprof.w"
+#line 638 "tprof.w"
 
 /*61:*/
-#line 1062 "../tprof.w"
+#line 1062 "tprof.w"
 
 cur_depth++;
 macro_stack[cur_depth]= m;
@@ -981,7 +981,7 @@ if(macro_defs[m].a==1)
 {macro_defs[m].s= total_time;
 }
 /*:61*/
-#line 639 "../tprof.w"
+#line 639 "tprof.w"
 
 }
 while(i<stamp_num)
@@ -1000,16 +1000,16 @@ case system_macro_pop_0+9:
 case system_macro_pop_0+10:
 {int d= c-system_macro_pop_0;
 /*28:*/
-#line 728 "../tprof.w"
+#line 728 "tprof.w"
 
 stamps[i].c= system_macro_pop;
 stamps[i].d= cur_depth-d;
 #if SHOW_READ_TIMING
 printf("{%d:%d:%d>%d}\n",i,system_macro_pop,cur_depth+d,cur_depth);
 #endif
-#line 734 "../tprof.w"
+#line 734 "tprof.w"
 /*62:*/
-#line 1074 "../tprof.w"
+#line 1074 "tprof.w"
 
 while(cur_depth> stamps[i].d)
 {int m= macro_stack[cur_depth];
@@ -1021,27 +1021,27 @@ cur_depth--;
 }
 
 /*:62*/
-#line 734 "../tprof.w"
+#line 734 "tprof.w"
 
 i++;
 /*:28*/
-#line 656 "../tprof.w"
+#line 656 "tprof.w"
 
 break;
 }
 case system_macro_pop_small:
 {int d= fget1();
 /*28:*/
-#line 728 "../tprof.w"
+#line 728 "tprof.w"
 
 stamps[i].c= system_macro_pop;
 stamps[i].d= cur_depth-d;
 #if SHOW_READ_TIMING
 printf("{%d:%d:%d>%d}\n",i,system_macro_pop,cur_depth+d,cur_depth);
 #endif
-#line 734 "../tprof.w"
+#line 734 "tprof.w"
 /*62:*/
-#line 1074 "../tprof.w"
+#line 1074 "tprof.w"
 
 while(cur_depth> stamps[i].d)
 {int m= macro_stack[cur_depth];
@@ -1053,27 +1053,27 @@ cur_depth--;
 }
 
 /*:62*/
-#line 734 "../tprof.w"
+#line 734 "tprof.w"
 
 i++;
 /*:28*/
-#line 661 "../tprof.w"
+#line 661 "tprof.w"
 
 break;
 }
 case system_macro_pop:
 {int d= fget2();
 /*28:*/
-#line 728 "../tprof.w"
+#line 728 "tprof.w"
 
 stamps[i].c= system_macro_pop;
 stamps[i].d= cur_depth-d;
 #if SHOW_READ_TIMING
 printf("{%d:%d:%d>%d}\n",i,system_macro_pop,cur_depth+d,cur_depth);
 #endif
-#line 734 "../tprof.w"
+#line 734 "tprof.w"
 /*62:*/
-#line 1074 "../tprof.w"
+#line 1074 "tprof.w"
 
 while(cur_depth> stamps[i].d)
 {int m= macro_stack[cur_depth];
@@ -1085,17 +1085,17 @@ cur_depth--;
 }
 
 /*:62*/
-#line 734 "../tprof.w"
+#line 734 "tprof.w"
 
 i++;
 /*:28*/
-#line 666 "../tprof.w"
+#line 666 "tprof.w"
 
 break;
 }
 case system_macro_push:
 {/*29:*/
-#line 739 "../tprof.w"
+#line 739 "tprof.w"
 
 int f= fget1();
 int l= fget2();
@@ -1111,10 +1111,10 @@ printf("[%d:%d<%d:",i,cur_depth,cur_depth+1);
 print_macro(m);
 printf("]\n");
 #endif
-#line 754 "../tprof.w"
+#line 754 "tprof.w"
  i++;
 /*:29*/
-#line 670 "../tprof.w"
+#line 670 "tprof.w"
 
 cur_depth++;
 macro_stack[cur_depth]= m;
@@ -1130,16 +1130,16 @@ default:
 if(c&POP_BIT)
 {int d= 1;
 /*28:*/
-#line 728 "../tprof.w"
+#line 728 "tprof.w"
 
 stamps[i].c= system_macro_pop;
 stamps[i].d= cur_depth-d;
 #if SHOW_READ_TIMING
 printf("{%d:%d:%d>%d}\n",i,system_macro_pop,cur_depth+d,cur_depth);
 #endif
-#line 734 "../tprof.w"
+#line 734 "tprof.w"
 /*62:*/
-#line 1074 "../tprof.w"
+#line 1074 "tprof.w"
 
 while(cur_depth> stamps[i].d)
 {int m= macro_stack[cur_depth];
@@ -1151,11 +1151,11 @@ cur_depth--;
 }
 
 /*:62*/
-#line 734 "../tprof.w"
+#line 734 "tprof.w"
 
 i++;
 /*:28*/
-#line 684 "../tprof.w"
+#line 684 "tprof.w"
 
 c= c&~POP_BIT;
 }
@@ -1182,7 +1182,7 @@ i++;
 #if SHOW_READ_TIMING
 printf("<%d:%d:%d> %s\n",i-1,c,cur_depth,cmd_name[c]);
 #endif
-#line 710 "../tprof.w"
+#line 710 "tprof.w"
  break;
 }
 }
@@ -1196,20 +1196,20 @@ macro_defs[0].l= 0;
 #if SHOW_READ_TIMING
 printf("Finished reading %d commands, depth=%d\n",i,cur_depth);
 #endif
-#line 723 "../tprof.w"
+#line 723 "tprof.w"
 /*:26*/
-#line 264 "../tprof.w"
+#line 264 "tprof.w"
 
 check_file_marker("Invalid timing data");
 fclose(in);
 /*:4*/
-#line 215 "../tprof.w"
+#line 215 "tprof.w"
 
 /*95:*/
-#line 1620 "../tprof.w"
+#line 1620 "tprof.w"
 
 /*34:*/
-#line 800 "../tprof.w"
+#line 800 "tprof.w"
 
 if(opt_raw)
 {printf("\nAll time stamps in order of appearance:\n");
@@ -1218,14 +1218,14 @@ printf("file\t line\ttime/ns\tcommand\t                level\tmacro\n");
 for(i= 1;i<stamp_num;i++)
 {int m= stamps[i].m;
 /*35:*/
-#line 830 "../tprof.w"
+#line 830 "tprof.w"
 
 uint32_t t= stamps[i].t;
 uint16_t l= stamps[i].l;
 uint8_t f= stamps[i].f;
 uint8_t c= stamps[i].c;
 /*:35*/
-#line 807 "../tprof.w"
+#line 807 "tprof.w"
 
 if(c<=system_profile_off)
 {if(opt_raw_num)printf("%6d\t",i);
@@ -1244,10 +1244,10 @@ printf("\n");
 }
 }
 /*:34*/
-#line 1621 "../tprof.w"
+#line 1621 "tprof.w"
 
 /*39:*/
-#line 851 "../tprof.w"
+#line 851 "tprof.w"
 
 if(opt_stack)
 {int c,d,m;
@@ -1266,15 +1266,15 @@ printf("\n");
 }
 }
 /*:39*/
-#line 1622 "../tprof.w"
+#line 1622 "tprof.w"
 
 /*56:*/
-#line 1002 "../tprof.w"
+#line 1002 "tprof.w"
 
 if(opt_cmd)
 {int*cmd_link= NULL;
 /*57:*/
-#line 1028 "../tprof.w"
+#line 1028 "tprof.w"
 
 ALLOCATE(cmd_link,cmd_num+1);
 cmd_link[cmd_num]= -1;
@@ -1287,7 +1287,7 @@ cmd_link[i]= cmd_link[l];
 cmd_link[l]= i;
 }
 /*:57*/
-#line 1005 "../tprof.w"
+#line 1005 "tprof.w"
 
 printf("\nCommand summary:\n");
 printf(" cmd\t        time\t time%%\t  freq\t      average\tname\n");
@@ -1303,10 +1303,10 @@ CMD_NAME(i));
 free(cmd_link);
 }
 /*:56*/
-#line 1623 "../tprof.w"
+#line 1623 "tprof.w"
 
 /*52:*/
-#line 973 "../tprof.w"
+#line 973 "tprof.w"
 
 if(opt_files)
 {printf("\nFiles in the order of appearance:\n");
@@ -1319,10 +1319,10 @@ i,file_line[i],
 full_file_names[i]);
 }
 /*:52*/
-#line 1624 "../tprof.w"
+#line 1624 "tprof.w"
 
 /*75:*/
-#line 1255 "../tprof.w"
+#line 1255 "tprof.w"
 
 if(opt_lines)
 {uint64_t limit= total_time*percent_limit/100.0;
@@ -1359,15 +1359,15 @@ printf("\n");
 }
 }
 /*:75*/
-#line 1625 "../tprof.w"
+#line 1625 "tprof.w"
 
 /*82:*/
-#line 1365 "../tprof.w"
+#line 1365 "tprof.w"
 
 if(opt_top_ten)
 {collect_line_time();
 /*80:*/
-#line 1325 "../tprof.w"
+#line 1325 "tprof.w"
 
 ALLOCATE(tt_time,tt);
 ALLOCATE(tt_file,tt);
@@ -1385,7 +1385,7 @@ for(f= l= 0;f<file_num;f++)
 {uint32_t t= line_time[l];
 if(t> tt_time[tt_count-1])
 /*81:*/
-#line 1349 "../tprof.w"
+#line 1349 "tprof.w"
 
 {
 if(tt_count<tt)tt_count++;
@@ -1401,13 +1401,13 @@ tt_file[i]= f;
 tt_line[i]= l-file_line[f];
 }
 /*:81*/
-#line 1341 "../tprof.w"
+#line 1341 "tprof.w"
 
 }
 }
 }
 /*:80*/
-#line 1368 "../tprof.w"
+#line 1368 "tprof.w"
 
 printf("\nThe top ten lines:\n");
 printf("  file\t  line\tpercent\t     absolut"
@@ -1423,10 +1423,10 @@ printf("\t%6d\t%s\t%s\n",freq,time_str(t/freq),file_names[tt_file[i]]);
 }
 }
 /*:82*/
-#line 1626 "../tprof.w"
+#line 1626 "tprof.w"
 
 /*63:*/
-#line 1086 "../tprof.w"
+#line 1086 "tprof.w"
 
 if(opt_macro)
 {sort_macros();
@@ -1443,10 +1443,10 @@ i= macro_defs[i].link;
 }while(i!=0);
 }
 /*:63*/
-#line 1627 "../tprof.w"
+#line 1627 "tprof.w"
 
 /*92:*/
-#line 1537 "../tprof.w"
+#line 1537 "tprof.w"
 
 if(opt_graph)
 {sort_macros();
@@ -1513,10 +1513,10 @@ i= macro_defs[i].link;
 }while(i!=0);
 }
 /*:92*/
-#line 1628 "../tprof.w"
+#line 1628 "tprof.w"
 
 /*43:*/
-#line 891 "../tprof.w"
+#line 891 "tprof.w"
 
 if(opt_summary)
 {printf("\n"
@@ -1529,10 +1529,10 @@ printf("Total number of macros:        %5d\n",macro_num);
 printf("Maximum stack nesting depth:   %5d\n",depth_num);
 }
 /*:43*/
-#line 1629 "../tprof.w"
+#line 1629 "tprof.w"
 
 /*:95*/
-#line 216 "../tprof.w"
+#line 216 "tprof.w"
 
 return 0;
 }
