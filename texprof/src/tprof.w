@@ -238,7 +238,7 @@ if (input_file_name==NULL)
    explain_usage("no input file given");
 in = fopen(input_file_name,"rb");
 if (in==NULL)
-{ char *tmp=malloc(strlen(input_file_name)+6);
+{ char *tmp=malloc(strlen(input_file_name)+7);
   if (tmp!=NULL)
   { strcpy(tmp,input_file_name);
     strcat(tmp,".tprof");
@@ -363,6 +363,7 @@ while (k< file_num)
 { char c;
   full_file_names[k]=file_names[k]=file_name_buffer+i;
   do { c = fget1();
+    if (i>=file_name_num) error("File name buffer overflow");
     file_name_buffer[i++]=c;
     if (c==DIR_SEPARATOR) file_names[k]=file_name_buffer+i;
   } while (c!=0);
@@ -406,6 +407,7 @@ while (k< macro_num)
   macro_map[j].m=0;
   macro_names[k++]=macro_name_buffer+i;
   do { c=fget1();
+    if (i>=macro_name_num) error("Name buffer overflow");
     macro_name_buffer[i++]=c;
   } while (c!=0);
 }
@@ -628,7 +630,7 @@ ALLOCATE(cmd_time,cmd_num);
 ALLOCATE(file_line,file_num+1); 
 ALLOCATE(cmd_freq,cmd_num);
 
-#define SHOW_READ_TIMING 0
+
 cur_depth=-1;
 total_time=0;
 total_num=0;
@@ -688,6 +690,8 @@ default:
       uint16_t l=fget2();
       uint32_t t=fget4();
       uint16_t m=macro_stack[cur_depth];
+      if (f>=file_num) error("File number out of range");
+      if (c>=cmd_num) error("Command number out of range");
       stamps[i].c=c;
       stamps[i].f=f;
       if (l> file_line[f])
@@ -704,7 +708,7 @@ default:
       stamps[i].m=m;
     }
     i++;
-#if SHOW_READ_TIMING
+#ifdef DEBUG
   printf("<%d:%d:%d> %s\n",i-1,c, cur_depth, cmd_name[c]);
 #endif
     break;
@@ -717,7 +721,7 @@ macro_defs[0].f=0;
 macro_defs[0].l=0;
 
 
-#if SHOW_READ_TIMING
+#ifdef DEBUG
   printf("Finished reading %d commands, depth=%d\n",i,cur_depth);
 #endif
 @
@@ -728,7 +732,7 @@ The table of |cmd_name|s is defined in the appendix.
 @ @<store pop |d|@>=
       stamps[i].c=system_macro_pop;
       stamps[i].d=cur_depth-d;
-#if SHOW_READ_TIMING
+#ifdef DEBUG
   printf("{%d:%d:%d>%d}\n",i,system_macro_pop,cur_depth+d,cur_depth);
 #endif
       @<time a pop command@>@;
@@ -746,7 +750,7 @@ The table of |cmd_name|s is defined in the appendix.
       stamps[i].l=l;
       stamps[i].d=cur_depth;
       stamps[i].m=m;
-#if SHOW_READ_TIMING
+#ifdef DEBUG
       printf("[%d:%d<%d:",i,cur_depth, cur_depth+1);
       print_macro(m);
       printf("]\n");
@@ -1440,7 +1444,7 @@ The total number of outgoing and incoming edges can only be estimated.
 So a dynamic allocation is used.
 
 @<allocate arrays@>=
-edges_num=16;
+edges_num=1024;
 edges_count=1; /* zero element is a sentinel and a head */
 ALLOCATE(edges,edges_num);
 @
@@ -1465,25 +1469,36 @@ as described above.
 
 @<functions@>=
 void start_child(int p, int c)
-{ uint16_t *e = &(macro_defs[p].e);
-   while (*e!=0)
-  { if (edges[*e].child==c)
-      goto found;
-    else
-      e = &(edges[*e].sibling);
+{ int e =macro_defs[p].e;
+  if (e==0)
+  { e =new_edge();
+    macro_defs[p].e=e;
+    edges[e].child=c;
+    goto found;
   }
-  *e=new_edge();
-  edges[*e].child=c;
+  do
+  { if (edges[e].child==c)
+      goto found;
+    else if (edges[e].sibling==0)
+    { int s=new_edge();
+      edges[e].sibling=s;
+      e = s;
+      edges[e].child=c;
+      goto found;
+    }
+    else
+      e = edges[e].sibling;
+  } while (true);
 found:
-  edges[*e].a++;
-  edges[*e].count++;
-  if (edges[*e].a==1)
+  edges[e].a++;
+  edges[e].count++;
+  if (edges[e].a==1)
   { uint16_t i;
-    edges[*e].ts=total_time;
-    edges[*e].Ts=macro_defs[p].t;
+    edges[e].ts=total_time;
+    edges[e].Ts=macro_defs[p].t;
     for (i= macro_defs[p].e;i!=0;i=edges[i].sibling)
-     if (i!=*e)
-       edges[*e].Ts +=edges[i].T;
+     if (i!=e)
+       edges[e].Ts +=edges[i].T;
   }
 }
 @
@@ -1673,9 +1688,10 @@ If an error occurs this program will print an error message
 and terminate. There is no attempt to recover from errors.
 
 @<error handling@>=
-void error(char *msg)
+int error(char *msg)
 { fprintf(stderr,"ERROR: %s\n", msg);
   exit(1);
+  return 0;
 }
 @
 
