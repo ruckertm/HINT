@@ -558,8 +558,9 @@ int get_macro_def(int f, int l, int c)
     if (macro_defs[m].f==f && macro_defs[m].l==l) 
       return m;
     else if (macro_defs[m].link==0)
-    { macro_defs[m].link=new_macro_def();
-      m= macro_defs[m].link;
+    { int n=new_macro_def();
+      macro_defs[m].link=n;
+      m= n;
     }
     else 
     { m= macro_defs[m].link;
