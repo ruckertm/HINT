@@ -95,11 +95,11 @@ uint64_t s;
 int macro_def_num;
 int macro_def_count;
 /*:16*//*20:*/
-#line 585 "tprof.w"
+#line 586 "tprof.w"
 
 bool opt_macro_id= false;
 /*:20*//*24:*/
-#line 616 "tprof.w"
+#line 617 "tprof.w"
 
 uint64_t total_time;
 uint32_t total_num;
@@ -108,58 +108,59 @@ int*file_line;
 int*cmd_freq;
 int cur_depth;
 /*:24*//*30:*/
-#line 779 "tprof.w"
+#line 780 "tprof.w"
 
 bool opt_raw= false;
 bool opt_raw_stack= false;
 bool opt_raw_num= false;
 /*:30*//*36:*/
-#line 843 "tprof.w"
+#line 844 "tprof.w"
 
 bool opt_stack= false;
 /*:36*//*40:*/
-#line 882 "tprof.w"
+#line 883 "tprof.w"
 
 bool opt_summary= true;
 /*:40*//*44:*/
-#line 913 "tprof.w"
+#line 916 "tprof.w"
 
 bool opt_machine= false;
+#define Mprintf(...) opt_machine?(void)0:printf(__VA_ARGS__)
 /*:44*//*49:*/
-#line 962 "tprof.w"
+#line 966 "tprof.w"
 
 bool opt_files= false;
 /*:49*//*53:*/
-#line 993 "tprof.w"
+#line 1000 "tprof.w"
 
 bool opt_cmd= false;
 /*:53*//*58:*/
-#line 1051 "tprof.w"
+#line 1058 "tprof.w"
 
 bool opt_macro= false;
 /*:58*//*67:*/
-#line 1176 "tprof.w"
+#line 1183 "tprof.w"
 
 int line_num= 0;
 /*:67*//*69:*/
-#line 1198 "tprof.w"
+#line 1205 "tprof.w"
 
 static uint64_t*line_time= NULL;
 static int*line_freq= NULL;
 /*:69*//*71:*/
-#line 1235 "tprof.w"
+#line 1242 "tprof.w"
 
 double percent_limit= 1.0;
 bool opt_lines= false;
 /*:71*//*76:*/
-#line 1302 "tprof.w"
+#line 1309 "tprof.w"
 
 static uint64_t*tt_time;
 static int*tt_file,*tt_line;
 static int tt= 10+1,tt_count;;
 bool opt_top_ten;
 /*:76*//*83:*/
-#line 1434 "tprof.w"
+#line 1441 "tprof.w"
 
 struct edge{
 uint16_t child,sibling;
@@ -168,11 +169,11 @@ uint64_t T,L,ts,Ts;
 }*edges;
 int edges_count,edges_num;
 /*:83*//*89:*/
-#line 1540 "tprof.w"
+#line 1547 "tprof.w"
 
 bool opt_graph= false;
 /*:89*//*101:*/
-#line 1739 "tprof.w"
+#line 1744 "tprof.w"
 
 static char*cmd_name[]= {
 "relax",
@@ -342,7 +343,7 @@ static const int sys_line_num= sizeof(line_name)/sizeof(*line_name);
 #line 208 "tprof.w"
 
 /*98:*/
-#line 1690 "tprof.w"
+#line 1695 "tprof.w"
 
 int error(char*msg)
 {fprintf(stderr,"ERROR: %s\n",msg);
@@ -426,8 +427,9 @@ else
 if(macro_defs[m].f==f&&macro_defs[m].l==l)
 return m;
 else if(macro_defs[m].link==0)
-{macro_defs[m].link= new_macro_def();
-m= macro_defs[m].link;
+{int n= new_macro_def();
+macro_defs[m].link= n;
+m= n;
 }
 else
 {m= macro_defs[m].link;
@@ -444,14 +446,14 @@ macro_defs[m].link= 0;
 return m;
 }
 /*:19*//*23:*/
-#line 597 "tprof.w"
+#line 598 "tprof.w"
 
 void print_macro(int i)
 {print_cs(macro_defs[i].n);
 if(opt_macro_id)printf(" [%d,%d]",macro_defs[i].f,macro_defs[i].l);
 }
 /*:23*//*47:*/
-#line 926 "tprof.w"
+#line 930 "tprof.w"
 
 char*time_str(double t)
 {static char str[20];
@@ -470,7 +472,7 @@ snprintf(str,20,"  %7.2f s",t/1000000000.0);
 return str;
 }
 /*:47*//*48:*/
-#line 948 "tprof.w"
+#line 952 "tprof.w"
 
 void print_fl(int f,int l)
 {if(f==system_file&&!opt_machine)
@@ -479,7 +481,7 @@ else
 printf("%4d\t%5d",f,l);
 }
 /*:48*//*64:*/
-#line 1112 "tprof.w"
+#line 1119 "tprof.w"
 
 void sort_edges(uint16_t p)
 {int i,j,k;
@@ -503,7 +505,7 @@ edges[k].sibling= j;
 macro_defs[p].e= edges[0].sibling;
 }
 /*:64*//*66:*/
-#line 1142 "tprof.w"
+#line 1149 "tprof.w"
 
 void sort_macros(void)
 {int i,k,j;
@@ -528,13 +530,13 @@ sort_edges(i);
 sorted= true;
 }
 /*:66*//*70:*/
-#line 1210 "tprof.w"
+#line 1217 "tprof.w"
 
 void collect_line_time(void)
 {int i,cur_f= -1,cur_l= -1;
 if(line_time!=NULL)return;
 /*68:*/
-#line 1181 "tprof.w"
+#line 1188 "tprof.w"
 
 line_num= 0;
 for(i= 0;i<file_num;i++)
@@ -544,20 +546,20 @@ line_num= line_num+fl+1;
 }
 file_line[file_num]= line_num;
 /*:68*/
-#line 1215 "tprof.w"
+#line 1222 "tprof.w"
 
 ALLOCATE(line_time,line_num);
 ALLOCATE(line_freq,line_num);
 for(i= 0;i<stamp_num;i++)
 {/*35:*/
-#line 834 "tprof.w"
+#line 835 "tprof.w"
 
 uint32_t t= stamps[i].t;
 uint16_t l= stamps[i].l;
 uint8_t f= stamps[i].f;
 uint8_t c= stamps[i].c;
 /*:35*/
-#line 1219 "tprof.w"
+#line 1226 "tprof.w"
 
 if(c<=system_profile_off)
 {line_time[file_line[f]+l]+= t;
@@ -569,7 +571,7 @@ cur_f= f;cur_l= l;
 }
 }
 /*:70*//*85:*/
-#line 1452 "tprof.w"
+#line 1459 "tprof.w"
 
 uint16_t new_edge(void)
 {if(edges_count<edges_num)
@@ -578,7 +580,7 @@ REALLOC(edges,edges_count,edges_num);
 return edges_count++;
 }
 /*:85*//*86:*/
-#line 1470 "tprof.w"
+#line 1477 "tprof.w"
 
 void start_child(int p,int c)
 {int e= macro_defs[p].e;
@@ -614,7 +616,7 @@ edges[e].Ts+= edges[i].T;
 }
 }
 /*:86*//*87:*/
-#line 1510 "tprof.w"
+#line 1517 "tprof.w"
 
 void end_child(int p,int c)
 {uint16_t e= macro_defs[p].e;
@@ -641,91 +643,91 @@ edges[e].T+= dt-dT;
 edges[e].a--;
 }
 /*:87*//*99:*/
-#line 1700 "tprof.w"
+#line 1705 "tprof.w"
 
 void explain_usage(char*msg)
 {fprintf(stderr,"ERROR: %s\n",msg);
 fprintf(stderr,/*96:*/
-#line 1652 "tprof.w"
+#line 1657 "tprof.w"
 
 "Use: "
 "tprof [-options] <input file>\n"
 "options:\n"
 /*32:*/
-#line 791 "tprof.w"
+#line 792 "tprof.w"
 
 "-R    show the table of raw time stamps\n"
 /*:32*//*38:*/
-#line 851 "tprof.w"
+#line 852 "tprof.w"
 
 "-S    show the table of macro stack changes\n"
 /*:38*//*42:*/
-#line 890 "tprof.w"
+#line 891 "tprof.w"
 
 "-N    do not show the table of global information\n"
 /*:42*//*51:*/
-#line 970 "tprof.w"
+#line 974 "tprof.w"
 
 "-F    show all files\n"
 /*:51*//*55:*/
-#line 1001 "tprof.w"
+#line 1008 "tprof.w"
 
 "-C    show table of command summaries\n"
 /*:55*//*60:*/
-#line 1059 "tprof.w"
+#line 1066 "tprof.w"
 
 "-M    show the table of all macros called\n"
 /*:60*//*73:*/
-#line 1252 "tprof.w"
+#line 1259 "tprof.w"
 
 "-L    show the table of times per input line\n"
 /*:73*//*78:*/
-#line 1322 "tprof.w"
+#line 1329 "tprof.w"
 
 "-T    show the table of the top 10 input lines\n"
 /*:78*//*91:*/
-#line 1548 "tprof.w"
+#line 1555 "tprof.w"
 
 "-G    show the table of the  macro call graph\n"
 /*:91*//*94:*/
-#line 1631 "tprof.w"
+#line 1636 "tprof.w"
 
 "-A    show all tables (equal to -TGFC) tables\n"
 /*:94*/
-#line 1656 "tprof.w"
+#line 1661 "tprof.w"
 
 "\n"
 /*22:*/
-#line 593 "tprof.w"
+#line 594 "tprof.w"
 
 "-i    add the macros file and line numbers after the macro name\n"
 /*:22*//*33:*/
-#line 793 "tprof.w"
+#line 794 "tprof.w"
 
 "-s    show the changes of the macro stack\n"
 "-n    show the time stamp numbers\n"
 /*:33*//*46:*/
-#line 921 "tprof.w"
+#line 925 "tprof.w"
 
 "-m    optimize output for machine readability\n"
 /*:46*//*74:*/
-#line 1254 "tprof.w"
+#line 1261 "tprof.w"
 
 "-p<n> don't show information for items with cumulative time below <n> percent\n"
 /*:74*//*79:*/
-#line 1324 "tprof.w"
+#line 1331 "tprof.w"
 
 "-t<n> replace 10 by n (2<=n<=100, default 10) for the top 10 input lines\n"
 /*:79*/
-#line 1658 "tprof.w"
+#line 1663 "tprof.w"
 
 /*:96*/
-#line 1703 "tprof.w"
+#line 1708 "tprof.w"
 );
 exit(1);
 }
 /*:99*//*100:*/
-#line 1712 "tprof.w"
+#line 1717 "tprof.w"
 
 void check_file_marker(char*msg)
 {char marker[8];
@@ -741,7 +743,7 @@ error(msg);
 int main(int argc,char*argv[])
 {int i,k;
 /*97:*/
-#line 1661 "tprof.w"
+#line 1666 "tprof.w"
 
 i= 1;
 while(i<argc)
@@ -751,53 +753,53 @@ if(argv[i][0]=='-')
 while(*option!=0)
 {switch(*option)
 {/*21:*/
-#line 589 "tprof.w"
+#line 590 "tprof.w"
 
 case'i':opt_macro_id= true;break;
 /*:21*//*31:*/
-#line 785 "tprof.w"
+#line 786 "tprof.w"
 
 case'R':opt_raw= true;break;
 case's':opt_raw_stack= true;break;
 case'n':opt_raw_num= true;break;
 /*:31*//*37:*/
-#line 847 "tprof.w"
+#line 848 "tprof.w"
 
 case'S':opt_stack= true;break;
 /*:37*//*41:*/
-#line 886 "tprof.w"
+#line 887 "tprof.w"
 
 case'N':opt_summary= false;break;
 /*:41*//*45:*/
-#line 917 "tprof.w"
+#line 921 "tprof.w"
 
-case'm':opt_machine= true;break;
+case'm':opt_machine= true;opt_summary= false;break;
 /*:45*//*50:*/
-#line 966 "tprof.w"
+#line 970 "tprof.w"
 
 case'F':opt_files= true;break;
 /*:50*//*54:*/
-#line 997 "tprof.w"
+#line 1004 "tprof.w"
 
 case'C':opt_cmd= true;break;
 /*:54*//*59:*/
-#line 1055 "tprof.w"
+#line 1062 "tprof.w"
 
 case'M':opt_macro= true;break;
 /*:59*//*72:*/
-#line 1240 "tprof.w"
+#line 1247 "tprof.w"
 
 case'L':opt_lines= true;break;
 case'p':{char*endptr;
 percent_limit= strtod(option+1,&endptr);
 if(endptr==option+1)
-explain_usage("-p<n> without a numeric argument <n>");
+explain_usage("-pMM<n> without a numeric argument <n>");
 else
 option= endptr-1;
 }
 break;
 /*:72*//*77:*/
-#line 1309 "tprof.w"
+#line 1316 "tprof.w"
 
 case'T':opt_top_ten= true;break;
 case't':{char*endptr;
@@ -810,17 +812,17 @@ option= endptr-1;
 }
 break;
 /*:77*//*90:*/
-#line 1544 "tprof.w"
+#line 1551 "tprof.w"
 
 case'G':opt_graph= true;break;
 /*:90*//*93:*/
-#line 1625 "tprof.w"
+#line 1630 "tprof.w"
 
 case'A':opt_files= opt_summary= 
 opt_cmd= opt_top_ten= 
 opt_graph= true;break;
 /*:93*/
-#line 1669 "tprof.w"
+#line 1674 "tprof.w"
 
 default:explain_usage("unknown option");
 }
@@ -892,7 +894,7 @@ macro_def_num= 16;
 macro_def_count= 1;
 ALLOCATE(macro_defs,macro_def_num);
 /*:17*//*84:*/
-#line 1446 "tprof.w"
+#line 1453 "tprof.w"
 
 edges_num= 1024;
 edges_count= 1;
@@ -948,7 +950,7 @@ macro_map[undefined_control_sequence+i].m= 0;
 
 check_file_marker("Invalid macro names");
 /*26:*/
-#line 627 "tprof.w"
+#line 628 "tprof.w"
 
 ALLOCATE(file_time,file_num);
 ALLOCATE(cmd_time,cmd_num);
@@ -963,7 +965,7 @@ macro_defs[0].a= 1;
 i= 0;
 {fget1();
 /*29:*/
-#line 743 "tprof.w"
+#line 744 "tprof.w"
 
 int f= fget1();
 int l= fget2();
@@ -979,13 +981,13 @@ printf("[%d:%d<%d:",i,cur_depth,cur_depth+1);
 print_macro(m);
 printf("]\n");
 #endif
-#line 758 "tprof.w"
+#line 759 "tprof.w"
  i++;
 /*:29*/
-#line 640 "tprof.w"
+#line 641 "tprof.w"
 
 /*61:*/
-#line 1066 "tprof.w"
+#line 1073 "tprof.w"
 
 cur_depth++;
 macro_stack[cur_depth]= m;
@@ -995,7 +997,7 @@ if(macro_defs[m].a==1)
 {macro_defs[m].s= total_time;
 }
 /*:61*/
-#line 641 "tprof.w"
+#line 642 "tprof.w"
 
 }
 while(i<stamp_num)
@@ -1014,16 +1016,16 @@ case system_macro_pop_0+9:
 case system_macro_pop_0+10:
 {int d= c-system_macro_pop_0;
 /*28:*/
-#line 732 "tprof.w"
+#line 733 "tprof.w"
 
 stamps[i].c= system_macro_pop;
 stamps[i].d= cur_depth-d;
 #ifdef DEBUG
 printf("{%d:%d:%d>%d}\n",i,system_macro_pop,cur_depth+d,cur_depth);
 #endif
-#line 738 "tprof.w"
+#line 739 "tprof.w"
 /*62:*/
-#line 1078 "tprof.w"
+#line 1085 "tprof.w"
 
 while(cur_depth> stamps[i].d)
 {int m= macro_stack[cur_depth];
@@ -1035,27 +1037,27 @@ cur_depth--;
 }
 
 /*:62*/
-#line 738 "tprof.w"
+#line 739 "tprof.w"
 
 i++;
 /*:28*/
-#line 658 "tprof.w"
+#line 659 "tprof.w"
 
 break;
 }
 case system_macro_pop_small:
 {int d= fget1();
 /*28:*/
-#line 732 "tprof.w"
+#line 733 "tprof.w"
 
 stamps[i].c= system_macro_pop;
 stamps[i].d= cur_depth-d;
 #ifdef DEBUG
 printf("{%d:%d:%d>%d}\n",i,system_macro_pop,cur_depth+d,cur_depth);
 #endif
-#line 738 "tprof.w"
+#line 739 "tprof.w"
 /*62:*/
-#line 1078 "tprof.w"
+#line 1085 "tprof.w"
 
 while(cur_depth> stamps[i].d)
 {int m= macro_stack[cur_depth];
@@ -1067,27 +1069,27 @@ cur_depth--;
 }
 
 /*:62*/
-#line 738 "tprof.w"
+#line 739 "tprof.w"
 
 i++;
 /*:28*/
-#line 663 "tprof.w"
+#line 664 "tprof.w"
 
 break;
 }
 case system_macro_pop:
 {int d= fget2();
 /*28:*/
-#line 732 "tprof.w"
+#line 733 "tprof.w"
 
 stamps[i].c= system_macro_pop;
 stamps[i].d= cur_depth-d;
 #ifdef DEBUG
 printf("{%d:%d:%d>%d}\n",i,system_macro_pop,cur_depth+d,cur_depth);
 #endif
-#line 738 "tprof.w"
+#line 739 "tprof.w"
 /*62:*/
-#line 1078 "tprof.w"
+#line 1085 "tprof.w"
 
 while(cur_depth> stamps[i].d)
 {int m= macro_stack[cur_depth];
@@ -1099,17 +1101,17 @@ cur_depth--;
 }
 
 /*:62*/
-#line 738 "tprof.w"
+#line 739 "tprof.w"
 
 i++;
 /*:28*/
-#line 668 "tprof.w"
+#line 669 "tprof.w"
 
 break;
 }
 case system_macro_push:
 {/*29:*/
-#line 743 "tprof.w"
+#line 744 "tprof.w"
 
 int f= fget1();
 int l= fget2();
@@ -1125,10 +1127,10 @@ printf("[%d:%d<%d:",i,cur_depth,cur_depth+1);
 print_macro(m);
 printf("]\n");
 #endif
-#line 758 "tprof.w"
+#line 759 "tprof.w"
  i++;
 /*:29*/
-#line 672 "tprof.w"
+#line 673 "tprof.w"
 
 cur_depth++;
 macro_stack[cur_depth]= m;
@@ -1144,16 +1146,16 @@ default:
 if(c&POP_BIT)
 {int d= 1;
 /*28:*/
-#line 732 "tprof.w"
+#line 733 "tprof.w"
 
 stamps[i].c= system_macro_pop;
 stamps[i].d= cur_depth-d;
 #ifdef DEBUG
 printf("{%d:%d:%d>%d}\n",i,system_macro_pop,cur_depth+d,cur_depth);
 #endif
-#line 738 "tprof.w"
+#line 739 "tprof.w"
 /*62:*/
-#line 1078 "tprof.w"
+#line 1085 "tprof.w"
 
 while(cur_depth> stamps[i].d)
 {int m= macro_stack[cur_depth];
@@ -1165,11 +1167,11 @@ cur_depth--;
 }
 
 /*:62*/
-#line 738 "tprof.w"
+#line 739 "tprof.w"
 
 i++;
 /*:28*/
-#line 686 "tprof.w"
+#line 687 "tprof.w"
 
 c= c&~POP_BIT;
 }
@@ -1198,7 +1200,7 @@ i++;
 #ifdef DEBUG
 printf("<%d:%d:%d> %s\n",i-1,c,cur_depth,cmd_name[c]);
 #endif
-#line 714 "tprof.w"
+#line 715 "tprof.w"
  break;
 }
 }
@@ -1212,7 +1214,7 @@ macro_defs[0].l= 0;
 #ifdef DEBUG
 printf("Finished reading %d commands, depth=%d\n",i,cur_depth);
 #endif
-#line 727 "tprof.w"
+#line 728 "tprof.w"
 /*:26*/
 #line 264 "tprof.w"
 
@@ -1222,26 +1224,26 @@ fclose(in);
 #line 215 "tprof.w"
 
 /*95:*/
-#line 1635 "tprof.w"
+#line 1640 "tprof.w"
 
 /*34:*/
-#line 804 "tprof.w"
+#line 805 "tprof.w"
 
 if(opt_raw)
-{printf("\nAll time stamps in order of appearance:\n");
-if(opt_raw_num)printf("number\t");
-printf("file\t line\ttime/ns\tcommand\t                level\tmacro\n");
+{Mprintf("\nAll time stamps in order of appearance:\n");
+if(opt_raw_num)Mprintf("number\t");
+Mprintf("file\t line\ttime/ns\tcommand\t                level\tmacro\n");
 for(i= 1;i<stamp_num;i++)
 {int m= stamps[i].m;
 /*35:*/
-#line 834 "tprof.w"
+#line 835 "tprof.w"
 
 uint32_t t= stamps[i].t;
 uint16_t l= stamps[i].l;
 uint8_t f= stamps[i].f;
 uint8_t c= stamps[i].c;
 /*:35*/
-#line 811 "tprof.w"
+#line 812 "tprof.w"
 
 if(c<=system_profile_off)
 {if(opt_raw_num)printf("%6d\t",i);
@@ -1260,14 +1262,14 @@ printf("\n");
 }
 }
 /*:34*/
-#line 1636 "tprof.w"
+#line 1641 "tprof.w"
 
 /*39:*/
-#line 855 "tprof.w"
+#line 856 "tprof.w"
 
 if(opt_stack)
 {int c,d,m;
-printf("\nThe macro stack and its nesting:\n"
+Mprintf("\nThe macro stack and its nesting:\n"
 "command\tdepth\tname [id]\n");
 for(i= 0;i<stamp_num;i++)
 {c= stamps[i].c;
@@ -1282,15 +1284,15 @@ printf("\n");
 }
 }
 /*:39*/
-#line 1637 "tprof.w"
+#line 1642 "tprof.w"
 
 /*56:*/
-#line 1006 "tprof.w"
+#line 1013 "tprof.w"
 
 if(opt_cmd)
 {int*cmd_link= NULL;
 /*57:*/
-#line 1032 "tprof.w"
+#line 1039 "tprof.w"
 
 ALLOCATE(cmd_link,cmd_num+1);
 cmd_link[cmd_num]= -1;
@@ -1303,10 +1305,10 @@ cmd_link[i]= cmd_link[l];
 cmd_link[l]= i;
 }
 /*:57*/
-#line 1009 "tprof.w"
+#line 1016 "tprof.w"
 
-printf("\nCommand summary:\n");
-printf(" cmd\t        time\t time%%\t  freq\t      average\tname\n");
+Mprintf("\nCommand summary:\n");
+Mprintf(" cmd\t        time\t time%%\t  freq\t      average\tname\n");
 for(i= cmd_link[cmd_num];i>=0;i= cmd_link[i])
 if(cmd_freq[i]> 0)
 {printf("%4d\t%s\t%5.2f%%",
@@ -1319,34 +1321,37 @@ CMD_NAME(i));
 free(cmd_link);
 }
 /*:56*/
-#line 1638 "tprof.w"
+#line 1643 "tprof.w"
 
 /*52:*/
-#line 977 "tprof.w"
+#line 981 "tprof.w"
 
 if(opt_files)
-{printf("\nFiles in the order of appearance:\n");
-printf("  file\t lines\tpercent\t     absolut"
+{Mprintf("\nFiles in the order of appearance:\n");
+Mprintf("  file\t lines\tpercent\t     absolut"
 "\tname\n");
 for(i= 0;i<file_num;i++)
+{double p= (100.0*file_time[i])/total_time;
+if(p>=percent_limit)
 printf("%6d\t%6d\t%6.2f%%\t%s\t%s\n",
 i,file_line[i],
-(100.0*file_time[i])/total_time,time_str(file_time[i]),
+p,time_str(file_time[i]),
 full_file_names[i]);
 }
+}
 /*:52*/
-#line 1639 "tprof.w"
+#line 1644 "tprof.w"
 
 /*75:*/
-#line 1259 "tprof.w"
+#line 1266 "tprof.w"
 
 if(opt_lines)
 {uint64_t limit= total_time*percent_limit/100.0;
 int k;
 collect_line_time();
-printf("\nLine summary:\n");
+Mprintf("\nLine summary:\n");
 if(percent_limit> 0)
-printf("Only files and lines above %.2f%%:\n",percent_limit);
+Mprintf("Only files and lines above %.2f%%:\n",percent_limit);
 for(k= i= 0;i<file_num;i++)
 {if(file_time[i]<=limit)
 k= file_line[i+1];
@@ -1375,15 +1380,15 @@ printf("\n");
 }
 }
 /*:75*/
-#line 1640 "tprof.w"
+#line 1645 "tprof.w"
 
 /*82:*/
-#line 1369 "tprof.w"
+#line 1376 "tprof.w"
 
 if(opt_top_ten)
 {collect_line_time();
 /*80:*/
-#line 1329 "tprof.w"
+#line 1336 "tprof.w"
 
 ALLOCATE(tt_time,tt);
 ALLOCATE(tt_file,tt);
@@ -1401,7 +1406,7 @@ for(f= l= 0;f<file_num;f++)
 {uint32_t t= line_time[l];
 if(t> tt_time[tt_count-1])
 /*81:*/
-#line 1353 "tprof.w"
+#line 1360 "tprof.w"
 
 {
 if(tt_count<tt)tt_count++;
@@ -1417,16 +1422,16 @@ tt_file[i]= f;
 tt_line[i]= l-file_line[f];
 }
 /*:81*/
-#line 1345 "tprof.w"
+#line 1352 "tprof.w"
 
 }
 }
 }
 /*:80*/
-#line 1372 "tprof.w"
+#line 1379 "tprof.w"
 
-printf("\nThe top ten lines:\n");
-printf("  file\t  line\tpercent\t     absolut"
+Mprintf("\nThe top ten lines:\n");
+Mprintf("  file\t  line\tpercent\t     absolut"
 "\t count\t     average\tfile\n");
 for(i= 1;i<tt_count;i++)
 {int freq= line_freq[tt_line[i]+file_line[tt_file[i]]];
@@ -1439,15 +1444,15 @@ printf("\t%6d\t%s\t%s\n",freq,time_str(t/freq),file_names[tt_file[i]]);
 }
 }
 /*:82*/
-#line 1641 "tprof.w"
+#line 1646 "tprof.w"
 
 /*63:*/
-#line 1090 "tprof.w"
+#line 1097 "tprof.w"
 
 if(opt_macro)
 {sort_macros();
-printf("\nMacros profiled:\n");
-printf(" file\t line\tcalls\t time direct\t  cumulative\tname\n");
+Mprintf("\nMacros profiled:\n");
+Mprintf(" file\t line\tcalls\t time direct\t  cumulative\tname\n");
 i= 0;
 do
 {printf("%5d\t%5d\t",macro_defs[i].f,macro_defs[i].l);
@@ -1459,20 +1464,15 @@ i= macro_defs[i].link;
 }while(i!=0);
 }
 /*:63*/
-#line 1642 "tprof.w"
+#line 1647 "tprof.w"
 
 /*92:*/
-#line 1552 "tprof.w"
+#line 1559 "tprof.w"
 
 if(opt_graph)
 {sort_macros();
-printf("\nThe macro call graph:\n"
-"        time\t        loop\tpercent\t");
-if(opt_machine)
-printf(" count\t total");
-else
-printf(" count/total");
-printf("\tchild\n");
+Mprintf("\nThe macro call graph:\n"
+"        time\t        loop\tpercent\t count/total\tchild\n");
 i= macro_defs[0].link;
 do
 {int e;
@@ -1507,13 +1507,15 @@ int n= edges[e].count;
 int m= macro_defs[c].count;
 uint64_t Te= edges[e].T;
 int64_t L= edges[e].L;
-printf("%s\t",time_str(Te));
+double p= 100.0*Te/Ti;
+if(p>=percent_limit)
+{printf("%s\t",time_str(Te));
 if(L==0&&!opt_machine)
 printf("        \t");
 else
 printf("%s\t",time_str(L));
 if(Ti!=0)
-printf("%6.2f%%\t",100.0*Te/Ti);
+printf("%6.2f%%\t",p);
 else
 printf("\t");
 if(opt_machine)
@@ -1522,6 +1524,7 @@ else
 printf("%6d/%-6d\t",n,m);
 print_macro(c);
 printf("\n");
+}
 e= edges[e].sibling;
 }
 printf("\n");
@@ -1529,10 +1532,10 @@ i= macro_defs[i].link;
 }while(i!=0);
 }
 /*:92*/
-#line 1643 "tprof.w"
+#line 1648 "tprof.w"
 
 /*43:*/
-#line 895 "tprof.w"
+#line 896 "tprof.w"
 
 if(opt_summary)
 {printf("\n"
@@ -1545,7 +1548,7 @@ printf("Total number of macros:        %5d\n",macro_num);
 printf("Maximum stack nesting depth:   %5d\n",depth_num);
 }
 /*:43*/
-#line 1644 "tprof.w"
+#line 1649 "tprof.w"
 
 /*:95*/
 #line 216 "tprof.w"

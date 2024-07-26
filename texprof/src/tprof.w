@@ -804,9 +804,9 @@ office products for further processing (see also the option {\tt -m} below).
 
 @<show all time stamps if requested@>=
 if (opt_raw)
-{ printf("\nAll time stamps in order of appearance:\n");
-  if (opt_raw_num) printf("number\t");
-  printf("file\t line\ttime/ns\tcommand\t                level\tmacro\n");
+{ Mprintf("\nAll time stamps in order of appearance:\n");
+  if (opt_raw_num) Mprintf("number\t");
+  Mprintf("file\t line\ttime/ns\tcommand\t                level\tmacro\n");
   for (i=1;i<stamp_num;i++)
   { int m=stamps[i].m;
     @<extract |t|, |f|, |l|, and |c| from stamp |i|@>@;
@@ -856,7 +856,7 @@ case 'S': opt_stack=true; break;
 @<show the complete macro stack if requested@>=
 if (opt_stack)
 {  int c,d,m;
-   printf("\nThe macro stack and its nesting:\n"
+   Mprintf("\nThe macro stack and its nesting:\n"
          "command\tdepth\tname [id]\n");
    for(i=0;i<stamp_num;i++)
    { c=stamps[i].c;
@@ -910,13 +910,16 @@ To print times over a wide range in a useful format,
 we use the following function. The option ``{\tt -m}'' can be used
 to display plain nano seconds which is the preferable if you plan
 to import the data into another program for further processing.
+The macro |Mprintf| is used instead of |printf| for lines that
+should not be printed when |opt_machine| is true.
 
 @<declarations@>=
 bool opt_machine=false;
+#define Mprintf(...) opt_machine?(void)0:printf(__VA_ARGS__)
 @
 
 @<process options@>=
-case 'm': opt_machine=true;break;
+case 'm': opt_machine=true;opt_summary=false;break;
 @
 
 @<explain format options@>=
@@ -977,14 +980,17 @@ Next we can print a summary table for the files:
 
 @<show the file summary if requested@>=
 if (opt_files)
-{ printf("\nFiles in the order of appearance:\n");
-  printf("  file\t lines\tpercent\t     absolut"
+{ Mprintf("\nFiles in the order of appearance:\n");
+  Mprintf("  file\t lines\tpercent\t     absolut"
          "\tname\n");
   for (i=0; i<file_num; i++)
-    printf("%6d\t%6d\t%6.2f%%\t%s\t%s\n",
-      i, file_line[i],
-      (100.0*file_time[i])/total_time, time_str(file_time[i]),
-      full_file_names[i]);
+  { double p=(100.0*file_time[i])/total_time;
+    if (p>=percent_limit)
+      printf("%6d\t%6d\t%6.2f%%\t%s\t%s\n",
+        i, file_line[i],
+        p, time_str(file_time[i]),
+        full_file_names[i]);
+  }
 }
 @
 
@@ -1008,8 +1014,8 @@ case 'C': opt_cmd=true;break;
 if (opt_cmd)
 { int *cmd_link=NULL;
   @<sort the commands by time@>@;
-  printf("\nCommand summary:\n");
-  printf(" cmd\t        time\t time%%\t  freq\t      average\tname\n");
+  Mprintf("\nCommand summary:\n");
+  Mprintf(" cmd\t        time\t time%%\t  freq\t      average\tname\n");
   for (i=cmd_link[cmd_num]; i>=0; i=cmd_link[i])
     if (cmd_freq[i]>0)
     { printf("%4d\t%s\t%5.2f%%",
@@ -1091,8 +1097,8 @@ while (cur_depth>stamps[i].d)
 @<show the table of macros profiled if requested@>=
 if (opt_macro)
 { sort_macros();
-  printf("\nMacros profiled:\n");
-  printf(" file\t line\tcalls\t time direct\t  cumulative\tname\n");
+  Mprintf("\nMacros profiled:\n");
+  Mprintf(" file\t line\tcalls\t time direct\t  cumulative\tname\n");
   i=0;
   do
   { printf("%5d\t%5d\t",macro_defs[i].f,macro_defs[i].l);
@@ -1243,7 +1249,7 @@ case 'L': opt_lines=true; break;
 case 'p':{ char *endptr;
 	   percent_limit=strtod(option+1, &endptr);
 	   if (endptr==option+1)
-  	     explain_usage("-p<n> without a numeric argument <n>");
+  	     explain_usage("-pMM<n> without a numeric argument <n>");
 	   else
 	     option=endptr-1;  
 	 }
@@ -1262,9 +1268,9 @@ if (opt_lines)
 { uint64_t limit= total_time*percent_limit/100.0;
   int k;
   collect_line_time();
-  printf("\nLine summary:\n");
+  Mprintf("\nLine summary:\n");
   if (percent_limit>0)
-    printf("Only files and lines above %.2f%%:\n",percent_limit);
+    Mprintf("Only files and lines above %.2f%%:\n",percent_limit);
   for (k=i=0; i<file_num; i++)
   { if (file_time[i]<=limit)
       k=file_line[i+1];
@@ -1371,8 +1377,8 @@ Inserting a new time into the top ten array using insertion sort.
 if (opt_top_ten)
 { collect_line_time();
   @<find the top ten lines@>@;
-  printf("\nThe top ten lines:\n");
-  printf("  file\t  line\tpercent\t     absolut"
+  Mprintf("\nThe top ten lines:\n");
+  Mprintf("  file\t  line\tpercent\t     absolut"
          "\t count\t     average\tfile\n");
   for (i=1; i< tt_count; i++)
   { int freq=line_freq[tt_line[i]+file_line[tt_file[i]]];
@@ -1553,13 +1559,8 @@ case 'G': opt_graph=true; break;
 @<show the macro call graph if requested@>=
 if (opt_graph)
 { sort_macros();
-  printf("\nThe macro call graph:\n"
-         "        time\t        loop\tpercent\t");
-  if(opt_machine)
-    printf(" count\t total");
-  else
-    printf(" count/total");
-  printf("\tchild\n");
+  Mprintf("\nThe macro call graph:\n"
+          "        time\t        loop\tpercent\t count/total\tchild\n");
   i=macro_defs[0].link;
   do
   { int e;
@@ -1594,21 +1595,24 @@ if (opt_graph)
       int m =macro_defs[c].count;
       uint64_t Te=edges[e].T;
       int64_t L=edges[e].L;
-      printf("%s\t",time_str(Te));
-      if (L==0 && !opt_machine)
-        printf("        \t");
-      else
-        printf("%s\t", time_str(L));
-      if (Ti!=0)
-        printf("%6.2f%%\t", 100.0*Te/Ti);
-      else
-        printf("\t");
-      if (opt_machine)
-        printf("%6d\t%6d\t",n,m);
-      else
-        printf("%6d/%-6d\t",n,m);
-      print_macro(c);
-      printf("\n");     
+      double p= 100.0*Te/Ti;
+      if (p>=percent_limit)
+      { printf("%s\t",time_str(Te));
+        if (L==0 && !opt_machine)
+          printf("        \t");
+        else
+          printf("%s\t", time_str(L));
+        if (Ti!=0)
+          printf("%6.2f%%\t", p);
+        else
+          printf("\t");
+        if (opt_machine)
+          printf("%6d\t%6d\t",n,m);
+        else
+          printf("%6d/%-6d\t",n,m);
+        print_macro(c);
+        printf("\n");
+      }
       e = edges[e].sibling;
     }
     printf("\n");

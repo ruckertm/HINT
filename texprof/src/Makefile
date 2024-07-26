@@ -122,10 +122,14 @@ install_bin: texprof tprof
 	ln -s -f $(BINDIR)/texprof $(LINKDIR)latexprof
 	ln -s -f $(BINDIR)/texprof $(LINKDIR)texprof
 	ln -s -f $(BINDIR)/tprof $(LINKDIR)tprof
+	mv texprof tprof ../bin
 	touch install_bin
 
 
 ### Step 5: Building the format files
+
+plain.fmt: install_bin
+	$(BINDIR)/texprof -ini plain.tex \\dump
 
 texprof.fmt:  install_bin ../aux/texprof.ini
 	$(BINDIR)/texprof -ini -etex -ltx ../aux/texprof.ini \\dump
@@ -139,7 +143,8 @@ latexprof.fmt: install_bin ../aux/latexprof.ini
 $(FMTDIR):
 	if [ ! -d "$(FMTDIR)" ]; then install -d -C $(FMTDIR) ; fi
 
-install_fmt: texprof.fmt latexprof.fmt $(FMTDIR)
+install_fmt: plain.fmt latexprof.fmt $(FMTDIR)
+	mv plain.fmt texprof.fmt
 	install -t $(FMTDIR) --mode=644  texprof.fmt latexprof.fmt
 	$(BINDIR)/mktexlsr
 	mv texprof.fmt latexprof.fmt ../fmt
