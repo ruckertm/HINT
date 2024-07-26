@@ -18,10 +18,10 @@ CWEAVE=cweave
 
 # The C compiler
 CC=gcc
-CFLAGS= -O0 -ggdb -DINIT -DDEBUG -Wall -I.
+CFLAGS= -O0 -ggdb -Wall -I.
 # To suppress warnings when compiling texprof these additional flags
 # can be used
-TEXFLAGS= -Wno-unused-result -Wno-parentheses -Wno-maybe-uninitialized -Wno-unused-function -Wno-unused-variable
+TEXFLAGS= -DINIT -DDEBUG -Wno-unused-result -Wno-parentheses -Wno-maybe-uninitialized -Wno-unused-function -Wno-unused-variable
 
 # The kpathsea library
 # This is the most difficult to get item because it is usualy only
