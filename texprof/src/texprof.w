@@ -2535,6 +2535,7 @@ typedef uint16_t quarterword; /*1/4 of a word*/
 typedef int32_t halfword; /*1/2 of a word*/
 typedef int8_t two_choices; /*used when there are two variants in a record*/
 typedef int8_t four_choices; /*used when there are four variants in a record*/
+typedef uint64_t fullword;
 typedef struct { @;@/
   halfword @!rh;
   union {
@@ -2549,6 +2550,7 @@ typedef struct { @;@/
   } four_quarters;
 typedef struct { @;@/
   union {
+  fullword @!w;
   int @!i;
   glue_ratio @!gr;
   two_halves @!hh;
@@ -24546,6 +24548,8 @@ dumping has begun@>;
 @<Dump the table of equivalents@>;
 @<Dump the font information@>;
 @<Dump the hyphenation tables@>;
+@<Dump the full file names@>;
+@<Dump the file and line information@>;
 @<Dump a couple more things and the closing check word@>;
 @<Close the format file@>;
 }
@@ -24574,6 +24578,8 @@ four_quarters @!w; /*four ASCII codes*/
 @<Undump the table of equivalents@>;
 @<Undump the font information@>;
 @<Undump the hyphenation tables@>;
+@<Undump the full file names@>;
+@<Undump the file and line information@>;
 @<Undump a couple more things and the closing check word@>;
 return true; /*it worked!*/
 bad_fmt: wake_up_terminal;
@@ -24709,13 +24715,13 @@ for (k=p; k<=lo_mem_max; k++) dump_wd(mem[k]);
 x=x+lo_mem_max+1-p;
 dump_int(hi_mem_min);dump_int(avail);
 for (k=hi_mem_min; k<=mem_end; k++) dump_wd(mem[k]);
-x=x+mem_end+1-hi_mem_min;
 p=avail;
 while (p!=null)
-  {@+decr(dyn_used);p=link(p);
-  }
+{@+fl_mem[p]=0; /*clear unallocated |fl_mem|*/
+  decr(dyn_used);p=link(p);
+}
 dump_int(var_used);dump_int(dyn_used);
-print_ln();print_int(x);
+print_ln();print_int(x);print_char('&');print_int(mem_end+1-hi_mem_min);
 print(" memory locations dumped; current usage is ");
 print_int(var_used);print_char('&');print_int(dyn_used)
 
@@ -31712,6 +31718,154 @@ store the depth values with the calls.
      }
   }
 }
+
+@*1 Dumping the profiling information.
+
+We dump the number of files first and then dump
+the file names including the
+terminating zero byte.
+We put eight byte into a memory word and dump them together.
+The last memory word is padded with zeros.
+
+@<Dump the full file names@>=
+{ two_halves hw;
+  int i,j;
+  hw.rh=file_num;
+  i=0;
+  for (k=0; k<=file_num; k++)
+  { j=strlen(file_num_name[k]);
+    if (j>i) i=j;
+  }
+  hw.lh=i;
+  dump_hh(hw);
+}
+{ memory_word m;
+  int word_count=0;
+  int byte_count=0;
+  m.w=0;
+  for (k=0;k<=file_num;k++)
+  { char *s=file_num_name[k];
+    do
+    { m.w=(m.w<<8)|*s;
+      byte_count++;
+      if (byte_count==8)
+      { dump_wd(m); word_count++;
+        m.w=0; byte_count=0;
+      }
+    } while (*s++!=0);
+  }
+  if (byte_count >0)
+  { while (byte_count<8)
+    { m.w=(m.w<<8)|0;
+      byte_count++;
+    }
+    dump_wd(m);word_count++;
+  }
+  print_ln();print_int(file_num);
+  print(" file names dumped; total size "); print_int(word_count*8);
+}
+
+@ @<Undump the full file names@>=
+
+{ two_halves hw;
+  memory_word m;
+  int byte_count=0;
+  int i,j;
+  char *buf;
+  undump_hh(hw);
+  file_num=hw.rh;
+  if (file_num>MAX_FILE_NUM) overflow("file number",file_num);
+  i=hw.lh;
+  buf=malloc(i+1);
+  if (buf==NULL)
+  { print_err("Out of memory while reading filenames from format file");
+    succumb;
+  }
+  for (k=0;k<=file_num;k++)
+  { char *s=buf;
+    do
+    { if (byte_count==0)
+      { undump_wd(m); byte_count=8; }
+      *s=(m.w>>56)&0xFF; m.w=m.w<<8;
+      byte_count--;
+    } while (*s++!=0);
+    file_num_name[k]=strdup(buf);
+    if (file_num_name[k]==NULL)
+    { print_err("Out of memory while reading filenames from format file");
+      succumb;
+    }
+  }
+  free(buf);
+}
+
+
+@ 
+Next we dump the file and line information from the |fl_mem| array.
+Because some formats leave many unallocated memory words in the |avail|
+list we dump only those memory words that are not on the avail list.
+We set the entry |fl_mem[p]| to zero if |p| is on the |avail| list
+while we traverse the list when dumping the memory words.
+Besides the unallocated entries also entries that specify the unknown
+file with line zero are completely zero. We do not dump these as well.
+
+When dumping an entry we set the topmost bit of the entry to 1.
+An entry that has the topmost bit equal to zero contains the count
+of the following zero entries. We dump entries in pairs since
+the dump file is organized as a file of memory words
+
+@<Dump the file and line information@>=
+{ int word_count=0;
+  k=hi_mem_min;
+  while (k<=mem_end)
+  { two_halves hw;
+    halfword e;
+    int word_count=0;
+    @<compute the next file line entry@>@;
+    hw.rh=e;
+    if (k>mem_end) e=0;
+    else
+    { @<compute the next file line entry@>@; }
+    hw.lh=e;
+    dump_hh(hw); word_count++;
+  }
+  print_ln(); print_int(word_count); 
+  print(" words of file/line information dumped.");
+}
+@ @<compute the next file line entry@>=
+  if (fl_mem[k]!=0) e=fl_mem[k++]|0x80000000;
+  else 
+  { int i;
+    i=1; k++;
+    while (k<=mem_end && fl_mem[k]==0)
+    { i++; k++; }
+    e=i;
+  }
+
+@ @<Undump the file and line information@>=
+k=hi_mem_min;
+while (k<=mem_end)
+{ two_halves hw;
+  halfword e;
+  undump_hh(hw);
+  e=hw.rh;
+  @<get the next file line entry@>@;
+  if (k<=mem_end) 
+  { e=hw.lh;
+    @<get the next file line entry@>@; 
+  }
+}
+
+@  @<get the next file line entry@>=
+if (e&0x80000000)
+  fl_mem[k++]=e&~0x80000000;
+else
+{ int i;
+  i=e;
+  while (i>0)
+  {i--; k++;}  
+}
+
+
 
 @* Index.
 Here is where you can find all uses of each identifier in the program,

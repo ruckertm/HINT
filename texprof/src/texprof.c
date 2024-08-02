@@ -8,18 +8,18 @@
 #include <math.h> 
 
 /*:9*//*1681:*/
-#line 29575 "texprof.w"
+#line 29581 "texprof.w"
 
 #ifdef WEB2CVERSION
 #define TL_VERSION "(TeX Live "WEB2CVERSION")"
 #else
-#line 29579 "texprof.w"
+#line 29585 "texprof.w"
 #define TL_VERSION
 #endif
-#line 29581 "texprof.w"
+#line 29587 "texprof.w"
 
 /*:1681*//*1694:*/
-#line 29808 "texprof.w"
+#line 29814 "texprof.w"
 
 #include <kpathsea/kpathsea.h> 
 static int argument_is(struct option*opt,char*s)
@@ -27,7 +27,7 @@ static int argument_is(struct option*opt,char*s)
 #define ARGUMENT_IS(S) argument_is(long_options+option_index,S)
 
 /*:1694*//*1731:*/
-#line 30587 "texprof.w"
+#line 30593 "texprof.w"
 
 #include <time.h> 
 static time_t start_time= ((time_t)-1);
@@ -36,7 +36,7 @@ static char*source_date_epoch,*force_source_date;
 #if defined(_MSC_VER) && _MSC_VER < 1800
 #define strtoull _strtoui64
 #endif
-#line 30595 "texprof.w"
+#line 30601 "texprof.w"
 
 static struct tm*tl_now(void)
 {struct tm*tp;
@@ -64,7 +64,7 @@ return tp;
 }
 
 /*:1731*//*1732:*/
-#line 30623 "texprof.w"
+#line 30629 "texprof.w"
 
 #define TIME_STR_SIZE 30
 static char time_str[TIME_STR_SIZE];
@@ -2158,6 +2158,7 @@ typedef uint16_t quarterword;
 typedef int32_t halfword;
 typedef int8_t two_choices;
 typedef int8_t four_choices;
+typedef uint64_t fullword;
 typedef struct{
 halfword rh;
 union{
@@ -2172,6 +2173,7 @@ quarterword b3;
 }four_quarters;
 typedef struct{
 union{
+fullword w;
 int i;
 glue_ratio gr;
 two_halves hh;
@@ -2180,12 +2182,12 @@ four_quarters qqqq;
 typedef struct{FILE*f;memory_word d;}word_file;
 
 /*:112*//*149:*/
-#line 3257 "texprof.w"
+#line 3259 "texprof.w"
 
 typedef int8_t glue_ord;
 
 /*:149*//*211:*/
-#line 4437 "texprof.w"
+#line 4439 "texprof.w"
 
 typedef struct{int16_t mode_field;
 pointer head_field,tail_field;
@@ -2195,12 +2197,12 @@ memory_word aux_field;
 }list_state_record;
 
 /*:211*//*268:*/
-#line 6100 "texprof.w"
+#line 6102 "texprof.w"
 
 typedef int8_t group_code;
 
 /*:268*//*299:*/
-#line 6749 "texprof.w"
+#line 6751 "texprof.w"
 
 typedef struct{
 quarterword state_field,index_field;
@@ -2209,33 +2211,33 @@ halfword depth_field;
 }in_state_record;
 
 /*:299*//*547:*/
-#line 11200 "texprof.w"
+#line 11202 "texprof.w"
 
 typedef uint8_t internal_font_number;
 typedef int32_t font_index;
 
 /*:547*//*593:*/
-#line 12401 "texprof.w"
+#line 12403 "texprof.w"
 
 typedef int16_t dvi_index;
 
 /*:593*//*919:*/
-#line 18698 "texprof.w"
+#line 18700 "texprof.w"
 
 typedef int32_t trie_pointer;
 
 /*:919*//*924:*/
-#line 18767 "texprof.w"
+#line 18769 "texprof.w"
 
 typedef int16_t hyph_pointer;
 
 /*:924*//*1408:*/
-#line 26163 "texprof.w"
+#line 26169 "texprof.w"
 
 typedef int32_t save_pointer;
 
 /*:1408*//*1631:*/
-#line 29046 "texprof.w"
+#line 29052 "texprof.w"
 
 typedef int mpfract;
 
@@ -2248,38 +2250,38 @@ typedef int mpfract;
 static int s_no(const char*str);
 
 /*:52*//*1560:*/
-#line 28317 "texprof.w"
+#line 28323 "texprof.w"
 
 static void scan_general_x_text(void);
 
 /*:1560*//*1562:*/
-#line 28332 "texprof.w"
+#line 28338 "texprof.w"
 
 static void toks_to_str(void);
 
 /*:1562*//*1685:*/
-#line 29618 "texprof.w"
+#line 29624 "texprof.w"
 
 static void main_init(int ac,char*av[]);
 
 
 /*:1685*//*1692:*/
-#line 29776 "texprof.w"
+#line 29782 "texprof.w"
 
 static void parse_options(int argc,char*argv[]);
 
 /*:1692*//*1705:*/
-#line 29995 "texprof.w"
+#line 30001 "texprof.w"
 
 static void recorder_change_filename(const char*new_name);
 
 /*:1705*//*1709:*/
-#line 30061 "texprof.w"
+#line 30067 "texprof.w"
 
 static void recorder_record_input(const char*fname);
 
 /*:1709*//*1725:*/
-#line 30399 "texprof.w"
+#line 30405 "texprof.w"
 
 static int input_command_line(void);
 
@@ -2383,12 +2385,12 @@ static bool arith_error;
 static scaled rem;
 
 /*:103*//*114:*/
-#line 2596 "texprof.w"
+#line 2598 "texprof.w"
 
 static pointer temp_ptr;
 
 /*:114*//*115:*/
-#line 2628 "texprof.w"
+#line 2630 "texprof.w"
 
 static memory_word mem0[mem_max-mem_min+1],
 *const mem= mem0-mem_min;
@@ -2396,32 +2398,32 @@ static pointer lo_mem_max;
 static pointer hi_mem_min;
 
 /*:115*//*116:*/
-#line 2642 "texprof.w"
+#line 2644 "texprof.w"
 
 static int var_used,dyn_used;
 #ifdef STAT
 #define incr_dyn_used incr(dyn_used)
 #define decr_dyn_used decr(dyn_used)
 #else
-#line 2648 "texprof.w"
+#line 2650 "texprof.w"
 #define incr_dyn_used
 #define decr_dyn_used
 #endif
-#line 2651 "texprof.w"
+#line 2653 "texprof.w"
 
 /*:116*//*117:*/
-#line 2665 "texprof.w"
+#line 2667 "texprof.w"
 
 static pointer avail;
 static pointer mem_end;
 
 /*:117*//*123:*/
-#line 2770 "texprof.w"
+#line 2772 "texprof.w"
 
 static pointer rover;
 
 /*:123*//*164:*/
-#line 3473 "texprof.w"
+#line 3475 "texprof.w"
 
 #ifdef DEBUG
 static bool is_free0[mem_max-mem_min+1],
@@ -2433,21 +2435,21 @@ static pointer was_mem_end,was_lo_max,was_hi_min;
 
 static bool panicking;
 #endif
-#line 3484 "texprof.w"
+#line 3486 "texprof.w"
 
 /*:164*//*172:*/
-#line 3629 "texprof.w"
+#line 3631 "texprof.w"
 
 static int font_in_short_display;
 
 /*:172*//*180:*/
-#line 3758 "texprof.w"
+#line 3760 "texprof.w"
 
 static int depth_threshold;
 static int breadth_max;
 
 /*:180*//*212:*/
-#line 4460 "texprof.w"
+#line 4462 "texprof.w"
 
 static list_state_record nest[nest_size+1];
 static int nest_ptr;
@@ -2456,14 +2458,14 @@ static list_state_record cur_list;
 static int shown_mode;
 
 /*:212*//*245:*/
-#line 5465 "texprof.w"
+#line 5467 "texprof.w"
 
 static int old_setting;
 static int sys_time,sys_day,sys_month,sys_year;
 
 
 /*:245*//*252:*/
-#line 5638 "texprof.w"
+#line 5640 "texprof.w"
 
 static memory_word eqtb0[eqtb_size-active_base+1],
 *const eqtb= eqtb0-active_base;
@@ -2471,7 +2473,7 @@ static quarterword xeq_level0[eqtb_size-int_base+1],
 *const xeq_level= xeq_level0-int_base;
 
 /*:252*//*255:*/
-#line 5688 "texprof.w"
+#line 5690 "texprof.w"
 
 static two_halves hash0[undefined_control_sequence-hash_base],
 *const hash= hash0-hash_base;
@@ -2481,7 +2483,7 @@ static bool no_new_control_sequence;
 static int cs_count;
 
 /*:255*//*270:*/
-#line 6109 "texprof.w"
+#line 6111 "texprof.w"
 
 static memory_word save_stack[save_size+1];
 static int save_ptr;
@@ -2491,12 +2493,12 @@ static group_code cur_group;
 static int cur_boundary;
 
 /*:270*//*285:*/
-#line 6397 "texprof.w"
+#line 6399 "texprof.w"
 
 static int mag_set;
 
 /*:285*//*296:*/
-#line 6658 "texprof.w"
+#line 6660 "texprof.w"
 
 static eight_bits cur_cmd;
 static halfword cur_chr;
@@ -2504,7 +2506,7 @@ static pointer cur_cs;
 static halfword cur_tok;
 
 /*:296*//*300:*/
-#line 6756 "texprof.w"
+#line 6758 "texprof.w"
 
 static in_state_record input_stack[stack_size+1];
 static int input_ptr;
@@ -2513,7 +2515,7 @@ static in_state_record cur_input;
 
 
 /*:300*//*303:*/
-#line 6861 "texprof.w"
+#line 6863 "texprof.w"
 
 static int in_open;
 static int open_parens;
@@ -2524,14 +2526,14 @@ static int line_stack0[max_in_open],
 *const line_stack= line_stack0-1;
 
 /*:303*//*304:*/
-#line 6906 "texprof.w"
+#line 6908 "texprof.w"
 
 static int scanner_status;
 static pointer warning_index;
 static pointer def_ref;
 
 /*:304*//*307:*/
-#line 7038 "texprof.w"
+#line 7040 "texprof.w"
 
 static pointer param_stack[param_size+1];
 
@@ -2540,18 +2542,18 @@ static int max_param_stack;
 
 
 /*:307*//*308:*/
-#line 7058 "texprof.w"
+#line 7060 "texprof.w"
 
 static int align_state;
 static int incsname_state;
 
 /*:308*//*309:*/
-#line 7070 "texprof.w"
+#line 7072 "texprof.w"
 
 static int base_ptr;
 
 /*:309*//*332:*/
-#line 7481 "texprof.w"
+#line 7483 "texprof.w"
 
 static pointer par_loc;
 static halfword par_token;
@@ -2559,51 +2561,51 @@ static pointer input_loc;
 static halfword input_token;
 
 /*:332*//*360:*/
-#line 7911 "texprof.w"
+#line 7913 "texprof.w"
 
 static bool force_eof;
 
 /*:360*//*381:*/
-#line 8266 "texprof.w"
+#line 8268 "texprof.w"
 
 static pointer cur_mark0[split_bot_mark_code-top_mark_code+1],
 *const cur_mark= cur_mark0-top_mark_code;
 
 
 /*:381*//*386:*/
-#line 8321 "texprof.w"
+#line 8323 "texprof.w"
 
 static int long_state;
 
 /*:386*//*387:*/
-#line 8332 "texprof.w"
+#line 8334 "texprof.w"
 
 static pointer pstack[9];
 
 /*:387*//*409:*/
-#line 8719 "texprof.w"
+#line 8721 "texprof.w"
 
 static int cur_val;
 static int cur_val_level;
 
 /*:409*//*437:*/
-#line 9150 "texprof.w"
+#line 9152 "texprof.w"
 
 static small_number radix;
 
 /*:437*//*446:*/
-#line 9285 "texprof.w"
+#line 9287 "texprof.w"
 
 static glue_ord cur_order;
 
 /*:446*//*479:*/
-#line 9918 "texprof.w"
+#line 9920 "texprof.w"
 
 static alpha_file read_file[16];
 static int8_t read_open[17];
 
 /*:479*//*488:*/
-#line 10111 "texprof.w"
+#line 10113 "texprof.w"
 
 static pointer cond_ptr;
 static int if_limit;
@@ -2611,44 +2613,44 @@ static small_number cur_if;
 static int if_line;
 
 /*:488*//*492:*/
-#line 10137 "texprof.w"
+#line 10139 "texprof.w"
 
 static int skip_line;
 
 /*:492*//*511:*/
-#line 10475 "texprof.w"
+#line 10477 "texprof.w"
 
 static str_number cur_name;
 static str_number cur_area;
 static str_number cur_ext;
 
 /*:511*//*512:*/
-#line 10491 "texprof.w"
+#line 10493 "texprof.w"
 
 static pool_pointer area_delimiter;
 static pool_pointer ext_delimiter;
 
 /*:512*//*526:*/
-#line 10702 "texprof.w"
+#line 10704 "texprof.w"
 
 static bool name_in_progress;
 static str_number job_name;
 static bool log_opened;
 
 /*:526*//*531:*/
-#line 10779 "texprof.w"
+#line 10781 "texprof.w"
 
 static byte_file dvi_file;
 static str_number output_file_name;
 static str_number log_name;
 
 /*:531*//*538:*/
-#line 10922 "texprof.w"
+#line 10924 "texprof.w"
 
 static byte_file tfm_file;
 
 /*:538*//*548:*/
-#line 11209 "texprof.w"
+#line 11211 "texprof.w"
 
 static memory_word font_info[font_mem_size+1];
 
@@ -2697,7 +2699,7 @@ static int16_t font_false_bchar0[font_max-font_base+1],
 
 
 /*:548*//*549:*/
-#line 11265 "texprof.w"
+#line 11267 "texprof.w"
 
 static int char_base0[font_max-font_base+1],
 *const char_base= char_base0-font_base;
@@ -2728,12 +2730,12 @@ static int param_base0[font_max-font_base+1],
 
 
 /*:549*//*554:*/
-#line 11363 "texprof.w"
+#line 11365 "texprof.w"
 
 static four_quarters null_character;
 
 /*:554*//*591:*/
-#line 12360 "texprof.w"
+#line 12362 "texprof.w"
 
 static int total_pages;
 static scaled max_v;
@@ -2749,7 +2751,7 @@ static pointer g;
 static int lq,lr;
 
 /*:591*//*594:*/
-#line 12408 "texprof.w"
+#line 12410 "texprof.w"
 
 static eight_bits dvi_buf[dvi_buf_size+1];
 static dvi_index half_buf;
@@ -2760,12 +2762,12 @@ static int dvi_offset;
 static int dvi_gone;
 
 /*:594*//*604:*/
-#line 12573 "texprof.w"
+#line 12575 "texprof.w"
 
 static pointer down_ptr,right_ptr;
 
 /*:604*//*615:*/
-#line 12799 "texprof.w"
+#line 12801 "texprof.w"
 
 static scaled dvi_h,dvi_v;
 static scaled cur_h,cur_v;
@@ -2773,7 +2775,7 @@ static internal_font_number dvi_f;
 static int cur_s;
 
 /*:615*//*645:*/
-#line 13410 "texprof.w"
+#line 13412 "texprof.w"
 
 static scaled total_stretch0[filll-normal+1],
 *const total_stretch= total_stretch0-normal,
@@ -2782,24 +2784,24 @@ total_shrink0[filll-normal+1],*const total_shrink= total_shrink0-normal;
 static int last_badness;
 
 /*:645*//*646:*/
-#line 13422 "texprof.w"
+#line 13424 "texprof.w"
 
 static pointer adjust_tail;
 
 /*:646*//*660:*/
-#line 13599 "texprof.w"
+#line 13601 "texprof.w"
 
 static int pack_begin_line;
 
 
 /*:660*//*683:*/
-#line 14020 "texprof.w"
+#line 14022 "texprof.w"
 
 static two_halves empty_field;
 static four_quarters null_delimiter;
 
 /*:683*//*718:*/
-#line 14684 "texprof.w"
+#line 14686 "texprof.w"
 
 static pointer cur_mlist;
 static small_number cur_style;
@@ -2808,7 +2810,7 @@ static scaled cur_mu;
 static bool mlist_penalties;
 
 /*:718*//*723:*/
-#line 14774 "texprof.w"
+#line 14776 "texprof.w"
 
 static internal_font_number cur_f;
 static quarterword cur_c;
@@ -2816,12 +2818,12 @@ static four_quarters cur_i;
 
 
 /*:723*//*764:*/
-#line 15597 "texprof.w"
+#line 15599 "texprof.w"
 
 static const int magic_offset= -9*ord_noad;
 
 /*:764*//*769:*/
-#line 15795 "texprof.w"
+#line 15797 "texprof.w"
 
 static pointer cur_align;
 static pointer cur_span;
@@ -2830,19 +2832,19 @@ static pointer align_ptr;
 static pointer cur_head,cur_tail;
 
 /*:769*//*813:*/
-#line 16575 "texprof.w"
+#line 16577 "texprof.w"
 
 static pointer just_box;
 
 /*:813*//*820:*/
-#line 16723 "texprof.w"
+#line 16725 "texprof.w"
 
 static pointer passive;
 static pointer printed_node;
 static halfword pass_number;
 
 /*:820*//*822:*/
-#line 16762 "texprof.w"
+#line 16764 "texprof.w"
 
 static scaled active_width0[6],*const active_width= active_width0-1;
 
@@ -2852,12 +2854,12 @@ static scaled background0[6],*const background= background0-1;
 static scaled break_width0[6],*const break_width= break_width0-1;
 
 /*:822*//*824:*/
-#line 16820 "texprof.w"
+#line 16822 "texprof.w"
 
 static bool no_shrink_error_yet;
 
 /*:824*//*827:*/
-#line 16880 "texprof.w"
+#line 16882 "texprof.w"
 
 static pointer cur_p;
 static bool second_pass;
@@ -2865,7 +2867,7 @@ static bool final_pass;
 static int threshold;
 
 /*:827*//*832:*/
-#line 16981 "texprof.w"
+#line 16983 "texprof.w"
 
 static int minimal_demerits0[tight_fit-very_loose_fit+1],
 *const minimal_demerits= minimal_demerits0-very_loose_fit;
@@ -2880,12 +2882,12 @@ static halfword best_pl_line0[tight_fit-very_loose_fit+1],
 
 
 /*:832*//*838:*/
-#line 17102 "texprof.w"
+#line 17104 "texprof.w"
 
 static scaled disc_width;
 
 /*:838*//*846:*/
-#line 17244 "texprof.w"
+#line 17246 "texprof.w"
 
 static halfword easy_line;
 static halfword last_special_line;
@@ -2897,7 +2899,7 @@ static scaled first_indent;
 static scaled second_indent;
 
 /*:846*//*871:*/
-#line 17758 "texprof.w"
+#line 17760 "texprof.w"
 
 static pointer best_bet;
 static int fewest_demerits;
@@ -2908,7 +2910,7 @@ static int line_diff;
 
 
 /*:871*//*891:*/
-#line 18095 "texprof.w"
+#line 18097 "texprof.w"
 
 static int16_t hc[66];
 static int hn;
@@ -2922,7 +2924,7 @@ static int l_hyf,r_hyf,init_l_hyf,init_r_hyf;
 static halfword hyf_bchar;
 
 /*:891*//*899:*/
-#line 18235 "texprof.w"
+#line 18237 "texprof.w"
 
 static int8_t hyf[65];
 static pointer init_list;
@@ -2930,12 +2932,12 @@ static bool init_lig;
 static bool init_lft;
 
 /*:899*//*904:*/
-#line 18359 "texprof.w"
+#line 18361 "texprof.w"
 
 static small_number hyphen_passed;
 
 /*:904*//*906:*/
-#line 18400 "texprof.w"
+#line 18402 "texprof.w"
 
 static halfword cur_l,cur_r;
 static pointer cur_q;
@@ -2944,7 +2946,7 @@ static bool ligature_present;
 static bool lft_hit,rt_hit;
 
 /*:906*//*920:*/
-#line 18705 "texprof.w"
+#line 18707 "texprof.w"
 
 static two_halves trie[trie_size+1];
 static small_number hyf_distance0[trie_op_size],
@@ -2956,14 +2958,14 @@ static quarterword hyf_next0[trie_op_size],
 static uint16_t op_start[256];
 
 /*:920*//*925:*/
-#line 18770 "texprof.w"
+#line 18772 "texprof.w"
 
 static str_number hyph_word[hyph_size+1];
 static pointer hyph_list[hyph_size+1];
 static hyph_pointer hyph_count;
 
 /*:925*//*942:*/
-#line 18989 "texprof.w"
+#line 18991 "texprof.w"
 
 #ifdef INIT
 static uint16_t trie_op_hash0[trie_op_size+trie_op_size+1],
@@ -2979,10 +2981,10 @@ static quarterword trie_op_val0[trie_op_size],
 
 static int trie_op_ptr;
 #endif
-#line 19004 "texprof.w"
+#line 19006 "texprof.w"
 
 /*:942*//*946:*/
-#line 19085 "texprof.w"
+#line 19087 "texprof.w"
 
 #ifdef INIT
 static packed_ASCII_code trie_c[trie_size+1];
@@ -2997,10 +2999,10 @@ static trie_pointer trie_ptr;
 static trie_pointer trie_hash[trie_size+1];
 
 #endif
-#line 19099 "texprof.w"
+#line 19101 "texprof.w"
 
 /*:946*//*949:*/
-#line 19172 "texprof.w"
+#line 19174 "texprof.w"
 
 #ifdef INIT
 static bool trie_taken0[trie_size],
@@ -3011,16 +3013,16 @@ static trie_pointer trie_min[256];
 static trie_pointer trie_max;
 static bool trie_not_ready;
 #endif
-#line 19182 "texprof.w"
+#line 19184 "texprof.w"
 
 /*:949*//*970:*/
-#line 19550 "texprof.w"
+#line 19552 "texprof.w"
 
 static scaled best_height_plus_depth;
 
 
 /*:970*//*979:*/
-#line 19763 "texprof.w"
+#line 19765 "texprof.w"
 
 static pointer page_tail;
 static int page_contents;
@@ -3030,7 +3032,7 @@ static int least_page_cost;
 static scaled best_size;
 
 /*:979*//*981:*/
-#line 19846 "texprof.w"
+#line 19848 "texprof.w"
 
 static scaled page_so_far[8];
 static pointer last_glue;
@@ -3041,12 +3043,12 @@ static int insert_penalties;
 
 
 /*:981*//*988:*/
-#line 19981 "texprof.w"
+#line 19983 "texprof.w"
 
 static bool output_active;
 
 /*:988*//*1031:*/
-#line 20731 "texprof.w"
+#line 20733 "texprof.w"
 
 static internal_font_number main_f;
 static four_quarters main_i;
@@ -3060,76 +3062,76 @@ static bool cancel_boundary;
 static bool ins_disc;
 
 /*:1031*//*1073:*/
-#line 21520 "texprof.w"
+#line 21522 "texprof.w"
 
 static pointer cur_box;
 
 /*:1073*//*1265:*/
-#line 24220 "texprof.w"
+#line 24222 "texprof.w"
 
 static halfword after_token;
 
 /*:1265*//*1280:*/
-#line 24325 "texprof.w"
+#line 24327 "texprof.w"
 
 static bool long_help_seen;
 
 /*:1280*//*1298:*/
-#line 24521 "texprof.w"
+#line 24523 "texprof.w"
 
 static str_number format_ident,frozen_format_ident;
 
 /*:1298*//*1304:*/
-#line 24604 "texprof.w"
+#line 24610 "texprof.w"
 
 static word_file fmt_file;
 
 /*:1304*//*1330:*/
-#line 25070 "texprof.w"
+#line 25076 "texprof.w"
 
 static int ready_already;
 
 /*:1330*//*1341:*/
-#line 25416 "texprof.w"
+#line 25422 "texprof.w"
 
 static alpha_file write_file[16];
 static bool write_open[18];
 
 /*:1341*//*1344:*/
-#line 25450 "texprof.w"
+#line 25456 "texprof.w"
 
 static pointer write_loc;
 
 /*:1344*//*1382:*/
-#line 25884 "texprof.w"
+#line 25890 "texprof.w"
 
 static int eTeX_mode;
 
 /*:1382*//*1390:*/
-#line 25955 "texprof.w"
+#line 25961 "texprof.w"
 
 static bool eof_seen0[max_in_open],
 *const eof_seen= eof_seen0-1;
 
 /*:1390*//*1432:*/
-#line 26450 "texprof.w"
+#line 26456 "texprof.w"
 
 static pointer pseudo_files;
 
 /*:1432*//*1455:*/
-#line 26713 "texprof.w"
+#line 26719 "texprof.w"
 
 static save_pointer grp_stack[max_in_open+1];
 static pointer if_stack[max_in_open+1];
 
 /*:1455*//*1496:*/
-#line 27355 "texprof.w"
+#line 27361 "texprof.w"
 
 static halfword max_reg_num;
 static char*max_reg_help_line;
 
 /*:1496*//*1498:*/
-#line 27422 "texprof.w"
+#line 27428 "texprof.w"
 
 static pointer sa_root0[mark_val-int_val+1],
 *const sa_root= sa_root0-int_val;
@@ -3137,81 +3139,81 @@ static pointer cur_ptr;
 static memory_word sa_null;
 
 /*:1498*//*1517:*/
-#line 27818 "texprof.w"
+#line 27824 "texprof.w"
 
 static pointer sa_chain;
 static quarterword sa_level;
 
 /*:1517*//*1528:*/
-#line 28065 "texprof.w"
+#line 28071 "texprof.w"
 
 static trie_pointer hyph_start;
 static trie_pointer hyph_index;
 
 /*:1528*//*1529:*/
-#line 28077 "texprof.w"
+#line 28083 "texprof.w"
 
 static pointer disc_ptr0[vsplit_code-copy_code+1],
 *const disc_ptr= disc_ptr0-copy_code;
 
 /*:1529*//*1537:*/
-#line 28141 "texprof.w"
+#line 28147 "texprof.w"
 
 static int expand_depth_count;
 
 /*:1537*//*1541:*/
-#line 28165 "texprof.w"
+#line 28171 "texprof.w"
 
 static int Prote_mode;
 
 /*:1541*//*1565:*/
-#line 28387 "texprof.w"
+#line 28393 "texprof.w"
 
 static eight_bits xchg_buffer0[xchg_buffer_size],
 *const xchg_buffer= xchg_buffer0-1;
 
 static int xchg_buffer_length;
 /*:1565*//*1580:*/
-#line 28542 "texprof.w"
+#line 28548 "texprof.w"
 
 static memory_word ROM0[ROM_size-ROM_base+1],
 *const ROM= ROM0-ROM_base;
 
 /*:1580*//*1626:*/
-#line 28966 "texprof.w"
+#line 28972 "texprof.w"
 
 static int two_to_the[31];
 static int spec_log0[28],*const spec_log= spec_log0-1;
 
 /*:1626*//*1637:*/
-#line 29184 "texprof.w"
+#line 29190 "texprof.w"
 
 static mpfract randoms[55];
 static int j_random;
 
 /*:1637*//*1638:*/
-#line 29191 "texprof.w"
+#line 29197 "texprof.w"
 
 static int random_seed;
 
 /*:1638*//*1663:*/
-#line 29437 "texprof.w"
+#line 29443 "texprof.w"
 
 static scaled last_saved_xpos,last_saved_ypos;
 
 /*:1663*//*1669:*/
-#line 29472 "texprof.w"
+#line 29478 "texprof.w"
 
 static int last_save_pos_number;
 
 /*:1669*//*1683:*/
-#line 29595 "texprof.w"
+#line 29601 "texprof.w"
 
 static char**argv;
 static int argc;
 
 /*:1683*//*1689:*/
-#line 29724 "texprof.w"
+#line 29730 "texprof.w"
 
 static int iniversion= false,etexp= false,ltxp= false,recorder_enabled= false;
 static int parsefirstlinep= -1,filelineerrorstylep= -1,interaction_option= -1;
@@ -3219,32 +3221,32 @@ static const char*user_progname= NULL,*output_directory= NULL,*c_job_name= NULL,
 *dump_name= NULL;
 
 /*:1689*//*1711:*/
-#line 30097 "texprof.w"
+#line 30103 "texprof.w"
 
 static char**cnf_lines= NULL;
 static int cnf_count= 0;
 
 /*:1711*//*1720:*/
-#line 30254 "texprof.w"
+#line 30260 "texprof.w"
 
 static char*source_filename_stack0[max_in_open]= {NULL},**const source_filename_stack= source_filename_stack0-1;
 static char*full_source_filename_stack0[max_in_open]= {NULL},**const full_source_filename_stack= full_source_filename_stack0-1;
 static char*full_name_of_file= NULL;
 
 /*:1720*//*1736:*/
-#line 30815 "texprof.w"
+#line 30821 "texprof.w"
 
 static int profile_on= false;
 
 /*:1736*//*1740:*/
-#line 30865 "texprof.w"
+#line 30871 "texprof.w"
 
 static uint8_t input_file_num0[max_in_open],
 *const input_file_num= input_file_num0-1;
 static uint8_t read_file_num[20];
 
 /*:1740*//*1741:*/
-#line 30878 "texprof.w"
+#line 30884 "texprof.w"
 
 #define FILE_NUM_BITS 8
 #define MAX_FILE_NUM ((1<<FILE_NUM_BITS)-1)
@@ -3260,20 +3262,20 @@ static int file_num;
 static uint32_t cur_file_line= 0;
 
 /*:1741*//*1749:*/
-#line 30975 "texprof.w"
+#line 30981 "texprof.w"
 
 static uint32_t fl_mem0[mem_max-mem_min+1],
 *const fl_mem= fl_mem0-mem_min;
 
 /*:1749*//*1750:*/
-#line 31002 "texprof.w"
+#line 31008 "texprof.w"
 
 static long start_nsec,start_sec,diff_nsec;
 struct timespec ts;
 static int time_error;
 
 /*:1750*//*1753:*/
-#line 31053 "texprof.w"
+#line 31059 "texprof.w"
 
 #define MAX_STAMPS 80000000
 #define MAX_MACRO_STACK  40000
@@ -3286,7 +3288,7 @@ static int prof_cmd= 0;
 static uint32_t prof_file_line= 0;
 
 /*:1753*//*1767:*/
-#line 31359 "texprof.w"
+#line 31365 "texprof.w"
 
 static uint64_t macro_stack[MAX_MACRO_STACK]= {0};
 static int prof_depth;
@@ -3305,12 +3307,12 @@ static void initialize(void)
 int i;
 
 /*:19*//*162:*/
-#line 3432 "texprof.w"
+#line 3434 "texprof.w"
 
 int k;
 
 /*:162*//*926:*/
-#line 18775 "texprof.w"
+#line 18777 "texprof.w"
 
 int z;
 
@@ -3455,17 +3457,17 @@ help_ptr= 0;use_err_help= false;
 interrupt= 0;OK_to_interrupt= true;
 
 /*:96*//*165:*/
-#line 3485 "texprof.w"
+#line 3487 "texprof.w"
 
 #ifdef DEBUG
 was_mem_end= mem_min;
 was_lo_max= mem_min;was_hi_min= mem_max;
 panicking= false;
 #endif
-#line 3491 "texprof.w"
+#line 3493 "texprof.w"
 
 /*:165*//*214:*/
-#line 4480 "texprof.w"
+#line 4482 "texprof.w"
 
 nest_ptr= 0;max_nest_stack= 0;
 mode= vmode;head= contrib_head;tail= contrib_head;
@@ -3473,7 +3475,7 @@ eTeX_aux= null;
 prev_depth= ignore_depth;mode_line= 0;
 prev_graf= 0;shown_mode= 0;
 /*990:*/
-#line 19991 "texprof.w"
+#line 19993 "texprof.w"
 
 page_contents= empty;page_tail= page_head;link(page_head)= null;
 last_glue= max_halfword;last_penalty= 0;last_kern= 0;
@@ -3481,105 +3483,105 @@ last_node_type= -1;
 page_depth= 0;page_max_depth= 0
 
 /*:990*/
-#line 4486 "texprof.w"
+#line 4488 "texprof.w"
 ;
 
 /*:214*//*253:*/
-#line 5644 "texprof.w"
+#line 5646 "texprof.w"
 
 for(k= int_base;k<=eqtb_size;k++)xeq_level[k]= level_one;
 
 /*:253*//*256:*/
-#line 5696 "texprof.w"
+#line 5698 "texprof.w"
 
 no_new_control_sequence= true;
 next(hash_base)= 0;text(hash_base)= 0;
 for(k= hash_base+1;k<=undefined_control_sequence-1;k++)hash[k]= hash[hash_base];
 
 /*:256*//*271:*/
-#line 6122 "texprof.w"
+#line 6124 "texprof.w"
 
 save_ptr= 0;cur_level= level_one;cur_group= bottom_level;cur_boundary= 0;
 max_save_stack= 0;
 
 /*:271*//*286:*/
-#line 6400 "texprof.w"
+#line 6402 "texprof.w"
 
 mag_set= 0;
 
 /*:286*//*382:*/
-#line 8271 "texprof.w"
+#line 8273 "texprof.w"
 
 top_mark= null;first_mark= null;bot_mark= null;
 split_first_mark= null;split_bot_mark= null;
 
 /*:382*//*438:*/
-#line 9157 "texprof.w"
+#line 9159 "texprof.w"
 
 cur_val= 0;cur_val_level= int_val;radix= 0;cur_order= normal;
 
 /*:438*//*480:*/
-#line 9922 "texprof.w"
+#line 9924 "texprof.w"
 
 for(k= 0;k<=16;k++)read_open[k]= closed;
 
 /*:480*//*489:*/
-#line 10117 "texprof.w"
+#line 10119 "texprof.w"
 
 cond_ptr= null;if_limit= normal;cur_if= 0;if_line= 0;
 
 /*:489*//*550:*/
-#line 11294 "texprof.w"
+#line 11296 "texprof.w"
 
 for(k= font_base;k<=font_max;k++)font_used[k]= false;
 
 /*:550*//*555:*/
-#line 11366 "texprof.w"
+#line 11368 "texprof.w"
 
 null_character.b0= min_quarterword;null_character.b1= min_quarterword;
 null_character.b2= min_quarterword;null_character.b3= min_quarterword;
 
 /*:555*//*592:*/
-#line 12374 "texprof.w"
+#line 12376 "texprof.w"
 
 total_pages= 0;max_v= 0;max_h= 0;max_push= 0;last_bop= -1;
 doing_leaders= false;dead_cycles= 0;cur_s= -1;
 
 /*:592*//*595:*/
-#line 12420 "texprof.w"
+#line 12422 "texprof.w"
 
 half_buf= dvi_buf_size/2;dvi_limit= dvi_buf_size;dvi_ptr= 0;
 dvi_offset= 0;dvi_gone= 0;
 
 /*:595*//*605:*/
-#line 12576 "texprof.w"
+#line 12578 "texprof.w"
 
 down_ptr= null;right_ptr= null;
 
 /*:605*//*647:*/
-#line 13425 "texprof.w"
+#line 13427 "texprof.w"
 adjust_tail= null;last_badness= 0;
 
 /*:647*//*661:*/
-#line 13603 "texprof.w"
+#line 13605 "texprof.w"
 
 pack_begin_line= 0;
 
 /*:661*//*684:*/
-#line 14024 "texprof.w"
+#line 14026 "texprof.w"
 
 empty_field.rh= empty;empty_field.lh= null;
 null_delimiter.b0= 0;null_delimiter.b1= min_quarterword;
 null_delimiter.b2= 0;null_delimiter.b3= min_quarterword;
 
 /*:684*//*770:*/
-#line 15804 "texprof.w"
+#line 15806 "texprof.w"
 
 align_ptr= null;cur_align= null;cur_span= null;cur_loop= null;
 cur_head= null;cur_tail= null;
 
 /*:770*//*927:*/
-#line 18778 "texprof.w"
+#line 18780 "texprof.w"
 
 for(z= 0;z<=hyph_size;z++)
 {hyph_word[z]= 0;hyph_list[z]= null;
@@ -3587,57 +3589,57 @@ for(z= 0;z<=hyph_size;z++)
 hyph_count= 0;
 
 /*:927*//*989:*/
-#line 19984 "texprof.w"
+#line 19986 "texprof.w"
 
 output_active= false;insert_penalties= 0;
 
 /*:989*//*1032:*/
-#line 20747 "texprof.w"
+#line 20749 "texprof.w"
 
 ligature_present= false;cancel_boundary= false;lft_hit= false;rt_hit= false;
 ins_disc= false;
 
 /*:1032*//*1266:*/
-#line 24223 "texprof.w"
+#line 24225 "texprof.w"
 
 after_token= 0;
 
 /*:1266*//*1281:*/
-#line 24328 "texprof.w"
+#line 24330 "texprof.w"
 long_help_seen= false;
 
 /*:1281*//*1299:*/
-#line 24524 "texprof.w"
+#line 24526 "texprof.w"
 
 format_ident= frozen_format_ident= 0;
 
 /*:1299*//*1342:*/
-#line 25420 "texprof.w"
+#line 25426 "texprof.w"
 
 for(k= 0;k<=17;k++)write_open[k]= false;
 
 /*:1342*//*1433:*/
-#line 26453 "texprof.w"
+#line 26459 "texprof.w"
 
 pseudo_files= null;
 
 /*:1433*//*1499:*/
-#line 27428 "texprof.w"
+#line 27434 "texprof.w"
 
 sa_mark= null;sa_null.hh.lh= null;sa_null.hh.rh= null;
 
 /*:1499*//*1518:*/
-#line 27822 "texprof.w"
+#line 27828 "texprof.w"
 
 sa_chain= null;sa_level= level_zero;
 
 /*:1518*//*1530:*/
-#line 28081 "texprof.w"
+#line 28087 "texprof.w"
 
 page_disc= null;split_disc= null;
 
 /*:1530*//*1746:*/
-#line 30942 "texprof.w"
+#line 30948 "texprof.w"
 
 file_num_name[unknown_file]= "unknown";
 file_num_name[system_file]= "system";
@@ -3650,7 +3652,7 @@ file_num= terminal_file;
 #ifdef INIT
 if(iniversion)
 {/*163:*/
-#line 3435 "texprof.w"
+#line 3437 "texprof.w"
 
 for(k= mem_bot+1;k<=lo_mem_stat_max;k++)mem[k].sc= 0;
 
@@ -3674,34 +3676,34 @@ lo_mem_max= rover+1000;link(lo_mem_max)= null;info(lo_mem_max)= null;
 for(k= hi_mem_stat_min;k<=mem_top;k++)
 mem[k]= mem[lo_mem_max];
 /*789:*/
-#line 16117 "texprof.w"
+#line 16119 "texprof.w"
 
 info(omit_template)= end_template_token;
 
 /*:789*//*796:*/
-#line 16226 "texprof.w"
+#line 16228 "texprof.w"
 
 link(end_span)= max_quarterword+1;info(end_span)= null;
 
 /*:796*//*819:*/
-#line 16693 "texprof.w"
+#line 16695 "texprof.w"
 
 type(last_active)= hyphenated;line_number(last_active)= max_halfword;
 subtype(last_active)= 0;
 
 /*:819*//*980:*/
-#line 19816 "texprof.w"
+#line 19818 "texprof.w"
 
 subtype(page_ins_head)= qi(255);
 type(page_ins_head)= split_up;link(page_ins_head)= page_ins_head;
 
 /*:980*//*987:*/
-#line 19975 "texprof.w"
+#line 19977 "texprof.w"
 
 type(page_head)= glue_node;subtype(page_head)= normal;
 
 /*:987*/
-#line 3457 "texprof.w"
+#line 3459 "texprof.w"
 ;
 avail= null;mem_end= mem_top;
 hi_mem_min= hi_mem_stat_min;
@@ -3709,7 +3711,7 @@ var_used= lo_mem_stat_max+1-mem_bot;dyn_used= hi_mem_stat_usage;
 
 
 /*:163*//*221:*/
-#line 4673 "texprof.w"
+#line 4675 "texprof.w"
 
 eq_type(undefined_control_sequence)= undefined_cs;
 equiv(undefined_control_sequence)= null;
@@ -3718,7 +3720,7 @@ for(k= active_base;k<=undefined_control_sequence-1;k++)
 eqtb[k]= eqtb[undefined_control_sequence];
 
 /*:221*//*227:*/
-#line 4828 "texprof.w"
+#line 4830 "texprof.w"
 
 equiv(glue_base)= zero_glue;eq_level(glue_base)= level_one;
 eq_type(glue_base)= glue_ref;
@@ -3726,7 +3728,7 @@ for(k= glue_base+1;k<=local_base-1;k++)eqtb[k]= eqtb[glue_base];
 glue_ref_count(zero_glue)= glue_ref_count(zero_glue)+local_base-glue_base;
 
 /*:227*//*231:*/
-#line 4962 "texprof.w"
+#line 4964 "texprof.w"
 
 par_shape_ptr= null;eq_type(par_shape_loc)= shape_ref;
 eq_level(par_shape_loc)= level_one;
@@ -3759,7 +3761,7 @@ sf_code(k)= 999;
 }
 
 /*:231*//*239:*/
-#line 5402 "texprof.w"
+#line 5404 "texprof.w"
 
 for(k= int_base;k<=del_code_base-1;k++)eqtb[k].i= 0;
 mag= 1000;tolerance= 10000;hang_after= 1;max_dead_cycles= 25;
@@ -3768,12 +3770,12 @@ for(k= 0;k<=255;k++)del_code(k)= -1;
 del_code('.')= 0;
 
 /*:239*//*249:*/
-#line 5607 "texprof.w"
+#line 5609 "texprof.w"
 
 for(k= dimen_base;k<=eqtb_size;k++)eqtb[k].sc= 0;
 
 /*:249*//*257:*/
-#line 5701 "texprof.w"
+#line 5703 "texprof.w"
 
 hash_used= frozen_control_sequence;
 cs_count= 0;
@@ -3782,7 +3784,7 @@ text(frozen_dont_expand)= s_no("notexpanded:");
 
 
 /*:257*//*551:*/
-#line 11300 "texprof.w"
+#line 11302 "texprof.w"
 
 font_ptr= null_font;fmem_ptr= 7;
 font_name[null_font]= s_no("nullfont");font_area[null_font]= empty_string;
@@ -3800,65 +3802,65 @@ param_base[null_font]= -1;
 for(k= 0;k<=6;k++)font_info[k].sc= 0;
 
 /*:551*//*945:*/
-#line 19062 "texprof.w"
+#line 19064 "texprof.w"
 
 for(k= -trie_op_size;k<=trie_op_size;k++)trie_op_hash[k]= 0;
 for(k= 0;k<=255;k++)trie_used[k]= min_quarterword;
 trie_op_ptr= 0;
 
 /*:945*//*950:*/
-#line 19189 "texprof.w"
+#line 19191 "texprof.w"
 
 trie_not_ready= true;trie_root= 0;trie_c[0]= si(0);trie_ptr= 0;
 
 /*:950*//*1215:*/
-#line 23504 "texprof.w"
+#line 23506 "texprof.w"
 
 text(frozen_protection)= s_no("inaccessible");
 
 
 /*:1215*//*1300:*/
-#line 24529 "texprof.w"
+#line 24531 "texprof.w"
 
 format_ident= frozen_format_ident= s_no(" (INITEX)");
 
 /*:1300*//*1368:*/
-#line 25667 "texprof.w"
+#line 25673 "texprof.w"
 
 text(end_write)= s_no("endwrite");eq_level(end_write)= level_one;
 eq_type(end_write)= outer_call;equiv(end_write)= null;
 
 /*:1368*//*1383:*/
-#line 25887 "texprof.w"
+#line 25893 "texprof.w"
 
 eTeX_mode= 0;
 /*1494:*/
-#line 27347 "texprof.w"
+#line 27353 "texprof.w"
 
 max_reg_num= 255;
 max_reg_help_line= "A register number must be between 0 and 255.";
 
 /*:1494*/
-#line 25889 "texprof.w"
+#line 25895 "texprof.w"
 
 
 /*:1383*//*1500:*/
-#line 27431 "texprof.w"
+#line 27437 "texprof.w"
 
 for(i= int_val;i<=tok_val;i++)sa_root[i]= null;
 
 /*:1500*//*1524:*/
-#line 28012 "texprof.w"
+#line 28018 "texprof.w"
 
 hyph_root= 0;hyph_start= 0;
 
 /*:1524*//*1542:*/
-#line 28173 "texprof.w"
+#line 28179 "texprof.w"
 
 Prote_mode= 0;
 
 /*:1542*//*1581:*/
-#line 28551 "texprof.w"
+#line 28557 "texprof.w"
 
 ROM[ROM_undefined_primitive]= eqtb[undefined_control_sequence];
 for(k= ROM_base;k<=256;k++)ROM[k]= ROM[ROM_undefined_primitive];
@@ -3922,7 +3924,7 @@ default:write_ln(write_file[selector]);
 static void print_char(ASCII_code s)
 {
 if(/*243:*/
-#line 5441 "texprof.w"
+#line 5443 "texprof.w"
 s==new_line_char
 
 /*:243*/
@@ -3976,7 +3978,7 @@ else{if(selector> pseudo)
 {print_char(s);return;
 }
 if((/*243:*/
-#line 5441 "texprof.w"
+#line 5443 "texprof.w"
 s==new_line_char
 
 /*:243*/
@@ -4027,7 +4029,7 @@ print(s);
 static void printn_esc(str_number s)
 {int c;
 /*242:*/
-#line 5439 "texprof.w"
+#line 5441 "texprof.w"
 c= escape_char
 
 /*:242*/
@@ -4040,7 +4042,7 @@ slow_print(s);
 static void print_esc(char*s)
 {int c;
 /*242:*/
-#line 5439 "texprof.w"
+#line 5441 "texprof.w"
 c= escape_char
 
 /*:242*/
@@ -4084,7 +4086,7 @@ print_the_digs(k);
 }
 
 /*:64*//*261:*/
-#line 5780 "texprof.w"
+#line 5782 "texprof.w"
 
 static void print_cs(int p)
 {if(p<hash_base)
@@ -4107,7 +4109,7 @@ printn_esc(text(p));print_char(' ');
 }
 
 /*:261*//*262:*/
-#line 5804 "texprof.w"
+#line 5806 "texprof.w"
 
 static void sprint_cs(pointer p)
 {if(p<hash_base)
@@ -4119,14 +4121,14 @@ else printn_esc(text(p));
 }
 
 /*:262*//*517:*/
-#line 10556 "texprof.w"
+#line 10558 "texprof.w"
 
 static void print_file_name(int n,int a,int e)
 {slow_print(a);slow_print(n);slow_print(e);
 }
 
 /*:517*//*698:*/
-#line 14327 "texprof.w"
+#line 14329 "texprof.w"
 
 static void print_size(int s)
 {if(s==text_size)print_esc("textfont");
@@ -4135,7 +4137,7 @@ else print_esc("scriptscriptfont");
 }
 
 /*:698*//*1354:*/
-#line 25551 "texprof.w"
+#line 25557 "texprof.w"
 
 static void print_write_whatsit(char*s,pointer p)
 {print_esc(s);
@@ -4146,7 +4148,7 @@ else print_char('-');
 }
 
 /*:1354*//*1504:*/
-#line 27599 "texprof.w"
+#line 27605 "texprof.w"
 
 static void print_sa_num(pointer q)
 {halfword n;
@@ -4158,7 +4160,7 @@ print_int(n);
 }
 
 /*:1504*//*1721:*/
-#line 30264 "texprof.w"
+#line 30270 "texprof.w"
 
 static void print_file_line(void)
 {int level= in_open;
@@ -4566,7 +4568,7 @@ result= true;
 not_found:return result;
 }
 /*1564:*/
-#line 28358 "texprof.w"
+#line 28364 "texprof.w"
 
 static void str_to_name(str_number s)
 {int k;
@@ -4828,13 +4830,13 @@ return xn_over_d;}
 /*:106*//*107:*/
 #line 2388 "texprof.w"
 /*1628:*/
-#line 29003 "texprof.w"
+#line 29009 "texprof.w"
 
 static scaled m_log(scaled x)
 {int y,z;
 int k;
 if(x<=0)/*1630:*/
-#line 29030 "texprof.w"
+#line 29036 "texprof.w"
 
 {print_err("Logarithm of ");
 
@@ -4845,7 +4847,7 @@ error();return 0;
 }
 
 /*:1630*/
-#line 29007 "texprof.w"
+#line 29013 "texprof.w"
 
 else{y= 1302456956+4-100;
 z= 27595+6553600;
@@ -4856,7 +4858,7 @@ while(x<mpfract_four)
 y= y+(z/unity);k= 2;
 while(x> mpfract_four+4)
 /*1629:*/
-#line 29022 "texprof.w"
+#line 29028 "texprof.w"
 
 {z= ((x-1)/two_to_the[k])+1;
 while(x<mpfract_four+z)
@@ -4866,14 +4868,14 @@ y= y+spec_log[k];x= x-z;
 }
 
 /*:1629*/
-#line 29017 "texprof.w"
+#line 29023 "texprof.w"
 ;
 return y/8;
 }
 }
 
 /*:1628*//*1632:*/
-#line 29075 "texprof.w"
+#line 29081 "texprof.w"
 
 static mpfract make_mpfract(int p,int q)
 {int f;
@@ -4888,7 +4890,7 @@ if(q<=0)
 #ifdef DEBUG
 if(q==0)confusion("/");
 #endif
-#line 29089 "texprof.w"
+#line 29095 "texprof.w"
 
 
 negate(q);negative= !negative;
@@ -4900,7 +4902,7 @@ if(negative)return-el_gordo;else return el_gordo;
 }
 else{n= (n-1)*mpfract_one;
 /*1633:*/
-#line 29117 "texprof.w"
+#line 29123 "texprof.w"
 
 f= 1;
 do{be_careful= p-q;p= be_careful+p;
@@ -4912,14 +4914,14 @@ be_careful= p-q;
 if(be_careful+p>=0)incr(f)
 
 /*:1633*/
-#line 29099 "texprof.w"
+#line 29105 "texprof.w"
 ;
 if(negative)return-(f+n);else return f+n;
 }
 }
 
 /*:1632*//*1634:*/
-#line 29132 "texprof.w"
+#line 29138 "texprof.w"
 
 static int take_mpfract(int q,mpfract f)
 {int p;
@@ -4927,7 +4929,7 @@ bool negative;
 int n;
 int be_careful;
 /*1635:*/
-#line 29155 "texprof.w"
+#line 29161 "texprof.w"
 
 if(f>=0)negative= false;
 else{negate(f);negative= true;
@@ -4937,7 +4939,7 @@ if(q<0)
 }
 
 /*:1635*/
-#line 29138 "texprof.w"
+#line 29144 "texprof.w"
 ;
 if(f<mpfract_one)n= 0;
 else{n= f/mpfract_one;f= f%mpfract_one;
@@ -4947,7 +4949,7 @@ else{arith_error= true;n= el_gordo;
 }
 f= f+mpfract_one;
 /*1636:*/
-#line 29168 "texprof.w"
+#line 29174 "texprof.w"
 
 p= mpfract_half;
 if(q<mpfract_four)
@@ -4959,7 +4961,7 @@ f= halfp(f);
 }while(!(f==1))
 
 /*:1636*/
-#line 29146 "texprof.w"
+#line 29152 "texprof.w"
 ;
 be_careful= n-el_gordo;
 if(be_careful+p> 0)
@@ -4970,7 +4972,7 @@ else return n+p;
 }
 
 /*:1634*//*1647:*/
-#line 29242 "texprof.w"
+#line 29248 "texprof.w"
 
 static void new_randoms(void)
 {int k;
@@ -4989,7 +4991,7 @@ j_random= 54;
 }
 
 /*:1647*//*1648:*/
-#line 29261 "texprof.w"
+#line 29267 "texprof.w"
 
 static void init_randoms(void)
 {mpfract j,jj,k;
@@ -5006,7 +5008,7 @@ new_randoms();new_randoms();new_randoms();
 }
 
 /*:1648*//*1649:*/
-#line 29283 "texprof.w"
+#line 29289 "texprof.w"
 
 static scaled unif_rand(scaled x)
 {scaled y;
@@ -5017,13 +5019,13 @@ else return-y;
 }
 
 /*:1649*//*1654:*/
-#line 29320 "texprof.w"
+#line 29326 "texprof.w"
 
 static int ab_vs_cd(int a,int b,int c,int d)
 {
 int q,r;
 /*1655:*/
-#line 29336 "texprof.w"
+#line 29342 "texprof.w"
 
 if(a<0)
 {negate(a);negate(b);
@@ -5045,7 +5047,7 @@ if(c==0)return_sign(0)else return_sign(-1);
 }
 
 /*:1655*/
-#line 29324 "texprof.w"
+#line 29330 "texprof.w"
 ;
 loop{q= a/d;r= c/b;
 if(q!=r)
@@ -5059,7 +5061,7 @@ a= b;b= q;c= d;d= r;
 }
 
 /*:1654*//*1656:*/
-#line 29360 "texprof.w"
+#line 29366 "texprof.w"
 
 static scaled norm_rand(void)
 {int x,u,l;
@@ -5093,7 +5095,7 @@ else return(r*r*r+0400000)/01000000;
 }
 
 /*:107*//*113:*/
-#line 2563 "texprof.w"
+#line 2565 "texprof.w"
 
 #ifdef DEBUG
 static void print_word(memory_word w)
@@ -5108,12 +5110,12 @@ print_int(w.qqqq.b0);print_char(':');print_int(w.qqqq.b1);print_char(':');
 print_int(w.qqqq.b2);print_char(':');print_int(w.qqqq.b3);
 }
 #endif
-#line 2577 "texprof.w"
+#line 2579 "texprof.w"
 
 /*:113*//*118:*/
-#line 2673 "texprof.w"
+#line 2675 "texprof.w"
 /*291:*/
-#line 6535 "texprof.w"
+#line 6537 "texprof.w"
 
 static void show_token_list(int p,int q,int l)
 {
@@ -5123,14 +5125,14 @@ ASCII_code n;
 match_chr= '#';n= '0';tally= 0;
 while((p!=null)&&(tally<l))
 {if(p==q)/*319:*/
-#line 7258 "texprof.w"
+#line 7260 "texprof.w"
 set_trick_count
 
 /*:319*/
-#line 6543 "texprof.w"
+#line 6545 "texprof.w"
 ;
 /*292:*/
-#line 6552 "texprof.w"
+#line 6554 "texprof.w"
 
 if((p<hi_mem_min)||(p> mem_end))
 {print_esc("CLOBBERED.");return;
@@ -5141,7 +5143,7 @@ else{m= info(p)/0400;c= info(p)%0400;
 if(info(p)<0)print_esc("BAD.");
 
 else/*293:*/
-#line 6568 "texprof.w"
+#line 6570 "texprof.w"
 
 switch(m){
 case left_brace:case right_brace:case math_shift:
@@ -5165,12 +5167,12 @@ default:print_esc("BAD.");
 }
 
 /*:293*/
-#line 6561 "texprof.w"
+#line 6563 "texprof.w"
 ;
 }
 
 /*:292*/
-#line 6544 "texprof.w"
+#line 6546 "texprof.w"
 ;
 p= link(p);
 }
@@ -5180,10 +5182,10 @@ if(p!=null)print_esc("ETC.");
 }
 
 /*:291*/
-#line 2673 "texprof.w"
+#line 2675 "texprof.w"
 
 /*305:*/
-#line 6914 "texprof.w"
+#line 6916 "texprof.w"
 
 static void runaway(void)
 {pointer p;
@@ -5205,11 +5207,11 @@ print_char('?');print_ln();show_token_list(link(p),null,error_line-10);
 }
 
 /*:305*/
-#line 2674 "texprof.w"
+#line 2676 "texprof.w"
 
 
 /*:118*//*119:*/
-#line 2685 "texprof.w"
+#line 2687 "texprof.w"
 static pointer get_avail(void)
 {pointer p;
 p= avail;
@@ -5229,13 +5231,13 @@ link(p)= null;
 #ifdef STAT
 incr(dyn_used);
 #endif
-#line 2704 "texprof.w"
+#line 2706 "texprof.w"
 
 return p;
 }
 
 /*:119*//*122:*/
-#line 2734 "texprof.w"
+#line 2736 "texprof.w"
 static void flush_list(pointer p)
 
 {pointer q,r;
@@ -5245,14 +5247,14 @@ do{q= r;r= link(r);
 #ifdef STAT
 decr(dyn_used);
 #endif
-#line 2743 "texprof.w"
+#line 2745 "texprof.w"
 }while(!(r==null));
 link(q)= avail;avail= p;
 }
 }
 
 /*:122*//*124:*/
-#line 2781 "texprof.w"
+#line 2783 "texprof.w"
 static pointer get_node(int s)
 {
 pointer p;
@@ -5261,7 +5263,7 @@ int r;
 int t;
 restart:p= rover;
 do{/*126:*/
-#line 2831 "texprof.w"
+#line 2833 "texprof.w"
 
 q= p+node_size(p);
 
@@ -5273,7 +5275,7 @@ q= q+node_size(q);
 }
 r= q-s;
 if(r> p+1)/*127:*/
-#line 2846 "texprof.w"
+#line 2848 "texprof.w"
 
 {node_size(p)= r-p;
 
@@ -5282,11 +5284,11 @@ goto found;
 }
 
 /*:127*/
-#line 2841 "texprof.w"
+#line 2843 "texprof.w"
 ;
 if(r==p)if(rlink(p)!=p)
 /*128:*/
-#line 2855 "texprof.w"
+#line 2857 "texprof.w"
 
 {rover= rlink(p);t= llink(p);
 llink(rover)= t;rlink(t)= rover;
@@ -5294,12 +5296,12 @@ goto found;
 }
 
 /*:128*/
-#line 2843 "texprof.w"
+#line 2845 "texprof.w"
 ;
 node_size(p)= q-p
 
 /*:126*/
-#line 2789 "texprof.w"
+#line 2791 "texprof.w"
 ;
 
 p= rlink(p);
@@ -5309,7 +5311,7 @@ if(s==010000000000)
 }
 if(lo_mem_max+2<hi_mem_min)if(lo_mem_max+2<=mem_bot+max_halfword)
 /*125:*/
-#line 2816 "texprof.w"
+#line 2818 "texprof.w"
 
 {if(hi_mem_min-lo_mem_max>=1998)t= lo_mem_max+1000;
 else t= lo_mem_max+1+(hi_mem_min-lo_mem_max)/2;
@@ -5322,7 +5324,7 @@ rover= q;goto restart;
 }
 
 /*:125*/
-#line 2797 "texprof.w"
+#line 2799 "texprof.w"
 ;
 overflow("main memory size",mem_max+1-mem_min);
 
@@ -5331,13 +5333,13 @@ found:link(r)= null;
 #ifdef STAT
 var_used= var_used+s;
 #endif
-#line 2805 "texprof.w"
+#line 2807 "texprof.w"
 
 return r;
 }
 
 /*:124*//*129:*/
-#line 2866 "texprof.w"
+#line 2868 "texprof.w"
 static void free_node(pointer p,halfword s)
 
 {pointer q;
@@ -5347,12 +5349,12 @@ llink(rover)= p;rlink(q)= p;
 #ifdef STAT
 var_used= var_used-s;
 #endif
-#line 2875 "texprof.w"
+#line 2877 "texprof.w"
 
 }
 
 /*:129*//*130:*/
-#line 2883 "texprof.w"
+#line 2885 "texprof.w"
 
 #ifdef INIT
 static void sort_avail(void)
@@ -5362,7 +5364,7 @@ pointer old_rover;
 p= get_node(010000000000);
 p= rlink(rover);rlink(rover)= max_halfword;old_rover= rover;
 while(p!=old_rover)/*131:*/
-#line 2905 "texprof.w"
+#line 2907 "texprof.w"
 
 if(p<rover)
 {q= p;p= rlink(q);rlink(q)= rover;rover= q;
@@ -5373,7 +5375,7 @@ r= rlink(p);rlink(p)= rlink(q);rlink(q)= p;p= r;
 }
 
 /*:131*/
-#line 2892 "texprof.w"
+#line 2894 "texprof.w"
 ;
 p= rover;
 while(rlink(p)!=max_halfword)
@@ -5382,10 +5384,10 @@ while(rlink(p)!=max_halfword)
 rlink(p)= rover;llink(rover)= p;
 }
 #endif
-#line 2900 "texprof.w"
+#line 2902 "texprof.w"
 
 /*:130*//*135:*/
-#line 3014 "texprof.w"
+#line 3016 "texprof.w"
 static pointer new_null_box(void)
 {pointer p;
 p= get_node(box_node_size);type(p)= hlist_node;
@@ -5396,7 +5398,7 @@ return p;
 }
 
 /*:135*//*138:*/
-#line 3044 "texprof.w"
+#line 3046 "texprof.w"
 static pointer new_rule(void)
 {pointer p;
 p= get_node(rule_node_size);type(p)= rule_node;
@@ -5406,7 +5408,7 @@ return p;
 }
 
 /*:138*//*143:*/
-#line 3113 "texprof.w"
+#line 3115 "texprof.w"
 static pointer new_ligature(quarterword f,quarterword c,pointer q)
 {pointer p;
 p= get_node(small_node_size);type(p)= ligature_node;
@@ -5421,7 +5423,7 @@ return p;
 }
 
 /*:143*//*144:*/
-#line 3148 "texprof.w"
+#line 3150 "texprof.w"
 static pointer new_disc(void)
 {pointer p;
 p= get_node(small_node_size);type(p)= disc_node;
@@ -5430,7 +5432,7 @@ return p;
 }
 
 /*:144*//*146:*/
-#line 3182 "texprof.w"
+#line 3184 "texprof.w"
 static pointer new_math(scaled w,small_number s)
 {pointer p;
 p= get_node(small_node_size);type(p)= math_node;
@@ -5438,7 +5440,7 @@ subtype(p)= s;width(p)= w;return p;
 }
 
 /*:146*//*150:*/
-#line 3264 "texprof.w"
+#line 3266 "texprof.w"
 static pointer new_spec(pointer p)
 {pointer q;
 q= get_node(glue_spec_size);
@@ -5448,25 +5450,25 @@ return q;
 }
 
 /*:150*//*151:*/
-#line 3277 "texprof.w"
+#line 3279 "texprof.w"
 static pointer new_param_glue(small_number n)
 {pointer p;
 pointer q;
 p= get_node(small_node_size);type(p)= glue_node;subtype(p)= n+1;
 leader_ptr(p)= null;
 q= /*223:*/
-#line 4742 "texprof.w"
+#line 4744 "texprof.w"
 glue_par(n)
 
 /*:223*/
-#line 3282 "texprof.w"
+#line 3284 "texprof.w"
 ;
 glue_ptr(p)= q;incr(glue_ref_count(q));
 return p;
 }
 
 /*:151*//*152:*/
-#line 3290 "texprof.w"
+#line 3292 "texprof.w"
 static pointer new_glue(pointer q)
 {pointer p;
 p= get_node(small_node_size);type(p)= glue_node;subtype(p)= normal;
@@ -5475,22 +5477,22 @@ return p;
 }
 
 /*:152*//*153:*/
-#line 3304 "texprof.w"
+#line 3306 "texprof.w"
 static pointer new_skip_param(small_number n)
 {pointer p;
 temp_ptr= new_spec(/*223:*/
-#line 4742 "texprof.w"
+#line 4744 "texprof.w"
 glue_par(n)
 
 /*:223*/
-#line 3306 "texprof.w"
+#line 3308 "texprof.w"
 );
 p= new_glue(temp_ptr);glue_ref_count(temp_ptr)= null;subtype(p)= n+1;
 return p;
 }
 
 /*:153*//*155:*/
-#line 3328 "texprof.w"
+#line 3330 "texprof.w"
 static pointer new_kern(scaled w)
 {pointer p;
 p= get_node(small_node_size);type(p)= kern_node;
@@ -5500,7 +5502,7 @@ return p;
 }
 
 /*:155*//*157:*/
-#line 3351 "texprof.w"
+#line 3353 "texprof.w"
 static pointer new_penalty(int m)
 {pointer p;
 p= get_node(small_node_size);type(p)= penalty_node;
@@ -5509,7 +5511,7 @@ penalty(p)= m;return p;
 }
 
 /*:157*//*166:*/
-#line 3496 "texprof.w"
+#line 3498 "texprof.w"
 
 #ifdef DEBUG
 static void check_mem(bool print_locs)
@@ -5520,7 +5522,7 @@ for(p= mem_min;p<=lo_mem_max;p++)is_free[p]= false;
 
 for(p= hi_mem_min;p<=mem_end;p++)is_free[p]= false;
 /*167:*/
-#line 3516 "texprof.w"
+#line 3518 "texprof.w"
 
 p= avail;q= null;clobbered= false;
 while(p!=null)
@@ -5536,10 +5538,10 @@ is_free[p]= true;q= p;p= link(q);
 done1:
 
 /*:167*/
-#line 3505 "texprof.w"
+#line 3507 "texprof.w"
 ;
 /*168:*/
-#line 3530 "texprof.w"
+#line 3532 "texprof.w"
 
 p= rover;q= null;clobbered= false;
 do{if((p>=lo_mem_max)||(p<mem_min))clobbered= true;
@@ -5563,10 +5565,10 @@ q= p;p= rlink(p);
 done2:
 
 /*:168*/
-#line 3506 "texprof.w"
+#line 3508 "texprof.w"
 ;
 /*169:*/
-#line 3552 "texprof.w"
+#line 3554 "texprof.w"
 
 p= mem_min;
 while(p<=lo_mem_max)
@@ -5579,10 +5581,10 @@ while((p<=lo_mem_max)&&is_free[p])incr(p);
 }
 
 /*:169*/
-#line 3507 "texprof.w"
+#line 3509 "texprof.w"
 ;
 if(print_locs)/*170:*/
-#line 3563 "texprof.w"
+#line 3565 "texprof.w"
 
 {print_nl("New busy locs:");
 for(p= mem_min;p<=lo_mem_max;p++)
@@ -5597,7 +5599,7 @@ if(!is_free[p]&&
 }
 
 /*:170*/
-#line 3508 "texprof.w"
+#line 3510 "texprof.w"
 ;
 for(p= mem_min;p<=lo_mem_max;p++)was_free[p]= is_free[p];
 for(p= hi_mem_min;p<=mem_end;p++)was_free[p]= is_free[p];
@@ -5605,10 +5607,10 @@ for(p= hi_mem_min;p<=mem_end;p++)was_free[p]= is_free[p];
 was_mem_end= mem_end;was_lo_max= lo_mem_max;was_hi_min= hi_mem_min;
 }
 #endif
-#line 3515 "texprof.w"
+#line 3517 "texprof.w"
 
 /*:166*//*171:*/
-#line 3585 "texprof.w"
+#line 3587 "texprof.w"
 
 #ifdef DEBUG
 static void search_mem(pointer p)
@@ -5630,7 +5632,7 @@ if(info(q)==p)
 }
 }
 /*254:*/
-#line 5651 "texprof.w"
+#line 5653 "texprof.w"
 
 for(q= active_base;q<=box_base+255;q++)
 {if(equiv(q)==p)
@@ -5639,10 +5641,10 @@ for(q= active_base;q<=box_base+255;q++)
 }
 
 /*:254*/
-#line 3605 "texprof.w"
+#line 3607 "texprof.w"
 ;
 /*284:*/
-#line 6384 "texprof.w"
+#line 6386 "texprof.w"
 
 if(save_ptr> 0)for(q= 0;q<=save_ptr-1;q++)
 {if(equiv_field(save_stack[q])==p)
@@ -5651,10 +5653,10 @@ if(save_ptr> 0)for(q= 0;q<=save_ptr-1;q++)
 }
 
 /*:284*/
-#line 3606 "texprof.w"
+#line 3608 "texprof.w"
 ;
 /*932:*/
-#line 18826 "texprof.w"
+#line 18828 "texprof.w"
 
 for(q= 0;q<=hyph_size;q++)
 {if(hyph_list[q]==p)
@@ -5663,14 +5665,14 @@ for(q= 0;q<=hyph_size;q++)
 }
 
 /*:932*/
-#line 3607 "texprof.w"
+#line 3609 "texprof.w"
 ;
 }
 #endif
-#line 3610 "texprof.w"
+#line 3612 "texprof.w"
 
 /*:171*//*173:*/
-#line 3635 "texprof.w"
+#line 3637 "texprof.w"
 static void short_display(int p)
 {int n;
 while(p> mem_min)
@@ -5681,12 +5683,12 @@ while(p> mem_min)
 print_char('*');
 
 else/*266:*/
-#line 6011 "texprof.w"
+#line 6013 "texprof.w"
 
 printn_esc(font_id_text(font(p)))
 
 /*:266*/
-#line 3644 "texprof.w"
+#line 3646 "texprof.w"
 ;
 print_char(' ');font_in_short_display= font(p);
 }
@@ -5694,7 +5696,7 @@ print_ASCII(qo(character(p)));
 }
 }
 else/*174:*/
-#line 3655 "texprof.w"
+#line 3657 "texprof.w"
 
 switch(type(p)){
 case hlist_node:case vlist_node:case ins_node:
@@ -5716,25 +5718,25 @@ default:do_nothing;
 }
 
 /*:174*/
-#line 3650 "texprof.w"
+#line 3652 "texprof.w"
 ;
 p= link(p);
 }
 }
 
 /*:173*//*175:*/
-#line 3679 "texprof.w"
+#line 3681 "texprof.w"
 static void print_font_and_char(int p)
 {if(p> mem_end)print_esc("CLOBBERED.");
 else{if((font(p)<font_base)||(font(p)> font_max))print_char('*');
 
 else/*266:*/
-#line 6011 "texprof.w"
+#line 6013 "texprof.w"
 
 printn_esc(font_id_text(font(p)))
 
 /*:266*/
-#line 3683 "texprof.w"
+#line 3685 "texprof.w"
 ;
 print_char(' ');print_ASCII(qo(character(p)));
 }
@@ -5753,7 +5755,7 @@ static void print_rule_dimen(scaled d)
 }
 
 /*:175*//*176:*/
-#line 3703 "texprof.w"
+#line 3705 "texprof.w"
 static void print_glue(scaled d,int order,char*s)
 
 {print_scaled(d);
@@ -5768,7 +5770,7 @@ else if(s!=0)print(s);
 }
 
 /*:176*//*177:*/
-#line 3718 "texprof.w"
+#line 3720 "texprof.w"
 static void print_spec(int p,char*s)
 
 {if((p<mem_min)||(p>=lo_mem_max))print_char('*');
@@ -5785,9 +5787,9 @@ if(shrink(p)!=0)
 }
 
 /*:177*//*178:*/
-#line 3736 "texprof.w"
+#line 3738 "texprof.w"
 /*690:*/
-#line 14148 "texprof.w"
+#line 14150 "texprof.w"
 
 static void print_fam_and_char(pointer p)
 {print_esc("fam");print_int(fam(p));print_char(' ');
@@ -5803,7 +5805,7 @@ else print_hex(a);
 }
 
 /*:690*//*691:*/
-#line 14169 "texprof.w"
+#line 14171 "texprof.w"
 
 static void show_info(void);
 static void print_subsidiary_data(pointer p,ASCII_code c)
@@ -5828,7 +5830,7 @@ flush_char;
 }
 
 /*:691*//*693:*/
-#line 14206 "texprof.w"
+#line 14208 "texprof.w"
 
 static void print_style(int c)
 {switch(c/2){
@@ -5841,10 +5843,10 @@ default:print("Unknown style!");
 }
 
 /*:693*/
-#line 3736 "texprof.w"
+#line 3738 "texprof.w"
 
 /*224:*/
-#line 4748 "texprof.w"
+#line 4750 "texprof.w"
 
 static void print_skip_param(int n)
 {switch(n){
@@ -5871,11 +5873,11 @@ default:print("[unknown glue parameter!]");
 }
 
 /*:224*/
-#line 3737 "texprof.w"
+#line 3739 "texprof.w"
 
 
 /*:178*//*181:*/
-#line 3774 "texprof.w"
+#line 3776 "texprof.w"
 static void show_node_list(int p)
 {
 int n;
@@ -5897,12 +5899,12 @@ incr(n);if(n> breadth_max)
 
 }
 /*182:*/
-#line 3800 "texprof.w"
+#line 3802 "texprof.w"
 
 if(is_char_node(p))print_font_and_char(p);
 else switch(type(p)){
 case hlist_node:case vlist_node:case unset_node:/*183:*/
-#line 3819 "texprof.w"
+#line 3821 "texprof.w"
 
 {if(type(p)==hlist_node)print_esc("h");
 else if(type(p)==vlist_node)print_esc("v");
@@ -5911,7 +5913,7 @@ print("box(");print_scaled(height(p));print_char('+');
 print_scaled(depth(p));print(")x");print_scaled(width(p));
 if(type(p)==unset_node)
 /*184:*/
-#line 3835 "texprof.w"
+#line 3837 "texprof.w"
 
 {if(span_count(p)!=min_quarterword)
 {print(" (");print_int(qo(span_count(p))+1);
@@ -5926,10 +5928,10 @@ if(glue_shrink(p)!=0)
 }
 
 /*:184*/
-#line 3826 "texprof.w"
+#line 3828 "texprof.w"
 
 else{/*185:*/
-#line 3858 "texprof.w"
+#line 3860 "texprof.w"
 
 g= unfix(glue_set(p));
 if((g!=float_constant(0))&&(glue_sign(p)!=normal))
@@ -5946,7 +5948,7 @@ else print_glue(round(unity*g),glue_order(p),0);
 }
 
 /*:185*/
-#line 3827 "texprof.w"
+#line 3829 "texprof.w"
 ;
 if(shift_amount(p)!=0)
 {print(", shifted ");print_scaled(shift_amount(p));
@@ -5956,20 +5958,20 @@ node_list_display(list_ptr(p));
 }
 
 /*:183*/
-#line 3803 "texprof.w"
+#line 3805 "texprof.w"
 break;
 case rule_node:/*186:*/
-#line 3873 "texprof.w"
+#line 3875 "texprof.w"
 
 {print_esc("rule(");print_rule_dimen(height(p));print_char('+');
 print_rule_dimen(depth(p));print(")x");print_rule_dimen(width(p));
 }
 
 /*:186*/
-#line 3804 "texprof.w"
+#line 3806 "texprof.w"
 break;
 case ins_node:/*187:*/
-#line 3878 "texprof.w"
+#line 3880 "texprof.w"
 
 {print_esc("insert");print_int(qo(subtype(p)));
 print(", natural size ");print_scaled(height(p));
@@ -5980,10 +5982,10 @@ node_list_display(ins_ptr(p));
 }
 
 /*:187*/
-#line 3805 "texprof.w"
+#line 3807 "texprof.w"
 break;
 case whatsit_node:/*1355:*/
-#line 25560 "texprof.w"
+#line 25566 "texprof.w"
 
 switch(subtype(p)){
 case open_node:{print_write_whatsit("openout",p);
@@ -6005,24 +6007,24 @@ print_int(what_lhm(p));print_char(',');
 print_int(what_rhm(p));print_char(')');
 }break;
 /*1675:*/
-#line 29497 "texprof.w"
+#line 29503 "texprof.w"
 
 case save_pos_code:print_esc("savepos");break;
 
 /*:1675*/
-#line 25580 "texprof.w"
+#line 25586 "texprof.w"
 
 default:print("whatsit?");
 }
 
 /*:1355*/
-#line 3806 "texprof.w"
+#line 3808 "texprof.w"
 break;
 case glue_node:/*188:*/
-#line 3887 "texprof.w"
+#line 3889 "texprof.w"
 
 if(subtype(p)>=a_leaders)/*189:*/
-#line 3905 "texprof.w"
+#line 3907 "texprof.w"
 
 {print_esc("");
 if(subtype(p)==c_leaders)print_char('c');
@@ -6032,7 +6034,7 @@ node_list_display(leader_ptr(p));
 }
 
 /*:189*/
-#line 3888 "texprof.w"
+#line 3890 "texprof.w"
 
 else{print_esc("glue");
 if(subtype(p)!=normal)
@@ -6051,10 +6053,10 @@ else print_spec(glue_ptr(p),"mu");
 }
 
 /*:188*/
-#line 3807 "texprof.w"
+#line 3809 "texprof.w"
 break;
 case kern_node:/*190:*/
-#line 3915 "texprof.w"
+#line 3917 "texprof.w"
 
 if(subtype(p)!=mu_glue)
 {print_esc("kern");
@@ -6067,10 +6069,10 @@ else{print_esc("mkern");print_scaled(width(p));print("mu");
 }
 
 /*:190*/
-#line 3808 "texprof.w"
+#line 3810 "texprof.w"
 break;
 case math_node:/*191:*/
-#line 3926 "texprof.w"
+#line 3928 "texprof.w"
 
 {print_esc("math");
 if(subtype(p)==before)print("on");
@@ -6081,10 +6083,10 @@ if(width(p)!=0)
 }
 
 /*:191*/
-#line 3809 "texprof.w"
+#line 3811 "texprof.w"
 break;
 case ligature_node:/*192:*/
-#line 3935 "texprof.w"
+#line 3937 "texprof.w"
 
 {print_font_and_char(lig_char(p));print(" (ligature ");
 if(subtype(p)> 1)print_char('|');
@@ -6094,19 +6096,19 @@ print_char(')');
 }
 
 /*:192*/
-#line 3810 "texprof.w"
+#line 3812 "texprof.w"
 break;
 case penalty_node:/*193:*/
-#line 3943 "texprof.w"
+#line 3945 "texprof.w"
 
 {print_esc("penalty ");print_int(penalty(p));
 }
 
 /*:193*/
-#line 3811 "texprof.w"
+#line 3813 "texprof.w"
 break;
 case disc_node:/*194:*/
-#line 3950 "texprof.w"
+#line 3952 "texprof.w"
 
 {print_esc("discretionary");
 if(replace_count(p)> 0)
@@ -6117,10 +6119,10 @@ append_char('|');show_node_list(post_break(p));flush_char;
 }
 
 /*:194*/
-#line 3812 "texprof.w"
+#line 3814 "texprof.w"
 break;
 case mark_node:/*195:*/
-#line 3959 "texprof.w"
+#line 3961 "texprof.w"
 
 {print_esc("mark");
 if(mark_class(p)!=0)
@@ -6130,23 +6132,23 @@ print_mark(mark_ptr(p));
 }
 
 /*:195*/
-#line 3813 "texprof.w"
+#line 3815 "texprof.w"
 break;
 case adjust_node:/*196:*/
-#line 3967 "texprof.w"
+#line 3969 "texprof.w"
 
 {print_esc("vadjust");node_list_display(adjust_ptr(p));
 }
 
 /*:196*/
-#line 3814 "texprof.w"
+#line 3816 "texprof.w"
 break;
 /*689:*/
-#line 14135 "texprof.w"
+#line 14137 "texprof.w"
 
 case style_node:print_style(subtype(p));break;
 case choice_node:/*694:*/
-#line 14217 "texprof.w"
+#line 14219 "texprof.w"
 
 {print_esc("mathchoice");
 append_char('D');show_node_list(display_mlist(p));flush_char;
@@ -6156,7 +6158,7 @@ append_char('s');show_node_list(script_script_mlist(p));flush_char;
 }
 
 /*:694*/
-#line 14137 "texprof.w"
+#line 14139 "texprof.w"
 break;
 case ord_noad:case op_noad:case bin_noad:
 case rel_noad:case open_noad:case close_noad:
@@ -6164,7 +6166,7 @@ case punct_noad:case inner_noad:
 case radical_noad:case over_noad:case under_noad:
 case vcenter_noad:case accent_noad:
 case left_noad:case right_noad:/*695:*/
-#line 14225 "texprof.w"
+#line 14227 "texprof.w"
 
 {switch(type(p)){
 case ord_noad:print_esc("mathord");break;
@@ -6200,10 +6202,10 @@ print_subsidiary_data(subscr(p),'_');
 }
 
 /*:695*/
-#line 14143 "texprof.w"
+#line 14145 "texprof.w"
 break;
 case fraction_noad:/*696:*/
-#line 14259 "texprof.w"
+#line 14261 "texprof.w"
 
 {print_esc("fraction, thickness ");
 if(thickness(p)==default_code)print("= default");
@@ -6225,17 +6227,17 @@ print_subsidiary_data(denominator(p),'/');
 }
 
 /*:696*/
-#line 14144 "texprof.w"
+#line 14146 "texprof.w"
 break;
 
 /*:689*/
-#line 3815 "texprof.w"
+#line 3817 "texprof.w"
 
 default:print("Unknown node type!");
 }
 
 /*:182*/
-#line 3794 "texprof.w"
+#line 3796 "texprof.w"
 ;
 p= link(p);
 }
@@ -6243,16 +6245,16 @@ p= link(p);
 }
 
 /*:181*//*197:*/
-#line 3974 "texprof.w"
+#line 3976 "texprof.w"
 static void show_box(pointer p)
 {/*235:*/
-#line 5207 "texprof.w"
+#line 5209 "texprof.w"
 
 depth_threshold= show_box_depth;
 breadth_max= show_box_breadth
 
 /*:235*/
-#line 3975 "texprof.w"
+#line 3977 "texprof.w"
 ;
 if(breadth_max<=0)breadth_max= 5;
 if(pool_ptr+depth_threshold>=pool_size)
@@ -6263,7 +6265,7 @@ print_ln();
 }
 
 /*:197*//*199:*/
-#line 3998 "texprof.w"
+#line 4000 "texprof.w"
 static void delete_token_ref(pointer p)
 
 {if(token_ref_count(p)==null)flush_list(p);
@@ -6271,12 +6273,12 @@ else decr(token_ref_count(p));
 }
 
 /*:199*//*200:*/
-#line 4012 "texprof.w"
+#line 4014 "texprof.w"
 static void delete_glue_ref(pointer p)
 fast_delete_glue_ref(p)
 
 /*:200*//*201:*/
-#line 4020 "texprof.w"
+#line 4022 "texprof.w"
 static void flush_node_list(pointer p)
 {
 pointer q;
@@ -6296,7 +6298,7 @@ delete_glue_ref(split_top_ptr(p));
 free_node(p,ins_node_size);goto done;
 }
 case whatsit_node:/*1357:*/
-#line 25599 "texprof.w"
+#line 25605 "texprof.w"
 
 {switch(subtype(p)){
 case open_node:free_node(p,open_node_size);break;
@@ -6305,12 +6307,12 @@ free_node(p,write_node_size);goto done;
 }
 case close_node:case language_node:free_node(p,small_node_size);break;
 /*1677:*/
-#line 29505 "texprof.w"
+#line 29511 "texprof.w"
 
 case save_pos_code:free_node(p,small_node_size);break;
 
 /*:1677*/
-#line 25606 "texprof.w"
+#line 25612 "texprof.w"
 
 default:confusion("ext3");
 
@@ -6319,7 +6321,7 @@ goto done;
 }
 
 /*:1357*/
-#line 4038 "texprof.w"
+#line 4040 "texprof.w"
 
 case glue_node:{fast_delete_glue_ref(glue_ptr(p));
 if(leader_ptr(p)!=null)flush_node_list(leader_ptr(p));
@@ -6332,7 +6334,7 @@ flush_node_list(post_break(p));
 }break;
 case adjust_node:flush_node_list(adjust_ptr(p));break;
 /*697:*/
-#line 14281 "texprof.w"
+#line 14283 "texprof.w"
 
 case style_node:{free_node(p,style_node_size);goto done;
 }
@@ -6366,7 +6368,7 @@ free_node(p,fraction_noad_size);goto done;
 }
 
 /*:697*/
-#line 4049 "texprof.w"
+#line 4051 "texprof.w"
 
 default:confusion("flushing");
 
@@ -6378,7 +6380,7 @@ p= q;
 }
 
 /*:201*//*203:*/
-#line 4083 "texprof.w"
+#line 4085 "texprof.w"
 static pointer copy_node_list(pointer p)
 
 {pointer h;
@@ -6388,12 +6390,12 @@ int words;
 h= get_avail();q= h;
 while(p!=null)
 {/*204:*/
-#line 4098 "texprof.w"
+#line 4100 "texprof.w"
 
 words= 1;
 if(is_char_node(p))r= get_avail();
 else/*205:*/
-#line 4107 "texprof.w"
+#line 4109 "texprof.w"
 
 switch(type(p)){
 case hlist_node:case vlist_node:case unset_node:{r= get_node(box_node_size);
@@ -6409,7 +6411,7 @@ ins_ptr(r)= copy_node_list(ins_ptr(p));
 words= ins_node_size-1;
 }break;
 case whatsit_node:/*1356:*/
-#line 25584 "texprof.w"
+#line 25590 "texprof.w"
 
 switch(subtype(p)){
 case open_node:{r= get_node(open_node_size);words= open_node_size;
@@ -6421,21 +6423,21 @@ case close_node:case language_node:{r= get_node(small_node_size);
 words= small_node_size;
 }break;
 /*1676:*/
-#line 29500 "texprof.w"
+#line 29506 "texprof.w"
 
 case save_pos_code:{r= get_node(small_node_size);
 words= small_node_size;
 }break;
 
 /*:1676*/
-#line 25594 "texprof.w"
+#line 25600 "texprof.w"
 
 default:confusion("ext2");
 
 }
 
 /*:1356*/
-#line 4122 "texprof.w"
+#line 4124 "texprof.w"
 break;
 case glue_node:{r= get_node(small_node_size);add_glue_ref(glue_ptr(p));
 glue_ptr(r)= glue_ptr(p);leader_ptr(r)= copy_node_list(leader_ptr(p));
@@ -6462,14 +6464,14 @@ default:confusion("copying");
 }
 
 /*:205*/
-#line 4102 "texprof.w"
+#line 4104 "texprof.w"
 ;
 while(words> 0)
 {decr(words);mem[r+words]= mem[p+words];
 }
 
 /*:204*/
-#line 4091 "texprof.w"
+#line 4093 "texprof.w"
 ;
 link(q)= r;q= r;p= link(p);
 }
@@ -6478,7 +6480,7 @@ return q;
 }
 
 /*:203*//*210:*/
-#line 4365 "texprof.w"
+#line 4367 "texprof.w"
 static void print_mode(int m)
 {if(m> 0)
 switch(m/(max_command+1)){
@@ -6496,7 +6498,7 @@ print(" mode");
 }
 
 /*:210*//*215:*/
-#line 4492 "texprof.w"
+#line 4494 "texprof.w"
 static void push_nest(void)
 {if(nest_ptr> max_nest_stack)
 {max_nest_stack= nest_ptr;
@@ -6509,13 +6511,13 @@ eTeX_aux= null;
 }
 
 /*:215*//*216:*/
-#line 4508 "texprof.w"
+#line 4510 "texprof.w"
 static void pop_nest(void)
 {free_avail(head);decr(nest_ptr);cur_list= nest[nest_ptr];
 }
 
 /*:216*//*217:*/
-#line 4514 "texprof.w"
+#line 4516 "texprof.w"
 static void print_totals(void);
 static void show_activities(void)
 {int p;
@@ -6538,7 +6540,7 @@ print_char(')');
 if(nest[p].ml_field<0)print(" (\\output routine)");
 if(p==0)
 {/*985:*/
-#line 19899 "texprof.w"
+#line 19901 "texprof.w"
 
 if(page_head!=page_tail)
 {print_nl("### current page:");
@@ -6570,14 +6572,14 @@ r= link(r);
 }
 
 /*:985*/
-#line 4535 "texprof.w"
+#line 4537 "texprof.w"
 ;
 if(link(contrib_head)!=null)
 print_nl("### recent contributions:");
 }
 show_box(link(nest[p].head_field));
 /*218:*/
-#line 4544 "texprof.w"
+#line 4546 "texprof.w"
 
 switch(abs(m)/(max_command+1)){
 case 0:{print_nl("prevdepth ");
@@ -6600,13 +6602,13 @@ case 2:if(a.i!=null)
 }
 
 /*:218*/
-#line 4540 "texprof.w"
+#line 4542 "texprof.w"
 ;
 }
 }
 
 /*:217*//*236:*/
-#line 5213 "texprof.w"
+#line 5215 "texprof.w"
 static void print_param(int n)
 {switch(n){
 case pretolerance_code:print_esc("pretolerance");break;
@@ -6665,7 +6667,7 @@ case right_hyphen_min_code:print_esc("righthyphenmin");break;
 case holding_inserts_code:print_esc("holdinginserts");break;
 case error_context_lines_code:print_esc("errorcontextlines");break;
 /*1389:*/
-#line 25943 "texprof.w"
+#line 25949 "texprof.w"
 
 case tracing_assigns_code:print_esc("tracingassigns");break;
 case tracing_groups_code:print_esc("tracinggroups");break;
@@ -6676,19 +6678,19 @@ case saving_vdiscards_code:print_esc("savingvdiscards");break;
 case saving_hyph_codes_code:print_esc("savinghyphcodes");break;
 
 /*:1389*//*1539:*/
-#line 28148 "texprof.w"
+#line 28154 "texprof.w"
 
 case expand_depth_code:print_esc("expanddepth");break;
 
 /*:1539*/
-#line 5270 "texprof.w"
+#line 5272 "texprof.w"
 
 default:print("[unknown integer parameter!]");
 }
 }
 
 /*:236*//*240:*/
-#line 5421 "texprof.w"
+#line 5423 "texprof.w"
 static void fix_date_and_time(void)
 {struct tm*t= tl_now();
 time= sys_time= t->tm_hour*60+t->tm_min;
@@ -6698,7 +6700,7 @@ year= sys_year= t->tm_year+1900;
 }
 
 /*:240*//*244:*/
-#line 5447 "texprof.w"
+#line 5449 "texprof.w"
 static void begin_diagnostic(void)
 {old_setting= selector;
 if((tracing_online<=0)&&(selector==term_and_log))
@@ -6715,7 +6717,7 @@ selector= old_setting;
 }
 
 /*:244*//*246:*/
-#line 5526 "texprof.w"
+#line 5528 "texprof.w"
 static void print_length_param(int n)
 {switch(n){
 case par_indent_code:print_esc("parindent");break;
@@ -6746,9 +6748,9 @@ default:print("[unknown dimen parameter!]");
 }
 
 /*:246*//*251:*/
-#line 5620 "texprof.w"
+#line 5622 "texprof.w"
 /*297:*/
-#line 6678 "texprof.w"
+#line 6680 "texprof.w"
 
 static void print_cmd_chr(quarterword cmd,halfword chr_code)
 {int n;
@@ -6764,7 +6766,7 @@ case spacer:chr_cmd("blank space ")break;
 case letter:chr_cmd("the letter ")break;
 case other_char:chr_cmd("the character ")break;
 /*226:*/
-#line 4817 "texprof.w"
+#line 4819 "texprof.w"
 
 case assign_glue:case assign_mu_glue:if(chr_code<skip_base)
 print_skip_param(chr_code-glue_base);
@@ -6775,7 +6777,7 @@ else{print_esc("muskip");print_int(chr_code-mu_skip_base);
 }break;
 
 /*:226*//*230:*/
-#line 4932 "texprof.w"
+#line 4934 "texprof.w"
 
 case assign_toks:if(chr_code>=toks_base)
 {print_esc("toks");print_int(chr_code-toks_base);
@@ -6790,25 +6792,25 @@ case every_vbox_loc:print_esc("everyvbox");break;
 case every_job_loc:print_esc("everyjob");break;
 case every_cr_loc:print_esc("everycr");break;
 /*1388:*/
-#line 25940 "texprof.w"
+#line 25946 "texprof.w"
 
 case every_eof_loc:print_esc("everyeof");break;
 
 /*:1388*/
-#line 4945 "texprof.w"
+#line 4947 "texprof.w"
 
 default:print_esc("errhelp");
 }break;
 
 /*:230*//*238:*/
-#line 5392 "texprof.w"
+#line 5394 "texprof.w"
 
 case assign_int:if(chr_code<count_base)print_param(chr_code-int_base);
 else{print_esc("count");print_int(chr_code-count_base);
 }break;
 
 /*:238*//*248:*/
-#line 5601 "texprof.w"
+#line 5603 "texprof.w"
 
 case assign_dimen:if(chr_code<scaled_base)
 print_length_param(chr_code-dimen_base);
@@ -6816,7 +6818,7 @@ else{print_esc("dimen");print_int(chr_code-scaled_base);
 }break;
 
 /*:248*//*265:*/
-#line 5943 "texprof.w"
+#line 5945 "texprof.w"
 
 case accent:print_esc("accent");break;
 case advance:print_esc("advance");break;
@@ -6836,22 +6838,22 @@ case ex_space:print_esc(" ");break;
 case expand_after:switch(chr_code){
 case 0:print_esc("expandafter");break;
 /*1445:*/
-#line 26601 "texprof.w"
+#line 26607 "texprof.w"
 
 case 1:print_esc("unless");break;
 
 /*:1445*//*1579:*/
-#line 28486 "texprof.w"
+#line 28492 "texprof.w"
 
 case primitive_code:print_esc("primitive");break;
 
 /*:1579*//*1589:*/
-#line 28605 "texprof.w"
+#line 28611 "texprof.w"
 
 case expanded_code:print_esc("expanded");
 
 /*:1589*/
-#line 5961 "texprof.w"
+#line 5963 "texprof.w"
 
 }break;
 case halign:print_esc("halign");break;
@@ -6874,12 +6876,12 @@ case omit:print_esc("omit");break;
 case radical:print_esc("radical");break;
 case read_to_cs:if(chr_code==0)print_esc("read")
 /*1442:*/
-#line 26568 "texprof.w"
+#line 26574 "texprof.w"
 ;
 else print_esc("readline")
 
 /*:1442*/
-#line 5982 "texprof.w"
+#line 5984 "texprof.w"
 ;break;
 case relax:print_esc("relax");break;
 case set_box:print_esc("setbox");break;
@@ -6887,7 +6889,7 @@ case set_prev_graf:print_esc("prevgraf");break;
 case set_shape:switch(chr_code){
 case par_shape_loc:print_esc("parshape");break;
 /*1535:*/
-#line 28120 "texprof.w"
+#line 28126 "texprof.w"
 
 case inter_line_penalties_loc:print_esc("interlinepenalties");break;
 case club_penalties_loc:print_esc("clubpenalties");break;
@@ -6895,28 +6897,28 @@ case widow_penalties_loc:print_esc("widowpenalties");break;
 case display_widow_penalties_loc:print_esc("displaywidowpenalties");
 
 /*:1535*/
-#line 5988 "texprof.w"
+#line 5990 "texprof.w"
 
 }break;
 case the:if(chr_code==0)print_esc("the")
 /*1417:*/
-#line 26344 "texprof.w"
+#line 26350 "texprof.w"
 ;
 else if(chr_code==1)print_esc("unexpanded");
 else print_esc("detokenize")
 
 /*:1417*/
-#line 5991 "texprof.w"
+#line 5993 "texprof.w"
 ;break;
 case toks_register:/*1515:*/
-#line 27799 "texprof.w"
+#line 27805 "texprof.w"
 
 {print_esc("toks");
 if(chr_code!=mem_bot)print_sa_num(chr_code);
 }
 
 /*:1515*/
-#line 5992 "texprof.w"
+#line 5994 "texprof.w"
 break;
 case vadjust:print_esc("vadjust");break;
 case valign:print_esc("valign");break;
@@ -6924,26 +6926,26 @@ case vcenter:print_esc("vcenter");break;
 case vrule:print_esc("vrule");break;
 
 /*:265*//*334:*/
-#line 7492 "texprof.w"
+#line 7494 "texprof.w"
 
 case par_end:print_esc("par");break;
 
 /*:334*//*376:*/
-#line 8190 "texprof.w"
+#line 8192 "texprof.w"
 
 case input:if(chr_code==0)print_esc("input")
 /*1430:*/
-#line 26438 "texprof.w"
+#line 26444 "texprof.w"
 ;
 else if(chr_code==2)print_esc("scantokens")
 
 /*:1430*/
-#line 8192 "texprof.w"
+#line 8194 "texprof.w"
 ;
 else print_esc("endinput");break;
 
 /*:376*//*384:*/
-#line 8287 "texprof.w"
+#line 8289 "texprof.w"
 
 case top_bot_mark:{switch((chr_code%marks_code)){
 case first_mark_code:print_esc("firstmark");break;
@@ -6956,10 +6958,10 @@ if(chr_code>=marks_code)print_char('s');
 }break;
 
 /*:384*//*411:*/
-#line 8739 "texprof.w"
+#line 8741 "texprof.w"
 
 case internal_register:/*1514:*/
-#line 27783 "texprof.w"
+#line 27789 "texprof.w"
 
 {if((chr_code<mem_bot)||(chr_code> lo_mem_stat_max))
 cmd= sa_type(chr_code);
@@ -6973,22 +6975,22 @@ if(chr_code!=null)print_sa_num(chr_code);
 }
 
 /*:1514*/
-#line 8740 "texprof.w"
+#line 8742 "texprof.w"
 break;
 
 /*:411*//*416:*/
-#line 8868 "texprof.w"
+#line 8870 "texprof.w"
 
 case set_aux:if(chr_code==vmode)print_esc("prevdepth");
 else print_esc("spacefactor");break;
 case set_page_int:if(chr_code==0)print_esc("deadcycles")
 /*1423:*/
-#line 26399 "texprof.w"
+#line 26405 "texprof.w"
 ;
 else if(chr_code==2)print_esc("interactionmode")
 
 /*:1423*/
-#line 8872 "texprof.w"
+#line 8874 "texprof.w"
 ;
 else print_esc("insertpenalties");break;
 case set_box_dimen:if(chr_code==width_offset)print_esc("wd");
@@ -7000,26 +7002,26 @@ case dimen_val:print_esc("lastkern");break;
 case glue_val:print_esc("lastskip");break;
 case input_line_no_code:print_esc("inputlineno");break;
 /*1380:*/
-#line 25875 "texprof.w"
+#line 25881 "texprof.w"
 
 case last_node_type_code:print_esc("lastnodetype");break;
 case eTeX_version_code:print_esc("eTeXversion");break;
 
 /*:1380*//*1394:*/
-#line 26027 "texprof.w"
+#line 26033 "texprof.w"
 
 case current_group_level_code:print_esc("currentgrouplevel");break;
 case current_group_type_code:print_esc("currentgrouptype");break;
 
 /*:1394*//*1397:*/
-#line 26051 "texprof.w"
+#line 26057 "texprof.w"
 
 case current_if_level_code:print_esc("currentiflevel");break;
 case current_if_type_code:print_esc("currentiftype");break;
 case current_if_branch_code:print_esc("currentifbranch");break;
 
 /*:1397*//*1400:*/
-#line 26089 "texprof.w"
+#line 26095 "texprof.w"
 
 case font_char_wd_code:print_esc("fontcharwd");break;
 case font_char_ht_code:print_esc("fontcharht");break;
@@ -7027,14 +7029,14 @@ case font_char_dp_code:print_esc("fontchardp");break;
 case font_char_ic_code:print_esc("fontcharic");break;
 
 /*:1400*//*1403:*/
-#line 26128 "texprof.w"
+#line 26134 "texprof.w"
 
 case par_shape_length_code:print_esc("parshapelength");break;
 case par_shape_indent_code:print_esc("parshapeindent");break;
 case par_shape_dimen_code:print_esc("parshapedimen");break;
 
 /*:1403*//*1461:*/
-#line 26829 "texprof.w"
+#line 26835 "texprof.w"
 
 case eTeX_expr-int_val+int_val:print_esc("numexpr");break;
 case eTeX_expr-int_val+dimen_val:print_esc("dimexpr");break;
@@ -7042,7 +7044,7 @@ case eTeX_expr-int_val+glue_val:print_esc("glueexpr");break;
 case eTeX_expr-int_val+mu_val:print_esc("muexpr");break;
 
 /*:1461*//*1484:*/
-#line 27249 "texprof.w"
+#line 27255 "texprof.w"
 
 case glue_stretch_order_code:print_esc("gluestretchorder");break;
 case glue_shrink_order_code:print_esc("glueshrinkorder");break;
@@ -7050,45 +7052,45 @@ case glue_stretch_code:print_esc("gluestretch");break;
 case glue_shrink_code:print_esc("glueshrink");break;
 
 /*:1484*//*1488:*/
-#line 27284 "texprof.w"
+#line 27290 "texprof.w"
 
 case mu_to_glue_code:print_esc("mutoglue");break;
 case glue_to_mu_code:print_esc("gluetomu");break;
 
 /*:1488*//*1554:*/
-#line 28285 "texprof.w"
+#line 28291 "texprof.w"
 
 case Prote_version_code:print_esc("Proteversion");break;
 
 /*:1554*//*1569:*/
-#line 28414 "texprof.w"
+#line 28420 "texprof.w"
 
 case shell_escape_code:print_esc("shellescape");break;
 
 /*:1569*//*1603:*/
-#line 28730 "texprof.w"
+#line 28736 "texprof.w"
 
 case elapsed_time_code:print_esc("elapsedtime");break;
 
 /*:1603*//*1640:*/
-#line 29198 "texprof.w"
+#line 29204 "texprof.w"
 
 case random_seed_code:print_esc("randomseed");break;
 
 /*:1640*//*1667:*/
-#line 29453 "texprof.w"
+#line 29459 "texprof.w"
 
 case last_xpos_code:print_esc("lastxpos");break;
 case last_ypos_code:print_esc("lastypos");break;
 
 /*:1667*/
-#line 8882 "texprof.w"
+#line 8884 "texprof.w"
 
 default:print_esc("badness");
 }break;
 
 /*:416*//*468:*/
-#line 9707 "texprof.w"
+#line 9709 "texprof.w"
 
 case convert:switch(chr_code){
 case number_code:print_esc("number");break;
@@ -7099,62 +7101,62 @@ case font_name_code:print_esc("fontname");break;
 case job_name_code:print_esc("jobname");break;
 case eTeX_revision_code:print_esc("eTeXrevision");break;
 /*1556:*/
-#line 28291 "texprof.w"
+#line 28297 "texprof.w"
 
 case Prote_revision_code:print_esc("Proterevision");break;
 
 /*:1556*//*1592:*/
-#line 28631 "texprof.w"
+#line 28637 "texprof.w"
 
 case strcmp_code:print_esc("strcmp");break;
 
 /*:1592*//*1598:*/
-#line 28692 "texprof.w"
+#line 28698 "texprof.w"
 
 case creation_date_code:print_esc("creationdate");break;
 
 /*:1598*//*1610:*/
-#line 28779 "texprof.w"
+#line 28785 "texprof.w"
 
 case file_size_code:print_esc("filesize");break;
 
 /*:1610*//*1614:*/
-#line 28806 "texprof.w"
+#line 28812 "texprof.w"
 
 case file_mod_date_code:print_esc("filemoddate");break;
 
 /*:1614*//*1618:*/
-#line 28846 "texprof.w"
+#line 28852 "texprof.w"
 
 case file_dump_code:print_esc("filedump");break;
 
 /*:1618*//*1622:*/
-#line 28909 "texprof.w"
+#line 28915 "texprof.w"
 
 case mdfive_sum_code:print_esc("mdfivesum");break;
 
 /*:1622*//*1644:*/
-#line 29222 "texprof.w"
+#line 29228 "texprof.w"
 
 case set_random_seed_code:print_esc("setrandomseed");break;
 
 /*:1644*//*1651:*/
-#line 29298 "texprof.w"
+#line 29304 "texprof.w"
 
 case uniform_deviate_code:print_esc("uniformdeviate");break;
 
 /*:1651*//*1658:*/
-#line 29382 "texprof.w"
+#line 29388 "texprof.w"
 
 case normal_deviate_code:print_esc("normaldeviate");
 
 /*:1658*/
-#line 9716 "texprof.w"
+#line 9718 "texprof.w"
 
 }break;
 
 /*:468*//*487:*/
-#line 10064 "texprof.w"
+#line 10066 "texprof.w"
 
 case if_test:{if(chr_code>=unless_code)print_esc("unless");
 switch(chr_code%unless_code){
@@ -7175,34 +7177,34 @@ case if_true_code:print_esc("iftrue");break;
 case if_false_code:print_esc("iffalse");break;
 case if_case_code:print_esc("ifcase");break;
 /*1446:*/
-#line 26604 "texprof.w"
+#line 26610 "texprof.w"
 
 case if_def_code:print_esc("ifdefined");break;
 case if_cs_code:print_esc("ifcsname");break;
 case if_font_char_code:print_esc("iffontchar");break;
 
 /*:1446*//*1572:*/
-#line 28431 "texprof.w"
+#line 28437 "texprof.w"
 
 case if_incsname_code:print_esc("ifincsname");break;
 case if_primitive_code:print_esc("ifprimitive");break;
 
 /*:1572*/
-#line 10083 "texprof.w"
+#line 10085 "texprof.w"
 
 default:print_esc("if");
 }
 }break;
 
 /*:487*//*491:*/
-#line 10129 "texprof.w"
+#line 10131 "texprof.w"
 
 case fi_or_else:if(chr_code==fi_code)print_esc("fi");
 else if(chr_code==or_code)print_esc("or");
 else print_esc("else");break;
 
 /*:491*//*780:*/
-#line 15950 "texprof.w"
+#line 15952 "texprof.w"
 
 case tab_mark:if(chr_code==span_code)print_esc("span");
 else chr_cmd("alignment tab character ")break;
@@ -7210,7 +7212,7 @@ case car_ret:if(chr_code==cr_code)print_esc("cr");
 else print_esc("crcr");break;
 
 /*:780*//*983:*/
-#line 19873 "texprof.w"
+#line 19875 "texprof.w"
 
 case set_page_dimen:switch(chr_code){
 case 0:print_esc("pagegoal");break;
@@ -7224,12 +7226,12 @@ default:print_esc("pagedepth");
 }break;
 
 /*:983*//*1052:*/
-#line 21119 "texprof.w"
+#line 21121 "texprof.w"
 
 case stop:if(chr_code==1)print_esc("dump");else print_esc("end");break;
 
 /*:1052*//*1058:*/
-#line 21218 "texprof.w"
+#line 21220 "texprof.w"
 
 case hskip:switch(chr_code){
 case skip_code:print_esc("hskip");break;
@@ -7250,7 +7252,7 @@ case kern:print_esc("kern");break;
 case mkern:print_esc("mkern");break;
 
 /*:1058*//*1071:*/
-#line 21486 "texprof.w"
+#line 21488 "texprof.w"
 
 case hmove:if(chr_code==1)print_esc("moveleft");else print_esc("moveright");break;
 case vmove:if(chr_code==1)print_esc("raise");else print_esc("lower");break;
@@ -7269,12 +7271,12 @@ else if(chr_code==x_leaders)print_esc("xleaders");
 else print_esc("shipout");break;
 
 /*:1071*//*1088:*/
-#line 21754 "texprof.w"
+#line 21756 "texprof.w"
 
 case start_par:if(chr_code==0)print_esc("noindent");else print_esc("indent");break;
 
 /*:1088*//*1107:*/
-#line 21984 "texprof.w"
+#line 21986 "texprof.w"
 
 case remove_item:if(chr_code==glue_node)print_esc("unskip");
 else if(chr_code==kern_node)print_esc("unkern");
@@ -7283,29 +7285,29 @@ case un_hbox:if(chr_code==copy_code)print_esc("unhcopy");
 else print_esc("unhbox");break;
 case un_vbox:if(chr_code==copy_code)print_esc("unvcopy")
 /*1532:*/
-#line 28096 "texprof.w"
+#line 28102 "texprof.w"
 ;
 else if(chr_code==last_box_code)print_esc("pagediscards");
 else if(chr_code==vsplit_code)print_esc("splitdiscards")
 
 /*:1532*/
-#line 21991 "texprof.w"
+#line 21993 "texprof.w"
 ;
 else print_esc("unvbox");break;
 
 /*:1107*//*1114:*/
-#line 22059 "texprof.w"
+#line 22061 "texprof.w"
 
 case discretionary:if(chr_code==1)
 print_esc("-");else print_esc("discretionary");break;
 
 /*:1114*//*1142:*/
-#line 22418 "texprof.w"
+#line 22420 "texprof.w"
 
 case eq_no:if(chr_code==1)print_esc("leqno");else print_esc("eqno");break;
 
 /*:1142*//*1156:*/
-#line 22667 "texprof.w"
+#line 22669 "texprof.w"
 
 case math_comp:switch(chr_code){
 case ord_noad:print_esc("mathord");break;
@@ -7324,12 +7326,12 @@ else if(chr_code==no_limits)print_esc("nolimits");
 else print_esc("displaylimits");break;
 
 /*:1156*//*1169:*/
-#line 22803 "texprof.w"
+#line 22805 "texprof.w"
 
 case math_style:print_style(chr_code);break;
 
 /*:1169*//*1178:*/
-#line 22906 "texprof.w"
+#line 22908 "texprof.w"
 
 case above:switch(chr_code){
 case over_code:print_esc("over");break;
@@ -7341,31 +7343,31 @@ default:print_esc("above");
 }break;
 
 /*:1178*//*1188:*/
-#line 23027 "texprof.w"
+#line 23029 "texprof.w"
 
 case left_right:if(chr_code==left_noad)print_esc("left")
 /*1428:*/
-#line 26428 "texprof.w"
+#line 26434 "texprof.w"
 ;
 else if(chr_code==middle_noad)print_esc("middle")
 
 /*:1428*/
-#line 23029 "texprof.w"
+#line 23031 "texprof.w"
 ;
 else print_esc("right");break;
 
 /*:1188*//*1208:*/
-#line 23357 "texprof.w"
+#line 23359 "texprof.w"
 
 case prefix:if(chr_code==1)print_esc("long");
 else if(chr_code==2)print_esc("outer")
 /*1453:*/
-#line 26688 "texprof.w"
+#line 26694 "texprof.w"
 ;
 else if(chr_code==8)print_esc("protected")
 
 /*:1453*/
-#line 23360 "texprof.w"
+#line 23362 "texprof.w"
 ;
 else print_esc("global");break;
 case def:if(chr_code==0)print_esc("def");
@@ -7374,12 +7376,12 @@ else if(chr_code==2)print_esc("edef");
 else print_esc("xdef");break;
 
 /*:1208*//*1219:*/
-#line 23539 "texprof.w"
+#line 23541 "texprof.w"
 
 case let:if(chr_code!=normal)print_esc("futurelet");else print_esc("let");break;
 
 /*:1219*//*1222:*/
-#line 23594 "texprof.w"
+#line 23596 "texprof.w"
 
 case shorthand_def:switch(chr_code){
 case char_def_code:print_esc("chardef");break;
@@ -7396,7 +7398,7 @@ case math_given:{print_esc("mathchar");print_hex(chr_code);
 }break;
 
 /*:1222*//*1230:*/
-#line 23763 "texprof.w"
+#line 23765 "texprof.w"
 
 case def_code:if(chr_code==cat_code_base)print_esc("catcode");
 else if(chr_code==math_code_base)print_esc("mathcode");
@@ -7407,19 +7409,19 @@ else print_esc("delcode");break;
 case def_family:print_size(chr_code-math_font_base);break;
 
 /*:1230*//*1250:*/
-#line 24057 "texprof.w"
+#line 24059 "texprof.w"
 
 case hyph_data:if(chr_code==1)print_esc("patterns");
 else print_esc("hyphenation");break;
 
 /*:1250*//*1254:*/
-#line 24094 "texprof.w"
+#line 24096 "texprof.w"
 
 case assign_font_int:if(chr_code==0)print_esc("hyphenchar");
 else print_esc("skewchar");break;
 
 /*:1254*//*1260:*/
-#line 24179 "texprof.w"
+#line 24181 "texprof.w"
 
 case set_font:{print("select font ");slow_print(font_name[chr_code]);
 if(font_size[chr_code]!=font_dsize[chr_code])
@@ -7429,7 +7431,7 @@ print("pt");
 }break;
 
 /*:1260*//*1262:*/
-#line 24197 "texprof.w"
+#line 24199 "texprof.w"
 
 case set_interaction:switch(chr_code){
 case batch_mode:print_esc("batchmode");break;
@@ -7439,53 +7441,53 @@ default:print_esc("errorstopmode");
 }break;
 
 /*:1262*//*1272:*/
-#line 24259 "texprof.w"
+#line 24261 "texprof.w"
 
 case in_stream:if(chr_code==0)print_esc("closein");
 else print_esc("openin");break;
 
 /*:1272*//*1277:*/
-#line 24296 "texprof.w"
+#line 24298 "texprof.w"
 
 case message:if(chr_code==0)print_esc("message");
 else print_esc("errmessage");break;
 
 /*:1277*//*1286:*/
-#line 24363 "texprof.w"
+#line 24365 "texprof.w"
 
 case case_shift:if(chr_code==lc_code_base)print_esc("lowercase");
 else print_esc("uppercase");break;
 
 /*:1286*//*1291:*/
-#line 24414 "texprof.w"
+#line 24416 "texprof.w"
 
 case xray:switch(chr_code){
 case show_box_code:print_esc("showbox");break;
 case show_the_code:print_esc("showthe");break;
 case show_lists_code:print_esc("showlists");break;
 /*1406:*/
-#line 26156 "texprof.w"
+#line 26162 "texprof.w"
 
 case show_groups:print_esc("showgroups");break;
 
 /*:1406*//*1415:*/
-#line 26327 "texprof.w"
+#line 26333 "texprof.w"
 
 case show_tokens:print_esc("showtokens");break;
 
 /*:1415*//*1420:*/
-#line 26368 "texprof.w"
+#line 26374 "texprof.w"
 
 case show_ifs:print_esc("showifs");break;
 
 /*:1420*/
-#line 24419 "texprof.w"
+#line 24421 "texprof.w"
 
 default:print_esc("show");
 }break;
 
 /*:1291*//*1294:*/
-#line 24470 "texprof.w"
+#line 24472 "texprof.w"
 
 case undefined_cs:print("undefined");break;
 case call:case long_call:case outer_call:
@@ -7500,7 +7502,7 @@ print("macro");
 case end_template:print_esc("outer endtemplate");break;
 
 /*:1294*//*1345:*/
-#line 25453 "texprof.w"
+#line 25459 "texprof.w"
 
 case extension:switch(chr_code){
 case open_node:print_esc("openout");break;
@@ -7510,42 +7512,42 @@ case special_node:print_esc("special");break;
 case immediate_code:print_esc("immediate");break;
 case set_language_code:print_esc("setlanguage");break;
 /*1604:*/
-#line 28733 "texprof.w"
+#line 28739 "texprof.w"
 
 case reset_timer_code:print_esc("resettimer");break;
 
 /*:1604*//*1672:*/
-#line 29482 "texprof.w"
+#line 29488 "texprof.w"
 
 case save_pos_code:print_esc("savepos");break;
 
 /*:1672*//*1738:*/
-#line 30830 "texprof.w"
+#line 30836 "texprof.w"
 
 case profile_on_code:print_esc("profileon");break;
 case profile_off_code:print_esc("profileoff");break;
 
 /*:1738*/
-#line 25461 "texprof.w"
+#line 25467 "texprof.w"
 
 default:print("[unknown extension!]");
 }break;
 
 /*:1345*/
-#line 6692 "texprof.w"
+#line 6694 "texprof.w"
 
 default:print("[unknown command code!]");
 }
 }
 
 /*:297*/
-#line 5620 "texprof.w"
+#line 5622 "texprof.w"
 
 #ifdef STAT
 static void show_eqtb(pointer n)
 {if(n<active_base)print_char('?');
 else if(n<glue_base)/*222:*/
-#line 4684 "texprof.w"
+#line 4686 "texprof.w"
 
 {sprint_cs(n);print_char('=');print_cmd_chr(eq_type(n),equiv(n));
 if(eq_type(n)>=call)
@@ -7554,10 +7556,10 @@ if(eq_type(n)>=call)
 }
 
 /*:222*/
-#line 5624 "texprof.w"
+#line 5626 "texprof.w"
 
 else if(n<local_base)/*228:*/
-#line 4834 "texprof.w"
+#line 4836 "texprof.w"
 
 if(n<skip_base)
 {print_skip_param(n-glue_base);print_char('=');
@@ -7573,10 +7575,10 @@ print_spec(equiv(n),"mu");
 }
 
 /*:228*/
-#line 5625 "texprof.w"
+#line 5627 "texprof.w"
 
 else if(n<int_base)/*232:*/
-#line 4993 "texprof.w"
+#line 4995 "texprof.w"
 
 if((n==par_shape_loc)||((n>=etex_pen_base)&&(n<etex_pens)))
 {print_cmd_chr(set_shape,n);print_char('=');
@@ -7603,7 +7605,7 @@ else{depth_threshold= 0;breadth_max= 1;show_node_list(equiv(n));
 }
 }
 else if(n<cat_code_base)/*233:*/
-#line 5021 "texprof.w"
+#line 5023 "texprof.w"
 
 {if(n==cur_font_loc)print("current font");
 else if(n<math_font_base+16)
@@ -7620,10 +7622,10 @@ printn_esc(hash[font_id_base+equiv(n)].rh);
 }
 
 /*:233*/
-#line 5018 "texprof.w"
+#line 5020 "texprof.w"
 
 else/*234:*/
-#line 5036 "texprof.w"
+#line 5038 "texprof.w"
 
 if(n<math_code_base)
 {if(n<lc_code_base)
@@ -7644,14 +7646,14 @@ print_char('=');print_int(ho(equiv(n)));
 }
 
 /*:234*/
-#line 5019 "texprof.w"
+#line 5021 "texprof.w"
 
 
 /*:232*/
-#line 5626 "texprof.w"
+#line 5628 "texprof.w"
 
 else if(n<dimen_base)/*241:*/
-#line 5429 "texprof.w"
+#line 5431 "texprof.w"
 
 {if(n<count_base)print_param(n-int_base);
 else if(n<del_code_base)
@@ -7663,10 +7665,10 @@ print_char('=');print_int(eqtb[n].i);
 }
 
 /*:241*/
-#line 5627 "texprof.w"
+#line 5629 "texprof.w"
 
 else if(n<=eqtb_size)/*250:*/
-#line 5610 "texprof.w"
+#line 5612 "texprof.w"
 
 {if(n<scaled_base)print_length_param(n-dimen_base);
 else{print_esc("dimen");print_int(n-scaled_base);
@@ -7675,15 +7677,15 @@ print_char('=');print_scaled(eqtb[n].sc);print("pt");
 }
 
 /*:250*/
-#line 5628 "texprof.w"
+#line 5630 "texprof.w"
 
 else print_char('?');
 }
 #endif
-#line 5632 "texprof.w"
+#line 5634 "texprof.w"
 
 /*:251*//*258:*/
-#line 5716 "texprof.w"
+#line 5718 "texprof.w"
 static pointer id_lookup(int j,int l)
 {
 int h;
@@ -7691,7 +7693,7 @@ int d;
 pointer p;
 int k;
 /*260:*/
-#line 5764 "texprof.w"
+#line 5766 "texprof.w"
 
 h= buffer[j];
 for(k= j+1;k<=j+l-1;k++)
@@ -7700,7 +7702,7 @@ while(h>=hash_prime)h= h-hash_prime;
 }
 
 /*:260*/
-#line 5722 "texprof.w"
+#line 5724 "texprof.w"
 ;
 p= h+hash_base;
 loop{if(text(p)> 0)if(length(text(p))==l)
@@ -7709,7 +7711,7 @@ if(next(p)==0)
 {if(no_new_control_sequence)
 p= undefined_control_sequence;
 else/*259:*/
-#line 5738 "texprof.w"
+#line 5740 "texprof.w"
 
 {if(text(p)> 0)
 {do{if(hash_is_full)overflow("hash size",hash_size);
@@ -7727,12 +7729,12 @@ text(p)= make_string();pool_ptr= pool_ptr+d;
 #ifdef STAT
 incr(cs_count);
 #endif
-#line 5755 "texprof.w"
+#line 5757 "texprof.w"
 
 }
 
 /*:259*/
-#line 5730 "texprof.w"
+#line 5732 "texprof.w"
 ;
 goto found;
 }
@@ -7742,7 +7744,7 @@ found:return p;
 }
 
 /*:258*//*263:*/
-#line 5820 "texprof.w"
+#line 5822 "texprof.w"
 
 #ifdef INIT
 static void primitive(char*str,quarterword c,halfword o)
@@ -7763,22 +7765,22 @@ flush_string;text(cur_val)= s;
 }
 eq_level(cur_val)= level_one;eq_type(cur_val)= c;equiv(cur_val)= o;
 /*1583:*/
-#line 28563 "texprof.w"
+#line 28569 "texprof.w"
 
 set_ROM_p_from_cs(cur_val);
 ROM[p]= eqtb[cur_val];
 
 /*:1583*/
-#line 5839 "texprof.w"
+#line 5841 "texprof.w"
 ;
 }
 #endif
-#line 5842 "texprof.w"
+#line 5844 "texprof.w"
 
 /*:263*//*267:*/
-#line 6068 "texprof.w"
+#line 6070 "texprof.w"
 /*283:*/
-#line 6367 "texprof.w"
+#line 6369 "texprof.w"
 
 #ifdef STAT
 static void restore_trace(pointer p,char*s)
@@ -7788,10 +7790,10 @@ show_eqtb(p);print_char('}');
 end_diagnostic(false);
 }
 #endif
-#line 6376 "texprof.w"
+#line 6378 "texprof.w"
 
 /*:283*//*1391:*/
-#line 25962 "texprof.w"
+#line 25968 "texprof.w"
 
 static void print_group(bool e)
 {
@@ -7832,7 +7834,7 @@ print_int(saved(-1));
 }
 
 /*:1391*//*1392:*/
-#line 26005 "texprof.w"
+#line 26011 "texprof.w"
 
 #ifdef STAT
 static void group_trace(bool e)
@@ -7841,10 +7843,10 @@ if(e)print("leaving ");else print("entering ");
 print_group(e);print_char('}');end_diagnostic(false);
 }
 #endif
-#line 26013 "texprof.w"
+#line 26019 "texprof.w"
 
 /*:1392*//*1438:*/
-#line 26523 "texprof.w"
+#line 26529 "texprof.w"
 
 static bool pseudo_input(void)
 {pointer p;
@@ -7869,7 +7871,7 @@ overflow("buffer size",buf_size);
 }
 
 /*:35*/
-#line 26534 "texprof.w"
+#line 26540 "texprof.w"
 ;
 last= first;
 for(r= p+1;r<=p+sz-1;r++)
@@ -7886,7 +7888,7 @@ return true;
 }
 
 /*:1438*//*1439:*/
-#line 26551 "texprof.w"
+#line 26557 "texprof.w"
 
 static void pseudo_close(void)
 {pointer p,q;
@@ -7898,7 +7900,7 @@ while(q!=null)
 }
 
 /*:1439*//*1456:*/
-#line 26727 "texprof.w"
+#line 26733 "texprof.w"
 
 static void group_warning(void)
 {int i;
@@ -7908,7 +7910,7 @@ base_ptr= input_ptr;input_stack[base_ptr]= cur_input;
 i= in_open;w= false;
 while((grp_stack[i]==cur_boundary)&&(i> 0))
 {/*1457:*/
-#line 26750 "texprof.w"
+#line 26756 "texprof.w"
 
 if(tracing_nesting> 0)
 {while((input_stack[base_ptr].state_field==token_list)||
@@ -7917,7 +7919,7 @@ if(input_stack[base_ptr].name_field> 17)w= true;
 }
 
 /*:1457*/
-#line 26735 "texprof.w"
+#line 26741 "texprof.w"
 ;
 grp_stack[i]= save_index(save_ptr);decr(i);
 }
@@ -7931,7 +7933,7 @@ if(history==spotless)history= warning_issued;
 }
 
 /*:1456*//*1458:*/
-#line 26762 "texprof.w"
+#line 26768 "texprof.w"
 
 static void if_warning(void)
 {int i;
@@ -7941,7 +7943,7 @@ base_ptr= input_ptr;input_stack[base_ptr]= cur_input;
 i= in_open;w= false;
 while(if_stack[i]==cond_ptr)
 {/*1457:*/
-#line 26750 "texprof.w"
+#line 26756 "texprof.w"
 
 if(tracing_nesting> 0)
 {while((input_stack[base_ptr].state_field==token_list)||
@@ -7950,7 +7952,7 @@ if(input_stack[base_ptr].name_field> 17)w= true;
 }
 
 /*:1457*/
-#line 26770 "texprof.w"
+#line 26776 "texprof.w"
 ;
 if_stack[i]= link(cond_ptr);decr(i);
 }
@@ -7964,7 +7966,7 @@ if(history==spotless)history= warning_issued;
 }
 
 /*:1458*//*1459:*/
-#line 26786 "texprof.w"
+#line 26792 "texprof.w"
 
 static void file_warning(void)
 {pointer p;
@@ -7997,7 +7999,7 @@ if(history==spotless)history= warning_issued;
 }
 
 /*:1459*//*1503:*/
-#line 27571 "texprof.w"
+#line 27577 "texprof.w"
 
 static void delete_sa_ref(pointer q)
 {
@@ -8024,7 +8026,7 @@ delete_sa_ptr;s= index_node_size;
 }
 
 /*:1503*//*1505:*/
-#line 27614 "texprof.w"
+#line 27620 "texprof.w"
 
 #ifdef STAT
 static void show_sa(pointer p,char*s)
@@ -8059,10 +8061,10 @@ else print_char('?');
 print_char('}');end_diagnostic(false);
 }
 #endif
-#line 27648 "texprof.w"
+#line 27654 "texprof.w"
 
 /*:1505*//*1519:*/
-#line 27832 "texprof.w"
+#line 27838 "texprof.w"
 
 static void sa_save(pointer p)
 {pointer q;
@@ -8088,7 +8090,7 @@ link(q)= sa_chain;sa_chain= q;add_sa_ref(p);
 }
 
 /*:1519*//*1520:*/
-#line 27856 "texprof.w"
+#line 27862 "texprof.w"
 
 static void sa_destroy(pointer p)
 {if(sa_index(p)<mu_val_limit)delete_glue_ref(sa_ptr(p));
@@ -8098,7 +8100,7 @@ else delete_token_ref(sa_ptr(p));
 }
 
 /*:1520*//*1521:*/
-#line 27882 "texprof.w"
+#line 27888 "texprof.w"
 
 static void sa_def(pointer p,halfword e)
 
@@ -8108,7 +8110,7 @@ if(sa_ptr(p)==e)
 #ifdef STAT
 if(tracing_assigns> 0)show_sa(p,"reassigning");
 #endif
-#line 27891 "texprof.w"
+#line 27897 "texprof.w"
 
 sa_destroy(p);
 }
@@ -8116,14 +8118,14 @@ else{
 #ifdef STAT
 if(tracing_assigns> 0)show_sa(p,"changing");
 #endif
-#line 27898 "texprof.w"
+#line 27904 "texprof.w"
 
 if(sa_lev(p)==cur_level)sa_destroy(p);else sa_save(p);
 sa_lev(p)= cur_level;sa_ptr(p)= e;
 #ifdef STAT
 if(tracing_assigns> 0)show_sa(p,"into");
 #endif
-#line 27904 "texprof.w"
+#line 27910 "texprof.w"
 
 }
 delete_sa_ref(p);
@@ -8136,41 +8138,41 @@ if(sa_int(p)==w)
 #ifdef STAT
 if(tracing_assigns> 0)show_sa(p,"reassigning");
 #endif
-#line 27916 "texprof.w"
+#line 27922 "texprof.w"
 
 }
 else{
 #ifdef STAT
 if(tracing_assigns> 0)show_sa(p,"changing");
 #endif
-#line 27922 "texprof.w"
+#line 27928 "texprof.w"
 
 if(sa_lev(p)!=cur_level)sa_save(p);
 sa_lev(p)= cur_level;sa_int(p)= w;
 #ifdef STAT
 if(tracing_assigns> 0)show_sa(p,"into");
 #endif
-#line 27928 "texprof.w"
+#line 27934 "texprof.w"
 
 }
 delete_sa_ref(p);
 }
 
 /*:1521*//*1522:*/
-#line 27938 "texprof.w"
+#line 27944 "texprof.w"
 
 static void gsa_def(pointer p,halfword e)
 {add_sa_ref(p);
 #ifdef STAT
 if(tracing_assigns> 0)show_sa(p,"globally changing");
 #endif
-#line 27944 "texprof.w"
+#line 27950 "texprof.w"
 
 sa_destroy(p);sa_lev(p)= level_one;sa_ptr(p)= e;
 #ifdef STAT
 if(tracing_assigns> 0)show_sa(p,"into");
 #endif
-#line 27949 "texprof.w"
+#line 27955 "texprof.w"
 
 delete_sa_ref(p);
 }
@@ -8180,19 +8182,19 @@ static void gsa_w_def(pointer p,int w)
 #ifdef STAT
 if(tracing_assigns> 0)show_sa(p,"globally changing");
 #endif
-#line 27958 "texprof.w"
+#line 27964 "texprof.w"
 
 sa_lev(p)= level_one;sa_int(p)= w;
 #ifdef STAT
 if(tracing_assigns> 0)show_sa(p,"into");
 #endif
-#line 27963 "texprof.w"
+#line 27969 "texprof.w"
 
 delete_sa_ref(p);
 }
 
 /*:1522*//*1523:*/
-#line 27970 "texprof.w"
+#line 27976 "texprof.w"
 
 static void sa_restore(void)
 {pointer p;
@@ -8202,7 +8204,7 @@ if(sa_lev(p)==level_one)
 #ifdef STAT
 if(tracing_restores> 0)show_sa(p,"retaining");
 #endif
-#line 27979 "texprof.w"
+#line 27985 "texprof.w"
 
 }
 else{if(sa_index(p)<dimen_val_limit)
@@ -8214,7 +8216,7 @@ sa_lev(p)= sa_lev(sa_chain);
 #ifdef STAT
 if(tracing_restores> 0)show_sa(p,"restoring");
 #endif
-#line 27990 "texprof.w"
+#line 27996 "texprof.w"
 
 }
 delete_sa_ref(p);
@@ -8225,11 +8227,11 @@ else free_node(p,pointer_node_size);
 }
 
 /*:1523*/
-#line 6068 "texprof.w"
+#line 6070 "texprof.w"
 
 
 /*:267*//*273:*/
-#line 6153 "texprof.w"
+#line 6155 "texprof.w"
 static void new_save_level(group_code c)
 {check_full_save_stack;
 if(eTeX_ex)
@@ -8245,13 +8247,13 @@ cur_boundary= save_ptr;cur_group= c;
 #ifdef STAT
 if(tracing_groups> 0)group_trace(false);
 #endif
-#line 6168 "texprof.w"
+#line 6170 "texprof.w"
 
 incr(cur_level);incr(save_ptr);
 }
 
 /*:273*//*274:*/
-#line 6178 "texprof.w"
+#line 6180 "texprof.w"
 static void eq_destroy(memory_word w)
 {pointer q;
 switch(eq_type_field(w)){
@@ -8263,21 +8265,21 @@ if(q!=null)free_node(q,info(q)+info(q)+1);
 }break;
 case box_ref:flush_node_list(equiv_field(w));break;
 /*1516:*/
-#line 27807 "texprof.w"
+#line 27813 "texprof.w"
 
 case toks_register:case internal_register:
 if((equiv_field(w)<mem_bot)||(equiv_field(w)> lo_mem_stat_max))
 delete_sa_ref(equiv_field(w));break;
 
 /*:1516*/
-#line 6188 "texprof.w"
+#line 6190 "texprof.w"
 
 default:do_nothing;
 }
 }
 
 /*:274*//*275:*/
-#line 6196 "texprof.w"
+#line 6198 "texprof.w"
 static void eq_save(pointer p,quarterword l)
 {check_full_save_stack;
 if(l==level_zero)save_type(save_ptr)= restore_zero;
@@ -8288,15 +8290,15 @@ save_level(save_ptr)= l;save_index(save_ptr)= p;incr(save_ptr);
 }
 
 /*:275*//*276:*/
-#line 6213 "texprof.w"
+#line 6215 "texprof.w"
 
 #ifdef STAT
 #define  assign_trace(A, B) if (tracing_assigns >  0) restore_trace(A, B);
 #else
-#line 6217 "texprof.w"
+#line 6219 "texprof.w"
 #define  assign_trace(A, B)
 #endif
-#line 6219 "texprof.w"
+#line 6221 "texprof.w"
 
 static void eq_define(pointer p,quarterword t,halfword e)
 
@@ -8313,7 +8315,7 @@ assign_trace(p,"into")
 }
 
 /*:276*//*277:*/
-#line 6238 "texprof.w"
+#line 6240 "texprof.w"
 static void eq_word_define(pointer p,int w)
 {
 if(eTeX_ex&&(eqtb[p].i==w))
@@ -8329,7 +8331,7 @@ assign_trace(p,"into")
 }
 
 /*:277*//*278:*/
-#line 6257 "texprof.w"
+#line 6259 "texprof.w"
 static void geq_define(pointer p,quarterword t,halfword e)
 
 {assign_trace(p,"globally changing")
@@ -8347,7 +8349,7 @@ assign_trace(p,"into");
 }
 
 /*:278*//*279:*/
-#line 6275 "texprof.w"
+#line 6277 "texprof.w"
 static void save_for_after(halfword t)
 {if(cur_level> level_one)
 {check_full_save_stack;
@@ -8357,7 +8359,7 @@ save_index(save_ptr)= t;incr(save_ptr);
 }
 
 /*:279*//*280:*/
-#line 6287 "texprof.w"
+#line 6289 "texprof.w"
 
 static void back_input(void);
 static void unsave(void)
@@ -8370,14 +8372,14 @@ a= false;
 if(cur_level> level_one)
 {decr(cur_level);
 /*281:*/
-#line 6304 "texprof.w"
+#line 6306 "texprof.w"
 
 loop{decr(save_ptr);
 if(save_type(save_ptr)==level_boundary)goto done;
 p= save_index(save_ptr);
 if(save_type(save_ptr)==insert_token)
 /*325:*/
-#line 7360 "texprof.w"
+#line 7362 "texprof.w"
 
 {t= cur_tok;cur_tok= p;
 if(a)
@@ -8392,7 +8394,7 @@ cur_tok= t;
 }
 
 /*:325*/
-#line 6309 "texprof.w"
+#line 6311 "texprof.w"
 
 else if(save_type(save_ptr)==restore_sa)
 {sa_restore();sa_chain= p;sa_level= save_level(save_ptr);
@@ -8402,7 +8404,7 @@ else{if(save_type(save_ptr)==restore_old_value)
 }
 else save_stack[save_ptr]= eqtb[undefined_control_sequence];
 /*282:*/
-#line 6337 "texprof.w"
+#line 6339 "texprof.w"
 
 if(p<int_base)
 if(eq_level(p)==level_one)
@@ -8410,7 +8412,7 @@ if(eq_level(p)==level_one)
 #ifdef STAT
 if(tracing_restores> 0)restore_trace(p,"retaining");
 #endif
-#line 6344 "texprof.w"
+#line 6346 "texprof.w"
 
 }
 else{eq_destroy(eqtb[p]);
@@ -8418,7 +8420,7 @@ eqtb[p]= save_stack[save_ptr];
 #ifdef STAT
 if(tracing_restores> 0)restore_trace(p,"restoring");
 #endif
-#line 6351 "texprof.w"
+#line 6353 "texprof.w"
 
 }
 else if(xeq_level[p]!=level_one)
@@ -8426,19 +8428,19 @@ else if(xeq_level[p]!=level_one)
 #ifdef STAT
 if(tracing_restores> 0)restore_trace(p,"restoring");
 #endif
-#line 6358 "texprof.w"
+#line 6360 "texprof.w"
 
 }
 else{
 #ifdef STAT
 if(tracing_restores> 0)restore_trace(p,"retaining");
 #endif
-#line 6364 "texprof.w"
+#line 6366 "texprof.w"
 
 }
 
 /*:282*/
-#line 6318 "texprof.w"
+#line 6320 "texprof.w"
 ;
 }
 }
@@ -8446,7 +8448,7 @@ done:
 #ifdef STAT
 if(tracing_groups> 0)group_trace(true);
 #endif
-#line 6325 "texprof.w"
+#line 6327 "texprof.w"
 
 if(grp_stack[in_open]==cur_boundary)group_warning();
 
@@ -8454,7 +8456,7 @@ cur_group= save_level(save_ptr);cur_boundary= save_index(save_ptr);
 if(eTeX_ex)decr(save_ptr)
 
 /*:281*/
-#line 6298 "texprof.w"
+#line 6300 "texprof.w"
 ;
 }
 else confusion("curlevel");
@@ -8462,7 +8464,7 @@ else confusion("curlevel");
 }
 
 /*:280*//*287:*/
-#line 6406 "texprof.w"
+#line 6408 "texprof.w"
 static void prepare_mag(void)
 {if((mag_set> 0)&&(mag!=mag_set))
 {print_err("Incompatible magnification (");print_int(mag);
@@ -8483,13 +8485,13 @@ mag_set= mag;
 }
 
 /*:287*//*294:*/
-#line 6593 "texprof.w"
+#line 6595 "texprof.w"
 static void token_show(pointer p)
 {if(p!=null)show_token_list(link(p),null,10000000);
 }
 
 /*:294*//*295:*/
-#line 6600 "texprof.w"
+#line 6602 "texprof.w"
 static void print_meaning(void)
 {print_cmd_chr(cur_cmd,cur_chr);
 if(cur_cmd>=call)
@@ -8502,7 +8504,7 @@ token_show(cur_mark[cur_chr]);
 }
 
 /*:295*//*298:*/
-#line 6699 "texprof.w"
+#line 6701 "texprof.w"
 static void show_cur_cmd_chr(void)
 {int n;
 int l;
@@ -8532,14 +8534,14 @@ end_diagnostic(false);
 }
 
 /*:298*//*310:*/
-#line 7080 "texprof.w"
+#line 7082 "texprof.w"
 static void show_context(void)
 {
 int old_setting;
 int nn;
 bool bottom_line;
 /*314:*/
-#line 7195 "texprof.w"
+#line 7197 "texprof.w"
 
 int i;
 int j;
@@ -8550,7 +8552,7 @@ int p;
 int q;
 
 /*:314*/
-#line 7085 "texprof.w"
+#line 7087 "texprof.w"
 
 base_ptr= input_ptr;input_stack[base_ptr]= cur_input;
 
@@ -8560,7 +8562,7 @@ if((state!=token_list))
 if((name> 19)||(base_ptr==0))bottom_line= true;
 if((base_ptr==input_ptr)||bottom_line||(nn<error_context_lines))
 /*311:*/
-#line 7103 "texprof.w"
+#line 7105 "texprof.w"
 
 {if((base_ptr==input_ptr)||(state!=token_list)||
 (token_type!=backed_up)||(loc!=null))
@@ -8569,7 +8571,7 @@ if((base_ptr==input_ptr)||bottom_line||(nn<error_context_lines))
 old_setting= selector;
 if(state!=token_list)
 {/*312:*/
-#line 7127 "texprof.w"
+#line 7129 "texprof.w"
 
 if(name<=17)
 if(terminal_input)
@@ -8586,10 +8588,10 @@ else print_int(line_stack[index+1]);
 print_char(' ')
 
 /*:312*/
-#line 7110 "texprof.w"
+#line 7112 "texprof.w"
 ;
 /*317:*/
-#line 7241 "texprof.w"
+#line 7243 "texprof.w"
 
 begin_pseudoprint;
 if(buffer[limit]==end_line_char)j= limit;
@@ -8600,11 +8602,11 @@ printn(buffer[i]);
 }
 
 /*:317*/
-#line 7111 "texprof.w"
+#line 7113 "texprof.w"
 ;
 }
 else{/*313:*/
-#line 7142 "texprof.w"
+#line 7144 "texprof.w"
 
 switch(token_type){
 case parameter:print_nl("<argument> ");break;
@@ -8629,22 +8631,22 @@ default:print_nl("?");
 }
 
 /*:313*/
-#line 7113 "texprof.w"
+#line 7115 "texprof.w"
 ;
 /*318:*/
-#line 7250 "texprof.w"
+#line 7252 "texprof.w"
 
 begin_pseudoprint;
 if(token_type<macro)show_token_list(start,loc,100000);
 else show_token_list(link(start),loc,100000)
 
 /*:318*/
-#line 7114 "texprof.w"
+#line 7116 "texprof.w"
 ;
 }
 selector= old_setting;
 /*316:*/
-#line 7219 "texprof.w"
+#line 7221 "texprof.w"
 
 if(trick_count==1000000)set_trick_count;
 
@@ -8664,14 +8666,14 @@ for(q= first_count;q<=p-1;q++)print_char(trick_buf[q%error_line]);
 if(m+n> error_line)print("...")
 
 /*:316*/
-#line 7117 "texprof.w"
+#line 7119 "texprof.w"
 ;
 incr(nn);
 }
 }
 
 /*:311*/
-#line 7093 "texprof.w"
+#line 7095 "texprof.w"
 
 else if(nn==error_context_lines)
 {print_nl("...");incr(nn);
@@ -8683,7 +8685,7 @@ done:cur_input= input_stack[input_ptr];
 }
 
 /*:310*//*322:*/
-#line 7289 "texprof.w"
+#line 7291 "texprof.w"
 static void begin_token_list(pointer p,quarterword t)
 {push_input;state= token_list;start= p;token_type= t;
 if(t>=macro)
@@ -8691,7 +8693,7 @@ if(t>=macro)
 if(t==macro)param_start= param_ptr;
 else{
 /*1772:*/
-#line 31404 "texprof.w"
+#line 31410 "texprof.w"
 
 uint32_t macro_fl= fl_mem[p];
 int macro_cs= undefined_control_sequence+t;
@@ -8700,7 +8702,7 @@ int macro_depth= cur_depth;
 
 
 /*:1772*/
-#line 7295 "texprof.w"
+#line 7297 "texprof.w"
 
 loc= link(p);
 if(tracing_macros> 1)
@@ -8713,7 +8715,7 @@ default:print_cmd_chr(assign_toks,t-output_text+output_routine_loc);
 print("->");token_show(p);end_diagnostic(false);
 }
 /*1770:*/
-#line 31388 "texprof.w"
+#line 31394 "texprof.w"
 
 macro_depth++;
 cur_depth= macro_depth;
@@ -8724,7 +8726,7 @@ if(macro_depth<=unchanged_depth)
 unchanged_depth= macro_depth-1;
 
 /*:1770*/
-#line 7306 "texprof.w"
+#line 7308 "texprof.w"
 
 }
 }
@@ -8732,7 +8734,7 @@ else loc= p;
 }
 
 /*:322*//*323:*/
-#line 7317 "texprof.w"
+#line 7319 "texprof.w"
 static void end_token_list(void)
 {if(token_type>=backed_up)
 {if(token_type<=inserted)flush_list(start);
@@ -8754,7 +8756,7 @@ check_interrupt;
 }
 
 /*:323*//*324:*/
-#line 7348 "texprof.w"
+#line 7350 "texprof.w"
 static void back_input(void)
 {pointer p;
 while((state==token_list)&&(loc==null)&&(token_type!=v_template))
@@ -8768,7 +8770,7 @@ loc= p;
 }
 
 /*:324*//*326:*/
-#line 7378 "texprof.w"
+#line 7380 "texprof.w"
 static void back_error(void)
 {OK_to_interrupt= false;back_input();OK_to_interrupt= true;error();
 }
@@ -8779,7 +8781,7 @@ OK_to_interrupt= true;error();
 }
 
 /*:326*//*327:*/
-#line 7393 "texprof.w"
+#line 7395 "texprof.w"
 static void begin_file_reading(void)
 {if(in_open==max_in_open)overflow("text input levels",max_in_open);
 
@@ -8796,7 +8798,7 @@ cur_file_num= terminal_file;
 }
 
 /*:327*//*328:*/
-#line 7411 "texprof.w"
+#line 7413 "texprof.w"
 static void end_file_reading(void)
 {first= start;line= line_stack[index];
 if((name==18)||(name==19))pseudo_close();else
@@ -8809,7 +8811,7 @@ pop_input;decr(in_open);
 }
 
 /*:328*//*329:*/
-#line 7426 "texprof.w"
+#line 7428 "texprof.w"
 static void clear_for_error_prompt(void)
 {while((state!=token_list)&&terminal_input&&
 (input_ptr> 0)&&(loc> limit))end_file_reading();
@@ -8817,14 +8819,14 @@ print_ln();clear_terminal;
 }
 
 /*:329*//*335:*/
-#line 7500 "texprof.w"
+#line 7502 "texprof.w"
 static void check_outer_validity(void)
 {pointer p;
 pointer q;
 if(scanner_status!=normal)
 {deletions_allowed= false;
 /*336:*/
-#line 7526 "texprof.w"
+#line 7528 "texprof.w"
 
 if(cur_cs!=0)
 {if((state==token_list)||(name<1)||(name> 17))
@@ -8835,11 +8837,11 @@ cur_cmd= spacer;cur_chr= ' ';
 }
 
 /*:336*/
-#line 7505 "texprof.w"
+#line 7507 "texprof.w"
 ;
 if(scanner_status> skipping)
 /*337:*/
-#line 7535 "texprof.w"
+#line 7537 "texprof.w"
 
 {runaway();
 if(cur_cs==0)print_err("File ended");
@@ -8849,7 +8851,7 @@ else{cur_cs= 0;print_err("Forbidden control sequence found");
 }
 print(" while scanning ");
 /*338:*/
-#line 7561 "texprof.w"
+#line 7563 "texprof.w"
 
 p= get_avail();
 switch(scanner_status){
@@ -8867,7 +8869,7 @@ case absorbing:{print("text");info(p)= right_brace_token+'}';
 ins_list(p)
 
 /*:338*/
-#line 7544 "texprof.w"
+#line 7546 "texprof.w"
 ;
 print(" of ");sprint_cs(warning_index);
 help4("I suspect you have forgotten a `}', causing me",
@@ -8878,7 +8880,7 @@ error();
 }
 
 /*:337*/
-#line 7507 "texprof.w"
+#line 7509 "texprof.w"
 
 else{print_err("Incomplete ");print_cmd_chr(if_test,cur_if);
 
@@ -8896,11 +8898,11 @@ deletions_allowed= true;
 }
 
 /*:335*//*339:*/
-#line 7579 "texprof.w"
+#line 7581 "texprof.w"
 static void firm_up_the_line(void);
 
 /*:339*//*340:*/
-#line 7585 "texprof.w"
+#line 7587 "texprof.w"
 static void get_next(void)
 {
 
@@ -8916,13 +8918,13 @@ int d;
 restart:cur_cs= 0;
 if(state!=token_list)
 /*342:*/
-#line 7615 "texprof.w"
+#line 7617 "texprof.w"
 
 
 {get_cur_chr:if(loc<=limit)
 {cur_chr= buffer[loc];incr(loc);
 /*1747:*/
-#line 30952 "texprof.w"
+#line 30958 "texprof.w"
 
 if(terminal_input)
 cur_file_line= FILE_LINE(terminal_file,0);
@@ -8932,24 +8934,24 @@ else
 cur_file_line= FILE_LINE(cur_file_num,line);
 
 /*:1747*/
-#line 7619 "texprof.w"
+#line 7621 "texprof.w"
 
 reswitch:cur_cmd= cat_code(cur_chr);
 /*343:*/
-#line 7642 "texprof.w"
+#line 7644 "texprof.w"
 
 switch(state+cur_cmd){
 /*344:*/
-#line 7656 "texprof.w"
+#line 7658 "texprof.w"
 
 any_state_plus(ignore):case skip_blanks+spacer:
 case new_line+spacer
 
 /*:344*/
-#line 7644 "texprof.w"
+#line 7646 "texprof.w"
 :goto get_cur_chr;
 any_state_plus(escape):/*353:*/
-#line 7764 "texprof.w"
+#line 7766 "texprof.w"
 
 {if(loc> limit)cur_cs= null_cs;
 else{start_cs:k= loc;cur_chr= buffer[k];cat= cat_code(cur_chr);
@@ -8959,12 +8961,12 @@ else if(cat==spacer)state= skip_blanks;
 else state= mid_line;
 if((cat==letter)&&(k<=limit))
 /*355:*/
-#line 7810 "texprof.w"
+#line 7812 "texprof.w"
 
 {do{cur_chr= buffer[k];cat= cat_code(cur_chr);incr(k);
 }while(!((cat!=letter)||(k> limit)));
 /*354:*/
-#line 7789 "texprof.w"
+#line 7791 "texprof.w"
 
 {if(buffer[k]==cur_chr)if(cat==sup_mark)if(k<limit)
 {c= buffer[k+1];if(c<0200)
@@ -8987,7 +8989,7 @@ goto start_cs;
 }
 
 /*:354*/
-#line 7813 "texprof.w"
+#line 7815 "texprof.w"
 ;
 if(cat!=letter)decr(k);
 
@@ -8997,10 +8999,10 @@ if(k> loc+1)
 }
 
 /*:355*/
-#line 7774 "texprof.w"
+#line 7776 "texprof.w"
 
 else/*354:*/
-#line 7789 "texprof.w"
+#line 7791 "texprof.w"
 
 {if(buffer[k]==cur_chr)if(cat==sup_mark)if(k<limit)
 {c= buffer[k+1];if(c<0200)
@@ -9023,7 +9025,7 @@ goto start_cs;
 }
 
 /*:354*/
-#line 7775 "texprof.w"
+#line 7777 "texprof.w"
 ;
 cur_cs= single_base+buffer[loc];incr(loc);
 }
@@ -9032,10 +9034,10 @@ if(cur_cmd>=outer_call)check_outer_validity();
 }
 
 /*:353*/
-#line 7646 "texprof.w"
+#line 7648 "texprof.w"
 break;
 any_state_plus(active_char):/*352:*/
-#line 7743 "texprof.w"
+#line 7745 "texprof.w"
 
 {cur_cs= cur_chr+active_base;
 cur_cmd= eq_type(cur_cs);cur_chr= equiv(cur_cs);state= mid_line;
@@ -9043,10 +9045,10 @@ if(cur_cmd>=outer_call)check_outer_validity();
 }
 
 /*:352*/
-#line 7648 "texprof.w"
+#line 7650 "texprof.w"
 break;
 any_state_plus(sup_mark):/*351:*/
-#line 7727 "texprof.w"
+#line 7729 "texprof.w"
 
 {if(cur_chr==buffer[loc])if(loc<limit)
 {c= buffer[loc+1];if(c<0200)
@@ -9064,10 +9066,10 @@ state= mid_line;
 }
 
 /*:351*/
-#line 7650 "texprof.w"
+#line 7652 "texprof.w"
 break;
 any_state_plus(invalid_char):/*345:*/
-#line 7664 "texprof.w"
+#line 7666 "texprof.w"
 
 {print_err("Text line contains an invalid character");
 
@@ -9078,41 +9080,41 @@ goto restart;
 }
 
 /*:345*/
-#line 7651 "texprof.w"
+#line 7653 "texprof.w"
 
 /*346:*/
-#line 7676 "texprof.w"
+#line 7678 "texprof.w"
 
 case mid_line+spacer:/*348:*/
-#line 7705 "texprof.w"
+#line 7707 "texprof.w"
 
 {state= skip_blanks;cur_chr= ' ';
 }
 
 /*:348*/
-#line 7677 "texprof.w"
+#line 7679 "texprof.w"
 break;
 case mid_line+car_ret:/*347:*/
-#line 7699 "texprof.w"
+#line 7701 "texprof.w"
 
 {loc= limit+1;cur_cmd= spacer;cur_chr= ' ';
 }
 
 /*:347*/
-#line 7678 "texprof.w"
+#line 7680 "texprof.w"
 break;
 case skip_blanks+car_ret:any_state_plus(comment):
 /*349:*/
-#line 7709 "texprof.w"
+#line 7711 "texprof.w"
 
 {loc= limit+1;goto get_cur_chr;
 }
 
 /*:349*/
-#line 7680 "texprof.w"
+#line 7682 "texprof.w"
 
 case new_line+car_ret:/*350:*/
-#line 7713 "texprof.w"
+#line 7715 "texprof.w"
 
 {loc= limit+1;cur_cs= par_loc;cur_cmd= eq_type(cur_cs);
 cur_chr= equiv(cur_cs);
@@ -9120,7 +9122,7 @@ if(cur_cmd>=outer_call)check_outer_validity();
 }
 
 /*:350*/
-#line 7681 "texprof.w"
+#line 7683 "texprof.w"
 break;
 case mid_line+left_brace:incr(align_state);break;
 case skip_blanks+left_brace:case new_line+left_brace:{
@@ -9134,30 +9136,30 @@ add_delims_to(case skip_blanks):add_delims_to(
 case new_line):state= mid_line;break;
 
 /*:346*/
-#line 7652 "texprof.w"
+#line 7654 "texprof.w"
 
 default:do_nothing;
 }
 
 /*:343*/
-#line 7623 "texprof.w"
+#line 7625 "texprof.w"
 ;
 }
 else{state= new_line;
 /*359:*/
-#line 7876 "texprof.w"
+#line 7878 "texprof.w"
 
 if(name> 17)/*361:*/
-#line 7915 "texprof.w"
+#line 7917 "texprof.w"
 
 {incr(line);first= start;
 /*1742:*/
-#line 30892 "texprof.w"
+#line 30898 "texprof.w"
 
 if(line>=MAX_LINE)overflow("too many input lines",MAX_LINE);
 
 /*:1742*/
-#line 7917 "texprof.w"
+#line 7919 "texprof.w"
 
 if(!force_eof)
 if(name<=19)
@@ -9197,18 +9199,18 @@ first= limit+1;loc= start;
 }
 
 /*:361*/
-#line 7878 "texprof.w"
+#line 7880 "texprof.w"
 
 else{if(!terminal_input)
 {cur_cmd= 0;cur_chr= 0;
 /*1748:*/
-#line 30961 "texprof.w"
+#line 30967 "texprof.w"
 
 cur_file_line= FILE_LINE(read_file_num[name-1],0);
 
 
 /*:1748*/
-#line 7881 "texprof.w"
+#line 7883 "texprof.w"
 
 return;
 }
@@ -9237,7 +9239,7 @@ else fatal_error("*** (job aborted, no legal \\end found)");
 }
 
 /*:359*/
-#line 7627 "texprof.w"
+#line 7629 "texprof.w"
 ;
 check_interrupt;
 goto get_cur_chr;
@@ -9245,10 +9247,10 @@ goto get_cur_chr;
 }
 
 /*:342*/
-#line 7599 "texprof.w"
+#line 7601 "texprof.w"
 
 else/*356:*/
-#line 7826 "texprof.w"
+#line 7828 "texprof.w"
 
 if(loc!=null)
 
@@ -9260,7 +9262,7 @@ cur_cmd= eq_type(cur_cs);cur_chr= equiv(cur_cs);
 if(cur_cmd>=outer_call)
 if(cur_cmd==dont_expand)
 /*357:*/
-#line 7858 "texprof.w"
+#line 7860 "texprof.w"
 
 {cur_cs= info(loc)-cs_token_flag;loc= null;
 cur_cmd= eq_type(cur_cs);cur_chr= equiv(cur_cs);
@@ -9270,7 +9272,7 @@ if(cur_cmd> max_command)
 }
 
 /*:357*/
-#line 7836 "texprof.w"
+#line 7838 "texprof.w"
 
 else check_outer_validity();
 }
@@ -9279,14 +9281,14 @@ switch(cur_cmd){
 case left_brace:incr(align_state);break;
 case right_brace:decr(align_state);break;
 case out_param:/*358:*/
-#line 7866 "texprof.w"
+#line 7868 "texprof.w"
 
 {begin_token_list(param_stack[param_start+cur_chr-1],parameter);
 goto restart;
 }
 
 /*:358*/
-#line 7843 "texprof.w"
+#line 7845 "texprof.w"
 
 default:do_nothing;
 }
@@ -9297,14 +9299,14 @@ end_token_list();goto restart;
 }
 
 /*:356*/
-#line 7601 "texprof.w"
+#line 7603 "texprof.w"
 ;
 /*341:*/
-#line 7611 "texprof.w"
+#line 7613 "texprof.w"
 
 if(cur_cmd<=car_ret)if(cur_cmd>=tab_mark)if(align_state==0)
 /*788:*/
-#line 16104 "texprof.w"
+#line 16106 "texprof.w"
 
 {if((scanner_status==aligning)||(cur_align==null))
 fatal_error("(interwoven alignment preambles are not allowed)");
@@ -9316,16 +9318,16 @@ align_state= 1000000;goto restart;
 }
 
 /*:788*/
-#line 7613 "texprof.w"
+#line 7615 "texprof.w"
 
 
 /*:341*/
-#line 7602 "texprof.w"
+#line 7604 "texprof.w"
 ;
 }
 
 /*:340*//*362:*/
-#line 7962 "texprof.w"
+#line 7964 "texprof.w"
 static void firm_up_the_line(void)
 {int k;
 limit= last;
@@ -9343,7 +9345,7 @@ limit= start+last-first;
 }
 
 /*:362*//*364:*/
-#line 8001 "texprof.w"
+#line 8003 "texprof.w"
 static void get_token(void)
 {no_new_control_sequence= false;get_next();no_new_control_sequence= true;
 
@@ -9352,9 +9354,9 @@ else cur_tok= cs_token_flag+cur_cs;
 }
 
 /*:364*//*365:*/
-#line 8027 "texprof.w"
+#line 8029 "texprof.w"
 /*388:*/
-#line 8348 "texprof.w"
+#line 8350 "texprof.w"
 
 static void macro_call(void)
 {
@@ -9373,31 +9375,31 @@ small_number save_scanner_status;
 pointer save_warning_index;
 ASCII_code match_chr;
 /*1769:*/
-#line 31380 "texprof.w"
+#line 31386 "texprof.w"
 
 uint32_t macro_fl= fl_mem[cur_chr];
 int macro_cs= cur_cs;
 int macro_depth= cur_depth;
 
 /*:1769*/
-#line 8365 "texprof.w"
+#line 8367 "texprof.w"
 
 save_scanner_status= scanner_status;save_warning_index= warning_index;
 warning_index= cur_cs;ref_count= cur_chr;r= link(ref_count);n= 0;
 if(tracing_macros> 0)/*400:*/
-#line 8575 "texprof.w"
+#line 8577 "texprof.w"
 
 {begin_diagnostic();print_ln();print_cs(warning_index);
 token_show(ref_count);end_diagnostic(false);
 }
 
 /*:400*/
-#line 8368 "texprof.w"
+#line 8370 "texprof.w"
 ;
 if(info(r)==protected_token)r= link(r);
 if(info(r)!=end_match_token)
 /*390:*/
-#line 8407 "texprof.w"
+#line 8409 "texprof.w"
 
 {scanner_status= matching;unbalance= 0;
 long_state= eq_type(cur_cs);
@@ -9408,12 +9410,12 @@ else{match_chr= info(r)-match_token;s= link(r);r= s;
 p= temp_head;m= 0;
 }
 /*391:*/
-#line 8427 "texprof.w"
+#line 8429 "texprof.w"
 
 resume:get_token();
 if(cur_tok==info(r))
 /*393:*/
-#line 8459 "texprof.w"
+#line 8461 "texprof.w"
 
 {r= link(r);
 if((info(r)>=match_token)&&(info(r)<=end_match_token))
@@ -9424,14 +9426,14 @@ else goto resume;
 }
 
 /*:393*/
-#line 8431 "texprof.w"
+#line 8433 "texprof.w"
 ;
 /*396:*/
-#line 8515 "texprof.w"
+#line 8517 "texprof.w"
 
 if(s!=r)
 if(s==null)/*397:*/
-#line 8532 "texprof.w"
+#line 8534 "texprof.w"
 
 {print_err("Use of ");sprint_cs(warning_index);
 
@@ -9444,7 +9446,7 @@ error();goto end;
 }
 
 /*:397*/
-#line 8517 "texprof.w"
+#line 8519 "texprof.w"
 
 else{t= s;
 do{store_new_token(info(t));incr(m);u= link(t);v= s;
@@ -9461,11 +9463,11 @@ r= s;
 }
 
 /*:396*/
-#line 8433 "texprof.w"
+#line 8435 "texprof.w"
 ;
 if(cur_tok==par_token)if(long_state!=long_call)
 /*395:*/
-#line 8484 "texprof.w"
+#line 8486 "texprof.w"
 
 {if(long_state==call)
 {runaway();print_err("Paragraph ended before ");
@@ -9482,19 +9484,19 @@ goto end;
 }
 
 /*:395*/
-#line 8435 "texprof.w"
+#line 8437 "texprof.w"
 ;
 if(cur_tok<right_brace_limit)
 if(cur_tok<left_brace_limit)
 /*398:*/
-#line 8543 "texprof.w"
+#line 8545 "texprof.w"
 
 {unbalance= 1;
 
 loop{fast_store_new_token(cur_tok);get_token();
 if(cur_tok==par_token)if(long_state!=long_call)
 /*395:*/
-#line 8484 "texprof.w"
+#line 8486 "texprof.w"
 
 {if(long_state==call)
 {runaway();print_err("Paragraph ended before ");
@@ -9511,7 +9513,7 @@ goto end;
 }
 
 /*:395*/
-#line 8548 "texprof.w"
+#line 8550 "texprof.w"
 ;
 if(cur_tok<right_brace_limit)
 if(cur_tok<left_brace_limit)incr(unbalance);
@@ -9523,10 +9525,10 @@ done1:rbrace_ptr= p;store_new_token(cur_tok);
 }
 
 /*:398*/
-#line 8438 "texprof.w"
+#line 8440 "texprof.w"
 
 else/*394:*/
-#line 8468 "texprof.w"
+#line 8470 "texprof.w"
 
 {back_input();print_err("Argument of ");sprint_cs(warning_index);
 
@@ -9542,10 +9544,10 @@ goto resume;
 }
 
 /*:394*/
-#line 8439 "texprof.w"
+#line 8441 "texprof.w"
 
 else/*392:*/
-#line 8447 "texprof.w"
+#line 8449 "texprof.w"
 
 {if(cur_tok==space_token)
 if(info(r)<=end_match_token)
@@ -9554,13 +9556,13 @@ store_new_token(cur_tok);
 }
 
 /*:392*/
-#line 8441 "texprof.w"
+#line 8443 "texprof.w"
 ;
 incr(m);
 if(info(r)> end_match_token)goto resume;
 if(info(r)<match_token)goto resume;
 found:if(s!=null)/*399:*/
-#line 8561 "texprof.w"
+#line 8563 "texprof.w"
 
 {if((m==1)&&(info(p)<right_brace_limit))
 {link(rbrace_ptr)= null;free_avail(p);
@@ -9576,21 +9578,21 @@ end_diagnostic(false);
 }
 
 /*:399*/
-#line 8445 "texprof.w"
+#line 8447 "texprof.w"
 
 
 /*:391*/
-#line 8417 "texprof.w"
+#line 8419 "texprof.w"
 ;
 
 }while(!(info(r)==end_match_token));
 }
 
 /*:390*/
-#line 8372 "texprof.w"
+#line 8374 "texprof.w"
 ;
 /*389:*/
-#line 8382 "texprof.w"
+#line 8384 "texprof.w"
 
 while((state==token_list)&&(loc==null)&&(token_type!=v_template))
 end_token_list();
@@ -9607,11 +9609,11 @@ param_ptr= param_ptr+n;
 }
 
 /*:389*/
-#line 8373 "texprof.w"
+#line 8375 "texprof.w"
 ;
 end:scanner_status= save_scanner_status;warning_index= save_warning_index;
 /*1770:*/
-#line 31388 "texprof.w"
+#line 31394 "texprof.w"
 
 macro_depth++;
 cur_depth= macro_depth;
@@ -9622,15 +9624,15 @@ if(macro_depth<=unchanged_depth)
 unchanged_depth= macro_depth-1;
 
 /*:1770*/
-#line 8375 "texprof.w"
+#line 8377 "texprof.w"
 
 }
 
 /*:388*/
-#line 8027 "texprof.w"
+#line 8029 "texprof.w"
 
 /*378:*/
-#line 8204 "texprof.w"
+#line 8206 "texprof.w"
 
 static void insert_relax(void)
 {cur_tok= cs_token_flag+cur_cs;back_input();
@@ -9638,20 +9640,20 @@ cur_tok= cs_token_flag+frozen_relax;back_input();token_type= inserted;
 }
 
 /*:378*/
-#line 8028 "texprof.w"
+#line 8030 "texprof.w"
 
 /*1434:*/
-#line 26458 "texprof.w"
+#line 26464 "texprof.w"
 
 static void pseudo_start(void);
 
 /*:1434*//*1492:*/
-#line 27333 "texprof.w"
+#line 27339 "texprof.w"
 
 static void scan_register_num(void);
 
 /*:1492*//*1497:*/
-#line 27407 "texprof.w"
+#line 27413 "texprof.w"
 
 static void new_index(quarterword i,pointer q)
 {int k;
@@ -9662,7 +9664,7 @@ mem[cur_ptr+k]= sa_null;
 }
 
 /*:1497*//*1501:*/
-#line 27467 "texprof.w"
+#line 27473 "texprof.w"
 
 static void find_sa_element(small_number t,halfword n,bool w)
 
@@ -9689,7 +9691,7 @@ add_sa_ptr;q= cur_ptr;i= hex_dig3(n);
 not_found3:new_index(i,q);
 add_sa_ptr;q= cur_ptr;i= hex_dig4(n);
 not_found4:/*1502:*/
-#line 27532 "texprof.w"
+#line 27538 "texprof.w"
 
 if(t==mark_val)
 {cur_ptr= get_node(mark_class_node_size);
@@ -9710,13 +9712,13 @@ sa_ref(cur_ptr)= null;
 sa_index(cur_ptr)= 16*t+i;sa_lev(cur_ptr)= level_one
 
 /*:1502*/
-#line 27492 "texprof.w"
+#line 27498 "texprof.w"
 ;
 link(cur_ptr)= q;add_sa_ptr;
 }
 
 /*:1501*/
-#line 8029 "texprof.w"
+#line 8031 "texprof.w"
 
 static void pass_text(void);
 static void start_input(void);
@@ -9738,18 +9740,18 @@ cv_backup= cur_val;cvl_backup= cur_val_level;radix_backup= radix;
 co_backup= cur_order;backup_backup= link(backup_head);
 reswitch:
 if(cur_cmd<call)/*366:*/
-#line 8056 "texprof.w"
+#line 8058 "texprof.w"
 
 {if(tracing_commands> 1)show_cur_cmd_chr();
 switch(cur_cmd){
 case top_bot_mark:/*385:*/
-#line 8301 "texprof.w"
+#line 8303 "texprof.w"
 
 {t= cur_chr%marks_code;
 if(cur_chr>=marks_code)scan_register_num();else cur_val= 0;
 if(cur_val==0)cur_ptr= cur_mark[t];
 else/*1506:*/
-#line 27652 "texprof.w"
+#line 27658 "texprof.w"
 
 {find_sa_element(mark_val,cur_val,false);
 if(cur_ptr!=null)
@@ -9758,17 +9760,17 @@ else cur_ptr= info(cur_ptr+(t/2)+1);
 }
 
 /*:1506*/
-#line 8305 "texprof.w"
+#line 8307 "texprof.w"
 ;
 if(cur_ptr!=null)begin_token_list(cur_ptr,mark_text);
 }
 
 /*:385*/
-#line 8059 "texprof.w"
+#line 8061 "texprof.w"
 break;
 case expand_after:switch(cur_chr){
 case 0:/*367:*/
-#line 8078 "texprof.w"
+#line 8080 "texprof.w"
 
 {get_token();t= cur_tok;get_token();
 if(cur_cmd> max_command)expand();else back_input();
@@ -9776,10 +9778,10 @@ cur_tok= t;back_input();
 }
 
 /*:367*/
-#line 8061 "texprof.w"
+#line 8063 "texprof.w"
 break;
 case 1:/*1447:*/
-#line 26612 "texprof.w"
+#line 26618 "texprof.w"
 
 {get_token();
 if((cur_cmd==if_test)&&(cur_chr!=if_case_code))
@@ -9793,10 +9795,10 @@ back_error();
 }
 
 /*:1447*/
-#line 8062 "texprof.w"
+#line 8064 "texprof.w"
 break;
 /*1586:*/
-#line 28586 "texprof.w"
+#line 28592 "texprof.w"
 
 case primitive_code:{get_token();
 set_ROM_p_from_cs(cur_cs);
@@ -9809,7 +9811,7 @@ back_input();
 }break;
 
 /*:1586*//*1590:*/
-#line 28611 "texprof.w"
+#line 28617 "texprof.w"
 
 case expanded_code:{scan_general_x_text();
 back_list(link(link(garbage)));
@@ -9817,11 +9819,11 @@ free_avail(link(garbage));
 }
 
 /*:1590*/
-#line 8063 "texprof.w"
+#line 8065 "texprof.w"
 
 }break;
 case no_expand:/*368:*/
-#line 8092 "texprof.w"
+#line 8094 "texprof.w"
 
 {save_scanner_status= scanner_status;scanner_status= normal;
 get_token();scanner_status= save_scanner_status;t= cur_tok;
@@ -9833,10 +9835,10 @@ link(p)= loc;start= p;loc= p;
 }
 
 /*:368*/
-#line 8065 "texprof.w"
+#line 8067 "texprof.w"
 break;
 case cs_name:/*371:*/
-#line 8128 "texprof.w"
+#line 8130 "texprof.w"
 
 {r= get_avail();p= r;
 incr(incsname_state);
@@ -9844,7 +9846,7 @@ do{get_x_token();
 if(cur_cs==0)store_new_token(cur_tok);
 }while(!(cur_cs!=0));
 if(cur_cmd!=end_cs_name)/*372:*/
-#line 8144 "texprof.w"
+#line 8146 "texprof.w"
 
 {print_err("Missing ");print_esc("endcsname");print(" inserted");
 
@@ -9854,11 +9856,11 @@ back_error();
 }
 
 /*:372*/
-#line 8134 "texprof.w"
+#line 8136 "texprof.w"
 ;
 decr(incsname_state);
 /*373:*/
-#line 8152 "texprof.w"
+#line 8154 "texprof.w"
 
 j= first;p= link(r);
 while(p!=null)
@@ -9878,7 +9880,7 @@ no_new_control_sequence= true;
 else cur_cs= single_base+buffer[first]
 
 /*:373*/
-#line 8136 "texprof.w"
+#line 8138 "texprof.w"
 ;
 flush_list(r);
 if(eq_type(cur_cs)==undefined_cs)
@@ -9888,13 +9890,13 @@ cur_tok= cur_cs+cs_token_flag;back_input();
 }
 
 /*:371*/
-#line 8066 "texprof.w"
+#line 8068 "texprof.w"
 break;
 case convert:conv_toks();break;
 case the:ins_the_toks();break;
 case if_test:conditional();break;
 case fi_or_else:/*509:*/
-#line 10391 "texprof.w"
+#line 10393 "texprof.w"
 
 {if(tracing_ifs> 0)if(tracing_commands<=1)show_cur_cmd_chr();
 if(cur_chr> if_limit)
@@ -9908,7 +9910,7 @@ error();
 }
 else{while(cur_chr!=fi_code)pass_text();
 /*495:*/
-#line 10175 "texprof.w"
+#line 10177 "texprof.w"
 
 {if(if_stack[in_open]==cond_ptr)if_warning();
 
@@ -9918,34 +9920,34 @@ free_node(p,if_node_size);
 }
 
 /*:495*/
-#line 10403 "texprof.w"
+#line 10405 "texprof.w"
 ;
 }
 }
 
 /*:509*/
-#line 8070 "texprof.w"
+#line 8072 "texprof.w"
 break;
 case input:/*377:*/
-#line 8195 "texprof.w"
+#line 8197 "texprof.w"
 
 if(cur_chr==1)force_eof= true
 /*1431:*/
-#line 26441 "texprof.w"
+#line 26447 "texprof.w"
 ;
 else if(cur_chr==2)pseudo_start()
 
 /*:1431*/
-#line 8197 "texprof.w"
+#line 8199 "texprof.w"
 ;
 else if(name_in_progress)insert_relax();
 else start_input()
 
 /*:377*/
-#line 8071 "texprof.w"
+#line 8073 "texprof.w"
 ;break;
 default:/*369:*/
-#line 8102 "texprof.w"
+#line 8104 "texprof.w"
 
 {print_err("Undefined control sequence");
 
@@ -9958,30 +9960,30 @@ error();
 }
 
 /*:369*/
-#line 8072 "texprof.w"
+#line 8074 "texprof.w"
 
 }
 }
 
 /*:366*/
-#line 8049 "texprof.w"
+#line 8051 "texprof.w"
 
 else if(cur_cmd<end_template)macro_call();
 else/*374:*/
-#line 8176 "texprof.w"
+#line 8178 "texprof.w"
 
 {cur_tok= cs_token_flag+frozen_endv;back_input();
 }
 
 /*:374*/
-#line 8051 "texprof.w"
+#line 8053 "texprof.w"
 ;
 cur_val= cv_backup;cur_val_level= cvl_backup;radix= radix_backup;
 cur_order= co_backup;link(backup_head)= backup_backup;
 }
 
 /*:365*//*379:*/
-#line 8214 "texprof.w"
+#line 8216 "texprof.w"
 static void get_x_token(void)
 
 {
@@ -10000,7 +10002,7 @@ else cur_tok= cs_token_flag+cur_cs;
 }
 
 /*:379*//*380:*/
-#line 8234 "texprof.w"
+#line 8236 "texprof.w"
 static void x_token(void)
 {while(cur_cmd> max_command)
 {expand();
@@ -10011,16 +10013,16 @@ else cur_tok= cs_token_flag+cur_cs;
 }
 
 /*:380*//*402:*/
-#line 8593 "texprof.w"
+#line 8595 "texprof.w"
 static void scan_left_brace(void)
 {/*403:*/
-#line 8607 "texprof.w"
+#line 8609 "texprof.w"
 
 do{get_x_token();
 }while(!((cur_cmd!=spacer)&&(cur_cmd!=relax)))
 
 /*:403*/
-#line 8594 "texprof.w"
+#line 8596 "texprof.w"
 ;
 if(cur_cmd!=left_brace)
 {print_err("Missing { inserted");
@@ -10035,22 +10037,22 @@ cur_chr= '{';incr(align_state);
 }
 
 /*:402*//*404:*/
-#line 8614 "texprof.w"
+#line 8616 "texprof.w"
 static void scan_optional_equals(void)
 {/*405:*/
-#line 8619 "texprof.w"
+#line 8621 "texprof.w"
 
 do{get_x_token();
 }while(!(cur_cmd!=spacer))
 
 /*:405*/
-#line 8615 "texprof.w"
+#line 8617 "texprof.w"
 ;
 if(cur_tok!=other_token+'=')back_input();
 }
 
 /*:404*//*406:*/
-#line 8638 "texprof.w"
+#line 8640 "texprof.w"
 static bool scan_keyword(char*s)
 {
 pointer p;
@@ -10073,7 +10075,7 @@ flush_list(link(backup_head));return true;
 }
 
 /*:406*//*407:*/
-#line 8662 "texprof.w"
+#line 8664 "texprof.w"
 static void mu_error(void)
 {print_err("Incompatible glue units");
 
@@ -10082,10 +10084,10 @@ error();
 }
 
 /*:407*//*408:*/
-#line 8679 "texprof.w"
+#line 8681 "texprof.w"
 static void scan_int(void);
 /*432:*/
-#line 9076 "texprof.w"
+#line 9078 "texprof.w"
 
 static void scan_eight_bit_int(void)
 {scan_int();
@@ -10098,7 +10100,7 @@ help2("A register number must be between 0 and 255.",
 }
 
 /*:432*//*433:*/
-#line 9087 "texprof.w"
+#line 9089 "texprof.w"
 
 static void scan_char_num(void)
 {scan_int();
@@ -10111,7 +10113,7 @@ help2("A character number must be between 0 and 255.",
 }
 
 /*:433*//*434:*/
-#line 9101 "texprof.w"
+#line 9103 "texprof.w"
 
 static void scan_four_bit_int(void)
 {scan_int();
@@ -10124,7 +10126,7 @@ help2("Since I expected to read a number between 0 and 15,",
 }
 
 /*:434*//*435:*/
-#line 9112 "texprof.w"
+#line 9114 "texprof.w"
 
 static void scan_fifteen_bit_int(void)
 {scan_int();
@@ -10137,7 +10139,7 @@ help2("A mathchar number must be between 0 and 32767.",
 }
 
 /*:435*//*436:*/
-#line 9123 "texprof.w"
+#line 9125 "texprof.w"
 
 static void scan_twenty_seven_bit_int(void)
 {scan_int();
@@ -10150,7 +10152,7 @@ help2("A numeric delimiter code must be between 0 and 2^{27}-1.",
 }
 
 /*:436*//*1493:*/
-#line 27336 "texprof.w"
+#line 27342 "texprof.w"
 
 static void scan_register_num(void)
 {scan_int();
@@ -10163,15 +10165,15 @@ int_error(cur_val);cur_val= 0;
 }
 
 /*:1493*/
-#line 8680 "texprof.w"
+#line 8682 "texprof.w"
 
 /*1412:*/
-#line 26284 "texprof.w"
+#line 26290 "texprof.w"
 
 static void scan_general_text(void);
 
 /*:1412*//*1454:*/
-#line 26694 "texprof.w"
+#line 26700 "texprof.w"
 
 static void get_x_or_protected(void)
 
@@ -10185,33 +10187,33 @@ expand();
 }
 
 /*:1454*//*1463:*/
-#line 26871 "texprof.w"
+#line 26877 "texprof.w"
 
 static void scan_expr(void);
 
 /*:1463*//*1468:*/
-#line 26963 "texprof.w"
+#line 26969 "texprof.w"
 
 static void scan_normal_glue(void);
 static void scan_mu_glue(void);
 
 /*:1468*/
-#line 8681 "texprof.w"
+#line 8683 "texprof.w"
 
 /*576:*/
-#line 11738 "texprof.w"
+#line 11740 "texprof.w"
 
 static void scan_font_ident(void)
 {internal_font_number f;
 halfword m;
 /*405:*/
-#line 8619 "texprof.w"
+#line 8621 "texprof.w"
 
 do{get_x_token();
 }while(!(cur_cmd!=spacer))
 
 /*:405*/
-#line 11742 "texprof.w"
+#line 11744 "texprof.w"
 ;
 if(cur_cmd==def_font)f= cur_font;
 else if(cur_cmd==set_font)f= cur_chr;
@@ -10228,7 +10230,7 @@ cur_val= f;
 }
 
 /*:576*//*577:*/
-#line 11761 "texprof.w"
+#line 11763 "texprof.w"
 
 static void find_font_dimen(bool writing)
 
@@ -10244,7 +10246,7 @@ font_glue[f]= null;
 if(n> font_params[f])
 if(f<font_ptr)cur_val= fmem_ptr;
 else/*579:*/
-#line 11792 "texprof.w"
+#line 11794 "texprof.w"
 
 {do{if(fmem_ptr==font_mem_size)
 overflow("font memory",font_mem_size);
@@ -10255,12 +10257,12 @@ cur_val= fmem_ptr-1;
 }
 
 /*:579*/
-#line 11775 "texprof.w"
+#line 11777 "texprof.w"
 
 else cur_val= n+param_base[f];
 }
 /*578:*/
-#line 11781 "texprof.w"
+#line 11783 "texprof.w"
 
 if(cur_val==fmem_ptr)
 {print_err("Font ");printn_esc(font_id_text(f));
@@ -10273,16 +10275,16 @@ error();
 }
 
 /*:578*/
-#line 11778 "texprof.w"
+#line 11780 "texprof.w"
 ;
 }
 
 /*:577*/
-#line 8682 "texprof.w"
+#line 8684 "texprof.w"
 
 
 /*:408*//*412:*/
-#line 8750 "texprof.w"
+#line 8752 "texprof.w"
 static void scan_something_internal(small_number level,bool negative)
 
 {
@@ -10294,7 +10296,7 @@ int p;
 m= cur_chr;
 switch(cur_cmd){
 case def_code:/*413:*/
-#line 8785 "texprof.w"
+#line 8787 "texprof.w"
 
 {scan_char_num();
 if(m==math_code_base)scanned_result(ho(math_code(cur_val)),int_val)
@@ -10303,11 +10305,11 @@ else scanned_result(eqtb[m+cur_val].i,int_val);
 }
 
 /*:413*/
-#line 8760 "texprof.w"
+#line 8762 "texprof.w"
 break;
 case toks_register:case assign_toks:
 case def_family:case set_font:case def_font:/*414:*/
-#line 8792 "texprof.w"
+#line 8794 "texprof.w"
 
 if(level!=tok_val)
 {print_err("Missing number, treated as zero");
@@ -10337,14 +10339,14 @@ scanned_result(font_id_base+cur_val,ident_val);
 }
 
 /*:414*/
-#line 8763 "texprof.w"
+#line 8765 "texprof.w"
 break;
 case assign_int:scanned_result(eqtb[m].i,int_val)break;
 case assign_dimen:scanned_result(eqtb[m].sc,dimen_val)break;
 case assign_glue:scanned_result(equiv(m),glue_val)break;
 case assign_mu_glue:scanned_result(equiv(m),mu_val)break;
 case set_aux:/*417:*/
-#line 8886 "texprof.w"
+#line 8888 "texprof.w"
 
 if(abs(mode)!=m)
 {print_err("Improper ");print_cmd_chr(set_aux,m);
@@ -10362,10 +10364,10 @@ else if(m==vmode)scanned_result(prev_depth,dimen_val)
 else scanned_result(space_factor,int_val)
 
 /*:417*/
-#line 8768 "texprof.w"
+#line 8770 "texprof.w"
 break;
 case set_prev_graf:/*421:*/
-#line 8927 "texprof.w"
+#line 8929 "texprof.w"
 
 if(mode==0)scanned_result(0,int_val)
 else{nest[nest_ptr]= cur_list;p= nest_ptr;
@@ -10374,29 +10376,29 @@ scanned_result(nest[p].pg_field,int_val);
 }
 
 /*:421*/
-#line 8769 "texprof.w"
+#line 8771 "texprof.w"
 break;
 case set_page_int:/*418:*/
-#line 8902 "texprof.w"
+#line 8904 "texprof.w"
 
 {if(m==0)cur_val= dead_cycles
 /*1424:*/
-#line 26402 "texprof.w"
+#line 26408 "texprof.w"
 ;
 else if(m==2)cur_val= interaction
 
 /*:1424*/
-#line 8904 "texprof.w"
+#line 8906 "texprof.w"
 ;
 else cur_val= insert_penalties;
 cur_val_level= int_val;
 }
 
 /*:418*/
-#line 8770 "texprof.w"
+#line 8772 "texprof.w"
 break;
 case set_page_dimen:/*420:*/
-#line 8920 "texprof.w"
+#line 8922 "texprof.w"
 
 {if((page_contents==empty)&&(!output_active))
 if(m==0)cur_val= max_dimen;else cur_val= 0;
@@ -10405,13 +10407,13 @@ cur_val_level= dimen_val;
 }
 
 /*:420*/
-#line 8771 "texprof.w"
+#line 8773 "texprof.w"
 break;
 case set_shape:/*422:*/
-#line 8934 "texprof.w"
+#line 8936 "texprof.w"
 
 {if(m> par_shape_loc)/*1536:*/
-#line 28126 "texprof.w"
+#line 28132 "texprof.w"
 
 {scan_int();
 if((equiv(m)==null)||(cur_val<0))cur_val= 0;
@@ -10421,7 +10423,7 @@ cur_val= penalty(equiv(m)+cur_val);
 }
 
 /*:1536*/
-#line 8935 "texprof.w"
+#line 8937 "texprof.w"
 
 else if(par_shape_ptr==null)cur_val= 0;
 else cur_val= info(par_shape_ptr);
@@ -10429,10 +10431,10 @@ cur_val_level= int_val;
 }
 
 /*:422*/
-#line 8772 "texprof.w"
+#line 8774 "texprof.w"
 break;
 case set_box_dimen:/*419:*/
-#line 8909 "texprof.w"
+#line 8911 "texprof.w"
 
 {scan_register_num();fetch_box(q);
 if(q==null)cur_val= 0;else cur_val= mem[q+m].sc;
@@ -10440,21 +10442,21 @@ cur_val_level= dimen_val;
 }
 
 /*:419*/
-#line 8773 "texprof.w"
+#line 8775 "texprof.w"
 break;
 case char_given:case math_given:scanned_result(cur_chr,int_val)break;
 case assign_font_dimen:/*424:*/
-#line 8993 "texprof.w"
+#line 8995 "texprof.w"
 
 {find_font_dimen(false);font_info[fmem_ptr].sc= 0;
 scanned_result(font_info[cur_val].sc,dimen_val);
 }
 
 /*:424*/
-#line 8775 "texprof.w"
+#line 8777 "texprof.w"
 break;
 case assign_font_int:/*425:*/
-#line 8998 "texprof.w"
+#line 9000 "texprof.w"
 
 {scan_font_ident();
 if(m==0)scanned_result(hyphen_char[cur_val],int_val)
@@ -10462,10 +10464,10 @@ else scanned_result(skew_char[cur_val],int_val);
 }
 
 /*:425*/
-#line 8776 "texprof.w"
+#line 8778 "texprof.w"
 break;
 case internal_register:/*426:*/
-#line 9004 "texprof.w"
+#line 9006 "texprof.w"
 
 {if((m<mem_bot)||(m> lo_mem_stat_max))
 {cur_val_level= sa_type(m);
@@ -10492,65 +10494,65 @@ case mu_val:cur_val= mu_skip(cur_val);
 }
 
 /*:426*/
-#line 8777 "texprof.w"
+#line 8779 "texprof.w"
 break;
 case last_item:/*423:*/
-#line 8948 "texprof.w"
+#line 8950 "texprof.w"
 
 if(m> eTeX_last_last_item_cmd_mod)
 /*1549:*/
-#line 28229 "texprof.w"
+#line 28235 "texprof.w"
 
 {switch(m){
 /*1555:*/
-#line 28288 "texprof.w"
+#line 28294 "texprof.w"
 
 case Prote_version_code:cur_val= Prote_version;break;
 
 /*:1555*//*1570:*/
-#line 28417 "texprof.w"
+#line 28423 "texprof.w"
 
 case shell_escape_code:cur_val= 0;break;
 
 /*:1570*//*1605:*/
-#line 28736 "texprof.w"
+#line 28742 "texprof.w"
 
 case elapsed_time_code:cur_val= get_elapsed_time;break;
 
 /*:1605*//*1641:*/
-#line 29201 "texprof.w"
+#line 29207 "texprof.w"
 
 case random_seed_code:cur_val= random_seed;break;
 
 /*:1641*//*1668:*/
-#line 29457 "texprof.w"
+#line 29463 "texprof.w"
 
 case last_xpos_code:cur_val= last_saved_xpos;break;
 case last_ypos_code:cur_val= last_saved_ypos;
 
 /*:1668*/
-#line 28231 "texprof.w"
+#line 28237 "texprof.w"
 
 }
 cur_val_level= int_val;
 }
 
 /*:1549*/
-#line 8950 "texprof.w"
+#line 8952 "texprof.w"
 
 else if(m>=input_line_no_code)
 if(m>=eTeX_glue)/*1462:*/
-#line 26840 "texprof.w"
+#line 26846 "texprof.w"
 
 {if(m<eTeX_mu)
 {switch(m){
 /*1489:*/
-#line 27288 "texprof.w"
+#line 27294 "texprof.w"
 
 case mu_to_glue_code:scan_mu_glue();
 
 /*:1489*/
-#line 26843 "texprof.w"
+#line 26849 "texprof.w"
 
 }
 cur_val_level= glue_val;
@@ -10558,12 +10560,12 @@ cur_val_level= glue_val;
 else if(m<eTeX_expr)
 {switch(m){
 /*1490:*/
-#line 27291 "texprof.w"
+#line 27297 "texprof.w"
 
 case glue_to_mu_code:scan_normal_glue();
 
 /*:1490*/
-#line 26849 "texprof.w"
+#line 26855 "texprof.w"
 
 }
 cur_val_level= mu_val;
@@ -10581,7 +10583,7 @@ if(negative)
 if(cur_val_level>=glue_val)
 {m= cur_val;cur_val= new_spec(m);delete_glue_ref(m);
 /*430:*/
-#line 9065 "texprof.w"
+#line 9067 "texprof.w"
 
 {negate(width(cur_val));
 negate(stretch(cur_val));
@@ -10589,7 +10591,7 @@ negate(shrink(cur_val));
 }
 
 /*:430*/
-#line 26865 "texprof.w"
+#line 26871 "texprof.w"
 ;
 }
 else negate(cur_val);
@@ -10597,12 +10599,12 @@ return;
 }
 
 /*:1462*/
-#line 8952 "texprof.w"
+#line 8954 "texprof.w"
 
 else if(m>=eTeX_dim)
 {switch(m){
 /*1401:*/
-#line 26095 "texprof.w"
+#line 26101 "texprof.w"
 
 case font_char_wd_code:
 case font_char_ht_code:
@@ -10621,7 +10623,7 @@ else cur_val= 0;
 }break;
 
 /*:1401*//*1404:*/
-#line 26133 "texprof.w"
+#line 26139 "texprof.w"
 
 case par_shape_length_code:
 case par_shape_indent_code:
@@ -10637,7 +10639,7 @@ cur_val_level= dimen_val;
 }break;
 
 /*:1404*//*1486:*/
-#line 27263 "texprof.w"
+#line 27269 "texprof.w"
 
 case glue_stretch_code:case glue_shrink_code:
 {scan_normal_glue();q= cur_val;
@@ -10647,7 +10649,7 @@ delete_glue_ref(q);
 }
 
 /*:1486*/
-#line 8955 "texprof.w"
+#line 8957 "texprof.w"
 
 }
 cur_val_level= dimen_val;
@@ -10656,18 +10658,18 @@ else{switch(m){
 case input_line_no_code:cur_val= line;break;
 case badness_code:cur_val= last_badness;break;
 /*1381:*/
-#line 25879 "texprof.w"
+#line 25885 "texprof.w"
 
 case eTeX_version_code:cur_val= eTeX_version;break;
 
 /*:1381*//*1395:*/
-#line 26031 "texprof.w"
+#line 26037 "texprof.w"
 
 case current_group_level_code:cur_val= cur_level-level_one;break;
 case current_group_type_code:cur_val= cur_group;break;
 
 /*:1395*//*1398:*/
-#line 26056 "texprof.w"
+#line 26062 "texprof.w"
 
 case current_if_level_code:{q= cond_ptr;cur_val= 0;
 while(q!=null)
@@ -10683,7 +10685,7 @@ else if(if_limit==fi_code)cur_val= -1;
 else cur_val= 0;break;
 
 /*:1398*//*1485:*/
-#line 27255 "texprof.w"
+#line 27261 "texprof.w"
 
 case glue_stretch_order_code:case glue_shrink_order_code:
 {scan_normal_glue();q= cur_val;
@@ -10693,7 +10695,7 @@ delete_glue_ref(q);
 }
 
 /*:1485*/
-#line 8962 "texprof.w"
+#line 8964 "texprof.w"
 
 }
 cur_val_level= int_val;
@@ -10726,10 +10728,10 @@ case last_node_type_code:cur_val= last_node_type;
 }
 
 /*:423*/
-#line 8778 "texprof.w"
+#line 8780 "texprof.w"
 break;
 default:/*427:*/
-#line 9029 "texprof.w"
+#line 9031 "texprof.w"
 
 {print_err("You can't use `");print_cmd_chr(cur_cmd,cur_chr);
 
@@ -10741,11 +10743,11 @@ else scanned_result(0,int_val);
 }
 
 /*:427*/
-#line 8779 "texprof.w"
+#line 8781 "texprof.w"
 
 }
 while(cur_val_level> level)/*428:*/
-#line 9045 "texprof.w"
+#line 9047 "texprof.w"
 
 {if(cur_val_level==glue_val)cur_val= width(cur_val);
 else if(cur_val_level==mu_val)mu_error();
@@ -10753,16 +10755,16 @@ decr(cur_val_level);
 }
 
 /*:428*/
-#line 8781 "texprof.w"
+#line 8783 "texprof.w"
 ;
 /*429:*/
-#line 9055 "texprof.w"
+#line 9057 "texprof.w"
 
 if(negative)
 if(cur_val_level>=glue_val)
 {cur_val= new_spec(cur_val);
 /*430:*/
-#line 9065 "texprof.w"
+#line 9067 "texprof.w"
 
 {negate(width(cur_val));
 negate(stretch(cur_val));
@@ -10770,7 +10772,7 @@ negate(shrink(cur_val));
 }
 
 /*:430*/
-#line 9059 "texprof.w"
+#line 9061 "texprof.w"
 ;
 }
 else negate(cur_val);
@@ -10778,12 +10780,12 @@ else if((cur_val_level>=glue_val)&&(cur_val_level<=mu_val))
 add_glue_ref(cur_val)
 
 /*:429*/
-#line 8782 "texprof.w"
+#line 8784 "texprof.w"
 ;
 }
 
 /*:412*//*439:*/
-#line 9166 "texprof.w"
+#line 9168 "texprof.w"
 static void scan_int(void)
 {
 bool negative;
@@ -10793,17 +10795,17 @@ bool vacuous;
 bool OK_so_far;
 radix= 0;OK_so_far= true;
 /*440:*/
-#line 9182 "texprof.w"
+#line 9184 "texprof.w"
 
 negative= false;
 do{/*405:*/
-#line 8619 "texprof.w"
+#line 8621 "texprof.w"
 
 do{get_x_token();
 }while(!(cur_cmd!=spacer))
 
 /*:405*/
-#line 9184 "texprof.w"
+#line 9186 "texprof.w"
 ;
 if(cur_tok==other_token+'-')
 {negative= !negative;cur_tok= other_token+'+';
@@ -10811,10 +10813,10 @@ if(cur_tok==other_token+'-')
 }while(!(cur_tok!=other_token+'+'))
 
 /*:440*/
-#line 9174 "texprof.w"
+#line 9176 "texprof.w"
 ;
 if(cur_tok==alpha_token)/*441:*/
-#line 9193 "texprof.w"
+#line 9195 "texprof.w"
 
 {get_token();
 if(cur_tok<cs_token_flag)
@@ -10834,23 +10836,23 @@ help2("A one-character control sequence belongs after a ` mark.",
 cur_val= '0';back_error();
 }
 else/*442:*/
-#line 9214 "texprof.w"
+#line 9216 "texprof.w"
 
 {get_x_token();if(cur_cmd!=spacer)back_input();
 }
 
 /*:442*/
-#line 9211 "texprof.w"
+#line 9213 "texprof.w"
 ;
 }
 
 /*:441*/
-#line 9175 "texprof.w"
+#line 9177 "texprof.w"
 
 else if((cur_cmd>=min_internal)&&(cur_cmd<=max_internal))
 scan_something_internal(int_val,false);
 else/*443:*/
-#line 9218 "texprof.w"
+#line 9220 "texprof.w"
 
 {radix= 10;m= 214748364;
 if(cur_tok==octal_token)
@@ -10861,7 +10863,7 @@ else if(cur_tok==hex_token)
 }
 vacuous= true;cur_val= 0;
 /*444:*/
-#line 9237 "texprof.w"
+#line 9239 "texprof.w"
 
 loop{if((cur_tok<zero_token+radix)&&(cur_tok>=zero_token)&&
 (cur_tok<=zero_token+9))d= cur_tok-zero_token;
@@ -10887,10 +10889,10 @@ get_x_token();
 done:
 
 /*:444*/
-#line 9227 "texprof.w"
+#line 9229 "texprof.w"
 ;
 if(vacuous)/*445:*/
-#line 9261 "texprof.w"
+#line 9263 "texprof.w"
 
 {print_err("Missing number, treated as zero");
 
@@ -10902,26 +10904,26 @@ back_error();
 }
 
 /*:445*/
-#line 9228 "texprof.w"
+#line 9230 "texprof.w"
 
 else if(cur_cmd!=spacer)back_input();
 }
 
 /*:443*/
-#line 9178 "texprof.w"
+#line 9180 "texprof.w"
 ;
 if(negative)negate(cur_val);
 }
 
 /*:439*//*447:*/
-#line 9300 "texprof.w"
+#line 9302 "texprof.w"
 static void scan_dimen(bool mu,bool inf,bool shortcut)
 
 {
 bool negative;
 int f;
 /*449:*/
-#line 9343 "texprof.w"
+#line 9345 "texprof.w"
 
 int num,denom;
 int k,kk;
@@ -10930,22 +10932,22 @@ scaled v;
 int save_cur_val;
 
 /*:449*/
-#line 9305 "texprof.w"
+#line 9307 "texprof.w"
 
 f= 0;arith_error= false;cur_order= normal;negative= false;
 if(!shortcut)
 {/*440:*/
-#line 9182 "texprof.w"
+#line 9184 "texprof.w"
 
 negative= false;
 do{/*405:*/
-#line 8619 "texprof.w"
+#line 8621 "texprof.w"
 
 do{get_x_token();
 }while(!(cur_cmd!=spacer))
 
 /*:405*/
-#line 9184 "texprof.w"
+#line 9186 "texprof.w"
 ;
 if(cur_tok==other_token+'-')
 {negative= !negative;cur_tok= other_token+'+';
@@ -10953,23 +10955,23 @@ if(cur_tok==other_token+'-')
 }while(!(cur_tok!=other_token+'+'))
 
 /*:440*/
-#line 9308 "texprof.w"
+#line 9310 "texprof.w"
 ;
 if((cur_cmd>=min_internal)&&(cur_cmd<=max_internal))
 /*448:*/
-#line 9332 "texprof.w"
+#line 9334 "texprof.w"
 
 if(mu)
 {scan_something_internal(mu_val,false);
 /*450:*/
-#line 9354 "texprof.w"
+#line 9356 "texprof.w"
 
 if(cur_val_level>=glue_val)
 {v= width(cur_val);delete_glue_ref(cur_val);cur_val= v;
 }
 
 /*:450*/
-#line 9335 "texprof.w"
+#line 9337 "texprof.w"
 ;
 if(cur_val_level==mu_val)goto attach_sign;
 if(cur_val_level!=int_val)mu_error();
@@ -10979,7 +10981,7 @@ if(cur_val_level==dimen_val)goto attach_sign;
 }
 
 /*:448*/
-#line 9311 "texprof.w"
+#line 9313 "texprof.w"
 
 else{back_input();
 if(cur_tok==continental_point_token)cur_tok= point_token;
@@ -10988,7 +10990,7 @@ else{radix= 10;cur_val= 0;
 }
 if(cur_tok==continental_point_token)cur_tok= point_token;
 if((radix==10)&&(cur_tok==point_token))/*451:*/
-#line 9365 "texprof.w"
+#line 9367 "texprof.w"
 
 {k= 0;p= null;get_token();
 loop{get_x_token();
@@ -11006,7 +11008,7 @@ if(cur_cmd!=spacer)back_input();
 }
 
 /*:451*/
-#line 9318 "texprof.w"
+#line 9320 "texprof.w"
 ;
 }
 }
@@ -11014,10 +11016,10 @@ if(cur_val<0)
 {negative= !negative;negate(cur_val);
 }
 /*452:*/
-#line 9388 "texprof.w"
+#line 9390 "texprof.w"
 
 if(inf)/*453:*/
-#line 9406 "texprof.w"
+#line 9408 "texprof.w"
 
 if(scan_keyword("fil"))
 
@@ -11035,32 +11037,32 @@ goto attach_fraction;
 }
 
 /*:453*/
-#line 9389 "texprof.w"
+#line 9391 "texprof.w"
 ;
 /*454:*/
-#line 9422 "texprof.w"
+#line 9424 "texprof.w"
 
 save_cur_val= cur_val;
 /*405:*/
-#line 8619 "texprof.w"
+#line 8621 "texprof.w"
 
 do{get_x_token();
 }while(!(cur_cmd!=spacer))
 
 /*:405*/
-#line 9424 "texprof.w"
+#line 9426 "texprof.w"
 ;
 if((cur_cmd<min_internal)||(cur_cmd> max_internal))back_input();
 else{if(mu)
 {scan_something_internal(mu_val,false);/*450:*/
-#line 9354 "texprof.w"
+#line 9356 "texprof.w"
 
 if(cur_val_level>=glue_val)
 {v= width(cur_val);delete_glue_ref(cur_val);cur_val= v;
 }
 
 /*:450*/
-#line 9427 "texprof.w"
+#line 9429 "texprof.w"
 ;
 if(cur_val_level!=mu_val)mu_error();
 }
@@ -11069,40 +11071,40 @@ v= cur_val;goto found;
 }
 if(mu)goto not_found;
 if(scan_keyword("em"))v= (/*557:*/
-#line 11398 "texprof.w"
+#line 11400 "texprof.w"
 quad(cur_font)
 
 /*:557*/
-#line 9434 "texprof.w"
+#line 9436 "texprof.w"
 );
 
 else if(scan_keyword("ex"))v= (/*558:*/
-#line 11400 "texprof.w"
+#line 11402 "texprof.w"
 x_height(cur_font)
 
 /*:558*/
-#line 9436 "texprof.w"
+#line 9438 "texprof.w"
 );
 
 else goto not_found;
 /*442:*/
-#line 9214 "texprof.w"
+#line 9216 "texprof.w"
 
 {get_x_token();if(cur_cmd!=spacer)back_input();
 }
 
 /*:442*/
-#line 9439 "texprof.w"
+#line 9441 "texprof.w"
 ;
 found:cur_val= nx_plus_y(save_cur_val,v,xn_over_d(v,f,0200000));
 goto attach_sign;
 not_found:
 
 /*:454*/
-#line 9391 "texprof.w"
+#line 9393 "texprof.w"
 ;
 if(mu)/*455:*/
-#line 9444 "texprof.w"
+#line 9446 "texprof.w"
 
 if(scan_keyword("mu"))goto attach_fraction;
 
@@ -11117,10 +11119,10 @@ error();goto attach_fraction;
 }
 
 /*:455*/
-#line 9392 "texprof.w"
+#line 9394 "texprof.w"
 ;
 if(scan_keyword("true"))/*456:*/
-#line 9457 "texprof.w"
+#line 9459 "texprof.w"
 
 {prepare_mag();
 if(mag!=1000)
@@ -11131,13 +11133,13 @@ cur_val= cur_val+(f/0200000);f= f%0200000;
 }
 
 /*:456*/
-#line 9393 "texprof.w"
+#line 9395 "texprof.w"
 ;
 
 if(scan_keyword("pt"))goto attach_fraction;
 
 /*457:*/
-#line 9475 "texprof.w"
+#line 9477 "texprof.w"
 
 if(scan_keyword("in"))set_conversion(7227,100)
 
@@ -11156,7 +11158,7 @@ else if(scan_keyword("cc"))set_conversion(14856,1157)
 else if(scan_keyword("sp"))goto done;
 
 else/*458:*/
-#line 9498 "texprof.w"
+#line 9500 "texprof.w"
 
 {print_err("Illegal unit of measure (");print("pt inserted)");
 
@@ -11172,7 +11174,7 @@ error();goto done2;
 
 
 /*:458*/
-#line 9492 "texprof.w"
+#line 9494 "texprof.w"
 ;
 cur_val= xn_over_d(cur_val,num,denom);
 f= (num*f+0200000*rem)/denom;
@@ -11180,27 +11182,27 @@ cur_val= cur_val+(f/0200000);f= f%0200000;
 done2:
 
 /*:457*/
-#line 9398 "texprof.w"
+#line 9400 "texprof.w"
 ;
 attach_fraction:if(cur_val>=040000)arith_error= true;
 else cur_val= cur_val*unity+f;
 done:
 
 /*:452*/
-#line 9325 "texprof.w"
+#line 9327 "texprof.w"
 ;
 /*442:*/
-#line 9214 "texprof.w"
+#line 9216 "texprof.w"
 
 {get_x_token();if(cur_cmd!=spacer)back_input();
 }
 
 /*:442*/
-#line 9326 "texprof.w"
+#line 9328 "texprof.w"
 ;
 attach_sign:if(arith_error||(abs(cur_val)>=010000000000))
 /*459:*/
-#line 9512 "texprof.w"
+#line 9514 "texprof.w"
 
 {print_err("Dimension too large");
 
@@ -11210,13 +11212,13 @@ error();cur_val= max_dimen;arith_error= false;
 }
 
 /*:459*/
-#line 9328 "texprof.w"
+#line 9330 "texprof.w"
 ;
 if(negative)negate(cur_val);
 }
 
 /*:447*//*460:*/
-#line 9530 "texprof.w"
+#line 9532 "texprof.w"
 static void scan_glue(small_number level)
 
 {
@@ -11224,17 +11226,17 @@ bool negative;
 pointer q;
 bool mu;
 mu= (level==mu_val);/*440:*/
-#line 9182 "texprof.w"
+#line 9184 "texprof.w"
 
 negative= false;
 do{/*405:*/
-#line 8619 "texprof.w"
+#line 8621 "texprof.w"
 
 do{get_x_token();
 }while(!(cur_cmd!=spacer))
 
 /*:405*/
-#line 9184 "texprof.w"
+#line 9186 "texprof.w"
 ;
 if(cur_tok==other_token+'-')
 {negative= !negative;cur_tok= other_token+'+';
@@ -11242,7 +11244,7 @@ if(cur_tok==other_token+'-')
 }while(!(cur_tok!=other_token+'+'))
 
 /*:440*/
-#line 9536 "texprof.w"
+#line 9538 "texprof.w"
 ;
 if((cur_cmd>=min_internal)&&(cur_cmd<=max_internal))
 {scan_something_internal(level,negative);
@@ -11257,7 +11259,7 @@ else{back_input();scan_dimen(mu,false,false);
 if(negative)negate(cur_val);
 }
 /*461:*/
-#line 9555 "texprof.w"
+#line 9557 "texprof.w"
 
 q= new_spec(zero_glue);width(q)= cur_val;
 if(scan_keyword("plus"))
@@ -11273,15 +11275,15 @@ shrink(q)= cur_val;shrink_order(q)= cur_order;
 cur_val= q
 
 /*:461*/
-#line 9550 "texprof.w"
+#line 9552 "texprof.w"
 ;
 }
 
 /*1464:*/
-#line 26876 "texprof.w"
+#line 26882 "texprof.w"
 
 /*1475:*/
-#line 27068 "texprof.w"
+#line 27074 "texprof.w"
 
 static int add_or_sub(int x,int y,int max_answer,bool negative)
 {int a;
@@ -11293,7 +11295,7 @@ return a;
 }
 
 /*:1475*//*1479:*/
-#line 27123 "texprof.w"
+#line 27129 "texprof.w"
 
 static int quotient(int n,int d)
 {bool negative;
@@ -11313,7 +11315,7 @@ return a;
 }
 
 /*:1479*//*1481:*/
-#line 27160 "texprof.w"
+#line 27166 "texprof.w"
 
 static int fract(int x,int n,int d,int max_answer)
 {
@@ -11347,7 +11349,7 @@ if(x<n)
 {t= x;x= n;n= t;
 }
 /*1482:*/
-#line 27210 "texprof.w"
+#line 27216 "texprof.w"
 
 f= 0;r= (d/2)-d;h= -r;
 loop{if(odd(n))
@@ -11369,7 +11371,7 @@ t= x;x= n;n= t;
 found1:
 
 /*:1482*/
-#line 27192 "texprof.w"
+#line 27198 "texprof.w"
 
 if(f> (max_answer-a))goto too_big;
 a= a+f;
@@ -11380,7 +11382,7 @@ done:return a;
 }
 
 /*:1481*/
-#line 26877 "texprof.w"
+#line 26883 "texprof.w"
 
 static void scan_expr(void)
 {
@@ -11397,25 +11399,25 @@ pointer p;
 pointer q;
 l= cur_val_level;a= arith_error;b= false;p= null;
 /*1465:*/
-#line 26920 "texprof.w"
+#line 26926 "texprof.w"
 
 restart:r= expr_none;e= 0;s= expr_none;t= 0;n= 0;
 resume:if(s==expr_none)o= l;else o= int_val;
 /*1467:*/
-#line 26952 "texprof.w"
+#line 26958 "texprof.w"
 
 /*405:*/
-#line 8619 "texprof.w"
+#line 8621 "texprof.w"
 
 do{get_x_token();
 }while(!(cur_cmd!=spacer))
 
 /*:405*/
-#line 26953 "texprof.w"
+#line 26959 "texprof.w"
 ;
 if(cur_tok==other_token+'(')
 /*1470:*/
-#line 26992 "texprof.w"
+#line 26998 "texprof.w"
 
 {q= get_node(expr_node_size);link(q)= p;type(q)= l;
 subtype(q)= 4*s+r;
@@ -11424,7 +11426,7 @@ p= q;l= o;goto restart;
 }
 
 /*:1470*/
-#line 26955 "texprof.w"
+#line 26961 "texprof.w"
 ;
 back_input();
 if(o==int_val)scan_int();
@@ -11434,19 +11436,19 @@ else scan_mu_glue();
 f= cur_val
 
 /*:1467*/
-#line 26923 "texprof.w"
+#line 26929 "texprof.w"
 ;
 found:/*1466:*/
-#line 26934 "texprof.w"
+#line 26940 "texprof.w"
 
 /*405:*/
-#line 8619 "texprof.w"
+#line 8621 "texprof.w"
 
 do{get_x_token();
 }while(!(cur_cmd!=spacer))
 
 /*:405*/
-#line 26935 "texprof.w"
+#line 26941 "texprof.w"
 ;
 if(cur_tok==other_token+'+')o= expr_add;
 else if(cur_tok==other_token+'-')o= expr_sub;
@@ -11465,11 +11467,11 @@ back_error();
 }
 
 /*:1466*/
-#line 26924 "texprof.w"
+#line 26930 "texprof.w"
 ;
 arith_error= b;
 /*1472:*/
-#line 27020 "texprof.w"
+#line 27026 "texprof.w"
 
 if((l==int_val)||(s> expr_sub))
 {if((f> infinity)||(f<-infinity))num_error(f);
@@ -11483,10 +11485,10 @@ else{if((abs(width(f))> max_dimen)||
 }
 
 /*:1472*/
-#line 26926 "texprof.w"
+#line 26932 "texprof.w"
 ;
 switch(s){/*1473:*/
-#line 27042 "texprof.w"
+#line 27048 "texprof.w"
 
 case expr_none:if((l>=glue_val)&&(o!=expr_none))
 {t= new_spec(f);delete_glue_ref(f);normalize_glue(t);
@@ -11494,7 +11496,7 @@ case expr_none:if((l>=glue_val)&&(o!=expr_none))
 else t= f;break;
 
 /*:1473*//*1477:*/
-#line 27102 "texprof.w"
+#line 27108 "texprof.w"
 
 case expr_mult:if(o==expr_div)
 {n= f;o= expr_scale;
@@ -11505,14 +11507,14 @@ else{expr_m(width(t));expr_m(stretch(t));expr_m(shrink(t));
 }break;
 
 /*:1477*//*1478:*/
-#line 27115 "texprof.w"
+#line 27121 "texprof.w"
 
 case expr_div:if(l<glue_val)expr_d(t);
 else{expr_d(width(t));expr_d(stretch(t));expr_d(shrink(t));
 }break;
 
 /*:1478*//*1480:*/
-#line 27145 "texprof.w"
+#line 27151 "texprof.w"
 
 case expr_scale:if(l==int_val)t= fract(t,n,f,infinity);
 else if(l==dimen_val)expr_s(t);
@@ -11520,18 +11522,18 @@ else{expr_s(width(t));expr_s(stretch(t));expr_s(shrink(t));
 }
 
 /*:1480*/
-#line 26927 "texprof.w"
+#line 26933 "texprof.w"
 
 }
 if(o> expr_sub)s= o;else/*1474:*/
-#line 27054 "texprof.w"
+#line 27060 "texprof.w"
 
 {s= expr_none;
 if(r==expr_none)e= t;
 else if(l==int_val)e= expr_add_sub(e,t,infinity);
 else if(l==dimen_val)e= expr_a(e,t);
 else/*1476:*/
-#line 27081 "texprof.w"
+#line 27087 "texprof.w"
 
 {width(e)= expr_a(width(e),width(t));
 if(stretch_order(e)==stretch_order(t))
@@ -11548,18 +11550,18 @@ delete_glue_ref(t);normalize_glue(e);
 }
 
 /*:1476*/
-#line 27059 "texprof.w"
+#line 27065 "texprof.w"
 ;
 r= o;
 }
 
 /*:1474*/
-#line 26929 "texprof.w"
+#line 26935 "texprof.w"
 ;
 b= arith_error;
 if(o!=expr_none)goto resume;
 if(p!=null)/*1471:*/
-#line 26999 "texprof.w"
+#line 27005 "texprof.w"
 
 {f= e;q= p;
 e= expr_e_field(q);t= expr_t_field(q);n= expr_n_field(q);
@@ -11569,11 +11571,11 @@ goto found;
 }
 
 /*:1471*/
-#line 26932 "texprof.w"
+#line 26938 "texprof.w"
 
 
 /*:1465*/
-#line 26892 "texprof.w"
+#line 26898 "texprof.w"
 ;
 if(b)
 {print_err("Arithmetic overflow");
@@ -11590,7 +11592,7 @@ arith_error= a;cur_val= e;cur_val_level= l;
 }
 
 /*:1464*//*1469:*/
-#line 26970 "texprof.w"
+#line 26976 "texprof.w"
 
 static void scan_normal_glue(void)
 {scan_glue(glue_val);
@@ -11601,11 +11603,11 @@ static void scan_mu_glue(void)
 }
 
 /*:1469*/
-#line 9553 "texprof.w"
+#line 9555 "texprof.w"
 
 
 /*:460*//*462:*/
-#line 9578 "texprof.w"
+#line 9580 "texprof.w"
 static pointer scan_rule_spec(void)
 {
 pointer q;
@@ -11629,9 +11631,9 @@ return q;
 }
 
 /*:462*//*463:*/
-#line 9612 "texprof.w"
+#line 9614 "texprof.w"
 /*1413:*/
-#line 26291 "texprof.w"
+#line 26297 "texprof.w"
 
 static void scan_general_text(void)
 {
@@ -11661,7 +11663,7 @@ scanner_status= s;warning_index= w;def_ref= d;
 }
 
 /*:1413*//*1435:*/
-#line 26461 "texprof.w"
+#line 26467 "texprof.w"
 
 static void pseudo_start(void)
 {int old_setting;
@@ -11676,7 +11678,7 @@ token_show(temp_head);selector= old_setting;
 flush_list(link(temp_head));
 str_room(1);s= make_string();
 /*1436:*/
-#line 26479 "texprof.w"
+#line 26485 "texprof.w"
 
 str_pool[pool_ptr]= si(' ');l= str_start[s];
 nl= si(new_line_char);
@@ -11710,11 +11712,11 @@ if(str_pool[l]==nl)incr(l);
 info(p)= link(p);link(p)= pseudo_files;pseudo_files= p
 
 /*:1436*/
-#line 26474 "texprof.w"
+#line 26480 "texprof.w"
 ;
 flush_string;
 /*1437:*/
-#line 26511 "texprof.w"
+#line 26517 "texprof.w"
 
 begin_file_reading();
 line= 0;limit= start;loc= limit+1;
@@ -11726,12 +11728,12 @@ name= 19;print("( ");incr(open_parens);update_terminal;
 else name= 18
 
 /*:1437*/
-#line 26476 "texprof.w"
+#line 26482 "texprof.w"
 ;
 }
 
 /*:1435*/
-#line 9612 "texprof.w"
+#line 9614 "texprof.w"
 
 static pointer str_toks(pool_pointer b)
 
@@ -11752,7 +11754,7 @@ pool_ptr= b;return p;
 }
 
 /*:463*//*464:*/
-#line 9638 "texprof.w"
+#line 9640 "texprof.w"
 static pointer the_toks(void)
 {
 int old_setting;
@@ -11760,7 +11762,7 @@ pointer p,q,r;
 pool_pointer b;
 small_number c;
 /*1418:*/
-#line 26348 "texprof.w"
+#line 26354 "texprof.w"
 
 if(odd(cur_chr))
 {c= cur_chr;scan_general_text();
@@ -11774,11 +11776,11 @@ selector= old_setting;return str_toks(b);
 }
 
 /*:1418*/
-#line 9644 "texprof.w"
+#line 9646 "texprof.w"
 ;
 get_x_token();scan_something_internal(tok_val,false);
 if(cur_val_level>=ident_val)/*465:*/
-#line 9661 "texprof.w"
+#line 9663 "texprof.w"
 
 {p= temp_head;link(p)= null;
 if(cur_val_level==ident_val)store_new_token(cs_token_flag+cur_val)
@@ -11792,7 +11794,7 @@ return p;
 }
 
 /*:465*/
-#line 9646 "texprof.w"
+#line 9648 "texprof.w"
 
 else{old_setting= selector;selector= new_string;b= pool_ptr;
 switch(cur_val_level){
@@ -11809,13 +11811,13 @@ selector= old_setting;return str_toks(b);
 }
 
 /*:464*//*466:*/
-#line 9675 "texprof.w"
+#line 9677 "texprof.w"
 static void ins_the_toks(void)
 {link(garbage)= the_toks();ins_list(link(temp_head));
 }
 
 /*:466*//*469:*/
-#line 9723 "texprof.w"
+#line 9725 "texprof.w"
 static void conv_toks(void)
 {int old_setting;
 int c;
@@ -11826,7 +11828,7 @@ pool_pointer m,n;
 bool r;
 str_number s,t;
 c= cur_chr;/*470:*/
-#line 9738 "texprof.w"
+#line 9740 "texprof.w"
 
 switch(c){
 case number_code:case roman_numeral_code:scan_int();break;
@@ -11837,12 +11839,12 @@ case font_name_code:scan_font_ident();break;
 case job_name_code:if(job_name==0)open_log_file();break;
 case eTeX_revision_code:do_nothing;break;
 /*1557:*/
-#line 28294 "texprof.w"
+#line 28300 "texprof.w"
 
 case Prote_revision_code:do_nothing;break;
 
 /*:1557*//*1593:*/
-#line 28643 "texprof.w"
+#line 28649 "texprof.w"
 
 case strcmp_code:{scan_general_x_text();toks_to_str();
 s= info(garbage);flush_list(link(garbage));
@@ -11865,12 +11867,12 @@ flush_string;flush_string;
 }break;
 
 /*:1593*//*1599:*/
-#line 28698 "texprof.w"
+#line 28704 "texprof.w"
 
 case creation_date_code:get_creation_date();break;
 
 /*:1599*//*1611:*/
-#line 28788 "texprof.w"
+#line 28794 "texprof.w"
 
 case file_size_code:{scan_general_x_text();toks_to_str();
 s= info(garbage);flush_list(link(garbage));str_to_name(s);
@@ -11880,7 +11882,7 @@ flush_string;
 }break;
 
 /*:1611*//*1615:*/
-#line 28820 "texprof.w"
+#line 28826 "texprof.w"
 
 case file_mod_date_code:{scan_general_x_text();toks_to_str();
 s= info(garbage);flush_list(link(garbage));str_to_name(s);
@@ -11889,7 +11891,7 @@ flush_string;
 }break;
 
 /*:1615*//*1619:*/
-#line 28860 "texprof.w"
+#line 28866 "texprof.w"
 
 case file_dump_code:{k= 0;l= 0;
 if(scan_keyword("offset")){scan_int();
@@ -11914,7 +11916,7 @@ flush_string;
 }break;
 
 /*:1619*//*1623:*/
-#line 28928 "texprof.w"
+#line 28934 "texprof.w"
 
 case mdfive_sum_code:{r= scan_keyword("file");scan_general_x_text();
 toks_to_str();s= info(garbage);flush_list(link(garbage));
@@ -11923,35 +11925,35 @@ flush_string;
 }break;
 
 /*:1623*//*1645:*/
-#line 29228 "texprof.w"
+#line 29234 "texprof.w"
 
 case set_random_seed_code:{scan_int();random_seed= cur_val;
 init_randoms();
 }break;
 
 /*:1645*//*1652:*/
-#line 29304 "texprof.w"
+#line 29310 "texprof.w"
 
 case uniform_deviate_code:{scan_int();
 cur_val= unif_rand(cur_val);
 }break;
 
 /*:1652*//*1659:*/
-#line 29385 "texprof.w"
+#line 29391 "texprof.w"
 
 case normal_deviate_code:cur_val= norm_rand();
 
 /*:1659*/
-#line 9747 "texprof.w"
+#line 9749 "texprof.w"
 
 }
 
 /*:470*/
-#line 9732 "texprof.w"
+#line 9734 "texprof.w"
 ;
 old_setting= selector;selector= new_string;b= pool_ptr;
 /*471:*/
-#line 9750 "texprof.w"
+#line 9752 "texprof.w"
 
 switch(c){
 case number_code:print_int(cur_val);break;
@@ -11968,34 +11970,34 @@ print("pt");
 case eTeX_revision_code:print(eTeX_revision);break;
 case job_name_code:printn(job_name);break;
 /*1558:*/
-#line 28297 "texprof.w"
+#line 28303 "texprof.w"
 
 case Prote_revision_code:print(Prote_revision);break;
 
 /*:1558*//*1594:*/
-#line 28664 "texprof.w"
+#line 28670 "texprof.w"
 
 case strcmp_code:print_int(cur_val);break;
 
 /*:1594*//*1600:*/
-#line 28704 "texprof.w"
+#line 28710 "texprof.w"
 
 case creation_date_code:for(k= 0;time_str[k]!='\0';k++)
 print_char(time_str[k]);break;
 
 /*:1600*//*1612:*/
-#line 28796 "texprof.w"
+#line 28802 "texprof.w"
 
 case file_size_code:if(cur_val!=-1)print_int(cur_val);break;
 
 /*:1612*//*1616:*/
-#line 28831 "texprof.w"
+#line 28837 "texprof.w"
 
 case file_mod_date_code:for(k= 0;time_str[k]!='\0';k++)
 print_char(time_str[k]);break;
 
 /*:1616*//*1620:*/
-#line 28888 "texprof.w"
+#line 28894 "texprof.w"
 
 case file_dump_code:
 {FILE*f= fopen((char*)name_of_file0,"rb");
@@ -12010,40 +12012,40 @@ fclose(f);
 }break;
 
 /*:1620*//*1624:*/
-#line 28939 "texprof.w"
+#line 28945 "texprof.w"
 
 case mdfive_sum_code:for(k= 0;k<l;k++)
 {dig[0]= md5_digest[k]%16;dig[1]= md5_digest[k]/16;print_the_digs(2);
 }break;
 
 /*:1624*//*1646:*/
-#line 29233 "texprof.w"
+#line 29239 "texprof.w"
 
 case set_random_seed_code:print_int(random_seed);break;
 
 /*:1646*//*1653:*/
-#line 29309 "texprof.w"
+#line 29315 "texprof.w"
 
 case uniform_deviate_code:print_int(cur_val);break;
 
 /*:1653*//*1660:*/
-#line 29388 "texprof.w"
+#line 29394 "texprof.w"
 
 case normal_deviate_code:print_int(cur_val);
 
 /*:1660*/
-#line 9765 "texprof.w"
+#line 9767 "texprof.w"
 
 }
 
 /*:471*/
-#line 9734 "texprof.w"
+#line 9736 "texprof.w"
 ;
 selector= old_setting;link(garbage)= str_toks(b);ins_list(link(temp_head));
 }
 
 /*:469*//*472:*/
-#line 9792 "texprof.w"
+#line 9794 "texprof.w"
 static pointer scan_toks(bool macro_def,bool xpand)
 {
 halfword t;
@@ -12057,13 +12059,13 @@ else scanner_status= absorbing;
 warning_index= cur_cs;def_ref= get_avail();token_ref_count(def_ref)= null;
 p= def_ref;hash_brace= 0;t= zero_token;
 if(macro_def)/*473:*/
-#line 9813 "texprof.w"
+#line 9815 "texprof.w"
 
 {loop{resume:get_token();
 if(cur_tok<right_brace_limit)goto done1;
 if(cur_cmd==mac_param)
 /*475:*/
-#line 9834 "texprof.w"
+#line 9836 "texprof.w"
 
 {s= match_token+cur_chr;get_token();
 if(cur_tok<left_brace_limit)
@@ -12089,14 +12091,14 @@ cur_tok= s;
 }
 
 /*:475*/
-#line 9819 "texprof.w"
+#line 9821 "texprof.w"
 ;
 store_new_token(cur_tok);
 }
 done1:store_new_token(end_match_token);
 if(cur_cmd==right_brace)
 /*474:*/
-#line 9827 "texprof.w"
+#line 9829 "texprof.w"
 
 {print_err("Missing { inserted");incr(align_state);
 
@@ -12105,20 +12107,20 @@ help2("Where was the left brace? You said something like `\\def\\a}',",
 }
 
 /*:474*/
-#line 9824 "texprof.w"
+#line 9826 "texprof.w"
 ;
 done:;}
 
 /*:473*/
-#line 9804 "texprof.w"
+#line 9806 "texprof.w"
 
 else scan_left_brace();
 /*476:*/
-#line 9858 "texprof.w"
+#line 9860 "texprof.w"
 
 unbalance= 1;
 loop{if(xpand)/*477:*/
-#line 9875 "texprof.w"
+#line 9877 "texprof.w"
 
 {loop{get_next();
 if(cur_cmd>=call)
@@ -12137,7 +12139,7 @@ done2:x_token();
 }
 
 /*:477*/
-#line 9860 "texprof.w"
+#line 9862 "texprof.w"
 
 else get_token();
 if(cur_tok<right_brace_limit)
@@ -12147,7 +12149,7 @@ if(unbalance==0)goto found;
 }
 else if(cur_cmd==mac_param)
 if(macro_def)/*478:*/
-#line 9892 "texprof.w"
+#line 9894 "texprof.w"
 
 {s= cur_tok;
 if(xpand)get_x_token();else get_token();
@@ -12165,20 +12167,20 @@ else cur_tok= out_param_token-'0'+cur_chr;
 }
 
 /*:478*/
-#line 9868 "texprof.w"
+#line 9870 "texprof.w"
 ;
 store_new_token(cur_tok);
 }
 
 /*:476*/
-#line 9806 "texprof.w"
+#line 9808 "texprof.w"
 ;
 found:scanner_status= normal;
 if(hash_brace!=0)store_new_token(hash_brace);
 return p;
 }
 /*1561:*/
-#line 28320 "texprof.w"
+#line 28326 "texprof.w"
 
 static void scan_general_x_text(void)
 {pointer d;
@@ -12188,7 +12190,7 @@ def_ref= d;
 }
 
 /*:1561*//*1563:*/
-#line 28337 "texprof.w"
+#line 28343 "texprof.w"
 
 static void toks_to_str(void)
 {int old_setting;
@@ -12199,11 +12201,11 @@ info(garbage)= make_string();
 }
 
 /*:1563*/
-#line 9811 "texprof.w"
+#line 9813 "texprof.w"
 
 
 /*:472*//*481:*/
-#line 9929 "texprof.w"
+#line 9931 "texprof.w"
 static void read_toks(int n,pointer r,halfword j)
 {
 pointer p;
@@ -12217,11 +12219,11 @@ store_new_token(end_match_token);
 if((n<0)||(n> 15))m= 16;else m= n;
 s= align_state;align_state= 1000000;
 do{/*482:*/
-#line 9946 "texprof.w"
+#line 9948 "texprof.w"
 
 begin_file_reading();name= m+1;
 if(read_open[m]==closed)/*483:*/
-#line 9971 "texprof.w"
+#line 9973 "texprof.w"
 
 if(interaction> nonstop_mode)
 if(n<0)prompt_input("")
@@ -12232,20 +12234,20 @@ else fatal_error("*** (cannot \\read from terminal in nonstop modes)")
 
 
 /*:483*/
-#line 9948 "texprof.w"
+#line 9950 "texprof.w"
 ;
 else if(read_open[m]==just_open)/*484:*/
-#line 9984 "texprof.w"
+#line 9986 "texprof.w"
 
 if(input_ln(&read_file[m],false))read_open[m]= normal;
 else{a_close(&read_file[m]);read_open[m]= closed;
 }
 
 /*:484*/
-#line 9949 "texprof.w"
+#line 9951 "texprof.w"
 
 else/*485:*/
-#line 9992 "texprof.w"
+#line 9994 "texprof.w"
 
 {if(!input_ln(&read_file[m],true))
 {a_close(&read_file[m]);read_open[m]= closed;
@@ -12260,14 +12262,14 @@ align_state= 1000000;limit= 0;error();
 }
 
 /*:485*/
-#line 9950 "texprof.w"
+#line 9952 "texprof.w"
 ;
 limit= last;
 if(end_line_char_inactive)decr(limit);
 else buffer[limit]= end_line_char;
 first= limit+1;loc= start;state= new_line;
 /*1443:*/
-#line 26571 "texprof.w"
+#line 26577 "texprof.w"
 
 if(j==1)
 {while(loc<=limit)
@@ -12280,7 +12282,7 @@ goto done;
 }
 
 /*:1443*/
-#line 9955 "texprof.w"
+#line 9957 "texprof.w"
 ;
 loop{get_token();
 if(cur_tok==0)goto done;
@@ -12294,14 +12296,14 @@ store_new_token(cur_tok);
 done:end_file_reading()
 
 /*:482*/
-#line 9941 "texprof.w"
+#line 9943 "texprof.w"
 ;
 }while(!(align_state==1000000));
 cur_val= def_ref;scanner_status= normal;align_state= s;
 }
 
 /*:481*//*493:*/
-#line 10146 "texprof.w"
+#line 10148 "texprof.w"
 static void pass_text(void)
 {
 int l;
@@ -12320,7 +12322,7 @@ if(tracing_ifs> 0)show_cur_cmd_chr();
 }
 
 /*:493*//*496:*/
-#line 10186 "texprof.w"
+#line 10188 "texprof.w"
 static void change_if_limit(small_number l,pointer p)
 {
 pointer q;
@@ -12337,7 +12339,7 @@ q= link(q);
 }
 
 /*:496*//*497:*/
-#line 10206 "texprof.w"
+#line 10208 "texprof.w"
 static void conditional(void)
 {
 bool b;
@@ -12350,7 +12352,7 @@ small_number this_if;
 bool is_unless;
 if(tracing_ifs> 0)if(tracing_commands<=1)show_cur_cmd_chr();
 /*494:*/
-#line 10169 "texprof.w"
+#line 10171 "texprof.w"
 
 {p= get_node(if_node_size);link(p)= cond_ptr;type(p)= if_limit;
 subtype(p)= cur_if;if_line_field(p)= if_line;
@@ -12358,15 +12360,15 @@ cond_ptr= p;cur_if= cur_chr;if_limit= if_code;if_line= line;
 }
 
 /*:494*/
-#line 10217 "texprof.w"
+#line 10219 "texprof.w"
 ;save_cond_ptr= cond_ptr;
 is_unless= (cur_chr>=unless_code);this_if= cur_chr%unless_code;
 /*500:*/
-#line 10248 "texprof.w"
+#line 10250 "texprof.w"
 
 switch(this_if){
 case if_char_code:case if_cat_code:/*505:*/
-#line 10321 "texprof.w"
+#line 10323 "texprof.w"
 
 {get_x_token_or_active_char;
 if((cur_cmd> active_char)||(cur_chr> 255))
@@ -12382,20 +12384,20 @@ if(this_if==if_char_code)b= (n==cur_chr);else b= (m==cur_cmd);
 }
 
 /*:505*/
-#line 10250 "texprof.w"
+#line 10252 "texprof.w"
 break;
 case if_int_code:case if_dim_code:/*502:*/
-#line 10278 "texprof.w"
+#line 10280 "texprof.w"
 
 {if(this_if==if_int_code)scan_int();else scan_normal_dimen;
 n= cur_val;/*405:*/
-#line 8619 "texprof.w"
+#line 8621 "texprof.w"
 
 do{get_x_token();
 }while(!(cur_cmd!=spacer))
 
 /*:405*/
-#line 10280 "texprof.w"
+#line 10282 "texprof.w"
 ;
 if((cur_tok>=other_token+'<')&&(cur_tok<=other_token+'>'))
 r= cur_tok-other_token;
@@ -12414,16 +12416,16 @@ case'>':b= (n> cur_val);
 }
 
 /*:502*/
-#line 10251 "texprof.w"
+#line 10253 "texprof.w"
 break;
 case if_odd_code:/*503:*/
-#line 10297 "texprof.w"
+#line 10299 "texprof.w"
 
 {scan_int();b= odd(cur_val);
 }
 
 /*:503*/
-#line 10252 "texprof.w"
+#line 10254 "texprof.w"
 break;
 case if_vmode_code:b= (abs(mode)==vmode);break;
 case if_hmode_code:b= (abs(mode)==hmode);break;
@@ -12431,7 +12433,7 @@ case if_mmode_code:b= (abs(mode)==mmode);break;
 case if_inner_code:b= (mode<0);break;
 case if_void_code:case if_hbox_code:
 case if_vbox_code:/*504:*/
-#line 10301 "texprof.w"
+#line 10303 "texprof.w"
 
 {scan_register_num();fetch_box(p);
 if(this_if==if_void_code)b= (p==null);
@@ -12441,17 +12443,17 @@ else b= (type(p)==vlist_node);
 }
 
 /*:504*/
-#line 10258 "texprof.w"
+#line 10260 "texprof.w"
 break;
 case ifx_code:/*506:*/
-#line 10342 "texprof.w"
+#line 10344 "texprof.w"
 
 {save_scanner_status= scanner_status;scanner_status= normal;
 get_next();n= cur_cs;p= cur_cmd;q= cur_chr;
 get_next();if(cur_cmd!=p)b= false;
 else if(cur_cmd<call)b= (cur_chr==q);
 else/*507:*/
-#line 10359 "texprof.w"
+#line 10361 "texprof.w"
 
 {p= link(cur_chr);q= link(equiv(n));
 if(p==q)b= true;
@@ -12464,20 +12466,20 @@ b= ((p==null)&&(q==null));
 }
 
 /*:507*/
-#line 10347 "texprof.w"
+#line 10349 "texprof.w"
 ;
 scanner_status= save_scanner_status;
 }
 
 /*:506*/
-#line 10259 "texprof.w"
+#line 10261 "texprof.w"
 break;
 case if_eof_code:{scan_four_bit_int();b= (read_open[cur_val]==closed);
 }break;
 case if_true_code:b= true;break;
 case if_false_code:b= false;break;
 /*1448:*/
-#line 26630 "texprof.w"
+#line 26636 "texprof.w"
 
 case if_def_code:{save_scanner_status= scanner_status;
 scanner_status= normal;
@@ -12486,14 +12488,14 @@ scanner_status= save_scanner_status;
 }break;
 
 /*:1448*//*1449:*/
-#line 26642 "texprof.w"
+#line 26648 "texprof.w"
 
 case if_cs_code:{n= get_avail();p= n;
 do{get_x_token();
 if(cur_cs==0)store_new_token(cur_tok);
 }while(!(cur_cs!=0));
 if(cur_cmd!=end_cs_name)/*372:*/
-#line 8144 "texprof.w"
+#line 8146 "texprof.w"
 
 {print_err("Missing ");print_esc("endcsname");print(" inserted");
 
@@ -12503,10 +12505,10 @@ back_error();
 }
 
 /*:372*/
-#line 26647 "texprof.w"
+#line 26653 "texprof.w"
 ;
 /*1450:*/
-#line 26653 "texprof.w"
+#line 26659 "texprof.w"
 
 m= first;p= link(n);
 while(p!=null)
@@ -12524,14 +12526,14 @@ cur_cs= id_lookup(first,m-first);
 else cur_cs= single_base+buffer[first]
 
 /*:1450*/
-#line 26648 "texprof.w"
+#line 26654 "texprof.w"
 ;
 flush_list(n);
 b= (eq_type(cur_cs)!=undefined_cs);
 }break;
 
 /*:1449*//*1451:*/
-#line 26672 "texprof.w"
+#line 26678 "texprof.w"
 
 case if_font_char_code:{scan_font_ident();n= cur_val;scan_char_num();
 if((font_bc[n]<=cur_val)&&(font_ec[n]>=cur_val))
@@ -12540,22 +12542,22 @@ else b= false;
 }break;
 
 /*:1451*//*1574:*/
-#line 28443 "texprof.w"
+#line 28449 "texprof.w"
 
 case if_incsname_code:b= (incsname_state> 0);break;
 
 /*:1574*//*1576:*/
-#line 28453 "texprof.w"
+#line 28459 "texprof.w"
 
 case if_primitive_code:{do{get_token();}while(!(cur_tok!=space_token));
 if((cur_cs!=0)&&(cur_cmd!=undefined_cs)&&(cur_cmd<call))b= true;else b= false;
 }break;
 
 /*:1576*/
-#line 10264 "texprof.w"
+#line 10266 "texprof.w"
 
 case if_case_code:/*508:*/
-#line 10370 "texprof.w"
+#line 10372 "texprof.w"
 
 {scan_int();n= cur_val;
 if(tracing_commands> 1)
@@ -12568,7 +12570,7 @@ if(cond_ptr==save_cond_ptr)
 if(cur_chr==or_code)decr(n);
 else goto common_ending;
 else if(cur_chr==fi_code)/*495:*/
-#line 10175 "texprof.w"
+#line 10177 "texprof.w"
 
 {if(if_stack[in_open]==cond_ptr)if_warning();
 
@@ -12578,7 +12580,7 @@ free_node(p,if_node_size);
 }
 
 /*:495*/
-#line 10381 "texprof.w"
+#line 10383 "texprof.w"
 ;
 }
 change_if_limit(or_code,save_cond_ptr);
@@ -12586,16 +12588,16 @@ return;
 }
 
 /*:508*/
-#line 10265 "texprof.w"
+#line 10267 "texprof.w"
 ;
 }
 
 /*:500*/
-#line 10219 "texprof.w"
+#line 10221 "texprof.w"
 ;
 if(is_unless)b= !b;
 if(tracing_commands> 1)/*501:*/
-#line 10268 "texprof.w"
+#line 10270 "texprof.w"
 
 {begin_diagnostic();
 if(b)print("{true}");else print("{false}");
@@ -12603,14 +12605,14 @@ end_diagnostic(false);
 }
 
 /*:501*/
-#line 10221 "texprof.w"
+#line 10223 "texprof.w"
 ;
 if(b)
 {change_if_limit(else_code,save_cond_ptr);
 return;
 }
 /*499:*/
-#line 10236 "texprof.w"
+#line 10238 "texprof.w"
 
 loop{pass_text();
 if(cond_ptr==save_cond_ptr)
@@ -12621,7 +12623,7 @@ help1("I'm ignoring this; it doesn't match any \\if.");
 error();
 }
 else if(cur_chr==fi_code)/*495:*/
-#line 10175 "texprof.w"
+#line 10177 "texprof.w"
 
 {if(if_stack[in_open]==cond_ptr)if_warning();
 
@@ -12631,15 +12633,15 @@ free_node(p,if_node_size);
 }
 
 /*:495*/
-#line 10245 "texprof.w"
+#line 10247 "texprof.w"
 ;
 }
 
 /*:499*/
-#line 10226 "texprof.w"
+#line 10228 "texprof.w"
 ;
 common_ending:if(cur_chr==fi_code)/*495:*/
-#line 10175 "texprof.w"
+#line 10177 "texprof.w"
 
 {if(if_stack[in_open]==cond_ptr)if_warning();
 
@@ -12649,20 +12651,20 @@ free_node(p,if_node_size);
 }
 
 /*:495*/
-#line 10227 "texprof.w"
+#line 10229 "texprof.w"
 
 else if_limit= fi_code;
 }
 
 /*:497*//*514:*/
-#line 10510 "texprof.w"
+#line 10512 "texprof.w"
 static bool quoted_filename;
 static void begin_name(void)
 {area_delimiter= 0;ext_delimiter= 0;quoted_filename= false;
 }
 
 /*:514*//*515:*/
-#line 10521 "texprof.w"
+#line 10523 "texprof.w"
 static bool more_name(ASCII_code c)
 {if(c==' '&&!quoted_filename)return false;
 else if(c=='"'){quoted_filename= !quoted_filename;return true;}
@@ -12674,7 +12676,7 @@ return true;
 }
 
 /*:515*//*516:*/
-#line 10534 "texprof.w"
+#line 10536 "texprof.w"
 static void end_name(void)
 {if(str_ptr+3> max_strings)
 overflow("number of strings",max_strings-init_str_ptr);
@@ -12693,7 +12695,7 @@ incr(str_ptr);cur_ext= make_string();
 }
 
 /*:516*//*518:*/
-#line 10571 "texprof.w"
+#line 10573 "texprof.w"
 static void pack_file_name(str_number n,str_number a,str_number e,char*f)
 {int k;
 ASCII_code c;
@@ -12712,7 +12714,7 @@ name_of_file[name_length+1]= 0;
 
 
 /*:518*//*524:*/
-#line 10625 "texprof.w"
+#line 10627 "texprof.w"
 static str_number make_name_string(void)
 {int k;
 if((pool_ptr+name_length> pool_size)||(str_ptr==max_strings)||
@@ -12733,27 +12735,27 @@ static str_number w_make_name_string(word_file*f)
 {return make_name_string();
 }
 #endif
-#line 10645 "texprof.w"
+#line 10647 "texprof.w"
 
 /*:524*//*525:*/
-#line 10665 "texprof.w"
+#line 10667 "texprof.w"
 static void scan_file_name(void)
 {
 pool_pointer j,k;
 int old_setting;
 name_in_progress= true;begin_name();
 /*403:*/
-#line 8607 "texprof.w"
+#line 8609 "texprof.w"
 
 do{get_x_token();
 }while(!((cur_cmd!=spacer)&&(cur_cmd!=relax)))
 
 /*:403*/
-#line 10670 "texprof.w"
+#line 10672 "texprof.w"
 ;
 if(cur_cmd==left_brace)
 /*1702:*/
-#line 29933 "texprof.w"
+#line 29939 "texprof.w"
 
 {back_input();name_in_progress= false;
 cur_cs= input_loc;
@@ -12761,7 +12763,7 @@ scan_general_x_text();
 old_setting= selector;selector= new_string;
 token_show(link(garbage));selector= old_setting;
 /*1703:*/
-#line 29953 "texprof.w"
+#line 29959 "texprof.w"
 
 for(k= j= str_start[str_ptr];k<pool_ptr;k++){
 if(str_pool[k]!='"'){str_pool[j]= str_pool[k];incr(j);}
@@ -12769,7 +12771,7 @@ if(str_pool[k]!='"'){str_pool[j]= str_pool[k];incr(j);}
 pool_ptr= j;
 
 /*:1703*/
-#line 29939 "texprof.w"
+#line 29945 "texprof.w"
 
 j= pool_ptr-1;while((j>=str_start[str_ptr])&&(area_delimiter==0))
 {
@@ -12783,7 +12785,7 @@ goto done;
 }
 
 /*:1702*/
-#line 10672 "texprof.w"
+#line 10674 "texprof.w"
 
 loop{if((cur_cmd> other_char)||(cur_chr> 255))
 {back_input();goto done;
@@ -12796,7 +12798,7 @@ loop{if((cur_cmd> other_char)||(cur_chr> 255))
 
 if(cur_chr==' '&&state!=token_list&&loc> limit)goto done;
 #endif
-#line 10684 "texprof.w"
+#line 10686 "texprof.w"
  if(!more_name(cur_chr))goto done;
 get_x_token();
 }
@@ -12804,7 +12806,7 @@ done:end_name();name_in_progress= false;
 }
 
 /*:525*//*528:*/
-#line 10721 "texprof.w"
+#line 10723 "texprof.w"
 static void pack_job_name(char*s)
 
 {cur_area= empty_string;cur_ext= empty_string;
@@ -12812,7 +12814,7 @@ cur_name= job_name;pack_cur_name(s);
 }
 
 /*:528*//*529:*/
-#line 10738 "texprof.w"
+#line 10740 "texprof.w"
 static void prompt_file_name(char*s,char*e)
 {
 int k;
@@ -12829,7 +12831,7 @@ if(interaction<scroll_mode)
 fatal_error("*** (job aborted, file error in nonstop mode)");
 
 clear_terminal;prompt_input(": ");/*530:*/
-#line 10757 "texprof.w"
+#line 10759 "texprof.w"
 
 {
 begin_name();k= first;
@@ -12842,13 +12844,13 @@ done:end_name();
 }
 
 /*:530*/
-#line 10753 "texprof.w"
+#line 10755 "texprof.w"
 ;
 pack_cur_name(e);
 }
 
 /*:529*//*533:*/
-#line 10789 "texprof.w"
+#line 10791 "texprof.w"
 static void open_log_file(void)
 {int old_setting;
 int k;
@@ -12861,19 +12863,19 @@ recorder_change_filename((char*)name_of_file+1);
 
 pack_job_name(".log");
 while(!a_open_out(&log_file))/*534:*/
-#line 10828 "texprof.w"
+#line 10830 "texprof.w"
 
 {selector= term_only;
 prompt_file_name("transcript file name",".log");
 }
 
 /*:534*/
-#line 10800 "texprof.w"
+#line 10802 "texprof.w"
 ;
 log_name= a_make_name_string(&log_file);
 selector= log_only;log_opened= true;
 /*535:*/
-#line 10833 "texprof.w"
+#line 10835 "texprof.w"
 
 {wlog("%s",banner);
 slow_print(format_ident);print("  ");
@@ -12890,7 +12892,7 @@ if(Prote_ex)
 }
 
 /*:535*/
-#line 10803 "texprof.w"
+#line 10805 "texprof.w"
 ;
 input_stack[input_ptr]= cur_input;
 print_nl("**");
@@ -12903,7 +12905,7 @@ selector= old_setting+2;
 }
 
 /*:533*//*536:*/
-#line 10854 "texprof.w"
+#line 10856 "texprof.w"
 static void start_input(void)
 {
 scan_file_name();
@@ -12921,10 +12923,10 @@ if(full_source_filename_stack[in_open]!=NULL)
 free(full_source_filename_stack[in_open]);
 full_source_filename_stack[in_open]= strdup(full_name_of_file);
 /*1744:*/
-#line 30907 "texprof.w"
+#line 30913 "texprof.w"
 
 /*1743:*/
-#line 30898 "texprof.w"
+#line 30904 "texprof.w"
 
 if(file_num>=MAX_FILE_NUM)overflow("file number",file_num);
 else file_num++;
@@ -12932,26 +12934,26 @@ file_num_name[file_num]= strdup(full_name_of_file);
 file_from_cmd[file_num]= cmd_count;
 
 /*:1743*/
-#line 30908 "texprof.w"
+#line 30914 "texprof.w"
 
 cur_file_num= file_num;
 
 /*:1744*/
-#line 10870 "texprof.w"
+#line 10872 "texprof.w"
 
 
 {/*1771:*/
-#line 31398 "texprof.w"
+#line 31404 "texprof.w"
 
 uint32_t macro_fl= FILE_LINE(cur_file_num,0);
 int macro_cs= 0;
 int macro_depth= cur_depth;
 
 /*:1771*/
-#line 10872 "texprof.w"
+#line 10874 "texprof.w"
 
 /*1770:*/
-#line 31388 "texprof.w"
+#line 31394 "texprof.w"
 
 macro_depth++;
 cur_depth= macro_depth;
@@ -12962,7 +12964,7 @@ if(macro_depth<=unchanged_depth)
 unchanged_depth= macro_depth-1;
 
 /*:1770*/
-#line 10873 "texprof.w"
+#line 10875 "texprof.w"
 
 }
 if(job_name==0)
@@ -12980,7 +12982,7 @@ if(name==str_ptr-1)
 {flush_string;name= cur_name;
 }
 /*537:*/
-#line 10898 "texprof.w"
+#line 10900 "texprof.w"
 
 {line= 1;
 if(input_ln(&cur_file,false))do_nothing;
@@ -12991,12 +12993,12 @@ first= limit+1;loc= start;
 }
 
 /*:537*/
-#line 10889 "texprof.w"
+#line 10891 "texprof.w"
 ;
 }
 
 /*:536*//*559:*/
-#line 11420 "texprof.w"
+#line 11422 "texprof.w"
 static internal_font_number read_font_info(pointer u,str_number nom,str_number aire,
 scaled s)
 {
@@ -13015,10 +13017,10 @@ int alpha;int beta;
 
 g= null_font;
 /*561:*/
-#line 11473 "texprof.w"
+#line 11475 "texprof.w"
 
 /*562:*/
-#line 11485 "texprof.w"
+#line 11487 "texprof.w"
 
 file_opened= false;
 pack_file_name(nom,empty_string,empty_string,".tfm");
@@ -13026,10 +13028,10 @@ if(!b_open_in(&tfm_file))abort;
 file_opened= true
 
 /*:562*/
-#line 11474 "texprof.w"
+#line 11476 "texprof.w"
 ;
 /*564:*/
-#line 11512 "texprof.w"
+#line 11514 "texprof.w"
 
 {read_sixteen(lf);
 fget;read_sixteen(lh);
@@ -13052,16 +13054,16 @@ if((nw==0)||(nh==0)||(nd==0)||(ni==0))abort;
 }
 
 /*:564*/
-#line 11475 "texprof.w"
+#line 11477 "texprof.w"
 ;
 /*565:*/
-#line 11539 "texprof.w"
+#line 11541 "texprof.w"
 
 lf= lf-6-lh;
 if(np<7)lf= lf+7-np;
 if((font_ptr==font_max)||(fmem_ptr+lf> font_mem_size))
 /*566:*/
-#line 11555 "texprof.w"
+#line 11557 "texprof.w"
 
 {start_font_error_message;
 print(" not loaded: Not enough room left");
@@ -13074,7 +13076,7 @@ error();goto done;
 }
 
 /*:566*/
-#line 11543 "texprof.w"
+#line 11545 "texprof.w"
 ;
 f= font_ptr+1;
 char_base[f]= fmem_ptr-bc;
@@ -13088,10 +13090,10 @@ exten_base[f]= kern_base[f]+kern_base_offset+nk;
 param_base[f]= exten_base[f]+ne
 
 /*:565*/
-#line 11476 "texprof.w"
+#line 11478 "texprof.w"
 ;
 /*567:*/
-#line 11568 "texprof.w"
+#line 11570 "texprof.w"
 
 {if(lh<2)abort;
 store_four_quarters(font_check[f]);
@@ -13109,10 +13111,10 @@ font_size[f]= z;
 }
 
 /*:567*/
-#line 11477 "texprof.w"
+#line 11479 "texprof.w"
 ;
 /*568:*/
-#line 11584 "texprof.w"
+#line 11586 "texprof.w"
 
 for(k= fmem_ptr;k<=width_base[f]-1;k++)
 {store_four_quarters(font_info[k].qqqq);
@@ -13122,7 +13124,7 @@ switch(c%4){
 case lig_tag:if(d>=nl)abort;break;
 case ext_tag:if(d>=ne)abort;break;
 case list_tag:/*569:*/
-#line 11605 "texprof.w"
+#line 11607 "texprof.w"
 
 {check_byte_range(d);
 while(d<current_character_being_worked_on)
@@ -13135,20 +13137,20 @@ if(d==current_character_being_worked_on)abort;
 not_found:;}
 
 /*:569*/
-#line 11592 "texprof.w"
+#line 11594 "texprof.w"
 break;
 default:do_nothing;
 }
 }
 
 /*:568*/
-#line 11478 "texprof.w"
+#line 11480 "texprof.w"
 ;
 /*570:*/
-#line 11640 "texprof.w"
+#line 11642 "texprof.w"
 
 {/*571:*/
-#line 11650 "texprof.w"
+#line 11652 "texprof.w"
 
 {alpha= 16;
 while(z>=040000000)
@@ -13158,7 +13160,7 @@ beta= 256/alpha;alpha= alpha*z;
 }
 
 /*:571*/
-#line 11641 "texprof.w"
+#line 11643 "texprof.w"
 ;
 for(k= width_base[f];k<=lig_kern_base[f]-1;k++)
 store_scaled(font_info[k].sc);
@@ -13169,10 +13171,10 @@ if(font_info[italic_base[f]].sc!=0)abort;
 }
 
 /*:570*/
-#line 11479 "texprof.w"
+#line 11481 "texprof.w"
 ;
 /*572:*/
-#line 11664 "texprof.w"
+#line 11666 "texprof.w"
 
 bch_label= 077777;bchar= 256;
 if(nl> 0)
@@ -13194,10 +13196,10 @@ for(k= kern_base[f]+kern_base_offset;k<=exten_base[f]-1;k++)
 store_scaled(font_info[k].sc);
 
 /*:572*/
-#line 11480 "texprof.w"
+#line 11482 "texprof.w"
 ;
 /*573:*/
-#line 11684 "texprof.w"
+#line 11686 "texprof.w"
 
 for(k= exten_base[f];k<=param_base[f]-1;k++)
 {store_four_quarters(font_info[k].qqqq);
@@ -13208,10 +13210,10 @@ check_existence(d);
 }
 
 /*:573*/
-#line 11481 "texprof.w"
+#line 11483 "texprof.w"
 ;
 /*574:*/
-#line 11696 "texprof.w"
+#line 11698 "texprof.w"
 
 {for(k= 1;k<=np;k++)
 if(k==1)
@@ -13226,10 +13228,10 @@ for(k= np+1;k<=7;k++)font_info[param_base[f]+k-1].sc= 0;
 }
 
 /*:574*/
-#line 11482 "texprof.w"
+#line 11484 "texprof.w"
 ;
 /*575:*/
-#line 11716 "texprof.w"
+#line 11718 "texprof.w"
 
 if(np>=7)font_params[f]= np;else font_params[f]= 7;
 hyphen_char[f]= default_hyphen_char;skew_char[f]= default_skew_char;
@@ -13250,14 +13252,14 @@ decr(param_base[f]);
 fmem_ptr= fmem_ptr+lf;font_ptr= f;g= f;goto done
 
 /*:575*/
-#line 11483 "texprof.w"
+#line 11485 "texprof.w"
 
 
 /*:561*/
-#line 11439 "texprof.w"
+#line 11441 "texprof.w"
 ;
 bad_tfm:/*560:*/
-#line 11461 "texprof.w"
+#line 11463 "texprof.w"
 
 start_font_error_message;
 
@@ -13271,14 +13273,14 @@ help5("I wasn't able to read the size data for this font,",
 error()
 
 /*:560*/
-#line 11440 "texprof.w"
+#line 11442 "texprof.w"
 ;
 done:if(file_opened)b_close(&tfm_file);
 return g;
 }
 
 /*:559*//*580:*/
-#line 11806 "texprof.w"
+#line 11808 "texprof.w"
 static void char_warning(internal_font_number f,eight_bits c)
 {int old_setting;
 if(tracing_lost_chars> 0)
@@ -13295,7 +13297,7 @@ tracing_online= old_setting;
 }
 
 /*:580*//*581:*/
-#line 11825 "texprof.w"
+#line 11827 "texprof.w"
 static pointer new_character(internal_font_number f,eight_bits c)
 {
 pointer p;
@@ -13309,14 +13311,14 @@ return null;
 }
 
 /*:581*//*596:*/
-#line 12435 "texprof.w"
+#line 12437 "texprof.w"
 static void write_dvi(dvi_index a,dvi_index b)
 {int k;
 for(k= a;k<=b;k++)pascal_write(dvi_file,"%c",dvi_buf[k]);
 }
 
 /*:596*//*597:*/
-#line 12447 "texprof.w"
+#line 12449 "texprof.w"
 static void dvi_swap(void)
 {if(dvi_limit==dvi_buf_size)
 {write_dvi(0,half_buf-1);dvi_limit= half_buf;
@@ -13328,7 +13330,7 @@ dvi_gone= dvi_gone+half_buf;
 }
 
 /*:597*//*599:*/
-#line 12467 "texprof.w"
+#line 12469 "texprof.w"
 static void dvi_four(int x)
 {if(x>=0)dvi_out(x/0100000000)
 else{x= x+010000000000;
@@ -13341,14 +13343,14 @@ dvi_out(x%0400);
 }
 
 /*:599*//*600:*/
-#line 12483 "texprof.w"
+#line 12485 "texprof.w"
 static void dvi_pop(int l)
 {if((l==dvi_offset+dvi_ptr)&&(dvi_ptr> 0))decr(dvi_ptr);
 else dvi_out(pop);
 }
 
 /*:600*//*601:*/
-#line 12491 "texprof.w"
+#line 12493 "texprof.w"
 static void dvi_font_def(internal_font_number f)
 {int k;
 dvi_out(fnt_def1);
@@ -13362,7 +13364,7 @@ dvi_four(font_dsize[f]);
 dvi_out(length(font_area[f]));
 dvi_out(length(font_name[f]));
 /*602:*/
-#line 12506 "texprof.w"
+#line 12508 "texprof.w"
 
 for(k= str_start[font_area[f]];k<=str_start[font_area[f]+1]-1;k++)
 dvi_out(so(str_pool[k]));
@@ -13370,12 +13372,12 @@ for(k= str_start[font_name[f]];k<=str_start[font_name[f]+1]-1;k++)
 dvi_out(so(str_pool[k]))
 
 /*:602*/
-#line 12503 "texprof.w"
+#line 12505 "texprof.w"
 ;
 }
 
 /*:601*//*606:*/
-#line 12585 "texprof.w"
+#line 12587 "texprof.w"
 static void movement(scaled w,eight_bits o)
 {
 small_number mstate;
@@ -13389,19 +13391,19 @@ if(o==down1)
 else{link(q)= right_ptr;right_ptr= q;
 }
 /*610:*/
-#line 12701 "texprof.w"
+#line 12703 "texprof.w"
 
 p= link(q);mstate= none_seen;
 while(p!=null)
 {if(width(p)==w)/*611:*/
-#line 12720 "texprof.w"
+#line 12722 "texprof.w"
 
 switch(mstate+info(p)){
 case none_seen+yz_OK:case none_seen+y_OK:
 case z_seen+yz_OK:case z_seen+y_OK:
 if(location(p)<dvi_gone)goto not_found;
 else/*612:*/
-#line 12735 "texprof.w"
+#line 12737 "texprof.w"
 
 {k= location(p)-dvi_offset;
 if(k<0)k= k+dvi_buf_size;
@@ -13410,13 +13412,13 @@ info(p)= y_here;goto found;
 }
 
 /*:612*/
-#line 12725 "texprof.w"
+#line 12727 "texprof.w"
 break;
 case none_seen+z_OK:case y_seen+yz_OK:
 case y_seen+z_OK:
 if(location(p)<dvi_gone)goto not_found;
 else/*613:*/
-#line 12742 "texprof.w"
+#line 12744 "texprof.w"
 
 {k= location(p)-dvi_offset;
 if(k<0)k= k+dvi_buf_size;
@@ -13425,7 +13427,7 @@ info(p)= z_here;goto found;
 }
 
 /*:613*/
-#line 12729 "texprof.w"
+#line 12731 "texprof.w"
 break;
 case none_seen+y_here:case none_seen+z_here:
 case y_seen+z_here:case z_seen+y_here:goto found;
@@ -13433,7 +13435,7 @@ default:do_nothing;
 }
 
 /*:611*/
-#line 12705 "texprof.w"
+#line 12707 "texprof.w"
 
 else switch(mstate+info(p)){
 case none_seen+y_here:mstate= y_seen;break;
@@ -13446,10 +13448,10 @@ p= link(p);
 not_found:
 
 /*:610*/
-#line 12598 "texprof.w"
+#line 12600 "texprof.w"
 ;
 /*609:*/
-#line 12668 "texprof.w"
+#line 12670 "texprof.w"
 
 info(q)= yz_OK;
 if(abs(w)>=040000000)
@@ -13473,10 +13475,10 @@ label2:dvi_out(w/0400);
 label1:dvi_out(w%0400);return
 
 /*:609*/
-#line 12599 "texprof.w"
+#line 12601 "texprof.w"
 ;
 found:/*608:*/
-#line 12644 "texprof.w"
+#line 12646 "texprof.w"
 
 info(q)= info(p);
 if(info(q)==y_here)
@@ -13502,12 +13504,12 @@ default:do_nothing;
 }
 
 /*:608*/
-#line 12601 "texprof.w"
+#line 12603 "texprof.w"
 ;
 }
 
 /*:606*//*614:*/
-#line 12755 "texprof.w"
+#line 12757 "texprof.w"
 static void prune_movements(int l)
 
 {
@@ -13523,14 +13525,14 @@ p= right_ptr;right_ptr= link(p);free_node(p,movement_node_size);
 }
 
 /*:614*//*617:*/
-#line 12832 "texprof.w"
+#line 12834 "texprof.w"
 static void vlist_out(void);
 
 
 /*:617*//*618:*/
-#line 12841 "texprof.w"
+#line 12843 "texprof.w"
 /*1367:*/
-#line 25646 "texprof.w"
+#line 25652 "texprof.w"
 
 static void special_out(pointer p)
 {pointer q,r;
@@ -13538,7 +13540,7 @@ int old_mode;
 
 if(subtype(p)==latespecial_node)
 {/*1370:*/
-#line 25698 "texprof.w"
+#line 25704 "texprof.w"
 
 q= get_avail();info(q)= right_brace_token+'}';
 fl_mem[q]= FILE_LINE(system_file,system_insert);
@@ -13555,7 +13557,7 @@ old_mode= mode;mode= 0;
 cur_cs= write_loc;q= scan_toks(false,true);
 get_token();if(cur_tok!=end_write_token)
 /*1371:*/
-#line 25717 "texprof.w"
+#line 25723 "texprof.w"
 
 {print_err("Unbalanced write command");
 
@@ -13566,20 +13568,20 @@ do{get_token();
 }
 
 /*:1371*/
-#line 25713 "texprof.w"
+#line 25719 "texprof.w"
 ;
 mode= old_mode;
 end_token_list()
 
 /*:1370*/
-#line 25653 "texprof.w"
+#line 25659 "texprof.w"
 ;
 write_tokens(p)= def_ref;
 }
 }
 
 /*:1367*//*1369:*/
-#line 25671 "texprof.w"
+#line 25677 "texprof.w"
 
 static void write_out(pointer p)
 {int old_setting;
@@ -13587,7 +13589,7 @@ int old_mode;
 small_number j;
 pointer q,r;
 /*1370:*/
-#line 25698 "texprof.w"
+#line 25704 "texprof.w"
 
 q= get_avail();info(q)= right_brace_token+'}';
 fl_mem[q]= FILE_LINE(system_file,system_insert);
@@ -13604,7 +13606,7 @@ old_mode= mode;mode= 0;
 cur_cs= write_loc;q= scan_toks(false,true);
 get_token();if(cur_tok!=end_write_token)
 /*1371:*/
-#line 25717 "texprof.w"
+#line 25723 "texprof.w"
 
 {print_err("Unbalanced write command");
 
@@ -13615,13 +13617,13 @@ do{get_token();
 }
 
 /*:1371*/
-#line 25713 "texprof.w"
+#line 25719 "texprof.w"
 ;
 mode= old_mode;
 end_token_list()
 
 /*:1370*/
-#line 25677 "texprof.w"
+#line 25683 "texprof.w"
 ;
 old_setting= selector;j= write_stream(p);
 if(write_open[j])selector= j;
@@ -13634,23 +13636,23 @@ flush_list(def_ref);selector= old_setting;
 }
 
 /*:1369*//*1372:*/
-#line 25729 "texprof.w"
+#line 25735 "texprof.w"
 
 /*1678:*/
-#line 29520 "texprof.w"
+#line 29526 "texprof.w"
 
 static void save_pos_out(pointer p)
 {int old_setting;
 int k;
 synch_h;synch_v;incr(last_save_pos_number);
 /*1665:*/
-#line 29443 "texprof.w"
+#line 29449 "texprof.w"
 
 last_saved_xpos= cur_h+DVI_std_x_offset;
 last_saved_ypos= page_height-(cur_v+DVI_std_y_offset);
 
 /*:1665*/
-#line 29525 "texprof.w"
+#line 29531 "texprof.w"
 
 old_setting= selector;selector= new_string;
 print("warning __PROTE_");print("SAVEPOS");print_char('=');
@@ -13665,13 +13667,13 @@ pool_ptr= str_start[str_ptr];
 }
 
 /*:1678*/
-#line 25730 "texprof.w"
+#line 25736 "texprof.w"
 
 static void out_what(pointer p)
 {small_number j;
 switch(subtype(p)){
 case open_node:case write_node:case close_node:/*1373:*/
-#line 25749 "texprof.w"
+#line 25755 "texprof.w"
 
 if(!doing_leaders)
 {j= write_stream(p);
@@ -13690,17 +13692,17 @@ write_open[j]= true;
 }
 
 /*:1373*/
-#line 25735 "texprof.w"
+#line 25741 "texprof.w"
 break;
 case special_node:special_out(p);break;
 case language_node:do_nothing;break;
 /*1679:*/
-#line 29538 "texprof.w"
+#line 29544 "texprof.w"
 
 case save_pos_code:save_pos_out(p);break;
 
 /*:1679*/
-#line 25738 "texprof.w"
+#line 25744 "texprof.w"
 
 default:confusion("ext4");
 
@@ -13708,7 +13710,7 @@ default:confusion("ext4");
 }
 
 /*:1372*/
-#line 12841 "texprof.w"
+#line 12843 "texprof.w"
 
 static void hlist_out(void)
 {
@@ -13736,13 +13738,13 @@ if(cur_s> 0)dvi_out(push);
 if(cur_s> max_push)max_push= cur_s;
 save_loc= dvi_offset+dvi_ptr;base_line= cur_v;left_edge= cur_h;
 while(p!=null)/*619:*/
-#line 12880 "texprof.w"
+#line 12882 "texprof.w"
 
 reswitch:if(is_char_node(p))
 {synch_h;synch_v;
 do{f= font(p);c= character(p);
 if(f!=dvi_f)/*620:*/
-#line 12895 "texprof.w"
+#line 12897 "texprof.w"
 
 {if(!font_used[f])
 {dvi_font_def(f);font_used[f]= true;
@@ -13754,7 +13756,7 @@ dvi_f= f;
 }
 
 /*:620*/
-#line 12884 "texprof.w"
+#line 12886 "texprof.w"
 ;
 if(c>=qi(128))dvi_out(set1);
 dvi_out(qo(c));
@@ -13764,11 +13766,11 @@ p= link(p);
 dvi_h= cur_h;
 }
 else/*621:*/
-#line 12905 "texprof.w"
+#line 12907 "texprof.w"
 
 {switch(type(p)){
 case hlist_node:case vlist_node:/*622:*/
-#line 12923 "texprof.w"
+#line 12925 "texprof.w"
 
 if(list_ptr(p)==null)cur_h= cur_h+width(p);
 else{save_h= dvi_h;save_v= dvi_v;
@@ -13780,21 +13782,21 @@ cur_h= edge+width(p);cur_v= base_line;
 }
 
 /*:622*/
-#line 12907 "texprof.w"
+#line 12909 "texprof.w"
 break;
 case rule_node:{rule_ht= height(p);rule_dp= depth(p);rule_wd= width(p);
 goto fin_rule;
 }
 case whatsit_node:/*1366:*/
-#line 25639 "texprof.w"
+#line 25645 "texprof.w"
 
 out_what(p)
 
 /*:1366*/
-#line 12911 "texprof.w"
+#line 12913 "texprof.w"
 ;break;
 case glue_node:/*624:*/
-#line 12950 "texprof.w"
+#line 12952 "texprof.w"
 
 {g= glue_ptr(p);rule_wd= width(g)-cur_g;
 if(g_sign!=normal)
@@ -13815,7 +13817,7 @@ cur_g= round(glue_temp);
 rule_wd= rule_wd+cur_g;
 if(subtype(p)>=a_leaders)
 /*625:*/
-#line 12974 "texprof.w"
+#line 12976 "texprof.w"
 
 {leader_box= leader_ptr(p);
 if(type(leader_box)==rule_node)
@@ -13827,7 +13829,7 @@ if((leader_wd> 0)&&(rule_wd> 0))
 {rule_wd= rule_wd+10;
 edge= cur_h+rule_wd;lx= 0;
 /*626:*/
-#line 13008 "texprof.w"
+#line 13010 "texprof.w"
 
 if(subtype(p)==a_leaders)
 {save_h= cur_h;
@@ -13843,11 +13845,11 @@ cur_h= cur_h+((lr-(lq-1)*lx)/2);
 }
 
 /*:626*/
-#line 12985 "texprof.w"
+#line 12987 "texprof.w"
 ;
 while(cur_h+leader_wd<=edge)
 /*627:*/
-#line 13025 "texprof.w"
+#line 13027 "texprof.w"
 
 {cur_v= base_line+shift_amount(leader_box);synch_v;save_v= dvi_v;
 synch_h;save_h= dvi_h;temp_ptr= leader_box;
@@ -13859,37 +13861,37 @@ cur_h= save_h+leader_wd+lx;
 }
 
 /*:627*/
-#line 12987 "texprof.w"
+#line 12989 "texprof.w"
 ;
 cur_h= edge-10;goto next_p;
 }
 }
 
 /*:625*/
-#line 12970 "texprof.w"
+#line 12972 "texprof.w"
 ;
 goto move_past;
 }
 
 /*:624*/
-#line 12912 "texprof.w"
+#line 12914 "texprof.w"
 
 case kern_node:case math_node:cur_h= cur_h+width(p);break;
 case ligature_node:/*651:*/
-#line 13487 "texprof.w"
+#line 13489 "texprof.w"
 
 {mem[lig_trick]= mem[lig_char(p)];link(lig_trick)= link(p);
 p= lig_trick;goto reswitch;
 }
 
 /*:651*/
-#line 12914 "texprof.w"
+#line 12916 "texprof.w"
 
 default:do_nothing;
 }
 goto next_p;
 fin_rule:/*623:*/
-#line 12933 "texprof.w"
+#line 12935 "texprof.w"
 
 if(is_running(rule_ht))rule_ht= height(this_box);
 if(is_running(rule_dp))rule_dp= depth(this_box);
@@ -13901,18 +13903,18 @@ cur_v= base_line;dvi_h= dvi_h+rule_wd;
 }
 
 /*:623*/
-#line 12918 "texprof.w"
+#line 12920 "texprof.w"
 ;
 move_past:cur_h= cur_h+rule_wd;
 next_p:p= link(p);
 }
 
 /*:621*/
-#line 12893 "texprof.w"
+#line 12895 "texprof.w"
 
 
 /*:619*/
-#line 12868 "texprof.w"
+#line 12870 "texprof.w"
 ;
 prune_movements(save_loc);
 if(cur_s> 0)dvi_pop(save_loc);
@@ -13920,7 +13922,7 @@ decr(cur_s);
 }
 
 /*:618*//*628:*/
-#line 13037 "texprof.w"
+#line 13039 "texprof.w"
 static void vlist_out(void)
 {
 scaled left_edge;
@@ -13948,16 +13950,16 @@ if(cur_s> max_push)max_push= cur_s;
 save_loc= dvi_offset+dvi_ptr;left_edge= cur_h;cur_v= cur_v-height(this_box);
 top_edge= cur_v;
 while(p!=null)/*629:*/
-#line 13070 "texprof.w"
+#line 13072 "texprof.w"
 
 {if(is_char_node(p))confusion("vlistout");
 
 else/*630:*/
-#line 13077 "texprof.w"
+#line 13079 "texprof.w"
 
 {switch(type(p)){
 case hlist_node:case vlist_node:/*631:*/
-#line 13097 "texprof.w"
+#line 13099 "texprof.w"
 
 if(list_ptr(p)==null)cur_v= cur_v+height(p)+depth(p);
 else{cur_v= cur_v+height(p);synch_v;
@@ -13970,21 +13972,21 @@ cur_v= save_v+depth(p);cur_h= left_edge;
 }
 
 /*:631*/
-#line 13079 "texprof.w"
+#line 13081 "texprof.w"
 break;
 case rule_node:{rule_ht= height(p);rule_dp= depth(p);rule_wd= width(p);
 goto fin_rule;
 }
 case whatsit_node:/*1365:*/
-#line 25636 "texprof.w"
+#line 25642 "texprof.w"
 
 out_what(p)
 
 /*:1365*/
-#line 13083 "texprof.w"
+#line 13085 "texprof.w"
 ;break;
 case glue_node:/*633:*/
-#line 13118 "texprof.w"
+#line 13120 "texprof.w"
 
 {g= glue_ptr(p);rule_ht= width(g)-cur_g;
 if(g_sign!=normal)
@@ -14005,7 +14007,7 @@ cur_g= round(glue_temp);
 rule_ht= rule_ht+cur_g;
 if(subtype(p)>=a_leaders)
 /*634:*/
-#line 13142 "texprof.w"
+#line 13144 "texprof.w"
 
 {leader_box= leader_ptr(p);
 if(type(leader_box)==rule_node)
@@ -14017,7 +14019,7 @@ if((leader_ht> 0)&&(rule_ht> 0))
 {rule_ht= rule_ht+10;
 edge= cur_v+rule_ht;lx= 0;
 /*635:*/
-#line 13160 "texprof.w"
+#line 13162 "texprof.w"
 
 if(subtype(p)==a_leaders)
 {save_v= cur_v;
@@ -14033,11 +14035,11 @@ cur_v= cur_v+((lr-(lq-1)*lx)/2);
 }
 
 /*:635*/
-#line 13153 "texprof.w"
+#line 13155 "texprof.w"
 ;
 while(cur_v+leader_ht<=edge)
 /*636:*/
-#line 13177 "texprof.w"
+#line 13179 "texprof.w"
 
 {cur_h= left_edge+shift_amount(leader_box);synch_h;save_h= dvi_h;
 cur_v= cur_v+height(leader_box);synch_v;save_v= dvi_v;
@@ -14050,27 +14052,27 @@ cur_v= save_v-height(leader_box)+leader_ht+lx;
 }
 
 /*:636*/
-#line 13155 "texprof.w"
+#line 13157 "texprof.w"
 ;
 cur_v= edge-10;goto next_p;
 }
 }
 
 /*:634*/
-#line 13138 "texprof.w"
+#line 13140 "texprof.w"
 ;
 goto move_past;
 }
 
 /*:633*/
-#line 13084 "texprof.w"
+#line 13086 "texprof.w"
 
 case kern_node:cur_v= cur_v+width(p);break;
 default:do_nothing;
 }
 goto next_p;
 fin_rule:/*632:*/
-#line 13108 "texprof.w"
+#line 13110 "texprof.w"
 
 if(is_running(rule_wd))rule_wd= width(this_box);
 rule_ht= rule_ht+rule_dp;
@@ -14082,19 +14084,19 @@ dvi_out(put_rule);dvi_four(rule_ht);dvi_four(rule_wd);
 goto next_p
 
 /*:632*/
-#line 13089 "texprof.w"
+#line 13091 "texprof.w"
 ;
 move_past:cur_v= cur_v+rule_ht;
 }
 
 /*:630*/
-#line 13073 "texprof.w"
+#line 13075 "texprof.w"
 ;
 next_p:p= link(p);
 }
 
 /*:629*/
-#line 13064 "texprof.w"
+#line 13066 "texprof.w"
 ;
 prune_movements(save_loc);
 if(cur_s> 0)dvi_pop(save_loc);
@@ -14102,7 +14104,7 @@ decr(cur_s);
 }
 
 /*:628*//*637:*/
-#line 13191 "texprof.w"
+#line 13193 "texprof.w"
 static void ship_out(pointer p)
 {
 int page_loc;
@@ -14110,27 +14112,27 @@ int j,k;
 int s;
 int old_setting;
 /*1761:*/
-#line 31208 "texprof.w"
+#line 31214 "texprof.w"
 
 int tmp_cmd;
 int tmp_file_line;
 int tmp_depth;
 
 /*:1761*/
-#line 13197 "texprof.w"
+#line 13199 "texprof.w"
 
 /*1766:*/
-#line 31257 "texprof.w"
+#line 31263 "texprof.w"
 
 if(profile_on)
 {/*1756:*/
-#line 31125 "texprof.w"
+#line 31131 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1774:*/
-#line 31471 "texprof.w"
+#line 31477 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -14144,14 +14146,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31484 "texprof.w"
+#line 31490 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1774*/
-#line 31129 "texprof.w"
+#line 31135 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -14163,52 +14165,52 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31140 "texprof.w"
+#line 31146 "texprof.w"
  cmd_count++;
 /*1751:*/
-#line 31013 "texprof.w"
+#line 31019 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31017 "texprof.w"
+#line 31023 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31019 "texprof.w"
+#line 31025 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31021 "texprof.w"
+#line 31027 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31023 "texprof.w"
+#line 31029 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31025 "texprof.w"
+#line 31031 "texprof.w"
 
 /*:1751*/
-#line 31141 "texprof.w"
+#line 31147 "texprof.w"
 
 /*1752:*/
-#line 31030 "texprof.w"
+#line 31036 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31035 "texprof.w"
+#line 31041 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1752*/
-#line 31142 "texprof.w"
+#line 31148 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1756*/
-#line 31259 "texprof.w"
+#line 31265 "texprof.w"
 
 tmp_file_line= prof_file_line;
 tmp_cmd= prof_cmd;
@@ -14219,7 +14221,7 @@ prof_cmd= system_cmd;
 
 
 /*:1766*/
-#line 13198 "texprof.w"
+#line 13200 "texprof.w"
 
 if(tracing_output> 0)
 {print_nl("");print_ln();
@@ -14240,10 +14242,10 @@ if(tracing_output> 0)
 begin_diagnostic();show_box(p);end_diagnostic(true);
 }
 /*639:*/
-#line 13244 "texprof.w"
+#line 13246 "texprof.w"
 
 /*640:*/
-#line 13261 "texprof.w"
+#line 13263 "texprof.w"
 
 if((height(p)> max_dimen)||(depth(p)> max_dimen)||
 (height(p)+depth(p)+v_offset> max_dimen)||
@@ -14266,10 +14268,10 @@ if(height(p)+depth(p)+v_offset> max_v)max_v= height(p)+depth(p)+v_offset;
 if(width(p)+h_offset> max_h)max_h= width(p)+h_offset
 
 /*:640*/
-#line 13246 "texprof.w"
+#line 13248 "texprof.w"
 ;
 /*616:*/
-#line 12805 "texprof.w"
+#line 12807 "texprof.w"
 
 dvi_h= 0;dvi_v= 0;cur_h= h_offset;dvi_f= null_font;
 ensure_dvi_open;
@@ -14289,7 +14291,7 @@ pool_ptr= str_start[str_ptr];
 }
 
 /*:616*/
-#line 13247 "texprof.w"
+#line 13249 "texprof.w"
 ;
 page_loc= dvi_offset+dvi_ptr;
 dvi_out(bop);
@@ -14301,13 +14303,13 @@ dvi_out(eop);incr(total_pages);cur_s= -1;
 done:
 
 /*:639*/
-#line 13217 "texprof.w"
+#line 13219 "texprof.w"
 ;
 if(tracing_output<=0)print_char(']');
 dead_cycles= 0;
 update_terminal;
 /*638:*/
-#line 13225 "texprof.w"
+#line 13227 "texprof.w"
 
 #ifdef STAT
 if(tracing_stats> 1)
@@ -14317,7 +14319,7 @@ print_int(var_used);print_char('&');
 print_int(dyn_used);print_char(';');
 }
 #endif
-#line 13234 "texprof.w"
+#line 13236 "texprof.w"
  flush_node_list(p);
 #ifdef STAT
 if(tracing_stats> 1)
@@ -14327,23 +14329,23 @@ print_int(dyn_used);print("; still untouched: ");
 print_int(hi_mem_min-lo_mem_max-1);print_ln();
 }
 #endif
-#line 13243 "texprof.w"
+#line 13245 "texprof.w"
 
 /*:638*/
-#line 13221 "texprof.w"
+#line 13223 "texprof.w"
 ;
 /*1763:*/
-#line 31224 "texprof.w"
+#line 31230 "texprof.w"
 
 if(profile_on)
 {/*1756:*/
-#line 31125 "texprof.w"
+#line 31131 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1774:*/
-#line 31471 "texprof.w"
+#line 31477 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -14357,14 +14359,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31484 "texprof.w"
+#line 31490 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1774*/
-#line 31129 "texprof.w"
+#line 31135 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -14376,52 +14378,52 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31140 "texprof.w"
+#line 31146 "texprof.w"
  cmd_count++;
 /*1751:*/
-#line 31013 "texprof.w"
+#line 31019 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31017 "texprof.w"
+#line 31023 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31019 "texprof.w"
+#line 31025 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31021 "texprof.w"
+#line 31027 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31023 "texprof.w"
+#line 31029 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31025 "texprof.w"
+#line 31031 "texprof.w"
 
 /*:1751*/
-#line 31141 "texprof.w"
+#line 31147 "texprof.w"
 
 /*1752:*/
-#line 31030 "texprof.w"
+#line 31036 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31035 "texprof.w"
+#line 31041 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1752*/
-#line 31142 "texprof.w"
+#line 31148 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1756*/
-#line 31226 "texprof.w"
+#line 31232 "texprof.w"
 
 prof_file_line= tmp_file_line;
 prof_cmd= tmp_cmd;
@@ -14431,12 +14433,12 @@ prof_depth= tmp_depth;
 
 
 /*:1763*/
-#line 13222 "texprof.w"
+#line 13224 "texprof.w"
 
 }
 
 /*:637*//*644:*/
-#line 13372 "texprof.w"
+#line 13374 "texprof.w"
 static void scan_spec(group_code c,bool three_codes)
 
 {
@@ -14459,7 +14461,7 @@ new_save_level(c);scan_left_brace();
 }
 
 /*:644*//*648:*/
-#line 13429 "texprof.w"
+#line 13431 "texprof.w"
 static pointer hpack(pointer p,scaled w,small_number m)
 {
 pointer r;
@@ -14475,7 +14477,7 @@ last_badness= 0;r= get_node(box_node_size);type(r)= hlist_node;
 subtype(r)= min_quarterword;shift_amount(r)= 0;
 q= r+list_offset;link(q)= p;
 h= 0;/*649:*/
-#line 13456 "texprof.w"
+#line 13458 "texprof.w"
 
 d= 0;x= 0;
 total_stretch[normal]= 0;total_shrink[normal]= 0;
@@ -14484,15 +14486,15 @@ total_stretch[fill]= 0;total_shrink[fill]= 0;
 total_stretch[filll]= 0;total_shrink[filll]= 0
 
 /*:649*/
-#line 13443 "texprof.w"
+#line 13445 "texprof.w"
 ;
 while(p!=null)/*650:*/
-#line 13463 "texprof.w"
+#line 13465 "texprof.w"
 
 
 {reswitch:while(is_char_node(p))
 /*653:*/
-#line 13508 "texprof.w"
+#line 13510 "texprof.w"
 
 {f= font(p);i= char_info(f,character(p));hd= height_depth(i);
 x= x+char_width(f,i);
@@ -14502,14 +14504,14 @@ p= link(p);
 }
 
 /*:653*/
-#line 13467 "texprof.w"
+#line 13469 "texprof.w"
 ;
 if(p!=null)
 {switch(type(p)){
 case hlist_node:case vlist_node:case rule_node:
 case unset_node:
 /*652:*/
-#line 13496 "texprof.w"
+#line 13498 "texprof.w"
 
 {x= x+width(p);
 if(type(p)>=rule_node)s= 0;else s= shift_amount(p);
@@ -14518,11 +14520,11 @@ if(depth(p)+s> d)d= depth(p)+s;
 }
 
 /*:652*/
-#line 13473 "texprof.w"
+#line 13475 "texprof.w"
 break;
 case ins_node:case mark_node:case adjust_node:if(adjust_tail!=null)
 /*654:*/
-#line 13523 "texprof.w"
+#line 13525 "texprof.w"
 
 {while(link(q)!=p)q= link(q);
 if(type(p)==adjust_node)
@@ -14536,17 +14538,17 @@ link(q)= p;p= q;
 }
 
 /*:654*/
-#line 13475 "texprof.w"
+#line 13477 "texprof.w"
 break;
 case whatsit_node:/*1359:*/
-#line 25615 "texprof.w"
+#line 25621 "texprof.w"
 do_nothing
 
 /*:1359*/
-#line 13476 "texprof.w"
+#line 13478 "texprof.w"
 ;break;
 case glue_node:/*655:*/
-#line 13535 "texprof.w"
+#line 13537 "texprof.w"
 
 {g= glue_ptr(p);x= x+width(g);
 o= stretch_order(g);total_stretch[o]= total_stretch[o]+stretch(g);
@@ -14559,18 +14561,18 @@ if(depth(g)> d)d= depth(g);
 }
 
 /*:655*/
-#line 13477 "texprof.w"
+#line 13479 "texprof.w"
 break;
 case kern_node:case math_node:x= x+width(p);break;
 case ligature_node:/*651:*/
-#line 13487 "texprof.w"
+#line 13489 "texprof.w"
 
 {mem[lig_trick]= mem[lig_char(p)];link(lig_trick)= link(p);
 p= lig_trick;goto reswitch;
 }
 
 /*:651*/
-#line 13479 "texprof.w"
+#line 13481 "texprof.w"
 
 default:do_nothing;
 }
@@ -14580,12 +14582,12 @@ p= link(p);
 
 
 /*:650*/
-#line 13446 "texprof.w"
+#line 13448 "texprof.w"
 ;
 if(adjust_tail!=null)link(adjust_tail)= null;
 height(r)= h;depth(r)= d;
 /*656:*/
-#line 13549 "texprof.w"
+#line 13551 "texprof.w"
 
 if(m==additional)w= x+w;
 width(r)= w;x= w-x;
@@ -14595,10 +14597,10 @@ set_glue_ratio_zero(glue_set(r));
 goto end;
 }
 else if(x> 0)/*657:*/
-#line 13562 "texprof.w"
+#line 13564 "texprof.w"
 
 {/*658:*/
-#line 13576 "texprof.w"
+#line 13578 "texprof.w"
 
 if(total_stretch[filll]!=0)o= filll;
 else if(total_stretch[fill]!=0)o= fill;
@@ -14606,7 +14608,7 @@ else if(total_stretch[fil]!=0)o= fil;
 else o= normal
 
 /*:658*/
-#line 13563 "texprof.w"
+#line 13565 "texprof.w"
 ;
 glue_order(r)= o;glue_sign(r)= stretching;
 if(total_stretch[o]!=0)glue_set(r)= fix(x/(double)total_stretch[o]);
@@ -14616,7 +14618,7 @@ set_glue_ratio_zero(glue_set(r));
 }
 if(o==normal)if(list_ptr(r)!=null)
 /*659:*/
-#line 13582 "texprof.w"
+#line 13584 "texprof.w"
 
 {last_badness= badness(x,total_stretch[normal]);
 if(last_badness> hbadness)
@@ -14630,19 +14632,19 @@ goto common_ending;
 }
 
 /*:659*/
-#line 13572 "texprof.w"
+#line 13574 "texprof.w"
 ;
 goto end;
 }
 
 /*:657*/
-#line 13558 "texprof.w"
+#line 13560 "texprof.w"
 
 else/*663:*/
-#line 13621 "texprof.w"
+#line 13623 "texprof.w"
 
 {/*664:*/
-#line 13641 "texprof.w"
+#line 13643 "texprof.w"
 
 if(total_shrink[filll]!=0)o= filll;
 else if(total_shrink[fill]!=0)o= fill;
@@ -14650,7 +14652,7 @@ else if(total_shrink[fil]!=0)o= fil;
 else o= normal
 
 /*:664*/
-#line 13622 "texprof.w"
+#line 13624 "texprof.w"
 ;
 glue_order(r)= o;glue_sign(r)= shrinking;
 if(total_shrink[o]!=0)glue_set(r)= fix((-x)/(double)total_shrink[o]);
@@ -14662,7 +14664,7 @@ if((total_shrink[o]<-x)&&(o==normal)&&(list_ptr(r)!=null))
 {last_badness= 1000000;
 set_glue_ratio_one(glue_set(r));
 /*665:*/
-#line 13647 "texprof.w"
+#line 13649 "texprof.w"
 
 if((-x-total_shrink[normal]> hfuzz)||(hbadness<100))
 {if((overfull_rule> 0)&&(-x-total_shrink[normal]> hfuzz))
@@ -14677,12 +14679,12 @@ goto common_ending;
 }
 
 /*:665*/
-#line 13633 "texprof.w"
+#line 13635 "texprof.w"
 ;
 }
 else if(o==normal)if(list_ptr(r)!=null)
 /*666:*/
-#line 13660 "texprof.w"
+#line 13662 "texprof.w"
 
 {last_badness= badness(-x,total_shrink[normal]);
 if(last_badness> hbadness)
@@ -14693,20 +14695,20 @@ goto common_ending;
 }
 
 /*:666*/
-#line 13637 "texprof.w"
+#line 13639 "texprof.w"
 ;
 goto end;
 }
 
 /*:663*/
-#line 13560 "texprof.w"
+#line 13562 "texprof.w"
 
 
 /*:656*/
-#line 13450 "texprof.w"
+#line 13452 "texprof.w"
 ;
 common_ending:/*662:*/
-#line 13606 "texprof.w"
+#line 13608 "texprof.w"
 
 if(output_active)print(") has occurred while \\output is active");
 else{if(pack_begin_line!=0)
@@ -14723,13 +14725,13 @@ font_in_short_display= null_font;short_display(list_ptr(r));print_ln();
 begin_diagnostic();show_box(r);end_diagnostic(true)
 
 /*:662*/
-#line 13452 "texprof.w"
+#line 13454 "texprof.w"
 ;
 end:return r;
 }
 
 /*:648*//*667:*/
-#line 13677 "texprof.w"
+#line 13679 "texprof.w"
 
 #define vpack(...) vpackage(__VA_ARGS__, max_dimen) 
 static pointer vpackage(pointer p,scaled h,small_number m,scaled l)
@@ -14743,7 +14745,7 @@ last_badness= 0;r= get_node(box_node_size);type(r)= vlist_node;
 subtype(r)= min_quarterword;shift_amount(r)= 0;
 list_ptr(r)= p;
 w= 0;/*649:*/
-#line 13456 "texprof.w"
+#line 13458 "texprof.w"
 
 d= 0;x= 0;
 total_stretch[normal]= 0;total_shrink[normal]= 0;
@@ -14752,10 +14754,10 @@ total_stretch[fill]= 0;total_shrink[fill]= 0;
 total_stretch[filll]= 0;total_shrink[filll]= 0
 
 /*:649*/
-#line 13689 "texprof.w"
+#line 13691 "texprof.w"
 ;
 while(p!=null)/*668:*/
-#line 13704 "texprof.w"
+#line 13706 "texprof.w"
 
 {if(is_char_node(p))confusion("vpack");
 
@@ -14763,7 +14765,7 @@ else switch(type(p)){
 case hlist_node:case vlist_node:case rule_node:
 case unset_node:
 /*669:*/
-#line 13721 "texprof.w"
+#line 13723 "texprof.w"
 
 {x= x+d+height(p);d= depth(p);
 if(type(p)>=rule_node)s= 0;else s= shift_amount(p);
@@ -14771,17 +14773,17 @@ if(width(p)+s> w)w= width(p)+s;
 }
 
 /*:669*/
-#line 13711 "texprof.w"
+#line 13713 "texprof.w"
 break;
 case whatsit_node:/*1358:*/
-#line 25613 "texprof.w"
+#line 25619 "texprof.w"
 do_nothing
 
 /*:1358*/
-#line 13712 "texprof.w"
+#line 13714 "texprof.w"
 ;break;
 case glue_node:/*670:*/
-#line 13727 "texprof.w"
+#line 13729 "texprof.w"
 
 {x= x+d;d= 0;
 g= glue_ptr(p);x= x+width(g);
@@ -14794,7 +14796,7 @@ if(width(g)> w)w= width(g);
 }
 
 /*:670*/
-#line 13713 "texprof.w"
+#line 13715 "texprof.w"
 break;
 case kern_node:{x= x+d+width(p);d= 0;
 }break;
@@ -14804,7 +14806,7 @@ p= link(p);
 }
 
 /*:668*/
-#line 13691 "texprof.w"
+#line 13693 "texprof.w"
 ;
 width(r)= w;
 if(d> l)
@@ -14812,7 +14814,7 @@ if(d> l)
 }
 else depth(r)= d;
 /*671:*/
-#line 13741 "texprof.w"
+#line 13743 "texprof.w"
 
 if(m==additional)h= x+h;
 height(r)= h;x= h-x;
@@ -14822,10 +14824,10 @@ set_glue_ratio_zero(glue_set(r));
 goto end;
 }
 else if(x> 0)/*672:*/
-#line 13754 "texprof.w"
+#line 13756 "texprof.w"
 
 {/*658:*/
-#line 13576 "texprof.w"
+#line 13578 "texprof.w"
 
 if(total_stretch[filll]!=0)o= filll;
 else if(total_stretch[fill]!=0)o= fill;
@@ -14833,7 +14835,7 @@ else if(total_stretch[fil]!=0)o= fil;
 else o= normal
 
 /*:658*/
-#line 13755 "texprof.w"
+#line 13757 "texprof.w"
 ;
 glue_order(r)= o;glue_sign(r)= stretching;
 if(total_stretch[o]!=0)glue_set(r)= fix(x/(double)total_stretch[o]);
@@ -14843,7 +14845,7 @@ set_glue_ratio_zero(glue_set(r));
 }
 if(o==normal)if(list_ptr(r)!=null)
 /*673:*/
-#line 13768 "texprof.w"
+#line 13770 "texprof.w"
 
 {last_badness= badness(x,total_stretch[normal]);
 if(last_badness> vbadness)
@@ -14857,19 +14859,19 @@ goto common_ending;
 }
 
 /*:673*/
-#line 13764 "texprof.w"
+#line 13766 "texprof.w"
 ;
 goto end;
 }
 
 /*:672*/
-#line 13750 "texprof.w"
+#line 13752 "texprof.w"
 
 else/*675:*/
-#line 13793 "texprof.w"
+#line 13795 "texprof.w"
 
 {/*664:*/
-#line 13641 "texprof.w"
+#line 13643 "texprof.w"
 
 if(total_shrink[filll]!=0)o= filll;
 else if(total_shrink[fill]!=0)o= fill;
@@ -14877,7 +14879,7 @@ else if(total_shrink[fil]!=0)o= fil;
 else o= normal
 
 /*:664*/
-#line 13794 "texprof.w"
+#line 13796 "texprof.w"
 ;
 glue_order(r)= o;glue_sign(r)= shrinking;
 if(total_shrink[o]!=0)glue_set(r)= fix((-x)/(double)total_shrink[o]);
@@ -14889,7 +14891,7 @@ if((total_shrink[o]<-x)&&(o==normal)&&(list_ptr(r)!=null))
 {last_badness= 1000000;
 set_glue_ratio_one(glue_set(r));
 /*676:*/
-#line 13813 "texprof.w"
+#line 13815 "texprof.w"
 
 if((-x-total_shrink[normal]> vfuzz)||(vbadness<100))
 {print_ln();print_nl("Overfull \\vbox (");
@@ -14899,12 +14901,12 @@ goto common_ending;
 }
 
 /*:676*/
-#line 13805 "texprof.w"
+#line 13807 "texprof.w"
 ;
 }
 else if(o==normal)if(list_ptr(r)!=null)
 /*677:*/
-#line 13821 "texprof.w"
+#line 13823 "texprof.w"
 
 {last_badness= badness(-x,total_shrink[normal]);
 if(last_badness> vbadness)
@@ -14915,20 +14917,20 @@ goto common_ending;
 }
 
 /*:677*/
-#line 13809 "texprof.w"
+#line 13811 "texprof.w"
 ;
 goto end;
 }
 
 /*:675*/
-#line 13752 "texprof.w"
+#line 13754 "texprof.w"
 
 
 /*:671*/
-#line 13698 "texprof.w"
+#line 13700 "texprof.w"
 ;
 common_ending:/*674:*/
-#line 13780 "texprof.w"
+#line 13782 "texprof.w"
 
 if(output_active)print(") has occurred while \\output is active");
 else{if(pack_begin_line!=0)
@@ -14943,13 +14945,13 @@ print_ln();
 begin_diagnostic();show_box(r);end_diagnostic(true)
 
 /*:674*/
-#line 13700 "texprof.w"
+#line 13702 "texprof.w"
 ;
 end:return r;
 }
 
 /*:667*//*678:*/
-#line 13833 "texprof.w"
+#line 13835 "texprof.w"
 static void append_to_vlist(pointer b)
 {scaled d;
 pointer p;
@@ -14965,7 +14967,7 @@ link(tail)= b;tail= b;prev_depth= depth(b);
 }
 
 /*:678*//*685:*/
-#line 14031 "texprof.w"
+#line 14033 "texprof.w"
 static pointer new_noad(void)
 {pointer p;
 p= get_node(noad_size);
@@ -14977,7 +14979,7 @@ return p;
 }
 
 /*:685*//*687:*/
-#line 14094 "texprof.w"
+#line 14096 "texprof.w"
 static pointer new_style(small_number s)
 {pointer p;
 p= get_node(style_node_size);type(p)= style_node;
@@ -14986,7 +14988,7 @@ return p;
 }
 
 /*:687*//*688:*/
-#line 14111 "texprof.w"
+#line 14113 "texprof.w"
 static pointer new_choice(void)
 {pointer p;
 p= get_node(style_node_size);type(p)= choice_node;
@@ -14997,13 +14999,13 @@ return p;
 }
 
 /*:688*//*692:*/
-#line 14202 "texprof.w"
+#line 14204 "texprof.w"
 static void show_info(void)
 {show_node_list(info(temp_ptr));
 }
 
 /*:692*//*703:*/
-#line 14404 "texprof.w"
+#line 14406 "texprof.w"
 static pointer fraction_rule(scaled t)
 
 {pointer p;
@@ -15011,7 +15013,7 @@ p= new_rule();height(p)= t;depth(p)= 0;return p;
 }
 
 /*:703*//*704:*/
-#line 14414 "texprof.w"
+#line 14416 "texprof.w"
 static pointer overbar(pointer b,scaled k,scaled t)
 {pointer p,q;
 p= new_kern(k);link(p)= b;q= fraction_rule(t);link(q)= p;
@@ -15019,9 +15021,9 @@ p= new_kern(t);link(p)= q;return vpack(p,natural);
 }
 
 /*:704*//*705:*/
-#line 14435 "texprof.w"
+#line 14437 "texprof.w"
 /*708:*/
-#line 14507 "texprof.w"
+#line 14509 "texprof.w"
 
 static pointer char_box(internal_font_number f,quarterword c)
 {four_quarters q;
@@ -15034,7 +15036,7 @@ p= get_avail();character(p)= c;font(p)= f;list_ptr(b)= p;return b;
 }
 
 /*:708*//*710:*/
-#line 14531 "texprof.w"
+#line 14533 "texprof.w"
 
 static void stack_into_box(pointer b,internal_font_number f,
 quarterword c)
@@ -15044,7 +15046,7 @@ height(b)= height(p);
 }
 
 /*:710*//*711:*/
-#line 14542 "texprof.w"
+#line 14544 "texprof.w"
 
 static scaled height_plus_depth(internal_font_number f,quarterword c)
 {four_quarters q;
@@ -15054,7 +15056,7 @@ return char_height(f,hd)+char_depth(f,hd);
 }
 
 /*:711*/
-#line 14435 "texprof.w"
+#line 14437 "texprof.w"
 
 static pointer var_delimiter(pointer d,small_number s,scaled v)
 {
@@ -15072,14 +15074,14 @@ bool large_attempt;
 f= null_font;w= 0;large_attempt= false;
 z= small_fam(d);x= small_char(d);
 loop{/*706:*/
-#line 14469 "texprof.w"
+#line 14471 "texprof.w"
 
 if((z!=0)||(x!=min_quarterword))
 {z= z+s+16;
 do{z= z-16;g= fam_fnt(z);
 if(g!=null_font)
 /*707:*/
-#line 14480 "texprof.w"
+#line 14482 "texprof.w"
 
 {y= x;
 if((qo(y)>=font_bc[g])&&(qo(y)<=font_ec[g]))
@@ -15102,30 +15104,30 @@ if(char_tag(q)==list_tag)
 }
 
 /*:707*/
-#line 14476 "texprof.w"
+#line 14478 "texprof.w"
 ;
 }while(!(z<16));
 }
 
 /*:706*/
-#line 14452 "texprof.w"
+#line 14454 "texprof.w"
 ;
 if(large_attempt)goto found;
 large_attempt= true;z= large_fam(d);x= large_char(d);
 }
 found:if(f!=null_font)
 /*709:*/
-#line 14521 "texprof.w"
+#line 14523 "texprof.w"
 
 if(char_tag(q)==ext_tag)
 /*712:*/
-#line 14550 "texprof.w"
+#line 14552 "texprof.w"
 
 {b= new_null_box();
 type(b)= vlist_node;
 r= font_info[exten_base[f]+rem_byte(q)].qqqq;
 /*713:*/
-#line 14575 "texprof.w"
+#line 14577 "texprof.w"
 
 c= ext_rep(r);u= height_plus_depth(f,c);
 w= 0;q= char_info(f,c);width(b)= char_width(f,q)+char_italic(f,q);
@@ -15139,7 +15141,7 @@ if(ext_mid(r)!=min_quarterword)w= w+u;
 }
 
 /*:713*/
-#line 14555 "texprof.w"
+#line 14557 "texprof.w"
 ;
 c= ext_bot(r);
 if(c!=min_quarterword)stack_into_box(b,f,c);
@@ -15156,12 +15158,12 @@ depth(b)= w-height(b);
 }
 
 /*:712*/
-#line 14524 "texprof.w"
+#line 14526 "texprof.w"
 
 else b= char_box(f,c)
 
 /*:709*/
-#line 14457 "texprof.w"
+#line 14459 "texprof.w"
 ;
 else{b= new_null_box();
 width(b)= null_delimiter_space;
@@ -15171,7 +15173,7 @@ return b;
 }
 
 /*:705*//*714:*/
-#line 14600 "texprof.w"
+#line 14602 "texprof.w"
 static pointer rebox(pointer b,scaled w)
 {pointer p;
 internal_font_number f;
@@ -15194,7 +15196,7 @@ else{width(b)= w;return b;
 }
 
 /*:714*//*715:*/
-#line 14626 "texprof.w"
+#line 14628 "texprof.w"
 static pointer math_glue(pointer g,scaled m)
 {pointer p;
 int n;
@@ -15215,7 +15217,7 @@ return p;
 }
 
 /*:715*//*716:*/
-#line 14648 "texprof.w"
+#line 14650 "texprof.w"
 static void math_kern(pointer p,scaled m)
 {int n;
 scaled f;
@@ -15229,14 +15231,14 @@ width(p)= mu_mult(width(p));subtype(p)= explicit;
 }
 
 /*:716*//*717:*/
-#line 14663 "texprof.w"
+#line 14665 "texprof.w"
 static void flush_math(void)
 {flush_node_list(link(head));flush_node_list(incompleat_noad);
 link(head)= null;tail= head;incompleat_noad= null;
 }
 
 /*:717*//*719:*/
-#line 14700 "texprof.w"
+#line 14702 "texprof.w"
 static void mlist_to_hlist(void);
 static pointer clean_box(pointer p,small_number s)
 {
@@ -15257,7 +15259,7 @@ save_style= cur_style;cur_style= s;mlist_penalties= false;
 mlist_to_hlist();q= link(temp_head);
 cur_style= save_style;
 /*702:*/
-#line 14394 "texprof.w"
+#line 14396 "texprof.w"
 
 {if(cur_style<script_style)cur_size= text_size;
 else cur_size= 16*((cur_style-text_style)/2);
@@ -15265,14 +15267,14 @@ cur_mu= x_over_n(math_quad(cur_size),18);
 }
 
 /*:702*/
-#line 14719 "texprof.w"
+#line 14721 "texprof.w"
 ;
 found:if(is_char_node(q)||(q==null))x= hpack(q,natural);
 else if((link(q)==null)&&(type(q)<=vlist_node)&&(shift_amount(q)==0))
 x= q;
 else x= hpack(q,natural);
 /*720:*/
-#line 14730 "texprof.w"
+#line 14732 "texprof.w"
 
 q= list_ptr(x);
 if(is_char_node(q))
@@ -15284,18 +15286,18 @@ if(type(r)==kern_node)
 }
 
 /*:720*/
-#line 14724 "texprof.w"
+#line 14726 "texprof.w"
 ;
 return x;
 }
 
 /*:719*//*721:*/
-#line 14747 "texprof.w"
+#line 14749 "texprof.w"
 static void fetch(pointer a)
 {cur_c= character(a);cur_f= fam_fnt(fam(a)+cur_size);
 if(cur_f==null_font)
 /*722:*/
-#line 14761 "texprof.w"
+#line 14763 "texprof.w"
 
 {print_err("");print_size(cur_size);print_char(' ');
 print_int(fam(a));print(" is undefined (character ");
@@ -15308,7 +15310,7 @@ error();cur_i= null_character;math_type(a)= empty;
 }
 
 /*:722*/
-#line 14750 "texprof.w"
+#line 14752 "texprof.w"
 
 else{if((qo(cur_c)>=font_bc[cur_f])&&(qo(cur_c)<=font_ec[cur_f]))
 cur_i= char_info(cur_f,cur_c);
@@ -15321,9 +15323,9 @@ math_type(a)= empty;cur_i= null_character;
 }
 
 /*:721*//*725:*/
-#line 14801 "texprof.w"
+#line 14803 "texprof.w"
 /*733:*/
-#line 14961 "texprof.w"
+#line 14963 "texprof.w"
 
 static void make_over(pointer q)
 {info(nucleus(q))= 
@@ -15333,7 +15335,7 @@ math_type(nucleus(q))= sub_box;
 }
 
 /*:733*//*734:*/
-#line 14969 "texprof.w"
+#line 14971 "texprof.w"
 
 static void make_under(pointer q)
 {pointer p,x,y;
@@ -15348,7 +15350,7 @@ info(nucleus(q))= y;math_type(nucleus(q))= sub_box;
 }
 
 /*:734*//*735:*/
-#line 14982 "texprof.w"
+#line 14984 "texprof.w"
 
 static void make_vcenter(pointer q)
 {pointer v;
@@ -15362,7 +15364,7 @@ depth(v)= delta-height(v);
 }
 
 /*:735*//*736:*/
-#line 15003 "texprof.w"
+#line 15005 "texprof.w"
 
 static void make_radical(pointer q)
 {pointer x,y;
@@ -15382,7 +15384,7 @@ info(nucleus(q))= hpack(y,natural);math_type(nucleus(q))= sub_box;
 }
 
 /*:736*//*737:*/
-#line 15025 "texprof.w"
+#line 15027 "texprof.w"
 
 static void make_math_accent(pointer q)
 {
@@ -15399,7 +15401,7 @@ fetch(accent_chr(q));
 if(char_exists(cur_i))
 {i= cur_i;c= cur_c;f= cur_f;
 /*740:*/
-#line 15072 "texprof.w"
+#line 15074 "texprof.w"
 
 s= 0;
 if(math_type(nucleus(q))==math_char)
@@ -15425,11 +15427,11 @@ cur_i= font_info[a].qqqq;
 done1:
 
 /*:740*/
-#line 15040 "texprof.w"
+#line 15042 "texprof.w"
 ;
 x= clean_box(nucleus(q),cramped_style(cur_style));w= width(x);h= height(x);
 /*739:*/
-#line 15062 "texprof.w"
+#line 15064 "texprof.w"
 
 loop{if(char_tag(i)!=list_tag)goto done;
 y= rem_byte(i);
@@ -15441,13 +15443,13 @@ c= y;
 done:
 
 /*:739*/
-#line 15042 "texprof.w"
+#line 15044 "texprof.w"
 ;
 if(h<x_height(f))delta= h;else delta= x_height(f);
 if((math_type(supscr(q))!=empty)||(math_type(subscr(q))!=empty))
 if(math_type(nucleus(q))==math_char)
 /*741:*/
-#line 15096 "texprof.w"
+#line 15098 "texprof.w"
 
 {flush_node_list(x);x= new_noad();
 mem[nucleus(x)]= mem[nucleus(q)];
@@ -15460,21 +15462,21 @@ x= clean_box(nucleus(q),cur_style);delta= delta+height(x)-h;h= height(x);
 }
 
 /*:741*/
-#line 15046 "texprof.w"
+#line 15048 "texprof.w"
 ;
 y= char_box(f,c);
 shift_amount(y)= s+half(w-width(y));
 width(y)= 0;p= new_kern(-delta);link(p)= x;link(y)= p;
 y= vpack(y,natural);width(y)= width(x);
 if(height(y)<h)/*738:*/
-#line 15057 "texprof.w"
+#line 15059 "texprof.w"
 
 {p= new_kern(h-height(y));link(p)= list_ptr(y);list_ptr(y)= p;
 height(y)= h;
 }
 
 /*:738*/
-#line 15051 "texprof.w"
+#line 15053 "texprof.w"
 ;
 info(nucleus(q))= y;
 math_type(nucleus(q))= sub_box;
@@ -15482,7 +15484,7 @@ math_type(nucleus(q))= sub_box;
 }
 
 /*:737*//*742:*/
-#line 15110 "texprof.w"
+#line 15112 "texprof.w"
 
 static void make_fraction(pointer q)
 {pointer p,v,x,y,z;
@@ -15490,7 +15492,7 @@ scaled delta,delta1,delta2,shift_up,shift_down,clr;
 
 if(thickness(q)==default_code)thickness(q)= default_rule_thickness;
 /*743:*/
-#line 15127 "texprof.w"
+#line 15129 "texprof.w"
 
 x= clean_box(numerator(q),num_style(cur_style));
 z= clean_box(denominator(q),denom_style(cur_style));
@@ -15505,10 +15507,10 @@ else shift_up= num3(cur_size);
 }
 
 /*:743*/
-#line 15118 "texprof.w"
+#line 15120 "texprof.w"
 ;
 if(thickness(q)==0)/*744:*/
-#line 15144 "texprof.w"
+#line 15146 "texprof.w"
 
 {if(cur_style<text_style)clr= 7*default_rule_thickness;
 else clr= 3*default_rule_thickness;
@@ -15520,10 +15522,10 @@ shift_down= shift_down+delta;
 }
 
 /*:744*/
-#line 15120 "texprof.w"
+#line 15122 "texprof.w"
 
 else/*745:*/
-#line 15157 "texprof.w"
+#line 15159 "texprof.w"
 
 {if(cur_style<text_style)clr= 3*thickness(q);
 else clr= thickness(q);
@@ -15535,10 +15537,10 @@ if(delta2> 0)shift_down= shift_down+delta2;
 }
 
 /*:745*/
-#line 15121 "texprof.w"
+#line 15123 "texprof.w"
 ;
 /*746:*/
-#line 15167 "texprof.w"
+#line 15169 "texprof.w"
 
 v= new_null_box();type(v)= vlist_node;
 height(v)= shift_up+height(x);depth(v)= depth(z)+shift_down;
@@ -15556,10 +15558,10 @@ link(p)= y;
 link(x)= p;list_ptr(v)= x
 
 /*:746*/
-#line 15122 "texprof.w"
+#line 15124 "texprof.w"
 ;
 /*747:*/
-#line 15183 "texprof.w"
+#line 15185 "texprof.w"
 
 if(cur_style<text_style)delta= delim1(cur_size);
 else delta= delim2(cur_size);
@@ -15568,12 +15570,12 @@ z= var_delimiter(right_delimiter(q),cur_size,delta);link(v)= z;
 new_hlist(q)= hpack(x,natural)
 
 /*:747*/
-#line 15124 "texprof.w"
+#line 15126 "texprof.w"
 ;
 }
 
 /*:742*//*748:*/
-#line 15205 "texprof.w"
+#line 15207 "texprof.w"
 
 static scaled make_op(pointer q)
 {scaled delta;
@@ -15600,7 +15602,7 @@ math_type(nucleus(q))= sub_box;info(nucleus(q))= x;
 else delta= 0;
 if(subtype(q)==limits)
 /*749:*/
-#line 15237 "texprof.w"
+#line 15239 "texprof.w"
 
 {x= clean_box(supscr(q),sup_style(cur_style));
 y= clean_box(nucleus(q),cur_style);
@@ -15612,7 +15614,7 @@ x= rebox(x,width(v));y= rebox(y,width(v));z= rebox(z,width(v));
 shift_amount(x)= half(delta);shift_amount(z)= -shift_amount(x);
 height(v)= height(y);depth(v)= depth(y);
 /*750:*/
-#line 15257 "texprof.w"
+#line 15259 "texprof.w"
 
 if(math_type(supscr(q))==empty)
 {free_node(x,box_node_size);list_ptr(v)= y;
@@ -15632,19 +15634,19 @@ depth(v)= depth(v)+big_op_spacing5+height(z)+depth(z)+shift_down;
 }
 
 /*:750*/
-#line 15248 "texprof.w"
+#line 15250 "texprof.w"
 ;
 new_hlist(q)= v;
 }
 
 /*:749*/
-#line 15230 "texprof.w"
+#line 15232 "texprof.w"
 ;
 return delta;
 }
 
 /*:748*//*751:*/
-#line 15285 "texprof.w"
+#line 15287 "texprof.w"
 
 static void make_ord(pointer q)
 {
@@ -15668,7 +15670,7 @@ if(skip_byte(cur_i)> stop_flag)
 cur_i= font_info[a].qqqq;
 }
 loop{/*752:*/
-#line 15328 "texprof.w"
+#line 15330 "texprof.w"
 
 if(next_char(cur_i)==cur_c)if(skip_byte(cur_i)<=stop_flag)
 if(op_byte(cur_i)>=kern_flag)
@@ -15697,7 +15699,7 @@ math_type(nucleus(q))= math_char;goto restart;
 }
 
 /*:752*/
-#line 15310 "texprof.w"
+#line 15312 "texprof.w"
 ;
 if(skip_byte(cur_i)>=stop_flag)return;
 a= a+qo(skip_byte(cur_i))+1;
@@ -15709,7 +15711,7 @@ cur_i= font_info[a].qqqq;
 }
 
 /*:751*//*755:*/
-#line 15410 "texprof.w"
+#line 15412 "texprof.w"
 
 static void make_scripts(pointer q,scaled delta)
 {pointer p,x,y,z;
@@ -15727,7 +15729,7 @@ free_node(z,box_node_size);
 }
 if(math_type(supscr(q))==empty)
 /*756:*/
-#line 15442 "texprof.w"
+#line 15444 "texprof.w"
 
 {x= clean_box(subscr(q),sub_style(cur_style));
 width(x)= width(x)+script_space;
@@ -15738,10 +15740,10 @@ shift_amount(x)= shift_down;
 }
 
 /*:756*/
-#line 15426 "texprof.w"
+#line 15428 "texprof.w"
 
 else{/*757:*/
-#line 15454 "texprof.w"
+#line 15456 "texprof.w"
 
 {x= clean_box(supscr(q),sup_style(cur_style));
 width(x)= width(x)+script_space;
@@ -15754,11 +15756,11 @@ if(shift_up<clr)shift_up= clr;
 }
 
 /*:757*/
-#line 15427 "texprof.w"
+#line 15429 "texprof.w"
 ;
 if(math_type(subscr(q))==empty)shift_amount(x)= -shift_up;
 else/*758:*/
-#line 15471 "texprof.w"
+#line 15473 "texprof.w"
 
 {y= clean_box(subscr(q),sub_style(cur_style));
 width(y)= width(y)+script_space;
@@ -15779,7 +15781,7 @@ x= vpack(x,natural);shift_amount(x)= shift_down;
 }
 
 /*:758*/
-#line 15430 "texprof.w"
+#line 15432 "texprof.w"
 ;
 }
 if(new_hlist(q)==null)new_hlist(q)= x;
@@ -15790,13 +15792,13 @@ link(p)= x;
 }
 
 /*:755*//*761:*/
-#line 15547 "texprof.w"
+#line 15549 "texprof.w"
 
 static small_number make_left_right(pointer q,small_number style,
 scaled max_d,scaled max_h)
 {scaled delta,delta1,delta2;
 cur_style= style;/*702:*/
-#line 14394 "texprof.w"
+#line 14396 "texprof.w"
 
 {if(cur_style<script_style)cur_size= text_size;
 else cur_size= 16*((cur_style-text_style)/2);
@@ -15804,7 +15806,7 @@ cur_mu= x_over_n(math_quad(cur_size),18);
 }
 
 /*:702*/
-#line 15551 "texprof.w"
+#line 15553 "texprof.w"
 ;
 delta2= max_d+axis_height(cur_size);
 delta1= max_h+max_d-delta2;
@@ -15817,7 +15819,7 @@ return type(q)-(left_noad-open_noad);
 }
 
 /*:761*/
-#line 14801 "texprof.w"
+#line 14803 "texprof.w"
 
 static void mlist_to_hlist(void)
 {
@@ -15839,7 +15841,7 @@ mlist= cur_mlist;penalties= mlist_penalties;
 style= cur_style;
 q= mlist;r= null;r_type= op_noad;max_h= 0;max_d= 0;
 /*702:*/
-#line 14394 "texprof.w"
+#line 14396 "texprof.w"
 
 {if(cur_style<script_style)cur_size= text_size;
 else cur_size= 16*((cur_style-text_style)/2);
@@ -15847,13 +15849,13 @@ cur_mu= x_over_n(math_quad(cur_size),18);
 }
 
 /*:702*/
-#line 14821 "texprof.w"
+#line 14823 "texprof.w"
 ;
 while(q!=null)/*726:*/
-#line 14833 "texprof.w"
+#line 14835 "texprof.w"
 
 {/*727:*/
-#line 14852 "texprof.w"
+#line 14854 "texprof.w"
 
 reswitch:delta= 0;
 switch(type(q)){
@@ -15867,17 +15869,17 @@ default:do_nothing;
 case rel_noad:case close_noad:case punct_noad:
 case right_noad:{
 /*728:*/
-#line 14875 "texprof.w"
+#line 14877 "texprof.w"
 
 if(r_type==bin_noad)type(r)= ord_noad
 
 /*:728*/
-#line 14864 "texprof.w"
+#line 14866 "texprof.w"
 ;
 if(type(q)==right_noad)goto done_with_noad;
 }break;
 /*732:*/
-#line 14940 "texprof.w"
+#line 14942 "texprof.w"
 
 case left_noad:goto done_with_noad;
 case fraction_noad:{make_fraction(q);goto check_dimensions;
@@ -15894,14 +15896,14 @@ case accent_noad:make_math_accent(q);break;
 case vcenter_noad:make_vcenter(q);break;
 
 /*:732*/
-#line 14867 "texprof.w"
+#line 14869 "texprof.w"
 
 /*729:*/
-#line 14878 "texprof.w"
+#line 14880 "texprof.w"
 
 case style_node:{cur_style= subtype(q);
 /*702:*/
-#line 14394 "texprof.w"
+#line 14396 "texprof.w"
 
 {if(cur_style<script_style)cur_size= text_size;
 else cur_size= 16*((cur_style-text_style)/2);
@@ -15909,12 +15911,12 @@ cur_mu= x_over_n(math_quad(cur_size),18);
 }
 
 /*:702*/
-#line 14880 "texprof.w"
+#line 14882 "texprof.w"
 ;
 goto done_with_node;
 }
 case choice_node:/*730:*/
-#line 14899 "texprof.w"
+#line 14901 "texprof.w"
 
 {switch(cur_style/2){
 case 0:choose_mlist(display_mlist)break;
@@ -15936,7 +15938,7 @@ goto done_with_node;
 }
 
 /*:730*/
-#line 14884 "texprof.w"
+#line 14886 "texprof.w"
 
 case ins_node:case mark_node:case adjust_node:
 case whatsit_node:case penalty_node:
@@ -15945,7 +15947,7 @@ case rule_node:{if(height(q)> max_h)max_h= height(q);
 if(depth(q)> max_d)max_d= depth(q);goto done_with_node;
 }
 case glue_node:{/*731:*/
-#line 14927 "texprof.w"
+#line 14929 "texprof.w"
 
 if(subtype(q)==mu_glue)
 {x= glue_ptr(q);
@@ -15960,7 +15962,7 @@ if(p!=null)if((type(p)==glue_node)||(type(p)==kern_node))
 }
 
 /*:731*/
-#line 14891 "texprof.w"
+#line 14893 "texprof.w"
 ;
 goto done_with_node;
 }
@@ -15968,18 +15970,18 @@ case kern_node:{math_kern(q,cur_mu);goto done_with_node;
 }
 
 /*:729*/
-#line 14869 "texprof.w"
+#line 14871 "texprof.w"
 
 default:confusion("mlist1");
 
 }
 /*753:*/
-#line 15367 "texprof.w"
+#line 15369 "texprof.w"
 
 switch(math_type(nucleus(q))){
 case math_char:case math_text_char:
 /*754:*/
-#line 15389 "texprof.w"
+#line 15391 "texprof.w"
 
 {fetch(nucleus(q));
 if(char_exists(cur_i))
@@ -15994,7 +15996,7 @@ else p= null;
 }
 
 /*:754*/
-#line 15372 "texprof.w"
+#line 15374 "texprof.w"
 break;
 case empty:p= null;break;
 case sub_box:p= info(nucleus(q));break;
@@ -16002,7 +16004,7 @@ case sub_mlist:{cur_mlist= info(nucleus(q));save_style= cur_style;
 mlist_penalties= false;mlist_to_hlist();
 
 cur_style= save_style;/*702:*/
-#line 14394 "texprof.w"
+#line 14396 "texprof.w"
 
 {if(cur_style<script_style)cur_size= text_size;
 else cur_size= 16*((cur_style-text_style)/2);
@@ -16010,7 +16012,7 @@ cur_mu= x_over_n(math_quad(cur_size),18);
 }
 
 /*:702*/
-#line 15378 "texprof.w"
+#line 15380 "texprof.w"
 ;
 p= hpack(link(temp_head),natural);
 }break;
@@ -16023,11 +16025,11 @@ goto check_dimensions;
 make_scripts(q,delta)
 
 /*:753*/
-#line 14873 "texprof.w"
+#line 14875 "texprof.w"
 
 
 /*:727*/
-#line 14836 "texprof.w"
+#line 14838 "texprof.w"
 ;
 check_dimensions:z= hpack(new_hlist(q),natural);
 if(height(z)> max_h)max_h= height(z);
@@ -16036,7 +16038,7 @@ free_node(z,box_node_size);
 done_with_noad:r= q;r_type= type(r);
 if(r_type==right_noad)
 {r_type= left_noad;cur_style= style;/*702:*/
-#line 14394 "texprof.w"
+#line 14396 "texprof.w"
 
 {if(cur_style<script_style)cur_size= text_size;
 else cur_size= 16*((cur_style-text_style)/2);
@@ -16044,29 +16046,29 @@ cur_mu= x_over_n(math_quad(cur_size),18);
 }
 
 /*:702*/
-#line 14843 "texprof.w"
+#line 14845 "texprof.w"
 ;
 }
 done_with_node:q= link(q);
 }
 
 /*:726*/
-#line 14824 "texprof.w"
+#line 14826 "texprof.w"
 ;
 /*728:*/
-#line 14875 "texprof.w"
+#line 14877 "texprof.w"
 
 if(r_type==bin_noad)type(r)= ord_noad
 
 /*:728*/
-#line 14825 "texprof.w"
+#line 14827 "texprof.w"
 ;
 /*759:*/
-#line 15496 "texprof.w"
+#line 15498 "texprof.w"
 
 p= temp_head;link(p)= null;q= mlist;r_type= 0;cur_style= style;
 /*702:*/
-#line 14394 "texprof.w"
+#line 14396 "texprof.w"
 
 {if(cur_style<script_style)cur_size= text_size;
 else cur_size= 16*((cur_style-text_style)/2);
@@ -16074,11 +16076,11 @@ cur_mu= x_over_n(math_quad(cur_size),18);
 }
 
 /*:702*/
-#line 15498 "texprof.w"
+#line 15500 "texprof.w"
 ;
 while(q!=null)
 {/*760:*/
-#line 15514 "texprof.w"
+#line 15516 "texprof.w"
 
 t= ord_noad;s= noad_size;pen= inf_penalty;
 switch(type(q)){
@@ -16095,11 +16097,11 @@ case accent_noad:s= accent_noad_size;break;
 case fraction_noad:s= fraction_noad_size;break;
 case left_noad:case right_noad:t= make_left_right(q,style,max_d,max_h);break;
 case style_node:/*762:*/
-#line 15562 "texprof.w"
+#line 15564 "texprof.w"
 
 {cur_style= subtype(q);s= style_node_size;
 /*702:*/
-#line 14394 "texprof.w"
+#line 14396 "texprof.w"
 
 {if(cur_style<script_style)cur_size= text_size;
 else cur_size= 16*((cur_style-text_style)/2);
@@ -16107,13 +16109,13 @@ cur_mu= x_over_n(math_quad(cur_size),18);
 }
 
 /*:702*/
-#line 15564 "texprof.w"
+#line 15566 "texprof.w"
 ;
 goto delete_q;
 }
 
 /*:762*/
-#line 15529 "texprof.w"
+#line 15531 "texprof.w"
 
 case whatsit_node:case penalty_node:
 case rule_node:case disc_node:case adjust_node:
@@ -16126,10 +16128,10 @@ default:confusion("mlist3");
 }
 
 /*:760*/
-#line 15503 "texprof.w"
+#line 15505 "texprof.w"
 ;
 /*765:*/
-#line 15600 "texprof.w"
+#line 15602 "texprof.w"
 
 if(r_type> 0)
 {switch(so(math_spacing[r_type*8+t+magic_offset])){
@@ -16149,10 +16151,10 @@ subtype(z)= x+1;
 }
 
 /*:765*/
-#line 15504 "texprof.w"
+#line 15506 "texprof.w"
 ;
 /*766:*/
-#line 15622 "texprof.w"
+#line 15624 "texprof.w"
 
 if(new_hlist(q)!=null)
 {link(p)= new_hlist(q);
@@ -16167,7 +16169,7 @@ if(r_type!=penalty_node)if(r_type!=rel_noad)
 }
 
 /*:766*/
-#line 15505 "texprof.w"
+#line 15507 "texprof.w"
 ;
 if(type(q)==right_noad)t= open_noad;
 r_type= t;
@@ -16175,12 +16177,12 @@ delete_q:r= q;q= link(q);free_node(r,s);
 done:;}
 
 /*:759*/
-#line 14827 "texprof.w"
+#line 14829 "texprof.w"
 ;
 }
 
 /*:725*//*771:*/
-#line 15811 "texprof.w"
+#line 15813 "texprof.w"
 static void push_alignment(void)
 {pointer p;
 p= get_node(align_stack_node_size);
@@ -16204,9 +16206,9 @@ free_node(p,align_stack_node_size);
 }
 
 /*:771*//*773:*/
-#line 15851 "texprof.w"
+#line 15853 "texprof.w"
 /*781:*/
-#line 15964 "texprof.w"
+#line 15966 "texprof.w"
 
 static void get_preamble_token(void)
 {
@@ -16229,7 +16231,7 @@ goto restart;
 }
 
 /*:781*/
-#line 15851 "texprof.w"
+#line 15853 "texprof.w"
 
 static void align_peek(void);
 static void normal_paragraph(void);
@@ -16240,7 +16242,7 @@ pointer p;
 save_cs_ptr= cur_cs;
 push_alignment();align_state= -1000000;
 /*775:*/
-#line 15884 "texprof.w"
+#line 15886 "texprof.w"
 
 if((mode==mmode)&&((tail!=head)||(incompleat_noad!=null)))
 {print_err("Improper ");print_esc("halign");print(" inside $$'s");
@@ -16252,11 +16254,11 @@ error();flush_math();
 }
 
 /*:775*/
-#line 15860 "texprof.w"
+#line 15862 "texprof.w"
 ;
 push_nest();
 /*774:*/
-#line 15875 "texprof.w"
+#line 15877 "texprof.w"
 
 if(mode==mmode)
 {mode= -vmode;prev_depth= nest[nest_ptr-2].aux_field.sc;
@@ -16264,30 +16266,30 @@ if(mode==mmode)
 else if(mode> 0)negate(mode)
 
 /*:774*/
-#line 15862 "texprof.w"
+#line 15864 "texprof.w"
 ;
 scan_spec(align_group,false);
 /*776:*/
-#line 15894 "texprof.w"
+#line 15896 "texprof.w"
 
 preamble= null;cur_align= align_head;cur_loop= null;scanner_status= aligning;
 warning_index= save_cs_ptr;align_state= -1000000;
 
 loop{/*777:*/
-#line 15905 "texprof.w"
+#line 15907 "texprof.w"
 
 link(cur_align)= new_param_glue(tab_skip_code);
 cur_align= link(cur_align)
 
 /*:777*/
-#line 15898 "texprof.w"
+#line 15900 "texprof.w"
 ;
 if(cur_cmd==car_ret)goto done;
 /*778:*/
-#line 15909 "texprof.w"
+#line 15911 "texprof.w"
 
 /*782:*/
-#line 15987 "texprof.w"
+#line 15989 "texprof.w"
 
 p= hold_head;link(p)= null;
 loop{get_preamble_token();
@@ -16309,13 +16311,13 @@ else if((cur_cmd!=spacer)||(p!=hold_head))
 done1:
 
 /*:782*/
-#line 15910 "texprof.w"
+#line 15912 "texprof.w"
 ;
 link(cur_align)= new_null_box();cur_align= link(cur_align);
 info(cur_align)= end_span;width(cur_align)= null_flag;
 u_part(cur_align)= link(hold_head);
 /*783:*/
-#line 16007 "texprof.w"
+#line 16009 "texprof.w"
 
 p= hold_head;link(p)= null;
 loop{resume:get_preamble_token();
@@ -16335,18 +16337,18 @@ done2:link(p)= get_avail();p= link(p);
 info(p)= end_template_token
 
 /*:783*/
-#line 15914 "texprof.w"
+#line 15916 "texprof.w"
 ;
 v_part(cur_align)= link(hold_head)
 
 /*:778*/
-#line 15901 "texprof.w"
+#line 15903 "texprof.w"
 ;
 }
 done:scanner_status= normal
 
 /*:776*/
-#line 15864 "texprof.w"
+#line 15866 "texprof.w"
 ;
 new_save_level(align_group);
 if(every_cr!=null)begin_token_list(every_cr,every_cr_text);
@@ -16354,9 +16356,9 @@ align_peek();
 }
 
 /*:773*//*785:*/
-#line 16059 "texprof.w"
+#line 16061 "texprof.w"
 /*786:*/
-#line 16072 "texprof.w"
+#line 16074 "texprof.w"
 
 static void init_span(pointer p)
 {push_nest();
@@ -16367,7 +16369,7 @@ cur_span= p;
 }
 
 /*:786*/
-#line 16059 "texprof.w"
+#line 16061 "texprof.w"
 
 static void init_row(void)
 {push_nest();mode= (-hmode-vmode)-mode;
@@ -16378,7 +16380,7 @@ cur_align= link(preamble);cur_tail= cur_head;init_span(cur_align);
 }
 
 /*:785*//*787:*/
-#line 16088 "texprof.w"
+#line 16090 "texprof.w"
 static void init_col(void)
 {extra_info(cur_align)= cur_cmd;
 if(cur_cmd==omit)align_state= 0;
@@ -16387,7 +16389,7 @@ else{back_input();begin_token_list(u_part(cur_align),u_template);
 }
 
 /*:787*//*790:*/
-#line 16125 "texprof.w"
+#line 16127 "texprof.w"
 static bool fin_col(void)
 {
 pointer p;
@@ -16405,16 +16407,16 @@ fatal_error("(interwoven alignment preambles are not allowed)");
 
 p= link(q);
 /*791:*/
-#line 16158 "texprof.w"
+#line 16160 "texprof.w"
 
 if((p==null)&&(extra_info(cur_align)<cr_code))
 if(cur_loop!=null)/*792:*/
-#line 16170 "texprof.w"
+#line 16172 "texprof.w"
 
 {link(q)= new_null_box();p= link(q);
 info(p)= end_span;width(p)= null_flag;cur_loop= link(cur_loop);
 /*793:*/
-#line 16179 "texprof.w"
+#line 16181 "texprof.w"
 
 q= hold_head;r= u_part(cur_loop);
 while(r!=null)
@@ -16428,7 +16430,7 @@ while(r!=null)
 link(q)= null;v_part(p)= link(hold_head)
 
 /*:793*/
-#line 16173 "texprof.w"
+#line 16175 "texprof.w"
 ;
 cur_loop= link(cur_loop);
 link(p)= new_glue(glue_ptr(cur_loop));
@@ -16436,7 +16438,7 @@ subtype(link(p))= tab_skip_code+1;
 }
 
 /*:792*/
-#line 16160 "texprof.w"
+#line 16162 "texprof.w"
 
 else{print_err("Extra alignment tab has been changed to ");
 
@@ -16448,12 +16450,12 @@ extra_info(cur_align)= cr_code;error();
 }
 
 /*:791*/
-#line 16141 "texprof.w"
+#line 16143 "texprof.w"
 ;
 if(extra_info(cur_align)!=span_code)
 {unsave();new_save_level(align_group);
 /*795:*/
-#line 16195 "texprof.w"
+#line 16197 "texprof.w"
 
 {if(mode==-hmode)
 {adjust_tail= cur_tail;u= hpack(link(head),natural);w= width(u);
@@ -16463,7 +16465,7 @@ else{u= vpackage(link(head),natural,0);w= height(u);
 }
 n= min_quarterword;
 if(cur_span!=cur_align)/*797:*/
-#line 16229 "texprof.w"
+#line 16231 "texprof.w"
 
 {q= cur_span;
 do{incr(n);q= link(link(q));
@@ -16480,12 +16482,12 @@ else if(width(info(q))<w)width(info(q))= w;
 }
 
 /*:797*/
-#line 16203 "texprof.w"
+#line 16205 "texprof.w"
 
 else if(w> width(cur_align))width(cur_align)= w;
 type(u)= unset_node;span_count(u)= n;
 /*658:*/
-#line 13576 "texprof.w"
+#line 13578 "texprof.w"
 
 if(total_stretch[filll]!=0)o= filll;
 else if(total_stretch[fill]!=0)o= fill;
@@ -16493,11 +16495,11 @@ else if(total_stretch[fil]!=0)o= fil;
 else o= normal
 
 /*:658*/
-#line 16206 "texprof.w"
+#line 16208 "texprof.w"
 ;
 glue_order(u)= o;glue_stretch(u)= total_stretch[o];
 /*664:*/
-#line 13641 "texprof.w"
+#line 13643 "texprof.w"
 
 if(total_shrink[filll]!=0)o= filll;
 else if(total_shrink[fill]!=0)o= fill;
@@ -16505,23 +16507,23 @@ else if(total_shrink[fil]!=0)o= fil;
 else o= normal
 
 /*:664*/
-#line 16208 "texprof.w"
+#line 16210 "texprof.w"
 ;
 glue_sign(u)= o;glue_shrink(u)= total_shrink[o];
 pop_nest();link(tail)= u;tail= u;
 }
 
 /*:795*/
-#line 16144 "texprof.w"
+#line 16146 "texprof.w"
 ;
 /*794:*/
-#line 16191 "texprof.w"
+#line 16193 "texprof.w"
 
 tail_append(new_glue(glue_ptr(link(cur_align))));
 subtype(tail)= tab_skip_code+1
 
 /*:794*/
-#line 16145 "texprof.w"
+#line 16147 "texprof.w"
 ;
 if(extra_info(cur_align)>=cr_code)
 {return true;
@@ -16536,7 +16538,7 @@ init_col();return false;
 }
 
 /*:790*//*798:*/
-#line 16249 "texprof.w"
+#line 16251 "texprof.w"
 static void fin_row(void)
 {pointer p;
 if(mode==-hmode)
@@ -16555,7 +16557,7 @@ align_peek();
 }
 
 /*:798*//*799:*/
-#line 16270 "texprof.w"
+#line 16272 "texprof.w"
 static void do_assignments(void);
 static void resume_after_display(void);
 static void build_page(void);
@@ -16574,14 +16576,14 @@ unsave();
 if(nest[nest_ptr-1].mode_field==mmode)o= display_indent;
 else o= 0;
 /*800:*/
-#line 16320 "texprof.w"
+#line 16322 "texprof.w"
 
 q= link(preamble);
 do{flush_list(u_part(q));flush_list(v_part(q));
 p= link(link(q));
 if(width(q)==null_flag)
 /*801:*/
-#line 16334 "texprof.w"
+#line 16336 "texprof.w"
 
 {width(q)= 0;r= link(q);s= glue_ptr(r);
 if(s!=zero_glue)
@@ -16591,11 +16593,11 @@ glue_ptr(r)= zero_glue;
 }
 
 /*:801*/
-#line 16325 "texprof.w"
+#line 16327 "texprof.w"
 ;
 if(info(q)!=end_span)
 /*802:*/
-#line 16349 "texprof.w"
+#line 16351 "texprof.w"
 
 {t= width(q)+width(glue_ptr(link(q)));
 r= info(q);s= end_span;info(s)= p;n= min_quarterword+1;
@@ -16614,7 +16616,7 @@ r= u;
 }
 
 /*:802*/
-#line 16328 "texprof.w"
+#line 16330 "texprof.w"
 ;
 type(q)= unset_node;span_count(q)= min_quarterword;height(q)= 0;
 depth(q)= 0;glue_order(q)= normal;glue_sign(q)= normal;
@@ -16622,10 +16624,10 @@ glue_stretch(q)= 0;glue_shrink(q)= 0;q= p;
 }while(!(q==null))
 
 /*:800*/
-#line 16288 "texprof.w"
+#line 16290 "texprof.w"
 ;
 /*803:*/
-#line 16372 "texprof.w"
+#line 16374 "texprof.w"
 
 save_ptr= save_ptr-2;pack_begin_line= -mode_line;
 if(mode==-vmode)
@@ -16644,17 +16646,17 @@ do{width(q)= height(q);height(q)= 0;q= link(link(q));
 pack_begin_line= 0
 
 /*:803*/
-#line 16290 "texprof.w"
+#line 16292 "texprof.w"
 ;
 /*804:*/
-#line 16389 "texprof.w"
+#line 16391 "texprof.w"
 
 q= link(head);s= head;
 while(q!=null)
 {if(!is_char_node(q))
 if(type(q)==unset_node)
 /*806:*/
-#line 16414 "texprof.w"
+#line 16416 "texprof.w"
 
 {if(mode==-vmode)
 {type(q)= hlist_node;width(q)= width(p);
@@ -16665,13 +16667,13 @@ glue_order(q)= glue_order(p);glue_sign(q)= glue_sign(p);
 glue_set(q)= glue_set(p);shift_amount(q)= o;
 r= link(list_ptr(q));s= link(list_ptr(p));
 do{/*807:*/
-#line 16433 "texprof.w"
+#line 16435 "texprof.w"
 
 n= span_count(r);t= width(s);w= t;u= hold_head;
 while(n> min_quarterword)
 {decr(n);
 /*808:*/
-#line 16450 "texprof.w"
+#line 16452 "texprof.w"
 
 s= link(s);v= glue_ptr(s);link(u)= new_glue(v);u= link(u);
 subtype(u)= tab_skip_code+1;t= t+width(v);
@@ -16690,12 +16692,12 @@ if(mode==-vmode)width(u)= width(s);else
 }
 
 /*:808*/
-#line 16438 "texprof.w"
+#line 16440 "texprof.w"
 ;
 }
 if(mode==-vmode)
 /*809:*/
-#line 16467 "texprof.w"
+#line 16469 "texprof.w"
 
 {height(r)= height(q);depth(r)= depth(q);
 if(t==width(r))
@@ -16718,10 +16720,10 @@ width(r)= w;type(r)= hlist_node;
 }
 
 /*:809*/
-#line 16442 "texprof.w"
+#line 16444 "texprof.w"
 
 else/*810:*/
-#line 16488 "texprof.w"
+#line 16490 "texprof.w"
 
 {width(r)= width(q);
 if(t==height(r))
@@ -16744,7 +16746,7 @@ height(r)= w;type(r)= vlist_node;
 }
 
 /*:810*/
-#line 16444 "texprof.w"
+#line 16446 "texprof.w"
 ;
 shift_amount(r)= 0;
 if(u!=hold_head)
@@ -16752,18 +16754,18 @@ if(u!=hold_head)
 }
 
 /*:807*/
-#line 16423 "texprof.w"
+#line 16425 "texprof.w"
 ;
 r= link(link(r));s= link(link(s));
 }while(!(r==null));
 }
 
 /*:806*/
-#line 16394 "texprof.w"
+#line 16396 "texprof.w"
 
 else if(type(q)==rule_node)
 /*805:*/
-#line 16401 "texprof.w"
+#line 16403 "texprof.w"
 
 {if(is_running(width(q)))width(q)= width(p);
 if(is_running(height(q)))height(q)= height(p);
@@ -16775,25 +16777,25 @@ shift_amount(q)= o;link(q)= r;link(s)= q;
 }
 
 /*:805*/
-#line 16397 "texprof.w"
+#line 16399 "texprof.w"
 ;
 s= q;q= link(q);
 }
 
 /*:804*/
-#line 16291 "texprof.w"
+#line 16293 "texprof.w"
 ;
 flush_node_list(p);pop_alignment();
 /*811:*/
-#line 16519 "texprof.w"
+#line 16521 "texprof.w"
 
 aux_save= aux;p= link(head);q= tail;pop_nest();
 if(mode==mmode)/*1205:*/
-#line 23304 "texprof.w"
+#line 23306 "texprof.w"
 
 {do_assignments();
 if(cur_cmd!=math_shift)/*1206:*/
-#line 23318 "texprof.w"
+#line 23320 "texprof.w"
 
 {print_err("Missing $$ inserted");
 
@@ -16803,10 +16805,10 @@ back_error();
 }
 
 /*:1206*/
-#line 23306 "texprof.w"
+#line 23308 "texprof.w"
 
 else/*1196:*/
-#line 23156 "texprof.w"
+#line 23158 "texprof.w"
 
 {get_x_token();
 if(cur_cmd!=math_shift)
@@ -16819,7 +16821,7 @@ back_error();
 }
 
 /*:1196*/
-#line 23307 "texprof.w"
+#line 23309 "texprof.w"
 ;
 pop_nest();
 tail_append(new_penalty(pre_display_penalty));
@@ -16832,7 +16834,7 @@ prev_depth= aux_save.sc;resume_after_display();
 }
 
 /*:1205*/
-#line 16521 "texprof.w"
+#line 16523 "texprof.w"
 
 else{aux= aux_save;link(tail)= p;
 if(p!=null)tail= q;
@@ -16840,11 +16842,11 @@ if(mode==vmode)build_page();
 }
 
 /*:811*/
-#line 16293 "texprof.w"
+#line 16295 "texprof.w"
 ;
 }
 /*784:*/
-#line 16035 "texprof.w"
+#line 16037 "texprof.w"
 
 static void align_peek(void)
 {
@@ -16864,13 +16866,13 @@ init_col();
 }
 
 /*:784*/
-#line 16295 "texprof.w"
+#line 16297 "texprof.w"
 
 
 /*:799*//*814:*/
-#line 16583 "texprof.w"
+#line 16585 "texprof.w"
 /*825:*/
-#line 16823 "texprof.w"
+#line 16825 "texprof.w"
 
 static pointer finite_shrink(pointer p)
 {pointer q;
@@ -16879,7 +16881,7 @@ if(no_shrink_error_yet)
 #ifdef STAT
 if(tracing_paragraphs> 0)end_diagnostic(true);
 #endif
-#line 16831 "texprof.w"
+#line 16833 "texprof.w"
 
 print_err("Infinite glue shrinkage found in a paragraph");
 
@@ -16892,7 +16894,7 @@ error();
 #ifdef STAT
 if(tracing_paragraphs> 0)begin_diagnostic();
 #endif
-#line 16843 "texprof.w"
+#line 16845 "texprof.w"
 
 }
 q= new_spec(p);shrink_order(q)= normal;
@@ -16900,7 +16902,7 @@ delete_glue_ref(p);return q;
 }
 
 /*:825*//*828:*/
-#line 16903 "texprof.w"
+#line 16905 "texprof.w"
 
 static void try_break(int pi,small_number break_type)
 {
@@ -16909,7 +16911,7 @@ pointer prev_r;
 halfword old_l;
 bool no_break_yet;
 /*829:*/
-#line 16931 "texprof.w"
+#line 16933 "texprof.w"
 
 pointer prev_prev_r;
 pointer s;
@@ -16927,27 +16929,27 @@ bool artificial_demerits;
 #ifdef STAT
 pointer save_link;
 #endif
-#line 16948 "texprof.w"
+#line 16950 "texprof.w"
  scaled shortfall;
 
 /*:829*/
-#line 16910 "texprof.w"
+#line 16912 "texprof.w"
 
 /*830:*/
-#line 16950 "texprof.w"
+#line 16952 "texprof.w"
 
 if(abs(pi)>=inf_penalty)
 if(pi> 0)goto end;
 else pi= eject_penalty
 
 /*:830*/
-#line 16911 "texprof.w"
+#line 16913 "texprof.w"
 ;
 no_break_yet= true;prev_r= active;old_l= 0;
 do_all_six(copy_to_cur_active);
 loop{resume:r= link(prev_r);
 /*831:*/
-#line 16960 "texprof.w"
+#line 16962 "texprof.w"
 
 
 if(type(r)==delta_node)
@@ -16956,10 +16958,10 @@ prev_prev_r= prev_r;prev_r= r;goto resume;
 }
 
 /*:831*/
-#line 16916 "texprof.w"
+#line 16918 "texprof.w"
 ;
 /*834:*/
-#line 17008 "texprof.w"
+#line 17010 "texprof.w"
 
 {l= line_number(r);
 if(l> old_l)
@@ -16967,22 +16969,22 @@ if(l> old_l)
 if((minimum_demerits<awful_bad)&&
 ((old_l!=easy_line)||(r==last_active)))
 /*835:*/
-#line 17026 "texprof.w"
+#line 17028 "texprof.w"
 
 {if(no_break_yet)/*836:*/
-#line 17062 "texprof.w"
+#line 17064 "texprof.w"
 
 {no_break_yet= false;do_all_six(set_break_width_to_background);
 s= cur_p;
 if(break_type> unhyphenated)if(cur_p!=null)
 /*839:*/
-#line 17105 "texprof.w"
+#line 17107 "texprof.w"
 
 {t= replace_count(cur_p);v= cur_p;s= post_break(cur_p);
 while(t> 0)
 {decr(t);v= link(v);
 /*840:*/
-#line 17123 "texprof.w"
+#line 17125 "texprof.w"
 
 if(is_char_node(v))
 {f= font(v);
@@ -17001,12 +17003,12 @@ default:confusion("disc1");
 }
 
 /*:840*/
-#line 17109 "texprof.w"
+#line 17111 "texprof.w"
 ;
 }
 while(s!=null)
 {/*841:*/
-#line 17140 "texprof.w"
+#line 17142 "texprof.w"
 
 if(is_char_node(s))
 {f= font(s);
@@ -17025,7 +17027,7 @@ default:confusion("disc2");
 }
 
 /*:841*/
-#line 17112 "texprof.w"
+#line 17114 "texprof.w"
 ;
 s= link(s);
 }
@@ -17035,13 +17037,13 @@ if(post_break(cur_p)==null)s= link(v);
 }
 
 /*:839*/
-#line 17066 "texprof.w"
+#line 17068 "texprof.w"
 ;
 while(s!=null)
 {if(is_char_node(s))goto done;
 switch(type(s)){
 case glue_node:/*837:*/
-#line 17081 "texprof.w"
+#line 17083 "texprof.w"
 
 {v= glue_ptr(s);break_width[1]= break_width[1]-width(v);
 break_width[2+stretch_order(v)]= break_width[2+stretch_order(v)]-stretch(v);
@@ -17049,7 +17051,7 @@ break_width[6]= break_width[6]-shrink(v);
 }
 
 /*:837*/
-#line 17070 "texprof.w"
+#line 17072 "texprof.w"
 break;
 case penalty_node:do_nothing;break;
 case math_node:break_width[1]= break_width[1]-width(s);break;
@@ -17062,10 +17064,10 @@ s= link(s);
 done:;}
 
 /*:836*/
-#line 17027 "texprof.w"
+#line 17029 "texprof.w"
 ;
 /*842:*/
-#line 17166 "texprof.w"
+#line 17168 "texprof.w"
 
 if(type(prev_r)==delta_node)
 {do_all_six(convert_to_break_width);
@@ -17080,7 +17082,7 @@ link(prev_r)= q;prev_prev_r= prev_r;prev_r= q;
 }
 
 /*:842*/
-#line 17028 "texprof.w"
+#line 17030 "texprof.w"
 ;
 if(abs(adj_demerits)>=awful_bad-minimum_demerits)
 minimum_demerits= awful_bad-1;
@@ -17088,14 +17090,14 @@ else minimum_demerits= minimum_demerits+abs(adj_demerits);
 for(fit_class= very_loose_fit;fit_class<=tight_fit;fit_class++)
 {if(minimal_demerits[fit_class]<=minimum_demerits)
 /*844:*/
-#line 17196 "texprof.w"
+#line 17198 "texprof.w"
 
 {q= get_node(passive_node_size);
 link(q)= passive;passive= q;cur_break(q)= cur_p;
 #ifdef STAT
 incr(pass_number);serial(q)= pass_number;
 #endif
-#line 17202 "texprof.w"
+#line 17204 "texprof.w"
 
 prev_break(q)= best_place[fit_class];
 q= get_node(active_node_size);break_node(q)= passive;
@@ -17106,7 +17108,7 @@ link(q)= r;link(prev_r)= q;prev_r= q;
 #ifdef STAT
 if(tracing_paragraphs> 0)
 /*845:*/
-#line 17216 "texprof.w"
+#line 17218 "texprof.w"
 
 {print_nl("@@");print_int(serial(passive));
 
@@ -17120,21 +17122,21 @@ else print_int(serial(prev_break(passive)));
 }
 
 /*:845*/
-#line 17211 "texprof.w"
+#line 17213 "texprof.w"
 ;
 #endif
-#line 17213 "texprof.w"
+#line 17215 "texprof.w"
 
 }
 
 /*:844*/
-#line 17034 "texprof.w"
+#line 17036 "texprof.w"
 ;
 minimal_demerits[fit_class]= awful_bad;
 }
 minimum_demerits= awful_bad;
 /*843:*/
-#line 17185 "texprof.w"
+#line 17187 "texprof.w"
 
 if(r!=last_active)
 {q= get_node(delta_node_size);link(q)= r;type(q)= delta_node;
@@ -17144,16 +17146,16 @@ link(prev_r)= q;prev_prev_r= prev_r;prev_r= q;
 }
 
 /*:843*/
-#line 17038 "texprof.w"
+#line 17040 "texprof.w"
 ;
 }
 
 /*:835*/
-#line 17014 "texprof.w"
+#line 17016 "texprof.w"
 ;
 if(r==last_active)goto end;
 /*849:*/
-#line 17292 "texprof.w"
+#line 17294 "texprof.w"
 
 if(l> easy_line)
 {line_width= second_width;old_l= max_halfword-1;
@@ -17165,23 +17167,23 @@ else line_width= mem[par_shape_ptr+2*l].sc;
 }
 
 /*:849*/
-#line 17016 "texprof.w"
+#line 17018 "texprof.w"
 ;
 }
 }
 
 /*:834*/
-#line 16919 "texprof.w"
+#line 16921 "texprof.w"
 ;
 /*850:*/
-#line 17312 "texprof.w"
+#line 17314 "texprof.w"
 
 {artificial_demerits= false;
 
 shortfall= line_width-cur_active_width[1];
 if(shortfall> 0)
 /*851:*/
-#line 17342 "texprof.w"
+#line 17344 "texprof.w"
 
 if((cur_active_width[3]!=0)||(cur_active_width[4]!=0)||
 (cur_active_width[5]!=0))
@@ -17199,10 +17201,10 @@ done1:;
 }
 
 /*:851*/
-#line 17318 "texprof.w"
+#line 17320 "texprof.w"
 
 else/*852:*/
-#line 17361 "texprof.w"
+#line 17363 "texprof.w"
 
 {if(-shortfall> cur_active_width[6])b= inf_bad+1;
 else b= badness(-shortfall,cur_active_width[6]);
@@ -17210,11 +17212,11 @@ if(b> 12)fit_class= tight_fit;else fit_class= decent_fit;
 }
 
 /*:852*/
-#line 17320 "texprof.w"
+#line 17322 "texprof.w"
 ;
 if((b> inf_bad)||(pi==eject_penalty))
 /*853:*/
-#line 17376 "texprof.w"
+#line 17378 "texprof.w"
 
 {if(final_pass&&(minimum_demerits==awful_bad)&&
 (link(r)==last_active)&&
@@ -17225,18 +17227,18 @@ node_r_stays_active= false;
 }
 
 /*:853*/
-#line 17323 "texprof.w"
+#line 17325 "texprof.w"
 
 else{prev_r= r;
 if(b> threshold)goto resume;
 node_r_stays_active= true;
 }
 /*854:*/
-#line 17392 "texprof.w"
+#line 17394 "texprof.w"
 
 if(artificial_demerits)d= 0;
 else/*858:*/
-#line 17453 "texprof.w"
+#line 17455 "texprof.w"
 
 {d= line_penalty+b;
 if(abs(d)>=10000)d= 100000000;else d= d*d;
@@ -17250,16 +17252,16 @@ if(abs(fit_class-fitness(r))> 1)d= d+adj_demerits;
 }
 
 /*:858*/
-#line 17394 "texprof.w"
+#line 17396 "texprof.w"
 ;
 #ifdef STAT
 if(tracing_paragraphs> 0)
 /*855:*/
-#line 17408 "texprof.w"
+#line 17410 "texprof.w"
 
 {if(printed_node!=cur_p)
 /*856:*/
-#line 17430 "texprof.w"
+#line 17432 "texprof.w"
 
 {print_nl("");
 if(cur_p==null)short_display(link(printed_node));
@@ -17271,7 +17273,7 @@ printed_node= cur_p;
 }
 
 /*:856*/
-#line 17410 "texprof.w"
+#line 17412 "texprof.w"
 ;
 print_nl("@");
 
@@ -17293,10 +17295,10 @@ if(artificial_demerits)print_char('*');else print_int(d);
 }
 
 /*:855*/
-#line 17397 "texprof.w"
+#line 17399 "texprof.w"
 ;
 #endif
-#line 17399 "texprof.w"
+#line 17401 "texprof.w"
 
 d= d+total_demerits(r);
 
@@ -17307,15 +17309,15 @@ if(d<minimum_demerits)minimum_demerits= d;
 }
 
 /*:854*/
-#line 17328 "texprof.w"
+#line 17330 "texprof.w"
 ;
 if(node_r_stays_active)goto resume;
 deactivate:/*859:*/
-#line 17475 "texprof.w"
+#line 17477 "texprof.w"
 
 link(prev_r)= link(r);free_node(r,active_node_size);
 if(prev_r==active)/*860:*/
-#line 17500 "texprof.w"
+#line 17502 "texprof.w"
 
 {r= link(active);
 if(type(r)==delta_node)
@@ -17326,7 +17328,7 @@ link(active)= link(r);free_node(r,delta_node_size);
 }
 
 /*:860*/
-#line 17478 "texprof.w"
+#line 17480 "texprof.w"
 
 else if(type(prev_r)==delta_node)
 {r= link(prev_r);
@@ -17343,18 +17345,18 @@ link(prev_r)= link(r);free_node(r,delta_node_size);
 }
 
 /*:859*/
-#line 17330 "texprof.w"
+#line 17332 "texprof.w"
 ;
 }
 
 /*:850*/
-#line 16922 "texprof.w"
+#line 16924 "texprof.w"
 ;
 }
 end:;
 #ifdef STAT
 /*857:*/
-#line 17445 "texprof.w"
+#line 17447 "texprof.w"
 
 if(cur_p==printed_node)if(cur_p!=null)if(type(cur_p)==disc_node)
 {t= replace_count(cur_p);
@@ -17364,15 +17366,15 @@ while(t> 0)
 }
 
 /*:857*/
-#line 16926 "texprof.w"
+#line 16928 "texprof.w"
 ;
 #endif
-#line 16928 "texprof.w"
+#line 16930 "texprof.w"
 
 }
 
 /*:828*//*876:*/
-#line 17829 "texprof.w"
+#line 17831 "texprof.w"
 
 static void post_line_break(int final_widow_penalty)
 {
@@ -17385,21 +17387,21 @@ quarterword t;
 int pen;
 halfword cur_line;
 /*877:*/
-#line 17861 "texprof.w"
+#line 17863 "texprof.w"
 
 q= break_node(best_bet);cur_p= null;
 do{r= q;q= prev_break(q);next_break(r)= cur_p;cur_p= r;
 }while(!(q==null))
 
 /*:877*/
-#line 17841 "texprof.w"
+#line 17843 "texprof.w"
 ;
 cur_line= prev_graf+1;
 do{/*879:*/
-#line 17898 "texprof.w"
+#line 17900 "texprof.w"
 
 /*880:*/
-#line 17910 "texprof.w"
+#line 17912 "texprof.w"
 
 q= cur_break(cur_p);disc_break= false;post_disc_break= false;
 if(q!=null)
@@ -17411,11 +17413,11 @@ goto done;
 }
 else{if(type(q)==disc_node)
 /*881:*/
-#line 17929 "texprof.w"
+#line 17931 "texprof.w"
 
 {t= replace_count(q);
 /*882:*/
-#line 17938 "texprof.w"
+#line 17940 "texprof.w"
 
 if(t==0)r= link(q);
 else{r= q;
@@ -17428,10 +17430,10 @@ flush_node_list(link(q));replace_count(q)= 0;
 }
 
 /*:882*/
-#line 17932 "texprof.w"
+#line 17934 "texprof.w"
 ;
 if(post_break(q)!=null)/*883:*/
-#line 17952 "texprof.w"
+#line 17954 "texprof.w"
 
 {s= post_break(q);
 while(link(s)!=null)s= link(s);
@@ -17439,10 +17441,10 @@ link(s)= r;r= post_break(q);post_break(q)= null;post_disc_break= true;
 }
 
 /*:883*/
-#line 17933 "texprof.w"
+#line 17935 "texprof.w"
 ;
 if(pre_break(q)!=null)/*884:*/
-#line 17961 "texprof.w"
+#line 17963 "texprof.w"
 
 {s= pre_break(q);link(q)= s;
 while(link(s)!=null)s= link(s);
@@ -17450,13 +17452,13 @@ pre_break(q)= null;q= s;
 }
 
 /*:884*/
-#line 17934 "texprof.w"
+#line 17936 "texprof.w"
 ;
 link(q)= r;disc_break= true;
 }
 
 /*:881*/
-#line 17920 "texprof.w"
+#line 17922 "texprof.w"
 
 else if((type(q)==math_node)||(type(q)==kern_node))width(q)= 0;
 }
@@ -17464,20 +17466,20 @@ else{q= temp_head;
 while(link(q)!=null)q= link(q);
 }
 /*885:*/
-#line 17967 "texprof.w"
+#line 17969 "texprof.w"
 
 r= new_param_glue(right_skip_code);link(r)= link(q);link(q)= r;q= r
 
 /*:885*/
-#line 17926 "texprof.w"
+#line 17928 "texprof.w"
 ;
 done:
 
 /*:880*/
-#line 17900 "texprof.w"
+#line 17902 "texprof.w"
 ;
 /*886:*/
-#line 17974 "texprof.w"
+#line 17976 "texprof.w"
 
 r= link(q);link(q)= null;q= link(temp_head);link(temp_head)= r;
 if(left_skip!=zero_glue)
@@ -17486,10 +17488,10 @@ link(r)= q;q= r;
 }
 
 /*:886*/
-#line 17901 "texprof.w"
+#line 17903 "texprof.w"
 ;
 /*888:*/
-#line 17993 "texprof.w"
+#line 17995 "texprof.w"
 
 if(cur_line> last_special_line)
 {cur_width= second_width;cur_indent= second_indent;
@@ -17504,10 +17506,10 @@ adjust_tail= adjust_head;just_box= hpack(q,cur_width,exactly);
 shift_amount(just_box)= cur_indent
 
 /*:888*/
-#line 17902 "texprof.w"
+#line 17904 "texprof.w"
 ;
 /*887:*/
-#line 17981 "texprof.w"
+#line 17983 "texprof.w"
 
 append_to_vlist(just_box);
 if(adjust_head!=adjust_tail)
@@ -17516,10 +17518,10 @@ if(adjust_head!=adjust_tail)
 adjust_tail= null
 
 /*:887*/
-#line 17904 "texprof.w"
+#line 17906 "texprof.w"
 ;
 /*889:*/
-#line 18013 "texprof.w"
+#line 18015 "texprof.w"
 
 if(cur_line+1!=best_line)
 {pen= inter_line_penalty;
@@ -17533,16 +17535,16 @@ link(tail)= r;tail= r;
 }
 
 /*:889*/
-#line 17905 "texprof.w"
+#line 17907 "texprof.w"
 
 
 /*:879*/
-#line 17844 "texprof.w"
+#line 17846 "texprof.w"
 ;
 incr(cur_line);cur_p= next_break(cur_p);
 if(cur_p!=null)if(!post_disc_break)
 /*878:*/
-#line 17873 "texprof.w"
+#line 17875 "texprof.w"
 
 {r= temp_head;
 loop{q= link(r);
@@ -17561,7 +17563,7 @@ link(temp_head)= q;
 }
 
 /*:878*/
-#line 17847 "texprof.w"
+#line 17849 "texprof.w"
 ;
 }while(!(cur_p==null));
 if((cur_line!=best_line)||(link(temp_head)!=null))
@@ -17571,10 +17573,10 @@ prev_graf= best_line-1;
 }
 
 /*:876*//*894:*/
-#line 18128 "texprof.w"
+#line 18130 "texprof.w"
 
 /*905:*/
-#line 18362 "texprof.w"
+#line 18364 "texprof.w"
 
 static
 small_number reconstitute(small_number j,small_number n,halfword bchar,halfword hchar)
@@ -17589,7 +17591,7 @@ font_index k;
 hyphen_passed= 0;t= hold_head;w= 0;link(hold_head)= null;
 
 /*907:*/
-#line 18414 "texprof.w"
+#line 18416 "texprof.w"
 
 cur_l= qi(hu[j]);cur_q= t;
 if(j==0)
@@ -17603,10 +17605,10 @@ else if(cur_l<non_char)append_charnode_to_t(cur_l);
 lig_stack= null;set_cur_r
 
 /*:907*/
-#line 18375 "texprof.w"
+#line 18377 "texprof.w"
 ;
 resume:/*908:*/
-#line 18430 "texprof.w"
+#line 18432 "texprof.w"
 
 if(cur_l==non_char)
 {k= bchar_label[hf];
@@ -17630,7 +17632,7 @@ else{if(hchar<non_char)if(odd(hyf[j]))
 }
 if(op_byte(q)<kern_flag)
 /*910:*/
-#line 18493 "texprof.w"
+#line 18495 "texprof.w"
 
 {if(cur_l==non_char)lft_hit= true;
 if(j==n)if(lig_stack==null)rt_hit= true;
@@ -17666,7 +17668,7 @@ goto resume;
 }
 
 /*:910*/
-#line 18454 "texprof.w"
+#line 18456 "texprof.w"
 ;
 w= char_kern(hf,q);goto done;
 }
@@ -17679,10 +17681,10 @@ k= k+qo(skip_byte(q))+1;q= font_info[k].qqqq;
 done:
 
 /*:908*/
-#line 18377 "texprof.w"
+#line 18379 "texprof.w"
 ;
 /*909:*/
-#line 18483 "texprof.w"
+#line 18485 "texprof.w"
 
 wrap_lig(rt_hit);
 if(w!=0)
@@ -17694,25 +17696,25 @@ pop_lig_stack;goto resume;
 }
 
 /*:909*/
-#line 18379 "texprof.w"
+#line 18381 "texprof.w"
 ;
 return j;
 }
 
 /*:905*/
-#line 18129 "texprof.w"
+#line 18131 "texprof.w"
 
 static void hyphenate(void)
 {
 /*900:*/
-#line 18241 "texprof.w"
+#line 18243 "texprof.w"
 
 int i,j,l;
 pointer q,r,s;
 halfword bchar;
 
 /*:900*//*911:*/
-#line 18536 "texprof.w"
+#line 18538 "texprof.w"
 
 pointer major_tail,minor_tail;
 
@@ -17722,32 +17724,32 @@ int r_count;
 pointer hyf_node;
 
 /*:911*//*921:*/
-#line 18715 "texprof.w"
+#line 18717 "texprof.w"
 
 trie_pointer z;
 int v;
 
 /*:921*//*928:*/
-#line 18787 "texprof.w"
+#line 18789 "texprof.w"
 
 hyph_pointer h;
 str_number k;
 pool_pointer u;
 
 /*:928*/
-#line 18132 "texprof.w"
+#line 18134 "texprof.w"
 
 /*922:*/
-#line 18724 "texprof.w"
+#line 18726 "texprof.w"
 
 for(j= 0;j<=hn;j++)hyf[j]= 0;
 /*929:*/
-#line 18796 "texprof.w"
+#line 18798 "texprof.w"
 
 h= hc[1];incr(hn);hc[hn]= cur_lang;
 for(j= 2;j<=hn;j++)h= (h+h+hc[j])%hyph_size;
 loop{/*930:*/
-#line 18806 "texprof.w"
+#line 18808 "texprof.w"
 
 k= hyph_word[h];if(k==0)goto not_found;
 if(length(k)<hn)goto not_found;
@@ -17758,7 +17760,7 @@ if(so(str_pool[u])> hc[j])goto done;
 incr(j);incr(u);
 }while(!(j> hn));
 /*931:*/
-#line 18820 "texprof.w"
+#line 18822 "texprof.w"
 
 s= hyph_list[h];
 while(s!=null)
@@ -17766,21 +17768,21 @@ while(s!=null)
 }
 
 /*:931*/
-#line 18815 "texprof.w"
+#line 18817 "texprof.w"
 ;
 decr(hn);goto found;
 }
 done:
 
 /*:930*/
-#line 18801 "texprof.w"
+#line 18803 "texprof.w"
 ;
 if(h> 0)decr(h);else h= hyph_size;
 }
 not_found:decr(hn)
 
 /*:929*/
-#line 18727 "texprof.w"
+#line 18729 "texprof.w"
 ;
 if(trie_char(cur_lang+1)!=qi(cur_lang))return;
 hc[0]= 0;hc[hn+1]= 0;hc[hn+2]= 256;
@@ -17789,7 +17791,7 @@ for(j= 0;j<=hn-r_hyf+1;j++)
 while(hc[l]==qo(trie_char(z)))
 {if(trie_op(z)!=min_quarterword)
 /*923:*/
-#line 18741 "texprof.w"
+#line 18743 "texprof.w"
 
 {v= trie_op(z);
 do{v= v+op_start[cur_lang];i= l-hyf_distance[v];
@@ -17799,7 +17801,7 @@ v= hyf_next[v];
 }
 
 /*:923*/
-#line 18734 "texprof.w"
+#line 18736 "texprof.w"
 ;
 incr(l);z= trie_link(z)+hc[l];
 }
@@ -17808,20 +17810,20 @@ found:for(j= 0;j<=l_hyf-1;j++)hyf[j]= 0;
 for(j= 0;j<=r_hyf-1;j++)hyf[hn-j]= 0
 
 /*:922*/
-#line 18133 "texprof.w"
+#line 18135 "texprof.w"
 ;
 /*901:*/
-#line 18253 "texprof.w"
+#line 18255 "texprof.w"
 
 for(j= l_hyf;j<=hn-r_hyf;j++)if(odd(hyf[j]))goto found1;
 return;
 found1:
 
 /*:901*/
-#line 18134 "texprof.w"
+#line 18136 "texprof.w"
 ;
 /*902:*/
-#line 18269 "texprof.w"
+#line 18271 "texprof.w"
 
 q= link(hb);link(hb)= null;r= link(ha);link(ha)= null;bchar= hyf_bchar;
 if(is_char_node(ha))
@@ -17848,7 +17850,7 @@ j= 0;goto common_ending;
 found2:s= ha;j= 0;hu[0]= 256;init_lig= false;init_list= null;
 common_ending:flush_node_list(r);
 /*912:*/
-#line 18546 "texprof.w"
+#line 18548 "texprof.w"
 
 do{l= j;j= reconstitute(j,hn,bchar,qi(hyf_char))+1;
 if(hyphen_passed==0)
@@ -17860,7 +17862,7 @@ if(odd(hyf[j-1]))
 }
 if(hyphen_passed> 0)
 /*913:*/
-#line 18571 "texprof.w"
+#line 18573 "texprof.w"
 
 do{r= get_node(small_node_size);
 link(r)= link(hold_head);type(r)= disc_node;
@@ -17868,7 +17870,7 @@ major_tail= r;r_count= 0;
 while(link(major_tail)> null)advance_major_tail;
 i= hyphen_passed;hyf[i]= 0;
 /*914:*/
-#line 18588 "texprof.w"
+#line 18590 "texprof.w"
 
 minor_tail= null;pre_break(r)= null;hyf_node= new_character(hf,hyf_char);
 if(hyf_node!=null)
@@ -17889,10 +17891,10 @@ l= i;decr(i);
 }
 
 /*:914*/
-#line 18577 "texprof.w"
+#line 18579 "texprof.w"
 ;
 /*915:*/
-#line 18609 "texprof.w"
+#line 18611 "texprof.w"
 
 minor_tail= null;post_break(r)= null;c_loc= 0;
 if(bchar_label[hf]!=non_address)
@@ -17912,7 +17914,7 @@ while(link(minor_tail)> null)minor_tail= link(minor_tail);
 }while(!(l>=j));
 while(l> j)
 /*916:*/
-#line 18630 "texprof.w"
+#line 18632 "texprof.w"
 
 {j= reconstitute(j,hn,bchar,non_char)+1;
 link(major_tail)= link(hold_head);
@@ -17920,15 +17922,15 @@ while(link(major_tail)> null)advance_major_tail;
 }
 
 /*:916*/
-#line 18627 "texprof.w"
+#line 18629 "texprof.w"
 ;
 }
 
 /*:915*/
-#line 18579 "texprof.w"
+#line 18581 "texprof.w"
 ;
 /*917:*/
-#line 18640 "texprof.w"
+#line 18642 "texprof.w"
 
 if(r_count> 127)
 {link(s)= link(r);link(r)= null;flush_node_list(r);
@@ -17938,33 +17940,33 @@ else{link(s)= r;replace_count(r)= r_count;
 s= major_tail
 
 /*:917*/
-#line 18581 "texprof.w"
+#line 18583 "texprof.w"
 ;
 hyphen_passed= j-1;link(hold_head)= null;
 }while(!(!odd(hyf[j-1])))
 
 /*:913*/
-#line 18557 "texprof.w"
+#line 18559 "texprof.w"
 ;
 }while(!(j> hn));
 link(s)= q
 
 /*:912*/
-#line 18294 "texprof.w"
+#line 18296 "texprof.w"
 ;
 flush_list(init_list)
 
 /*:902*/
-#line 18136 "texprof.w"
+#line 18138 "texprof.w"
 ;
 }
 
 /*:894*//*941:*/
-#line 18962 "texprof.w"
+#line 18964 "texprof.w"
 
 #ifdef INIT
 /*943:*/
-#line 19012 "texprof.w"
+#line 19014 "texprof.w"
 
 static quarterword new_trie_op(small_number d,small_number n,quarterword v)
 {
@@ -17996,7 +17998,7 @@ if(h> -trie_op_size)decr(h);else h= trie_op_size;
 }
 
 /*:943*//*947:*/
-#line 19114 "texprof.w"
+#line 19116 "texprof.w"
 
 static trie_pointer trie_node(trie_pointer p)
 
@@ -18018,7 +18020,7 @@ if(h> 0)decr(h);else h= trie_size;
 }
 
 /*:947*//*948:*/
-#line 19140 "texprof.w"
+#line 19142 "texprof.w"
 
 static trie_pointer compress_trie(trie_pointer p)
 {if(p==0)return 0;
@@ -18029,7 +18031,7 @@ return trie_node(p);
 }
 
 /*:948*//*952:*/
-#line 19213 "texprof.w"
+#line 19215 "texprof.w"
 
 static void first_fit(trie_pointer p)
 {
@@ -18043,7 +18045,7 @@ c= so(trie_c[p]);
 z= trie_min[c];
 loop{h= z-c;
 /*953:*/
-#line 19238 "texprof.w"
+#line 19240 "texprof.w"
 
 if(trie_max<h+256)
 {if(trie_size<=h+256)overflow("pattern memory",trie_size);
@@ -18054,11 +18056,11 @@ trie_link(trie_max)= trie_max+1;trie_back(trie_max)= trie_max-1;
 }
 
 /*:953*/
-#line 19225 "texprof.w"
+#line 19227 "texprof.w"
 ;
 if(trie_taken[h])goto not_found;
 /*954:*/
-#line 19247 "texprof.w"
+#line 19249 "texprof.w"
 
 q= trie_r[p];
 while(q> 0)
@@ -18068,12 +18070,12 @@ q= trie_r[q];
 goto found
 
 /*:954*/
-#line 19228 "texprof.w"
+#line 19230 "texprof.w"
 ;
 not_found:z= trie_link(z);
 }
 found:/*955:*/
-#line 19255 "texprof.w"
+#line 19257 "texprof.w"
 
 trie_taken[h]= true;trie_ref[p]= h;q= p;
 do{z= h+so(trie_c[q]);l= trie_back(z);r= trie_link(z);
@@ -18087,12 +18089,12 @@ q= trie_r[q];
 }while(!(q==0))
 
 /*:955*/
-#line 19231 "texprof.w"
+#line 19233 "texprof.w"
 ;
 }
 
 /*:952*//*956:*/
-#line 19270 "texprof.w"
+#line 19272 "texprof.w"
 
 static void trie_pack(trie_pointer p)
 {trie_pointer q;
@@ -18105,7 +18107,7 @@ p= trie_r[p];
 }
 
 /*:956*//*958:*/
-#line 19307 "texprof.w"
+#line 19309 "texprof.w"
 
 static void trie_fix(trie_pointer p)
 {trie_pointer q;
@@ -18120,7 +18122,7 @@ p= trie_r[p];
 }
 
 /*:958*//*959:*/
-#line 19324 "texprof.w"
+#line 19326 "texprof.w"
 
 static void new_patterns(void)
 {
@@ -18134,13 +18136,13 @@ int c;
 if(trie_not_ready)
 {set_cur_lang;scan_left_brace();
 /*960:*/
-#line 19351 "texprof.w"
+#line 19353 "texprof.w"
 
 k= 0;hyf[0]= 0;digit_sensed= false;
 loop{get_x_token();
 switch(cur_cmd){
 case letter:case other_char:/*961:*/
-#line 19369 "texprof.w"
+#line 19371 "texprof.w"
 
 if(digit_sensed||(cur_chr<'0')||(cur_chr> '9'))
 {if(cur_chr=='.')cur_chr= 0;
@@ -18160,14 +18162,14 @@ else if(k<63)
 }
 
 /*:961*/
-#line 19355 "texprof.w"
+#line 19357 "texprof.w"
 break;
 case spacer:case right_brace:{if(k> 0)
 /*962:*/
-#line 19391 "texprof.w"
+#line 19393 "texprof.w"
 
 {/*964:*/
-#line 19419 "texprof.w"
+#line 19421 "texprof.w"
 
 if(hc[1]==0)hyf[0]= 0;
 if(hc[k]==0)hyf[k]= 0;
@@ -18178,7 +18180,7 @@ if(l> 0)decr(l);else goto done1;
 done1:
 
 /*:964*/
-#line 19392 "texprof.w"
+#line 19394 "texprof.w"
 ;
 q= 0;hc[0]= cur_lang;
 while(l<=k)
@@ -18188,7 +18190,7 @@ while((p> 0)&&(c> so(trie_c[p])))
 }
 if((p==0)||(c<so(trie_c[p])))
 /*963:*/
-#line 19411 "texprof.w"
+#line 19413 "texprof.w"
 
 {if(trie_ptr==trie_size)overflow("pattern memory",trie_size);
 
@@ -18198,7 +18200,7 @@ trie_c[p]= si(c);trie_o[p]= min_quarterword;
 }
 
 /*:963*/
-#line 19400 "texprof.w"
+#line 19402 "texprof.w"
 ;
 q= p;
 }
@@ -18211,7 +18213,7 @@ trie_o[q]= v;
 }
 
 /*:962*/
-#line 19357 "texprof.w"
+#line 19359 "texprof.w"
 ;
 if(cur_cmd==right_brace)goto done;
 k= 0;hyf[0]= 0;digit_sensed= false;
@@ -18225,18 +18227,18 @@ help1("(See Appendix H.)");error();
 done:
 
 /*:960*/
-#line 19337 "texprof.w"
+#line 19339 "texprof.w"
 ;
 if(saving_hyph_codes> 0)
 /*1525:*/
-#line 28015 "texprof.w"
+#line 28021 "texprof.w"
 
 {c= cur_lang;first_child= false;p= 0;
 do{q= p;p= trie_r[q];
 }while(!((p==0)||(c<=so(trie_c[p]))));
 if((p==0)||(c<so(trie_c[p])))
 /*963:*/
-#line 19411 "texprof.w"
+#line 19413 "texprof.w"
 
 {if(trie_ptr==trie_size)overflow("pattern memory",trie_size);
 
@@ -18246,18 +18248,18 @@ trie_c[p]= si(c);trie_o[p]= min_quarterword;
 }
 
 /*:963*/
-#line 28020 "texprof.w"
+#line 28026 "texprof.w"
 ;
 q= p;
 /*1526:*/
-#line 28030 "texprof.w"
+#line 28036 "texprof.w"
 
 p= trie_l[q];first_child= true;
 for(c= 0;c<=255;c++)
 if((lc_code(c)> 0)||((c==255)&&first_child))
 {if(p==0)
 /*963:*/
-#line 19411 "texprof.w"
+#line 19413 "texprof.w"
 
 {if(trie_ptr==trie_size)overflow("pattern memory",trie_size);
 
@@ -18267,7 +18269,7 @@ trie_c[p]= si(c);trie_o[p]= min_quarterword;
 }
 
 /*:963*/
-#line 28036 "texprof.w"
+#line 28042 "texprof.w"
 
 else trie_c[p]= si(c);
 trie_o[p]= qi(lc_code(c));
@@ -18276,12 +18278,12 @@ q= p;p= trie_r[q];first_child= false;
 if(first_child)trie_l[q]= 0;else trie_r[q]= 0
 
 /*:1526*/
-#line 28022 "texprof.w"
+#line 28028 "texprof.w"
 ;
 }
 
 /*:1525*/
-#line 19339 "texprof.w"
+#line 19341 "texprof.w"
 ;
 }
 else{print_err("Too late for ");print_esc("patterns");
@@ -18291,7 +18293,7 @@ error();link(garbage)= scan_toks(false,false);flush_list(def_ref);
 }
 
 /*:959*//*965:*/
-#line 19435 "texprof.w"
+#line 19437 "texprof.w"
 
 static void init_trie(void)
 {int p;
@@ -18299,27 +18301,27 @@ int j,k,t;
 int r,s;
 two_halves h;
 /*1761:*/
-#line 31208 "texprof.w"
+#line 31214 "texprof.w"
 
 int tmp_cmd;
 int tmp_file_line;
 int tmp_depth;
 
 /*:1761*/
-#line 19441 "texprof.w"
+#line 19443 "texprof.w"
 
 /*1764:*/
-#line 31234 "texprof.w"
+#line 31240 "texprof.w"
 
 if(profile_on)
 {/*1756:*/
-#line 31125 "texprof.w"
+#line 31131 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1774:*/
-#line 31471 "texprof.w"
+#line 31477 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -18333,14 +18335,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31484 "texprof.w"
+#line 31490 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1774*/
-#line 31129 "texprof.w"
+#line 31135 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -18352,52 +18354,52 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31140 "texprof.w"
+#line 31146 "texprof.w"
  cmd_count++;
 /*1751:*/
-#line 31013 "texprof.w"
+#line 31019 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31017 "texprof.w"
+#line 31023 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31019 "texprof.w"
+#line 31025 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31021 "texprof.w"
+#line 31027 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31023 "texprof.w"
+#line 31029 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31025 "texprof.w"
+#line 31031 "texprof.w"
 
 /*:1751*/
-#line 31141 "texprof.w"
+#line 31147 "texprof.w"
 
 /*1752:*/
-#line 31030 "texprof.w"
+#line 31036 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31035 "texprof.w"
+#line 31041 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1752*/
-#line 31142 "texprof.w"
+#line 31148 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1756*/
-#line 31236 "texprof.w"
+#line 31242 "texprof.w"
 
 tmp_file_line= prof_file_line;
 tmp_cmd= prof_cmd;
@@ -18408,13 +18410,13 @@ prof_cmd= system_cmd;
 
 
 /*:1764*/
-#line 19442 "texprof.w"
+#line 19444 "texprof.w"
 
 /*951:*/
-#line 19197 "texprof.w"
+#line 19199 "texprof.w"
 
 /*944:*/
-#line 19046 "texprof.w"
+#line 19048 "texprof.w"
 
 op_start[0]= -min_quarterword;
 for(j= 1;j<=255;j++)op_start[j]= op_start[j-1]+qo(trie_used[j-1]);
@@ -18429,7 +18431,7 @@ trie_op_hash[j]= trie_op_hash[k];trie_op_hash[k]= k;
 }
 
 /*:944*/
-#line 19198 "texprof.w"
+#line 19200 "texprof.w"
 ;
 for(p= 0;p<=trie_size;p++)trie_hash[p]= 0;
 hyph_root= compress_trie(hyph_root);
@@ -18439,13 +18441,13 @@ for(p= 0;p<=255;p++)trie_min[p]= p+1;
 trie_link(0)= 1;trie_max= 0
 
 /*:951*/
-#line 19443 "texprof.w"
+#line 19445 "texprof.w"
 ;
 if(trie_root!=0)
 {first_fit(trie_root);trie_pack(trie_root);
 }
 if(hyph_root!=0)/*1527:*/
-#line 28046 "texprof.w"
+#line 28052 "texprof.w"
 
 {if(trie_root==0)for(p= 0;p<=255;p++)trie_min[p]= p+2;
 first_fit(hyph_root);trie_pack(hyph_root);
@@ -18453,10 +18455,10 @@ hyph_start= trie_ref[hyph_root];
 }
 
 /*:1527*/
-#line 19447 "texprof.w"
+#line 19449 "texprof.w"
 ;
 /*957:*/
-#line 19286 "texprof.w"
+#line 19288 "texprof.w"
 
 h.rh= 0;h.b0= min_quarterword;h.b1= min_quarterword;
 
@@ -18473,21 +18475,21 @@ do{s= trie_link(r);trie[r]= h;r= s;
 trie_char(0)= qi('?');
 
 /*:957*/
-#line 19448 "texprof.w"
+#line 19450 "texprof.w"
 ;
 trie_not_ready= false;
 /*1763:*/
-#line 31224 "texprof.w"
+#line 31230 "texprof.w"
 
 if(profile_on)
 {/*1756:*/
-#line 31125 "texprof.w"
+#line 31131 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1774:*/
-#line 31471 "texprof.w"
+#line 31477 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -18501,14 +18503,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31484 "texprof.w"
+#line 31490 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1774*/
-#line 31129 "texprof.w"
+#line 31135 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -18520,52 +18522,52 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31140 "texprof.w"
+#line 31146 "texprof.w"
  cmd_count++;
 /*1751:*/
-#line 31013 "texprof.w"
+#line 31019 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31017 "texprof.w"
+#line 31023 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31019 "texprof.w"
+#line 31025 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31021 "texprof.w"
+#line 31027 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31023 "texprof.w"
+#line 31029 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31025 "texprof.w"
+#line 31031 "texprof.w"
 
 /*:1751*/
-#line 31141 "texprof.w"
+#line 31147 "texprof.w"
 
 /*1752:*/
-#line 31030 "texprof.w"
+#line 31036 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31035 "texprof.w"
+#line 31041 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1752*/
-#line 31142 "texprof.w"
+#line 31148 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1756*/
-#line 31226 "texprof.w"
+#line 31232 "texprof.w"
 
 prof_file_line= tmp_file_line;
 prof_cmd= tmp_cmd;
@@ -18575,23 +18577,23 @@ prof_depth= tmp_depth;
 
 
 /*:1763*/
-#line 19450 "texprof.w"
+#line 19452 "texprof.w"
 
 }
 
 /*:965*/
-#line 18964 "texprof.w"
-
-#endif
 #line 18966 "texprof.w"
 
+#endif
+#line 18968 "texprof.w"
+
 /*:941*/
-#line 16583 "texprof.w"
+#line 16585 "texprof.w"
 
 static void line_break(int final_widow_penalty)
 {
 /*861:*/
-#line 17529 "texprof.w"
+#line 17531 "texprof.w"
 
 bool auto_breaking;
 pointer prev_p;
@@ -18599,36 +18601,36 @@ pointer q,r,s,prev_s;
 internal_font_number f;
 
 /*:861*//*892:*/
-#line 18109 "texprof.w"
+#line 18111 "texprof.w"
 
 small_number j;
 int c;
 
 /*:892*/
-#line 16586 "texprof.w"
+#line 16588 "texprof.w"
 
 /*1761:*/
-#line 31208 "texprof.w"
+#line 31214 "texprof.w"
 
 int tmp_cmd;
 int tmp_file_line;
 int tmp_depth;
 
 /*:1761*/
-#line 16587 "texprof.w"
+#line 16589 "texprof.w"
 
 /*1762:*/
-#line 31213 "texprof.w"
+#line 31219 "texprof.w"
 
 if(profile_on)
 {/*1756:*/
-#line 31125 "texprof.w"
+#line 31131 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1774:*/
-#line 31471 "texprof.w"
+#line 31477 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -18642,14 +18644,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31484 "texprof.w"
+#line 31490 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1774*/
-#line 31129 "texprof.w"
+#line 31135 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -18661,52 +18663,52 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31140 "texprof.w"
+#line 31146 "texprof.w"
  cmd_count++;
 /*1751:*/
-#line 31013 "texprof.w"
+#line 31019 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31017 "texprof.w"
+#line 31023 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31019 "texprof.w"
+#line 31025 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31021 "texprof.w"
+#line 31027 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31023 "texprof.w"
+#line 31029 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31025 "texprof.w"
+#line 31031 "texprof.w"
 
 /*:1751*/
-#line 31141 "texprof.w"
+#line 31147 "texprof.w"
 
 /*1752:*/
-#line 31030 "texprof.w"
+#line 31036 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31035 "texprof.w"
+#line 31041 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1752*/
-#line 31142 "texprof.w"
+#line 31148 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1756*/
-#line 31215 "texprof.w"
+#line 31221 "texprof.w"
 
 tmp_file_line= prof_file_line;
 tmp_cmd= prof_cmd;
@@ -18717,11 +18719,11 @@ prof_cmd= system_cmd;
 
 
 /*:1762*/
-#line 16588 "texprof.w"
+#line 16590 "texprof.w"
 
 pack_begin_line= mode_line;
 /*815:*/
-#line 16612 "texprof.w"
+#line 16614 "texprof.w"
 
 link(temp_head)= link(head);
 if(is_char_node(tail))tail_append(new_penalty(inf_penalty))
@@ -18736,7 +18738,7 @@ init_r_hyf= (prev_graf/0200000)%0100;
 pop_nest();
 
 /*:815*//*826:*/
-#line 16849 "texprof.w"
+#line 16851 "texprof.w"
 
 no_shrink_error_yet= true;
 check_shrinkage(left_skip);check_shrinkage(right_skip);
@@ -18747,7 +18749,7 @@ background[2+stretch_order(r)]= background[2+stretch_order(r)]+stretch(r);
 background[6]= shrink(q)+shrink(r);
 
 /*:826*//*833:*/
-#line 16994 "texprof.w"
+#line 16996 "texprof.w"
 
 minimum_demerits= awful_bad;
 minimal_demerits[tight_fit]= awful_bad;
@@ -18756,7 +18758,7 @@ minimal_demerits[loose_fit]= awful_bad;
 minimal_demerits[very_loose_fit]= awful_bad;
 
 /*:833*//*847:*/
-#line 17257 "texprof.w"
+#line 17259 "texprof.w"
 
 if(par_shape_ptr==null)
 if(hang_indent==0)
@@ -18764,7 +18766,7 @@ if(hang_indent==0)
 second_indent= 0;
 }
 else/*848:*/
-#line 17271 "texprof.w"
+#line 17273 "texprof.w"
 
 {last_special_line= abs(hang_after);
 if(hang_after<0)
@@ -18781,7 +18783,7 @@ else second_indent= 0;
 }
 
 /*:848*/
-#line 17263 "texprof.w"
+#line 17265 "texprof.w"
 
 else{last_special_line= info(par_shape_ptr)-1;
 second_width= mem[par_shape_ptr+2*(last_special_line+1)].sc;
@@ -18791,10 +18793,10 @@ if(looseness==0)easy_line= last_special_line;
 else easy_line= max_halfword
 
 /*:847*/
-#line 16590 "texprof.w"
+#line 16592 "texprof.w"
 ;
 /*862:*/
-#line 17539 "texprof.w"
+#line 17541 "texprof.w"
 
 threshold= pretolerance;
 if(threshold>=0)
@@ -18803,7 +18805,7 @@ if(threshold>=0)
 if(tracing_paragraphs> 0)
 {begin_diagnostic();print_nl("@firstpass");}
 #endif
-#line 17547 "texprof.w"
+#line 17549 "texprof.w"
 
 second_pass= false;final_pass= false;
 }
@@ -18812,28 +18814,28 @@ final_pass= (emergency_stretch<=0);
 #ifdef STAT
 if(tracing_paragraphs> 0)begin_diagnostic();
 #endif
-#line 17555 "texprof.w"
+#line 17557 "texprof.w"
 
 }
 loop{if(threshold> inf_bad)threshold= inf_bad;
 if(second_pass)/*890:*/
-#line 18080 "texprof.w"
+#line 18082 "texprof.w"
 
 {
 #ifdef INIT
 if(trie_not_ready)init_trie();
 #endif
-#line 18085 "texprof.w"
+#line 18087 "texprof.w"
 
 cur_lang= init_cur_lang;l_hyf= init_l_hyf;r_hyf= init_r_hyf;
 set_hyph_index;
 }
 
 /*:890*/
-#line 17558 "texprof.w"
+#line 17560 "texprof.w"
 ;
 /*863:*/
-#line 17597 "texprof.w"
+#line 17599 "texprof.w"
 
 q= get_node(active_node_size);
 type(q)= unhyphenated;fitness(q)= decent_fit;
@@ -18844,17 +18846,17 @@ passive= null;printed_node= temp_head;pass_number= 0;
 font_in_short_display= null_font
 
 /*:863*/
-#line 17559 "texprof.w"
+#line 17561 "texprof.w"
 ;
 cur_p= link(temp_head);auto_breaking= true;
 prev_p= cur_p;
 while((cur_p!=null)&&(link(active)!=last_active))
 /*865:*/
-#line 17633 "texprof.w"
+#line 17635 "texprof.w"
 
 {if(is_char_node(cur_p))
 /*866:*/
-#line 17669 "texprof.w"
+#line 17671 "texprof.w"
 
 {prev_p= cur_p;
 do{f= font(cur_p);
@@ -18864,20 +18866,20 @@ cur_p= link(cur_p);
 }
 
 /*:866*/
-#line 17635 "texprof.w"
+#line 17637 "texprof.w"
 ;
 switch(type(cur_p)){
 case hlist_node:case vlist_node:case rule_node:act_width= act_width+width(cur_p);break;
 case whatsit_node:/*1361:*/
-#line 25624 "texprof.w"
+#line 25630 "texprof.w"
 
 adv_past(cur_p)
 
 /*:1361*/
-#line 17639 "texprof.w"
+#line 17641 "texprof.w"
 break;
 case glue_node:{/*867:*/
-#line 17680 "texprof.w"
+#line 17682 "texprof.w"
 
 if(auto_breaking)
 {if(is_char_node(prev_p))try_break(0,unhyphenated);
@@ -18892,16 +18894,16 @@ active_width[2+stretch_order(q)]+stretch(q);
 active_width[6]= active_width[6]+shrink(q)
 
 /*:867*/
-#line 17641 "texprof.w"
+#line 17643 "texprof.w"
 ;
 if(second_pass&&auto_breaking)
 /*893:*/
-#line 18116 "texprof.w"
+#line 18118 "texprof.w"
 
 {prev_s= cur_p;s= link(prev_s);
 if(s!=null)
 {/*895:*/
-#line 18142 "texprof.w"
+#line 18144 "texprof.w"
 
 loop{if(is_char_node(s))
 {c= qo(character(s));hf= font(s);
@@ -18913,12 +18915,12 @@ else{q= lig_ptr(s);c= qo(character(q));hf= font(q);
 else if((type(s)==kern_node)&&(subtype(s)==normal))goto resume;
 else if(type(s)==whatsit_node)
 {/*1362:*/
-#line 25627 "texprof.w"
+#line 25633 "texprof.w"
 
 adv_past(s)
 
 /*:1362*/
-#line 18152 "texprof.w"
+#line 18154 "texprof.w"
 ;
 goto resume;
 }
@@ -18935,11 +18937,11 @@ if(hyf_char> 255)goto done1;
 ha= prev_s
 
 /*:895*/
-#line 18119 "texprof.w"
+#line 18121 "texprof.w"
 ;
 if(l_hyf+r_hyf> 63)goto done1;
 /*896:*/
-#line 18169 "texprof.w"
+#line 18171 "texprof.w"
 
 hn= 0;
 loop{if(is_char_node(s))
@@ -18952,7 +18954,7 @@ hb= s;incr(hn);hu[hn]= c;hc[hn]= hc[0];hyf_bchar= non_char;
 }
 else if(type(s)==ligature_node)
 /*897:*/
-#line 18196 "texprof.w"
+#line 18198 "texprof.w"
 
 {if(font(lig_char(s))!=hf)goto done3;
 j= hn;q= lig_ptr(s);if(q> null)hyf_bchar= character(q);
@@ -18969,7 +18971,7 @@ if(odd(subtype(s)))hyf_bchar= font_bchar[hf];else hyf_bchar= non_char;
 }
 
 /*:897*/
-#line 18181 "texprof.w"
+#line 18183 "texprof.w"
 
 else if((type(s)==kern_node)&&(subtype(s)==normal))
 {hb= s;
@@ -18981,10 +18983,10 @@ s= link(s);
 done3:
 
 /*:896*/
-#line 18121 "texprof.w"
+#line 18123 "texprof.w"
 ;
 /*898:*/
-#line 18211 "texprof.w"
+#line 18213 "texprof.w"
 
 if(hn<l_hyf+r_hyf)goto done1;
 loop{if(!(is_char_node(s)))
@@ -19002,14 +19004,14 @@ s= link(s);
 done4:
 
 /*:898*/
-#line 18123 "texprof.w"
+#line 18125 "texprof.w"
 ;
 hyphenate();
 }
 done1:;}
 
 /*:893*/
-#line 17643 "texprof.w"
+#line 17645 "texprof.w"
 ;
 }break;
 case kern_node:if(subtype(cur_p)==explicit)kern_break
@@ -19018,12 +19020,12 @@ case ligature_node:{f= font(lig_char(cur_p));
 act_width= act_width+char_width(f,char_info(f,character(lig_char(cur_p))));
 }break;
 case disc_node:/*868:*/
-#line 17696 "texprof.w"
+#line 17698 "texprof.w"
 
 {s= pre_break(cur_p);disc_width= 0;
 if(s==null)try_break(ex_hyphen_penalty,hyphenated);
 else{do{/*869:*/
-#line 17714 "texprof.w"
+#line 17716 "texprof.w"
 
 if(is_char_node(s))
 {f= font(s);
@@ -19042,7 +19044,7 @@ default:confusion("disc3");
 }
 
 /*:869*/
-#line 17699 "texprof.w"
+#line 17701 "texprof.w"
 ;
 s= link(s);
 }while(!(s==null));
@@ -19053,7 +19055,7 @@ act_width= act_width-disc_width;
 r= replace_count(cur_p);s= link(cur_p);
 while(r> 0)
 {/*870:*/
-#line 17731 "texprof.w"
+#line 17733 "texprof.w"
 
 if(is_char_node(s))
 {f= font(s);
@@ -19072,7 +19074,7 @@ default:confusion("disc4");
 }
 
 /*:870*/
-#line 17708 "texprof.w"
+#line 17710 "texprof.w"
 ;
 decr(r);s= link(s);
 }
@@ -19080,7 +19082,7 @@ prev_p= cur_p;cur_p= s;goto done5;
 }
 
 /*:868*/
-#line 17651 "texprof.w"
+#line 17653 "texprof.w"
 
 case math_node:{auto_breaking= (subtype(cur_p)==after);kern_break;
 }break;
@@ -19093,16 +19095,16 @@ prev_p= cur_p;cur_p= link(cur_p);
 done5:;}
 
 /*:865*/
-#line 17565 "texprof.w"
+#line 17567 "texprof.w"
 ;
 if(cur_p==null)
 /*872:*/
-#line 17767 "texprof.w"
+#line 17769 "texprof.w"
 
 {try_break(eject_penalty,hyphenated);
 if(link(active)!=last_active)
 {/*873:*/
-#line 17777 "texprof.w"
+#line 17779 "texprof.w"
 
 r= link(active);fewest_demerits= awful_bad;
 do{if(type(r)!=delta_node)if(total_demerits(r)<fewest_demerits)
@@ -19113,11 +19115,11 @@ r= link(r);
 best_line= line_number(best_bet)
 
 /*:873*/
-#line 17770 "texprof.w"
+#line 17772 "texprof.w"
 ;
 if(looseness==0)goto done;
 /*874:*/
-#line 17791 "texprof.w"
+#line 17793 "texprof.w"
 
 {r= link(active);actual_looseness= 0;
 do{if(type(r)!=delta_node)
@@ -19138,17 +19140,17 @@ best_line= line_number(best_bet);
 }
 
 /*:874*/
-#line 17772 "texprof.w"
+#line 17774 "texprof.w"
 ;
 if((actual_looseness==looseness)||final_pass)goto done;
 }
 }
 
 /*:872*/
-#line 17568 "texprof.w"
+#line 17570 "texprof.w"
 ;
 /*864:*/
-#line 17606 "texprof.w"
+#line 17608 "texprof.w"
 
 q= link(active);
 while(q!=last_active)
@@ -19165,14 +19167,14 @@ q= cur_p;
 }
 
 /*:864*/
-#line 17569 "texprof.w"
+#line 17571 "texprof.w"
 ;
 if(!second_pass)
 {
 #ifdef STAT
 if(tracing_paragraphs> 0)print_nl("@secondpass");
 #endif
-#line 17575 "texprof.w"
+#line 17577 "texprof.w"
  threshold= tolerance;second_pass= true;final_pass= (emergency_stretch<=0);
 }
 else{
@@ -19180,7 +19182,7 @@ else{
 if(tracing_paragraphs> 0)
 print_nl("@emergencypass");
 #endif
-#line 17582 "texprof.w"
+#line 17584 "texprof.w"
  background[2]= background[2]+emergency_stretch;final_pass= true;
 }
 }
@@ -19190,21 +19192,21 @@ if(tracing_paragraphs> 0)
 {end_diagnostic(true);normalize_selector();
 }
 #endif
-#line 17591 "texprof.w"
+#line 17593 "texprof.w"
 
 /*:862*/
-#line 16591 "texprof.w"
+#line 16593 "texprof.w"
 ;
 /*875:*/
-#line 17815 "texprof.w"
+#line 17817 "texprof.w"
 
 post_line_break(final_widow_penalty)
 
 /*:875*/
-#line 16593 "texprof.w"
+#line 16595 "texprof.w"
 ;
 /*864:*/
-#line 17606 "texprof.w"
+#line 17608 "texprof.w"
 
 q= link(active);
 while(q!=last_active)
@@ -19221,21 +19223,21 @@ q= cur_p;
 }
 
 /*:864*/
-#line 16594 "texprof.w"
+#line 16596 "texprof.w"
 ;
 pack_begin_line= 0;
 /*1763:*/
-#line 31224 "texprof.w"
+#line 31230 "texprof.w"
 
 if(profile_on)
 {/*1756:*/
-#line 31125 "texprof.w"
+#line 31131 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1774:*/
-#line 31471 "texprof.w"
+#line 31477 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -19249,14 +19251,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31484 "texprof.w"
+#line 31490 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1774*/
-#line 31129 "texprof.w"
+#line 31135 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -19268,52 +19270,52 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31140 "texprof.w"
+#line 31146 "texprof.w"
  cmd_count++;
 /*1751:*/
-#line 31013 "texprof.w"
+#line 31019 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31017 "texprof.w"
+#line 31023 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31019 "texprof.w"
+#line 31025 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31021 "texprof.w"
+#line 31027 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31023 "texprof.w"
+#line 31029 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31025 "texprof.w"
+#line 31031 "texprof.w"
 
 /*:1751*/
-#line 31141 "texprof.w"
+#line 31147 "texprof.w"
 
 /*1752:*/
-#line 31030 "texprof.w"
+#line 31036 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31035 "texprof.w"
+#line 31041 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1752*/
-#line 31142 "texprof.w"
+#line 31148 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1756*/
-#line 31226 "texprof.w"
+#line 31232 "texprof.w"
 
 prof_file_line= tmp_file_line;
 prof_cmd= tmp_cmd;
@@ -19323,12 +19325,12 @@ prof_depth= tmp_depth;
 
 
 /*:1763*/
-#line 16596 "texprof.w"
+#line 16598 "texprof.w"
 
 }
 
 /*1386:*/
-#line 25908 "texprof.w"
+#line 25914 "texprof.w"
 
 static bool eTeX_enabled(bool b,quarterword j,halfword k)
 {if(!b)
@@ -19339,7 +19341,7 @@ return b;
 }
 
 /*:1386*//*1409:*/
-#line 26175 "texprof.w"
+#line 26181 "texprof.w"
 
 static void show_save_groups(void)
 {
@@ -19414,7 +19416,7 @@ goto found;
 }
 }
 /*1411:*/
-#line 26264 "texprof.w"
+#line 26270 "texprof.w"
 
 i= saved(-4);
 if(i!=0)
@@ -19432,10 +19434,10 @@ print_esc("setbox");print_int(i-box_flag);print_char('=');
 else print_cmd_chr(leader_ship,i-(leader_flag-a_leaders))
 
 /*:1411*/
-#line 26248 "texprof.w"
+#line 26254 "texprof.w"
 ;
 found1:print_esc(s);/*1410:*/
-#line 26257 "texprof.w"
+#line 26263 "texprof.w"
 
 if(saved(-2)!=0)
 {print_char(' ');
@@ -19444,7 +19446,7 @@ print_scaled(saved(-2));print("pt");
 }
 
 /*:1410*/
-#line 26249 "texprof.w"
+#line 26255 "texprof.w"
 ;
 found2:print_char('{');
 found:print_char(')');decr(cur_level);
@@ -19454,16 +19456,16 @@ done:save_ptr= v;cur_level= l;cur_group= c;
 }
 
 /*:1409*//*1425:*/
-#line 26405 "texprof.w"
+#line 26411 "texprof.w"
 
 static void new_interaction(void);
 
 /*:1425*/
-#line 16599 "texprof.w"
+#line 16601 "texprof.w"
 
 
 /*:814*//*933:*/
-#line 18844 "texprof.w"
+#line 18846 "texprof.w"
 static void new_hyph_exceptions(void)
 {
 int n;
@@ -19481,20 +19483,20 @@ if(trie_not_ready)
 {hyph_index= 0;goto not_found1;
 }
 #endif
-#line 18861 "texprof.w"
+#line 18863 "texprof.w"
  set_hyph_index;
 not_found1:
 /*934:*/
-#line 18867 "texprof.w"
+#line 18869 "texprof.w"
 
 n= 0;p= null;
 loop{get_x_token();
 reswitch:switch(cur_cmd){
 case letter:case other_char:case char_given:/*936:*/
-#line 18893 "texprof.w"
+#line 18895 "texprof.w"
 
 if(cur_chr=='-')/*937:*/
-#line 18908 "texprof.w"
+#line 18910 "texprof.w"
 
 {if(n<63)
 {q= get_avail();link(q)= p;info(q)= n;p= q;
@@ -19502,7 +19504,7 @@ if(cur_chr=='-')/*937:*/
 }
 
 /*:937*/
-#line 18894 "texprof.w"
+#line 18896 "texprof.w"
 
 else{set_lc_code(cur_chr);
 if(hc[0]==0)
@@ -19518,13 +19520,13 @@ else if(n<63)
 }
 
 /*:936*/
-#line 18872 "texprof.w"
+#line 18874 "texprof.w"
 break;
 case char_num:{scan_char_num();cur_chr= cur_val;cur_cmd= char_given;
 goto reswitch;
 }
 case spacer:case right_brace:{if(n> 1)/*938:*/
-#line 18914 "texprof.w"
+#line 18916 "texprof.w"
 
 {incr(n);hc[n]= cur_lang;str_room(n);h= 0;
 for(j= 1;j<=n;j++)
@@ -19533,14 +19535,14 @@ append_char(hc[j]);
 }
 s= make_string();
 /*939:*/
-#line 18924 "texprof.w"
+#line 18926 "texprof.w"
 
 if(hyph_count==hyph_size)overflow("exception dictionary",hyph_size);
 
 incr(hyph_count);
 while(hyph_word[h]!=0)
 {/*940:*/
-#line 18935 "texprof.w"
+#line 18937 "texprof.w"
 
 k= hyph_word[h];
 if(length(k)<length(s))goto found;
@@ -19555,25 +19557,25 @@ t= hyph_word[h];hyph_word[h]= s;s= t;
 not_found:
 
 /*:940*/
-#line 18930 "texprof.w"
+#line 18932 "texprof.w"
 ;
 if(h> 0)decr(h);else h= hyph_size;
 }
 hyph_word[h]= s;hyph_list[h]= p
 
 /*:939*/
-#line 18921 "texprof.w"
+#line 18923 "texprof.w"
 ;
 }
 
 /*:938*/
-#line 18876 "texprof.w"
+#line 18878 "texprof.w"
 ;
 if(cur_cmd==right_brace)return;
 n= 0;p= null;
 }break;
 default:/*935:*/
-#line 18884 "texprof.w"
+#line 18886 "texprof.w"
 
 {print_err("Improper ");print_esc("hyphenation");
 
@@ -19584,18 +19586,18 @@ error();
 }
 
 /*:935*/
-#line 18880 "texprof.w"
+#line 18882 "texprof.w"
 
 }
 }
 
 /*:934*/
-#line 18864 "texprof.w"
+#line 18866 "texprof.w"
 ;
 }
 
 /*:933*//*967:*/
-#line 19475 "texprof.w"
+#line 19477 "texprof.w"
 static pointer prune_page_top(pointer p,bool s)
 
 {pointer prev_p;
@@ -19604,7 +19606,7 @@ prev_p= temp_head;link(temp_head)= p;
 while(p!=null)
 switch(type(p)){
 case hlist_node:case vlist_node:case rule_node:/*968:*/
-#line 19500 "texprof.w"
+#line 19502 "texprof.w"
 
 {q= new_skip_param(split_top_skip_code);link(prev_p)= q;link(q)= p;
 
@@ -19614,7 +19616,7 @@ p= null;
 }
 
 /*:968*/
-#line 19483 "texprof.w"
+#line 19485 "texprof.w"
 break;
 case whatsit_node:case mark_node:case ins_node:{prev_p= p;p= link(prev_p);
 }break;
@@ -19633,7 +19635,7 @@ return link(temp_head);
 }
 
 /*:967*//*969:*/
-#line 19524 "texprof.w"
+#line 19526 "texprof.w"
 static pointer vert_break(pointer p,scaled h,scaled d)
 
 {
@@ -19649,11 +19651,11 @@ small_number t;
 prev_p= p;
 least_cost= awful_bad;do_all_six(set_height_zero);prev_dp= 0;
 loop{/*971:*/
-#line 19558 "texprof.w"
+#line 19560 "texprof.w"
 
 if(p==null)pi= eject_penalty;
 else/*972:*/
-#line 19573 "texprof.w"
+#line 19575 "texprof.w"
 
 switch(type(p)){
 case hlist_node:case vlist_node:case rule_node:{
@@ -19661,12 +19663,12 @@ cur_height= cur_height+prev_dp+height(p);prev_dp= depth(p);
 goto not_found;
 }
 case whatsit_node:/*1364:*/
-#line 25633 "texprof.w"
+#line 25639 "texprof.w"
 
 goto not_found
 
 /*:1364*/
-#line 19579 "texprof.w"
+#line 19581 "texprof.w"
 ;
 case glue_node:if(precedes_break(prev_p))pi= 0;
 else goto update_heights;break;
@@ -19681,14 +19683,14 @@ default:confusion("vertbreak");
 }
 
 /*:972*/
-#line 19562 "texprof.w"
+#line 19564 "texprof.w"
 ;
 /*973:*/
-#line 19594 "texprof.w"
+#line 19596 "texprof.w"
 
 if(pi<inf_penalty)
 {/*974:*/
-#line 19608 "texprof.w"
+#line 19610 "texprof.w"
 
 if(cur_height<h)
 if((active_height[3]!=0)||(active_height[4]!=0)||
@@ -19698,7 +19700,7 @@ else if(cur_height-h> active_height[6])b= awful_bad;
 else b= badness(cur_height-h,active_height[6])
 
 /*:974*/
-#line 19596 "texprof.w"
+#line 19598 "texprof.w"
 ;
 if(b<awful_bad)
 if(pi<=eject_penalty)b= pi;
@@ -19712,11 +19714,11 @@ if((b==awful_bad)||(pi<=eject_penalty))goto done;
 }
 
 /*:973*/
-#line 19564 "texprof.w"
+#line 19566 "texprof.w"
 ;
 if((type(p)<glue_node)||(type(p)> kern_node))goto not_found;
 update_heights:/*975:*/
-#line 19620 "texprof.w"
+#line 19622 "texprof.w"
 
 if(type(p)==kern_node)q= p;
 else{q= glue_ptr(p);
@@ -19738,7 +19740,7 @@ glue_ptr(p)= r;q= r;
 cur_height= cur_height+prev_dp+width(q);prev_dp= 0
 
 /*:975*/
-#line 19567 "texprof.w"
+#line 19569 "texprof.w"
 ;
 not_found:if(prev_dp> d)
 {cur_height= cur_height+prev_dp-d;
@@ -19746,7 +19748,7 @@ prev_dp= d;
 }
 
 /*:971*/
-#line 19540 "texprof.w"
+#line 19542 "texprof.w"
 ;
 prev_p= p;p= link(prev_p);
 }
@@ -19754,9 +19756,9 @@ done:return best_place;
 }
 
 /*:969*//*976:*/
-#line 19655 "texprof.w"
+#line 19657 "texprof.w"
 /*1507:*/
-#line 27682 "texprof.w"
+#line 27688 "texprof.w"
 
 static bool do_marks(small_number a,small_number l,pointer q)
 {int i;
@@ -19772,7 +19774,7 @@ if(sa_used(q)==0)
 else
 {switch(a){
 /*1508:*/
-#line 27708 "texprof.w"
+#line 27714 "texprof.w"
 
 case vsplit_init:if(sa_split_first_mark(q)!=null)
 {delete_token_ref(sa_split_first_mark(q));sa_split_first_mark(q)= null;
@@ -19780,7 +19782,7 @@ delete_token_ref(sa_split_bot_mark(q));sa_split_bot_mark(q)= null;
 }break;
 
 /*:1508*//*1510:*/
-#line 27735 "texprof.w"
+#line 27741 "texprof.w"
 
 case fire_up_init:if(sa_bot_mark(q)!=null)
 {if(sa_top_mark(q)!=null)delete_token_ref(sa_top_mark(q));
@@ -19793,14 +19795,14 @@ sa_top_mark(q)= sa_bot_mark(q);
 }break;
 
 /*:1510*//*1511:*/
-#line 27746 "texprof.w"
+#line 27752 "texprof.w"
 
 case fire_up_done:if((sa_top_mark(q)!=null)&&(sa_first_mark(q)==null))
 {sa_first_mark(q)= sa_top_mark(q);add_token_ref(sa_top_mark(q));
 }break;
 
 /*:1511*//*1513:*/
-#line 27769 "texprof.w"
+#line 27775 "texprof.w"
 
 #ifdef INIT
 case destroy_marks:for(i= top_mark_code;i<=split_bot_mark_code;i++)
@@ -19810,10 +19812,10 @@ if(cur_ptr!=null)
 }
 }
 #endif
-#line 27778 "texprof.w"
+#line 27784 "texprof.w"
 
 /*:1513*/
-#line 27696 "texprof.w"
+#line 27702 "texprof.w"
 
 }
 if(sa_bot_mark(q)==null)if(sa_split_bot_mark(q)==null)
@@ -19824,7 +19826,7 @@ return(q==null);
 }
 
 /*:1507*/
-#line 19655 "texprof.w"
+#line 19657 "texprof.w"
 
 static pointer vsplit(halfword n,scaled h)
 
@@ -19841,7 +19843,7 @@ if(split_first_mark!=null)
 delete_token_ref(split_bot_mark);split_bot_mark= null;
 }
 /*977:*/
-#line 19681 "texprof.w"
+#line 19683 "texprof.w"
 
 if(v==null)
 {return null;
@@ -19856,17 +19858,17 @@ error();return null;
 }
 
 /*:977*/
-#line 19670 "texprof.w"
+#line 19672 "texprof.w"
 ;
 q= vert_break(list_ptr(v),h,split_max_depth);
 /*978:*/
-#line 19697 "texprof.w"
+#line 19699 "texprof.w"
 
 p= list_ptr(v);
 if(p==q)list_ptr(v)= null;
 else loop{if(type(p)==mark_node)
 if(mark_class(p)!=0)/*1509:*/
-#line 27717 "texprof.w"
+#line 27723 "texprof.w"
 
 {find_sa_element(mark_val,mark_class(p),true);
 if(sa_split_first_mark(cur_ptr)==null)
@@ -19879,7 +19881,7 @@ add_token_ref(mark_ptr(p));
 }
 
 /*:1509*/
-#line 19701 "texprof.w"
+#line 19703 "texprof.w"
 
 else if(split_first_mark==null)
 {split_first_mark= mark_ptr(p);
@@ -19899,7 +19901,7 @@ p= link(p);
 done:
 
 /*:978*/
-#line 19673 "texprof.w"
+#line 19675 "texprof.w"
 ;
 q= prune_page_top(q,saving_vdiscards> 0);
 p= list_ptr(v);free_node(v,box_node_size);
@@ -19909,7 +19911,7 @@ return vpackage(p,h,exactly,split_max_depth);
 }
 
 /*:976*//*984:*/
-#line 19888 "texprof.w"
+#line 19890 "texprof.w"
 static void print_totals(void)
 {print_scaled(page_total);
 print_plus(2,"");
@@ -19922,7 +19924,7 @@ if(page_shrink!=0)
 }
 
 /*:984*//*986:*/
-#line 19934 "texprof.w"
+#line 19936 "texprof.w"
 static void freeze_page_specs(small_number s)
 {page_contents= s;
 page_goal= vsize;page_max_depth= max_depth;
@@ -19937,12 +19939,12 @@ print(", max depth=");print_scaled(page_max_depth);
 end_diagnostic(false);
 }
 #endif
-#line 19948 "texprof.w"
+#line 19950 "texprof.w"
 
 }
 
 /*:986*//*991:*/
-#line 20002 "texprof.w"
+#line 20004 "texprof.w"
 static void box_error(eight_bits n)
 {error();begin_diagnostic();
 print_nl("The following box has been deleted:");
@@ -19952,7 +19954,7 @@ flush_node_list(box(n));box(n)= null;
 }
 
 /*:991*//*992:*/
-#line 20013 "texprof.w"
+#line 20015 "texprof.w"
 static void ensure_vbox(eight_bits n)
 {pointer p;
 p= box(n);
@@ -19967,9 +19969,9 @@ box_error(n);
 }
 
 /*:992*//*993:*/
-#line 20032 "texprof.w"
+#line 20034 "texprof.w"
 /*1011:*/
-#line 20342 "texprof.w"
+#line 20344 "texprof.w"
 
 static void fire_up(pointer c)
 {
@@ -19981,7 +19983,7 @@ int save_vbadness;
 scaled save_vfuzz;
 pointer save_split_top_skip;
 /*1012:*/
-#line 20375 "texprof.w"
+#line 20377 "texprof.w"
 
 if(type(best_page_break)==penalty_node)
 {geq_word_define(int_base+output_penalty_code,penalty(best_page_break));
@@ -19990,7 +19992,7 @@ penalty(best_page_break)= inf_penalty;
 else geq_word_define(int_base+output_penalty_code,inf_penalty)
 
 /*:1012*/
-#line 20352 "texprof.w"
+#line 20354 "texprof.w"
 ;
 if(sa_mark!=null)
 if(do_marks(fire_up_init,0,sa_mark))sa_mark= null;
@@ -20000,11 +20002,11 @@ top_mark= bot_mark;add_token_ref(top_mark);
 delete_token_ref(first_mark);first_mark= null;
 }
 /*1013:*/
-#line 20387 "texprof.w"
+#line 20389 "texprof.w"
 
 if(c==best_page_break)best_page_break= null;
 /*1014:*/
-#line 20411 "texprof.w"
+#line 20413 "texprof.w"
 
 if(box(255)!=null)
 {print_err("");print_esc("box");print("255 is not void");
@@ -20015,13 +20017,13 @@ box_error(255);
 }
 
 /*:1014*/
-#line 20389 "texprof.w"
+#line 20391 "texprof.w"
 ;
 insert_penalties= 0;
 save_split_top_skip= split_top_skip;
 if(holding_inserts<=0)
 /*1017:*/
-#line 20465 "texprof.w"
+#line 20467 "texprof.w"
 
 {r= link(page_ins_head);
 while(r!=page_ins_head)
@@ -20037,14 +20039,14 @@ r= link(r);
 }
 
 /*:1017*/
-#line 20393 "texprof.w"
+#line 20395 "texprof.w"
 ;
 q= hold_head;link(q)= null;prev_p= page_head;p= link(prev_p);
 while(p!=best_page_break)
 {if(type(p)==ins_node)
 {if(holding_inserts<=0)
 /*1019:*/
-#line 20491 "texprof.w"
+#line 20493 "texprof.w"
 
 {r= link(page_ins_head);
 while(subtype(r)!=subtype(p))r= link(r);
@@ -20052,7 +20054,7 @@ if(best_ins_ptr(r)==null)wait= true;
 else{wait= false;s= last_ins_ptr(r);link(s)= ins_ptr(p);
 if(best_ins_ptr(r)==p)
 /*1020:*/
-#line 20507 "texprof.w"
+#line 20509 "texprof.w"
 
 {if(type(r)==split_up)
 if((broken_ins(r)==p)&&(broken_ptr(r)!=null))
@@ -20074,14 +20076,14 @@ box(n)= vpack(temp_ptr,natural);
 }
 
 /*:1020*/
-#line 20498 "texprof.w"
+#line 20500 "texprof.w"
 
 else{while(link(s)!=null)s= link(s);
 last_ins_ptr(r)= s;
 }
 }
 /*1021:*/
-#line 20527 "texprof.w"
+#line 20529 "texprof.w"
 
 link(prev_p)= link(p);link(p)= null;
 if(wait)
@@ -20093,17 +20095,17 @@ free_node(p,ins_node_size);
 p= prev_p
 
 /*:1021*/
-#line 20504 "texprof.w"
+#line 20506 "texprof.w"
 ;
 }
 
 /*:1019*/
-#line 20399 "texprof.w"
+#line 20401 "texprof.w"
 ;
 }
 else if(type(p)==mark_node)
 if(mark_class(p)!=0)/*1512:*/
-#line 27751 "texprof.w"
+#line 27757 "texprof.w"
 
 {find_sa_element(mark_val,mark_class(p),true);
 if(sa_first_mark(cur_ptr)==null)
@@ -20115,10 +20117,10 @@ sa_bot_mark(cur_ptr)= mark_ptr(p);add_token_ref(mark_ptr(p));
 }
 
 /*:1512*/
-#line 20402 "texprof.w"
+#line 20404 "texprof.w"
 
 else/*1015:*/
-#line 20420 "texprof.w"
+#line 20422 "texprof.w"
 
 {if(first_mark==null)
 {first_mark= mark_ptr(p);
@@ -20129,13 +20131,13 @@ bot_mark= mark_ptr(p);add_token_ref(bot_mark);
 }
 
 /*:1015*/
-#line 20403 "texprof.w"
+#line 20405 "texprof.w"
 ;
 prev_p= p;p= link(prev_p);
 }
 split_top_skip= save_split_top_skip;
 /*1016:*/
-#line 20440 "texprof.w"
+#line 20442 "texprof.w"
 
 if(p!=null)
 {if(link(contrib_head)==null)
@@ -20151,7 +20153,7 @@ box(255)= vpackage(link(page_head),best_size,exactly,page_max_depth);
 vbadness= save_vbadness;vfuzz= save_vfuzz;
 if(last_glue!=max_halfword)delete_glue_ref(last_glue);
 /*990:*/
-#line 19991 "texprof.w"
+#line 19993 "texprof.w"
 
 page_contents= empty;page_tail= page_head;link(page_head)= null;
 last_glue= max_halfword;last_penalty= 0;last_kern= 0;
@@ -20159,17 +20161,17 @@ last_node_type= -1;
 page_depth= 0;page_max_depth= 0
 
 /*:990*/
-#line 20454 "texprof.w"
+#line 20456 "texprof.w"
 ;
 if(q!=hold_head)
 {link(page_head)= link(hold_head);page_tail= q;
 }
 
 /*:1016*/
-#line 20408 "texprof.w"
+#line 20410 "texprof.w"
 ;
 /*1018:*/
-#line 20479 "texprof.w"
+#line 20481 "texprof.w"
 
 r= link(page_ins_head);
 while(r!=page_ins_head)
@@ -20178,11 +20180,11 @@ while(r!=page_ins_head)
 link(page_ins_head)= page_ins_head
 
 /*:1018*/
-#line 20409 "texprof.w"
+#line 20411 "texprof.w"
 
 
 /*:1013*/
-#line 20362 "texprof.w"
+#line 20364 "texprof.w"
 ;
 if(sa_mark!=null)
 if(do_marks(fire_up_done,0,sa_mark))sa_mark= null;
@@ -20192,7 +20194,7 @@ if((top_mark!=null)&&(first_mark==null))
 if(output_routine!=null)
 if(dead_cycles>=max_dead_cycles)
 /*1023:*/
-#line 20553 "texprof.w"
+#line 20555 "texprof.w"
 
 {print_err("Output loop---");print_int(dead_cycles);
 
@@ -20203,10 +20205,10 @@ help3("I've concluded that your \\output is awry; it never does a",
 }
 
 /*:1023*/
-#line 20370 "texprof.w"
+#line 20372 "texprof.w"
 
 else/*1024:*/
-#line 20562 "texprof.w"
+#line 20564 "texprof.w"
 
 {output_active= true;
 incr(dead_cycles);
@@ -20218,10 +20220,10 @@ return;
 }
 
 /*:1024*/
-#line 20371 "texprof.w"
+#line 20373 "texprof.w"
 ;
 /*1022:*/
-#line 20541 "texprof.w"
+#line 20543 "texprof.w"
 
 {if(link(page_head)!=null)
 {if(link(contrib_head)==null)
@@ -20235,12 +20237,12 @@ ship_out(box(255));box(255)= null;
 }
 
 /*:1022*/
-#line 20372 "texprof.w"
+#line 20374 "texprof.w"
 ;
 }
 
 /*:1011*/
-#line 20032 "texprof.w"
+#line 20034 "texprof.w"
 
 static void build_page(void)
 {
@@ -20251,28 +20253,28 @@ int pi;
 int n;
 scaled delta,h,w;
 /*1761:*/
-#line 31208 "texprof.w"
+#line 31214 "texprof.w"
 
 int tmp_cmd;
 int tmp_file_line;
 int tmp_depth;
 
 /*:1761*/
-#line 20041 "texprof.w"
+#line 20043 "texprof.w"
 
 if((link(contrib_head)==null)||output_active)return;
 /*1765:*/
-#line 31245 "texprof.w"
+#line 31251 "texprof.w"
 
 if(profile_on)
 {/*1756:*/
-#line 31125 "texprof.w"
+#line 31131 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1774:*/
-#line 31471 "texprof.w"
+#line 31477 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -20286,14 +20288,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31484 "texprof.w"
+#line 31490 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1774*/
-#line 31129 "texprof.w"
+#line 31135 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -20305,52 +20307,52 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31140 "texprof.w"
+#line 31146 "texprof.w"
  cmd_count++;
 /*1751:*/
-#line 31013 "texprof.w"
+#line 31019 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31017 "texprof.w"
+#line 31023 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31019 "texprof.w"
+#line 31025 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31021 "texprof.w"
+#line 31027 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31023 "texprof.w"
+#line 31029 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31025 "texprof.w"
+#line 31031 "texprof.w"
 
 /*:1751*/
-#line 31141 "texprof.w"
+#line 31147 "texprof.w"
 
 /*1752:*/
-#line 31030 "texprof.w"
+#line 31036 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31035 "texprof.w"
+#line 31041 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1752*/
-#line 31142 "texprof.w"
+#line 31148 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1756*/
-#line 31247 "texprof.w"
+#line 31253 "texprof.w"
 
 tmp_file_line= prof_file_line;
 tmp_cmd= prof_cmd;
@@ -20362,11 +20364,11 @@ prof_cmd= system_cmd;
 
 
 /*:1765*/
-#line 20043 "texprof.w"
+#line 20045 "texprof.w"
 
 do{resume:p= link(contrib_head);
 /*995:*/
-#line 20060 "texprof.w"
+#line 20062 "texprof.w"
 
 if(last_glue!=max_halfword)delete_glue_ref(last_glue);
 last_penalty= 0;last_kern= 0;
@@ -20380,18 +20382,18 @@ else if(type(p)==kern_node)last_kern= width(p);
 }
 
 /*:995*/
-#line 20045 "texprof.w"
+#line 20047 "texprof.w"
 ;
 /*996:*/
-#line 20078 "texprof.w"
+#line 20080 "texprof.w"
 
 /*999:*/
-#line 20112 "texprof.w"
+#line 20114 "texprof.w"
 
 switch(type(p)){
 case hlist_node:case vlist_node:case rule_node:if(page_contents<box_there)
 /*1000:*/
-#line 20135 "texprof.w"
+#line 20137 "texprof.w"
 
 {if(page_contents==empty)freeze_page_specs(box_there);
 else page_contents= box_there;
@@ -20402,10 +20404,10 @@ link(q)= p;link(contrib_head)= q;goto resume;
 }
 
 /*:1000*/
-#line 20116 "texprof.w"
+#line 20118 "texprof.w"
 
 else/*1001:*/
-#line 20144 "texprof.w"
+#line 20146 "texprof.w"
 
 {page_total= page_total+page_depth+height(p);
 page_depth= depth(p);
@@ -20413,15 +20415,15 @@ goto contribute;
 }
 
 /*:1001*/
-#line 20118 "texprof.w"
+#line 20120 "texprof.w"
 break;
 case whatsit_node:/*1363:*/
-#line 25630 "texprof.w"
+#line 25636 "texprof.w"
 
 goto contribute
 
 /*:1363*/
-#line 20120 "texprof.w"
+#line 20122 "texprof.w"
 ;
 case glue_node:if(page_contents<box_there)goto done1;
 else if(precedes_break(page_tail))pi= 0;
@@ -20433,7 +20435,7 @@ else goto update_heights;break;
 case penalty_node:if(page_contents<box_there)goto done1;else pi= penalty(p);break;
 case mark_node:goto contribute;
 case ins_node:/*1007:*/
-#line 20233 "texprof.w"
+#line 20235 "texprof.w"
 
 {if(page_contents==empty)freeze_page_specs(inserts_only);
 n= subtype(p);r= page_ins_head;
@@ -20441,7 +20443,7 @@ while(n>=subtype(link(r)))r= link(r);
 n= qo(n);
 if(subtype(r)!=qi(n))
 /*1008:*/
-#line 20262 "texprof.w"
+#line 20264 "texprof.w"
 
 {q= get_node(page_ins_node_size);link(q)= link(r);link(r)= q;r= q;
 subtype(r)= qi(n);type(r)= inserting;ensure_vbox(n);
@@ -20466,7 +20468,7 @@ error();
 }
 
 /*:1008*/
-#line 20240 "texprof.w"
+#line 20242 "texprof.w"
 ;
 if(type(r)==split_up)insert_penalties= insert_penalties+float_cost(p);
 else{last_ins_ptr(r)= p;
@@ -20478,7 +20480,7 @@ if(((h<=0)||(h<=delta))&&(height(p)+height(r)<=dimen(n)))
 {page_goal= page_goal-h;height(r)= height(r)+height(p);
 }
 else/*1009:*/
-#line 20295 "texprof.w"
+#line 20297 "texprof.w"
 
 {if(count(n)<=0)w= max_dimen;
 else{w= page_goal-page_total-page_depth;
@@ -20489,7 +20491,7 @@ q= vert_break(ins_ptr(p),w,depth(p));
 height(r)= height(r)+best_height_plus_depth;
 #ifdef STAT
 if(tracing_pages> 0)/*1010:*/
-#line 20315 "texprof.w"
+#line 20317 "texprof.w"
 
 {begin_diagnostic();print_nl("% split");print_int(n);
 
@@ -20503,10 +20505,10 @@ end_diagnostic(false);
 }
 
 /*:1010*/
-#line 20304 "texprof.w"
+#line 20306 "texprof.w"
 ;
 #endif
-#line 20306 "texprof.w"
+#line 20308 "texprof.w"
 
 if(count(n)!=1000)
 best_height_plus_depth= x_over_n(best_height_plus_depth,1000)*count(n);
@@ -20517,28 +20519,28 @@ else if(type(q)==penalty_node)insert_penalties= insert_penalties+penalty(q);
 }
 
 /*:1009*/
-#line 20251 "texprof.w"
+#line 20253 "texprof.w"
 ;
 }
 goto contribute;
 }
 
 /*:1007*/
-#line 20130 "texprof.w"
+#line 20132 "texprof.w"
 
 default:confusion("page");
 
 }
 
 /*:999*/
-#line 20083 "texprof.w"
+#line 20085 "texprof.w"
 ;
 /*1004:*/
-#line 20178 "texprof.w"
+#line 20180 "texprof.w"
 
 if(pi<inf_penalty)
 {/*1006:*/
-#line 20225 "texprof.w"
+#line 20227 "texprof.w"
 
 if(page_total<page_goal)
 if((page_so_far[3]!=0)||(page_so_far[4]!=0)||
@@ -20548,7 +20550,7 @@ else if(page_total-page_goal> page_shrink)b= awful_bad;
 else b= badness(page_total-page_goal,page_shrink)
 
 /*:1006*/
-#line 20181 "texprof.w"
+#line 20183 "texprof.w"
 ;
 if(b<awful_bad)
 if(pi<=eject_penalty)c= pi;
@@ -20558,7 +20560,7 @@ else c= b;
 if(insert_penalties>=10000)c= awful_bad;
 #ifdef STAT
 if(tracing_pages> 0)/*1005:*/
-#line 20211 "texprof.w"
+#line 20213 "texprof.w"
 
 {begin_diagnostic();print_nl("%");
 print(" t=");print_totals();
@@ -20574,10 +20576,10 @@ end_diagnostic(false);
 }
 
 /*:1005*/
-#line 20189 "texprof.w"
+#line 20191 "texprof.w"
 ;
 #endif
-#line 20191 "texprof.w"
+#line 20193 "texprof.w"
 
 if(c<=least_page_cost)
 {best_page_break= p;best_size= page_goal;
@@ -20592,17 +20594,17 @@ if((c==awful_bad)||(pi<=eject_penalty))
 {fire_up(p);
 if(output_active)
 {/*1763:*/
-#line 31224 "texprof.w"
+#line 31230 "texprof.w"
 
 if(profile_on)
 {/*1756:*/
-#line 31125 "texprof.w"
+#line 31131 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1774:*/
-#line 31471 "texprof.w"
+#line 31477 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -20616,14 +20618,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31484 "texprof.w"
+#line 31490 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1774*/
-#line 31129 "texprof.w"
+#line 31135 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -20635,52 +20637,52 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31140 "texprof.w"
+#line 31146 "texprof.w"
  cmd_count++;
 /*1751:*/
-#line 31013 "texprof.w"
+#line 31019 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31017 "texprof.w"
+#line 31023 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31019 "texprof.w"
+#line 31025 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31021 "texprof.w"
+#line 31027 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31023 "texprof.w"
+#line 31029 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31025 "texprof.w"
+#line 31031 "texprof.w"
 
 /*:1751*/
-#line 31141 "texprof.w"
+#line 31147 "texprof.w"
 
 /*1752:*/
-#line 31030 "texprof.w"
+#line 31036 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31035 "texprof.w"
+#line 31041 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1752*/
-#line 31142 "texprof.w"
+#line 31148 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1756*/
-#line 31226 "texprof.w"
+#line 31232 "texprof.w"
 
 prof_file_line= tmp_file_line;
 prof_cmd= tmp_cmd;
@@ -20690,7 +20692,7 @@ prof_depth= tmp_depth;
 
 
 /*:1763*/
-#line 20204 "texprof.w"
+#line 20206 "texprof.w"
 
 return;
 }
@@ -20699,11 +20701,11 @@ goto done;
 }
 
 /*:1004*/
-#line 20086 "texprof.w"
+#line 20088 "texprof.w"
 ;
 if((type(p)<glue_node)||(type(p)> kern_node))goto contribute;
 update_heights:/*1003:*/
-#line 20157 "texprof.w"
+#line 20159 "texprof.w"
 
 if(type(p)==kern_node)q= p;
 else{q= glue_ptr(p);
@@ -20726,10 +20728,10 @@ glue_ptr(p)= r;q= r;
 page_total= page_total+page_depth+width(q);page_depth= 0
 
 /*:1003*/
-#line 20089 "texprof.w"
+#line 20091 "texprof.w"
 ;
 contribute:/*1002:*/
-#line 20150 "texprof.w"
+#line 20152 "texprof.w"
 
 if(page_depth> page_max_depth)
 {page_total= 
@@ -20738,19 +20740,19 @@ page_depth= page_max_depth;
 }
 
 /*:1002*/
-#line 20090 "texprof.w"
+#line 20092 "texprof.w"
 ;
 /*997:*/
-#line 20095 "texprof.w"
+#line 20097 "texprof.w"
 
 link(page_tail)= p;page_tail= p;
 link(contrib_head)= link(p);link(p)= null;goto done
 
 /*:997*/
-#line 20091 "texprof.w"
+#line 20093 "texprof.w"
 ;
 done1:/*998:*/
-#line 20099 "texprof.w"
+#line 20101 "texprof.w"
 
 link(contrib_head)= link(p);link(p)= null;
 if(saving_vdiscards> 0)
@@ -20760,35 +20762,35 @@ tail_page_disc= p;
 else flush_node_list(p)
 
 /*:998*/
-#line 20092 "texprof.w"
+#line 20094 "texprof.w"
 ;
 done:
 
 /*:996*/
-#line 20048 "texprof.w"
+#line 20050 "texprof.w"
 ;
 }while(!(link(contrib_head)==null));
 /*994:*/
-#line 20056 "texprof.w"
+#line 20058 "texprof.w"
 
 if(nest_ptr==0)tail= contrib_head;
 else contrib_tail= contrib_head
 
 /*:994*/
-#line 20050 "texprof.w"
+#line 20052 "texprof.w"
 ;
 /*1763:*/
-#line 31224 "texprof.w"
+#line 31230 "texprof.w"
 
 if(profile_on)
 {/*1756:*/
-#line 31125 "texprof.w"
+#line 31131 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1774:*/
-#line 31471 "texprof.w"
+#line 31477 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -20802,14 +20804,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31484 "texprof.w"
+#line 31490 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1774*/
-#line 31129 "texprof.w"
+#line 31135 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -20821,52 +20823,52 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31140 "texprof.w"
+#line 31146 "texprof.w"
  cmd_count++;
 /*1751:*/
-#line 31013 "texprof.w"
+#line 31019 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31017 "texprof.w"
+#line 31023 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31019 "texprof.w"
+#line 31025 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31021 "texprof.w"
+#line 31027 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31023 "texprof.w"
+#line 31029 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31025 "texprof.w"
+#line 31031 "texprof.w"
 
 /*:1751*/
-#line 31141 "texprof.w"
+#line 31147 "texprof.w"
 
 /*1752:*/
-#line 31030 "texprof.w"
+#line 31036 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31035 "texprof.w"
+#line 31041 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1752*/
-#line 31142 "texprof.w"
+#line 31148 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1756*/
-#line 31226 "texprof.w"
+#line 31232 "texprof.w"
 
 prof_file_line= tmp_file_line;
 prof_cmd= tmp_cmd;
@@ -20876,14 +20878,14 @@ prof_depth= tmp_depth;
 
 
 /*:1763*/
-#line 20051 "texprof.w"
+#line 20053 "texprof.w"
 
 }
 
 /*:993*//*1029:*/
-#line 20662 "texprof.w"
+#line 20664 "texprof.w"
 /*1042:*/
-#line 20995 "texprof.w"
+#line 20997 "texprof.w"
 
 static void app_space(void)
 {pointer q;
@@ -20891,7 +20893,7 @@ if((space_factor>=2000)&&(xspace_skip!=zero_glue))
 q= new_param_glue(xspace_skip_code);
 else{if(space_skip!=zero_glue)main_p= space_skip;
 else/*1041:*/
-#line 20984 "texprof.w"
+#line 20986 "texprof.w"
 
 {main_p= font_glue[cur_font];
 if(main_p==null)
@@ -20904,18 +20906,18 @@ font_glue[cur_font]= main_p;
 }
 
 /*:1041*/
-#line 21001 "texprof.w"
+#line 21003 "texprof.w"
 ;
 main_p= new_spec(main_p);
 /*1043:*/
-#line 21009 "texprof.w"
+#line 21011 "texprof.w"
 
 if(space_factor>=2000)width(main_p)= width(main_p)+extra_space(cur_font);
 stretch(main_p)= xn_over_d(stretch(main_p),space_factor,1000);
 shrink(main_p)= xn_over_d(shrink(main_p),1000,space_factor)
 
 /*:1043*/
-#line 21003 "texprof.w"
+#line 21005 "texprof.w"
 ;
 q= new_glue(main_p);glue_ref_count(main_p)= null;
 }
@@ -20923,7 +20925,7 @@ link(tail)= q;tail= q;
 }
 
 /*:1042*//*1046:*/
-#line 21055 "texprof.w"
+#line 21057 "texprof.w"
 
 static void insert_dollar_sign(void)
 {back_input();cur_tok= math_shift_token+'$';
@@ -20934,7 +20936,7 @@ help2("I've inserted a begin-math/end-math symbol since I think",
 }
 
 /*:1046*//*1048:*/
-#line 21080 "texprof.w"
+#line 21082 "texprof.w"
 
 static void you_cant(void)
 {print_err("You can't use `");
@@ -20944,7 +20946,7 @@ print("' in ");print_mode(mode);
 }
 
 /*:1048*//*1049:*/
-#line 21088 "texprof.w"
+#line 21090 "texprof.w"
 
 static void report_illegal_case(void)
 {you_cant();
@@ -20956,7 +20958,7 @@ error();
 }
 
 /*:1049*//*1050:*/
-#line 21103 "texprof.w"
+#line 21105 "texprof.w"
 
 static bool privileged(void)
 {if(mode> 0)return true;
@@ -20965,7 +20967,7 @@ else{report_illegal_case();return false;
 }
 
 /*:1050*//*1053:*/
-#line 21130 "texprof.w"
+#line 21132 "texprof.w"
 
 static bool its_all_over(void)
 {
@@ -20984,7 +20986,7 @@ return false;
 }
 
 /*:1053*//*1059:*/
-#line 21241 "texprof.w"
+#line 21243 "texprof.w"
 
 static void append_glue(void)
 {small_number s;
@@ -21005,7 +21007,7 @@ if(s> skip_code)subtype(tail)= mu_glue;
 }
 
 /*:1059*//*1060:*/
-#line 21260 "texprof.w"
+#line 21262 "texprof.w"
 
 static void append_kern(void)
 {quarterword s;
@@ -21014,13 +21016,13 @@ tail_append(new_kern(cur_val));subtype(tail)= s;
 }
 
 /*:1060*//*1063:*/
-#line 21304 "texprof.w"
+#line 21306 "texprof.w"
 
 static void off_save(void)
 {pointer p;
 if(cur_group==bottom_level)
 /*1065:*/
-#line 21344 "texprof.w"
+#line 21346 "texprof.w"
 
 {print_err("Extra ");print_cmd_chr(cur_cmd,cur_chr);
 
@@ -21029,12 +21031,12 @@ error();
 }
 
 /*:1065*/
-#line 21308 "texprof.w"
+#line 21310 "texprof.w"
 
 else{back_input();p= get_avail();link(temp_head)= p;
 print_err("Missing ");
 /*1064:*/
-#line 21325 "texprof.w"
+#line 21327 "texprof.w"
 
 switch(cur_group){
 case semi_simple_group:{info(p)= cs_token_flag+frozen_end_group;
@@ -21055,7 +21057,7 @@ default:{info(p)= right_brace_token+'}';print_char('}');
 }
 
 /*:1064*/
-#line 21312 "texprof.w"
+#line 21314 "texprof.w"
 ;
 print(" inserted");ins_list(link(temp_head));
 help5("I've inserted something that you may have forgotten.",
@@ -21068,7 +21070,7 @@ error();
 }
 
 /*:1063*//*1068:*/
-#line 21382 "texprof.w"
+#line 21384 "texprof.w"
 
 static void extra_right_brace(void)
 {print_err("Extra }, or forgotten ");
@@ -21087,7 +21089,7 @@ incr(align_state);
 }
 
 /*:1068*//*1069:*/
-#line 21402 "texprof.w"
+#line 21404 "texprof.w"
 
 static void normal_paragraph(void)
 {if(looseness!=0)eq_word_define(int_base+looseness_code,0);
@@ -21099,13 +21101,13 @@ eq_define(inter_line_penalties_loc,shape_ref,null);
 }
 
 /*:1069*//*1074:*/
-#line 21526 "texprof.w"
+#line 21528 "texprof.w"
 
 static void box_end(int box_context)
 {pointer p;
 small_number a;
 if(box_context<box_flag)/*1075:*/
-#line 21542 "texprof.w"
+#line 21544 "texprof.w"
 
 {if(cur_box!=null)
 {shift_amount(cur_box)= box_context;
@@ -21130,10 +21132,10 @@ link(tail)= cur_box;tail= cur_box;
 }
 
 /*:1075*/
-#line 21531 "texprof.w"
+#line 21533 "texprof.w"
 
 else if(box_context<ship_out_flag)/*1076:*/
-#line 21565 "texprof.w"
+#line 21567 "texprof.w"
 
 {if(box_context<global_box_flag)
 {cur_val= box_context-box_flag;a= 0;
@@ -21145,20 +21147,20 @@ else sa_def_box;
 }
 
 /*:1076*/
-#line 21532 "texprof.w"
+#line 21534 "texprof.w"
 
 else if(cur_box!=null)
 if(box_context> ship_out_flag)/*1077:*/
-#line 21575 "texprof.w"
+#line 21577 "texprof.w"
 
 {/*403:*/
-#line 8607 "texprof.w"
+#line 8609 "texprof.w"
 
 do{get_x_token();
 }while(!((cur_cmd!=spacer)&&(cur_cmd!=relax)))
 
 /*:403*/
-#line 21576 "texprof.w"
+#line 21578 "texprof.w"
 ;
 if(((cur_cmd==hskip)&&(abs(mode)!=vmode))||
 ((cur_cmd==vskip)&&(abs(mode)==vmode)))
@@ -21175,13 +21177,13 @@ flush_node_list(cur_box);
 }
 
 /*:1077*/
-#line 21534 "texprof.w"
+#line 21536 "texprof.w"
 
 else ship_out(cur_box);
 }
 
 /*:1074*//*1078:*/
-#line 21596 "texprof.w"
+#line 21598 "texprof.w"
 
 static void begin_box(int box_context)
 {
@@ -21196,7 +21198,7 @@ change_box(null);
 case copy_code:{scan_register_num();fetch_box(q);cur_box= copy_node_list(q);
 }break;
 case last_box_code:/*1079:*/
-#line 21621 "texprof.w"
+#line 21623 "texprof.w"
 
 {cur_box= null;
 if(abs(mode)==mmode)
@@ -21210,7 +21212,7 @@ help2("Sorry...I usually can't take things from the current page.",
 else{if(!is_char_node(tail))
 if((type(tail)==hlist_node)||(type(tail)==vlist_node))
 /*1080:*/
-#line 21637 "texprof.w"
+#line 21639 "texprof.w"
 
 {q= head;
 do{p= q;
@@ -21225,16 +21227,16 @@ tail= p;link(p)= null;
 done:;}
 
 /*:1080*/
-#line 21633 "texprof.w"
+#line 21635 "texprof.w"
 ;
 }
 }
 
 /*:1079*/
-#line 21610 "texprof.w"
+#line 21612 "texprof.w"
 break;
 case vsplit_code:/*1081:*/
-#line 21652 "texprof.w"
+#line 21654 "texprof.w"
 
 {scan_register_num();n= cur_val;
 if(!scan_keyword("to"))
@@ -21249,10 +21251,10 @@ cur_box= vsplit(n,cur_val);
 }
 
 /*:1081*/
-#line 21612 "texprof.w"
+#line 21614 "texprof.w"
 break;
 default:/*1082:*/
-#line 21668 "texprof.w"
+#line 21670 "texprof.w"
 
 {k= cur_chr-vtop_code;saved(0)= box_context;
 if(k==hmode)
@@ -21276,25 +21278,25 @@ return;
 }
 
 /*:1082*/
-#line 21613 "texprof.w"
+#line 21615 "texprof.w"
 
 }
 box_end(box_context);
 }
 
 /*:1078*//*1083:*/
-#line 21690 "texprof.w"
+#line 21692 "texprof.w"
 
 static void scan_box(int box_context)
 
 {/*403:*/
-#line 8607 "texprof.w"
+#line 8609 "texprof.w"
 
 do{get_x_token();
 }while(!((cur_cmd!=spacer)&&(cur_cmd!=relax)))
 
 /*:403*/
-#line 21693 "texprof.w"
+#line 21695 "texprof.w"
 ;
 if(cur_cmd==make_box)begin_box(box_context);
 else if((box_context>=leader_flag)&&((cur_cmd==hrule)||(cur_cmd==vrule)))
@@ -21310,7 +21312,7 @@ help3("I was expecting to see \\hbox or \\vbox or \\copy or \\box or",
 }
 
 /*:1083*//*1085:*/
-#line 21720 "texprof.w"
+#line 21722 "texprof.w"
 
 static void package(small_number c)
 {scaled h;
@@ -21320,7 +21322,7 @@ d= box_max_depth;unsave();save_ptr= save_ptr-3;
 if(mode==-hmode)cur_box= hpack(link(head),saved(2),saved(1));
 else{cur_box= vpackage(link(head),saved(2),saved(1),d);
 if(c==vtop_code)/*1086:*/
-#line 21738 "texprof.w"
+#line 21740 "texprof.w"
 
 {h= 0;p= list_ptr(cur_box);
 if(p!=null)if(type(p)<=rule_node)h= height(p);
@@ -21328,14 +21330,14 @@ depth(cur_box)= depth(cur_box)-h+height(cur_box);height(cur_box)= h;
 }
 
 /*:1086*/
-#line 21728 "texprof.w"
+#line 21730 "texprof.w"
 ;
 }
 pop_nest();box_end(saved(0));
 }
 
 /*:1085*//*1090:*/
-#line 21769 "texprof.w"
+#line 21771 "texprof.w"
 
 static small_number norm_min(int h)
 {if(h<=0)return 1;else if(h>=63)return 63;
@@ -21358,7 +21360,7 @@ if(nest_ptr==1)build_page();
 }
 
 /*:1090*//*1092:*/
-#line 21793 "texprof.w"
+#line 21795 "texprof.w"
 
 static void indent_in_hmode(void)
 {pointer p,q;
@@ -21373,7 +21375,7 @@ tail_append(p);
 }
 
 /*:1092*//*1094:*/
-#line 21822 "texprof.w"
+#line 21824 "texprof.w"
 
 static void head_for_vmode(void)
 {if(mode<0)
@@ -21390,7 +21392,7 @@ else{back_input();cur_tok= par_token;back_input();token_type= inserted;
 }
 
 /*:1094*//*1095:*/
-#line 21837 "texprof.w"
+#line 21839 "texprof.w"
 
 static void end_graf(void)
 {if(mode==hmode)
@@ -21402,7 +21404,7 @@ error_count= 0;
 }
 
 /*:1095*//*1098:*/
-#line 21858 "texprof.w"
+#line 21860 "texprof.w"
 
 static void begin_insert_or_adjust(void)
 {if(cur_cmd==vadjust)cur_val= 255;
@@ -21420,7 +21422,7 @@ push_nest();mode= -vmode;prev_depth= ignore_depth;
 }
 
 /*:1098*//*1100:*/
-#line 21895 "texprof.w"
+#line 21897 "texprof.w"
 
 static void make_mark(void)
 {pointer p;
@@ -21435,7 +21437,7 @@ mark_ptr(p)= def_ref;link(tail)= p;tail= p;
 }
 
 /*:1100*//*1102:*/
-#line 21914 "texprof.w"
+#line 21916 "texprof.w"
 
 static void append_penalty(void)
 {scan_int();tail_append(new_penalty(cur_val));
@@ -21443,7 +21445,7 @@ if(mode==vmode)build_page();
 }
 
 /*:1102*//*1104:*/
-#line 21933 "texprof.w"
+#line 21935 "texprof.w"
 
 static void delete_last(void)
 {
@@ -21451,7 +21453,7 @@ pointer p,q;
 int m;
 if((mode==vmode)&&(tail==head))
 /*1105:*/
-#line 21955 "texprof.w"
+#line 21957 "texprof.w"
 
 {if((cur_chr!=glue_node)||(last_glue!=max_halfword))
 {you_cant();
@@ -21466,7 +21468,7 @@ error();
 }
 
 /*:1105*/
-#line 21940 "texprof.w"
+#line 21942 "texprof.w"
 
 else{if(!is_char_node(tail))if(type(tail)==cur_chr)
 {q= head;
@@ -21483,21 +21485,21 @@ link(p)= null;flush_node_list(tail);tail= p;
 }
 
 /*:1104*//*1109:*/
-#line 22000 "texprof.w"
+#line 22002 "texprof.w"
 
 static void unpackage(void)
 {
 pointer p;
 int c;
 if(cur_chr> copy_code)/*1533:*/
-#line 28100 "texprof.w"
+#line 28106 "texprof.w"
 
 {link(tail)= disc_ptr[cur_chr];disc_ptr[cur_chr]= null;
 goto done;
 }
 
 /*:1533*/
-#line 22005 "texprof.w"
+#line 22007 "texprof.w"
 ;
 c= cur_chr;scan_register_num();fetch_box(p);
 if(p==null)return;
@@ -21519,7 +21521,7 @@ while(link(tail)!=null)tail= link(tail);
 }
 
 /*:1109*//*1112:*/
-#line 22035 "texprof.w"
+#line 22037 "texprof.w"
 
 static void append_italic_correction(void)
 {
@@ -21536,7 +21538,7 @@ subtype(tail)= explicit;
 }
 
 /*:1112*//*1116:*/
-#line 22069 "texprof.w"
+#line 22071 "texprof.w"
 
 static void append_discretionary(void)
 {int c;
@@ -21551,7 +21553,7 @@ scan_left_brace();push_nest();mode= -hmode;space_factor= 1000;
 }
 
 /*:1116*//*1118:*/
-#line 22089 "texprof.w"
+#line 22091 "texprof.w"
 
 static void build_discretionary(void)
 {
@@ -21559,7 +21561,7 @@ pointer p,q;
 int n;
 unsave();
 /*1120:*/
-#line 22131 "texprof.w"
+#line 22133 "texprof.w"
 
 q= head;p= link(q);n= 0;
 while(p!=null)
@@ -21581,14 +21583,14 @@ q= p;p= link(q);incr(n);
 done:
 
 /*:1120*/
-#line 22097 "texprof.w"
+#line 22099 "texprof.w"
 ;
 p= link(head);pop_nest();
 switch(saved(-1)){
 case 0:pre_break(tail)= p;break;
 case 1:post_break(tail)= p;break;
 case 2:/*1119:*/
-#line 22109 "texprof.w"
+#line 22111 "texprof.w"
 
 {if((n> 0)&&(abs(mode)==mmode))
 {print_err("Illegal math ");print_esc("discretionary");
@@ -21610,7 +21612,7 @@ decr(save_ptr);return;
 }
 
 /*:1119*/
-#line 22103 "texprof.w"
+#line 22105 "texprof.w"
 ;
 }
 incr(saved(-1));new_save_level(disc_group);scan_left_brace();
@@ -21618,7 +21620,7 @@ push_nest();mode= -hmode;space_factor= 1000;
 }
 
 /*:1118*//*1122:*/
-#line 22165 "texprof.w"
+#line 22167 "texprof.w"
 
 static void make_accent(void)
 {double s,t;
@@ -21633,7 +21635,7 @@ if(p!=null)
 a= char_width(f,char_info(f,character(p)));
 do_assignments();
 /*1123:*/
-#line 22185 "texprof.w"
+#line 22187 "texprof.w"
 
 q= null;f= cur_font;
 if((cur_cmd==letter)||(cur_cmd==other_char)||(cur_cmd==char_given))
@@ -21644,10 +21646,10 @@ else if(cur_cmd==char_num)
 else back_input()
 
 /*:1123*/
-#line 22179 "texprof.w"
+#line 22181 "texprof.w"
 ;
 if(q!=null)/*1124:*/
-#line 22201 "texprof.w"
+#line 22203 "texprof.w"
 
 {t= slant(f)/float_constant(65536);
 
@@ -21664,19 +21666,19 @@ tail= new_kern(-a-delta);subtype(tail)= acc_kern;link(p)= tail;p= q;
 }
 
 /*:1124*/
-#line 22180 "texprof.w"
+#line 22182 "texprof.w"
 ;
 link(tail)= p;tail= p;space_factor= 1000;
 }
 }
 
 /*:1122*//*1126:*/
-#line 22229 "texprof.w"
+#line 22231 "texprof.w"
 
 static void align_error(void)
 {if(abs(align_state)> 2)
 /*1127:*/
-#line 22249 "texprof.w"
+#line 22251 "texprof.w"
 
 {print_err("Misplaced ");print_cmd_chr(cur_cmd,cur_chr);
 
@@ -21700,7 +21702,7 @@ error();
 }
 
 /*:1127*/
-#line 22232 "texprof.w"
+#line 22234 "texprof.w"
 
 else{back_input();
 if(align_state<0)
@@ -21719,7 +21721,7 @@ help3("I've put in what seems to be necessary to fix",
 }
 
 /*:1126*//*1128:*/
-#line 22274 "texprof.w"
+#line 22276 "texprof.w"
 
 static void no_align_error(void)
 {print_err("Misplaced ");print_esc("noalign");
@@ -21735,7 +21737,7 @@ help2("I expect to see \\omit only after tab marks or the \\cr of",
 }
 
 /*:1128*//*1130:*/
-#line 22304 "texprof.w"
+#line 22306 "texprof.w"
 
 static void do_endv(void)
 {base_ptr= input_ptr;input_stack[base_ptr]= cur_input;
@@ -21755,7 +21757,7 @@ else off_save();
 }
 
 /*:1130*//*1134:*/
-#line 22339 "texprof.w"
+#line 22341 "texprof.w"
 
 static void cs_error(void)
 {print_err("Extra ");print_esc("endcsname");
@@ -21765,14 +21767,14 @@ error();
 }
 
 /*:1134*//*1135:*/
-#line 22357 "texprof.w"
+#line 22359 "texprof.w"
 
 static void push_math(group_code c)
 {push_nest();mode= -mmode;incompleat_noad= null;new_save_level(c);
 }
 
 /*:1135*//*1137:*/
-#line 22370 "texprof.w"
+#line 22372 "texprof.w"
 
 static void init_math(void)
 {
@@ -21787,20 +21789,20 @@ scaled v;
 scaled d;
 get_token();
 if((cur_cmd==math_shift)&&(mode> 0))/*1144:*/
-#line 22428 "texprof.w"
+#line 22430 "texprof.w"
 
 {if(head==tail)
 {pop_nest();w= -max_dimen;
 }
 else{line_break(display_widow_penalty);
 /*1145:*/
-#line 22448 "texprof.w"
+#line 22450 "texprof.w"
 
 v= shift_amount(just_box)+2*quad(cur_font);w= -max_dimen;
 p= list_ptr(just_box);
 while(p!=null)
 {/*1146:*/
-#line 22465 "texprof.w"
+#line 22467 "texprof.w"
 
 reswitch:if(is_char_node(p))
 {f= font(p);d= char_width(f,char_info(f,character(p)));
@@ -21810,18 +21812,18 @@ switch(type(p)){
 case hlist_node:case vlist_node:case rule_node:{d= width(p);goto found;
 }
 case ligature_node:/*651:*/
-#line 13487 "texprof.w"
+#line 13489 "texprof.w"
 
 {mem[lig_trick]= mem[lig_char(p)];link(lig_trick)= link(p);
 p= lig_trick;goto reswitch;
 }
 
 /*:651*/
-#line 22473 "texprof.w"
+#line 22475 "texprof.w"
 
 case kern_node:case math_node:d= width(p);break;
 case glue_node:/*1147:*/
-#line 22487 "texprof.w"
+#line 22489 "texprof.w"
 
 {q= glue_ptr(p);d= width(q);
 if(glue_sign(just_box)==stretching)
@@ -21838,20 +21840,20 @@ if(subtype(p)>=a_leaders)goto found;
 }
 
 /*:1147*/
-#line 22476 "texprof.w"
+#line 22478 "texprof.w"
 break;
 case whatsit_node:/*1360:*/
-#line 25617 "texprof.w"
+#line 25623 "texprof.w"
 d= 0
 
 /*:1360*/
-#line 22477 "texprof.w"
+#line 22479 "texprof.w"
 ;break;
 default:d= 0;
 }
 
 /*:1146*/
-#line 22453 "texprof.w"
+#line 22455 "texprof.w"
 ;
 if(v<max_dimen)v= v+d;
 goto not_found;
@@ -21865,12 +21867,12 @@ not_found:p= link(p);
 done:
 
 /*:1145*/
-#line 22435 "texprof.w"
+#line 22437 "texprof.w"
 ;
 }
 
 /*1148:*/
-#line 22505 "texprof.w"
+#line 22507 "texprof.w"
 
 if(par_shape_ptr==null)
 if((hang_indent!=0)&&
@@ -21888,7 +21890,7 @@ s= mem[p-1].sc;l= mem[p].sc;
 }
 
 /*:1148*/
-#line 22438 "texprof.w"
+#line 22440 "texprof.w"
 ;
 push_math(math_shift_group);mode= mmode;
 eq_word_define(int_base+cur_fam_code,-1);
@@ -21900,58 +21902,58 @@ if(nest_ptr==1)build_page();
 }
 
 /*:1144*/
-#line 22383 "texprof.w"
+#line 22385 "texprof.w"
 
 else{back_input();/*1138:*/
-#line 22388 "texprof.w"
+#line 22390 "texprof.w"
 
 {push_math(math_shift_group);eq_word_define(int_base+cur_fam_code,-1);
 if(every_math!=null)begin_token_list(every_math,every_math_text);
 }
 
 /*:1138*/
-#line 22384 "texprof.w"
+#line 22386 "texprof.w"
 ;
 }
 }
 
 /*:1137*//*1141:*/
-#line 22412 "texprof.w"
+#line 22414 "texprof.w"
 
 static void start_eq_no(void)
 {saved(0)= cur_chr;incr(save_ptr);
 /*1138:*/
-#line 22388 "texprof.w"
+#line 22390 "texprof.w"
 
 {push_math(math_shift_group);eq_word_define(int_base+cur_fam_code,-1);
 if(every_math!=null)begin_token_list(every_math,every_math_text);
 }
 
 /*:1138*/
-#line 22415 "texprof.w"
+#line 22417 "texprof.w"
 ;
 }
 
 /*:1141*//*1150:*/
-#line 22549 "texprof.w"
+#line 22551 "texprof.w"
 
 static void scan_math(pointer p)
 {
 int c;
 restart:/*403:*/
-#line 8607 "texprof.w"
+#line 8609 "texprof.w"
 
 do{get_x_token();
 }while(!((cur_cmd!=spacer)&&(cur_cmd!=relax)))
 
 /*:403*/
-#line 22553 "texprof.w"
+#line 22555 "texprof.w"
 ;
 reswitch:switch(cur_cmd){
 case letter:case other_char:case char_given:{c= ho(math_code(cur_chr));
 if(c==0100000)
 {/*1151:*/
-#line 22578 "texprof.w"
+#line 22580 "texprof.w"
 
 {cur_cs= cur_chr+active_base;
 cur_cmd= eq_type(cur_cs);cur_chr= equiv(cur_cs);
@@ -21959,7 +21961,7 @@ x_token();back_input();
 }
 
 /*:1151*/
-#line 22557 "texprof.w"
+#line 22559 "texprof.w"
 ;
 goto restart;
 }
@@ -21973,14 +21975,14 @@ case math_given:c= cur_chr;break;
 case delim_num:{scan_twenty_seven_bit_int();c= cur_val/010000;
 }break;
 default:/*1152:*/
-#line 22587 "texprof.w"
+#line 22589 "texprof.w"
 
 {back_input();scan_left_brace();
 saved(0)= p;incr(save_ptr);push_math(math_group);return;
 }
 
 /*:1152*/
-#line 22569 "texprof.w"
+#line 22571 "texprof.w"
 
 }
 math_type(p)= math_char;character(p)= qi(c%256);
@@ -21989,13 +21991,13 @@ else fam(p)= (c/256)%16;
 }
 
 /*:1150*//*1154:*/
-#line 22618 "texprof.w"
+#line 22620 "texprof.w"
 
 static void set_math_char(int c)
 {pointer p;
 if(c>=0100000)
 /*1151:*/
-#line 22578 "texprof.w"
+#line 22580 "texprof.w"
 
 {cur_cs= cur_chr+active_base;
 cur_cmd= eq_type(cur_cs);cur_chr= equiv(cur_cs);
@@ -22003,7 +22005,7 @@ x_token();back_input();
 }
 
 /*:1151*/
-#line 22622 "texprof.w"
+#line 22624 "texprof.w"
 
 else{p= new_noad();math_type(nucleus(p))= math_char;
 character(nucleus(p))= qi(c%256);
@@ -22018,7 +22020,7 @@ link(tail)= p;tail= p;
 }
 
 /*:1154*//*1158:*/
-#line 22690 "texprof.w"
+#line 22692 "texprof.w"
 
 static void math_limit_switch(void)
 {
@@ -22031,18 +22033,18 @@ help1("I'm ignoring this misplaced \\limits or \\nolimits command.");error();
 }
 
 /*:1158*//*1159:*/
-#line 22706 "texprof.w"
+#line 22708 "texprof.w"
 
 static void scan_delimiter(pointer p,bool r)
 {if(r)scan_twenty_seven_bit_int();
 else{/*403:*/
-#line 8607 "texprof.w"
+#line 8609 "texprof.w"
 
 do{get_x_token();
 }while(!((cur_cmd!=spacer)&&(cur_cmd!=relax)))
 
 /*:403*/
-#line 22709 "texprof.w"
+#line 22711 "texprof.w"
 ;
 switch(cur_cmd){
 case letter:case other_char:cur_val= del_code(cur_chr);break;
@@ -22051,7 +22053,7 @@ default:cur_val= -1;
 }
 }
 if(cur_val<0)/*1160:*/
-#line 22724 "texprof.w"
+#line 22726 "texprof.w"
 
 {print_err("Missing delimiter (. inserted)");
 
@@ -22065,7 +22067,7 @@ back_error();cur_val= 0;
 }
 
 /*:1160*/
-#line 22717 "texprof.w"
+#line 22719 "texprof.w"
 ;
 small_fam(p)= (cur_val/04000000)%16;
 small_char(p)= qi((cur_val/010000)%256);
@@ -22074,7 +22076,7 @@ large_char(p)= qi(cur_val%256);
 }
 
 /*:1159*//*1162:*/
-#line 22739 "texprof.w"
+#line 22741 "texprof.w"
 
 static void math_radical(void)
 {tail_append(get_node(radical_noad_size));
@@ -22086,12 +22088,12 @@ scan_delimiter(left_delimiter(tail),true);scan_math(nucleus(tail));
 }
 
 /*:1162*//*1164:*/
-#line 22752 "texprof.w"
+#line 22754 "texprof.w"
 
 static void math_ac(void)
 {if(cur_cmd==accent)
 /*1165:*/
-#line 22769 "texprof.w"
+#line 22771 "texprof.w"
 
 {print_err("Please use ");print_esc("mathaccent");
 print(" for accents in math mode");
@@ -22102,7 +22104,7 @@ error();
 }
 
 /*:1165*/
-#line 22755 "texprof.w"
+#line 22757 "texprof.w"
 ;
 tail_append(get_node(accent_noad_size));
 type(tail)= accent_noad;subtype(tail)= normal;
@@ -22118,7 +22120,7 @@ scan_math(nucleus(tail));
 }
 
 /*:1164*//*1171:*/
-#line 22816 "texprof.w"
+#line 22818 "texprof.w"
 
 static void append_choices(void)
 {tail_append(new_choice());incr(save_ptr);saved(-1)= 0;
@@ -22126,15 +22128,15 @@ push_math(math_choice_group);scan_left_brace();
 }
 
 /*:1171*//*1173:*/
-#line 22825 "texprof.w"
+#line 22827 "texprof.w"
 
 /*1183:*/
-#line 22970 "texprof.w"
+#line 22972 "texprof.w"
 
 static pointer fin_mlist(pointer p)
 {pointer q;
 if(incompleat_noad!=null)/*1184:*/
-#line 22979 "texprof.w"
+#line 22981 "texprof.w"
 
 {math_type(denominator(incompleat_noad))= sub_mlist;
 info(denominator(incompleat_noad))= link(head);
@@ -22148,7 +22150,7 @@ link(delim_ptr)= incompleat_noad;link(incompleat_noad)= p;
 }
 
 /*:1184*/
-#line 22973 "texprof.w"
+#line 22975 "texprof.w"
 
 else{link(tail)= p;q= link(head);
 }
@@ -22156,7 +22158,7 @@ pop_nest();return q;
 }
 
 /*:1183*/
-#line 22826 "texprof.w"
+#line 22828 "texprof.w"
 
 static void build_choices(void)
 {
@@ -22173,7 +22175,7 @@ incr(saved(-1));push_math(math_choice_group);scan_left_brace();
 }
 
 /*:1173*//*1175:*/
-#line 22849 "texprof.w"
+#line 22851 "texprof.w"
 
 static void sub_sup(void)
 {small_number t;
@@ -22184,7 +22186,7 @@ if(tail!=head)if(scripts_allowed(tail))
 t= math_type(p);
 }
 if((p==null)||(t!=empty))/*1176:*/
-#line 22862 "texprof.w"
+#line 22864 "texprof.w"
 
 {tail_append(new_noad());
 p= supscr(tail)+cur_cmd-sup_mark;
@@ -22203,20 +22205,20 @@ error();
 }
 
 /*:1176*/
-#line 22858 "texprof.w"
+#line 22860 "texprof.w"
 ;
 scan_math(p);
 }
 
 /*:1175*//*1180:*/
-#line 22919 "texprof.w"
+#line 22921 "texprof.w"
 
 static void math_fraction(void)
 {small_number c;
 c= cur_chr;
 if(incompleat_noad!=null)
 /*1182:*/
-#line 22951 "texprof.w"
+#line 22953 "texprof.w"
 
 {if(c>=delimited_code)
 {scan_delimiter(garbage,false);scan_delimiter(garbage,false);
@@ -22231,7 +22233,7 @@ error();
 }
 
 /*:1182*/
-#line 22924 "texprof.w"
+#line 22926 "texprof.w"
 
 else{incompleat_noad= get_node(fraction_noad_size);
 type(incompleat_noad)= fraction_noad;
@@ -22243,7 +22245,7 @@ mem[left_delimiter(incompleat_noad)].qqqq= null_delimiter;
 mem[right_delimiter(incompleat_noad)].qqqq= null_delimiter;
 link(head)= null;tail= head;
 /*1181:*/
-#line 22938 "texprof.w"
+#line 22940 "texprof.w"
 
 if(c>=delimited_code)
 {scan_delimiter(left_delimiter(incompleat_noad),false);
@@ -22258,13 +22260,13 @@ case atop_code:thickness(incompleat_noad)= 0;
 }
 
 /*:1181*/
-#line 22934 "texprof.w"
+#line 22936 "texprof.w"
 ;
 }
 }
 
 /*:1180*//*1190:*/
-#line 23035 "texprof.w"
+#line 23037 "texprof.w"
 
 static void math_left_right(void)
 {small_number t;
@@ -22273,7 +22275,7 @@ pointer q;
 t= cur_chr;
 if((t!=left_noad)&&(cur_group!=math_left_group))
 /*1191:*/
-#line 23063 "texprof.w"
+#line 23065 "texprof.w"
 
 {if(cur_group==math_shift_group)
 {scan_delimiter(garbage,false);
@@ -22293,7 +22295,7 @@ else off_save();
 }
 
 /*:1191*/
-#line 23042 "texprof.w"
+#line 23044 "texprof.w"
 
 else{p= new_noad();type(p)= t;
 scan_delimiter(delimiter(p),false);
@@ -22316,7 +22318,7 @@ info(nucleus(tail))= q;
 }
 
 /*:1190*//*1193:*/
-#line 23087 "texprof.w"
+#line 23089 "texprof.w"
 
 static void after_math(void)
 {bool l;
@@ -22325,7 +22327,7 @@ int m;
 pointer p;
 pointer a;
 /*1197:*/
-#line 23171 "texprof.w"
+#line 23173 "texprof.w"
 
 pointer b;
 scaled w;
@@ -22339,11 +22341,11 @@ pointer r;
 pointer t;
 
 /*:1197*/
-#line 23094 "texprof.w"
+#line 23096 "texprof.w"
 
 danger= false;
 /*1194:*/
-#line 23117 "texprof.w"
+#line 23119 "texprof.w"
 
 if((font_params[fam_fnt(2+text_size)]<total_mathsy_params)||
 (font_params[fam_fnt(2+script_size)]<total_mathsy_params)||
@@ -22366,12 +22368,12 @@ error();flush_math();danger= true;
 }
 
 /*:1194*/
-#line 23097 "texprof.w"
+#line 23099 "texprof.w"
 ;
 m= mode;l= false;p= fin_mlist(null);
 if(mode==-m)
 {/*1196:*/
-#line 23156 "texprof.w"
+#line 23158 "texprof.w"
 
 {get_x_token();
 if(cur_cmd!=math_shift)
@@ -22384,7 +22386,7 @@ back_error();
 }
 
 /*:1196*/
-#line 23100 "texprof.w"
+#line 23102 "texprof.w"
 ;
 cur_mlist= p;cur_style= text_style;mlist_penalties= false;
 mlist_to_hlist();a= hpack(link(temp_head),natural);
@@ -22392,7 +22394,7 @@ unsave();decr(save_ptr);
 if(saved(0)==1)l= true;
 danger= false;
 /*1194:*/
-#line 23117 "texprof.w"
+#line 23119 "texprof.w"
 
 if((font_params[fam_fnt(2+text_size)]<total_mathsy_params)||
 (font_params[fam_fnt(2+script_size)]<total_mathsy_params)||
@@ -22415,13 +22417,13 @@ error();flush_math();danger= true;
 }
 
 /*:1194*/
-#line 23107 "texprof.w"
+#line 23109 "texprof.w"
 ;
 m= mode;p= fin_mlist(null);
 }
 else a= null;
 if(m<0)/*1195:*/
-#line 23144 "texprof.w"
+#line 23146 "texprof.w"
 
 {tail_append(new_math(math_surround,before));
 cur_mlist= p;cur_style= text_style;mlist_penalties= (mode> 0);mlist_to_hlist();
@@ -22432,10 +22434,10 @@ space_factor= 1000;unsave();
 }
 
 /*:1195*/
-#line 23111 "texprof.w"
+#line 23113 "texprof.w"
 
 else{if(a==null)/*1196:*/
-#line 23156 "texprof.w"
+#line 23158 "texprof.w"
 
 {get_x_token();
 if(cur_cmd!=math_shift)
@@ -22448,10 +22450,10 @@ back_error();
 }
 
 /*:1196*/
-#line 23112 "texprof.w"
+#line 23114 "texprof.w"
 ;
 /*1198:*/
-#line 23187 "texprof.w"
+#line 23189 "texprof.w"
 
 cur_mlist= p;cur_style= display_style;mlist_penalties= false;
 mlist_to_hlist();p= link(temp_head);
@@ -22465,7 +22467,7 @@ else{e= width(a);q= e+math_quad(text_size);
 }
 if(w+q> z)
 /*1200:*/
-#line 23223 "texprof.w"
+#line 23225 "texprof.w"
 
 {if((e!=0)&&((w-total_shrink[normal]+q<=z)||
 (total_shrink[fil]!=0)||(total_shrink[fill]!=0)||
@@ -22483,10 +22485,10 @@ w= width(b);
 }
 
 /*:1200*/
-#line 23200 "texprof.w"
+#line 23202 "texprof.w"
 ;
 /*1201:*/
-#line 23247 "texprof.w"
+#line 23249 "texprof.w"
 
 d= half(z-w);
 if((e> 0)&&(d<2*e))
@@ -22495,10 +22497,10 @@ if(p!=null)if(!is_char_node(p))if(type(p)==glue_node)d= 0;
 }
 
 /*:1201*/
-#line 23202 "texprof.w"
+#line 23204 "texprof.w"
 ;
 /*1202:*/
-#line 23260 "texprof.w"
+#line 23262 "texprof.w"
 
 tail_append(new_penalty(pre_display_penalty));
 if((d+s<=pre_display_size)||l)
@@ -22514,10 +22516,10 @@ tail_append(new_penalty(inf_penalty));
 else tail_append(new_param_glue(g1))
 
 /*:1202*/
-#line 23203 "texprof.w"
+#line 23205 "texprof.w"
 ;
 /*1203:*/
-#line 23274 "texprof.w"
+#line 23276 "texprof.w"
 
 if(e!=0)
 {r= new_kern(z-w-e-d);
@@ -22531,10 +22533,10 @@ b= hpack(b,natural);
 shift_amount(b)= s+d;append_to_vlist(b)
 
 /*:1203*/
-#line 23204 "texprof.w"
+#line 23206 "texprof.w"
 ;
 /*1204:*/
-#line 23286 "texprof.w"
+#line 23288 "texprof.w"
 
 if((a!=null)&&(e==0)&&!l)
 {tail_append(new_penalty(inf_penalty));
@@ -22549,18 +22551,18 @@ tail_append(new_penalty(post_display_penalty));
 if(g2> 0)tail_append(new_param_glue(g2))
 
 /*:1204*/
-#line 23205 "texprof.w"
+#line 23207 "texprof.w"
 ;
 resume_after_display()
 
 /*:1198*/
-#line 23113 "texprof.w"
+#line 23115 "texprof.w"
 ;
 }
 }
 
 /*:1193*//*1199:*/
-#line 23208 "texprof.w"
+#line 23210 "texprof.w"
 
 static void resume_after_display(void)
 {if(cur_group!=math_shift_group)confusion("display");
@@ -22570,22 +22572,22 @@ push_nest();mode= hmode;space_factor= 1000;set_cur_lang;clang= cur_lang;
 prev_graf= (norm_min(left_hyphen_min)*0100+norm_min(right_hyphen_min))
 *0200000+cur_lang;
 /*442:*/
-#line 9214 "texprof.w"
+#line 9216 "texprof.w"
 
 {get_x_token();if(cur_cmd!=spacer)back_input();
 }
 
 /*:442*/
-#line 23216 "texprof.w"
+#line 23218 "texprof.w"
 ;
 if(nest_ptr==1)build_page();
 }
 
 /*:1199*//*1210:*/
-#line 23407 "texprof.w"
+#line 23409 "texprof.w"
 
 /*1214:*/
-#line 23485 "texprof.w"
+#line 23487 "texprof.w"
 
 static void get_r_token(void)
 {
@@ -22606,7 +22608,7 @@ cur_tok= cs_token_flag+frozen_protection;ins_error();goto restart;
 }
 
 /*:1214*//*1228:*/
-#line 23732 "texprof.w"
+#line 23734 "texprof.w"
 
 static void trap_zero_glue(void)
 {if((width(cur_val)==0)&&(stretch(cur_val)==0)&&(shrink(cur_val)==0))
@@ -22616,7 +22618,7 @@ delete_glue_ref(cur_val);cur_val= zero_glue;
 }
 
 /*:1228*//*1235:*/
-#line 23813 "texprof.w"
+#line 23815 "texprof.w"
 
 static void do_register_command(small_number a)
 {
@@ -22627,7 +22629,7 @@ int w;
 q= cur_cmd;
 e= false;
 /*1236:*/
-#line 23845 "texprof.w"
+#line 23847 "texprof.w"
 
 {if(q!=internal_register)
 {get_x_token();
@@ -22662,14 +22664,14 @@ found:if(p<glue_val)if(e)w= sa_int(l);else w= eqtb[l].i;
 else if(e)s= sa_ptr(l);else s= equiv(l)
 
 /*:1236*/
-#line 23822 "texprof.w"
+#line 23824 "texprof.w"
 ;
 if(q==internal_register)scan_optional_equals();
 else if(scan_keyword("by"))do_nothing;
 
 arith_error= false;
 if(q<multiply)/*1237:*/
-#line 23878 "texprof.w"
+#line 23880 "texprof.w"
 
 if(p<glue_val)
 {if(p==int_val)scan_int();else scan_normal_dimen;
@@ -22677,7 +22679,7 @@ if(q==advance)cur_val= cur_val+w;
 }
 else{scan_glue(p);
 if(q==advance)/*1238:*/
-#line 23887 "texprof.w"
+#line 23889 "texprof.w"
 
 {q= new_spec(cur_val);r= s;
 delete_glue_ref(cur_val);
@@ -22696,15 +22698,15 @@ cur_val= q;
 }
 
 /*:1238*/
-#line 23884 "texprof.w"
+#line 23886 "texprof.w"
 ;
 }
 
 /*:1237*/
-#line 23827 "texprof.w"
+#line 23829 "texprof.w"
 
 else/*1239:*/
-#line 23904 "texprof.w"
+#line 23906 "texprof.w"
 
 {scan_int();
 if(p<glue_val)
@@ -22727,7 +22729,7 @@ cur_val= r;
 }
 
 /*:1239*/
-#line 23828 "texprof.w"
+#line 23830 "texprof.w"
 ;
 if(arith_error)
 {print_err("Arithmetic overflow");
@@ -22743,7 +22745,7 @@ else{trap_zero_glue();sa_define(l,cur_val,l,glue_ref,cur_val);
 }
 
 /*:1235*//*1242:*/
-#line 23956 "texprof.w"
+#line 23958 "texprof.w"
 
 static void alter_aux(void)
 {halfword c;
@@ -22765,7 +22767,7 @@ else space_factor= cur_val;
 }
 
 /*:1242*//*1243:*/
-#line 23976 "texprof.w"
+#line 23978 "texprof.w"
 
 static void alter_prev_graf(void)
 {int p;
@@ -22783,7 +22785,7 @@ else{nest[p].pg_field= cur_val;cur_list= nest[nest_ptr];
 }
 
 /*:1243*//*1244:*/
-#line 23992 "texprof.w"
+#line 23994 "texprof.w"
 
 static void alter_page_so_far(void)
 {int c;
@@ -22792,7 +22794,7 @@ page_so_far[c]= cur_val;
 }
 
 /*:1244*//*1245:*/
-#line 23999 "texprof.w"
+#line 24001 "texprof.w"
 
 static void alter_integer(void)
 {small_number c;
@@ -22800,7 +22802,7 @@ static void alter_integer(void)
 c= cur_chr;scan_optional_equals();scan_int();
 if(c==0)dead_cycles= cur_val
 /*1426:*/
-#line 26408 "texprof.w"
+#line 26414 "texprof.w"
 ;
 else if(c==2)
 {if((cur_val<batch_mode)||(cur_val> error_stop_mode))
@@ -22815,13 +22817,13 @@ else{cur_chr= cur_val;new_interaction();
 }
 
 /*:1426*/
-#line 24005 "texprof.w"
+#line 24007 "texprof.w"
 
 else insert_penalties= cur_val;
 }
 
 /*:1245*//*1246:*/
-#line 24009 "texprof.w"
+#line 24011 "texprof.w"
 
 static void alter_box_dimen(void)
 {small_number c;
@@ -22832,7 +22834,7 @@ if(b!=null)mem[b+c].sc= cur_val;
 }
 
 /*:1246*//*1256:*/
-#line 24103 "texprof.w"
+#line 24105 "texprof.w"
 
 static void new_font(small_number a)
 {
@@ -22856,11 +22858,11 @@ str_room(1);t= make_string();
 }
 define(u,set_font,null_font);scan_optional_equals();scan_file_name();
 /*1257:*/
-#line 24132 "texprof.w"
+#line 24134 "texprof.w"
 
 name_in_progress= true;
 if(scan_keyword("at"))/*1258:*/
-#line 24149 "texprof.w"
+#line 24151 "texprof.w"
 
 {scan_normal_dimen;s= cur_val;
 if((s<=0)||(s>=01000000000))
@@ -22874,7 +22876,7 @@ error();s= 10*unity;
 }
 
 /*:1258*/
-#line 24134 "texprof.w"
+#line 24136 "texprof.w"
 
 
 else if(scan_keyword("scaled"))
@@ -22891,10 +22893,10 @@ else s= -1000;
 name_in_progress= false
 
 /*:1257*/
-#line 24125 "texprof.w"
+#line 24127 "texprof.w"
 ;
 /*1259:*/
-#line 24165 "texprof.w"
+#line 24167 "texprof.w"
 
 flushable_string= str_ptr-1;
 for(f= font_base+1;f<=font_ptr;f++)
@@ -22910,14 +22912,14 @@ goto common_ending;
 }
 
 /*:1259*/
-#line 24127 "texprof.w"
+#line 24129 "texprof.w"
 ;
 f= read_font_info(u,cur_name,cur_area,s);
 common_ending:define(u,set_font,f);eqtb[font_id_base+f]= eqtb[u];font_id_text(f)= t;
 }
 
 /*:1256*//*1264:*/
-#line 24208 "texprof.w"
+#line 24210 "texprof.w"
 
 static void new_interaction(void)
 {print_ln();
@@ -22928,13 +22930,13 @@ interaction= cur_chr;
 if(interaction==batch_mode)selector= no_print;else selector= term_only
 
 /*:74*/
-#line 24212 "texprof.w"
+#line 24214 "texprof.w"
 ;
 if(log_opened)selector= selector+2;
 }
 
 /*:1264*/
-#line 23408 "texprof.w"
+#line 23410 "texprof.w"
 
 static void prefixed_command(void)
 {
@@ -22949,17 +22951,17 @@ a= 0;
 while(cur_cmd==prefix)
 {if(!odd(a/cur_chr))a= a+cur_chr;
 /*403:*/
-#line 8607 "texprof.w"
+#line 8609 "texprof.w"
 
 do{get_x_token();
 }while(!((cur_cmd!=spacer)&&(cur_cmd!=relax)))
 
 /*:403*/
-#line 23421 "texprof.w"
+#line 23423 "texprof.w"
 ;
 if(cur_cmd<=max_non_prefixed_command)
 /*1211:*/
-#line 23436 "texprof.w"
+#line 23438 "texprof.w"
 
 {print_err("You can't use a prefix with `");
 
@@ -22971,12 +22973,12 @@ back_error();return;
 }
 
 /*:1211*/
-#line 23423 "texprof.w"
+#line 23425 "texprof.w"
 ;
 if(tracing_commands> 2)if(eTeX_ex)show_cur_cmd_chr();
 }
 /*1212:*/
-#line 23446 "texprof.w"
+#line 23448 "texprof.w"
 
 if(a>=8)
 {j= protected_token;a= a-8;
@@ -22998,10 +23000,10 @@ error();
 }
 
 /*:1212*/
-#line 23426 "texprof.w"
+#line 23428 "texprof.w"
 ;
 /*1213:*/
-#line 23473 "texprof.w"
+#line 23475 "texprof.w"
 
 if(global_defs!=0)
 if(global_defs<0)
@@ -23011,16 +23013,16 @@ else{if(!global)a= a+4;
 }
 
 /*:1213*/
-#line 23427 "texprof.w"
+#line 23429 "texprof.w"
 ;
 switch(cur_cmd){
 /*1216:*/
-#line 23511 "texprof.w"
+#line 23513 "texprof.w"
 
 case set_font:define(cur_font_loc,data,cur_chr);break;
 
 /*:1216*//*1217:*/
-#line 23518 "texprof.w"
+#line 23520 "texprof.w"
 
 case def:{uint32_t def_fl;
 if(odd(cur_chr)&&!global&&(global_defs>=0))a= a+4;
@@ -23035,7 +23037,7 @@ fl_mem[def_ref]= def_fl;
 }break;
 
 /*:1217*//*1220:*/
-#line 23542 "texprof.w"
+#line 23544 "texprof.w"
 
 case let:{n= cur_chr;
 get_r_token();p= cur_cs;
@@ -23058,7 +23060,7 @@ define(p,cur_cmd,cur_chr);
 }break;
 
 /*:1220*//*1223:*/
-#line 23614 "texprof.w"
+#line 23616 "texprof.w"
 
 case shorthand_def:{n= cur_chr;get_r_token();p= cur_cs;define(p,relax,256);
 scan_optional_equals();
@@ -23088,7 +23090,7 @@ case toks_def_code:define(p,assign_toks,toks_base+cur_val);
 }break;
 
 /*:1223*//*1224:*/
-#line 23642 "texprof.w"
+#line 23644 "texprof.w"
 
 case read_to_cs:{j= cur_chr;scan_int();n= cur_val;
 if(!scan_keyword("to"))
@@ -23103,7 +23105,7 @@ p= cur_cs;read_toks(n,p,j);define(p,call,cur_val);
 }break;
 
 /*:1224*//*1225:*/
-#line 23659 "texprof.w"
+#line 23661 "texprof.w"
 
 case toks_register:case assign_toks:{uint32_t def_fl= cur_file_line;q= cur_cs;
 e= false;
@@ -23120,16 +23122,16 @@ else e= true;
 p= cur_chr;
 scan_optional_equals();
 /*403:*/
-#line 8607 "texprof.w"
+#line 8609 "texprof.w"
 
 do{get_x_token();
 }while(!((cur_cmd!=spacer)&&(cur_cmd!=relax)))
 
 /*:403*/
-#line 23674 "texprof.w"
+#line 23676 "texprof.w"
 ;
 if(cur_cmd!=left_brace)/*1226:*/
-#line 23694 "texprof.w"
+#line 23696 "texprof.w"
 
 if((cur_cmd==toks_register)||(cur_cmd==assign_toks))
 {if(cur_cmd==toks_register)
@@ -23150,7 +23152,7 @@ goto done;
 }
 
 /*:1226*/
-#line 23676 "texprof.w"
+#line 23678 "texprof.w"
 ;
 back_input();cur_cs= q;q= scan_toks(false,false);
 if(link(def_ref)==null)
@@ -23170,7 +23172,7 @@ fl_mem[def_ref]= def_fl;
 }break;
 
 /*:1225*//*1227:*/
-#line 23715 "texprof.w"
+#line 23717 "texprof.w"
 
 case assign_int:{p= cur_chr;scan_optional_equals();scan_int();
 word_define(p,cur_val);
@@ -23185,10 +23187,10 @@ define(p,glue_ref,cur_val);
 }break;
 
 /*:1227*//*1231:*/
-#line 23775 "texprof.w"
+#line 23777 "texprof.w"
 
 case def_code:{/*1232:*/
-#line 23793 "texprof.w"
+#line 23795 "texprof.w"
 
 if(cur_chr==cat_code_base)n= max_char_code;
 else if(cur_chr==math_code_base)n= 0100000;
@@ -23197,7 +23199,7 @@ else if(cur_chr==del_code_base)n= 077777777;
 else n= 255
 
 /*:1232*/
-#line 23776 "texprof.w"
+#line 23778 "texprof.w"
 ;
 p= cur_chr;scan_char_num();p= p+cur_val;scan_optional_equals();
 scan_int();
@@ -23216,20 +23218,20 @@ else word_define(p,cur_val);
 }break;
 
 /*:1231*//*1233:*/
-#line 23800 "texprof.w"
+#line 23802 "texprof.w"
 
 case def_family:{p= cur_chr;scan_four_bit_int();p= p+cur_val;
 scan_optional_equals();scan_font_ident();define(p,data,cur_val);
 }break;
 
 /*:1233*//*1234:*/
-#line 23807 "texprof.w"
+#line 23809 "texprof.w"
 
 case internal_register:case advance:
 case multiply:case divide:do_register_command(a);break;
 
 /*:1234*//*1240:*/
-#line 23929 "texprof.w"
+#line 23931 "texprof.w"
 
 case set_box:{scan_register_num();
 if(global)n= global_box_flag+cur_val;else n= box_flag+cur_val;
@@ -23243,7 +23245,7 @@ help2("Sorry, \\setbox is not allowed after \\halign in a display,",
 }break;
 
 /*:1240*//*1241:*/
-#line 23949 "texprof.w"
+#line 23951 "texprof.w"
 
 case set_aux:alter_aux();break;
 case set_prev_graf:alter_prev_graf();break;
@@ -23252,7 +23254,7 @@ case set_page_int:alter_integer();break;
 case set_box_dimen:alter_box_dimen();break;
 
 /*:1241*//*1247:*/
-#line 24020 "texprof.w"
+#line 24022 "texprof.w"
 
 case set_shape:{q= cur_chr;scan_optional_equals();scan_int();n= cur_val;
 if(n<=0)p= null;
@@ -23276,14 +23278,14 @@ define(q,shape_ref,p);
 }break;
 
 /*:1247*//*1251:*/
-#line 24061 "texprof.w"
+#line 24063 "texprof.w"
 
 case hyph_data:if(cur_chr==1)
 {
 #ifdef INIT
 new_patterns();goto done;
 #endif
-#line 24067 "texprof.w"
+#line 24069 "texprof.w"
  print_err("Patterns can be loaded only by INITEX");
 
 help0;error();
@@ -23294,7 +23296,7 @@ else{new_hyph_exceptions();goto done;
 }break;
 
 /*:1251*//*1252:*/
-#line 24079 "texprof.w"
+#line 24081 "texprof.w"
 
 case assign_font_dimen:{find_font_dimen(true);k= cur_val;
 scan_optional_equals();scan_normal_dimen;font_info[k].sc= cur_val;
@@ -23305,46 +23307,46 @@ if(n==0)hyphen_char[f]= cur_val;else skew_char[f]= cur_val;
 }break;
 
 /*:1252*//*1255:*/
-#line 24100 "texprof.w"
+#line 24102 "texprof.w"
 
 case def_font:new_font(a);break;
 
 /*:1255*//*1263:*/
-#line 24205 "texprof.w"
+#line 24207 "texprof.w"
 
 case set_interaction:new_interaction();break;
 
 /*:1263*/
-#line 23429 "texprof.w"
+#line 23431 "texprof.w"
 
 default:confusion("prefix");
 
 }
 done:/*1268:*/
-#line 24230 "texprof.w"
+#line 24232 "texprof.w"
 
 if(after_token!=0)
 {cur_tok= after_token;back_input();after_token= 0;
 }
 
 /*:1268*/
-#line 23433 "texprof.w"
+#line 23435 "texprof.w"
 ;
 }
 
 /*:1210*//*1269:*/
-#line 24238 "texprof.w"
+#line 24240 "texprof.w"
 
 static void do_assignments(void)
 {
 loop{/*403:*/
-#line 8607 "texprof.w"
+#line 8609 "texprof.w"
 
 do{get_x_token();
 }while(!((cur_cmd!=spacer)&&(cur_cmd!=relax)))
 
 /*:403*/
-#line 24241 "texprof.w"
+#line 24243 "texprof.w"
 ;
 if(cur_cmd<=max_non_prefixed_command)return;
 set_box_allowed= false;prefixed_command();set_box_allowed= true;
@@ -23352,7 +23354,7 @@ set_box_allowed= false;prefixed_command();set_box_allowed= true;
 }
 
 /*:1269*//*1274:*/
-#line 24266 "texprof.w"
+#line 24268 "texprof.w"
 
 static void open_or_close_in(void)
 {int c;
@@ -23367,10 +23369,10 @@ pack_cur_name(".tex");
 if(a_open_in(&read_file[n]))
 {read_open[n]= just_open;
 /*1745:*/
-#line 30912 "texprof.w"
+#line 30918 "texprof.w"
 
 /*1743:*/
-#line 30898 "texprof.w"
+#line 30904 "texprof.w"
 
 if(file_num>=MAX_FILE_NUM)overflow("file number",file_num);
 else file_num++;
@@ -23378,19 +23380,19 @@ file_num_name[file_num]= strdup(full_name_of_file);
 file_from_cmd[file_num]= cmd_count;
 
 /*:1743*/
-#line 30913 "texprof.w"
+#line 30919 "texprof.w"
 
 read_file_num[n]= file_num;
 
 /*:1745*/
-#line 24279 "texprof.w"
+#line 24281 "texprof.w"
 
 }
 }
 }
 
 /*:1274*//*1278:*/
-#line 24300 "texprof.w"
+#line 24302 "texprof.w"
 
 static void issue_message(void)
 {int old_setting;
@@ -23402,7 +23404,7 @@ token_show(def_ref);selector= old_setting;
 flush_list(def_ref);
 str_room(1);s= make_string();
 if(c==0)/*1279:*/
-#line 24315 "texprof.w"
+#line 24317 "texprof.w"
 
 {if(term_offset+length(s)> max_print_line-2)print_ln();
 else if((term_offset> 0)||(file_offset> 0))print_char(' ');
@@ -23410,10 +23412,10 @@ slow_print(s);update_terminal;
 }
 
 /*:1279*/
-#line 24310 "texprof.w"
+#line 24312 "texprof.w"
 
 else/*1282:*/
-#line 24330 "texprof.w"
+#line 24332 "texprof.w"
 
 {print_err("");slow_print(s);
 if(err_help!=null)use_err_help= true;
@@ -23429,13 +23431,13 @@ error();use_err_help= false;
 }
 
 /*:1282*/
-#line 24311 "texprof.w"
+#line 24313 "texprof.w"
 ;
 flush_string;
 }
 
 /*:1278*//*1287:*/
-#line 24367 "texprof.w"
+#line 24369 "texprof.w"
 
 static void shift_case(void)
 {pointer b;
@@ -23445,7 +23447,7 @@ eight_bits c;
 b= cur_chr;p= scan_toks(false,false);p= link(def_ref);
 while(p!=null)
 {/*1288:*/
-#line 24386 "texprof.w"
+#line 24388 "texprof.w"
 
 t= info(p);
 if(t<cs_token_flag+single_base)
@@ -23454,7 +23456,7 @@ if(equiv(b+c)!=0)info(p)= t-c+equiv(b+c);
 }
 
 /*:1288*/
-#line 24375 "texprof.w"
+#line 24377 "texprof.w"
 ;
 p= link(p);
 }
@@ -23462,7 +23464,7 @@ back_list(link(def_ref));free_avail(def_ref);
 }
 
 /*:1287*//*1292:*/
-#line 24423 "texprof.w"
+#line 24425 "texprof.w"
 
 static void show_whatever(void)
 {
@@ -23475,7 +23477,7 @@ switch(cur_chr){
 case show_lists_code:{begin_diagnostic();show_activities();
 }break;
 case show_box_code:/*1295:*/
-#line 24483 "texprof.w"
+#line 24485 "texprof.w"
 
 {scan_register_num();fetch_box(p);begin_diagnostic();
 print_nl("> \\box");print_int(cur_val);print_char('=');
@@ -23483,10 +23485,10 @@ if(p==null)print("void");else show_box(p);
 }
 
 /*:1295*/
-#line 24434 "texprof.w"
+#line 24436 "texprof.w"
 break;
 case show_code:/*1293:*/
-#line 24460 "texprof.w"
+#line 24462 "texprof.w"
 
 {get_token();
 if(interaction==error_stop_mode)wake_up_terminal;
@@ -23498,16 +23500,16 @@ print_meaning();goto common_ending;
 }
 
 /*:1293*/
-#line 24435 "texprof.w"
+#line 24437 "texprof.w"
 
 /*1407:*/
-#line 26159 "texprof.w"
+#line 26165 "texprof.w"
 
 case show_groups:{begin_diagnostic();show_save_groups();
 }break;
 
 /*:1407*//*1421:*/
-#line 26375 "texprof.w"
+#line 26381 "texprof.w"
 
 case show_ifs:{begin_diagnostic();print_nl("");print_ln();
 if(cond_ptr==null)
@@ -23526,10 +23528,10 @@ decr(n);t= subtype(p);l= if_line_field(p);m= type(p);p= link(p);
 }break;
 
 /*:1421*/
-#line 24436 "texprof.w"
+#line 24438 "texprof.w"
 
 default:/*1296:*/
-#line 24489 "texprof.w"
+#line 24491 "texprof.w"
 
 {the_toks();
 if(interaction==error_stop_mode)wake_up_terminal;
@@ -23538,11 +23540,11 @@ flush_list(link(temp_head));goto common_ending;
 }
 
 /*:1296*/
-#line 24438 "texprof.w"
+#line 24440 "texprof.w"
 
 }
 /*1297:*/
-#line 24496 "texprof.w"
+#line 24498 "texprof.w"
 
 end_diagnostic(true);print_err("OK");
 
@@ -23552,7 +23554,7 @@ selector= term_and_log;
 }
 
 /*:1297*/
-#line 24440 "texprof.w"
+#line 24442 "texprof.w"
 ;
 common_ending:if(interaction<error_stop_mode)
 {help0;decr(error_count);
@@ -23574,7 +23576,7 @@ error();
 }
 
 /*:1292*//*1301:*/
-#line 24532 "texprof.w"
+#line 24534 "texprof.w"
 
 #ifdef INIT
 static void store_fmt_file(void)
@@ -23584,7 +23586,7 @@ int p,q;
 int x;
 four_quarters w;
 /*1303:*/
-#line 24589 "texprof.w"
+#line 24595 "texprof.w"
 
 if(save_ptr!=0)
 {print_err("You can't dump inside a group");
@@ -23593,10 +23595,10 @@ help1("`{...\\dump}' is a no-no.");succumb;
 }
 
 /*:1303*/
-#line 24540 "texprof.w"
+#line 24542 "texprof.w"
 ;
 /*1327:*/
-#line 24998 "texprof.w"
+#line 25004 "texprof.w"
 
 selector= new_string;
 print(" (preloaded format=");printn(job_name);print_char(' ');
@@ -23615,41 +23617,41 @@ slow_print(w_make_name_string(&fmt_file));flush_string;
 print_nl("");slow_print(format_ident)
 
 /*:1327*/
-#line 24542 "texprof.w"
+#line 24544 "texprof.w"
 ;
 /*1306:*/
-#line 24624 "texprof.w"
+#line 24630 "texprof.w"
 
 dump_int(0);
 /*1384:*/
-#line 25891 "texprof.w"
+#line 25897 "texprof.w"
 
 dump_int(eTeX_mode);
 for(j= 0;j<=eTeX_states-1;j++)eTeX_state(j)= 0;
 
 /*:1384*//*1440:*/
-#line 26561 "texprof.w"
+#line 26567 "texprof.w"
 
 while(pseudo_files!=null)pseudo_close();
 
 /*:1440*/
-#line 24626 "texprof.w"
+#line 24632 "texprof.w"
 
 /*1543:*/
-#line 28176 "texprof.w"
+#line 28182 "texprof.w"
 
 dump_int(Prote_mode);
 
 /*:1543*/
-#line 24627 "texprof.w"
+#line 24633 "texprof.w"
 
 /*1584:*/
-#line 28570 "texprof.w"
+#line 28576 "texprof.w"
 
 for(k= ROM_base;k<=ROM_size;k++)dump_wd(ROM[k]);
 
 /*:1584*/
-#line 24628 "texprof.w"
+#line 24634 "texprof.w"
 
 dump_int(mem_bot);
 dump_int(mem_top);
@@ -23658,10 +23660,10 @@ dump_int(hash_prime);
 dump_int(hyph_size)
 
 /*:1306*/
-#line 24543 "texprof.w"
+#line 24545 "texprof.w"
 ;
 /*1308:*/
-#line 24663 "texprof.w"
+#line 24669 "texprof.w"
 
 dump_int(pool_ptr);
 dump_int(str_ptr);
@@ -23675,10 +23677,10 @@ print_ln();print_int(str_ptr);print(" strings of total length ");
 print_int(pool_ptr)
 
 /*:1308*/
-#line 24544 "texprof.w"
+#line 24546 "texprof.w"
 ;
 /*1310:*/
-#line 24698 "texprof.w"
+#line 24704 "texprof.w"
 
 sort_avail();var_used= 0;
 dump_int(lo_mem_max);dump_int(rover);
@@ -23693,24 +23695,24 @@ for(k= p;k<=lo_mem_max;k++)dump_wd(mem[k]);
 x= x+lo_mem_max+1-p;
 dump_int(hi_mem_min);dump_int(avail);
 for(k= hi_mem_min;k<=mem_end;k++)dump_wd(mem[k]);
-x= x+mem_end+1-hi_mem_min;
 p= avail;
 while(p!=null)
-{decr(dyn_used);p= link(p);
+{fl_mem[p]= 0;
+decr(dyn_used);p= link(p);
 }
 dump_int(var_used);dump_int(dyn_used);
-print_ln();print_int(x);
+print_ln();print_int(x);print_char('&');print_int(mem_end+1-hi_mem_min);
 print(" memory locations dumped; current usage is ");
 print_int(var_used);print_char('&');print_int(dyn_used)
 
 /*:1310*/
-#line 24545 "texprof.w"
+#line 24547 "texprof.w"
 ;
 /*1312:*/
-#line 24746 "texprof.w"
+#line 24752 "texprof.w"
 
 /*1314:*/
-#line 24767 "texprof.w"
+#line 24773 "texprof.w"
 
 k= active_base;
 do{j= k;
@@ -23734,10 +23736,10 @@ k= j+1;dump_int(k-l);
 }while(!(k==int_base))
 
 /*:1314*/
-#line 24747 "texprof.w"
+#line 24753 "texprof.w"
 ;
 /*1315:*/
-#line 24789 "texprof.w"
+#line 24795 "texprof.w"
 
 do{j= k;
 while(j<eqtb_size)
@@ -23758,12 +23760,12 @@ k= j+1;dump_int(k-l);
 }while(!(k> eqtb_size))
 
 /*:1315*/
-#line 24748 "texprof.w"
+#line 24754 "texprof.w"
 ;
 dump_int(par_loc);dump_int(write_loc);
 dump_int(input_loc);
 /*1317:*/
-#line 24825 "texprof.w"
+#line 24831 "texprof.w"
 
 dump_int(hash_used);cs_count= frozen_control_sequence-1-hash_used;
 for(p= hash_base;p<=hash_used;p++)if(text(p)!=0)
@@ -23774,21 +23776,21 @@ dump_int(cs_count);
 print_ln();print_int(cs_count);print(" multiletter control sequences")
 
 /*:1317*/
-#line 24751 "texprof.w"
+#line 24757 "texprof.w"
 
 
 /*:1312*/
-#line 24546 "texprof.w"
+#line 24548 "texprof.w"
 ;
 /*1319:*/
-#line 24841 "texprof.w"
+#line 24847 "texprof.w"
 
 dump_int(fmem_ptr);
 for(k= 0;k<=fmem_ptr-1;k++)dump_wd(font_info[k]);
 dump_int(font_ptr);
 for(k= null_font;k<=font_ptr;k++)
 /*1321:*/
-#line 24858 "texprof.w"
+#line 24864 "texprof.w"
 
 {dump_qqqq(font_check[k]);
 dump_int(font_size[k]);
@@ -23821,17 +23823,17 @@ if(font_size[k]!=font_dsize[k])
 }
 
 /*:1321*/
-#line 24846 "texprof.w"
+#line 24852 "texprof.w"
 ;
 print_ln();print_int(fmem_ptr-7);print(" words of font info for ");
 print_int(font_ptr-font_base);print(" preloaded font");
 if(font_ptr!=font_base+1)print_char('s')
 
 /*:1319*/
-#line 24547 "texprof.w"
+#line 24549 "texprof.w"
 ;
 /*1323:*/
-#line 24915 "texprof.w"
+#line 24921 "texprof.w"
 
 dump_int(hyph_count);
 for(k= 0;k<=hyph_size;k++)if(hyph_word[k]!=0)
@@ -23861,34 +23863,128 @@ dump_int(k);dump_int(qo(trie_used[k]));
 }
 
 /*:1323*/
-#line 24548 "texprof.w"
+#line 24550 "texprof.w"
+;
+/*1783:*/
+#line 31730 "texprof.w"
+
+{two_halves hw;
+int i,j;
+hw.rh= file_num;
+i= 0;
+for(k= 0;k<=file_num;k++)
+{j= strlen(file_num_name[k]);
+if(j> i)i= j;
+}
+hw.lh= i;
+dump_hh(hw);
+}
+{memory_word m;
+int word_count= 0;
+int byte_count= 0;
+m.w= 0;
+for(k= 0;k<=file_num;k++)
+{char*s= file_num_name[k];
+do
+{m.w= (m.w<<8)|*s;
+byte_count++;
+if(byte_count==8)
+{dump_wd(m);word_count++;
+m.w= 0;byte_count= 0;
+}
+}while(*s++!=0);
+}
+if(byte_count> 0)
+{while(byte_count<8)
+{m.w= (m.w<<8)|0;
+byte_count++;
+}
+dump_wd(m);word_count++;
+}
+print_ln();print_int(file_num);
+print(" file names dumped; total size ");print_int(word_count*8);
+}
+
+/*:1783*/
+#line 24551 "texprof.w"
+;
+/*1785:*/
+#line 31816 "texprof.w"
+
+{int word_count= 0;
+k= hi_mem_min;
+while(k<=mem_end)
+{two_halves hw;
+halfword e;
+int word_count= 0;
+/*1786:*/
+#line 31834 "texprof.w"
+
+if(fl_mem[k]!=0)e= fl_mem[k++]|0x80000000;
+else
+{int i;
+i= 1;k++;
+while(k<=mem_end&&fl_mem[k]==0)
+{i++;k++;}
+e= i;
+}
+
+/*:1786*/
+#line 31823 "texprof.w"
+
+hw.rh= e;
+if(k> mem_end)e= 0;
+else
+{/*1786:*/
+#line 31834 "texprof.w"
+
+if(fl_mem[k]!=0)e= fl_mem[k++]|0x80000000;
+else
+{int i;
+i= 1;k++;
+while(k<=mem_end&&fl_mem[k]==0)
+{i++;k++;}
+e= i;
+}
+
+/*:1786*/
+#line 31827 "texprof.w"
+}
+hw.lh= e;
+dump_hh(hw);word_count++;
+}
+print_ln();print_int(word_count);
+print(" words of file/line information dumped.");
+}
+/*:1785*/
+#line 24552 "texprof.w"
 ;
 /*1325:*/
-#line 24987 "texprof.w"
+#line 24993 "texprof.w"
 
 dump_int(interaction);dump_int(format_ident);dump_int(69069);
 tracing_stats= 0
 
 /*:1325*/
-#line 24549 "texprof.w"
+#line 24553 "texprof.w"
 ;
 /*1328:*/
-#line 25015 "texprof.w"
+#line 25021 "texprof.w"
 
 w_close(&fmt_file)
 
 /*:1328*/
-#line 24550 "texprof.w"
+#line 24554 "texprof.w"
 ;
 }
 #endif
-#line 24553 "texprof.w"
+#line 24557 "texprof.w"
 
 /*:1301*//*1347:*/
-#line 25471 "texprof.w"
+#line 25477 "texprof.w"
 
 /*1348:*/
-#line 25493 "texprof.w"
+#line 25499 "texprof.w"
 
 static void new_whatsit(small_number s,small_number w)
 {pointer p;
@@ -23897,7 +23993,7 @@ link(tail)= p;tail= p;
 }
 
 /*:1348*//*1349:*/
-#line 25503 "texprof.w"
+#line 25509 "texprof.w"
 
 static void new_write_whatsit(small_number w)
 {new_whatsit(cur_chr,w);
@@ -23910,14 +24006,14 @@ write_stream(tail)= cur_val;
 }
 
 /*:1349*/
-#line 25472 "texprof.w"
+#line 25478 "texprof.w"
 
 static void do_extension(void)
 {int k;
 pointer p;
 switch(cur_chr){
 case open_node:/*1350:*/
-#line 25514 "texprof.w"
+#line 25520 "texprof.w"
 
 {new_write_whatsit(open_node_size);
 scan_optional_equals();scan_file_name();
@@ -23925,29 +24021,29 @@ open_name(tail)= cur_name;open_area(tail)= cur_area;open_ext(tail)= cur_ext;
 }
 
 /*:1350*/
-#line 25477 "texprof.w"
+#line 25483 "texprof.w"
 break;
 case write_node:/*1351:*/
-#line 25524 "texprof.w"
+#line 25530 "texprof.w"
 
 {k= cur_cs;new_write_whatsit(write_node_size);
 cur_cs= k;p= scan_toks(false,false);write_tokens(tail)= def_ref;
 }
 
 /*:1351*/
-#line 25478 "texprof.w"
+#line 25484 "texprof.w"
 break;
 case close_node:/*1352:*/
-#line 25529 "texprof.w"
+#line 25535 "texprof.w"
 
 {new_write_whatsit(write_node_size);write_tokens(tail)= null;
 }
 
 /*:1352*/
-#line 25479 "texprof.w"
+#line 25485 "texprof.w"
 break;
 case special_node:/*1353:*/
-#line 25537 "texprof.w"
+#line 25543 "texprof.w"
 
 {if(scan_keyword("shipout"))
 {new_whatsit(latespecial_node,write_node_size);write_stream(tail)= null;
@@ -23958,10 +24054,10 @@ p= scan_toks(false,true);write_tokens(tail)= def_ref;
 }}
 
 /*:1353*/
-#line 25480 "texprof.w"
+#line 25486 "texprof.w"
 break;
 case immediate_code:/*1374:*/
-#line 25771 "texprof.w"
+#line 25777 "texprof.w"
 
 {get_x_token();
 if((cur_cmd==extension)&&(cur_chr<=close_node))
@@ -23973,10 +24069,10 @@ else back_input();
 }
 
 /*:1374*/
-#line 25481 "texprof.w"
+#line 25487 "texprof.w"
 break;
 case set_language_code:/*1376:*/
-#line 25799 "texprof.w"
+#line 25805 "texprof.w"
 
 if(abs(mode)!=hmode)report_illegal_case();
 else{new_whatsit(language_node,small_node_size);
@@ -23990,58 +24086,58 @@ what_rhm(tail)= norm_min(right_hyphen_min);
 }
 
 /*:1376*/
-#line 25482 "texprof.w"
+#line 25488 "texprof.w"
 break;
 /*1607:*/
-#line 28761 "texprof.w"
+#line 28767 "texprof.w"
 
 case reset_timer_code:reset_timer;break;
 
 /*:1607*//*1673:*/
-#line 29485 "texprof.w"
+#line 29491 "texprof.w"
 
 case save_pos_code:/*1674:*/
-#line 29492 "texprof.w"
+#line 29498 "texprof.w"
 
 {new_whatsit(save_pos_code,small_node_size);write_stream(tail)= null;
 write_tokens(tail)= null;
 }
 
 /*:1674*/
-#line 29486 "texprof.w"
+#line 29492 "texprof.w"
 break;
 
 /*:1673*//*1739:*/
-#line 30834 "texprof.w"
+#line 30840 "texprof.w"
 
 case profile_on_code:
 if(!profile_on)
 {profile_on= true;
 /*1758:*/
-#line 31168 "texprof.w"
+#line 31174 "texprof.w"
 
 /*1751:*/
-#line 31013 "texprof.w"
+#line 31019 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31017 "texprof.w"
+#line 31023 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31019 "texprof.w"
+#line 31025 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31021 "texprof.w"
+#line 31027 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31023 "texprof.w"
+#line 31029 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31025 "texprof.w"
+#line 31031 "texprof.w"
 
 /*:1751*/
-#line 31169 "texprof.w"
+#line 31175 "texprof.w"
 
 diff_nsec= 0;
 start_nsec= ts.tv_nsec;
@@ -24050,11 +24146,11 @@ prof_file_line= cur_file_line;
 prof_cmd= system_profile_on;
 prof_depth= cur_depth;
 /*1773:*/
-#line 31466 "texprof.w"
+#line 31472 "texprof.w"
 
 if(unchanged_depth<prof_depth)
 /*1775:*/
-#line 31491 "texprof.w"
+#line 31497 "texprof.w"
 
 {int i;
 if(last_depth> unchanged_depth)
@@ -24066,7 +24162,7 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(unchanged_depth);
 print_char('}');print_ln();
 #endif
-#line 31502 "texprof.w"
+#line 31508 "texprof.w"
  cmd_count++;
 }
 if(st_count+2*(prof_depth-unchanged_depth)> MAX_STAMPS)
@@ -24080,7 +24176,7 @@ print_char('<');print_int(CALL_DEPTH(macro_stack[i]));
 print_char(':');print_cs(CALL_EQTB(macro_stack[i]));
 print_char(']');print_ln();
 #endif
-#line 31515 "texprof.w"
+#line 31521 "texprof.w"
  cmd_count++;
 stamp[st_count++]= CALL_CFL(macro_stack[i]);
 stamp[st_count++]= CALL_DE(macro_stack[i]);
@@ -24091,33 +24187,33 @@ if(prof_depth> prof_max_depth)prof_max_depth= prof_depth;
 
 
 /*:1775*/
-#line 31468 "texprof.w"
+#line 31474 "texprof.w"
 
 
 
 /*:1773*/
-#line 31176 "texprof.w"
+#line 31182 "texprof.w"
 
 
 /*:1758*/
-#line 30838 "texprof.w"
+#line 30844 "texprof.w"
 
 }
 break;
 case profile_off_code:
 if(profile_on)
 {/*1757:*/
-#line 31154 "texprof.w"
+#line 31160 "texprof.w"
 
 prof_file_line= cur_file_line;
 prof_cmd= system_profile_off;
 prof_depth= cur_depth;
 /*1773:*/
-#line 31466 "texprof.w"
+#line 31472 "texprof.w"
 
 if(unchanged_depth<prof_depth)
 /*1775:*/
-#line 31491 "texprof.w"
+#line 31497 "texprof.w"
 
 {int i;
 if(last_depth> unchanged_depth)
@@ -24129,7 +24225,7 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(unchanged_depth);
 print_char('}');print_ln();
 #endif
-#line 31502 "texprof.w"
+#line 31508 "texprof.w"
  cmd_count++;
 }
 if(st_count+2*(prof_depth-unchanged_depth)> MAX_STAMPS)
@@ -24143,7 +24239,7 @@ print_char('<');print_int(CALL_DEPTH(macro_stack[i]));
 print_char(':');print_cs(CALL_EQTB(macro_stack[i]));
 print_char(']');print_ln();
 #endif
-#line 31515 "texprof.w"
+#line 31521 "texprof.w"
  cmd_count++;
 stamp[st_count++]= CALL_CFL(macro_stack[i]);
 stamp[st_count++]= CALL_DE(macro_stack[i]);
@@ -24154,21 +24250,21 @@ if(prof_depth> prof_max_depth)prof_max_depth= prof_depth;
 
 
 /*:1775*/
-#line 31468 "texprof.w"
+#line 31474 "texprof.w"
 
 
 
 /*:1773*/
-#line 31158 "texprof.w"
+#line 31164 "texprof.w"
 
 /*1756:*/
-#line 31125 "texprof.w"
+#line 31131 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1774:*/
-#line 31471 "texprof.w"
+#line 31477 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -24182,14 +24278,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31484 "texprof.w"
+#line 31490 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1774*/
-#line 31129 "texprof.w"
+#line 31135 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -24201,63 +24297,63 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31140 "texprof.w"
+#line 31146 "texprof.w"
  cmd_count++;
 /*1751:*/
-#line 31013 "texprof.w"
+#line 31019 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31017 "texprof.w"
+#line 31023 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31019 "texprof.w"
+#line 31025 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31021 "texprof.w"
+#line 31027 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31023 "texprof.w"
+#line 31029 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31025 "texprof.w"
+#line 31031 "texprof.w"
 
 /*:1751*/
-#line 31141 "texprof.w"
+#line 31147 "texprof.w"
 
 /*1752:*/
-#line 31030 "texprof.w"
+#line 31036 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31035 "texprof.w"
+#line 31041 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1752*/
-#line 31142 "texprof.w"
+#line 31148 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1756*/
-#line 31159 "texprof.w"
+#line 31165 "texprof.w"
 
 
 /*:1757*/
-#line 30843 "texprof.w"
+#line 30849 "texprof.w"
 
 profile_on= false;
 }
 break;
 
 /*:1739*/
-#line 25483 "texprof.w"
+#line 25489 "texprof.w"
 
 default:confusion("ext1");
 
@@ -24265,7 +24361,7 @@ default:confusion("ext1");
 }
 
 /*:1347*//*1375:*/
-#line 25785 "texprof.w"
+#line 25791 "texprof.w"
 
 static void fix_language(void)
 {ASCII_code l;
@@ -24281,10 +24377,10 @@ what_rhm(tail)= norm_min(right_hyphen_min);
 }
 
 /*:1375*/
-#line 20662 "texprof.w"
+#line 20664 "texprof.w"
 
 /*1067:*/
-#line 21361 "texprof.w"
+#line 21363 "texprof.w"
 
 static void handle_right_brace(void)
 {pointer p,q;
@@ -24300,7 +24396,7 @@ help2("You've closed more groups than you opened.",
 case semi_simple_group:case math_shift_group:
 case math_left_group:extra_right_brace();break;
 /*1084:*/
-#line 21711 "texprof.w"
+#line 21713 "texprof.w"
 
 case hbox_group:package(0);break;
 case adjusted_hbox_group:{adjust_tail= adjust_head;package(0);
@@ -24311,7 +24407,7 @@ case vtop_group:{end_graf();package(vtop_code);
 }break;
 
 /*:1084*//*1099:*/
-#line 21874 "texprof.w"
+#line 21876 "texprof.w"
 
 case insert_group:{end_graf();q= split_top_skip;add_glue_ref(q);
 d= split_max_depth;f= floating_penalty;unsave();decr(save_ptr);
@@ -24332,12 +24428,12 @@ free_node(p,box_node_size);
 if(nest_ptr==0)build_page();
 }break;
 case output_group:/*1025:*/
-#line 20575 "texprof.w"
+#line 20577 "texprof.w"
 
 {if((loc!=null)||
 ((token_type!=output_text)&&(token_type!=backed_up)))
 /*1026:*/
-#line 20596 "texprof.w"
+#line 20598 "texprof.w"
 
 {print_err("Unbalanced output routine");
 
@@ -24348,12 +24444,12 @@ do{get_token();
 }
 
 /*:1026*/
-#line 20578 "texprof.w"
+#line 20580 "texprof.w"
 ;
 end_token_list();
 end_graf();unsave();output_active= false;insert_penalties= 0;
 /*1027:*/
-#line 20605 "texprof.w"
+#line 20607 "texprof.w"
 
 if(box(255)!=null)
 {print_err("Output routine didn't use all of ");
@@ -24366,7 +24462,7 @@ box_error(255);
 }
 
 /*:1027*/
-#line 20581 "texprof.w"
+#line 20583 "texprof.w"
 ;
 if(tail!=head)
 {link(page_tail)= link(head);
@@ -24383,16 +24479,16 @@ pop_nest();build_page();
 }
 
 /*:1025*/
-#line 21893 "texprof.w"
+#line 21895 "texprof.w"
 break;
 
 /*:1099*//*1117:*/
-#line 22086 "texprof.w"
+#line 22088 "texprof.w"
 
 case disc_group:build_discretionary();break;
 
 /*:1117*//*1131:*/
-#line 22322 "texprof.w"
+#line 22324 "texprof.w"
 
 case align_group:{back_input();cur_tok= cs_token_flag+frozen_cr;
 print_err("Missing ");print_esc("cr");print(" inserted");
@@ -24402,13 +24498,13 @@ ins_error();
 }break;
 
 /*:1131*//*1132:*/
-#line 22330 "texprof.w"
+#line 22332 "texprof.w"
 
 case no_align_group:{end_graf();unsave();align_peek();
 }break;
 
 /*:1132*//*1167:*/
-#line 22784 "texprof.w"
+#line 22786 "texprof.w"
 
 case vcenter_group:{end_graf();unsave();save_ptr= save_ptr-2;
 p= vpack(link(head),saved(1),saved(0));pop_nest();
@@ -24417,12 +24513,12 @@ math_type(nucleus(tail))= sub_box;info(nucleus(tail))= p;
 }break;
 
 /*:1167*//*1172:*/
-#line 22822 "texprof.w"
+#line 22824 "texprof.w"
 
 case math_choice_group:build_choices();break;
 
 /*:1172*//*1185:*/
-#line 22996 "texprof.w"
+#line 22998 "texprof.w"
 
 case math_group:{unsave();decr(save_ptr);
 math_type(saved(0))= sub_mlist;p= fin_mlist(null);info(saved(0))= p;
@@ -24436,19 +24532,19 @@ free_node(p,noad_size);
 }
 else if(type(p)==accent_noad)if(saved(0)==nucleus(tail))
 if(type(tail)==ord_noad)/*1186:*/
-#line 23011 "texprof.w"
+#line 23013 "texprof.w"
 
 {q= head;while(link(q)!=tail)q= link(q);
 link(q)= p;free_node(tail,noad_size);tail= p;
 }
 
 /*:1186*/
-#line 23008 "texprof.w"
+#line 23010 "texprof.w"
 ;
 }break;
 
 /*:1185*/
-#line 21376 "texprof.w"
+#line 21378 "texprof.w"
 
 default:confusion("rightbrace");
 
@@ -24456,21 +24552,21 @@ default:confusion("rightbrace");
 }
 
 /*:1067*/
-#line 20663 "texprof.w"
+#line 20665 "texprof.w"
 
 static void main_control(void)
 {
 int t;
 /*1754:*/
-#line 31082 "texprof.w"
+#line 31088 "texprof.w"
 
 /*1768:*/
-#line 31366 "texprof.w"
+#line 31372 "texprof.w"
 
 {int macro_depth= -1,macro_cs= 0;
 uint32_t macro_fl= FILE_LINE(terminal_file,0);
 /*1770:*/
-#line 31388 "texprof.w"
+#line 31394 "texprof.w"
 
 macro_depth++;
 cur_depth= macro_depth;
@@ -24481,7 +24577,7 @@ if(macro_depth<=unchanged_depth)
 unchanged_depth= macro_depth-1;
 
 /*:1770*/
-#line 31369 "texprof.w"
+#line 31375 "texprof.w"
 
 cmd_count++;
 stamp[st_count++]= CALL_CFL(macro_stack[0]);
@@ -24490,16 +24586,16 @@ last_depth= unchanged_depth= prof_depth= 0;
 }
 
 /*:1768*/
-#line 31083 "texprof.w"
+#line 31089 "texprof.w"
 
 prof_cmd= system_cmd;
 prof_file_line= FILE_LINE(system_file,system_start);
 /*1773:*/
-#line 31466 "texprof.w"
+#line 31472 "texprof.w"
 
 if(unchanged_depth<prof_depth)
 /*1775:*/
-#line 31491 "texprof.w"
+#line 31497 "texprof.w"
 
 {int i;
 if(last_depth> unchanged_depth)
@@ -24511,7 +24607,7 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(unchanged_depth);
 print_char('}');print_ln();
 #endif
-#line 31502 "texprof.w"
+#line 31508 "texprof.w"
  cmd_count++;
 }
 if(st_count+2*(prof_depth-unchanged_depth)> MAX_STAMPS)
@@ -24525,7 +24621,7 @@ print_char('<');print_int(CALL_DEPTH(macro_stack[i]));
 print_char(':');print_cs(CALL_EQTB(macro_stack[i]));
 print_char(']');print_ln();
 #endif
-#line 31515 "texprof.w"
+#line 31521 "texprof.w"
  cmd_count++;
 stamp[st_count++]= CALL_CFL(macro_stack[i]);
 stamp[st_count++]= CALL_DE(macro_stack[i]);
@@ -24536,12 +24632,12 @@ if(prof_depth> prof_max_depth)prof_max_depth= prof_depth;
 
 
 /*:1775*/
-#line 31468 "texprof.w"
+#line 31474 "texprof.w"
 
 
 
 /*:1773*/
-#line 31086 "texprof.w"
+#line 31092 "texprof.w"
 
 #if 0
 clock_getres(CLOCK_MONOTONIC,&ts);
@@ -24556,47 +24652,47 @@ printf("CLOCK_PROCESS_CPUTIME_ID: %ld %ld\n",ts.tv_sec,ts.tv_nsec);
 clock_getres(CLOCK_THREAD_CPUTIME_ID,&ts);
 printf("CLOCK_THREAD_CPUTIME_ID: %ld %ld\n",ts.tv_sec,ts.tv_nsec);
 #endif
-#line 31100 "texprof.w"
+#line 31106 "texprof.w"
 /*1751:*/
-#line 31013 "texprof.w"
+#line 31019 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31017 "texprof.w"
+#line 31023 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31019 "texprof.w"
+#line 31025 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31021 "texprof.w"
+#line 31027 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31023 "texprof.w"
+#line 31029 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31025 "texprof.w"
+#line 31031 "texprof.w"
 
 /*:1751*/
-#line 31100 "texprof.w"
+#line 31106 "texprof.w"
 
 diff_nsec= 0;
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1754*/
-#line 20667 "texprof.w"
+#line 20669 "texprof.w"
 
 if(every_job!=null)begin_token_list(every_job,every_job_text);
 big_switch:
 /*1756:*/
-#line 31125 "texprof.w"
+#line 31131 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1774:*/
-#line 31471 "texprof.w"
+#line 31477 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -24610,14 +24706,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31484 "texprof.w"
+#line 31490 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1774*/
-#line 31129 "texprof.w"
+#line 31135 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -24629,68 +24725,68 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31140 "texprof.w"
+#line 31146 "texprof.w"
  cmd_count++;
 /*1751:*/
-#line 31013 "texprof.w"
+#line 31019 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31017 "texprof.w"
+#line 31023 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31019 "texprof.w"
+#line 31025 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31021 "texprof.w"
+#line 31027 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31023 "texprof.w"
+#line 31029 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31025 "texprof.w"
+#line 31031 "texprof.w"
 
 /*:1751*/
-#line 31141 "texprof.w"
+#line 31147 "texprof.w"
 
 /*1752:*/
-#line 31030 "texprof.w"
+#line 31036 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31035 "texprof.w"
+#line 31041 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1752*/
-#line 31142 "texprof.w"
+#line 31148 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1756*/
-#line 20670 "texprof.w"
+#line 20672 "texprof.w"
 
 get_x_token();
 big_reswitch:
 /*1760:*/
-#line 31195 "texprof.w"
+#line 31201 "texprof.w"
 
 if(profile_on)
 {prof_cmd= cur_cmd;
 prof_depth= cur_depth;
 prof_file_line= cur_file_line;
 /*1773:*/
-#line 31466 "texprof.w"
+#line 31472 "texprof.w"
 
 if(unchanged_depth<prof_depth)
 /*1775:*/
-#line 31491 "texprof.w"
+#line 31497 "texprof.w"
 
 {int i;
 if(last_depth> unchanged_depth)
@@ -24702,7 +24798,7 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(unchanged_depth);
 print_char('}');print_ln();
 #endif
-#line 31502 "texprof.w"
+#line 31508 "texprof.w"
  cmd_count++;
 }
 if(st_count+2*(prof_depth-unchanged_depth)> MAX_STAMPS)
@@ -24716,7 +24812,7 @@ print_char('<');print_int(CALL_DEPTH(macro_stack[i]));
 print_char(':');print_cs(CALL_EQTB(macro_stack[i]));
 print_char(']');print_ln();
 #endif
-#line 31515 "texprof.w"
+#line 31521 "texprof.w"
  cmd_count++;
 stamp[st_count++]= CALL_CFL(macro_stack[i]);
 stamp[st_count++]= CALL_DE(macro_stack[i]);
@@ -24727,20 +24823,20 @@ if(prof_depth> prof_max_depth)prof_max_depth= prof_depth;
 
 
 /*:1775*/
-#line 31468 "texprof.w"
+#line 31474 "texprof.w"
 
 
 
 /*:1773*/
-#line 31200 "texprof.w"
+#line 31206 "texprof.w"
 
 }
 
 /*:1760*/
-#line 20673 "texprof.w"
+#line 20675 "texprof.w"
 
 /*1030:*/
-#line 20704 "texprof.w"
+#line 20706 "texprof.w"
 
 if(interrupt!=0)if(OK_to_interrupt)
 {back_input();check_interrupt;goto big_switch;
@@ -24748,11 +24844,11 @@ if(interrupt!=0)if(OK_to_interrupt)
 #ifdef DEBUG
 if(panicking)check_mem(false);
 #endif
-#line 20711 "texprof.w"
+#line 20713 "texprof.w"
  if(tracing_commands> 0)show_cur_cmd_chr()
 
 /*:1030*/
-#line 20674 "texprof.w"
+#line 20676 "texprof.w"
 ;
 switch(abs(mode)+cur_cmd){
 case hmode+letter:case hmode+other_char:
@@ -24767,79 +24863,79 @@ case hmode+spacer:if(space_factor==1000)goto append_normal_space;
 else app_space();break;
 case hmode+ex_space:case mmode+ex_space:goto append_normal_space;
 /*1044:*/
-#line 21020 "texprof.w"
+#line 21022 "texprof.w"
 
 any_mode(relax):case vmode+spacer:case mmode+spacer:
 case mmode+no_boundary:do_nothing;
 any_mode(ignore_spaces):{/*405:*/
-#line 8619 "texprof.w"
+#line 8621 "texprof.w"
 
 do{get_x_token();
 }while(!(cur_cmd!=spacer))
 
 /*:405*/
-#line 21023 "texprof.w"
+#line 21025 "texprof.w"
 ;
 goto big_reswitch;
 }
 case vmode+stop:
 if(its_all_over())
 {/*1759:*/
-#line 31181 "texprof.w"
+#line 31187 "texprof.w"
 
 /*1755:*/
-#line 31109 "texprof.w"
+#line 31115 "texprof.w"
 
 prof_cmd= cur_cmd;
 prof_file_line= cur_file_line;
 prof_depth= 0;
 profile_on= true;
 /*1751:*/
-#line 31013 "texprof.w"
+#line 31019 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31017 "texprof.w"
+#line 31023 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31019 "texprof.w"
+#line 31025 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31021 "texprof.w"
+#line 31027 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31023 "texprof.w"
+#line 31029 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31025 "texprof.w"
+#line 31031 "texprof.w"
 
 /*:1751*/
-#line 31114 "texprof.w"
+#line 31120 "texprof.w"
 
 /*1752:*/
-#line 31030 "texprof.w"
+#line 31036 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31035 "texprof.w"
+#line 31041 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1752*/
-#line 31115 "texprof.w"
+#line 31121 "texprof.w"
 
 /*1756:*/
-#line 31125 "texprof.w"
+#line 31131 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1774:*/
-#line 31471 "texprof.w"
+#line 31477 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -24853,14 +24949,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31484 "texprof.w"
+#line 31490 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1774*/
-#line 31129 "texprof.w"
+#line 31135 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -24872,89 +24968,89 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31140 "texprof.w"
+#line 31146 "texprof.w"
  cmd_count++;
 /*1751:*/
-#line 31013 "texprof.w"
+#line 31019 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31017 "texprof.w"
+#line 31023 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31019 "texprof.w"
+#line 31025 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31021 "texprof.w"
+#line 31027 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31023 "texprof.w"
+#line 31029 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31025 "texprof.w"
+#line 31031 "texprof.w"
 
 /*:1751*/
-#line 31141 "texprof.w"
+#line 31147 "texprof.w"
 
 /*1752:*/
-#line 31030 "texprof.w"
+#line 31036 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31035 "texprof.w"
+#line 31041 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1752*/
-#line 31142 "texprof.w"
+#line 31148 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1756*/
-#line 31116 "texprof.w"
+#line 31122 "texprof.w"
 
 
 
 /*:1755*/
-#line 31182 "texprof.w"
+#line 31188 "texprof.w"
 
 
 /*:1759*/
-#line 21028 "texprof.w"
+#line 21030 "texprof.w"
 
 return;
 }
 break;
 /*1047:*/
-#line 21074 "texprof.w"
+#line 21076 "texprof.w"
 
 case vmode+vmove:case hmode+hmove:case mmode+hmove:any_mode(last_item):
 
 /*:1047*//*1097:*/
-#line 21855 "texprof.w"
+#line 21857 "texprof.w"
 
 case vmode+vadjust:
 
 /*:1097*//*1110:*/
-#line 22025 "texprof.w"
+#line 22027 "texprof.w"
 case vmode+ital_corr:
 
 /*:1110*//*1143:*/
-#line 22421 "texprof.w"
+#line 22423 "texprof.w"
 non_math(eq_no):
 
 /*:1143*/
-#line 21032 "texprof.w"
+#line 21034 "texprof.w"
 any_mode(mac_param):
 report_illegal_case();break;
 /*1045:*/
-#line 21044 "texprof.w"
+#line 21046 "texprof.w"
 
 non_math(sup_mark):non_math(sub_mark):non_math(math_char_num):
 non_math(math_given):non_math(math_comp):non_math(delim_num):
@@ -24967,10 +25063,10 @@ case mmode+vskip:case mmode+un_vbox:
 case mmode+valign:case mmode+hrule
 
 /*:1045*/
-#line 21034 "texprof.w"
+#line 21036 "texprof.w"
 :insert_dollar_sign();break;
 /*1055:*/
-#line 21163 "texprof.w"
+#line 21165 "texprof.w"
 
 case vmode+hrule:case hmode+vrule:case mmode+vrule:{tail_append(scan_rule_spec());
 if(abs(mode)==vmode)prev_depth= ignore_depth;
@@ -24978,14 +25074,14 @@ else if(abs(mode)==hmode)space_factor= 1000;
 }break;
 
 /*:1055*//*1056:*/
-#line 21174 "texprof.w"
+#line 21176 "texprof.w"
 
 case vmode+vskip:case hmode+hskip:case mmode+hskip:
 case mmode+mskip:append_glue();break;
 any_mode(kern):case mmode+mkern:append_kern();break;
 
 /*:1056*//*1062:*/
-#line 21288 "texprof.w"
+#line 21290 "texprof.w"
 
 non_math(left_brace):new_save_level(simple_group);break;
 any_mode(begin_group):new_save_level(semi_simple_group);break;
@@ -24993,12 +25089,12 @@ any_mode(end_group):if(cur_group==semi_simple_group)unsave();
 else off_save();break;
 
 /*:1062*//*1066:*/
-#line 21358 "texprof.w"
+#line 21360 "texprof.w"
 
 any_mode(right_brace):handle_right_brace();break;
 
 /*:1066*//*1072:*/
-#line 21507 "texprof.w"
+#line 21509 "texprof.w"
 
 case vmode+hmove:case hmode+vmove:case mmode+vmove:{t= cur_chr;
 scan_normal_dimen;
@@ -25008,7 +25104,7 @@ any_mode(leader_ship):scan_box(leader_flag-a_leaders+cur_chr);break;
 any_mode(make_box):begin_box(0);break;
 
 /*:1072*//*1089:*/
-#line 21757 "texprof.w"
+#line 21759 "texprof.w"
 
 case vmode+start_par:new_graf(cur_chr> 0);break;
 case vmode+letter:case vmode+other_char:
@@ -25022,12 +25118,12 @@ case vmode+ex_space:case vmode+no_boundary:
 }break;
 
 /*:1089*//*1091:*/
-#line 21790 "texprof.w"
+#line 21792 "texprof.w"
 
 case hmode+start_par:case mmode+start_par:indent_in_hmode();break;
 
 /*:1091*//*1093:*/
-#line 21810 "texprof.w"
+#line 21812 "texprof.w"
 
 case vmode+par_end:{normal_paragraph();
 if(mode> 0)build_page();
@@ -25041,53 +25137,53 @@ case hmode+stop:case hmode+vskip:case hmode+hrule:
 case hmode+un_vbox:case hmode+halign:head_for_vmode();break;
 
 /*:1093*//*1096:*/
-#line 21850 "texprof.w"
+#line 21852 "texprof.w"
 
 any_mode(insert):case hmode+vadjust:
 case mmode+vadjust:begin_insert_or_adjust();break;
 any_mode(mark):make_mark();break;
 
 /*:1096*//*1101:*/
-#line 21911 "texprof.w"
+#line 21913 "texprof.w"
 
 any_mode(break_penalty):append_penalty();break;
 
 /*:1101*//*1103:*/
-#line 21927 "texprof.w"
+#line 21929 "texprof.w"
 
 any_mode(remove_item):delete_last();break;
 
 /*:1103*//*1108:*/
-#line 21996 "texprof.w"
+#line 21998 "texprof.w"
 
 case vmode+un_vbox:case hmode+un_hbox:
 case mmode+un_hbox:unpackage();break;
 
 /*:1108*//*1111:*/
-#line 22031 "texprof.w"
+#line 22033 "texprof.w"
 
 case hmode+ital_corr:append_italic_correction();break;
 case mmode+ital_corr:tail_append(new_kern(0))break;
 
 /*:1111*//*1115:*/
-#line 22063 "texprof.w"
+#line 22065 "texprof.w"
 
 case hmode+discretionary:case mmode+discretionary:append_discretionary();break;
 
 /*:1115*//*1121:*/
-#line 22154 "texprof.w"
+#line 22156 "texprof.w"
 
 case hmode+accent:make_accent();break;
 
 /*:1121*//*1125:*/
-#line 22224 "texprof.w"
+#line 22226 "texprof.w"
 
 any_mode(car_ret):any_mode(tab_mark):align_error();break;
 any_mode(no_align):no_align_error();break;
 any_mode(omit):omit_error();break;
 
 /*:1125*//*1129:*/
-#line 22291 "texprof.w"
+#line 22293 "texprof.w"
 
 case vmode+halign:case hmode+valign:init_align();break;
 case mmode+halign:if(privileged())
@@ -25096,31 +25192,31 @@ else off_save();break;
 case vmode+endv:case hmode+endv:do_endv();break;
 
 /*:1129*//*1133:*/
-#line 22336 "texprof.w"
+#line 22338 "texprof.w"
 
 any_mode(end_cs_name):cs_error();break;
 
 /*:1133*//*1136:*/
-#line 22367 "texprof.w"
+#line 22369 "texprof.w"
 
 case hmode+math_shift:init_math();break;
 
 /*:1136*//*1139:*/
-#line 22397 "texprof.w"
+#line 22399 "texprof.w"
 
 case mmode+eq_no:if(privileged())
 if(cur_group==math_shift_group)start_eq_no();
 else off_save();break;
 
 /*:1139*//*1149:*/
-#line 22535 "texprof.w"
+#line 22537 "texprof.w"
 
 case mmode+left_brace:{tail_append(new_noad());
 back_input();scan_math(nucleus(tail));
 }break;
 
 /*:1149*//*1153:*/
-#line 22599 "texprof.w"
+#line 22601 "texprof.w"
 
 case mmode+letter:case mmode+other_char:
 case mmode+char_given:
@@ -25136,7 +25232,7 @@ set_math_char(cur_val/010000);
 }break;
 
 /*:1153*//*1157:*/
-#line 22684 "texprof.w"
+#line 22686 "texprof.w"
 
 case mmode+math_comp:{tail_append(new_noad());
 type(tail)= cur_chr;scan_math(nucleus(tail));
@@ -25144,17 +25240,17 @@ type(tail)= cur_chr;scan_math(nucleus(tail));
 case mmode+limit_switch:math_limit_switch();break;
 
 /*:1157*//*1161:*/
-#line 22736 "texprof.w"
+#line 22738 "texprof.w"
 
 case mmode+radical:math_radical();break;
 
 /*:1161*//*1163:*/
-#line 22749 "texprof.w"
+#line 22751 "texprof.w"
 
 case mmode+accent:case mmode+math_accent:math_ac();break;
 
 /*:1163*//*1166:*/
-#line 22778 "texprof.w"
+#line 22780 "texprof.w"
 
 case mmode+vcenter:{scan_spec(vcenter_group,false);normal_paragraph();
 push_nest();mode= -vmode;prev_depth= ignore_depth;
@@ -25162,7 +25258,7 @@ if(every_vbox!=null)begin_token_list(every_vbox,every_vbox_text);
 }break;
 
 /*:1166*//*1170:*/
-#line 22806 "texprof.w"
+#line 22808 "texprof.w"
 
 case mmode+math_style:tail_append(new_style(cur_chr))break;
 case mmode+non_script:{tail_append(new_glue(zero_glue));
@@ -25171,31 +25267,31 @@ subtype(tail)= cond_math_glue;
 case mmode+math_choice:append_choices();break;
 
 /*:1170*//*1174:*/
-#line 22846 "texprof.w"
+#line 22848 "texprof.w"
 
 case mmode+sub_mark:case mmode+sup_mark:sub_sup();break;
 
 /*:1174*//*1179:*/
-#line 22916 "texprof.w"
+#line 22918 "texprof.w"
 
 case mmode+above:math_fraction();break;
 
 /*:1179*//*1189:*/
-#line 23032 "texprof.w"
+#line 23034 "texprof.w"
 
 case mmode+left_right:math_left_right();break;
 
 /*:1189*//*1192:*/
-#line 23083 "texprof.w"
+#line 23085 "texprof.w"
 
 case mmode+math_shift:if(cur_group==math_shift_group)after_math();
 else off_save();break;
 
 /*:1192*/
-#line 21035 "texprof.w"
+#line 21037 "texprof.w"
 
 /*1209:*/
-#line 23372 "texprof.w"
+#line 23374 "texprof.w"
 
 any_mode(toks_register):
 any_mode(assign_toks):
@@ -25229,63 +25325,63 @@ any_mode(hyph_data):
 any_mode(set_interaction):prefixed_command();break;
 
 /*:1209*//*1267:*/
-#line 24226 "texprof.w"
+#line 24228 "texprof.w"
 
 any_mode(after_assignment):{get_token();after_token= cur_tok;
 }break;
 
 /*:1267*//*1270:*/
-#line 24247 "texprof.w"
+#line 24249 "texprof.w"
 
 any_mode(after_group):{get_token();save_for_after(cur_tok);
 }break;
 
 /*:1270*//*1273:*/
-#line 24263 "texprof.w"
+#line 24265 "texprof.w"
 
 any_mode(in_stream):open_or_close_in();break;
 
 /*:1273*//*1275:*/
-#line 24287 "texprof.w"
+#line 24289 "texprof.w"
 
 any_mode(message):issue_message();break;
 
 /*:1275*//*1284:*/
-#line 24354 "texprof.w"
+#line 24356 "texprof.w"
 
 any_mode(case_shift):shift_case();break;
 
 /*:1284*//*1289:*/
-#line 24396 "texprof.w"
+#line 24398 "texprof.w"
 
 any_mode(xray):show_whatever();break;
 
 /*:1289*/
-#line 21036 "texprof.w"
+#line 21038 "texprof.w"
 
 /*1346:*/
-#line 25468 "texprof.w"
+#line 25474 "texprof.w"
 
 any_mode(extension):do_extension();
 
 /*:1346*/
-#line 21037 "texprof.w"
+#line 21039 "texprof.w"
 
 
 /*:1044*/
-#line 20687 "texprof.w"
+#line 20689 "texprof.w"
 
 }
 goto big_switch;
 main_loop:
 /*1756:*/
-#line 31125 "texprof.w"
+#line 31131 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1774:*/
-#line 31471 "texprof.w"
+#line 31477 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -25299,14 +25395,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31484 "texprof.w"
+#line 31490 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1774*/
-#line 31129 "texprof.w"
+#line 31135 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -25318,66 +25414,66 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31140 "texprof.w"
+#line 31146 "texprof.w"
  cmd_count++;
 /*1751:*/
-#line 31013 "texprof.w"
+#line 31019 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31017 "texprof.w"
+#line 31023 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31019 "texprof.w"
+#line 31025 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31021 "texprof.w"
+#line 31027 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31023 "texprof.w"
+#line 31029 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31025 "texprof.w"
+#line 31031 "texprof.w"
 
 /*:1751*/
-#line 31141 "texprof.w"
+#line 31147 "texprof.w"
 
 /*1752:*/
-#line 31030 "texprof.w"
+#line 31036 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31035 "texprof.w"
+#line 31041 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1752*/
-#line 31142 "texprof.w"
+#line 31148 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1756*/
-#line 20691 "texprof.w"
+#line 20693 "texprof.w"
 
 /*1760:*/
-#line 31195 "texprof.w"
+#line 31201 "texprof.w"
 
 if(profile_on)
 {prof_cmd= cur_cmd;
 prof_depth= cur_depth;
 prof_file_line= cur_file_line;
 /*1773:*/
-#line 31466 "texprof.w"
+#line 31472 "texprof.w"
 
 if(unchanged_depth<prof_depth)
 /*1775:*/
-#line 31491 "texprof.w"
+#line 31497 "texprof.w"
 
 {int i;
 if(last_depth> unchanged_depth)
@@ -25389,7 +25485,7 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(unchanged_depth);
 print_char('}');print_ln();
 #endif
-#line 31502 "texprof.w"
+#line 31508 "texprof.w"
  cmd_count++;
 }
 if(st_count+2*(prof_depth-unchanged_depth)> MAX_STAMPS)
@@ -25403,7 +25499,7 @@ print_char('<');print_int(CALL_DEPTH(macro_stack[i]));
 print_char(':');print_cs(CALL_EQTB(macro_stack[i]));
 print_char(']');print_ln();
 #endif
-#line 31515 "texprof.w"
+#line 31521 "texprof.w"
  cmd_count++;
 stamp[st_count++]= CALL_CFL(macro_stack[i]);
 stamp[st_count++]= CALL_DE(macro_stack[i]);
@@ -25414,20 +25510,20 @@ if(prof_depth> prof_max_depth)prof_max_depth= prof_depth;
 
 
 /*:1775*/
-#line 31468 "texprof.w"
+#line 31474 "texprof.w"
 
 
 
 /*:1773*/
-#line 31200 "texprof.w"
+#line 31206 "texprof.w"
 
 }
 
 /*:1760*/
-#line 20692 "texprof.w"
+#line 20694 "texprof.w"
 
 /*1033:*/
-#line 20769 "texprof.w"
+#line 20771 "texprof.w"
 
 adjust_space_factor;
 main_f= cur_font;
@@ -25445,15 +25541,15 @@ cur_r= cur_l;cur_l= non_char;
 goto main_lig_loop1;
 
 main_loop_wrapup:/*1034:*/
-#line 20827 "texprof.w"
+#line 20829 "texprof.w"
 
 wrapup(rt_hit)
 
 /*:1034*/
-#line 20786 "texprof.w"
+#line 20788 "texprof.w"
 ;
 main_loop_move:/*1035:*/
-#line 20830 "texprof.w"
+#line 20832 "texprof.w"
 
 
 if(lig_stack==null)goto big_reswitch;
@@ -25469,10 +25565,10 @@ if(!char_exists(main_i))
 link(tail)= lig_stack;tail= lig_stack
 
 /*:1035*/
-#line 20789 "texprof.w"
+#line 20791 "texprof.w"
 ;
 main_loop_lookahead:/*1037:*/
-#line 20862 "texprof.w"
+#line 20864 "texprof.w"
 
 get_next();
 if(cur_cmd==letter)goto main_loop_lookahead1;
@@ -25493,10 +25589,10 @@ cur_r= qi(cur_chr);character(lig_stack)= cur_r;
 if(cur_r==false_bchar)cur_r= non_char
 
 /*:1037*/
-#line 20791 "texprof.w"
+#line 20793 "texprof.w"
 ;
 main_lig_loop:/*1038:*/
-#line 20891 "texprof.w"
+#line 20893 "texprof.w"
 
 if(char_tag(main_i)!=lig_tag)goto main_loop_wrapup;
 if(cur_r==non_char)goto main_loop_wrapup;
@@ -25507,7 +25603,7 @@ main_lig_loop1:main_j= font_info[main_k].qqqq;
 main_lig_loop2:if(next_char(main_j)==cur_r)
 if(skip_byte(main_j)<=stop_flag)
 /*1039:*/
-#line 20917 "texprof.w"
+#line 20919 "texprof.w"
 
 {if(op_byte(main_j)>=kern_flag)
 {wrapup(rt_hit);
@@ -25550,7 +25646,7 @@ main_k= bchar_label[main_f];goto main_lig_loop1;
 }
 
 /*:1039*/
-#line 20901 "texprof.w"
+#line 20903 "texprof.w"
 ;
 if(skip_byte(main_j)==qi(0))incr(main_k);
 else{if(skip_byte(main_j)>=stop_flag)goto main_loop_wrapup;
@@ -25559,10 +25655,10 @@ main_k= main_k+qo(skip_byte(main_j))+1;
 goto main_lig_loop1
 
 /*:1038*/
-#line 20793 "texprof.w"
+#line 20795 "texprof.w"
 ;
 main_loop_move_lig:/*1036:*/
-#line 20847 "texprof.w"
+#line 20849 "texprof.w"
 
 main_p= lig_ptr(lig_stack);
 if(main_p> null)tail_append(main_p);
@@ -25576,18 +25672,18 @@ else cur_r= character(lig_stack);
 goto main_lig_loop
 
 /*:1036*/
-#line 20795 "texprof.w"
+#line 20797 "texprof.w"
 
 
 /*:1033*/
-#line 20695 "texprof.w"
+#line 20697 "texprof.w"
 ;
 append_normal_space:/*1040:*/
-#line 20969 "texprof.w"
+#line 20971 "texprof.w"
 
 if(space_skip==zero_glue)
 {/*1041:*/
-#line 20984 "texprof.w"
+#line 20986 "texprof.w"
 
 {main_p= font_glue[cur_font];
 if(main_p==null)
@@ -25600,7 +25696,7 @@ font_glue[cur_font]= main_p;
 }
 
 /*:1041*/
-#line 20972 "texprof.w"
+#line 20974 "texprof.w"
 ;
 temp_ptr= new_glue(main_p);
 }
@@ -25609,25 +25705,25 @@ link(tail)= temp_ptr;tail= temp_ptr;
 goto big_switch
 
 /*:1040*/
-#line 20697 "texprof.w"
+#line 20699 "texprof.w"
 ;
 }
 
 /*:1029*//*1283:*/
-#line 24347 "texprof.w"
+#line 24349 "texprof.w"
 static void give_err_help(void)
 {token_show(err_help);
 }
 
 /*:1283*//*1302:*/
-#line 24564 "texprof.w"
+#line 24568 "texprof.w"
 /*523:*/
-#line 10612 "texprof.w"
+#line 10614 "texprof.w"
 
 static bool open_fmt_file(void);
 
 /*:523*/
-#line 24564 "texprof.w"
+#line 24568 "texprof.w"
 
 static bool load_fmt_file(void)
 {
@@ -25636,60 +25732,60 @@ int p,q;
 int x;
 four_quarters w;
 /*1307:*/
-#line 24641 "texprof.w"
+#line 24647 "texprof.w"
 
 x= fmt_file.d.i;
 if(x!=0)goto bad_fmt;
 /*1385:*/
-#line 25895 "texprof.w"
+#line 25901 "texprof.w"
 
 undump(0,1,eTeX_mode);
 if(eTeX_ex)
 {/*1495:*/
-#line 27351 "texprof.w"
+#line 27357 "texprof.w"
 
 max_reg_num= 32767;
 max_reg_help_line= "A register number must be between 0 and 32767.";
 
 /*:1495*//*1540:*/
-#line 28151 "texprof.w"
+#line 28157 "texprof.w"
 
 expand_depth= 10000;
 expand_depth_count= 0;
 
 /*:1540*/
-#line 25898 "texprof.w"
+#line 25904 "texprof.w"
 ;
 }
 else{/*1494:*/
-#line 27347 "texprof.w"
+#line 27353 "texprof.w"
 
 max_reg_num= 255;
 max_reg_help_line= "A register number must be between 0 and 255.";
 
 /*:1494*/
-#line 25900 "texprof.w"
+#line 25906 "texprof.w"
 ;
 }
 
 /*:1385*/
-#line 24644 "texprof.w"
+#line 24650 "texprof.w"
 
 /*1544:*/
-#line 28179 "texprof.w"
+#line 28185 "texprof.w"
 
 undump(0,1,Prote_mode);
 
 /*:1544*/
-#line 24645 "texprof.w"
+#line 24651 "texprof.w"
 
 /*1585:*/
-#line 28575 "texprof.w"
+#line 28581 "texprof.w"
 
 for(k= ROM_base;k<=ROM_size;k++)undump_wd(ROM[k]);
 
 /*:1585*/
-#line 24646 "texprof.w"
+#line 24652 "texprof.w"
 
 undump_int(x);
 if(x!=mem_bot)goto bad_fmt;
@@ -25703,10 +25799,10 @@ undump_int(x);
 if(x!=hyph_size)goto bad_fmt
 
 /*:1307*/
-#line 24571 "texprof.w"
+#line 24575 "texprof.w"
 ;
 /*1309:*/
-#line 24680 "texprof.w"
+#line 24686 "texprof.w"
 
 undump_size(0,pool_size,"string pool size",pool_ptr);
 undump_size(0,max_strings,"max strings",str_ptr);
@@ -25719,10 +25815,10 @@ k= pool_ptr-4;undump_four_ASCII;
 init_str_ptr= str_ptr;init_pool_ptr= pool_ptr
 
 /*:1309*/
-#line 24572 "texprof.w"
+#line 24576 "texprof.w"
 ;
 /*1311:*/
-#line 24722 "texprof.w"
+#line 24728 "texprof.w"
 
 undump(lo_mem_stat_max+1000,hi_mem_stat_min-1,lo_mem_max);
 undump(lo_mem_stat_max+1,lo_mem_max,rover);
@@ -25748,13 +25844,13 @@ for(k= hi_mem_min;k<=mem_end;k++)undump_wd(mem[k]);
 undump_int(var_used);undump_int(dyn_used)
 
 /*:1311*/
-#line 24573 "texprof.w"
+#line 24577 "texprof.w"
 ;
 /*1313:*/
-#line 24753 "texprof.w"
+#line 24759 "texprof.w"
 
 /*1316:*/
-#line 24808 "texprof.w"
+#line 24814 "texprof.w"
 
 k= active_base;
 do{undump_int(x);
@@ -25768,7 +25864,7 @@ k= k+x;
 }while(!(k> eqtb_size))
 
 /*:1316*/
-#line 24754 "texprof.w"
+#line 24760 "texprof.w"
 ;
 undump(hash_base,frozen_control_sequence,par_loc);
 par_token= cs_token_flag+par_loc;
@@ -25776,7 +25872,7 @@ undump(hash_base,frozen_control_sequence,write_loc);
 undump(hash_base,frozen_control_sequence,input_loc);
 input_token= cs_token_flag+input_loc;
 /*1318:*/
-#line 24834 "texprof.w"
+#line 24840 "texprof.w"
 
 undump(hash_base,frozen_control_sequence,hash_used);p= hash_base-1;
 do{undump(p+1,hash_used,p);undump_hh(hash[p]);
@@ -25785,21 +25881,21 @@ for(p= hash_used+1;p<=undefined_control_sequence-1;p++)undump_hh(hash[p]);
 undump_int(cs_count)
 
 /*:1318*/
-#line 24760 "texprof.w"
+#line 24766 "texprof.w"
 
 
 /*:1313*/
-#line 24574 "texprof.w"
+#line 24578 "texprof.w"
 ;
 /*1320:*/
-#line 24851 "texprof.w"
+#line 24857 "texprof.w"
 
 undump_size(7,font_mem_size,"font mem size",fmem_ptr);
 for(k= 0;k<=fmem_ptr-1;k++)undump_wd(font_info[k]);
 undump_size(font_base,font_max,"font max",font_ptr);
 for(k= null_font;k<=font_ptr;k++)
 /*1322:*/
-#line 24889 "texprof.w"
+#line 24895 "texprof.w"
 
 {undump_qqqq(font_check[k]);
 undump_int(font_size[k]);
@@ -25827,14 +25923,14 @@ undump(min_quarterword,non_char,font_false_bchar[k]);
 }
 
 /*:1322*/
-#line 24856 "texprof.w"
+#line 24862 "texprof.w"
 
 
 /*:1320*/
-#line 24575 "texprof.w"
+#line 24579 "texprof.w"
 ;
 /*1324:*/
-#line 24945 "texprof.w"
+#line 24951 "texprof.w"
 
 undump(0,hyph_size,hyph_count);
 for(k= 1;k<=hyph_count;k++)
@@ -25846,14 +25942,14 @@ undump_size(0,trie_size,"trie size",j);
 #ifdef INIT
 trie_max= j;
 #endif
-#line 24956 "texprof.w"
+#line 24962 "texprof.w"
  undump(0,j,hyph_start);
 for(k= 0;k<=j;k++)undump_hh(trie[k]);
 undump_size(0,trie_op_size,"trie op size",j);
 #ifdef INIT
 trie_op_ptr= j;
 #endif
-#line 24962 "texprof.w"
+#line 24968 "texprof.w"
  for(k= 1;k<=j;k++)
 {undump(0,63,hyf_distance[k]);
 undump(0,63,hyf_num[k]);
@@ -25862,7 +25958,7 @@ undump(min_quarterword,max_quarterword,hyf_next[k]);
 #ifdef INIT
 for(k= 0;k<=255;k++)trie_used[k]= min_quarterword;
 #endif
-#line 24970 "texprof.w"
+#line 24976 "texprof.w"
 
 k= 256;
 while(j> 0)
@@ -25870,20 +25966,110 @@ while(j> 0)
 #ifdef INIT
 trie_used[k]= qi(x);
 #endif
-#line 24977 "texprof.w"
+#line 24983 "texprof.w"
 
 j= j-x;op_start[k]= qo(j);
 }
 #ifdef INIT
 trie_not_ready= false
 #endif
-#line 24983 "texprof.w"
+#line 24989 "texprof.w"
 
 /*:1324*/
-#line 24576 "texprof.w"
+#line 24580 "texprof.w"
+;
+/*1784:*/
+#line 31768 "texprof.w"
+
+
+{two_halves hw;
+memory_word m;
+int byte_count= 0;
+int i,j;
+char*buf;
+undump_hh(hw);
+file_num= hw.rh;
+if(file_num> MAX_FILE_NUM)overflow("file number",file_num);
+i= hw.lh;
+buf= malloc(i+1);
+if(buf==NULL)
+{print_err("Out of memory while reading filenames from format file");
+succumb;
+}
+for(k= 0;k<=file_num;k++)
+{char*s= buf;
+do
+{if(byte_count==0)
+{undump_wd(m);byte_count= 8;}
+*s= (m.w>>56)&0xFF;m.w= m.w<<8;
+byte_count--;
+}while(*s++!=0);
+file_num_name[k]= strdup(buf);
+if(file_num_name[k]==NULL)
+{print_err("Out of memory while reading filenames from format file");
+succumb;
+}
+}
+free(buf);
+}
+
+
+/*:1784*/
+#line 24581 "texprof.w"
+;
+/*1787:*/
+#line 31844 "texprof.w"
+
+k= hi_mem_min;
+while(k<=mem_end)
+{two_halves hw;
+halfword e;
+undump_hh(hw);
+e= hw.rh;
+/*1788:*/
+#line 31858 "texprof.w"
+
+if(e&0x80000000)
+fl_mem[k++]= e&~0x80000000;
+else
+{int i;
+i= e;
+while(i> 0)
+{i--;k++;}
+}
+
+
+
+/*:1788*/
+#line 31851 "texprof.w"
+
+if(k<=mem_end)
+{e= hw.lh;
+/*1788:*/
+#line 31858 "texprof.w"
+
+if(e&0x80000000)
+fl_mem[k++]= e&~0x80000000;
+else
+{int i;
+i= e;
+while(i> 0)
+{i--;k++;}
+}
+
+
+
+/*:1788*/
+#line 31854 "texprof.w"
+
+}
+}
+
+/*:1787*/
+#line 24582 "texprof.w"
 ;
 /*1326:*/
-#line 24991 "texprof.w"
+#line 24997 "texprof.w"
 
 undump(batch_mode,error_stop_mode,interaction);
 if(interaction_option>=0)interaction= interaction_option;
@@ -25892,7 +26078,7 @@ undump_int(x);
 if((x!=69069)||eof(fmt_file))goto bad_fmt
 
 /*:1326*/
-#line 24577 "texprof.w"
+#line 24583 "texprof.w"
 ;
 return true;
 bad_fmt:wake_up_terminal;
@@ -25902,19 +26088,19 @@ return false;
 }
 
 /*:1302*//*1329:*/
-#line 25025 "texprof.w"
+#line 25031 "texprof.w"
 /*1332:*/
-#line 25123 "texprof.w"
+#line 25129 "texprof.w"
 
 static void close_files_and_terminate(void)
 {int k;
 /*1377:*/
-#line 25811 "texprof.w"
+#line 25817 "texprof.w"
 
 for(k= 0;k<=15;k++)if(write_open[k])a_close(&write_file[k]);
 
 /*:1377*//*1776:*/
-#line 31535 "texprof.w"
+#line 31541 "texprof.w"
 
 {FILE*prof;
 pack_job_name(".tprof");
@@ -25924,16 +26110,16 @@ else{
 int i;
 prof_file_line= cur_file_line;
 /*1777:*/
-#line 31558 "texprof.w"
+#line 31564 "texprof.w"
 
 fputs("TEX PROF",prof);
 
 
 /*:1777*/
-#line 31543 "texprof.w"
+#line 31549 "texprof.w"
 
 /*1778:*/
-#line 31582 "texprof.w"
+#line 31588 "texprof.w"
 
 PUT2(file_num+1);
 {int n,m;
@@ -25959,19 +26145,19 @@ PUT2(prof_max_depth);
 
 
 /*:1778*/
-#line 31544 "texprof.w"
+#line 31550 "texprof.w"
 
 /*1777:*/
-#line 31558 "texprof.w"
+#line 31564 "texprof.w"
 
 fputs("TEX PROF",prof);
 
 
 /*:1777*/
-#line 31545 "texprof.w"
+#line 31551 "texprof.w"
 
 /*1779:*/
-#line 31608 "texprof.w"
+#line 31614 "texprof.w"
 
 for(i= 0;i<=file_num;i++)
 {fputs(file_num_name[i],prof);
@@ -25979,19 +26165,19 @@ PUT1(0);
 }
 
 /*:1779*/
-#line 31546 "texprof.w"
+#line 31552 "texprof.w"
 
 /*1777:*/
-#line 31558 "texprof.w"
+#line 31564 "texprof.w"
 
 fputs("TEX PROF",prof);
 
 
 /*:1777*/
-#line 31547 "texprof.w"
+#line 31553 "texprof.w"
 
 /*1780:*/
-#line 31619 "texprof.w"
+#line 31625 "texprof.w"
 
 for(i= hash_base;i<undefined_control_sequence;i++)
 if(text(i)!=0)
@@ -26004,19 +26190,19 @@ PUT1(0);
 
 
 /*:1780*/
-#line 31548 "texprof.w"
+#line 31554 "texprof.w"
 
 /*1777:*/
-#line 31558 "texprof.w"
+#line 31564 "texprof.w"
 
 fputs("TEX PROF",prof);
 
 
 /*:1777*/
-#line 31549 "texprof.w"
+#line 31555 "texprof.w"
 
 /*1782:*/
-#line 31667 "texprof.w"
+#line 31673 "texprof.w"
 
 
 i= 0;
@@ -26027,12 +26213,12 @@ while(i<st_count)
 if(c==system_macro_pop)
 {int n= stamp[i]&0xFFFF;
 /*1781:*/
-#line 31647 "texprof.w"
+#line 31653 "texprof.w"
 
 #if SHOW_WRITE_TIMING
 printf("!%d:%d:%d>%d\n",j++,i,last_depth,last_depth-n);
 #endif
-#line 31651 "texprof.w"
+#line 31657 "texprof.w"
  if(n<=10)
 PUT1(system_macro_pop_0+n);
 else if(n<=255)
@@ -26046,7 +26232,7 @@ PUT2(n);
 last_depth= last_depth-n;
 
 /*:1781*/
-#line 31676 "texprof.w"
+#line 31682 "texprof.w"
 
 i++;
 }
@@ -26055,12 +26241,12 @@ else if(c==system_macro_push)
 if(d<=last_depth)
 {int n= last_depth-d+1;
 /*1781:*/
-#line 31647 "texprof.w"
+#line 31653 "texprof.w"
 
 #if SHOW_WRITE_TIMING
 printf("!%d:%d:%d>%d\n",j++,i,last_depth,last_depth-n);
 #endif
-#line 31651 "texprof.w"
+#line 31657 "texprof.w"
  if(n<=10)
 PUT1(system_macro_pop_0+n);
 else if(n<=255)
@@ -26074,7 +26260,7 @@ PUT2(n);
 last_depth= last_depth-n;
 
 /*:1781*/
-#line 31683 "texprof.w"
+#line 31689 "texprof.w"
 
 
 
@@ -26087,7 +26273,7 @@ print_char(':');print_int(d);
 print_char(':');print_cs(stamp[i+1]&0xffff);
 print_char(']');print_ln();
 #endif
-#line 31695 "texprof.w"
+#line 31701 "texprof.w"
  PUT4(stamp[i]);i++;
 PUT2(stamp[i]);i++;
 last_depth= d;
@@ -26099,12 +26285,12 @@ if(c&POP_BIT)
 #if SHOW_WRITE_TIMING
 printf("!%d:%d:%d>%d}\n",j++,i,last_depth+1,last_depth);
 #endif
-#line 31706 "texprof.w"
+#line 31712 "texprof.w"
 }
 #if SHOW_WRITE_TIMING
 printf("!%d:%d:%d:%d>\n",j++,i,stamp[i]>>24,last_depth);
 #endif
-#line 31710 "texprof.w"
+#line 31716 "texprof.w"
  PUT4(stamp[i]);i++;
 PUT4(stamp[i]);i++;
 }
@@ -26112,28 +26298,28 @@ PUT4(stamp[i]);i++;
 }
 
 /*:1782*/
-#line 31550 "texprof.w"
+#line 31556 "texprof.w"
 
 /*1777:*/
-#line 31558 "texprof.w"
+#line 31564 "texprof.w"
 
 fputs("TEX PROF",prof);
 
 
 /*:1777*/
-#line 31551 "texprof.w"
+#line 31557 "texprof.w"
 
 fclose(prof);
 }
 }
 
 /*:1776*/
-#line 25126 "texprof.w"
+#line 25132 "texprof.w"
 
 new_line_char= -1;
 #ifdef STAT
 /*1333:*/
-#line 25146 "texprof.w"
+#line 25152 "texprof.w"
 
 if(log_opened)
 {wlog_ln(" ");
@@ -26166,12 +26352,12 @@ save_size);
 }
 
 /*:1333*/
-#line 25129 "texprof.w"
+#line 25135 "texprof.w"
 ;
 #endif
-#line 25131 "texprof.w"
+#line 25137 "texprof.w"
  wake_up_terminal;/*641:*/
-#line 13289 "texprof.w"
+#line 13291 "texprof.w"
 
 while(cur_s> -1)
 {if(cur_s> 0)dvi_out(pop)
@@ -26189,7 +26375,7 @@ dvi_four(max_v);dvi_four(max_h);
 dvi_out(max_push/256);dvi_out(max_push%256);
 dvi_out((total_pages/256)%256);dvi_out(total_pages%256);
 /*642:*/
-#line 13320 "texprof.w"
+#line 13322 "texprof.w"
 
 while(font_ptr> font_base)
 {if(font_used[font_ptr])dvi_font_def(font_ptr);
@@ -26197,7 +26383,7 @@ decr(font_ptr);
 }
 
 /*:642*/
-#line 13305 "texprof.w"
+#line 13307 "texprof.w"
 ;
 dvi_out(post_post);dvi_four(last_bop);dvi_out(id_byte);
 k= 4+((dvi_buf_size-dvi_ptr)%4);
@@ -26205,13 +26391,13 @@ while(k> 0)
 {dvi_out(223);decr(k);
 }
 /*598:*/
-#line 12460 "texprof.w"
+#line 12462 "texprof.w"
 
 if(dvi_limit==half_buf)write_dvi(half_buf,dvi_buf_size-1);
 if(dvi_ptr> 0)write_dvi(0,dvi_ptr-1)
 
 /*:598*/
-#line 13311 "texprof.w"
+#line 13313 "texprof.w"
 ;
 print_nl("Output written on ");slow_print(output_file_name);
 
@@ -26222,7 +26408,7 @@ b_close(&dvi_file);
 }
 
 /*:641*/
-#line 25131 "texprof.w"
+#line 25137 "texprof.w"
 ;
 if(log_opened)
 {wlog_cr;a_close(&log_file);selector= selector-2;
@@ -26235,7 +26421,7 @@ slow_print(log_name);print_char('.');print_nl("");
 }
 
 /*:1332*//*1334:*/
-#line 25180 "texprof.w"
+#line 25186 "texprof.w"
 
 static void final_cleanup(void)
 {
@@ -26284,21 +26470,21 @@ for(c= last_box_code;c<=vsplit_code;c++)flush_node_list(disc_ptr[c]);
 if(last_glue!=max_halfword)delete_glue_ref(last_glue);
 store_fmt_file();return;
 #endif
-#line 25228 "texprof.w"
+#line 25234 "texprof.w"
  print_nl("(\\dump is performed only by INITEX)");return;
 
 }
 }
 
 /*:1334*//*1335:*/
-#line 25233 "texprof.w"
+#line 25239 "texprof.w"
 
 #ifdef INIT
 static void init_prim(void)
 {no_new_control_sequence= false;
 first= 0;
 /*225:*/
-#line 4777 "texprof.w"
+#line 4779 "texprof.w"
 
 primitive("lineskip",assign_glue,glue_base+line_skip_code);
 
@@ -26340,7 +26526,7 @@ primitive("thickmuskip",assign_mu_glue,glue_base+thick_mu_skip_code);
 
 
 /*:225*//*229:*/
-#line 4912 "texprof.w"
+#line 4914 "texprof.w"
 
 primitive("output",assign_toks,output_routine_loc);
 
@@ -26362,7 +26548,7 @@ primitive("errhelp",assign_toks,err_help_loc);
 
 
 /*:229*//*237:*/
-#line 5277 "texprof.w"
+#line 5279 "texprof.w"
 
 primitive("pretolerance",assign_int,int_base+pretolerance_code);
 
@@ -26479,7 +26665,7 @@ primitive("errorcontextlines",assign_int,int_base+error_context_lines_code);
 
 
 /*:237*//*247:*/
-#line 5555 "texprof.w"
+#line 5557 "texprof.w"
 
 primitive("parindent",assign_dimen,dimen_base+par_indent_code);
 
@@ -26527,7 +26713,7 @@ primitive("emergencystretch",assign_dimen,dimen_base+emergency_stretch_code);
 
 
 /*:247*//*264:*/
-#line 5847 "texprof.w"
+#line 5849 "texprof.w"
 
 primitive(" ",ex_space,0);
 
@@ -26619,14 +26805,14 @@ primitive("vrule",vrule,0);
 
 
 /*:264*//*333:*/
-#line 7487 "texprof.w"
+#line 7489 "texprof.w"
 
 primitive("par",par_end,256);
 
 par_loc= cur_val;par_token= cs_token_flag+par_loc;
 
 /*:333*//*375:*/
-#line 8183 "texprof.w"
+#line 8185 "texprof.w"
 
 primitive("input",input,0);
 
@@ -26635,7 +26821,7 @@ primitive("endinput",input,1);
 
 
 /*:375*//*383:*/
-#line 8275 "texprof.w"
+#line 8277 "texprof.w"
 
 primitive("topmark",top_bot_mark,top_mark_code);
 
@@ -26649,7 +26835,7 @@ primitive("splitbotmark",top_bot_mark,split_bot_mark_code);
 
 
 /*:383*//*410:*/
-#line 8729 "texprof.w"
+#line 8731 "texprof.w"
 
 primitive("count",internal_register,mem_bot+int_val);
 
@@ -26661,7 +26847,7 @@ primitive("muskip",internal_register,mem_bot+mu_val);
 
 
 /*:410*//*415:*/
-#line 8842 "texprof.w"
+#line 8844 "texprof.w"
 
 primitive("spacefactor",set_aux,hmode);
 
@@ -26689,7 +26875,7 @@ primitive("badness",last_item,badness_code);
 
 
 /*:415*//*467:*/
-#line 9693 "texprof.w"
+#line 9695 "texprof.w"
 
 primitive("number",convert,number_code);
 
@@ -26705,7 +26891,7 @@ primitive("jobname",convert,job_name_code);
 
 
 /*:467*//*486:*/
-#line 10028 "texprof.w"
+#line 10030 "texprof.w"
 
 primitive("if",if_test,if_char_code);
 
@@ -26743,7 +26929,7 @@ primitive("ifcase",if_test,if_case_code);
 
 
 /*:486*//*490:*/
-#line 10120 "texprof.w"
+#line 10122 "texprof.w"
 
 primitive("fi",fi_or_else,fi_code);
 
@@ -26754,14 +26940,14 @@ primitive("else",fi_or_else,else_code);
 
 
 /*:490*//*552:*/
-#line 11316 "texprof.w"
+#line 11318 "texprof.w"
 
 primitive("nullfont",set_font,null_font);
 
 text(frozen_null_font)= text(cur_val);eqtb[frozen_null_font]= eqtb[cur_val];
 
 /*:552*//*779:*/
-#line 15935 "texprof.w"
+#line 15937 "texprof.w"
 
 primitive("span",tab_mark,span_code);
 
@@ -26778,7 +26964,7 @@ eqtb[frozen_end_template]= eqtb[frozen_endv];
 eq_type(frozen_end_template)= end_template;
 
 /*:779*//*982:*/
-#line 19855 "texprof.w"
+#line 19857 "texprof.w"
 
 primitive("pagegoal",set_page_dimen,0);
 
@@ -26798,7 +26984,7 @@ primitive("pagedepth",set_page_dimen,7);
 
 
 /*:982*//*1051:*/
-#line 21113 "texprof.w"
+#line 21115 "texprof.w"
 
 primitive("end",stop,0);
 
@@ -26806,7 +26992,7 @@ primitive("dump",stop,1);
 
 
 /*:1051*//*1057:*/
-#line 21190 "texprof.w"
+#line 21192 "texprof.w"
 
 primitive("hskip",hskip,skip_code);
 
@@ -26836,7 +27022,7 @@ primitive("mkern",mkern,mu_glue);
 
 
 /*:1057*//*1070:*/
-#line 21453 "texprof.w"
+#line 21455 "texprof.w"
 
 primitive("moveleft",hmove,1);
 
@@ -26871,7 +27057,7 @@ primitive("xleaders",leader_ship,x_leaders);
 
 
 /*:1070*//*1087:*/
-#line 21748 "texprof.w"
+#line 21750 "texprof.w"
 
 primitive("indent",start_par,1);
 
@@ -26879,7 +27065,7 @@ primitive("noindent",start_par,0);
 
 
 /*:1087*//*1106:*/
-#line 21968 "texprof.w"
+#line 21970 "texprof.w"
 
 primitive("unpenalty",remove_item,penalty_node);
 
@@ -26897,7 +27083,7 @@ primitive("unvcopy",un_vbox,copy_code);
 
 
 /*:1106*//*1113:*/
-#line 22053 "texprof.w"
+#line 22055 "texprof.w"
 
 primitive("-",discretionary,1);
 
@@ -26905,7 +27091,7 @@ primitive("discretionary",discretionary,0);
 
 
 /*:1113*//*1140:*/
-#line 22402 "texprof.w"
+#line 22404 "texprof.w"
 
 primitive("eqno",eq_no,0);
 
@@ -26913,7 +27099,7 @@ primitive("leqno",eq_no,1);
 
 
 /*:1140*//*1155:*/
-#line 22639 "texprof.w"
+#line 22641 "texprof.w"
 
 primitive("mathord",math_comp,ord_noad);
 
@@ -26943,7 +27129,7 @@ primitive("nolimits",limit_switch,no_limits);
 
 
 /*:1155*//*1168:*/
-#line 22793 "texprof.w"
+#line 22795 "texprof.w"
 
 primitive("displaystyle",math_style,display_style);
 
@@ -26955,7 +27141,7 @@ primitive("scriptscriptstyle",math_style,script_script_style);
 
 
 /*:1168*//*1177:*/
-#line 22892 "texprof.w"
+#line 22894 "texprof.w"
 
 primitive("above",above,above_code);
 
@@ -26971,7 +27157,7 @@ primitive("atopwithdelims",above,delimited_code+atop_code);
 
 
 /*:1177*//*1187:*/
-#line 23020 "texprof.w"
+#line 23022 "texprof.w"
 
 primitive("left",left_right,left_noad);
 
@@ -26980,7 +27166,7 @@ primitive("right",left_right,right_noad);
 text(frozen_right)= text(cur_val);eqtb[frozen_right]= eqtb[cur_val];
 
 /*:1187*//*1207:*/
-#line 23341 "texprof.w"
+#line 23343 "texprof.w"
 
 primitive("long",prefix,1);
 
@@ -26998,7 +27184,7 @@ primitive("xdef",def,3);
 
 
 /*:1207*//*1218:*/
-#line 23533 "texprof.w"
+#line 23535 "texprof.w"
 
 primitive("let",let,normal);
 
@@ -27006,7 +27192,7 @@ primitive("futurelet",let,normal+1);
 
 
 /*:1218*//*1221:*/
-#line 23578 "texprof.w"
+#line 23580 "texprof.w"
 
 primitive("chardef",shorthand_def,char_def_code);
 
@@ -27024,7 +27210,7 @@ primitive("toksdef",shorthand_def,toks_def_code);
 
 
 /*:1221*//*1229:*/
-#line 23743 "texprof.w"
+#line 23745 "texprof.w"
 
 primitive("catcode",def_code,cat_code_base);
 
@@ -27046,7 +27232,7 @@ primitive("scriptscriptfont",def_family,math_font_base+script_script_size);
 
 
 /*:1229*//*1249:*/
-#line 24051 "texprof.w"
+#line 24053 "texprof.w"
 
 primitive("hyphenation",hyph_data,0);
 
@@ -27054,7 +27240,7 @@ primitive("patterns",hyph_data,1);
 
 
 /*:1249*//*1253:*/
-#line 24088 "texprof.w"
+#line 24090 "texprof.w"
 
 primitive("hyphenchar",assign_font_int,0);
 
@@ -27062,7 +27248,7 @@ primitive("skewchar",assign_font_int,1);
 
 
 /*:1253*//*1261:*/
-#line 24187 "texprof.w"
+#line 24189 "texprof.w"
 
 primitive("batchmode",set_interaction,batch_mode);
 
@@ -27074,7 +27260,7 @@ primitive("errorstopmode",set_interaction,error_stop_mode);
 
 
 /*:1261*//*1271:*/
-#line 24253 "texprof.w"
+#line 24255 "texprof.w"
 
 primitive("openin",in_stream,1);
 
@@ -27082,7 +27268,7 @@ primitive("closein",in_stream,0);
 
 
 /*:1271*//*1276:*/
-#line 24290 "texprof.w"
+#line 24292 "texprof.w"
 
 primitive("message",message,0);
 
@@ -27090,7 +27276,7 @@ primitive("errmessage",message,1);
 
 
 /*:1276*//*1285:*/
-#line 24357 "texprof.w"
+#line 24359 "texprof.w"
 
 primitive("lowercase",case_shift,lc_code_base);
 
@@ -27098,7 +27284,7 @@ primitive("uppercase",case_shift,uc_code_base);
 
 
 /*:1285*//*1290:*/
-#line 24404 "texprof.w"
+#line 24406 "texprof.w"
 
 primitive("show",xray,show_code);
 
@@ -27110,7 +27296,7 @@ primitive("showlists",xray,show_lists_code);
 
 
 /*:1290*//*1343:*/
-#line 25433 "texprof.w"
+#line 25439 "texprof.w"
 
 primitive("openout",extension,open_node);
 
@@ -27126,7 +27312,7 @@ primitive("setlanguage",extension,set_language_code);
 
 
 /*:1343*//*1737:*/
-#line 30824 "texprof.w"
+#line 30830 "texprof.w"
 
 primitive("profileon",extension,profile_on_code);
 
@@ -27134,15 +27320,15 @@ primitive("profileoff",extension,profile_off_code);
 
 
 /*:1737*/
-#line 25238 "texprof.w"
+#line 25244 "texprof.w"
 ;
 no_new_control_sequence= true;
 }
 #endif
-#line 25242 "texprof.w"
+#line 25248 "texprof.w"
 
 /*:1335*//*1337:*/
-#line 25294 "texprof.w"
+#line 25300 "texprof.w"
 
 #ifdef DEBUG
 static void debug_help(void)
@@ -27161,7 +27347,7 @@ breakpoint:m= 0;
 else{fscanf(term_in.f," %d",&n);
 switch(m){
 /*1338:*/
-#line 25319 "texprof.w"
+#line 25325 "texprof.w"
 
 case 1:print_word(mem[n]);break;
 case 2:print_int(info(n));break;
@@ -27186,7 +27372,7 @@ case 15:{font_in_short_display= null_font;short_display(n);
 case 16:panicking= !panicking;break;
 
 /*:1338*/
-#line 25311 "texprof.w"
+#line 25317 "texprof.w"
 
 default:print("?");
 }
@@ -27194,25 +27380,25 @@ default:print("?");
 }
 }
 #endif
-#line 25318 "texprof.w"
+#line 25324 "texprof.w"
 
 /*:1337*//*1545:*/
-#line 28187 "texprof.w"
+#line 28193 "texprof.w"
 
 static void Prote_initialize(void)
 {int k;
 /*1567:*/
-#line 28399 "texprof.w"
+#line 28405 "texprof.w"
 
 xchg_buffer_length= 0;
 
 /*:1567*//*1573:*/
-#line 28440 "texprof.w"
+#line 28446 "texprof.w"
 
 incsname_state= 0;
 
 /*:1573*//*1627:*/
-#line 28970 "texprof.w"
+#line 28976 "texprof.w"
 
 two_to_the[0]= 1;
 for(k= 1;k<=30;k++)two_to_the[k]= 2*two_to_the[k-1];
@@ -27233,32 +27419,32 @@ for(k= 14;k<=27;k++)spec_log[k]= two_to_the[27-k];
 spec_log[28]= 1;
 
 /*:1627*//*1642:*/
-#line 29210 "texprof.w"
+#line 29216 "texprof.w"
 
 random_seed= sys_time;
 init_randoms();
 
 /*:1642*//*1664:*/
-#line 29440 "texprof.w"
+#line 29446 "texprof.w"
 
 last_saved_xpos= 0;last_saved_ypos= 0;
 
 /*:1664*//*1670:*/
-#line 29475 "texprof.w"
+#line 29481 "texprof.w"
 
 last_save_pos_number= 0;
 
 /*:1670*/
-#line 28190 "texprof.w"
+#line 28196 "texprof.w"
 ;
 }
 
 /*:1545*/
-#line 25025 "texprof.w"
+#line 25031 "texprof.w"
 
 
 /*:1329*//*1331:*/
-#line 25079 "texprof.w"
+#line 25085 "texprof.w"
 
 int main(int argc,char*argv[]){
 main_init(argc,argv);
@@ -27299,17 +27485,17 @@ if(buf_size> max_halfword)bad= 18;
 if(max_quarterword-min_quarterword<255)bad= 19;
 
 /*:110*//*289:*/
-#line 6459 "texprof.w"
+#line 6461 "texprof.w"
 
 if(cs_token_flag+undefined_control_sequence> max_halfword)bad= 21;
 
 /*:289*//*1248:*/
-#line 24046 "texprof.w"
+#line 24048 "texprof.w"
 
 if(2*max_halfword<mem_top-mem_min)bad= 41;
 
 /*:1248*/
-#line 25085 "texprof.w"
+#line 25091 "texprof.w"
 
 if(bad> 0)
 {wterm_ln("Ouch---my internal constants have been clobbered!"
@@ -27324,7 +27510,7 @@ if(iniversion)
 {init_prim();
 init_str_ptr= str_ptr;init_pool_ptr= pool_ptr;fix_date_and_time();}
 #endif
-#line 25099 "texprof.w"
+#line 25105 "texprof.w"
  ready_already= 314159;
 start_of_TEX:/*54:*/
 #line 1449 "texprof.w"
@@ -27341,22 +27527,22 @@ else{slow_print(format_ident);print_ln();
 update_terminal;
 
 /*:60*//*527:*/
-#line 10711 "texprof.w"
+#line 10713 "texprof.w"
 
 job_name= 0;name_in_progress= false;log_opened= false;
 
 /*:527*//*532:*/
-#line 10784 "texprof.w"
+#line 10786 "texprof.w"
 output_file_name= 0;
 
 /*:532*/
-#line 25100 "texprof.w"
+#line 25106 "texprof.w"
 ;
 /*1336:*/
-#line 25250 "texprof.w"
+#line 25256 "texprof.w"
 
 {/*330:*/
-#line 7435 "texprof.w"
+#line 7437 "texprof.w"
 
 {input_ptr= 0;max_in_stack= 0;
 in_open= 0;open_parens= 0;max_buf_stack= 0;
@@ -27372,16 +27558,16 @@ limit= last;first= last+1;
 }
 
 /*:330*/
-#line 25251 "texprof.w"
+#line 25257 "texprof.w"
 ;
 /*1378:*/
-#line 25833 "texprof.w"
+#line 25839 "texprof.w"
 
 #ifdef INIT
 if(iniversion&&(buffer[loc]=='*'||etexp))
 {no_new_control_sequence= false;
 /*1379:*/
-#line 25867 "texprof.w"
+#line 25873 "texprof.w"
 
 primitive("lastnodetype",last_item,last_node_type_code);
 
@@ -27391,7 +27577,7 @@ primitive("eTeXrevision",convert,eTeX_revision_code);
 
 
 /*:1379*//*1387:*/
-#line 25920 "texprof.w"
+#line 25926 "texprof.w"
 
 primitive("everyeof",assign_toks,every_eof_loc);
 
@@ -27411,7 +27597,7 @@ primitive("savinghyphcodes",assign_int,int_base+saving_hyph_codes_code);
 
 
 /*:1387*//*1393:*/
-#line 26021 "texprof.w"
+#line 26027 "texprof.w"
 
 primitive("currentgrouplevel",last_item,current_group_level_code);
 
@@ -27419,7 +27605,7 @@ primitive("currentgrouptype",last_item,current_group_type_code);
 
 
 /*:1393*//*1396:*/
-#line 26043 "texprof.w"
+#line 26049 "texprof.w"
 
 primitive("currentiflevel",last_item,current_if_level_code);
 
@@ -27429,7 +27615,7 @@ primitive("currentifbranch",last_item,current_if_branch_code);
 
 
 /*:1396*//*1399:*/
-#line 26079 "texprof.w"
+#line 26085 "texprof.w"
 
 primitive("fontcharwd",last_item,font_char_wd_code);
 
@@ -27441,7 +27627,7 @@ primitive("fontcharic",last_item,font_char_ic_code);
 
 
 /*:1399*//*1402:*/
-#line 26120 "texprof.w"
+#line 26126 "texprof.w"
 
 primitive("parshapelength",last_item,par_shape_length_code);
 
@@ -27451,19 +27637,19 @@ primitive("parshapedimen",last_item,par_shape_dimen_code);
 
 
 /*:1402*//*1405:*/
-#line 26152 "texprof.w"
+#line 26158 "texprof.w"
 
 primitive("showgroups",xray,show_groups);
 
 
 /*:1405*//*1414:*/
-#line 26323 "texprof.w"
+#line 26329 "texprof.w"
 
 primitive("showtokens",xray,show_tokens);
 
 
 /*:1414*//*1416:*/
-#line 26338 "texprof.w"
+#line 26344 "texprof.w"
 
 primitive("unexpanded",the,1);
 
@@ -27471,37 +27657,37 @@ primitive("detokenize",the,show_tokens);
 
 
 /*:1416*//*1419:*/
-#line 26364 "texprof.w"
+#line 26370 "texprof.w"
 
 primitive("showifs",xray,show_ifs);
 
 
 /*:1419*//*1422:*/
-#line 26395 "texprof.w"
+#line 26401 "texprof.w"
 
 primitive("interactionmode",set_page_int,2);
 
 
 /*:1422*//*1427:*/
-#line 26424 "texprof.w"
+#line 26430 "texprof.w"
 
 primitive("middle",left_right,middle_noad);
 
 
 /*:1427*//*1429:*/
-#line 26434 "texprof.w"
+#line 26440 "texprof.w"
 
 primitive("scantokens",input,2);
 
 
 /*:1429*//*1441:*/
-#line 26564 "texprof.w"
+#line 26570 "texprof.w"
 
 primitive("readline",read_to_cs,1);
 
 
 /*:1441*//*1444:*/
-#line 26591 "texprof.w"
+#line 26597 "texprof.w"
 
 primitive("unless",expand_after,1);
 
@@ -27513,13 +27699,13 @@ primitive("iffontchar",if_test,if_font_char_code);
 
 
 /*:1444*//*1452:*/
-#line 26684 "texprof.w"
+#line 26690 "texprof.w"
 
 primitive("protected",prefix,8);
 
 
 /*:1452*//*1460:*/
-#line 26819 "texprof.w"
+#line 26825 "texprof.w"
 
 primitive("numexpr",last_item,eTeX_expr-int_val+int_val);
 
@@ -27531,7 +27717,7 @@ primitive("muexpr",last_item,eTeX_expr-int_val+mu_val);
 
 
 /*:1460*//*1483:*/
-#line 27239 "texprof.w"
+#line 27245 "texprof.w"
 
 primitive("gluestretchorder",last_item,glue_stretch_order_code);
 
@@ -27543,7 +27729,7 @@ primitive("glueshrink",last_item,glue_shrink_code);
 
 
 /*:1483*//*1487:*/
-#line 27278 "texprof.w"
+#line 27284 "texprof.w"
 
 primitive("mutoglue",last_item,mu_to_glue_code);
 
@@ -27551,7 +27737,7 @@ primitive("gluetomu",last_item,glue_to_mu_code);
 
 
 /*:1487*//*1491:*/
-#line 27316 "texprof.w"
+#line 27322 "texprof.w"
 
 primitive("marks",mark,marks_code);
 
@@ -27567,7 +27753,7 @@ primitive("splitbotmarks",top_bot_mark,split_bot_mark_code+marks_code);
 
 
 /*:1491*//*1531:*/
-#line 28090 "texprof.w"
+#line 28096 "texprof.w"
 
 primitive("pagediscards",un_vbox,last_box_code);
 
@@ -27575,7 +27761,7 @@ primitive("splitdiscards",un_vbox,vsplit_code);
 
 
 /*:1531*//*1534:*/
-#line 28110 "texprof.w"
+#line 28116 "texprof.w"
 
 primitive("interlinepenalties",set_shape,inter_line_penalties_loc);
 
@@ -27587,42 +27773,42 @@ primitive("displaywidowpenalties",set_shape,display_widow_penalties_loc);
 
 
 /*:1534*//*1538:*/
-#line 28144 "texprof.w"
+#line 28150 "texprof.w"
 
 primitive("expanddepth",assign_int,int_base+expand_depth_code);
 
 
 /*:1538*/
-#line 25837 "texprof.w"
+#line 25843 "texprof.w"
 
 if(buffer[loc]=='*')incr(loc);
 eTeX_mode= 1;
 /*1495:*/
-#line 27351 "texprof.w"
+#line 27357 "texprof.w"
 
 max_reg_num= 32767;
 max_reg_help_line= "A register number must be between 0 and 32767.";
 
 /*:1495*//*1540:*/
-#line 28151 "texprof.w"
+#line 28157 "texprof.w"
 
 expand_depth= 10000;
 expand_depth_count= 0;
 
 /*:1540*/
-#line 25840 "texprof.w"
+#line 25846 "texprof.w"
 
 if(buffer[loc]=='*'||ltxp){
 /*1566:*/
-#line 28392 "texprof.w"
+#line 28398 "texprof.w"
 
 if(xchg_buffer_size<64)bad= 51;
 
 /*:1566*/
-#line 25842 "texprof.w"
+#line 25848 "texprof.w"
 
 /*1553:*/
-#line 28277 "texprof.w"
+#line 28283 "texprof.w"
 
 primitive("Proteversion",last_item,Prote_version_code);
 
@@ -27630,13 +27816,13 @@ primitive("Proterevision",convert,Prote_revision_code);
 
 
 /*:1553*//*1568:*/
-#line 28410 "texprof.w"
+#line 28416 "texprof.w"
 
 primitive("shellescape",last_item,shell_escape_code);
 
 
 /*:1568*//*1571:*/
-#line 28425 "texprof.w"
+#line 28431 "texprof.w"
 
 primitive("ifincsname",if_test,if_incsname_code);
 
@@ -27644,32 +27830,32 @@ primitive("ifprimitive",if_test,if_primitive_code);
 
 
 /*:1571*//*1578:*/
-#line 28481 "texprof.w"
+#line 28487 "texprof.w"
 
 primitive("primitive",expand_after,primitive_code);
 
 text(frozen_primitive)= text(cur_val);eqtb[frozen_primitive]= eqtb[cur_val];
 
 /*:1578*//*1588:*/
-#line 28601 "texprof.w"
+#line 28607 "texprof.w"
 
 primitive("expanded",expand_after,expanded_code);
 
 
 /*:1588*//*1591:*/
-#line 28627 "texprof.w"
+#line 28633 "texprof.w"
 
 primitive("strcmp",convert,strcmp_code);
 
 
 /*:1591*//*1597:*/
-#line 28688 "texprof.w"
+#line 28694 "texprof.w"
 
 primitive("creationdate",convert,creation_date_code);
 
 
 /*:1597*//*1602:*/
-#line 28724 "texprof.w"
+#line 28730 "texprof.w"
 
 primitive("resettimer",extension,reset_timer_code);
 
@@ -27677,55 +27863,55 @@ primitive("elapsedtime",last_item,elapsed_time_code);
 
 
 /*:1602*//*1609:*/
-#line 28775 "texprof.w"
+#line 28781 "texprof.w"
 
 primitive("filesize",convert,file_size_code);
 
 
 /*:1609*//*1613:*/
-#line 28802 "texprof.w"
+#line 28808 "texprof.w"
 
 primitive("filemoddate",convert,file_mod_date_code);
 
 
 /*:1613*//*1617:*/
-#line 28842 "texprof.w"
+#line 28848 "texprof.w"
 
 primitive("filedump",convert,file_dump_code);
 
 
 /*:1617*//*1621:*/
-#line 28905 "texprof.w"
+#line 28911 "texprof.w"
 
 primitive("mdfivesum",convert,mdfive_sum_code);
 
 
 /*:1621*//*1639:*/
-#line 29194 "texprof.w"
+#line 29200 "texprof.w"
 
 primitive("randomseed",last_item,random_seed_code);
 
 
 /*:1639*//*1643:*/
-#line 29218 "texprof.w"
+#line 29224 "texprof.w"
 
 primitive("setrandomseed",convert,set_random_seed_code);
 
 
 /*:1643*//*1650:*/
-#line 29294 "texprof.w"
+#line 29300 "texprof.w"
 
 primitive("uniformdeviate",convert,uniform_deviate_code);
 
 
 /*:1650*//*1657:*/
-#line 29378 "texprof.w"
+#line 29384 "texprof.w"
 
 primitive("normaldeviate",convert,normal_deviate_code);
 
 
 /*:1657*//*1662:*/
-#line 29424 "texprof.w"
+#line 29430 "texprof.w"
 
 primitive("pagewidth",assign_dimen,dimen_base+page_width_code);
 
@@ -27733,7 +27919,7 @@ primitive("pageheight",assign_dimen,dimen_base+page_height_code);
 
 
 /*:1662*//*1666:*/
-#line 29447 "texprof.w"
+#line 29453 "texprof.w"
 
 primitive("lastxpos",last_item,last_xpos_code);
 
@@ -27741,26 +27927,26 @@ primitive("lastypos",last_item,last_ypos_code);
 
 
 /*:1666*//*1671:*/
-#line 29478 "texprof.w"
+#line 29484 "texprof.w"
 
 primitive("savepos",extension,save_pos_code);
 
 
 /*:1671*/
-#line 25843 "texprof.w"
+#line 25849 "texprof.w"
 
 if(buffer[loc]=='*')incr(loc);
 Prote_mode= 1;
 }
 }
 #endif
-#line 25849 "texprof.w"
+#line 25855 "texprof.w"
 
 if(!no_new_control_sequence)
 no_new_control_sequence= true;else
 
 /*:1378*/
-#line 25252 "texprof.w"
+#line 25258 "texprof.w"
 
 if((format_ident==0)||(buffer[loc]=='&'))
 {if(format_ident!=0)initialize();
@@ -27783,14 +27969,14 @@ fix_date_and_time();
 if(interaction==batch_mode)selector= no_print;else selector= term_only
 
 /*:74*/
-#line 25268 "texprof.w"
+#line 25274 "texprof.w"
 ;
 if((loc<limit)&&(cat_code(buffer[loc])!=escape))start_input();
 
 }
 
 /*:1336*/
-#line 25101 "texprof.w"
+#line 25107 "texprof.w"
 ;
 history= spotless;
 main_control();
@@ -27800,9 +27986,9 @@ ready_already= 0;
 return 0;}
 
 /*:1331*//*1682:*/
-#line 29585 "texprof.w"
+#line 29591 "texprof.w"
 /*1690:*/
-#line 29730 "texprof.w"
+#line 29736 "texprof.w"
 
 static struct option long_options[]= {
 {"help",0,0,0},
@@ -27825,25 +28011,25 @@ static struct option long_options[]= {
 {"file-line-error",0,&filelineerrorstylep,1},
 {"no-file-line-error",0,&filelineerrorstylep,0},
 /*1735:*/
-#line 30812 "texprof.w"
+#line 30818 "texprof.w"
 
 {"prof",0,&profile_on,1},
 
 /*:1735*/
-#line 29751 "texprof.w"
+#line 29757 "texprof.w"
 
 {0,0,0,0}};
 
 
 /*:1690*/
-#line 29585 "texprof.w"
+#line 29591 "texprof.w"
 
 /*1686:*/
-#line 29630 "texprof.w"
+#line 29636 "texprof.w"
 
 static void usage_help(void)
 {/*1687:*/
-#line 29640 "texprof.w"
+#line 29646 "texprof.w"
 
 fprintf(stdout,
 "Usage: %s [OPTION]... [TEXNAME[.tex]] [COMMANDS]\n"
@@ -27872,10 +28058,10 @@ fprintf(stdout,
 
 
 /*:1687*/
-#line 29632 "texprof.w"
+#line 29638 "texprof.w"
 
 fprintf(stdout,"Options:\n"/*1688:*/
-#line 29670 "texprof.w"
+#line 29676 "texprof.w"
 
 " -help                 "
 "\t display this help and exit\n"
@@ -27916,20 +28102,20 @@ fprintf(stdout,"Options:\n"/*1688:*/
 
 
 /*:1688*//*1734:*/
-#line 30806 "texprof.w"
+#line 30812 "texprof.w"
 
 " -prof                 "
 "\t enable profiling\n"
 
 /*:1734*/
-#line 29633 "texprof.w"
+#line 29639 "texprof.w"
 );
 fprintf(stdout,"\nFor further information and reporting bugs see https://hint.userweb.mwn.de/\n");
 exit(0);
 }
 
 /*:1686*//*1700:*/
-#line 29876 "texprof.w"
+#line 29882 "texprof.w"
 
 static char*normalize_quotes(const char*nom,const char*mesg)
 {int quoted= false;
@@ -27957,7 +28143,7 @@ return ret;
 }
 
 /*:1700*//*1704:*/
-#line 29973 "texprof.w"
+#line 29979 "texprof.w"
 
 static char*recorder_name= NULL;
 static FILE*recorder_file= NULL;
@@ -27979,7 +28165,7 @@ free(cwd);
 }
 
 /*:1704*//*1707:*/
-#line 30004 "texprof.w"
+#line 30010 "texprof.w"
 
 static void
 recorder_change_filename(const char*new_name)
@@ -27989,7 +28175,7 @@ return;
 #if defined(_WIN32)
 fclose(recorder_file);
 #endif 
-#line 30013 "texprof.w"
+#line 30019 "texprof.w"
 if(output_directory){
 temp= concat3(output_directory,DIR_SEP_STRING,new_name);
 new_name= temp;
@@ -27998,20 +28184,20 @@ new_name= temp;
 #if defined(_WIN32)
 remove(new_name);
 #endif 
-#line 30021 "texprof.w"
+#line 30027 "texprof.w"
 rename(recorder_name,new_name);
 free(recorder_name);
 recorder_name= xstrdup(new_name);
 #if defined(_WIN32)
 recorder_file= xfopen(recorder_name,FOPEN_A_MODE);
 #endif 
-#line 30027 "texprof.w"
+#line 30033 "texprof.w"
 if(temp)
 free(temp);
 }
 
 /*:1707*//*1708:*/
-#line 30036 "texprof.w"
+#line 30042 "texprof.w"
 
 static void
 recorder_record_name(const char*pfx,const char*fname)
@@ -28035,7 +28221,7 @@ recorder_record_output(const char*fname)
 }
 
 /*:1708*//*1713:*/
-#line 30108 "texprof.w"
+#line 30114 "texprof.w"
 
 static void add_cnf_line(char*arg)
 {cnf_count++;
@@ -28044,7 +28230,7 @@ cnf_lines[cnf_count-1]= arg;
 }
 
 /*:1713*//*1716:*/
-#line 30162 "texprof.w"
+#line 30168 "texprof.w"
 
 #ifdef WIN32
 static void clean_windows_filename(char*filename)
@@ -28057,7 +28243,7 @@ if(*pp=='\\')
 }
 }
 #endif
-#line 30174 "texprof.w"
+#line 30180 "texprof.w"
 
 static char*find_file(char*fname,kpse_file_format_type t,int mx)
 {char*filename;
@@ -28090,7 +28276,7 @@ if(argv[optind]&&argv[optind][0]!='&'&&argv[optind][0]!='\\')
 #ifdef WIN32
 clean_windows_filename(argv[optind]);
 #endif
-#line 30206 "texprof.w"
+#line 30212 "texprof.w"
  argv[optind]= normalize_quotes(argv[optind],"input file");
 input_file_name= find_file(argv[optind],kpse_tex_format,false);
 }
@@ -28099,7 +28285,7 @@ return input_file_name;
 
 
 /*:1716*//*1719:*/
-#line 30243 "texprof.w"
+#line 30249 "texprof.w"
 
 static int texmf_yesno(const char*var)
 {
@@ -28108,7 +28294,7 @@ return value&&(*value=='t'||*value=='y'||*value=='1');
 }
 
 /*:1719*//*1723:*/
-#line 30317 "texprof.w"
+#line 30323 "texprof.w"
 
 static void parse_first_line(char*filename)
 {FILE*f= NULL;
@@ -28140,7 +28326,7 @@ free(t);
 }
 
 /*:1723*//*1724:*/
-#line 30366 "texprof.w"
+#line 30372 "texprof.w"
 
 static void input_add_char(unsigned int c)
 {if(last>=max_buf_stack)
@@ -28159,7 +28345,7 @@ overflow("buffer size",buf_size);
 }
 
 /*:35*/
-#line 30371 "texprof.w"
+#line 30377 "texprof.w"
 ;
 }
 buffer[last]= xord[c];incr(last);
@@ -28189,7 +28375,7 @@ return(loc<last);
 }
 
 /*:1724*//*1727:*/
-#line 30475 "texprof.w"
+#line 30481 "texprof.w"
 
 static void update_name_of_file(const char*s,int k)
 {int j;
@@ -28200,7 +28386,7 @@ name_of_file[name_length+1]= 0;
 }
 
 /*:1727*//*1728:*/
-#line 30489 "texprof.w"
+#line 30495 "texprof.w"
 
 static FILE*open_in(char*filename,kpse_file_format_type t,const char*rwb)
 {char*fname= NULL;
@@ -28238,7 +28424,7 @@ return f->f!=NULL&&ferror(f->f)==0;
 }
 
 /*:1728*//*1733:*/
-#line 30641 "texprof.w"
+#line 30647 "texprof.w"
 
 
 static void
@@ -28302,11 +28488,11 @@ static void get_creation_date(void)
 static struct _stat file_stat;
 #define GET_FILE_STAT _stat(fname,&file_stat)
 #else
-#line 30704 "texprof.w"
+#line 30710 "texprof.w"
  static struct stat file_stat;
 #define GET_FILE_STAT stat(fname,&file_stat)
 #endif
-#line 30707 "texprof.w"
+#line 30713 "texprof.w"
 
 
 static char*find_input_file(void)
@@ -28392,10 +28578,10 @@ return DIGEST_SIZE;
 }
 
 /*:1733*/
-#line 29586 "texprof.w"
+#line 29592 "texprof.w"
 
 /*1684:*/
-#line 29599 "texprof.w"
+#line 29605 "texprof.w"
 
 static void main_init(int ac,char*av[])
 {
@@ -28407,7 +28593,7 @@ kpse_record_input= recorder_record_input;
 kpse_record_output= recorder_record_output;
 
 /*1693:*/
-#line 29782 "texprof.w"
+#line 29788 "texprof.w"
 
 #if defined(WIN32)
 {char*enc;
@@ -28416,7 +28602,7 @@ enc= kpse_var_value("command_line_encoding");
 get_command_line_args_utf8(enc,&argc,&argv);
 parse_options(argc,argv);
 /*1710:*/
-#line 30069 "texprof.w"
+#line 30075 "texprof.w"
 
 if(recorder_enabled){
 char**p= kpse_find_file_generic("texmf.cnf",kpse_cnf_format,0,1);
@@ -28435,21 +28621,21 @@ free(pp);
 
 
 /*:1710*/
-#line 29789 "texprof.w"
+#line 29795 "texprof.w"
 
 }
 #else
-#line 29792 "texprof.w"
+#line 29798 "texprof.w"
  parse_options(ac,av);
 #endif
-#line 29794 "texprof.w"
+#line 29800 "texprof.w"
 
 
 /*:1693*/
-#line 29609 "texprof.w"
+#line 29615 "texprof.w"
 
 /*1715:*/
-#line 30137 "texprof.w"
+#line 30143 "texprof.w"
 
 if(!user_progname)
 user_progname= dump_name;
@@ -28457,18 +28643,18 @@ user_progname= dump_name;
 if(user_progname)
 kpse_reset_program_name(user_progname);
 #else
-#line 30144 "texprof.w"
+#line 30150 "texprof.w"
  kpse_set_program_name(argv[0],user_progname);
 #endif
-#line 30146 "texprof.w"
+#line 30152 "texprof.w"
  xputenv("engine","hitex");
 
 
 /*:1715*/
-#line 29610 "texprof.w"
+#line 29616 "texprof.w"
 
 /*1714:*/
-#line 30118 "texprof.w"
+#line 30124 "texprof.w"
 
 #if 1 
 {int i;
@@ -28477,14 +28663,14 @@ kpathsea_cnf_line_env_progname(kpse_def,cnf_lines[i]);
 free(cnf_lines);
 }
 #endif
-#line 30126 "texprof.w"
+#line 30132 "texprof.w"
 
 
 /*:1714*/
-#line 29611 "texprof.w"
+#line 29617 "texprof.w"
 
 /*1717:*/
-#line 30216 "texprof.w"
+#line 30222 "texprof.w"
 
 main_input_file= get_input_file_name();
 
@@ -28500,14 +28686,14 @@ argv[argc-1]= file_name;
 }
 }
 #endif
-#line 30231 "texprof.w"
+#line 30237 "texprof.w"
 
 
 /*:1717*/
-#line 29612 "texprof.w"
+#line 29618 "texprof.w"
 
 /*1718:*/
-#line 30236 "texprof.w"
+#line 30242 "texprof.w"
 
 if(filelineerrorstylep<0)
 filelineerrorstylep= texmf_yesno("file_line_error_style");
@@ -28515,10 +28701,10 @@ if(parsefirstlinep<0)
 parsefirstlinep= texmf_yesno("parse_first_line");
 
 /*:1718*/
-#line 29613 "texprof.w"
+#line 29619 "texprof.w"
 
 /*1722:*/
-#line 30293 "texprof.w"
+#line 30299 "texprof.w"
 
 if(parsefirstlinep&&!dump_name)
 parse_first_line(main_input_file);
@@ -28540,10 +28726,10 @@ exit(1);
 }
 
 /*:1722*/
-#line 29614 "texprof.w"
+#line 29620 "texprof.w"
 
 /*1730:*/
-#line 30555 "texprof.w"
+#line 30561 "texprof.w"
 
 kpse_set_program_enabled(kpse_tfm_format,MAKE_TEX_TFM_BY_DEFAULT,
 kpse_src_compile);
@@ -28555,12 +28741,12 @@ kpse_src_compile);
 
 
 /*:1730*/
-#line 29615 "texprof.w"
+#line 29621 "texprof.w"
 
 }
 
 /*:1684*//*1691:*/
-#line 29760 "texprof.w"
+#line 29766 "texprof.w"
 
 static void parse_options(int argc,char*argv[])
 {while(true){
@@ -28568,7 +28754,7 @@ int option_index;
 int g= getopt_long_only(argc,argv,"+",long_options,&option_index);
 if(g==0)
 {/*1695:*/
-#line 29816 "texprof.w"
+#line 29822 "texprof.w"
 
 if(ARGUMENT_IS("help"))usage_help();
 else if(ARGUMENT_IS("version")){
@@ -28579,7 +28765,7 @@ exit(0);
 
 
 /*:1695*//*1696:*/
-#line 29830 "texprof.w"
+#line 29836 "texprof.w"
 
 else if(ARGUMENT_IS("interaction")){
 if(STREQ(optarg,"batchmode"))interaction_option= batch_mode;
@@ -28590,14 +28776,14 @@ else WARNING1("Ignoring unknown argument `%s' to --interaction",optarg);
 }
 
 /*:1696*//*1697:*/
-#line 29842 "texprof.w"
+#line 29848 "texprof.w"
 
 else if(ARGUMENT_IS("mktex"))kpse_maketex_option(optarg,true);
 else if(ARGUMENT_IS("no-mktex"))kpse_maketex_option(optarg,false);
 
 
 /*:1697*//*1698:*/
-#line 29851 "texprof.w"
+#line 29857 "texprof.w"
 
 else if(ARGUMENT_IS("kpathsea-debug"))
 kpathsea_debug|= atoi(optarg);
@@ -28605,7 +28791,7 @@ kpathsea_debug|= atoi(optarg);
 
 
 /*:1698*//*1699:*/
-#line 29860 "texprof.w"
+#line 29866 "texprof.w"
 
 else if(ARGUMENT_IS("progname"))
 user_progname= normalize_quotes(optarg,"program name");
@@ -28617,13 +28803,13 @@ else if(ARGUMENT_IS("jobname"))
 c_job_name= normalize_quotes(optarg,"job name");
 
 /*:1699*//*1712:*/
-#line 30101 "texprof.w"
+#line 30107 "texprof.w"
 
 else if(ARGUMENT_IS("cnf-line"))
 add_cnf_line(optarg);
 
 /*:1712*/
-#line 29766 "texprof.w"
+#line 29772 "texprof.w"
 }
 else if(g=='?')
 {fprintf(stderr,"Try '%s --help' for more information\n",argv[0]);
@@ -28632,7 +28818,7 @@ exit(1);
 else if(g==-1)break;
 }
 /*1701:*/
-#line 29909 "texprof.w"
+#line 29915 "texprof.w"
 
 if(output_directory)
 xputenv("TEXMF_OUTPUT_DIRECTORY",output_directory);
@@ -28640,12 +28826,12 @@ else if(getenv("TEXMF_OUTPUT_DIRECTORY"))
 output_directory= getenv("TEXMF_OUTPUT_DIRECTORY");
 
 /*:1701*/
-#line 29773 "texprof.w"
+#line 29779 "texprof.w"
 
 }
 
 /*:1691*//*1726:*/
-#line 30414 "texprof.w"
+#line 30420 "texprof.w"
 
 static FILE*open_out(const char*file_name,const char*file_mode)
 {FILE*f= NULL;
@@ -28694,11 +28880,11 @@ static bool w_open_out(word_file*f)
 return f->f!=NULL&&ferror(f->f)==0;
 }
 #endif
-#line 30462 "texprof.w"
+#line 30468 "texprof.w"
 
 
 /*:1726*//*1729:*/
-#line 30532 "texprof.w"
+#line 30538 "texprof.w"
 
 static bool open_fmt_file(void)
 {int j= loc;
@@ -28719,7 +28905,7 @@ found:loc= j;return true;
 
 
 /*:1729*/
-#line 29587 "texprof.w"
+#line 29593 "texprof.w"
 
 
 /*:1682*/
