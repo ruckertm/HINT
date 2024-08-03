@@ -20,6 +20,10 @@ The HINT projects home page is at https://hint.userweb.mwn.de/
    go to https://hint.userweb.mwn.de/hint/hintview.html and
    were you can get setup files or links to app-stores.
 
+### texprof
+    texprof is a profiler for TeX. It maps the runtime of TeX to
+    the files, lines, and macros of TeX's input files.
+
 ## LICENSE
 
 In this repository you find artifacts, notably source code,
