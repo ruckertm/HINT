@@ -981,7 +981,7 @@ Next we can print a summary table for the files:
 @<show the file summary if requested@>=
 if (opt_files)
 { Mprintf("\nFiles in the order of appearance:\n");
-  Mprintf("  file\t lines\tpercent\t     absolut"
+  Mprintf("  file\t lines\tpercent\t     absolute"
          "\tname\n");
   for (i=0; i<file_num; i++)
   { double p=(100.0*file_time[i])/total_time;
@@ -1276,7 +1276,7 @@ if (opt_lines)
       k=file_line[i+1];
     else  
     { printf("%s\n",file_names[i]);
-      printf("  file\t  line\tpercent\t     absolut"
+      printf("  file\t  line\tpercent\t     absolute"
              "\t count\t     average\n");
       printf("%6d\t\t%6.2f%%\t%s\n",
              i, (100.0*file_time[i])/total_time,time_str(file_time[i]));
@@ -1378,7 +1378,7 @@ if (opt_top_ten)
 { collect_line_time();
   @<find the top ten lines@>@;
   Mprintf("\nThe top ten lines:\n");
-  Mprintf("  file\t  line\tpercent\t     absolut"
+  Mprintf("  file\t  line\tpercent\t     absolute"
          "\t count\t     average\tfile\n");
   for (i=1; i< tt_count; i++)
   { int freq=line_freq[tt_line[i]+file_line[tt_file[i]]];
