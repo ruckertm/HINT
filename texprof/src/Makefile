@@ -1,4 +1,4 @@
-# This file creates the tprof and texprof executable files
+# This file creates the texprofile and texprof executable files
 # and installs them with the install_bin target.
 # This file creates the texprof.fmt and latexprof.fmt format filrd
 # and installs them with the install_fmt target.
@@ -44,6 +44,7 @@ KPATHSEA_LIB_DIR=/usr/local/lib/x86_64-pc-linux-gnu/
 # it is available from TeX Live https://www.tug.org/texlive/
 TEX=tex
 PDFTEX=pdftex
+HITEX=hitex
 MKINDEX=mkindex
 
 
@@ -68,13 +69,13 @@ all: install_bin install_fmt
 
 ### Step 1: Extracting the .c and .tex files
 
-# produce tprof.c and texprof.c from the .w files with CTANGLE
+# produce texprofile.c and texprof.c from the .w files with CTANGLE
 
 %.c: %.w
 	$(CTANGLE) $<
 
 
-# produce tprof.tex and texprof.tex from the .w files with CWEAVE
+# produce texprofile.tex and texprof.tex from the .w files with CWEAVE
 
 %.tex %.scn %.idx: %.w
 	$(CWEAVE) $<
@@ -82,8 +83,8 @@ all: install_bin install_fmt
 
 ### Step 2: Compiling the c files
 
-tprof: tprof.c
-	$(CC) $(CFLAGS) -o tprof tprof.c
+texprofile: texprofile.c
+	$(CC) $(CFLAGS) -o texprofile texprofile.c
 
 texprof.o: texprof.c
 	$(CC) $(CFLAGS) $(TEXFLAGS) -I$(KPATHSEA_H_DIR) -c -o texprof.o texprof.c
@@ -106,7 +107,7 @@ texprof: texprof.o md5.o
 # the root of the TeX instalation
 SYSVAR=$(shell kpsewhich -var-value=TEXMFSYSVAR)
 # the name of the TeX engine
-ENGINE=hitex
+ENGINE=texprof
 # the directory for formats
 FMTDIR=$(SYSVAR)/web2c/$(ENGINE)
 # the directory where the system finds executables
@@ -117,12 +118,12 @@ LINKDIR=$(dir $(TEX))
 # the directory where the binaries are in the TeX installation
 BINDIR=$(SYSVAR:/texmf-var=/bin/x86_64-linux)
 
-install_bin: texprof tprof
-	install -t $(BINDIR) --mode=755 texprof tprof
+install_bin: texprof texprofile
+	install -t $(BINDIR) --mode=755 texprof texprofile
 	ln -s -f $(BINDIR)/texprof $(LINKDIR)latexprof
 	ln -s -f $(BINDIR)/texprof $(LINKDIR)texprof
-	ln -s -f $(BINDIR)/tprof $(LINKDIR)tprof
-	mv texprof tprof ../bin
+	ln -s -f $(BINDIR)/texprofile $(LINKDIR)texprofile
+	mv texprof texprofile ../bin
 	touch install_bin
 
 
@@ -160,18 +161,27 @@ texprof.pdf texprof.toc: texprof.tex texprof.scn texprof.idx
 	$(PDFTEX) texprof
 	$(PDFTEX) texprof
 
-tprof.pdf tprof.aux: tprof.tex tprof.scn tprof.idx
-	touch tprof.toc
-	TEXINPUTS=".:../aux:" $(PDFTEX) tprof
-	TEXINPUTS=".:../aux:" $(PDFTEX) tprof
+texprof.hnt: texprof.tex texprof.scn texprof.idx
+	$(HITEX) texprof
+	$(HITEX) texprof
+
+texprofile.pdf texprofile.aux: texprofile.tex texprofile.scn texprofile.idx
+	touch texprofile.toc
+	TEXINPUTS=".:../aux:" $(PDFTEX) texprofile
+	TEXINPUTS=".:../aux:" $(PDFTEX) texprofile
+
+texprofile.hnt: texprofile.tex texprofile.scn texprofile.idx
+	touch texprofile.toc
+	TEXINPUTS=".:../aux:" $(HITEX) texprofile
+	TEXINPUTS=".:../aux:" $(HITEX) texprofile
 
 
 
 ### Cleaning up
 
 clean:
-	rm -f tprof.tex texprof.tex tprof.c texprof.c
-	rm -f *.o texprof tprof
+	rm -f texprofile.tex texprof.tex texprofile.c texprof.c
+	rm -f *.o texprof texprofile
 	rm -f *.aux *.get *.put *.red *.wrt *.idx *.inx *.toc *.log *.scn
 	rm -f *.pdf *.dvi *.hnt
 	rm -f texprof.tprof latexprof.tprof

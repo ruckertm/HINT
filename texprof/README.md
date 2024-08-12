@@ -1,7 +1,7 @@
 # The TeX Macro Profiler
 
 ## Description
-This repository implements two programs: `texprof` and `tprof`.
+This repository implements two programs: `texprof` and `texprofile`.
 
 `texprof` is a TeX engine, based on Donald Knuths TeX program.
 Like other TeX engines, it takes a `.tex` input file and produces
@@ -15,27 +15,28 @@ little as possible, almost no computations are done
 during data collection, and the data is written to
 the `.tprof` file in a raw, binary format.
 
-`tprof` is the program to read such a `.tprof` file,
+`texprofile` is the program to read such a `.tprof` file,
 analyze the data, and display it in a reasonable
 format.
 
-`texprof` and `tprof` are written as literate `cweb` programs
-`texprof.w` and `tprof.w.` Using `ctangle` you can generate
-normal C programs, `texprof.c` and `tprof.c`,
+`texprof` and `texprofile` are written as literate `cweb` programs
+`texprof.w` and `texprofile.w.` Using `ctangle` you can generate
+normal C programs, `texprof.c` and `texprofile.c`,
 from which you can obtain executable programs with a C
 compiler. Further, with `cweave` you can generate
-`texprof.tex` and `tprof.tex` from which you can produce
+`texprof.tex` and `texprofile.tex` from which you can produce
 the documentation as PDF files with `pdftex`,
 as HINT files with `hitex` or even as DVI files with `texprof`.
 
 In case you do not have the `cweb` system installed, you find
 the C and PDF files in the `src/` and `doc/` subdirectories as well.
 
-In case you just want a short instruction manual,
-you will have to wait a little.
-I will give a talk at the TUG 2024
-conference and after that, I will prepare some
-more documentation to appear here.
+In case you just want a short instruction manual, you will have to
+wait a little.  My talk at the TUG 2024 conference
+https://tug.org/tug2024/ is available on youtube (Day 1 stream) and an
+updated version will be published in TUGBoat
+(https://tug.org/TUGboat/) vol. 45, no. 2.  After that, I will prepare
+some more documentation to appear here.
 
 ## Installation
 For Installation instructions see the `Makefile` in the `src/` subdirectory.
@@ -46,7 +47,9 @@ doc - for documentation
 
 src - C sources
 
-aux - for auxiliary files 
+aux - for auxiliary files
+
+fmt - for format files
 
 
 ## Authors

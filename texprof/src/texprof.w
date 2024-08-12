@@ -457,8 +457,8 @@ if (iniversion)  /* \TeX\ Live*/
   {@+@<Initialize table entries (done by \.{INITEX} only)@>@;@+}
 #endif
 
-@ The declaration of all basic type definitions needed by Hi\TeX\ are
-contained in a system dependent header file.
+@ The declaration of the necessary type definitions are
+contained in header files.
 
 
 @<Header files and function declarations@>=
@@ -30149,7 +30149,7 @@ if (!user_progname)
 #else
   kpse_set_program_name (argv[0], user_progname);
 #endif
-  xputenv ("engine", "hitex");@/
+  xputenv ("engine", "texprof");@/
 
 
 @ After the options, the command line usually continues with the name of the input

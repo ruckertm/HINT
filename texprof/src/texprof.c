@@ -28647,7 +28647,7 @@ kpse_reset_program_name(user_progname);
  kpse_set_program_name(argv[0],user_progname);
 #endif
 #line 30152 "texprof.w"
- xputenv("engine","hitex");
+ xputenv("engine","texprof");
 
 
 /*:1715*/
