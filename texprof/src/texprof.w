@@ -4866,7 +4866,7 @@ registers.
 @d err_help_loc (local_base+9) /*points to token list for \.{\\errhelp}*/
 @d tex_toks (local_base+10) /*end of \TeX's token list parameters*/
 @#
-@d etex_toks_base tex_toks /*base for \eTeX's token list parameters*/
+@d etex_toks_base pdf_toks /*base for \eTeX's token list parameters*/
 @d every_eof_loc etex_toks_base /*points to token list for \.{\\everyeof}*/
 @d etex_toks (etex_toks_base+1) /*end of \eTeX's token list parameters*/
 @#
@@ -5121,7 +5121,7 @@ that will be defined later.
 @d error_context_lines_code 54 /*maximum intermediate line pairs shown*/
 @d tex_int_pars 55 /*total number of \TeX's integer parameters*/
 @#
-@d etex_int_base tex_int_pars /*base for \eTeX's integer parameters*/
+@d etex_int_base pdf_int_pars /*base for \eTeX's integer parameters*/
 @d tracing_assigns_code etex_int_base /*show assignments*/
 @d tracing_groups_code (etex_int_base+1) /*show save/restore groups*/
 @d tracing_ifs_code (etex_int_base+2) /*show conditionals*/
@@ -5495,7 +5495,7 @@ here, and the 256 \.{\\dimen} registers.
 @d emergency_stretch_code 20 /*reduces badnesses on final pass of line-breaking*/
 @d page_width_code 21 /*current paper page width*/
 @d page_height_code 22 /*current paper page height*/
-@d dimen_pars 23 /*total number of dimension parameters*/
+@d dimen_pars (pdftex_last_dimen_code+1) /*total number of dimension parameters*/
 @d scaled_base (dimen_base+dimen_pars)
    /*table of 256 user-defined \.{\\dimen} registers*/
 @d eqtb_size (scaled_base+255) /*largest subscript of |eqtb|*/
@@ -5550,6 +5550,7 @@ case v_offset_code: print_esc("voffset");@+break;
 case emergency_stretch_code: print_esc("emergencystretch");@+break;
 case page_width_code: print_esc("pagewidth");@+break;
 case page_height_code: print_esc("pageheight");@+break;
+@<Cases for |print_lenght_param|@>@;
 default:print("[unknown dimen parameter!]");
 }
 }
@@ -8834,7 +8835,7 @@ the codes for its extensions: |eTeX_version_code|, \dots\ .
 @d input_line_no_code (glue_val+2) /*code for \.{\\inputlineno}*/
 @d badness_code (input_line_no_code+1) /*code for \.{\\badness}*/
 @#
-@d eTeX_int (badness_code+1) /*first of \eTeX\ codes for integers*/
+@d eTeX_int (pdftex_last_item_codes+1) /*first of \eTeX\ codes for integers*/
 @d eTeX_dim (eTeX_int+8) /*first of \eTeX\ codes for dimensions*/
 @d eTeX_glue (eTeX_dim+9) /*first of \eTeX\ codes for glue*/
 @d eTeX_mu (eTeX_glue+1) /*first of \eTeX\ codes for muglue*/
@@ -9686,11 +9687,14 @@ return p;
 @d string_code 2 /*command code for \.{\\string}*/
 @d meaning_code 3 /*command code for \.{\\meaning}*/
 @d font_name_code 4 /*command code for \.{\\fontname}*/
-@d job_name_code 5 /*command code for \.{\\jobname}*/
-@d etex_convert_base (job_name_code+1) /*base for \eTeX's command codes*/
+@d etex_convert_base 5 /*base for \eTeX's command codes*/
 @d eTeX_revision_code etex_convert_base /*command code for \.{\\eTeXrevision}*/
 @d etex_convert_codes (etex_convert_base+1) /*end of \eTeX's command codes*/
-@d eTeX_last_convert_cmd_mod etex_convert_codes
+@d eTeX_last_convert_cmd_mod etex_convert_codes /* prote codes follow */
+
+
+@#
+@d job_name_code pdftex_convert_codes /*command code for \.{\\jobname}*/
 
 @<Put each...@>=
 primitive("number", convert, number_code);@/
@@ -28254,6 +28258,8 @@ expands to the token list.
 @d file_mod_date_code (eTeX_last_convert_cmd_mod+8) /* \.{\\filemodedate} */
 @d file_dump_code (eTeX_last_convert_cmd_mod+9) /* \.{\\filedump} */
 @d mdfive_sum_code (eTeX_last_convert_cmd_mod+10) /* \.{\\mdfivesum} */
+@d Prote_last_convert_code mdfive_sum_code
+
 @ When modifying the meaning of something---in this case, for now,
 switching to the primitive meaning if it exists---or modifying the
 way expansion is done, it seems that it can be thought as a special
@@ -31865,7 +31871,872 @@ else
   {i--; k++;}  
 }
 
+@*1 Profiling \.{PDF} Specific Macros.
+Macro packages providing \.{PDF} specific features typicaly test
+whether the current engine is generating \.{PDF} output
+before activating \.{PDF}-specific macros, and these macros
+then use \.{PDF}-specific primitives. To be able to profile
+these macros, the engine must provide (or at least pretend to provide)
+the necessary primitives to make the test for \.{PDF} output succeed
+and prevent the macros from failing because of undefined
+primitives or unexpected behaviour. Generating \.{PDF} ouput
+is usualy not required.
 
+The {\tt -pdf} option is designed to provide the necessary behaviour.
+  
+@<explain the options@>=
+  " -pdf                 "@/
+  @t\qquad@>"\t pretend to produce PDF output; requires -ini\n"@/
+
+@ This option will set the |pdf_on| variable, defined below, to true.
+
+@<more options@>=
+      { "pdf", 0, &pdf_on, 1 },
+
+@ @<Global variables@>=
+static int @!pdf_on=false;
+
+@ Let us start with implementing the \.{PDF} version primitive.
+This primitive uses the |last_item| command with a special modifier
+\pdfTeX\ adds the codes for its extensions: |pdftex_version_code|, \dots
+between \TeX's |badness_code| and \eTeX's |eTeX_int| codes.
+The |elapsed_time_code| and |random_seed_code| are already defined above
+but we duplicate them here for simplicity.
+So here is the pdf version as well as all of PDF\TeX's command codes for the |last_item| command:
+
+@d pdftex_version 140 /* \.{\\pdftexversion} */
+@d pdftex_revision "25" /* \.{\\pdftexrevision} */
+@d pdftex_version_string "-1.40.25" /*current \pdfTeX\ version*/
+@#
+@d pdftex_first_rint_code (badness_code+1) /*base for \pdfTeX's command codes*/
+@d pdftex_version_code (pdftex_first_rint_code+0) /*code for \.{\\pdftexversion}*/
+@d pdf_last_obj_code (pdftex_first_rint_code+1) /*code for \.{\\pdflastobj}*/
+@d pdf_last_xform_code (pdftex_first_rint_code+2) /*code for \.{\\pdflastxform}*/
+@d pdf_last_ximage_code (pdftex_first_rint_code+3) /*code for \.{\\pdflastximage}*/
+@d pdf_last_ximage_pages_code (pdftex_first_rint_code+4) /*code for \.{\\pdflastximagepages}*/
+@d pdf_last_annot_code (pdftex_first_rint_code+5) /*code for \.{\\pdflastannot}*/
+@d pdf_last_x_pos_code (pdftex_first_rint_code+6) /*code for \.{\\pdflastxpos}*/
+@d pdf_last_y_pos_code (pdftex_first_rint_code+7) /*code for \.{\\pdflastypos}*/
+@d pdf_retval_code (pdftex_first_rint_code+8) /*global multi-purpose return value*/
+@d pdf_last_ximage_colordepth_code (pdftex_first_rint_code+9) /*code for \.{\\pdflastximagecolordepth}*/
+@d pdf_elapsed_time_code (pdftex_first_rint_code+10) /*code for \.{\\pdfelapsedtime}*/
+@d pdf_shell_escape_code (pdftex_first_rint_code+11) /*code for \.{\\pdfshellescape}*/
+@d pdf_random_seed_code (pdftex_first_rint_code+12) /*code for \.{\\pdfrandomseed}*/
+@d pdf_last_link_code (pdftex_first_rint_code+13) /*code for \.{\\pdflastlink}*/
+@d pdftex_last_item_codes (pdftex_first_rint_code+13) /*end of \pdfTeX's command codes*/
+
+@ Using these codes we can add the primitives:
+
+@<Put each...@>=
+if (pdf_on)
+{
+primitive("pdftexversion", last_item, pdftex_version_code);@/
+@!@:pdftex\_version\_}{\.{\\pdftexversion} primitive@>
+primitive("pdflastobj", last_item, pdf_last_obj_code);@/
+@!@:pdf\_last\_obj\_}{\.{\\pdflastobj} primitive@>
+primitive("pdflastxform", last_item, pdf_last_xform_code);@/
+@!@:pdf\_last\_xform\_}{\.{\\pdflastxform} primitive@>
+primitive("pdflastximage", last_item, pdf_last_ximage_code);@/
+@!@:pdf\_last\_ximage\_}{\.{\\pdflastximage} primitive@>
+primitive("pdflastximagepages", last_item, pdf_last_ximage_pages_code);@/
+@!@:pdf\_last\_ximage\_pages\_}{\.{\\pdflastximagepages} primitive@>
+primitive("pdflastannot", last_item, pdf_last_annot_code);@/
+@!@:pdf\_last\_annot\_}{\.{\\pdflastannot} primitive@>
+primitive("pdflastxpos", last_item, pdf_last_x_pos_code);@/
+@!@:pdf\_last\_x\_pos\_}{\.{\\pdflastxpos} primitive@>
+primitive("pdflastypos", last_item, pdf_last_y_pos_code);@/
+@!@:pdf\_last\_y\_pos\_}{\.{\\pdflastypos} primitive@>
+primitive("pdfretval", last_item, pdf_retval_code);@/
+@!@:pdf\_retval\_}{\.{\\pdfretval} primitive@>
+primitive("pdflastximagecolordepth", last_item, pdf_last_ximage_colordepth_code);@/
+@!@:pdf\_last\_ximage\_colordepth\_}{\.{\\pdflastximagecolordepth} primitive@>
+primitive("pdfelapsedtime", last_item, pdf_elapsed_time_code);
+@!@:elapsed\_time\_}{\.{\\pdfelapsedtime} primitive@>
+primitive("pdfshellescape", last_item, pdf_shell_escape_code);
+@!@:pdf\_shell\_escape\_}{\.{\\pdfshellescape} primitive@>
+primitive("pdfrandomseed", last_item, pdf_random_seed_code);
+@!@:random\_seed\_}{\.{\\pdfrandomseed} primitive@>
+primitive("pdflastlink", last_item, pdf_last_link_code);@/
+@!@:pdf\_last\_link\_}{\.{\\pdflastlink} primitive@>
+}
+
+@ Next we need to print the commands:
+
+@<Cases of |last_item| for |print_cmd_chr|@>=
+  case pdftex_version_code: print_esc("pdftexversion");@+break;
+  case pdf_last_obj_code: print_esc("pdflastobj");@+break;
+  case pdf_last_xform_code: print_esc("pdflastxform");@+break;
+  case pdf_last_ximage_code: print_esc("pdflastximage");@+break;
+  case pdf_last_ximage_pages_code: print_esc("pdflastximagepages");@+break;
+  case pdf_last_annot_code: print_esc("pdflastannot");@+break;
+  case pdf_last_x_pos_code: print_esc("pdflastxpos");@+break;
+  case pdf_last_y_pos_code: print_esc("pdflastypos");@+break;
+  case pdf_retval_code: print_esc("pdfretval");@+break;
+  case pdf_last_ximage_colordepth_code: print_esc("pdflastximagecolordepth");@+break;
+  case pdf_elapsed_time_code: print_esc("pdfelapsedtime");@+break;
+  case pdf_shell_escape_code: print_esc("pdfshellescape");@+break;
+  case pdf_random_seed_code: print_esc("pdfrandomseed");@+break;
+  case pdf_last_link_code: print_esc("pdflastlink");@+break;
+
+@ The implementation needs a few global variables.
+
+@<Glob...@>=
+static int 
+@!pdf_last_obj,
+@!pdf_last_xform,
+@!pdf_last_ximage,
+@!pdf_last_ximage_pages,
+@!pdf_last_annot,
+@!pdf_last_x_pos,
+@!pdf_last_y_pos,
+@!pdf_retval,
+@!pdf_last_ximage_colordepth,
+@!pdf_last_link;
+static double pdf_reset_timer=0.0; /*time of the last reset in seconds*/
+
+
+@ And this is sufficient to finish the implementation of this first batch of primitives:
+@<Cases for fetching an integer value@>=
+  case pdftex_version_code: cur_val=pdftex_version;@+break;
+  case pdf_last_obj_code: cur_val=pdf_last_obj;@+break;
+  case pdf_last_xform_code: cur_val=pdf_last_xform;@+break;
+  case pdf_last_ximage_code: cur_val=pdf_last_ximage;@+break;
+  case pdf_last_ximage_pages_code: cur_val=pdf_last_ximage_pages;@+break;
+  case pdf_last_annot_code: cur_val=pdf_last_annot;@+break;
+  case pdf_last_x_pos_code: cur_val=pdf_last_x_pos;@+break;
+  case pdf_last_y_pos_code: cur_val=pdf_last_y_pos;@+break;
+  case pdf_retval_code: cur_val=pdf_retval;@+break;
+  case pdf_last_ximage_colordepth_code: cur_val=pdf_last_ximage_colordepth;@+break;
+  case pdf_elapsed_time_code: 
+  { double t=(start_sec*1.0+start_nsec/1000000000.0-pdf_reset_timer)*0x10000;
+    if (t>=infinity) cur_val=infinity;
+    else cur_val=(scaled)t;
+    @+break;
+  }
+  case pdf_random_seed_code: cur_val=random_seed;@+break;
+  case pdf_shell_escape_code: cur_val=0;@+break;
+  case pdf_last_link_code: cur_val=pdf_last_link;@+break;
+
+
+@ The next group of primitves uses the assignment commands. We start
+by defining the necessary command codes followed by the primitives.
+
+@d pdftex_first_loc tex_toks /*base for \pdfTeX's token list parameters*/
+@d pdf_pages_attr_loc (pdftex_first_loc+0) /*points to token list for \.{\\pdfpagesattr}*/
+@d pdf_page_attr_loc (pdftex_first_loc+1) /*points to token list for \.{\\pdfpageattr}*/
+@d pdf_page_resources_loc (pdftex_first_loc+2) /*points to token list for \.{\\pdfpageresources}*/
+@d pdf_pk_mode_loc (pdftex_first_loc+3) /*points to token list for \.{\\pdfpkmode}*/
+@d pdf_toks (pdftex_first_loc+4) /*end of \pdfTeX's token list parameters*/
+@#
+@d pdftex_first_integer_code tex_int_pars /*base for \pdfTeX's integer parameters*/
+@d pdf_output_code (pdftex_first_integer_code+0) /*switch on PDF output if positive*/
+@d pdf_compress_level_code (pdftex_first_integer_code+1) /*compress level of streams*/
+@d pdf_decimal_digits_code (pdftex_first_integer_code+2) /*digits after the decimal point of numbers*/
+@d pdf_move_chars_code (pdftex_first_integer_code+3) /*move chars 0..31 to higher area if possible*/
+@d pdf_image_resolution_code (pdftex_first_integer_code+4) /*default image resolution*/
+@d pdf_pk_resolution_code (pdftex_first_integer_code+5) /*default resolution of PK font*/
+@d pdf_unique_resname_code (pdftex_first_integer_code+6) /*generate unique names for resouces*/
+@d pdf_option_always_use_pdfpagebox_code (pdftex_first_integer_code+7) /*if the PDF inclusion should always use a specific PDF page box*/
+@d pdf_option_pdf_inclusion_errorlevel_code (pdftex_first_integer_code+8) /*if the PDF inclusion should treat pdfs newer than |pdf_minor_version| as an error*/
+@d pdf_major_version_code (pdftex_first_integer_code+9) /*integer part of the PDF version produced*/
+@d pdf_minor_version_code (pdftex_first_integer_code+10) /*fractional part of the PDF version produced*/
+@d pdf_force_pagebox_code (pdftex_first_integer_code+11) /*if the PDF inclusion should always use a specific PDF page box*/
+@d pdf_pagebox_code (pdftex_first_integer_code+12) /*default pagebox to use for PDF inclusion*/
+@d pdf_inclusion_errorlevel_code (pdftex_first_integer_code+13) /*if the PDF inclusion should treat pdfs newer than |pdf_minor_version| as an error*/
+@d pdf_gamma_code (pdftex_first_integer_code+14)
+@d pdf_image_gamma_code (pdftex_first_integer_code+15)
+@d pdf_image_hicolor_code (pdftex_first_integer_code+16)
+@d pdf_image_apply_gamma_code (pdftex_first_integer_code+17)
+@d pdf_adjust_spacing_code (pdftex_first_integer_code+18) /*level of spacing adjusting*/
+@d pdf_protrude_chars_code (pdftex_first_integer_code+19) /*protrude chars at left/right edge of paragraphs*/
+@d pdf_tracing_fonts_code (pdftex_first_integer_code+20) /*level of font detail in log*/
+@d pdf_objcompresslevel_code (pdftex_first_integer_code+21) /*activate object streams*/
+@d pdf_adjust_interword_glue_code (pdftex_first_integer_code+22) /*adjust interword glue?*/
+@d pdf_prepend_kern_code (pdftex_first_integer_code+23) /*prepend kern before certain characters?*/
+@d pdf_append_kern_code (pdftex_first_integer_code+24) /*append kern before certain characters?*/
+@d pdf_gen_tounicode_code (pdftex_first_integer_code+25) /*generate ToUnicode for fonts?*/
+@d pdf_draftmode_code (pdftex_first_integer_code+26) /*switch on draftmode if positive*/
+@d pdf_inclusion_copy_font_code (pdftex_first_integer_code+27) /*generate ToUnicode for fonts?*/
+@d pdf_suppress_warning_dup_dest_code (pdftex_first_integer_code+28) /*suppress warning about duplicated destinations*/
+@d pdf_suppress_warning_dup_map_code (pdftex_first_integer_code+29) /*suppress warning about duplicated map lines*/
+@d pdf_suppress_warning_page_group_code (pdftex_first_integer_code+30) /*suppress warning about multiple pdfs with page group*/
+@d pdf_info_omit_date_code (pdftex_first_integer_code+31) /*omit generating CreationDate and ModDate*/
+@d pdf_suppress_ptex_info_code (pdftex_first_integer_code+32) /*suppress /PTEX.* entries in PDF dictionaries*/
+@d pdf_omit_charset_code (pdftex_first_integer_code+33) /*suppress /PTEX.* entries in PDF dictionaries*/
+@d pdf_omit_info_dict_code (pdftex_first_integer_code+34) /*suppress /PTEX.* entries in PDF dictionaries*/
+@d pdf_omit_procset_code (pdftex_first_integer_code+35) /*suppress /PTEX.* entries in PDF dictionaries*/
+@d pdf_int_pars (pdftex_first_integer_code+36) /*total number of \pdfTeX's integer parameters*/
+@#
+@d pdftex_first_dimen_code 23 /*first number defined in this section*/
+@d pdf_h_origin_code (pdftex_first_dimen_code+0) /*horigin of the PDF output*/
+@d pdf_v_origin_code (pdftex_first_dimen_code+1) /*vorigin of the PDF output*/
+@d pdf_page_width_code (pdftex_first_dimen_code+2) /*page width of the PDF output*/
+@d pdf_page_height_code (pdftex_first_dimen_code+3) /*page height of the PDF output*/
+@d pdf_link_margin_code (pdftex_first_dimen_code+4) /*link margin in the PDF output*/
+@d pdf_dest_margin_code (pdftex_first_dimen_code+5) /*dest margin in the PDF output*/
+@d pdf_thread_margin_code (pdftex_first_dimen_code+6) /*thread margin in the PDF output*/
+@d pdf_first_line_height_code (pdftex_first_dimen_code+7)
+@d pdf_last_line_depth_code (pdftex_first_dimen_code+8)
+@d pdf_each_line_height_code (pdftex_first_dimen_code+9)
+@d pdf_each_line_depth_code (pdftex_first_dimen_code+10)
+@d pdf_ignored_dimen_code (pdftex_first_dimen_code+11)
+@d pdf_px_dimen_code (pdftex_first_dimen_code+12)
+@d pdftex_last_dimen_code (pdftex_first_dimen_code+12) /*last number defined in this section*/
+@d dimen_pars (pdftex_last_dimen_code+1) /*total number of dimension parameters*/
+
+@<Put each...@>=
+if (pdf_on)
+{
+primitive("pdfpagesattr", assign_toks, pdf_pages_attr_loc);
+@!@:pdf\_pages\_attr\_}{\.{\\pdfpagesattr} primitive@>
+primitive("pdfpageattr", assign_toks, pdf_page_attr_loc);
+@!@:pdf\_page\_attr\_}{\.{\\pdfpageattr} primitive@>
+primitive("pdfpageresources", assign_toks, pdf_page_resources_loc);
+@!@:pdf\_page\_resources\_}{\.{\\pdfpageresources} primitive@>
+primitive("pdfpkmode", assign_toks, pdf_pk_mode_loc);
+@!@:pdf\_pk\_mode\_}{\.{\\pdfpkmode} primitive@>
+@#
+primitive("pdfoutput", assign_int, int_base+pdf_output_code);@/
+@!@:pdf\_output\_}{\.{\\pdfoutput} primitive@>
+primitive("pdfcompresslevel", assign_int, int_base+pdf_compress_level_code);@/
+@!@:pdf\_compress\_level\_}{\.{\\pdfcompresslevel} primitive@>
+primitive("pdfobjcompresslevel", assign_int, int_base+pdf_objcompresslevel_code);@/
+@!@:pdf\_objcompresslevel\_}{\.{\\pdfobjcompresslevel} primitive@>
+primitive("pdfdecimaldigits", assign_int, int_base+pdf_decimal_digits_code);@/
+@!@:pdf\_decimal\_digits\_}{\.{\\pdfdecimaldigits} primitive@>
+primitive("pdfmovechars", assign_int, int_base+pdf_move_chars_code);@/
+@!@:pdf\_move\_chars\_}{\.{\\pdfmovechars} primitive@>
+primitive("pdfimageresolution", assign_int, int_base+pdf_image_resolution_code);@/
+@!@:pdf\_image\_resolution\_}{\.{\\pdfimageresolution} primitive@>
+primitive("pdfpkresolution", assign_int, int_base+pdf_pk_resolution_code);@/
+@!@:pdf\_pk\_resolution\_}{\.{\\pdfpkresolution} primitive@>
+primitive("pdfuniqueresname", assign_int, int_base+pdf_unique_resname_code);@/
+@!@:pdf\_unique\_resname\_}{\.{\\pdfuniqueresname} primitive@>
+primitive("pdfoptionpdfminorversion", assign_int, int_base+pdf_minor_version_code);@/
+@!@:pdf\_minor\_version\_}{\.{\\pdfoptionpdfminorversion} primitive@>
+primitive("pdfoptionalwaysusepdfpagebox", assign_int, int_base+pdf_option_always_use_pdfpagebox_code);@/
+@!@:pdf\_option\_always\_use\_pdfpagebox\_}{\.{\\pdfoptionalwaysusepdfpagebox} primitive@>
+primitive("pdfoptionpdfinclusionerrorlevel", assign_int, int_base+pdf_option_pdf_inclusion_errorlevel_code);@/
+@!@:pdf\_option\_pdf\_inclusion\_errorlevel\_}{\.{\\pdfoptionpdfinclusionerrorlevel} primitive@>
+primitive("pdfmajorversion", assign_int, int_base+pdf_major_version_code);@/
+@!@:pdf\_major\_version\_}{\.{\\pdfmajorversion} primitive@>
+primitive("pdfminorversion", assign_int, int_base+pdf_minor_version_code);@/
+@!@:pdf\_minor\_version\_}{\.{\\pdfminorversion} primitive@>
+primitive("pdfforcepagebox", assign_int, int_base+pdf_force_pagebox_code);@/
+@!@:pdf\_force\_pagebox\_}{\.{\\pdfforcepagebox} primitive@>
+primitive("pdfpagebox", assign_int, int_base+pdf_pagebox_code);@/
+@!@:pdf\_pagebox\_}{\.{\\pdfpagebox} primitive@>
+primitive("pdfinclusionerrorlevel", assign_int, int_base+pdf_inclusion_errorlevel_code);@/
+@!@:pdf\_inclusion\_errorlevel\_}{\.{\\pdfinclusionerrorlevel} primitive@>
+primitive("pdfgamma", assign_int, int_base+pdf_gamma_code);@/
+@!@:pdf\_gamma\_}{\.{\\pdfgamma} primitive@>
+@!@:pdf\_gamma\_}{\.{\\pdfgamma} primitive@>
+primitive("pdfimagegamma", assign_int, int_base+pdf_image_gamma_code);@/
+@!@:pdf\_image\_gamma\_}{\.{\\pdfimagegamma} primitive@>
+primitive("pdfimagehicolor", assign_int, int_base+pdf_image_hicolor_code);@/
+@!@:pdf\_image\_hicolor\_}{\.{\\pdfimagehicolor} primitive@>
+primitive("pdfimageapplygamma", assign_int, int_base+pdf_image_apply_gamma_code);@/
+@!@:pdf\_image\_apply\_gamma\_}{\.{\\pdfimageapplygamma} primitive@>
+primitive("pdfadjustspacing", assign_int, int_base+pdf_adjust_spacing_code);@/
+@!@:pdf\_adjust\_spacing\_}{\.{\\pdfadjustspacing} primitive@>
+primitive("pdfprotrudechars", assign_int, int_base+pdf_protrude_chars_code);@/
+@!@:pdf\_protrude\_chars\_}{\.{\\pdfprotrudechars} primitive@>
+primitive("pdftracingfonts", assign_int, int_base+pdf_tracing_fonts_code);@/
+@!@:pdf\_tracing\_fonts\_}{\.{\\pdftracingfonts} primitive@>
+primitive("pdfadjustinterwordglue", assign_int, int_base+pdf_adjust_interword_glue_code);@/
+@!@:pdf\_adjust\_interword\_glue\_}{\.{\\pdfadjustinterwordglue} primitive@>
+primitive("pdfprependkern", assign_int, int_base+pdf_prepend_kern_code);@/
+@!@:pdf\_prepend\_kern\_}{\.{\\pdfprependkern} primitive@>
+primitive("pdfappendkern", assign_int, int_base+pdf_append_kern_code);@/
+@!@:pdf\_append\_kern\_}{\.{\\pdfappendkern} primitive@>
+primitive("pdfgentounicode", assign_int, int_base+pdf_gen_tounicode_code);@/
+@!@:pdf\_gen\_tounicode\_}{\.{\\pdfgentounicode} primitive@>
+primitive("pdfdraftmode", assign_int, int_base+pdf_draftmode_code);@/
+@!@:pdf\_draftmode\_}{\.{\\pdfdraftmode} primitive@>
+primitive("pdfinclusioncopyfonts", assign_int, int_base+pdf_inclusion_copy_font_code);@/
+@!@:pdf\_inclusion\_copy\_font\_}{\.{\\pdfinclusioncopyfonts} primitive@>
+primitive("pdfsuppresswarningdupdest", assign_int, int_base+pdf_suppress_warning_dup_dest_code);@/
+@!@:pdf\_suppress\_warning\_dup\_dest\_}{\.{\\pdfsuppresswarningdupdest} primitive@>
+primitive("pdfsuppresswarningdupmap", assign_int, int_base+pdf_suppress_warning_dup_map_code);@/
+@!@:pdf\_suppress\_warning\_dup\_map\_}{\.{\\pdfsuppresswarningdupmap} primitive@>
+primitive("pdfsuppresswarningpagegroup", assign_int, int_base+pdf_suppress_warning_page_group_code);@/
+@!@:pdf\_suppress\_warning\_page\_group\_}{\.{\\pdfsuppresswarningpagegroup} primitive@>
+primitive("pdfinfoomitdate", assign_int, int_base+pdf_info_omit_date_code);@/
+@!@:pdf\_info\_omit\_date\_}{\.{\\pdfinfoomitdate} primitive@>
+primitive("pdfsuppressptexinfo", assign_int, int_base+pdf_suppress_ptex_info_code);@/
+@!@:pdf\_suppress\_ptex\_info\_}{\.{\\pdfsuppressptexinfo} primitive@>
+primitive("pdfomitcharset", assign_int, int_base+pdf_omit_charset_code);@/
+@!@:pdf\_omit\_charset}{\.{\\pdfomitcharset} primitive@>
+primitive("pdfomitinfodict", assign_int, int_base+pdf_omit_info_dict_code);@/
+@!@:pdf\_omit\_info\_dict}{\.{\\pdfomitinfodict} primitive@>
+primitive("pdfomitprocset", assign_int, int_base+pdf_omit_procset_code);@/
+@!@:pdf\_omit\_procset}{\.{\\pdfomitprocset} primitive@>
+@#
+primitive("pdfhorigin", assign_dimen, dimen_base+pdf_h_origin_code);@/
+@!@:pdf\_h\_origin\_}{\.{\\pdfhorigin} primitive@>
+primitive("pdfvorigin", assign_dimen, dimen_base+pdf_v_origin_code);@/
+@!@:pdf\_v\_origin\_}{\.{\\pdfvorigin} primitive@>
+primitive("pdfpagewidth", assign_dimen, dimen_base+pdf_page_width_code);@/
+@!@:pdf\_page\_width\_}{\.{\\pdfpagewidth} primitive@>
+primitive("pdfpageheight", assign_dimen, dimen_base+pdf_page_height_code);@/
+@!@:pdf\_page\_height\_}{\.{\\pdfpageheight} primitive@>
+primitive("pdflinkmargin", assign_dimen, dimen_base+pdf_link_margin_code);@/
+@!@:pdf\_link\_margin\_}{\.{\\pdflinkmargin} primitive@>
+primitive("pdfdestmargin", assign_dimen, dimen_base+pdf_dest_margin_code);@/
+@!@:pdf\_dest\_margin\_}{\.{\\pdfdestmargin} primitive@>
+primitive("pdfthreadmargin", assign_dimen, dimen_base+pdf_thread_margin_code);@/
+@!@:pdf\_thread\_margin\_}{\.{\\pdfthreadmargin} primitive@>
+primitive("pdffirstlineheight", assign_dimen, dimen_base+pdf_first_line_height_code);@/
+@!@:pdf\_first\_line\_height\_}{\.{\\pdffirstlineheight} primitive@>
+primitive("pdflastlinedepth", assign_dimen, dimen_base+pdf_last_line_depth_code);@/
+@!@:pdf\_last\_line\_depth\_}{\.{\\pdflastlinedepth} primitive@>
+primitive("pdfeachlineheight", assign_dimen, dimen_base+pdf_each_line_height_code);@/
+@!@:pdf\_each\_line\_height\_}{\.{\\pdfeachlineheight} primitive@>
+primitive("pdfeachlinedepth", assign_dimen, dimen_base+pdf_each_line_depth_code);@/
+@!@:pdf\_each\_line\_depth\_}{\.{\\pdfeachlinedepth} primitive@>
+primitive("pdfignoreddimen", assign_dimen, dimen_base+pdf_ignored_dimen_code);@/
+@!@:pdf\_ignored\_dimen\_}{\.{\\pdfignoreddimen} primitive@>
+primitive("pdfpxdimen", assign_dimen, dimen_base+pdf_px_dimen_code);@/
+@!@:pdf\_px\_dimen\_}{\.{\\pdfpxdimen} primitive@>
+}
+
+@ As before we add cases to the printing routines.
+ 
+@<Cases of |assign_toks| for |print_cmd_chr|@>=
+  case pdf_pages_attr_loc: print_esc("pdfpagesattr");@+break;
+  case pdf_page_attr_loc: print_esc("pdfpageattr");@+break;
+  case pdf_page_resources_loc: print_esc("pdfpageresources");@+break;
+  case pdf_pk_mode_loc: print_esc("pdfpkmode");@+break;
+
+@ @<Cases for |print_param|@>=
+case pdf_output_code: print_esc("pdfoutput");@+break;
+case pdf_compress_level_code: print_esc("pdfcompresslevel");@+break;
+case pdf_objcompresslevel_code: print_esc("pdfobjcompresslevel");@+break;
+case pdf_decimal_digits_code: print_esc("pdfdecimaldigits");@+break;
+case pdf_move_chars_code: print_esc("pdfmovechars");@+break;
+case pdf_image_resolution_code: print_esc("pdfimageresolution");@+break;
+case pdf_pk_resolution_code: print_esc("pdfpkresolution");@+break;
+case pdf_unique_resname_code: print_esc("pdfuniqueresname");@+break;
+case pdf_option_always_use_pdfpagebox_code: print_esc("pdfoptionalwaysusepdfpagebox");@+break;
+case pdf_option_pdf_inclusion_errorlevel_code: print_esc("pdfoptionpdfinclusionerrorlevel");@+break;
+case pdf_major_version_code: print_esc("pdfmajorversion");@+break;
+case pdf_minor_version_code: print_esc("pdfminorversion");@+break;
+case pdf_force_pagebox_code: print_esc("pdfforcepagebox");@+break;
+case pdf_pagebox_code: print_esc("pdfpagebox");@+break;
+case pdf_inclusion_errorlevel_code: print_esc("pdfinclusionerrorlevel");@+break;
+case pdf_gamma_code: print_esc("pdfgamma");@+break;
+case pdf_image_gamma_code: print_esc("pdfimagegamma");@+break;
+case pdf_image_hicolor_code: print_esc("pdfimagehicolor");@+break;
+case pdf_image_apply_gamma_code: print_esc("pdfimageapplygamma");@+break;
+case pdf_adjust_spacing_code: print_esc("pdfadjustspacing");@+break;
+case pdf_protrude_chars_code: print_esc("pdfprotrudechars");@+break;
+case pdf_tracing_fonts_code: print_esc("pdftracingfonts");@+break;
+case pdf_adjust_interword_glue_code: print_esc("pdfadjustinterwordglue");@+break;
+case pdf_prepend_kern_code: print_esc("pdfprependkern");@+break;
+case pdf_append_kern_code: print_esc("pdfappendkern");@+break;
+case pdf_gen_tounicode_code: print_esc("pdfgentounicode");@+break;
+case pdf_draftmode_code: print_esc("pdfdraftmode");@+break;
+case pdf_inclusion_copy_font_code: print_esc("pdfinclusioncopyfonts");@+break;
+case pdf_suppress_warning_dup_dest_code: print_esc("pdfsuppresswarningdupdest");@+break;
+case pdf_suppress_warning_dup_map_code: print_esc("pdfsuppresswarningdupmap");@+break;
+case pdf_suppress_warning_page_group_code: print_esc("pdfsuppresswarningpagegroup");@+break;
+case pdf_info_omit_date_code: print_esc("pdfinfoomitdate");@+break;
+case pdf_suppress_ptex_info_code: print_esc("pdfsuppressptexinfo");@+break;
+case pdf_omit_charset_code: print_esc("pdfomitcharset");@+break;
+case pdf_omit_info_dict_code: print_esc("pdfomitinfodict");@+break;
+case pdf_omit_procset_code: print_esc("pdfomitprocset");@+break;
+
+@ @<Cases for |print_lenght_param|@>=
+case pdf_h_origin_code: print_esc("pdfhorigin");@+break;
+case pdf_v_origin_code: print_esc("pdfvorigin");@+break;
+case pdf_page_width_code: print_esc("pdfpagewidth");@+break;
+case pdf_page_height_code: print_esc("pdfpageheight");@+break;
+case pdf_link_margin_code: print_esc("pdflinkmargin");@+break;
+case pdf_dest_margin_code: print_esc("pdfdestmargin");@+break;
+case pdf_thread_margin_code: print_esc("pdfthreadmargin");@+break;
+case pdf_first_line_height_code: print_esc("pdffirstlineheight");@+break;
+case pdf_last_line_depth_code: print_esc("pdflastlinedepth");@+break;
+case pdf_each_line_height_code: print_esc("pdfeachlineheight");@+break;
+case pdf_each_line_depth_code: print_esc("pdfeachlinedepth");@+break;
+case pdf_ignored_dimen_code: print_esc("pdfignoreddimen");@+break;
+case pdf_px_dimen_code: print_esc("pdfpxdimen");@+break;
+
+@ It remains to initialize some of these entries.
+
+@<Initialize table entries...@>=
+dimen_par(pdf_h_origin_code)=4736287; /* 0.5 inch */
+dimen_par(pdf_v_origin_code)=4736287;
+int_par(pdf_compress_level_code)=9;
+int_par(pdf_objcompresslevel_code)=0;
+int_par(pdf_decimal_digits_code)=3;
+int_par(pdf_image_resolution_code)=72;
+int_par(pdf_major_version_code)=1;
+int_par(pdf_minor_version_code)=4;
+int_par(pdf_gamma_code)=1000;
+int_par(pdf_image_gamma_code)=2200;
+int_par(pdf_image_hicolor_code)=1;
+int_par(pdf_image_apply_gamma_code)=0;
+int_par(pdf_draftmode_code)=0;
+dimen_par(pdf_px_dimen_code)=65782; /* 1bp */
+
+@ The next class of primitives extend the |convert| comand.
+These codes go in between |Prote_last_convert_code| and |job_name_code|.
+
+@d pdftex_first_expand_code (Prote_last_convert_code+1) /*base for \pdfTeX's command codes*/
+@d pdftex_revision_code (pdftex_first_expand_code+0) /*command code for \.{\\pdftexrevision}*/
+@d pdftex_banner_code (pdftex_first_expand_code+1) /*command code for \.{\\pdftexbanner}*/
+@d pdf_font_name_code (pdftex_first_expand_code+2) /*command code for \.{\\pdffontname}*/
+@d pdf_font_objnum_code (pdftex_first_expand_code+3) /*command code for \.{\\pdffontobjnum}*/
+@d pdf_font_size_code (pdftex_first_expand_code+4) /*command code for \.{\\pdffontsize}*/
+@d pdf_page_ref_code (pdftex_first_expand_code+5) /*command code for \.{\\pdfpageref}*/
+@d pdf_xform_name_code (pdftex_first_expand_code+6) /*command code for \.{\\pdfxformname}*/
+@d pdf_escape_string_code (pdftex_first_expand_code+7) /*command code for \.{\\pdfescapestring}*/
+@d pdf_escape_name_code (pdftex_first_expand_code+8) /*command code for \.{\\pdfescapename}*/
+@d left_margin_kern_code (pdftex_first_expand_code+9) /*command code for \.{\\leftmarginkern}*/
+@d right_margin_kern_code (pdftex_first_expand_code+10) /*command code for \.{\\rightmarginkern}*/
+@d pdf_strcmp_code (pdftex_first_expand_code+11) /*command code for \.{\\pdfstrcmp}*/
+@d pdf_colorstack_init_code (pdftex_first_expand_code+12) /*command code for \.{\\pdfcolorstackinit}*/
+@d pdf_escape_hex_code (pdftex_first_expand_code+13) /*command code for \.{\\pdfescapehex}*/
+@d pdf_unescape_hex_code (pdftex_first_expand_code+14) /*command code for \.{\\pdfunescapehex}*/
+@d pdf_creation_date_code (pdftex_first_expand_code+15) /*command code for \.{\\pdfcreationdate}*/
+@d pdf_file_mod_date_code (pdftex_first_expand_code+16) /*command code for \.{\\pdffilemoddate}*/
+@d pdf_file_size_code (pdftex_first_expand_code+17) /*command code for \.{\\pdffilesize}*/
+@d pdf_mdfive_sum_code (pdftex_first_expand_code+18) /*command code for \.{\\pdfmdfivesum}*/
+@d pdf_file_dump_code (pdftex_first_expand_code+19) /*command code for \.{\\pdffiledump}*/
+@d pdf_match_code (pdftex_first_expand_code+20) /*command code for \.{\\pdfmatch}*/
+@d pdf_last_match_code (pdftex_first_expand_code+21) /*command code for \.{\\pdflastmatch}*/
+@d pdf_uniform_deviate_code (pdftex_first_expand_code+22) /*end of \pdfTeX's command codes*/
+@d pdf_normal_deviate_code (pdftex_first_expand_code+23) /*end of \pdfTeX's command codes*/
+@d pdf_insert_ht_code (pdftex_first_expand_code+24) /*command code for \.{\\pdfinsertht}*/
+@d pdf_ximage_bbox_code (pdftex_first_expand_code+25) /*command code for \.{\\pdfximagebbox}*/
+@d pdftex_convert_codes (pdftex_first_expand_code+26) /*end of \pdfTeX's command codes*/
+
+
+@<Put each...@>=
+primitive("pdftexrevision", convert, pdftex_revision_code);@/
+@!@:pdftex\_revision\_}{\.{\\pdftexrevision} primitive@>
+primitive("pdftexbanner", convert, pdftex_banner_code);@/
+@!@:pdftex\_banner\_}{\.{\\pdftexbanner} primitive@>
+primitive("pdffontname", convert, pdf_font_name_code);@/
+@!@:pdf\_font\_name\_}{\.{\\pdffontname} primitive@>
+primitive("pdffontobjnum", convert, pdf_font_objnum_code);@/
+@!@:pdf\_font\_objnum\_}{\.{\\pdffontobjnum} primitive@>
+primitive("pdffontsize", convert, pdf_font_size_code);@/
+@!@:pdf\_font\_size\_}{\.{\\pdffontsize} primitive@>
+primitive("pdfpageref", convert, pdf_page_ref_code);@/
+@!@:pdf\_page\_ref\_}{\.{\\pdfpageref} primitive@>
+primitive("leftmarginkern", convert, left_margin_kern_code);@/
+@!@:left\_margin\_kern\_}{\.{\\leftmarginkern} primitive@>
+primitive("rightmarginkern", convert, right_margin_kern_code);@/
+@!@:right\_margin\_kern\_}{\.{\\rightmarginkern} primitive@>
+primitive("pdfxformname", convert, pdf_xform_name_code);@/
+@!@:pdf\_xform\_name\_}{\.{\\pdfxformname} primitive@>
+primitive("pdfescapestring", convert, pdf_escape_string_code);@/
+@!@:pdf\_escape\_string\_}{\.{\\pdfescapestring} primitive@>
+primitive("pdfescapename", convert, pdf_escape_name_code);@/
+@!@:pdf\_escape\_name\_}{\.{\\pdfescapename} primitive@>
+primitive("pdfescapehex", convert, pdf_escape_hex_code);@/
+@!@:pdf\_escape\_hex\_}{\.{\\pdfescapehex} primitive@>
+primitive("pdfunescapehex", convert, pdf_unescape_hex_code);@/
+@!@:pdf\_unescape\_hex\_}{\.{\\pdfunescapehex} primitive@>
+primitive("pdfcreationdate", convert, pdf_creation_date_code);@/
+@!@:pdf\_creation\_date\_}{\.{\\pdfcreationdate} primitive@>
+primitive("pdffilemoddate", convert, pdf_file_mod_date_code);@/
+@!@:pdf\_file\_mod\_date\_}{\.{\\pdffilemoddate} primitive@>
+primitive("pdffilesize", convert, pdf_file_size_code);@/
+@!@:pdf\_file\_size\_}{\.{\\pdffilesize} primitive@>
+primitive("pdfmdfivesum", convert, pdf_mdfive_sum_code);@/
+@!@:pdf\_mdfive\_sum\_}{\.{\\pdfmdfivesum} primitive@>
+primitive("pdffiledump", convert, pdf_file_dump_code);@/
+@!@:pdf\_file\_dump\_}{\.{\\pdffiledump} primitive@>
+primitive("pdfmatch", convert, pdf_match_code);@/
+@!@:pdf\_match\_}{\.{\\pdfmatch} primitive@>
+primitive("pdflastmatch", convert, pdf_last_match_code);@/
+@!@:pdf\_last\_match\_}{\.{\\pdflastmatch} primitive@>
+primitive("pdfstrcmp", convert, pdf_strcmp_code);@/
+@!@:pdf\_strcmp\_}{\.{\\pdfstrcmp} primitive@>
+primitive("pdfcolorstackinit", convert, pdf_colorstack_init_code);@/
+@!@:pdf\_colorstack\_init\_}{\.{\\pdfcolorstackinit} primitive@>
+primitive("pdfuniformdeviate", convert, uniform_deviate_code);@/
+@!@:uniform\_deviate\_}{\.{\\pdfuniformdeviate} primitive@>
+primitive("pdfnormaldeviate", convert, normal_deviate_code);@/
+@!@:normal\_deviate\_}{\.{\\pdfnormaldeviate} primitive@>
+
+@ The usual code for printing:
+
+@<Cases of |convert| for |print_cmd_chr|@>
+  case pdftex_revision_code: print_esc("pdftexrevision");@+break;
+  case pdftex_banner_code: print_esc("pdftexbanner");@+break;
+  case pdf_font_name_code: print_esc("pdffontname");@+break;
+  case pdf_font_objnum_code: print_esc("pdffontobjnum");@+break;
+  case pdf_font_size_code: print_esc("pdffontsize");@+break;
+  case pdf_page_ref_code: print_esc("pdfpageref");@+break;
+  case left_margin_kern_code: print_esc("leftmarginkern");@+break;
+  case right_margin_kern_code: print_esc("rightmarginkern");@+break;
+  case pdf_xform_name_code: print_esc("pdfxformname");@+break;
+  case pdf_escape_string_code: print_esc("pdfescapestring");@+break;
+  case pdf_escape_name_code: print_esc("pdfescapename");@+break;
+  case pdf_escape_hex_code: print_esc("pdfescapehex");@+break;
+  case pdf_unescape_hex_code: print_esc("pdfunescapehex");@+break;
+  case pdf_creation_date_code: print_esc("pdfcreationdate");@+break;
+  case pdf_file_mod_date_code: print_esc("pdffilemoddate");@+break;
+  case pdf_file_size_code: print_esc("pdffilesize");@+break;
+  case pdf_mdfive_sum_code: print_esc("pdfmdfivesum");@+break;
+  case pdf_file_dump_code: print_esc("pdffiledump");@+break;
+  case pdf_match_code: print_esc("pdfmatch");@+break;
+  case pdf_last_match_code: print_esc("pdflastmatch");@+break;
+  case pdf_strcmp_code: print_esc("pdfstrcmp");@+break;
+  case pdf_colorstack_init_code: print_esc("pdfcolorstackinit");@+break;
+  case pdf_uniform_deviate_code: print_esc("pdfuniformdeviate");@+break;
+  case pdf_normal_deviate_code: print_esc("pdfnormaldeviate");@+break;
+  case pdf_insert_ht_code: print_esc("pdfinsertht");@+break;
+  case pdf_ximage_bbox_code: print_esc("pdfximagebbox");@+break;
+
+@ The following code is taken from pdftex. At this point, I should drop
+some of the primitives that I do not want to implement.
+
+@<Cases of `Scan the argument for command |c|'@>=
+case pdftex_revision_code: do_nothing;
+case pdftex_banner_code: do_nothing;
+case pdf_font_name_code: case pdf_font_objnum_code:
+  case pdf_font_size_code: {@+
+    scan_font_ident();
+    if (cur_val==null_font)
+        pdf_error("font","invalid font identifier");
+    if (c!=pdf_font_size_code) {@+
+        pdf_check_vf_cur_val();
+        if (!font_used[cur_val])
+            pdf_init_font_cur_val();
+    }
+} @+break;
+case pdf_page_ref_code: {@+
+    scan_int();
+    if (cur_val <= 0)
+        pdf_error("pageref","invalid page number");
+} @+break;
+case left_margin_kern_code: case right_margin_kern_code: {@+
+    scan_register_num();
+    fetch_box(p);
+    if ((p==null)||(type(p)!=hlist_node))
+        pdf_error("marginkern","a non-empty hbox expected");
+} @+break;
+case pdf_xform_name_code: {@+
+    scan_int();
+    pdf_check_obj(obj_type_xform, cur_val);
+} @+break;
+case pdf_escape_string_code:
+  {@+
+    save_scanner_status=scanner_status;
+    save_warning_index=warning_index;
+    save_def_ref=def_ref;
+    save_cur_string;
+    scan_pdf_ext_toks();
+    s=tokens_to_string(def_ref);
+    delete_token_ref(def_ref);
+    def_ref=save_def_ref;
+    warning_index=save_warning_index;
+    scanner_status=save_scanner_status;
+    b=pool_ptr;
+    escapestring(str_start[s]);
+    link(garbage)=str_toks(b);
+    flush_str(s);
+    ins_list(link(temp_head));
+    restore_cur_string;
+    return;
+  }
+case pdf_escape_name_code:
+  {@+
+    save_scanner_status=scanner_status;
+    save_warning_index=warning_index;
+    save_def_ref=def_ref;
+    save_cur_string;
+    scan_pdf_ext_toks();
+    s=tokens_to_string(def_ref);
+    delete_token_ref(def_ref);
+    def_ref=save_def_ref;
+    warning_index=save_warning_index;
+    scanner_status=save_scanner_status;
+    b=pool_ptr;
+    escapename(str_start[s]);
+    link(garbage)=str_toks(b);
+    flush_str(s);
+    ins_list(link(temp_head));
+    restore_cur_string;
+    return;
+  }
+case pdf_escape_hex_code:
+  {@+
+    save_scanner_status=scanner_status;
+    save_warning_index=warning_index;
+    save_def_ref=def_ref;
+    save_cur_string;
+    scan_pdf_ext_toks();
+    s=tokens_to_string(def_ref);
+    delete_token_ref(def_ref);
+    def_ref=save_def_ref;
+    warning_index=save_warning_index;
+    scanner_status=save_scanner_status;
+    b=pool_ptr;
+    escapehex(str_start[s]);
+    link(garbage)=str_toks(b);
+    flush_str(s);
+    ins_list(link(temp_head));
+    restore_cur_string;
+    return;
+  }
+case pdf_unescape_hex_code:
+  {@+
+    save_scanner_status=scanner_status;
+    save_warning_index=warning_index;
+    save_def_ref=def_ref;
+    save_cur_string;
+    scan_pdf_ext_toks();
+    s=tokens_to_string(def_ref);
+    delete_token_ref(def_ref);
+    def_ref=save_def_ref;
+    warning_index=save_warning_index;
+    scanner_status=save_scanner_status;
+    b=pool_ptr;
+    unescapehex(str_start[s]);
+    link(garbage)=str_toks(b);
+    flush_str(s);
+    ins_list(link(temp_head));
+    restore_cur_string;
+    return;
+  }
+case pdf_creation_date_code:
+  {@+
+    b=pool_ptr;
+    getcreationdate();
+    link(garbage)=str_toks(b);
+    ins_list(link(temp_head));
+    return;
+  }
+case pdf_file_mod_date_code:
+  {@+
+    save_scanner_status=scanner_status;
+    save_warning_index=warning_index;
+    save_def_ref=def_ref;
+    save_cur_string;
+    scan_pdf_ext_toks();
+    s=tokens_to_string(def_ref);
+    delete_token_ref(def_ref);
+    def_ref=save_def_ref;
+    warning_index=save_warning_index;
+    scanner_status=save_scanner_status;
+    b=pool_ptr;
+    getfilemoddate(s);
+    link(garbage)=str_toks(b);
+    flush_str(s);
+    ins_list(link(temp_head));
+    restore_cur_string;
+    return;
+  }
+case pdf_file_size_code:
+  {@+
+    save_scanner_status=scanner_status;
+    save_warning_index=warning_index;
+    save_def_ref=def_ref;
+    save_cur_string;
+    scan_pdf_ext_toks();
+    s=tokens_to_string(def_ref);
+    delete_token_ref(def_ref);
+    def_ref=save_def_ref;
+    warning_index=save_warning_index;
+    scanner_status=save_scanner_status;
+    b=pool_ptr;
+    getfilesize(s);
+    link(garbage)=str_toks(b);
+    flush_str(s);
+    ins_list(link(temp_head));
+    restore_cur_string;
+    return;
+  }
+case pdf_mdfive_sum_code:
+  {@+
+    save_scanner_status=scanner_status;
+    save_warning_index=warning_index;
+    save_def_ref=def_ref;
+    save_cur_string;
+    bl=scan_keyword("file");
+    scan_pdf_ext_toks();
+    s=tokens_to_string(def_ref);
+    delete_token_ref(def_ref);
+    def_ref=save_def_ref;
+    warning_index=save_warning_index;
+    scanner_status=save_scanner_status;
+    b=pool_ptr;
+    getmd5sum(s, bl);
+    link(garbage)=str_toks(b);
+    flush_str(s);
+    ins_list(link(temp_head));
+    restore_cur_string;
+    return;
+  }
+case pdf_file_dump_code:
+  {@+
+    save_scanner_status=scanner_status;
+    save_warning_index=warning_index;
+    save_def_ref=def_ref;
+    save_cur_string;
+     /*scan offset*/
+    cur_val=0;
+    if ((scan_keyword("offset"))) {@+
+      scan_int();
+      if ((cur_val < 0)) {@+
+        print_err("Bad file offset");
+@.Bad file offset@>
+        help2("A file offset must be between 0 and 2^{31}-1,",@/
+          "I changed this one to zero.");
+        int_error(cur_val);
+        cur_val=0;
+      }
+    }
+    i=cur_val;
+     /*scan length*/
+    cur_val=0;
+    if ((scan_keyword("length"))) {@+
+      scan_int();
+      if ((cur_val < 0)) {@+
+        print_err("Bad dump length");
+@.Bad dump length@>
+        help2("A dump length must be between 0 and 2^{31}-1,",@/
+          "I changed this one to zero.");
+        int_error(cur_val);
+        cur_val=0;
+      }
+    }
+    j=cur_val;
+     /*scan file name*/
+    scan_pdf_ext_toks();
+    s=tokens_to_string(def_ref);
+    delete_token_ref(def_ref);
+    def_ref=save_def_ref;
+    warning_index=save_warning_index;
+    scanner_status=save_scanner_status;
+    b=pool_ptr;
+    getfiledump(s, i, j);
+    link(garbage)=str_toks(b);
+    flush_str(s);
+    ins_list(link(temp_head));
+    restore_cur_string;
+    return;
+  }
+case pdf_match_code:
+  {@+
+    save_scanner_status=scanner_status;
+    save_warning_index=warning_index;
+    save_def_ref=def_ref;
+    save_cur_string;
+     /*scan for icase*/
+    bl=scan_keyword("icase");
+     /*scan for subcount*/
+    i=-1; /*default for subcount*/
+    if (scan_keyword("subcount")) {@+
+      scan_int();
+      i=cur_val;
+    }
+    scan_pdf_ext_toks();
+    s=tokens_to_string(def_ref);
+    delete_token_ref(def_ref);
+    scan_pdf_ext_toks();
+    t=tokens_to_string(def_ref);
+    delete_token_ref(def_ref);
+    def_ref=save_def_ref;
+    warning_index=save_warning_index;
+    scanner_status=save_scanner_status;
+    b=pool_ptr;
+    matchstrings(s, t, i, bl);
+    link(garbage)=str_toks(b);
+    flush_str(t);
+    flush_str(s);
+    ins_list(link(temp_head));
+    restore_cur_string;
+    return;
+  }
+case pdf_last_match_code:
+  {@+
+    scan_int();
+    if (cur_val < 0) {@+
+      print_err("Bad match number");
+@.Bad match number@>
+      help2("Since I expected zero or a positive number,",@/
+      "I changed this one to zero.");
+      int_error(cur_val);
+      cur_val=0;
+    }
+    b=pool_ptr;
+    getmatch(cur_val);
+    link(garbage)=str_toks(b);
+    ins_list(link(temp_head));
+    return;
+  }
+case pdf_strcmp_code:
+  {@+
+    save_scanner_status=scanner_status;
+    save_warning_index=warning_index;
+    save_def_ref=def_ref;
+    save_cur_string;
+    compare_strings();
+    def_ref=save_def_ref;
+    warning_index=save_warning_index;
+    scanner_status=save_scanner_status;
+    restore_cur_string;
+  } @+break;
+case pdf_colorstack_init_code:
+  {@+
+    bl=scan_keyword("page");
+    if (scan_keyword("direct"))
+        cur_val=direct_always;
+    else
+        if (scan_keyword("page"))
+            cur_val=direct_page;
+        else
+            cur_val=set_origin;
+    save_scanner_status=scanner_status;
+    save_warning_index=warning_index;
+    save_def_ref=def_ref;
+    save_cur_string;
+    scan_pdf_ext_toks();
+    s=tokens_to_string(def_ref);
+    delete_token_ref(def_ref);
+    def_ref=save_def_ref;
+    warning_index=save_warning_index;
+    scanner_status=save_scanner_status;
+    cur_val=newcolorstack(s, cur_val, bl);
+    flush_str(s);
+    cur_val_level=int_val;
+    if (cur_val < 0) {@+
+        print_err("Too many color stacks");
+@.Too many color stacks@>
+        help2("The number of color stacks is limited to 32768.",@/
+        "I'll use the default color stack 0 here.");
+        error();
+        cur_val=0;
+    restore_cur_string;
+    }
+  } @+break;
+case job_name_code: if (job_name==0) open_log_file();@+break;
+case uniform_deviate_code: scan_int();@+break;
+case normal_deviate_code: do_nothing;@+break;
+case pdf_insert_ht_code: scan_register_num();@+break;
+case pdf_ximage_bbox_code: {@+
+    scan_int();
+    pdf_check_obj(obj_type_ximage, cur_val);
+    i=obj_ximage_data(cur_val);
+    scan_int();
+    j=cur_val;
+    if ((j < 1)||(j > 4))
+        pdf_error("pdfximagebbox","invalid parameter");
+}
+
+
+@  Look at these!
+%  pdfcopyfont, pdf_copy_font, 0
+%  pdfprimitive, no_expand, 1
+%  letterspace_font 101 /*letterspace a font ( \.{\\letterspacefont} )*/
+%  left_margin_kern_code:
+%  right_margin_kern_code
 
 @* Index.
 Here is where you can find all uses of each identifier in the program,
