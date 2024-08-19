@@ -136,6 +136,7 @@
   \fi
 \fi
 \def\PASCAL{Pascal}
+\def\pdfTeX{pdf\TeX}
 \def\ph{\hbox{Pascal-H}}
 \def\pct!{{\char`\%}} % percent sign in ordinary text
 \def\grp{\.{\char'173...\char'175}}
@@ -399,7 +400,9 @@ uses identifiers that \TeX will declare as macros.
 
 @p @<Header files and function declarations@>@;
 @h
-enum {@+@<Constants in the outer block@>@+};
+enum {@<Constants in the outer block@>@;
+      @!empty_string=256 /*the empty string follows after 256 characters*/
+};
 @<Types in the outer block@>@;
 @<Forward declarations@>@;
 @<Global variables@>@;
@@ -521,7 +524,6 @@ in production versions of \TeX.
 @!file_name_size=1024, /*file names shouldn't be longer than this*/
 @!xchg_buffer_size=64, /*must be at least 64*/
    /*size of |eight_bits| buffer for exchange with system routines*/
-@!empty_string=256 /*the empty string follows after 256 characters*/
 
 @ Like the preceding parameters, the following quantities can be changed
 at compile time to extend or reduce \TeX's capacity. But if they are changed,
@@ -531,7 +533,7 @@ to generate new tables for the production \TeX\ program.
 One can't simply make helter-skelter changes to the following constants,
 since certain rather complex initialization
 numbers are computed from them. They are defined here using
-\.{WEB} macros, instead of being put into \PASCAL's |const| list, in order to
+\.{WEB} macros, instead of being put into the above |enum| list in order to
 emphasize this distinction.
 
 @d mem_bot 0 /*smallest index in the |mem| array dumped by \.{INITEX};
@@ -7322,11 +7324,10 @@ to be equal to either |backed_up| or |inserted| about 2/3 of the time.
   {@+if (token_type <= inserted) flush_list(start);
   else{@+delete_token_ref(start); /*update reference count*/
     if (token_type==macro)  /*parameters must be flushed*/
-    { while (param_ptr > param_start)
+      while (param_ptr > param_start)
         {@+decr(param_ptr);
         flush_list(param_stack[param_ptr]);
         }
-    }
     }
   }
 else if (token_type==u_template)
@@ -21025,7 +21026,7 @@ pace through the other combinations of possibilities.
 
 @<Cases of |main_control| that are not part of the inner loop@>=
 any_mode(relax): case vmode+spacer: case mmode+spacer:
-  case mmode+no_boundary: do_nothing;
+  case mmode+no_boundary: do_nothing;@+break;
 any_mode(ignore_spaces): {@+@<Get the next non-blank non-call...@>;
   goto big_reswitch;
   }
@@ -21788,8 +21789,7 @@ prev_graf=(norm_min(left_hyphen_min)*0100+norm_min(right_hyphen_min))
 if (indented)
   {@+tail=new_null_box();link(head)=tail;width(tail)=par_indent;@+
   }
-if (every_par!=null)
-  begin_token_list(every_par, every_par_text);
+if (every_par!=null) begin_token_list(every_par, every_par_text);
 if (nest_ptr==1) build_page(); /*put |par_skip| glue on current page*/
 }
 
@@ -25133,10 +25133,9 @@ the input files that may still be open.
 @<Last-minute...@>=
 static void close_files_and_terminate(void)
 {@+int k; /*all-purpose index*/
-@<Finish the extensions@>@;
-new_line_char=-1;
+@<Finish the extensions@>;new_line_char=-1;
 #ifdef @!STAT
-@<Output statistics about this job@>;@;
+if (tracing_stats > 0) @<Output statistics about this job@>;@;
 #endif
 wake_up_terminal;@<Finish the \.{DVI} file@>;
 if (log_opened)
@@ -28653,7 +28652,10 @@ as long as relative characters are mapped to the same value, whatever
 the system. Nul strings are valid.
 
 @<Cases of `Scan the argument for command |c|'@>=
-case strcmp_code: {@+scan_general_x_text();toks_to_str();
+case strcmp_code:  @<Scan the argument for |strcmp_code|@>@;@+break;
+
+@ @<Scan the argument for |strcmp_code|@>=
+{@+scan_general_x_text();toks_to_str();
   s=info(garbage);flush_list(link(garbage));
   scan_general_x_text();toks_to_str();
   t=info(garbage);flush_list(link(garbage));
@@ -28671,7 +28673,7 @@ case strcmp_code: {@+scan_general_x_text();toks_to_str();
     else cur_val=cur_val/(double)abs(cur_val);
     }
   flush_string;flush_string;
-  } @+break;
+  }
 
 @ @<Cases of `Print the result of command |c|'@>=
 case strcmp_code: print_int(cur_val);@+break;
@@ -28798,12 +28800,15 @@ returned.
 @^system dependencies@>
 
 @<Cases of `Scan the argument for command |c|'@>=
-case file_size_code: {@+scan_general_x_text();toks_to_str();
+case file_size_code: @<Scan the argument for |file_size_code|@>@;@+break;
+
+@ @<Scan the argument for |file_size_code|@>=
+{@+scan_general_x_text();toks_to_str();
   s=info(garbage);flush_list(link(garbage));str_to_name(s);
   cur_val=-1; /*invalid value if error*/
   cur_val=get_file_size();
   flush_string;
-  } @+break;
+}
 
 @ @<Cases of `Print the result of command |c|'@>=
 case file_size_code: if (cur_val!=-1) print_int(cur_val);@+break;
@@ -28830,11 +28835,14 @@ simply setting |xchg_buffer_length| to $0$.
 @d get_file_mtime xchg_buffer_length=0
 
 @<Cases of `Scan the argument for command |c|'@>=
-case file_mod_date_code: {@+scan_general_x_text();toks_to_str();
+case file_mod_date_code: @<Scan the argument for |file_mod_date_code|@>@;@+break;
+
+@  @<Scan the argument for |file_mod_date_code|@>=
+{@+scan_general_x_text();toks_to_str();
   s=info(garbage);flush_list(link(garbage));str_to_name(s);
   get_file_mod_date();
   flush_string;
-  } @+break;
+} @+break;
 
 @ Printing the result consists simply in printing every
 |text_char| in |time_str|.
@@ -28870,7 +28878,10 @@ byte at a time), \.{k}, \.{l} and \.{f} will be defined here and used
 when printing.
 
 @<Cases of `Scan the argument for command |c|'@>=
-case file_dump_code: {@+k=0;l=0; /*defaults*/
+case file_dump_code:  @<Scan the argument for |file_dump_code|@>@;@+break;
+
+@ @<Scan the argument for |file_dump_code|@>=
+{@+k=0;l=0; /*defaults*/
   if (scan_keyword("offset")) {@+scan_int();
     if (cur_val < 0) {@+print_err("Bad ");print_esc("filedump");
 @.Bad \\filedump@>
@@ -28890,7 +28901,7 @@ case file_dump_code: {@+k=0;l=0; /*defaults*/
   scan_general_x_text();toks_to_str();s=info(garbage);
   flush_list(link(garbage));str_to_name(s);
   flush_string; /*this one was the filename argument*/
-  } @+break;
+  } 
 
 @ The variables have been set, and the file name has been defined. We
 simply print the uppercase hexadecimal transcription of every byte
@@ -28938,11 +28949,14 @@ The general text is converted to a string. It is legal to have an empty
 string if the argument is not a file.
 
 @<Cases of `Scan the argument for command |c|'@>=
-case mdfive_sum_code: {@+r=scan_keyword("file");scan_general_x_text();
+case mdfive_sum_code:  @<Scan the argument for |mdfive_sum_code|@>@; @+break;
+
+@ @<Scan the argument for |mdfive_sum_code|@>=
+{@+r=scan_keyword("file");scan_general_x_text();
 toks_to_str();s=info(garbage);flush_list(link(garbage));
 l=get_md5_sum(s,r);
 flush_string; /*done with the filename or string to hash*/
-} @+break;
+}
 
 @ As a result, there is $16$ bytes in the |md5_digest| representing the
 MD5 hash. We simply print, byte by byte, the uppercase hexadecimal
@@ -29395,10 +29409,10 @@ primitive("normaldeviate", convert, normal_deviate_code);@/
 case normal_deviate_code: print_esc("normaldeviate");
 
 @ @<Cases of `Scan the argument for command |c|'@>=
-case normal_deviate_code: cur_val=norm_rand();
+case normal_deviate_code: cur_val=norm_rand();@+break;
 
 @ @<Cases of `Print the result of command |c|'@>=
-case normal_deviate_code: print_int(cur_val);
+case normal_deviate_code: print_int(cur_val);@+break;
 
 @*1 DVI related primitives.
 
@@ -31889,9 +31903,18 @@ The {\tt -pdf} option is designed to provide the necessary behaviour.
   @t\qquad@>"\t pretend to produce PDF output; requires -ini\n"@/
 
 @ This option will set the |pdf_on| variable, defined below, to true.
+  The option requires the {\tt -ini} option.
 
-@<more options@>=
-      { "pdf", 0, &pdf_on, 1 },
+@<handle the options@>=
+else @+if (ARGUMENT_IS ("pdf")) @t\2@>
+   if (iniversion) pdf_on=true;
+   else 
+    { fprintf(stderr,"-pdf requires -ini; try -ini -pdf\n");
+      exit(1);
+    }
+
+@ @<more options@>=
+      { "pdf", 0, 0, 0 },
 
 @ @<Global variables@>=
 static int @!pdf_on=false;
@@ -32396,18 +32419,13 @@ primitive("pdfnormaldeviate", convert, normal_deviate_code);@/
 some of the primitives that I do not want to implement.
 
 @<Cases of `Scan the argument for command |c|'@>=
-case pdftex_revision_code: do_nothing;
-case pdftex_banner_code: do_nothing;
+case pdftex_revision_code: do_nothing;@+break;
+case pdftex_banner_code: do_nothing;@+break;
 case pdf_font_name_code: case pdf_font_objnum_code:
   case pdf_font_size_code: {@+
     scan_font_ident();
     if (cur_val==null_font)
         pdf_error("font","invalid font identifier");
-    if (c!=pdf_font_size_code) {@+
-        pdf_check_vf_cur_val();
-        if (!font_used[cur_val])
-            pdf_init_font_cur_val();
-    }
 } @+break;
 case pdf_page_ref_code: {@+
     scan_int();
@@ -32415,6 +32433,7 @@ case pdf_page_ref_code: {@+
         pdf_error("pageref","invalid page number");
 } @+break;
 case left_margin_kern_code: case right_margin_kern_code: {@+
+    pointer p;
     scan_register_num();
     fetch_box(p);
     if ((p==null)||(type(p)!=hlist_node))
@@ -32422,312 +32441,95 @@ case left_margin_kern_code: case right_margin_kern_code: {@+
 } @+break;
 case pdf_xform_name_code: {@+
     scan_int();
-    pdf_check_obj(obj_type_xform, cur_val);
 } @+break;
 case pdf_escape_string_code:
-  {@+
-    save_scanner_status=scanner_status;
-    save_warning_index=warning_index;
-    save_def_ref=def_ref;
-    save_cur_string;
-    scan_pdf_ext_toks();
-    s=tokens_to_string(def_ref);
-    delete_token_ref(def_ref);
-    def_ref=save_def_ref;
-    warning_index=save_warning_index;
-    scanner_status=save_scanner_status;
-    b=pool_ptr;
-    escapestring(str_start[s]);
-    link(garbage)=str_toks(b);
-    flush_str(s);
-    ins_list(link(temp_head));
-    restore_cur_string;
-    return;
-  }
 case pdf_escape_name_code:
-  {@+
-    save_scanner_status=scanner_status;
-    save_warning_index=warning_index;
-    save_def_ref=def_ref;
-    save_cur_string;
-    scan_pdf_ext_toks();
-    s=tokens_to_string(def_ref);
-    delete_token_ref(def_ref);
-    def_ref=save_def_ref;
-    warning_index=save_warning_index;
-    scanner_status=save_scanner_status;
-    b=pool_ptr;
-    escapename(str_start[s]);
-    link(garbage)=str_toks(b);
-    flush_str(s);
-    ins_list(link(temp_head));
-    restore_cur_string;
-    return;
-  }
 case pdf_escape_hex_code:
-  {@+
-    save_scanner_status=scanner_status;
-    save_warning_index=warning_index;
-    save_def_ref=def_ref;
-    save_cur_string;
-    scan_pdf_ext_toks();
-    s=tokens_to_string(def_ref);
-    delete_token_ref(def_ref);
-    def_ref=save_def_ref;
-    warning_index=save_warning_index;
-    scanner_status=save_scanner_status;
-    b=pool_ptr;
-    escapehex(str_start[s]);
-    link(garbage)=str_toks(b);
-    flush_str(s);
-    ins_list(link(temp_head));
-    restore_cur_string;
-    return;
-  }
 case pdf_unescape_hex_code:
-  {@+
-    save_scanner_status=scanner_status;
-    save_warning_index=warning_index;
-    save_def_ref=def_ref;
-    save_cur_string;
-    scan_pdf_ext_toks();
-    s=tokens_to_string(def_ref);
-    delete_token_ref(def_ref);
-    def_ref=save_def_ref;
-    warning_index=save_warning_index;
-    scanner_status=save_scanner_status;
-    b=pool_ptr;
-    unescapehex(str_start[s]);
-    link(garbage)=str_toks(b);
-    flush_str(s);
-    ins_list(link(temp_head));
-    restore_cur_string;
+    scan_general_x_text(); /*the simplified version*/
+    ins_list(link(link(garbage)));
+    free_avail(link(garbage)); /*drop reference count*/
     return;
-  }
-case pdf_creation_date_code:
-  {@+
-    b=pool_ptr;
-    getcreationdate();
-    link(garbage)=str_toks(b);
-    ins_list(link(temp_head));
-    return;
-  }
-case pdf_file_mod_date_code:
-  {@+
-    save_scanner_status=scanner_status;
-    save_warning_index=warning_index;
-    save_def_ref=def_ref;
-    save_cur_string;
-    scan_pdf_ext_toks();
-    s=tokens_to_string(def_ref);
-    delete_token_ref(def_ref);
-    def_ref=save_def_ref;
-    warning_index=save_warning_index;
-    scanner_status=save_scanner_status;
-    b=pool_ptr;
-    getfilemoddate(s);
-    link(garbage)=str_toks(b);
-    flush_str(s);
-    ins_list(link(temp_head));
-    restore_cur_string;
-    return;
-  }
-case pdf_file_size_code:
-  {@+
-    save_scanner_status=scanner_status;
-    save_warning_index=warning_index;
-    save_def_ref=def_ref;
-    save_cur_string;
-    scan_pdf_ext_toks();
-    s=tokens_to_string(def_ref);
-    delete_token_ref(def_ref);
-    def_ref=save_def_ref;
-    warning_index=save_warning_index;
-    scanner_status=save_scanner_status;
-    b=pool_ptr;
-    getfilesize(s);
-    link(garbage)=str_toks(b);
-    flush_str(s);
-    ins_list(link(temp_head));
-    restore_cur_string;
-    return;
-  }
-case pdf_mdfive_sum_code:
-  {@+
-    save_scanner_status=scanner_status;
-    save_warning_index=warning_index;
-    save_def_ref=def_ref;
-    save_cur_string;
-    bl=scan_keyword("file");
-    scan_pdf_ext_toks();
-    s=tokens_to_string(def_ref);
-    delete_token_ref(def_ref);
-    def_ref=save_def_ref;
-    warning_index=save_warning_index;
-    scanner_status=save_scanner_status;
-    b=pool_ptr;
-    getmd5sum(s, bl);
-    link(garbage)=str_toks(b);
-    flush_str(s);
-    ins_list(link(temp_head));
-    restore_cur_string;
-    return;
-  }
-case pdf_file_dump_code:
-  {@+
-    save_scanner_status=scanner_status;
-    save_warning_index=warning_index;
-    save_def_ref=def_ref;
-    save_cur_string;
-     /*scan offset*/
-    cur_val=0;
-    if ((scan_keyword("offset"))) {@+
-      scan_int();
-      if ((cur_val < 0)) {@+
-        print_err("Bad file offset");
-@.Bad file offset@>
-        help2("A file offset must be between 0 and 2^{31}-1,",@/
-          "I changed this one to zero.");
-        int_error(cur_val);
-        cur_val=0;
-      }
-    }
-    i=cur_val;
-     /*scan length*/
-    cur_val=0;
-    if ((scan_keyword("length"))) {@+
-      scan_int();
-      if ((cur_val < 0)) {@+
-        print_err("Bad dump length");
-@.Bad dump length@>
-        help2("A dump length must be between 0 and 2^{31}-1,",@/
-          "I changed this one to zero.");
-        int_error(cur_val);
-        cur_val=0;
-      }
-    }
-    j=cur_val;
-     /*scan file name*/
-    scan_pdf_ext_toks();
-    s=tokens_to_string(def_ref);
-    delete_token_ref(def_ref);
-    def_ref=save_def_ref;
-    warning_index=save_warning_index;
-    scanner_status=save_scanner_status;
-    b=pool_ptr;
-    getfiledump(s, i, j);
-    link(garbage)=str_toks(b);
-    flush_str(s);
-    ins_list(link(temp_head));
-    restore_cur_string;
-    return;
-  }
+case pdf_creation_date_code: get_creation_date();@+break;
+case pdf_file_mod_date_code: @<Scan the argument for |file_mod_date_code|@>@;@+break;
+case pdf_file_size_code: @<Scan the argument for |file_size_code|@>@;@+break;
+case pdf_mdfive_sum_code:  @<Scan the argument for |mdfive_sum_code|@>@; @+break;
+case pdf_file_dump_code:  @<Scan the argument for |file_dump_code|@>@;@+break;
 case pdf_match_code:
-  {@+
-    save_scanner_status=scanner_status;
-    save_warning_index=warning_index;
-    save_def_ref=def_ref;
-    save_cur_string;
-     /*scan for icase*/
-    bl=scan_keyword("icase");
-     /*scan for subcount*/
-    i=-1; /*default for subcount*/
-    if (scan_keyword("subcount")) {@+
-      scan_int();
-      i=cur_val;
-    }
-    scan_pdf_ext_toks();
-    s=tokens_to_string(def_ref);
-    delete_token_ref(def_ref);
-    scan_pdf_ext_toks();
-    t=tokens_to_string(def_ref);
-    delete_token_ref(def_ref);
-    def_ref=save_def_ref;
-    warning_index=save_warning_index;
-    scanner_status=save_scanner_status;
-    b=pool_ptr;
-    matchstrings(s, t, i, bl);
-    link(garbage)=str_toks(b);
-    flush_str(t);
-    flush_str(s);
-    ins_list(link(temp_head));
-    restore_cur_string;
-    return;
-  }
+  scan_keyword("icase");
+  if (scan_keyword("subcount")) scan_int();
+  scan_general_x_text(); /*the simplified version*/
+  flush_list(link(garbage));
+  scan_general_x_text(); /*the simplified version*/
+  flush_list(link(garbage));
+  break;
 case pdf_last_match_code:
-  {@+
-    scan_int();
-    if (cur_val < 0) {@+
-      print_err("Bad match number");
-@.Bad match number@>
-      help2("Since I expected zero or a positive number,",@/
-      "I changed this one to zero.");
-      int_error(cur_val);
-      cur_val=0;
-    }
-    b=pool_ptr;
-    getmatch(cur_val);
-    link(garbage)=str_toks(b);
+  {@+pointer p,q;
+    scan_int(); 
+    /* always returning ``\.{-1->}''*/
+    p=temp_head;link(p)=null;
+    store_new_token(other_token+'-');
+    store_new_token(other_token+'1');
+    store_new_token(other_token+'-');
+    store_new_token(other_token+'>');
     ins_list(link(temp_head));
     return;
   }
-case pdf_strcmp_code:
-  {@+
-    save_scanner_status=scanner_status;
-    save_warning_index=warning_index;
-    save_def_ref=def_ref;
-    save_cur_string;
-    compare_strings();
-    def_ref=save_def_ref;
-    warning_index=save_warning_index;
-    scanner_status=save_scanner_status;
-    restore_cur_string;
-  } @+break;
+case pdf_strcmp_code:  @<Scan the argument for |strcmp_code|@>@;@+break;
 case pdf_colorstack_init_code:
   {@+
-    bl=scan_keyword("page");
-    if (scan_keyword("direct"))
-        cur_val=direct_always;
-    else
-        if (scan_keyword("page"))
-            cur_val=direct_page;
-        else
-            cur_val=set_origin;
-    save_scanner_status=scanner_status;
-    save_warning_index=warning_index;
-    save_def_ref=def_ref;
-    save_cur_string;
-    scan_pdf_ext_toks();
-    s=tokens_to_string(def_ref);
-    delete_token_ref(def_ref);
-    def_ref=save_def_ref;
-    warning_index=save_warning_index;
-    scanner_status=save_scanner_status;
-    cur_val=newcolorstack(s, cur_val, bl);
-    flush_str(s);
-    cur_val_level=int_val;
-    if (cur_val < 0) {@+
-        print_err("Too many color stacks");
-@.Too many color stacks@>
-        help2("The number of color stacks is limited to 32768.",@/
-        "I'll use the default color stack 0 here.");
-        error();
-        cur_val=0;
-    restore_cur_string;
-    }
+    scan_keyword("page");
+    if (!scan_keyword("direct"))
+      scan_keyword("page");
+    scan_general_x_text(); /*the simplified version*/
+    flush_list(link(garbage));
+    cur_val=0;
   } @+break;
-case job_name_code: if (job_name==0) open_log_file();@+break;
-case uniform_deviate_code: scan_int();@+break;
-case normal_deviate_code: do_nothing;@+break;
+case pdf_uniform_deviate_code: scan_int();cur_val=unif_rand(cur_val);@+break;
+case pdf_normal_deviate_code: cur_val=norm_rand();@+break;
 case pdf_insert_ht_code: scan_register_num();@+break;
 case pdf_ximage_bbox_code: {@+
     scan_int();
-    pdf_check_obj(obj_type_ximage, cur_val);
-    i=obj_ximage_data(cur_val);
     scan_int();
-    j=cur_val;
-    if ((j < 1)||(j > 4))
-        pdf_error("pdfximagebbox","invalid parameter");
+}@+break;
+
+@ The second part of handling conversion commands is the printingof the result.
+
+
+@<Cases of `Print the result of command |c|'@>=
+case pdftex_revision_code: print(pdftex_revision);@+break;
+case pdftex_banner_code: print("This is pdfTeX, Version 3.141592653");@+break;
+case pdf_font_name_code: case pdf_font_objnum_code: print_int(cur_val);@+break;
+case pdf_font_size_code: 
+    print_scaled(font_size[cur_val]);
+    print("pt");@+break;
+case pdf_page_ref_code: print_int(1);@+break;
+case left_margin_kern_code:  print("0pt");@+break;
+case right_margin_kern_code:  print("0pt");@+break;
+case pdf_xform_name_code: print_int(cur_val);@+break;
+case pdf_strcmp_code: print_int(0);@+break;
+case pdf_colorstack_init_code: print_int(cur_val);@+break;
+case pdf_uniform_deviate_code: print_int(cur_val);@+break;
+case pdf_normal_deviate_code: print_int(cur_val);@+break;
+case pdf_insert_ht_code: print("10pt");@+break;
+case pdf_ximage_bbox_code: print("10pt");@+break;
+
+
+@ A few functions are neede to complete the implementation of the \pdfTeX\ simulation.
+
+
+@<Error handling procedures@>=
+static void pdf_error(char *t, char *p)
+{@+
+    normalize_selector();
+    print_err("pdfTeX error");
+    if (t!=0) {@+
+        print(" (");
+        print(t);
+        print(")");
+    }
+    print(": ");print(p);
+    succumb;
 }
 
 
