@@ -9727,7 +9727,8 @@ case convert: switch (chr_code) {
 for |convert| functions into the scanner; `\.{\\outer}' control sequences
 are allowed to follow `\.{\\string}' and `\.{\\meaning}'.
 
-@p static void conv_toks(void)
+@p static void scan_pdf_ext_toks(void);
+static void conv_toks(void)
 {@+int old_setting; /*holds |selector| setting*/
 int @!c; /*desired type of conversion*/
 small_number @!save_scanner_status; /*|scanner_status| upon entry*/
@@ -25471,6 +25472,8 @@ case extension: switch (chr_code) {
   default:print("[unknown extension!]");
   } @+break;
 
+
+
 @ When an |extension| command occurs in |main_control|, in any mode,
 the |do_extension| routine is called.
 
@@ -28286,11 +28289,12 @@ We will start by giving a mean to test that \Prote\ is activated and
 to identify the version.
 
 @<Generate all \Prote\ primitives@>=
+if (!pdf_on) {
 primitive("Proteversion", last_item, Prote_version_code);
 @!@:Prote\_version\_}{\.{\\Proteversion} primitive@>
 primitive("Proterevision", convert, Prote_revision_code);@/
 @!@:Prote\_revision\_}{\.{\\Proterevision} primitive@>
-
+}
 @ We use the different hooks added to insert our cases.
 
 @<Cases of |last_item| for |print_cmd_chr|@>=
@@ -28419,8 +28423,10 @@ simply expands to a read-only integer reflecting it. In \Prote, it is
 always $0$.
 
 @<Generate all \Prote\ primitives@>=
+if (!pdf_on) {
 primitive("shellescape", last_item, shell_escape_code);
 @!@:shellescape\_}{\.{\\shellescape} primitive@>
+}
 
 @ @<Cases of |last_item| for |print_cmd_chr|@>=
 case shell_escape_code: print_esc("shellescape");@+break;
@@ -28436,8 +28442,10 @@ expansion rules as the other |if_test| ones.
 @<Generate all \Prote\ primitives@>=
 primitive("ifincsname", if_test, if_incsname_code);
 @!@:if\_incsname\_}{\.{\\if} primitive@>
+if (!pdf_on) {
 primitive("ifprimitive", if_test, if_primitive_code);
 @!@:if\_primitive\_}{\.{\\if} primitive@>
+}
 
 @ @<Cases of |if_test| for |print_cmd_chr|@>=
 case if_incsname_code: print_esc("ifincsname");@+break;
@@ -28490,9 +28498,11 @@ initialization of the |frozen_primitive| address is just to document
 the code: these values will be overwritten on each actual call.
 
 @<Generate all \Prote\ primitives@>=
+if (!pdf_on) {
 primitive("primitive", expand_after, primitive_code);
 @!@:primitive\_}{\.{\\primitive} primitive@>
 text(frozen_primitive)=text(cur_val);eqtb[frozen_primitive]=eqtb[cur_val];
+}
 
 @ @<Cases of |expandafter| for |print_cmd_chr|@>=
 case primitive_code: print_esc("primitive");@+break;
@@ -28636,8 +28646,10 @@ if the first string is lexicographically sorted after the second, the
 expansion is $1$.
 
 @<Generate all \Prote\ primitives@>=
+if (!pdf_on) {
 primitive("strcmp", convert, strcmp_code);
 @!@:strcmp\_}{\.{\\strcmp} primitive@>
+}
 
 @ @<Cases of |convert| for |print_cmd_chr|@>=
 case strcmp_code: print_esc("strcmp");@+break;
@@ -28700,8 +28712,10 @@ absolute value of the offset from UT in minutes (00--59). All fields
 after the year are optional and default to zero values.
 
 @ @<Generate all \Prote\ primitives@>=
+if (!pdf_on) {
 primitive("creationdate", convert, creation_date_code);@/
 @!@:creationdate\_}{\.{\\creationdate} primitive@>
+}
 
 @ @<Cases of |convert| for |print_cmd_chr|@>=
 case creation_date_code: print_esc("creationdate");@+break;
@@ -28736,10 +28750,12 @@ the permanent answer.
 @d get_elapsed_time infinity /*a function should be implemented*/
 
 @ @<Generate all \Prote\ primitives@>=
+if (!pdf_on) {
 primitive("resettimer", extension, reset_timer_code);@/
 @!@:resettimer\_}{\.{\\resettimer} primitive@>
 primitive("elapsedtime", last_item, elapsed_time_code);@/
 @!@:elapsedtime\_}{\.{\\elapsedtime} primitive@>
+}
 
 @ @<Cases of |last_item| for |print_cmd_chr|@>=
 case elapsed_time_code: print_esc("elapsedtime");@+break;
@@ -28758,13 +28774,10 @@ scaled seconds, from the moment of the call to the moment of reference.
 So there is no persistent variable neither a kind of clock implemented.
 @^system dependencies@>
 
-Standard \PASCAL\ doesn't provide related routines so our
-syntactically correct but semantically useless routines are implemented
-here: the |reset_timer| does nothing, while the |get_elapsed_time|
-simply returns, even when |reset_timer| has been called, the invalid
-value |infinity|.
+Since we maintain the time anyway, we implement the timing function.
+@<Glob...@>=
+static double reset_timer=0.0; /*time of the last reset in seconds*/
 
-@d reset_timer do_nothing
 
 @ Since to reset the timer a simple call to the routine is necessary,
 we simply add it to \.{main\_control} by adding it to the cases handled
@@ -28773,7 +28786,7 @@ by \.{do\_extension}. It contributes nothing to the token list: it is a
 other hooks.
 
 @<Cases for |do_extension|@>=
-case reset_timer_code: reset_timer;@+break;
+case reset_timer_code: reset_timer=start_sec*1.0+start_nsec/1000000000.0;@+break;
 
 @*1 \Prote\ file related primitives.
 
@@ -28787,8 +28800,10 @@ multiplied.
 file.
 
 @<Generate all \Prote\ primitives@>=
+if (!pdf_on) {
 primitive("filesize", convert, file_size_code);
 @!@:filesize\_}{\.{\\filesize} primitive@>
+}
 
 @ @<Cases of |convert| for |print_cmd_chr|@>=
 case file_size_code: print_esc("filesize");@+break;
@@ -28817,8 +28832,10 @@ case file_size_code: if (cur_val!=-1) print_int(cur_val);@+break;
 creation date (see \.{\\creationdate}).
 
 @<Generate all \Prote\ primitives@>=
+if (!pdf_on) {
 primitive("filemoddate", convert, file_mod_date_code);
 @!@:filemoddate\_}{\.{\\filemoddate} primitive@>
+}
 
 @ @<Cases of |convert| for |print_cmd_chr|@>=
 case file_mod_date_code: print_esc("filemoddate");@+break;
@@ -28860,8 +28877,10 @@ default to $0$. A length of $0$ expands to nothing (it is not an error).
 The file name is given as a |general text|.
 
 @<Generate all \Prote\ primitives@>=
+if (!pdf_on) {
 primitive("filedump", convert, file_dump_code);
 @!@:filedump\_}{\.{\\filedump} primitive@>
+}
 
 @ @<Cases of |convert| for |print_cmd_chr|@>=
 case file_dump_code: print_esc("filedump");@+break;
@@ -28926,8 +28945,10 @@ it takes values from external and put them as a token list in the
 stream.
 
 @<Generate all \Prote\ primitives@>=
+if (!pdf_on) {
 primitive("mdfivesum", convert, mdfive_sum_code);
 @!@:mdfivesum\_}{\.{\\mdfivesum} primitive@>
+}
 
 @ @<Cases of |convert| for |print_cmd_chr|@>=
 case mdfive_sum_code: print_esc("mdfivesum");@+break;
@@ -29218,8 +29239,10 @@ that is kept in the global integer |random_seed|.
 static int @!random_seed; /*seed for pseudo-random number generation*/
 
 @ @<Generate all \Prote\ primitives@>=
+if (!pdf_on) {
 primitive("randomseed", last_item, random_seed_code);@/
 @!@:randomseed\_}{\.{\\randomseed} primitive@>
+}
 
 @ @<Cases of |last_item| for |print_cmd_chr|@>=
 case random_seed_code: print_esc("randomseed");@+break;
@@ -29242,8 +29265,10 @@ a dedicated primitive is defined to take the new seed and call
 |init_randoms|.
 
 @<Generate all \Prote\ primitives@>=
+if (!pdf_on) {
 primitive("setrandomseed", convert, set_random_seed_code);@/
 @!@:setrandomseed\_}{\.{\\setrandomseed} primitive@>
+}
 
 @ @<Cases of |convert| for |print_cmd_chr|@>=
 case set_random_seed_code: print_esc("setrandomseed");@+break;
@@ -29318,8 +29343,10 @@ else return-y;
 @ This can be used by calling the following primitive.
 
 @<Generate all \Prote\ primitives@>=
+if (!pdf_on) {
 primitive("uniformdeviate", convert, uniform_deviate_code);@/
 @!@:uniformdeviate\_}{\.{\\uniformdeviate} primitive@>
+}
 
 @ @<Cases of |convert| for |print_cmd_chr|@>=
 case uniform_deviate_code: print_esc("uniformdeviate");@+break;
@@ -29402,8 +29429,10 @@ return x;
 @ This can be used by calling the following primitive.
 
 @<Generate all \Prote\ primitives@>=
+if (!pdf_on) {
 primitive("normaldeviate", convert, normal_deviate_code);@/
 @!@:normaldeviate\_}{\.{\\normaldeviate} primitive@>
+}
 
 @ @<Cases of |convert| for |print_cmd_chr|@>=
 case normal_deviate_code: print_esc("normaldeviate");
@@ -29448,10 +29477,12 @@ Hence the need, for these primitive, to define the paper size, with the
 initialized to $0$ by the generic \TeX\ code.
 
 @<Generate all \Prote\ primitives@>=
+if (!pdf_on) {
 primitive("pagewidth", assign_dimen, dimen_base+page_width_code);@/
 @!@:pagewidth\_}{\.{\\pagewidth} primitive@>
 primitive("pageheight", assign_dimen, dimen_base+page_height_code);@/
 @!@:pageheight\_}{\.{\\pageheight} primitive@>
+}
 
 @ When instructed to, the \.{h} and \.{v} last values are transformed,
 in the coordinates system defined above and saved in the global
@@ -29471,10 +29502,12 @@ last_saved_xpos=cur_h+DVI_std_x_offset;
 last_saved_ypos=page_height-(cur_v+DVI_std_y_offset);
 
 @ @<Generate all \Prote\ primitives@>=
+if (!pdf_on) {
 primitive("lastxpos", last_item, last_xpos_code);@/
 @!@:lastxpos\_}{\.{\\lastxpos} primitive@>
 primitive("lastypos", last_item, last_ypos_code);@/
 @!@:lastypos\_}{\.{\\lastypos} primitive@>
+}
 
 @ @<Cases of |last_item| for |print_cmd_chr|@>=
 case last_xpos_code: print_esc("lastxpos");@+break;
@@ -29502,8 +29535,10 @@ static int last_save_pos_number; /*identifying the order of the call*/
 last_save_pos_number=0; /*i.e. none*/
 
 @ @<Generate all \Prote\ primitives@>=
+if (!pdf_on) {
 primitive("savepos", extension, save_pos_code);@/
 @!@:savepos\_}{\.{\\savepos} primitive@>
+}
 
 @ @<Cases of |extension| for |print_cmd_chr|@>=
 case save_pos_code: print_esc("savepos");@+break;
@@ -30846,6 +30881,7 @@ we define two primitives for switching profiling on and off.
 
 @d profile_on_code (eTeX_last_extension_cmd_mod+3) /* `\.{\\profileon}' */
 @d profile_off_code (eTeX_last_extension_cmd_mod+4) /* `\.{\\profileoff}' */
+@d pdftex_first_extension_code profile_off_code+1
 
 @<Put each...@>=
 primitive("profileon", extension, profile_on_code);
@@ -31925,7 +31961,8 @@ This primitive uses the |last_item| command with a special modifier
 between \TeX's |badness_code| and \eTeX's |eTeX_int| codes.
 The |elapsed_time_code| and |random_seed_code| are already defined above
 but we duplicate them here for simplicity.
-So here is the pdf version as well as all of PDF\TeX's command codes for the |last_item| command:
+So here is the pdf version as well as all of PDF\TeX's command codes 
+for the |last_item| command:
 
 @d pdftex_version 140 /* \.{\\pdftexversion} */
 @d pdftex_revision "25" /* \.{\\pdftexrevision} */
@@ -32015,7 +32052,6 @@ static int
 @!pdf_retval,
 @!pdf_last_ximage_colordepth,
 @!pdf_last_link;
-static double pdf_reset_timer=0.0; /*time of the last reset in seconds*/
 
 
 @ And this is sufficient to finish the implementation of this first batch of primitives:
@@ -32031,7 +32067,7 @@ static double pdf_reset_timer=0.0; /*time of the last reset in seconds*/
   case pdf_retval_code: cur_val=pdf_retval;@+break;
   case pdf_last_ximage_colordepth_code: cur_val=pdf_last_ximage_colordepth;@+break;
   case pdf_elapsed_time_code: 
-  { double t=(start_sec*1.0+start_nsec/1000000000.0-pdf_reset_timer)*0x10000;
+  { double t=(start_sec*1.0+start_nsec/1000000000.0-reset_timer)*0x10000;
     if (t>=infinity) cur_val=infinity;
     else cur_val=(scaled)t;
     @+break;
@@ -32221,6 +32257,10 @@ primitive("pdfignoreddimen", assign_dimen, dimen_base+pdf_ignored_dimen_code);@/
 @!@:pdf\_ignored\_dimen\_}{\.{\\pdfignoreddimen} primitive@>
 primitive("pdfpxdimen", assign_dimen, dimen_base+pdf_px_dimen_code);@/
 @!@:pdf\_px\_dimen\_}{\.{\\pdfpxdimen} primitive@>
+primitive("ifpdfprimitive", if_test, if_primitive_code);
+@!@:if\_primitive\_}{\.{\\if} primitive@>
+
+
 }
 
 @ As before we add cases to the printing routines.
@@ -32305,37 +32345,39 @@ dimen_par(pdf_px_dimen_code)=65782; /* 1bp */
 @ The next class of primitives extend the |convert| comand.
 These codes go in between |Prote_last_convert_code| and |job_name_code|.
 
-@d pdftex_first_expand_code (Prote_last_convert_code+1) /*base for \pdfTeX's command codes*/
-@d pdftex_revision_code (pdftex_first_expand_code+0) /*command code for \.{\\pdftexrevision}*/
-@d pdftex_banner_code (pdftex_first_expand_code+1) /*command code for \.{\\pdftexbanner}*/
-@d pdf_font_name_code (pdftex_first_expand_code+2) /*command code for \.{\\pdffontname}*/
-@d pdf_font_objnum_code (pdftex_first_expand_code+3) /*command code for \.{\\pdffontobjnum}*/
-@d pdf_font_size_code (pdftex_first_expand_code+4) /*command code for \.{\\pdffontsize}*/
-@d pdf_page_ref_code (pdftex_first_expand_code+5) /*command code for \.{\\pdfpageref}*/
-@d pdf_xform_name_code (pdftex_first_expand_code+6) /*command code for \.{\\pdfxformname}*/
-@d pdf_escape_string_code (pdftex_first_expand_code+7) /*command code for \.{\\pdfescapestring}*/
-@d pdf_escape_name_code (pdftex_first_expand_code+8) /*command code for \.{\\pdfescapename}*/
-@d left_margin_kern_code (pdftex_first_expand_code+9) /*command code for \.{\\leftmarginkern}*/
-@d right_margin_kern_code (pdftex_first_expand_code+10) /*command code for \.{\\rightmarginkern}*/
-@d pdf_strcmp_code (pdftex_first_expand_code+11) /*command code for \.{\\pdfstrcmp}*/
-@d pdf_colorstack_init_code (pdftex_first_expand_code+12) /*command code for \.{\\pdfcolorstackinit}*/
-@d pdf_escape_hex_code (pdftex_first_expand_code+13) /*command code for \.{\\pdfescapehex}*/
-@d pdf_unescape_hex_code (pdftex_first_expand_code+14) /*command code for \.{\\pdfunescapehex}*/
-@d pdf_creation_date_code (pdftex_first_expand_code+15) /*command code for \.{\\pdfcreationdate}*/
-@d pdf_file_mod_date_code (pdftex_first_expand_code+16) /*command code for \.{\\pdffilemoddate}*/
-@d pdf_file_size_code (pdftex_first_expand_code+17) /*command code for \.{\\pdffilesize}*/
-@d pdf_mdfive_sum_code (pdftex_first_expand_code+18) /*command code for \.{\\pdfmdfivesum}*/
-@d pdf_file_dump_code (pdftex_first_expand_code+19) /*command code for \.{\\pdffiledump}*/
-@d pdf_match_code (pdftex_first_expand_code+20) /*command code for \.{\\pdfmatch}*/
-@d pdf_last_match_code (pdftex_first_expand_code+21) /*command code for \.{\\pdflastmatch}*/
-@d pdf_uniform_deviate_code (pdftex_first_expand_code+22) /*end of \pdfTeX's command codes*/
-@d pdf_normal_deviate_code (pdftex_first_expand_code+23) /*end of \pdfTeX's command codes*/
-@d pdf_insert_ht_code (pdftex_first_expand_code+24) /*command code for \.{\\pdfinsertht}*/
-@d pdf_ximage_bbox_code (pdftex_first_expand_code+25) /*command code for \.{\\pdfximagebbox}*/
-@d pdftex_convert_codes (pdftex_first_expand_code+26) /*end of \pdfTeX's command codes*/
+@d pdftex_first_convert_code (Prote_last_convert_code+1) /*base for \pdfTeX's command codes*/
+@d pdftex_revision_code (pdftex_first_convert_code+0) /*command code for \.{\\pdftexrevision}*/
+@d pdftex_banner_code (pdftex_first_convert_code+1) /*command code for \.{\\pdftexbanner}*/
+@d pdf_font_name_code (pdftex_first_convert_code+2) /*command code for \.{\\pdffontname}*/
+@d pdf_font_objnum_code (pdftex_first_convert_code+3) /*command code for \.{\\pdffontobjnum}*/
+@d pdf_font_size_code (pdftex_first_convert_code+4) /*command code for \.{\\pdffontsize}*/
+@d pdf_page_ref_code (pdftex_first_convert_code+5) /*command code for \.{\\pdfpageref}*/
+@d pdf_xform_name_code (pdftex_first_convert_code+6) /*command code for \.{\\pdfxformname}*/
+@d pdf_escape_string_code (pdftex_first_convert_code+7) /*command code for \.{\\pdfescapestring}*/
+@d pdf_escape_name_code (pdftex_first_convert_code+8) /*command code for \.{\\pdfescapename}*/
+@d left_margin_kern_code (pdftex_first_convert_code+9) /*command code for \.{\\leftmarginkern}*/
+@d right_margin_kern_code (pdftex_first_convert_code+10) /*command code for \.{\\rightmarginkern}*/
+@d pdf_strcmp_code (pdftex_first_convert_code+11) /*command code for \.{\\pdfstrcmp}*/
+@d pdf_colorstack_init_code (pdftex_first_convert_code+12) /*command code for \.{\\pdfcolorstackinit}*/
+@d pdf_escape_hex_code (pdftex_first_convert_code+13) /*command code for \.{\\pdfescapehex}*/
+@d pdf_unescape_hex_code (pdftex_first_convert_code+14) /*command code for \.{\\pdfunescapehex}*/
+@d pdf_creation_date_code (pdftex_first_convert_code+15) /*command code for \.{\\pdfcreationdate}*/
+@d pdf_file_mod_date_code (pdftex_first_convert_code+16) /*command code for \.{\\pdffilemoddate}*/
+@d pdf_file_size_code (pdftex_first_convert_code+17) /*command code for \.{\\pdffilesize}*/
+@d pdf_mdfive_sum_code (pdftex_first_convert_code+18) /*command code for \.{\\pdfmdfivesum}*/
+@d pdf_file_dump_code (pdftex_first_convert_code+19) /*command code for \.{\\pdffiledump}*/
+@d pdf_match_code (pdftex_first_convert_code+20) /*command code for \.{\\pdfmatch}*/
+@d pdf_last_match_code (pdftex_first_convert_code+21) /*command code for \.{\\pdflastmatch}*/
+@d pdf_uniform_deviate_code (pdftex_first_convert_code+22) /*end of \pdfTeX's command codes*/
+@d pdf_normal_deviate_code (pdftex_first_convert_code+23) /*end of \pdfTeX's command codes*/
+@d pdf_insert_ht_code (pdftex_first_convert_code+24) /*command code for \.{\\pdfinsertht}*/
+@d pdf_ximage_bbox_code (pdftex_first_convert_code+25) /*command code for \.{\\pdfximagebbox}*/
+@d pdftex_convert_codes (pdftex_first_convert_code+26) /*end of \pdfTeX's command codes*/
 
 
 @<Put each...@>=
+if (pdf_on)
+{
 primitive("pdftexrevision", convert, pdftex_revision_code);@/
 @!@:pdftex\_revision\_}{\.{\\pdftexrevision} primitive@>
 primitive("pdftexbanner", convert, pdftex_banner_code);@/
@@ -32384,6 +32426,7 @@ primitive("pdfuniformdeviate", convert, uniform_deviate_code);@/
 @!@:uniform\_deviate\_}{\.{\\pdfuniformdeviate} primitive@>
 primitive("pdfnormaldeviate", convert, normal_deviate_code);@/
 @!@:normal\_deviate\_}{\.{\\pdfnormaldeviate} primitive@>
+}
 
 @ The usual code for printing:
 
@@ -32417,6 +32460,8 @@ primitive("pdfnormaldeviate", convert, normal_deviate_code);@/
 
 @ The following code is taken from pdftex. At this point, I should drop
 some of the primitives that I do not want to implement.
+To skip general text we use the following macro
+
 
 @<Cases of `Scan the argument for command |c|'@>=
 case pdftex_revision_code: do_nothing;@+break;
@@ -32458,10 +32503,8 @@ case pdf_file_dump_code:  @<Scan the argument for |file_dump_code|@>@;@+break;
 case pdf_match_code:
   scan_keyword("icase");
   if (scan_keyword("subcount")) scan_int();
-  scan_general_x_text(); /*the simplified version*/
-  flush_list(link(garbage));
-  scan_general_x_text(); /*the simplified version*/
-  flush_list(link(garbage));
+  scan_pdf_ext_toks(); /*the simplified version*/  
+  scan_pdf_ext_toks(); /*the simplified version*/
   break;
 case pdf_last_match_code:
   {@+pointer p,q;
@@ -32481,8 +32524,7 @@ case pdf_colorstack_init_code:
     scan_keyword("page");
     if (!scan_keyword("direct"))
       scan_keyword("page");
-    scan_general_x_text(); /*the simplified version*/
-    flush_list(link(garbage));
+    scan_pdf_ext_toks(); /*the simplified version*/
     cur_val=0;
   } @+break;
 case pdf_uniform_deviate_code: scan_int();cur_val=unif_rand(cur_val);@+break;
@@ -32493,8 +32535,22 @@ case pdf_ximage_bbox_code: {@+
     scan_int();
 }@+break;
 
-@ The second part of handling conversion commands is the printingof the result.
 
+@ This is the ``dummy'' |scan_pdf_ext_toks| routine we used above
+and a variation of it which we need later.
+
+@<Declare procedures needed in |do_ext...@>=
+static void scan_pdf_ext_toks(void)
+{ scan_toks(false,true);  /*like \.{\\special}*/
+  flush_list(def_ref);
+}
+static void scan_pdf_ext_late_toks(void)
+{ scan_toks(false, false); /*like \.{\\special}, but doesn't expand*/
+  flush_list(def_ref);
+}
+
+
+@ The second part of handling conversion commands is the printing of the result.
 
 @<Cases of `Print the result of command |c|'@>=
 case pdftex_revision_code: print(pdftex_revision);@+break;
@@ -32504,11 +32560,23 @@ case pdf_font_size_code:
     print_scaled(font_size[cur_val]);
     print("pt");@+break;
 case pdf_page_ref_code: print_int(1);@+break;
+case pdf_xform_name_code: print_int(cur_val);@+break;
+case pdf_escape_string_code:
+case pdf_escape_name_code:
 case left_margin_kern_code:  print("0pt");@+break;
 case right_margin_kern_code:  print("0pt");@+break;
-case pdf_xform_name_code: print_int(cur_val);@+break;
-case pdf_strcmp_code: print_int(0);@+break;
+case pdf_strcmp_code: print_int(cur_val);@+break;
 case pdf_colorstack_init_code: print_int(cur_val);@+break;
+case pdf_escape_hex_code:
+case pdf_unescape_hex_code:
+case pdf_creation_date_code: for (k=0; time_str[k]!='\0'; k++)
+   print_char(time_str[k]);@+break;
+case pdf_file_mod_date_code:
+case pdf_file_size_code: if (cur_val!=-1) print_int(cur_val);@+break;
+case pdf_mdfive_sum_code:
+case pdf_file_dump_code:
+case pdf_match_code:
+case pdf_last_match_code:
 case pdf_uniform_deviate_code: print_int(cur_val);@+break;
 case pdf_normal_deviate_code: print_int(cur_val);@+break;
 case pdf_insert_ht_code: print("10pt");@+break;
@@ -32533,12 +32601,617 @@ static void pdf_error(char *t, char *p)
 }
 
 
+@ The last command we need to consider is the |extension| command.
+
+@d pdf_literal_node (pdftex_first_extension_code+0)
+@d      pdf_lateliteral_node (pdftex_first_extension_code+1) /*Not needed*/
+@d pdf_obj_code (pdftex_first_extension_code+2)
+@d pdf_refobj_node (pdftex_first_extension_code+3)
+@d pdf_xform_code (pdftex_first_extension_code+4)
+@d pdf_refxform_node (pdftex_first_extension_code+5)
+@d pdf_ximage_code (pdftex_first_extension_code+6)
+@d pdf_refximage_node (pdftex_first_extension_code+7)
+@d pdf_annot_node (pdftex_first_extension_code+8)
+@d pdf_start_link_node (pdftex_first_extension_code+9)
+@d pdf_end_link_node (pdftex_first_extension_code+10)
+@d pdf_outline_code (pdftex_first_extension_code+11)
+@d pdf_dest_node (pdftex_first_extension_code+12)
+@d pdf_thread_node (pdftex_first_extension_code+13)
+@d pdf_start_thread_node (pdftex_first_extension_code+14)
+@d pdf_end_thread_node (pdftex_first_extension_code+15)
+@d pdf_save_pos_node (pdftex_first_extension_code+16)
+
+@d pdf_info_code (pdftex_first_extension_code+17)
+@d pdf_catalog_code (pdftex_first_extension_code+18)
+@d pdf_names_code (pdftex_first_extension_code+19)
+
+@d pdf_font_attr_code (pdftex_first_extension_code+20)
+@d pdf_include_chars_code (pdftex_first_extension_code+21)
+@d pdf_map_file_code (pdftex_first_extension_code+22)
+@d pdf_map_line_code (pdftex_first_extension_code+23)
+@d pdf_trailer_code (pdftex_first_extension_code+24)
+@d pdf_trailer_id_code (pdftex_first_extension_code+25)
+@d pdf_reset_timer_code (pdftex_first_extension_code+26)
+
+@d pdf_font_expand_code (pdftex_first_extension_code+27)
+@d pdf_set_random_seed_code (pdftex_first_extension_code+28)
+
+@d pdf_snap_ref_point_node (pdftex_first_extension_code+29)
+@d pdf_snapy_node (pdftex_first_extension_code+30)
+@d pdf_snapy_comp_node (pdftex_first_extension_code+31)
+@d pdf_glyph_to_unicode_code (pdftex_first_extension_code+32)
+@d pdf_colorstack_node (pdftex_first_extension_code+33)
+@d pdf_setmatrix_node (pdftex_first_extension_code+34)
+@d pdf_save_node (pdftex_first_extension_code+35)
+@d pdf_restore_node (pdftex_first_extension_code+36)
+@d pdf_nobuiltin_tounicode_code (pdftex_first_extension_code+37)
+@d pdf_interword_space_on_node (pdftex_first_extension_code+38)
+@d pdf_interword_space_off_node (pdftex_first_extension_code+39)
+@d pdf_fake_space_node (pdftex_first_extension_code+40)
+@d pdf_running_link_off_node (pdftex_first_extension_code+41)
+@d pdf_running_link_on_node (pdftex_first_extension_code+42)
+@d pdf_space_font_code (pdftex_first_extension_code+43)
+@#
+@d tracing_stack_level_code (pdftex_first_extension_code+44)
+@d pdf_par_token_context_code (pdftex_first_extension_code+45)
+@d pdf_par_token_name_code (pdftex_first_extension_code+46)
+@d pdf_show_stream_code (pdftex_first_extension_code+47)
+@#
+@d pdftex_last_extension_code (pdftex_first_extension_code+47)
+
+@<Put each...@>=
+if (pdf_on)
+{
+primitive("pdfliteral", extension, pdf_literal_node);@/
+@!@:pdf\_literal\_}{\.{\\pdfliteral} primitive@>
+primitive("pdfobj", extension, pdf_obj_code);@/
+@!@:pdf\_obj\_}{\.{\\pdfobj} primitive@>
+primitive("pdfrefobj", extension, pdf_refobj_node);@/
+@!@:pdf\_refobj\_}{\.{\\pdfrefobj} primitive@>
+primitive("pdfxform", extension, pdf_xform_code);@/
+@!@:pdf\_xform\_}{\.{\\pdfxform} primitive@>
+primitive("pdfrefxform", extension, pdf_refxform_node);@/
+@!@:pdf\_refxform\_}{\.{\\pdfrefxform} primitive@>
+primitive("pdfximage", extension, pdf_ximage_code);@/
+@!@:pdf\_ximage\_}{\.{\\pdfximage} primitive@>
+primitive("pdfrefximage", extension, pdf_refximage_node);@/
+@!@:pdf\_refximage\_}{\.{\\pdfrefximage} primitive@>
+primitive("pdfannot", extension, pdf_annot_node);@/
+@!@:pdf\_annot\_}{\.{\\pdfannot} primitive@>
+primitive("pdfstartlink", extension, pdf_start_link_node);@/
+@!@:pdf\_start\_link\_}{\.{\\pdfstartlink} primitive@>
+primitive("pdfendlink", extension, pdf_end_link_node);@/
+@!@:pdf\_end\_link\_}{\.{\\pdfendlink} primitive@>
+primitive("pdfoutline", extension, pdf_outline_code);@/
+@!@:pdf\_outline\_}{\.{\\pdfoutline} primitive@>
+primitive("pdfdest", extension, pdf_dest_node);@/
+@!@:pdf\_dest\_}{\.{\\pdfdest} primitive@>
+primitive("pdfthread", extension, pdf_thread_node);@/
+@!@:pdf\_thread\_}{\.{\\pdfthread} primitive@>
+primitive("pdfstartthread", extension, pdf_start_thread_node);@/
+@!@:pdf\_start\_thread\_}{\.{\\pdfstartthread} primitive@>
+primitive("pdfendthread", extension, pdf_end_thread_node);@/
+@!@:pdf\_end\_thread\_}{\.{\\pdfendthread} primitive@>
+primitive("pdfsavepos", extension, pdf_save_pos_node);@/
+@!@:pdf\_save\_pos\_}{\.{\\pdfsavepos} primitive@>
+
+primitive("pdfinfo", extension, pdf_info_code);@/
+@!@:pdf\_info\_}{\.{\\pdfinfo} primitive@>
+primitive("pdfcatalog", extension, pdf_catalog_code);@/
+@!@:pdf\_catalog\_}{\.{\\pdfcatalog} primitive@>
+primitive("pdfnames", extension, pdf_names_code);@/
+@!@:pdf\_names\_}{\.{\\pdfnames} primitive@>
+
+primitive("pdffontattr", extension, pdf_font_attr_code);@/
+@!@:pdf\_font\_attr\_}{\.{\\pdffontattr} primitive@>
+primitive("pdfincludechars", extension, pdf_include_chars_code);@/
+@!@:pdf\_include\_chars\_}{\.{\\pdfincludechars} primitive@>
+primitive("pdfmapfile", extension, pdf_map_file_code);@/
+@!@:pdf\_map\_file\_}{\.{\\pdfmapfile} primitive@>
+primitive("pdfmapline", extension, pdf_map_line_code);@/
+@!@:pdf\_map\_line\_}{\.{\\pdfmapline} primitive@>
+primitive("pdftrailer", extension, pdf_trailer_code);@/
+@!@:pdf\_trailer\_}{\.{\\pdftrailer} primitive@>
+primitive("pdftrailerid", extension, pdf_trailer_id_code);@/
+@!@:pdf\_trailer\_id\_}{\.{\\pdftrailerid} primitive@>
+primitive("pdfresettimer", extension, pdf_reset_timer_code);@/
+@!@:reset\_timer\_}{\.{\\pdfresettimer} primitive@>
+
+primitive("pdffontexpand", extension, pdf_font_expand_code);@/
+@!@:pdf\_font\_expand\_}{\.{\\pdffontexpand} primitive@>
+primitive("pdfsetrandomseed", extension, pdf_set_random_seed_code);@/
+@!@:set\_random\_seed\_code}{\.{\\pdfsetrandomseed} primitive@>
+
+primitive("pdfsnaprefpoint", extension, pdf_snap_ref_point_node);@/
+@!@:pdf\_snap\_ref\_point\_}{\.{\\pdfsnaprefpoint} primitive@>
+primitive("pdfsnapy", extension, pdf_snapy_node);@/
+@!@:pdf\_snapy\_}{\.{\\pdfsnapy} primitive@>
+primitive("pdfsnapycomp", extension, pdf_snapy_comp_node);@/
+@!@:pdf\_snapy\_comp\_}{\.{\\pdfsnapycomp} primitive@>
+primitive("pdfglyphtounicode", extension, pdf_glyph_to_unicode_code);@/
+@!@:pdf\_glyph\_to\_unicode\_}{\.{\\pdfglyphtounicode} primitive@>
+primitive("pdfcolorstack", extension, pdf_colorstack_node);@/
+@!@:pdf\_colorstack\_}{\.{\\pdfcolorstack} primitive@>
+primitive("pdfsetmatrix", extension, pdf_setmatrix_node);@/
+@!@:pdf\_setmatrix\_}{\.{\\pdfsetmatrix} primitive@>
+primitive("pdfsave", extension, pdf_save_node);@/
+@!@:pdf\_save\_}{\.{\\pdfsave} primitive@>
+primitive("pdfrestore", extension, pdf_restore_node);@/
+@!@:pdf\_restore\_}{\.{\\pdfrestore} primitive@>
+primitive("pdfnobuiltintounicode", extension, pdf_nobuiltin_tounicode_code);@/
+@!@:pdf\_nobuiltin\_tounicode\_}{\.{\\pdfnobuiltintounicode} primitive@>
+primitive("pdfinterwordspaceon", extension, pdf_interword_space_on_node);@/
+@!@:pdf\_interword\_space\_on\_}{\.{\\pdfinterwordspaceon} primitive@>
+primitive("pdfinterwordspaceoff", extension, pdf_interword_space_off_node);@/
+@!@:pdf\_interword\_space\_off\_}{\.{\\pdfinterwordspaceoff} primitive@>
+primitive("pdffakespace", extension, pdf_fake_space_node);@/
+@!@:pdf\_fake\_space\_}{\.{\\pdffakespace} primitive@>
+primitive("pdfrunninglinkoff", extension, pdf_running_link_off_node);@/
+@!@:pdf\_running\_link\_off\_}{\.{\\pdfrunninglinkoff} primitive@>
+primitive("pdfrunninglinkon", extension, pdf_running_link_on_node);@/
+@!@:pdf\_running\_link\_on\_}{\.{\\pdfrunninglinkon} primitive@>
+primitive("pdfspacefont", extension, pdf_space_font_code);@/
+@!@:pdf\_space\_font\_}{\.{\\pdfspacefont} primitive@>
+@#
+primitive("tracingstacklevels", extension, tracing_stack_level_code);@/
+@!@:tracingstacklevels\_}{\.{\\tracingstacklevels} primitive@>
+primitive("partokencontext", extension, pdf_par_token_context_code);@/
+@!@:\partokencontext}{\.{\\partokencontext} primitive@>
+primitive("partokenname", extension, pdf_par_token_name_code);@/
+@!@:partokenname\_}{\.{\\partokenname} primitive@>
+primitive("showstream", extension, pdf_show_stream_code);@/
+@!@:showstream\_}{\.{\\showstream} primitive@>
+}
+
+@ After having defined the primitives, we arange for printing them.
+
+@<Cases of |extension| for |print_cmd_chr|@>=
+  case pdf_annot_node: print_esc("pdfannot");@+break;
+  case pdf_catalog_code: print_esc("pdfcatalog");@+break;
+  case pdf_dest_node: print_esc("pdfdest");@+break;
+  case pdf_end_link_node: print_esc("pdfendlink");@+break;
+  case pdf_end_thread_node: print_esc("pdfendthread");@+break;
+  case pdf_font_attr_code: print_esc("pdffontattr");@+break;
+  case pdf_font_expand_code: print_esc("pdffontexpand");@+break;
+  case pdf_include_chars_code: print_esc("pdfincludechars");@+break;
+  case pdf_info_code: print_esc("pdfinfo");@+break;
+  case pdf_literal_node: print_esc("pdfliteral");@+break;
+  case pdf_colorstack_node: print_esc("pdfcolorstack");@+break;
+  case pdf_setmatrix_node: print_esc("pdfsetmatrix");@+break;
+  case pdf_save_node: print_esc("pdfsave");@+break;
+  case pdf_restore_node: print_esc("pdfrestore");@+break;
+  case pdf_map_file_code: print_esc("pdfmapfile");@+break;
+  case pdf_map_line_code: print_esc("pdfmapline");@+break;
+  case pdf_names_code: print_esc("pdfnames");@+break;
+  case pdf_obj_code: print_esc("pdfobj");@+break;
+  case pdf_outline_code: print_esc("pdfoutline");@+break;
+  case pdf_refobj_node: print_esc("pdfrefobj");@+break;
+  case pdf_refxform_node: print_esc("pdfrefxform");@+break;
+  case pdf_refximage_node: print_esc("pdfrefximage");@+break;
+  case pdf_save_pos_node: print_esc("pdfsavepos");@+break;
+  case pdf_snap_ref_point_node: print_esc("pdfsnaprefpoint");@+break;
+  case pdf_snapy_comp_node: print_esc("pdfsnapycomp");@+break;
+  case pdf_snapy_node: print_esc("pdfsnapy");@+break;
+  case pdf_start_link_node: print_esc("pdfstartlink");@+break;
+  case pdf_start_thread_node: print_esc("pdfstartthread");@+break;
+  case pdf_thread_node: print_esc("pdfthread");@+break;
+  case pdf_trailer_code: print_esc("pdftrailer");@+break;
+  case pdf_trailer_id_code: print_esc("pdftrailerid");@+break;
+  case pdf_xform_code: print_esc("pdfxform");@+break;
+  case pdf_ximage_code: print_esc("pdfximage");@+break;
+  case pdf_reset_timer_code: print_esc("pdfresettimer");@+break;
+  case pdf_set_random_seed_code: print_esc("pdfsetrandomseed");@+break;
+  case pdf_nobuiltin_tounicode_code: print_esc("pdfnobuiltintounicode");@+break;
+  case pdf_glyph_to_unicode_code: print_esc("pdfglyphtounicode");@+break;
+  case pdf_interword_space_on_node: print_esc("pdfinterwordspaceon");@+break;
+  case pdf_interword_space_off_node: print_esc("pdfinterwordspaceoff");@+break;
+  case pdf_fake_space_node: print_esc("pdffakespace");@+break;
+  case pdf_running_link_off_node: print_esc("pdfrunninglinkoff");@+break;
+  case pdf_running_link_on_node: print_esc("pdfrunninglinkon");@+break;
+  case pdf_space_font_code: print_esc("pdfspacefont");@+break;
+  case tracing_stack_level_code: print_esc("tracingstacklevels");@+break;
+  case pdf_par_token_context_code: print_esc("partokencontext");@+break;
+  case pdf_par_token_name_code: print_esc("partokenname");@+break;
+  case pdf_show_stream_code: print_esc("showstream");@+break;
+
+
+@ And last not least we have to implement the primitives.
+
+@<Cases for |do_extension|@>=
+  case pdf_annot_node: @<Implement \.{\\pdfannot}@>@;@+break;
+  case pdf_catalog_code: @<Implement \.{\\pdfcatalog}@>@;@+break;
+  case pdf_dest_node: @<Implement \.{\\pdfdest}@>@;@+break;
+  case pdf_end_link_node: @+break;
+  case pdf_end_thread_node: @+break;
+  case pdf_font_attr_code: @<Implement \.{\\pdffontattr}@>@;@+break;
+  case pdf_font_expand_code: read_expand_font();@+break;
+  case pdf_include_chars_code: pdf_include_chars();@+break;
+  case pdf_info_code: scan_pdf_ext_toks();@+break;
+  case pdf_literal_node: @<Implement \.{\\pdfliteral}@>@;@+break;
+  case pdf_colorstack_node: @<Implement \.{\\pdfcolorstack}@>@;@+break;
+  case pdf_setmatrix_node:    scan_pdf_ext_toks();@+break;
+  case pdf_save_node: @+break;
+  case pdf_restore_node: @+break;
+  case pdf_map_file_code: scan_pdf_ext_toks();@+break;
+  case pdf_map_line_code: scan_pdf_ext_toks();@+break;
+  case pdf_names_code: scan_pdf_ext_toks();@+break;
+  case pdf_obj_code: @<Implement \.{\\pdfobj}@>@;@+break;
+  case pdf_outline_code: @<Implement \.{\\pdfoutline}@>@;@+break;
+  case pdf_refobj_node:  scan_int();@+break;
+  case pdf_refxform_node: scan_int();@+break;
+  case pdf_refximage_node:  scan_int();@+break;
+  case pdf_save_pos_node: @+break;
+  case pdf_snap_ref_point_node: @+break;
+  case pdf_snapy_comp_node:  scan_int();@+break;
+  case pdf_snapy_node: @+break;
+  case pdf_start_link_node: scan_action();@+break;
+  case pdf_start_thread_node: scan_thread_id();@+break;
+  case pdf_thread_node:  scan_thread_id();@+break;
+  case pdf_trailer_code: scan_pdf_ext_toks();@+break;
+  case pdf_trailer_id_code: scan_pdf_ext_toks();@+break;
+  case pdf_xform_code: @<Implement \.{\\pdfxform}@>@;@+break;
+  case pdf_ximage_code:   scan_image(); @+break;
+  case pdf_reset_timer_code: 
+     reset_timer=start_sec*1.0+start_nsec/1000000000.0;@+break;
+  case pdf_set_random_seed_code: 
+  {@+scan_int();random_seed=cur_val;
+    init_randoms();
+  } @+break;
+  case pdf_glyph_to_unicode_code: scan_pdf_ext_toks();scan_pdf_ext_toks();@+break;
+  case pdf_nobuiltin_tounicode_code: scan_font_ident();@+break;
+  case pdf_interword_space_on_node: @+break;
+  case pdf_interword_space_off_node: @+break;
+  case pdf_fake_space_node: @+break;
+  case pdf_running_link_off_node: @+break;
+  case pdf_running_link_on_node: @+break;
+  case pdf_space_font_code: scan_pdf_ext_toks(); @+break;
+  case tracing_stack_level_code: scan_int();@+break;
+  case pdf_par_token_context_code: scan_optional_equals();scan_int();@+break; 
+  case pdf_par_token_name_code: scan_optional_equals();get_token();@+break;
+  case pdf_show_stream_code: scan_optional_equals();scan_int();@+break; 
+
+
+@ @<Implement \.{\\pdfannot}@>=
+{@+ if (scan_keyword("reserveobjnum")) {@+@<Scan an optional space@>;}
+    else{@+if (scan_keyword("useobjnum")) {@+scan_int();}
+      scan_pdf_ext_toks();
+    }
+}
+
+@ @<Implement \.{\\pdfcatalog}@>=
+{@+ scan_pdf_ext_toks();
+    if (scan_keyword("openaction")) scan_action();
+}
+
+@ The |scan_action| routine is used not only here 
+but also for links and outlines.
+
+
+@d pdf_action_page 0 /*GoTo action*/
+@d pdf_action_goto 1 /*GoTo action*/
+@d pdf_action_thread 2 /*Thread action*/
+@d pdf_action_user 3 /*user-defined action*/
+
+@<Declare procedures needed in |do_ext...@>=
+static void scan_action(void) /*read an action specification*/
+{@+int pdf_action;
+   int pdf_action_file=0;
+   int pdf_action_new_window=0;
+    if (scan_keyword("user"))
+        pdf_action=pdf_action_user;
+    else if (scan_keyword("goto"))
+        pdf_action=pdf_action_goto;
+    else if (scan_keyword("thread"))
+        pdf_action=pdf_action_thread;
+    else
+        pdf_error("ext1","action type missing");
+    if (pdf_action==pdf_action_user) {@+
+       scan_pdf_ext_toks(); 
+       return;     }
+    if (scan_keyword("file")) {@+
+     scan_pdf_ext_toks(); 
+     pdf_action_file=1;
+    }
+    if (scan_keyword("struct")) {@+
+        if (pdf_action!=pdf_action_goto)
+            pdf_error("ext1","only GoTo action can be used with `struct'");
+        if (pdf_action_file!=0) {@+
+            scan_pdf_ext_toks();
+        }
+        else if (scan_keyword("name")) {@+
+            scan_pdf_ext_toks();
+        }
+        else if (scan_keyword("num")) {@+
+            scan_int();
+            if (cur_val <= 0)
+                pdf_error("ext1","num identifier must be positive");
+        }
+        else
+            pdf_error("ext1","identifier type missing");
+    }
+    if (scan_keyword("page")) {@+
+        if (pdf_action!=pdf_action_goto)
+            pdf_error("ext1","only GoTo action can be used with `page'");
+        pdf_action=pdf_action_page;
+        scan_int();
+        if (cur_val <= 0)
+            pdf_error("ext1","page number must be positive");
+         scan_pdf_ext_toks();
+    }
+    else if (scan_keyword("name")) {@+
+        scan_pdf_ext_toks();
+    }
+    else if (scan_keyword("num")) {@+
+        if ((pdf_action==pdf_action_goto)&&
+            (pdf_action_file!=0))
+            pdf_error("ext1",
+                "`goto' option cannot be used with both `file' and `num'");
+        scan_int();
+        if (cur_val <= 0)
+            pdf_error("ext1","num identifier must be positive");
+    }
+    else
+        pdf_error("ext1","identifier type missing");
+    if (scan_keyword("newwindow")) {@+
+        pdf_action_new_window=1;
+        @<Scan an optional space@>;}
+    else if (scan_keyword("nonewwindow")) {@+
+        pdf_action_new_window=2;
+        @<Scan an optional space@>;}
+    else
+        pdf_action_new_window=0;
+    if ((pdf_action_new_window > 0)&&
+        (((pdf_action!=pdf_action_goto)&&
+          (pdf_action!=pdf_action_page))||
+         (pdf_action_file==0)))
+            pdf_error("ext1",
+                "`newwindow'/`nonewwindow' must be used with `goto' and `file' option");
+}
+
+@ Next we scan a destination.
+
+@d pdf_dest_xyz 0
+@d pdf_dest_fit 1
+@d pdf_dest_fith 2
+@d pdf_dest_fitv 3
+@d pdf_dest_fitb 4
+@d pdf_dest_fitbh 5
+@d pdf_dest_fitbv 6
+@d pdf_dest_fitr 7
+
+@<Implement \.{\\pdfdest}@>=
+{@+ int pdf_dest_type;
+    if (scan_keyword("struct")) {@+
+        scan_int();
+        if (cur_val <= 0)
+            pdf_error("ext1","struct identifier must be positive");
+    } 
+    if (scan_keyword("num")) {@+
+        scan_int();
+        if (cur_val <= 0)
+            pdf_error("ext1","num identifier must be positive");
+        if (cur_val > max_halfword)
+            pdf_error("ext1","number too big");
+    }
+    else if (scan_keyword("name")) {@+
+        scan_pdf_ext_toks();
+    }
+    else
+        pdf_error("ext1","identifier type missing");
+    if (scan_keyword("xyz")) {@+
+        pdf_dest_type=pdf_dest_xyz;
+        if (scan_keyword("zoom")) {@+
+            scan_int();
+            if (cur_val > max_halfword)
+                pdf_error("ext1","number too big");
+        }
+    }
+    else if (scan_keyword("fitbh"))
+        pdf_dest_type=pdf_dest_fitbh;
+    else if (scan_keyword("fitbv"))
+        pdf_dest_type=pdf_dest_fitbv;
+    else if (scan_keyword("fitb"))
+        pdf_dest_type=pdf_dest_fitb;
+    else if (scan_keyword("fith"))
+        pdf_dest_type=pdf_dest_fith;
+    else if (scan_keyword("fitv"))
+        pdf_dest_type=pdf_dest_fitv;
+    else if (scan_keyword("fitr"))
+        pdf_dest_type=pdf_dest_fitr;
+    else if (scan_keyword("fit"))
+        pdf_dest_type=pdf_dest_fit;
+    else
+        pdf_error("ext1","destination type missing");
+    @<Scan an optional space@>;
+    if (pdf_dest_type==pdf_dest_fitr) {@+
+        scan_alt_rule(); /*scans | < rule spec > | to |alt_rule|*/
+    }
+}
+
+
+
+@ @<Declare procedures needed in |do_ext...@>=
+static void scan_alt_rule(void) /*scans rule spec to |alt_rule|*/
+{@+
+reswitch:
+    if (scan_keyword("width")) {@+
+        scan_normal_dimen;
+         goto reswitch;
+    }
+    if (scan_keyword("height")) {@+
+        scan_normal_dimen;
+         goto reswitch;
+    }
+    if (scan_keyword("depth")) {@+
+        scan_normal_dimen;
+         goto reswitch;
+    }
+}
+
+
+
+@ @<Implement \.{\\pdffontattr}@>=
+{@+
+    scan_font_ident();
+    if (cur_val==null_font)
+        pdf_error("font","invalid font identifier");
+    scan_pdf_ext_toks();
+}
+
+@ To implement \.{\\pdffontexpand} we need the following routine:
+
+@<Declare procedures needed in |do_ext...@>=
+static void read_expand_font(void) /*read font expansion spec*/
+{@+int shrink_limit, stretch_limit, font_step;
+    internal_font_number f;
+
+     /*read font expansion parameters*/
+    scan_font_ident();
+    f=cur_val;
+    if (f==null_font)
+        pdf_error("font expansion","invalid font identifier");
+    scan_optional_equals();
+    scan_int();
+    scan_int();
+    scan_int();
+    if (scan_keyword("autoexpand")) {@+
+        @<Scan an optional space@>;
+    }
+}
+
+@ Do implement \.{\\pdfincludechars} we need the next function.
+@<Declare procedures needed in |do_ext...@>=
+static void pdf_include_chars(void)
+{@+str_number s;
+    pool_pointer k; /*running indices*/
+    internal_font_number f;
+
+    scan_font_ident();
+    f=cur_val;
+    if (f==null_font)
+        pdf_error("font","invalid font identifier");
+    scan_pdf_ext_toks();
+}
+
+@ @<Implement \.{\\pdfliteral}@>=
+{@+ int k;
+    if (scan_keyword("shipout")) k=pdf_lateliteral_node;
+    else k=pdf_literal_node;
+    if (scan_keyword("direct")) do_nothing;
+    else if (scan_keyword("page")) do_nothing;
+    else do_nothing;
+    if (k==pdf_literal_node) scan_pdf_ext_toks();
+    else scan_pdf_ext_late_toks();
+}
+
+@ 
+
+@d colorstack_set 0
+@d colorstack_push 1
+@d colorstack_data 1 /* last value where data field is set */
+@d colorstack_pop 2
+@d colorstack_current 3
+
+@<Implement \.{\\pdfcolorstack}@>=
+{@+int i;
+    scan_int();
+    if (scan_keyword("set")) {@+
+        i=colorstack_set;
+    }
+    else if (scan_keyword("push")) {@+
+        i=colorstack_push;
+    }
+    else if (scan_keyword("pop")) {@+
+        i=colorstack_pop;
+    }
+    else if (scan_keyword("current")) {@+
+        i=colorstack_current;
+    }
+    else{@+
+        i=-1; /*error*/
+    }
+    if (i >= 0) {@+
+        if (i <= colorstack_data) {@+
+            scan_pdf_ext_toks();
+        }
+    }
+}
+
+@ @<Implement \.{\\pdfobj}@>=
+{@+
+     if (scan_keyword("reserveobjnum")) {@+
+        @<Scan an optional space@>;
+     }
+    else{@+
+        if (scan_keyword("useobjnum")) scan_int();
+        if (scan_keyword("stream")) {@+
+            if (scan_keyword("attr")) scan_pdf_ext_toks();
+        }
+        if (scan_keyword("file")) do_nothing;
+        scan_pdf_ext_toks();
+    }
+}
+
+@ @<Implement \.{\\pdfoutline}@>=
+{@+
+    if (scan_keyword("attr")) scan_pdf_ext_toks();
+    scan_action();
+    if (scan_keyword("count")) scan_int();
+    scan_pdf_ext_toks();
+}
+
+@ @<Implement \.{\\pdfxform}@>=
+{@+
+    if (scan_keyword("attr")) scan_pdf_ext_toks();
+    if (scan_keyword("resources")) scan_pdf_ext_toks();
+    scan_register_num();
+}
+
+@ The next procedure us neede for \.{\\pdfthread} and \.{\\pdfstartthread}
+
+@<Declare procedures needed in |do_ext...@>=
+static void scan_thread_id(void)
+{@+if (scan_keyword("num")) scan_int();
+    else if (scan_keyword("name")) scan_pdf_ext_toks();
+}
+
+@ The next functions are used to implement \.{\\pdfximage}.
+@<Declare procedures needed in |do_ext...@>=
+static void scan_pdf_box_spec(void) /*scans PDF pagebox specification*/
+{@+
+    if (scan_keyword("mediabox")) return;
+    else if (scan_keyword("cropbox")) return;
+    else if (scan_keyword("bleedbox")) return;
+    else if (scan_keyword("trimbox")) return;
+    else if (scan_keyword("artbox")) return;
+}
+
+static void scan_image(void)
+{@+ scan_alt_rule();
+    if (scan_keyword("attr")) scan_pdf_ext_toks();
+    if (scan_keyword("named")) scan_pdf_ext_toks();
+    else if (scan_keyword("page")) scan_int();
+    if (scan_keyword("colorspace")) scan_int();
+    scan_pdf_box_spec();
+    scan_pdf_ext_toks();
+}
+
+@ There are only a few primitives left. The first is \.{\\pdfprimitive}.
+It is already implemented as a \Prote\ primitive, and we just need to
+enter it in the hashtable with the proper name.
+
+@<Put each...@>=
+if (pdf_on)
+{primitive("pdfprimitive", expand_after, primitive_code);@/
+@!@:pdfprimitive\_}{\.{\\pdfprimitive} primitive@>
+text(frozen_primitive)=text(cur_val);eqtb[frozen_primitive]=eqtb[cur_val];
+}
+
+
+
 @  Look at these!
 %  pdfcopyfont, pdf_copy_font, 0
-%  pdfprimitive, no_expand, 1
 %  letterspace_font 101 /*letterspace a font ( \.{\\letterspacefont} )*/
-%  left_margin_kern_code:
-%  right_margin_kern_code
 
 @* Index.
 Here is where you can find all uses of each identifier in the program,
