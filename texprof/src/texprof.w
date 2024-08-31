@@ -8951,22 +8951,28 @@ legal in similar contexts.
 
 @<Fetch an item in the current node...@>=
 if (m > eTeX_last_last_item_cmd_mod)
-  @/@<Fetch a \Prote\ item@>@;@/
+{@+switch (m) {
+    @/@<Cases for fetching a \Prote\ int value@>@/
+    }  /*there are no other cases*/
+    cur_val_level=int_val;
+}
 else if (m >= input_line_no_code)
- if (m >= eTeX_glue) @<Process an expression and |return|@>@;
+{if (m >= eTeX_glue) @<Process an expression and |return|@>@;
  else if (m >= eTeX_dim)
-  {@+switch (m) {
-  @/@<Cases for fetching a dimension value@>@/
-  }  /*there are no other cases*/
-  cur_val_level=dimen_val;
-  }
- else{@+switch (m) {
-  case input_line_no_code: cur_val=line;@+break;
-  case badness_code: cur_val=last_badness;@+break;
-  @/@<Cases for fetching an integer value@>@/
-  }  /*there are no other cases*/
-  cur_val_level=int_val;
-  }
+ {@+switch (m) {
+    @/@<Cases for fetching a dimension value@>@/
+    }  /*there are no other cases*/
+    cur_val_level=dimen_val;
+ }
+ else
+ {@+switch (m) {
+    case input_line_no_code: cur_val=line;@+break;
+    case badness_code: cur_val=last_badness;@+break;
+    @/@<Cases for fetching an integer value@>@/
+    }  /*there are no other cases*/
+    cur_val_level=int_val;
+ }
+}
 else{@+if (cur_chr==glue_val) cur_val=zero_glue;@+else cur_val=0;
   tx=tail;
   if (cur_chr==last_node_type_code)
@@ -28238,12 +28244,6 @@ in order to keep our number assignations gathered.
 @d shell_escape_code (eTeX_last_last_item_cmd_mod+4) /* \.{\\shellescape} */
 @d last_xpos_code (eTeX_last_last_item_cmd_mod+5) /* \.{\\lastxpos} */
 @d last_ypos_code (eTeX_last_last_item_cmd_mod+6) /* \.{\\lastypos} */
-@<Fetch a \Prote\ item@>=
-{@+switch (m) {
-    @/@<Cases for fetching a \Prote\ int value@>@/
-    }  /*there are no other cases*/
-    cur_val_level=int_val;
-}
 
 @ The \.{convert} class is for conversion of some external stuff to put
 it, as a token list, into the scanner. It is not an internal value that
@@ -28429,7 +28429,10 @@ primitive("shellescape", last_item, shell_escape_code);
 }
 
 @ @<Cases of |last_item| for |print_cmd_chr|@>=
-case shell_escape_code: print_esc("shellescape");@+break;
+case shell_escape_code:
+  if (pdf_on) print_esc("pdfshellescape");
+  else print_esc("shellescape");
+  @+break;
 
 @ @<Cases for fetching a \Prote\ int value@>=
 case shell_escape_code: cur_val=0;@+break;
@@ -28449,7 +28452,10 @@ primitive("ifprimitive", if_test, if_primitive_code);
 
 @ @<Cases of |if_test| for |print_cmd_chr|@>=
 case if_incsname_code: print_esc("ifincsname");@+break;
-case if_primitive_code: print_esc("ifprimitive");@+break;
+case if_primitive_code:
+  if (pdf_on) print_esc("ifpdfprimitive");
+  else print_esc("ifprimitive");
+  @+break;
 
 @ The conditional \.{\\ifincsname} is simple since we increment a global
 variable |incsname_state| when we enter the \.{\\csname} command and
@@ -28505,7 +28511,10 @@ text(frozen_primitive)=text(cur_val);eqtb[frozen_primitive]=eqtb[cur_val];
 }
 
 @ @<Cases of |expandafter| for |print_cmd_chr|@>=
-case primitive_code: print_esc("primitive");@+break;
+case primitive_code:
+  if (pdf_on) print_esc("pdfprimitive");
+  else print_esc("primitive");
+  @+break;
 
 @ The problem is that the primitives are added at |level_one| and that a
 redefinition as a macro at this same level by a user simply overwrites
@@ -28652,7 +28661,10 @@ primitive("strcmp", convert, strcmp_code);
 }
 
 @ @<Cases of |convert| for |print_cmd_chr|@>=
-case strcmp_code: print_esc("strcmp");@+break;
+case strcmp_code:
+  if (pdf_on) print_esc("pdfstrcmp");
+  else print_esc("strcmp");
+  @+break;
 
 @ It should be noted that the strings comparison is \TeX\ strings
 comparison: the arguments are subject to the manipulation done when
@@ -28718,8 +28730,11 @@ primitive("creationdate", convert, creation_date_code);@/
 }
 
 @ @<Cases of |convert| for |print_cmd_chr|@>=
-case creation_date_code: print_esc("creationdate");@+break;
-
+case creation_date_code:
+  if (pdf_on) print_esc("pdfcreationdate");
+  else print_esc("creationdate");
+  @+break;
+  
 @ |get_creation_date| has to be provided by the system.
 @^system dependencies@>
 
@@ -28758,13 +28773,24 @@ primitive("elapsedtime", last_item, elapsed_time_code);@/
 }
 
 @ @<Cases of |last_item| for |print_cmd_chr|@>=
-case elapsed_time_code: print_esc("elapsedtime");@+break;
+case elapsed_time_code:
+  if (pdf_on)  print_esc("pdfelapsedtime");
+  else print_esc("elapsedtime");
+  @+break;
 
 @ @<Cases of |extension| for |print_cmd_chr|@>=
-case reset_timer_code: print_esc("resettimer");@+break;
+case reset_timer_code:
+  if (pdf_on) print_esc("pdfresettimer");
+  else print_esc("resettimer");
+  @+break;
 
 @ @<Cases for fetching a \Prote\ int value@>=
-case elapsed_time_code: cur_val=get_elapsed_time;@+break;
+case elapsed_time_code: 
+  { double t=(start_sec*1.0+start_nsec/1000000000.0-reset_timer)*0x10000;
+    if (t>=infinity) cur_val=infinity;
+    else cur_val=(scaled)t;
+    @+break;
+  }
 
 @ The reference moment can be reset by a call to the primitive
 \.{\\resettimer}. It simply resets the reference moment to the moment
@@ -28806,8 +28832,11 @@ primitive("filesize", convert, file_size_code);
 }
 
 @ @<Cases of |convert| for |print_cmd_chr|@>=
-case file_size_code: print_esc("filesize");@+break;
-
+case file_size_code:
+  if (pdf_on) print_esc("pdffilesize");
+   else print_esc("filesize");
+   @+break;
+   
 @ In order to be able to treat the problem when trying to open the file,
 we open here and pass the file pointer, if success, to a dedicated
 function in order to get its size. In case of problem, nothing is
@@ -31932,18 +31961,22 @@ and prevent the macros from failing because of undefined
 primitives or unexpected behaviour. Generating \.{PDF} ouput
 is usualy not required.
 
-The {\tt -pdf} option is designed to provide the necessary behaviour.
+The {\tt -pdf} option is designed to provide the necessary behaviour
+by implementing replacements for the primitives of \pdfTeX.
   
 @<explain the options@>=
   " -pdf                 "@/
-  @t\qquad@>"\t pretend to produce PDF output; requires -ini\n"@/
+  @t\qquad@>"\t pretend to be pdftex; requires -ini; implies -ltx\n"@/
 
 @ This option will set the |pdf_on| variable, defined below, to true.
-  The option requires the {\tt -ini} option.
+  The option requires the {\tt -ini} option because its effect is just
+  the definition of additional primitives during initialization. It further
+  implies the {\tt -ltx} option because the primitives necesary to 
+  run \LaTeX\ are part of \pdfTeX. 
 
 @<handle the options@>=
 else @+if (ARGUMENT_IS ("pdf")) @t\2@>
-   if (iniversion) pdf_on=true;
+   if (iniversion) pdf_on=ltxp=true;
    else 
     { fprintf(stderr,"-pdf requires -ini; try -ini -pdf\n");
       exit(1);
@@ -31959,7 +31992,7 @@ static int @!pdf_on=false;
 This primitive uses the |last_item| command with a special modifier
 \pdfTeX\ adds the codes for its extensions: |pdftex_version_code|, \dots
 between \TeX's |badness_code| and \eTeX's |eTeX_int| codes.
-The |elapsed_time_code| and |random_seed_code| are already defined above
+Some codes like |elapsed_time_code| or |random_seed_code| are already defined above
 but we duplicate them here for simplicity.
 So here is the pdf version as well as all of PDF\TeX's command codes 
 for the |last_item| command:
@@ -31979,8 +32012,8 @@ for the |last_item| command:
 @d pdf_last_y_pos_code (pdftex_first_rint_code+7) /*code for \.{\\pdflastypos}*/
 @d pdf_retval_code (pdftex_first_rint_code+8) /*global multi-purpose return value*/
 @d pdf_last_ximage_colordepth_code (pdftex_first_rint_code+9) /*code for \.{\\pdflastximagecolordepth}*/
-@d pdf_elapsed_time_code (pdftex_first_rint_code+10) /*code for \.{\\pdfelapsedtime}*/
-@d pdf_shell_escape_code (pdftex_first_rint_code+11) /*code for \.{\\pdfshellescape}*/
+@d pdf_elapsed_time_code elapsed_time_code
+@d pdf_shell_escape_code shell_escape_code           /*code for \.{\\pdfshellescape}*/
 @d pdf_random_seed_code (pdftex_first_rint_code+12) /*code for \.{\\pdfrandomseed}*/
 @d pdf_last_link_code (pdftex_first_rint_code+13) /*code for \.{\\pdflastlink}*/
 @d pdftex_last_item_codes (pdftex_first_rint_code+13) /*end of \pdfTeX's command codes*/
@@ -32033,8 +32066,6 @@ primitive("pdflastlink", last_item, pdf_last_link_code);@/
   case pdf_last_y_pos_code: print_esc("pdflastypos");@+break;
   case pdf_retval_code: print_esc("pdfretval");@+break;
   case pdf_last_ximage_colordepth_code: print_esc("pdflastximagecolordepth");@+break;
-  case pdf_elapsed_time_code: print_esc("pdfelapsedtime");@+break;
-  case pdf_shell_escape_code: print_esc("pdfshellescape");@+break;
   case pdf_random_seed_code: print_esc("pdfrandomseed");@+break;
   case pdf_last_link_code: print_esc("pdflastlink");@+break;
 
@@ -32066,12 +32097,6 @@ static int
   case pdf_last_y_pos_code: cur_val=pdf_last_y_pos;@+break;
   case pdf_retval_code: cur_val=pdf_retval;@+break;
   case pdf_last_ximage_colordepth_code: cur_val=pdf_last_ximage_colordepth;@+break;
-  case pdf_elapsed_time_code: 
-  { double t=(start_sec*1.0+start_nsec/1000000000.0-reset_timer)*0x10000;
-    if (t>=infinity) cur_val=infinity;
-    else cur_val=(scaled)t;
-    @+break;
-  }
   case pdf_random_seed_code: cur_val=random_seed;@+break;
   case pdf_shell_escape_code: cur_val=0;@+break;
   case pdf_last_link_code: cur_val=pdf_last_link;@+break;
@@ -32357,13 +32382,13 @@ These codes go in between |Prote_last_convert_code| and |job_name_code|.
 @d pdf_escape_name_code (pdftex_first_convert_code+8) /*command code for \.{\\pdfescapename}*/
 @d left_margin_kern_code (pdftex_first_convert_code+9) /*command code for \.{\\leftmarginkern}*/
 @d right_margin_kern_code (pdftex_first_convert_code+10) /*command code for \.{\\rightmarginkern}*/
-@d pdf_strcmp_code (pdftex_first_convert_code+11) /*command code for \.{\\pdfstrcmp}*/
+@d pdf_strcmp_code strcmp_code
 @d pdf_colorstack_init_code (pdftex_first_convert_code+12) /*command code for \.{\\pdfcolorstackinit}*/
 @d pdf_escape_hex_code (pdftex_first_convert_code+13) /*command code for \.{\\pdfescapehex}*/
 @d pdf_unescape_hex_code (pdftex_first_convert_code+14) /*command code for \.{\\pdfunescapehex}*/
-@d pdf_creation_date_code (pdftex_first_convert_code+15) /*command code for \.{\\pdfcreationdate}*/
+@d pdf_creation_date_code creation_date_code
 @d pdf_file_mod_date_code (pdftex_first_convert_code+16) /*command code for \.{\\pdffilemoddate}*/
-@d pdf_file_size_code (pdftex_first_convert_code+17) /*command code for \.{\\pdffilesize}*/
+@d pdf_file_size_code file_size_code  /*command code for \.{\\pdffilesize}*/
 @d pdf_mdfive_sum_code (pdftex_first_convert_code+18) /*command code for \.{\\pdfmdfivesum}*/
 @d pdf_file_dump_code (pdftex_first_convert_code+19) /*command code for \.{\\pdffiledump}*/
 @d pdf_match_code (pdftex_first_convert_code+20) /*command code for \.{\\pdfmatch}*/
@@ -32446,12 +32471,10 @@ primitive("pdfnormaldeviate", convert, normal_deviate_code);@/
   case pdf_unescape_hex_code: print_esc("pdfunescapehex");@+break;
   case pdf_creation_date_code: print_esc("pdfcreationdate");@+break;
   case pdf_file_mod_date_code: print_esc("pdffilemoddate");@+break;
-  case pdf_file_size_code: print_esc("pdffilesize");@+break;
   case pdf_mdfive_sum_code: print_esc("pdfmdfivesum");@+break;
   case pdf_file_dump_code: print_esc("pdffiledump");@+break;
   case pdf_match_code: print_esc("pdfmatch");@+break;
   case pdf_last_match_code: print_esc("pdflastmatch");@+break;
-  case pdf_strcmp_code: print_esc("pdfstrcmp");@+break;
   case pdf_colorstack_init_code: print_esc("pdfcolorstackinit");@+break;
   case pdf_uniform_deviate_code: print_esc("pdfuniformdeviate");@+break;
   case pdf_normal_deviate_code: print_esc("pdfnormaldeviate");@+break;
@@ -32495,9 +32518,7 @@ case pdf_unescape_hex_code:
     ins_list(link(link(garbage)));
     free_avail(link(garbage)); /*drop reference count*/
     return;
-case pdf_creation_date_code: get_creation_date();@+break;
 case pdf_file_mod_date_code: @<Scan the argument for |file_mod_date_code|@>@;@+break;
-case pdf_file_size_code: @<Scan the argument for |file_size_code|@>@;@+break;
 case pdf_mdfive_sum_code:  @<Scan the argument for |mdfive_sum_code|@>@; @+break;
 case pdf_file_dump_code:  @<Scan the argument for |file_dump_code|@>@;@+break;
 case pdf_match_code:
@@ -32518,7 +32539,6 @@ case pdf_last_match_code:
     ins_list(link(temp_head));
     return;
   }
-case pdf_strcmp_code:  @<Scan the argument for |strcmp_code|@>@;@+break;
 case pdf_colorstack_init_code:
   {@+
     scan_keyword("page");
@@ -32565,14 +32585,10 @@ case pdf_escape_string_code:
 case pdf_escape_name_code:
 case left_margin_kern_code:  print("0pt");@+break;
 case right_margin_kern_code:  print("0pt");@+break;
-case pdf_strcmp_code: print_int(cur_val);@+break;
 case pdf_colorstack_init_code: print_int(cur_val);@+break;
 case pdf_escape_hex_code:
 case pdf_unescape_hex_code:
-case pdf_creation_date_code: for (k=0; time_str[k]!='\0'; k++)
-   print_char(time_str[k]);@+break;
 case pdf_file_mod_date_code:
-case pdf_file_size_code: if (cur_val!=-1) print_int(cur_val);@+break;
 case pdf_mdfive_sum_code:
 case pdf_file_dump_code:
 case pdf_match_code:
@@ -32631,7 +32647,7 @@ static void pdf_error(char *t, char *p)
 @d pdf_map_line_code (pdftex_first_extension_code+23)
 @d pdf_trailer_code (pdftex_first_extension_code+24)
 @d pdf_trailer_id_code (pdftex_first_extension_code+25)
-@d pdf_reset_timer_code (pdftex_first_extension_code+26)
+@d pdf_reset_timer_code reset_timer_code
 
 @d pdf_font_expand_code (pdftex_first_extension_code+27)
 @d pdf_set_random_seed_code (pdftex_first_extension_code+28)
@@ -32799,7 +32815,6 @@ primitive("showstream", extension, pdf_show_stream_code);@/
   case pdf_trailer_id_code: print_esc("pdftrailerid");@+break;
   case pdf_xform_code: print_esc("pdfxform");@+break;
   case pdf_ximage_code: print_esc("pdfximage");@+break;
-  case pdf_reset_timer_code: print_esc("pdfresettimer");@+break;
   case pdf_set_random_seed_code: print_esc("pdfsetrandomseed");@+break;
   case pdf_nobuiltin_tounicode_code: print_esc("pdfnobuiltintounicode");@+break;
   case pdf_glyph_to_unicode_code: print_esc("pdfglyphtounicode");@+break;
@@ -32851,8 +32866,6 @@ primitive("showstream", extension, pdf_show_stream_code);@/
   case pdf_trailer_id_code: scan_pdf_ext_toks();@+break;
   case pdf_xform_code: @<Implement \.{\\pdfxform}@>@;@+break;
   case pdf_ximage_code:   scan_image(); @+break;
-  case pdf_reset_timer_code: 
-     reset_timer=start_sec*1.0+start_nsec/1000000000.0;@+break;
   case pdf_set_random_seed_code: 
   {@+scan_int();random_seed=cur_val;
     init_randoms();
