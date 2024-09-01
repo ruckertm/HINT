@@ -32873,9 +32873,9 @@ primitive("showstream", extension, pdf_show_stream_code);@/
   case pdf_snap_ref_point_node: @+break;
   case pdf_snapy_comp_node:  scan_int();@+break;
   case pdf_snapy_node: @+break;
-  case pdf_start_link_node: scan_action();@+break;
-  case pdf_start_thread_node: scan_thread_id();@+break;
-  case pdf_thread_node:  scan_thread_id();@+break;
+  case pdf_start_link_node: scan_annot(); scan_action();@+break;
+  case pdf_start_thread_node:  scan_annot(); scan_thread_id();@+break;
+  case pdf_thread_node:  scan_annot(); scan_thread_id();@+break;
   case pdf_trailer_code: scan_pdf_ext_toks();@+break;
   case pdf_trailer_id_code: scan_pdf_ext_toks();@+break;
   case pdf_xform_code: @<Implement \.{\\pdfxform}@>@;@+break;
@@ -32896,7 +32896,9 @@ primitive("showstream", extension, pdf_show_stream_code);@/
 
 @ @<Implement \.{\\pdfannot}@>=
 {@+ if (scan_keyword("reserveobjnum")) {@+@<Scan an optional space@>;}
-    else{@+if (scan_keyword("useobjnum")) {@+scan_int();}
+    else{@+
+      if (scan_keyword("useobjnum")) {@+scan_int();}
+      scan_annot();
       scan_pdf_ext_toks();
     }
 }
@@ -33069,6 +33071,13 @@ reswitch:
         scan_normal_dimen;
          goto reswitch;
     }
+}
+
+static void scan_annot(void) /*scan an annotation*/
+{@+
+    scan_alt_rule(); /*scans | < rule spec > |*/
+    if (scan_keyword("attr"))
+      scan_pdf_ext_toks();
 }
 
 

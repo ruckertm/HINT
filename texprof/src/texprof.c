@@ -24590,7 +24590,7 @@ flush_list(def_ref);
 
 
 /*:1811*//*1819:*/
-#line 32918 "texprof.w"
+#line 32920 "texprof.w"
 
 static void scan_action(void)
 {int pdf_action;
@@ -24660,7 +24660,7 @@ pdf_action_new_window= 1;
 }
 
 /*:442*/
-#line 32980 "texprof.w"
+#line 32982 "texprof.w"
 ;}
 else if(scan_keyword("nonewwindow")){
 pdf_action_new_window= 2;
@@ -24671,7 +24671,7 @@ pdf_action_new_window= 2;
 }
 
 /*:442*/
-#line 32983 "texprof.w"
+#line 32985 "texprof.w"
 ;}
 else
 pdf_action_new_window= 0;
@@ -24684,7 +24684,7 @@ pdf_error("ext1",
 }
 
 /*:1819*//*1821:*/
-#line 33056 "texprof.w"
+#line 33058 "texprof.w"
 
 static void scan_alt_rule(void)
 {
@@ -24703,10 +24703,17 @@ goto reswitch;
 }
 }
 
+static void scan_annot(void)
+{
+scan_alt_rule();
+if(scan_keyword("attr"))
+scan_pdf_ext_toks();
+}
+
 
 
 /*:1821*//*1823:*/
-#line 33086 "texprof.w"
+#line 33095 "texprof.w"
 
 static void read_expand_font(void)
 {int shrink_limit,stretch_limit,font_step;
@@ -24729,13 +24736,13 @@ if(scan_keyword("autoexpand")){
 }
 
 /*:442*/
-#line 33101 "texprof.w"
+#line 33110 "texprof.w"
 ;
 }
 }
 
 /*:1823*//*1824:*/
-#line 33106 "texprof.w"
+#line 33115 "texprof.w"
 
 static void pdf_include_chars(void)
 {str_number s;
@@ -24750,7 +24757,7 @@ scan_pdf_ext_toks();
 }
 
 /*:1824*//*1830:*/
-#line 33195 "texprof.w"
+#line 33204 "texprof.w"
 
 static void scan_thread_id(void)
 {if(scan_keyword("num"))scan_int();
@@ -24758,7 +24765,7 @@ else if(scan_keyword("name"))scan_pdf_ext_toks();
 }
 
 /*:1830*//*1831:*/
-#line 33202 "texprof.w"
+#line 33211 "texprof.w"
 
 static void scan_pdf_box_spec(void)
 {
@@ -25142,7 +25149,9 @@ case pdf_annot_node:/*1817:*/
 /*:442*/
 #line 32898 "texprof.w"
 ;}
-else{if(scan_keyword("useobjnum")){scan_int();}
+else{
+if(scan_keyword("useobjnum")){scan_int();}
+scan_annot();
 scan_pdf_ext_toks();
 }
 }
@@ -25151,7 +25160,7 @@ scan_pdf_ext_toks();
 #line 32851 "texprof.w"
 break;
 case pdf_catalog_code:/*1818:*/
-#line 32904 "texprof.w"
+#line 32906 "texprof.w"
 
 {scan_pdf_ext_toks();
 if(scan_keyword("openaction"))scan_action();
@@ -25161,7 +25170,7 @@ if(scan_keyword("openaction"))scan_action();
 #line 32852 "texprof.w"
 break;
 case pdf_dest_node:/*1820:*/
-#line 33005 "texprof.w"
+#line 33007 "texprof.w"
 
 {int pdf_dest_type;
 if(scan_keyword("struct")){
@@ -25212,7 +25221,7 @@ pdf_error("ext1","destination type missing");
 }
 
 /*:442*/
-#line 33048 "texprof.w"
+#line 33050 "texprof.w"
 ;
 if(pdf_dest_type==pdf_dest_fitr){
 scan_alt_rule();
@@ -25227,7 +25236,7 @@ break;
 case pdf_end_link_node:break;
 case pdf_end_thread_node:break;
 case pdf_font_attr_code:/*1822:*/
-#line 33076 "texprof.w"
+#line 33085 "texprof.w"
 
 {
 scan_font_ident();
@@ -25243,7 +25252,7 @@ case pdf_font_expand_code:read_expand_font();break;
 case pdf_include_chars_code:pdf_include_chars();break;
 case pdf_info_code:scan_pdf_ext_toks();break;
 case pdf_literal_node:/*1825:*/
-#line 33119 "texprof.w"
+#line 33128 "texprof.w"
 
 {int k;
 if(scan_keyword("shipout"))k= pdf_lateliteral_node;
@@ -25259,7 +25268,7 @@ else scan_pdf_ext_late_toks();
 #line 32860 "texprof.w"
 break;
 case pdf_colorstack_node:/*1826:*/
-#line 33138 "texprof.w"
+#line 33147 "texprof.w"
 
 {int i;
 scan_int();
@@ -25295,7 +25304,7 @@ case pdf_map_file_code:scan_pdf_ext_toks();break;
 case pdf_map_line_code:scan_pdf_ext_toks();break;
 case pdf_names_code:scan_pdf_ext_toks();break;
 case pdf_obj_code:/*1827:*/
-#line 33163 "texprof.w"
+#line 33172 "texprof.w"
 
 {
 if(scan_keyword("reserveobjnum")){
@@ -25306,7 +25315,7 @@ if(scan_keyword("reserveobjnum")){
 }
 
 /*:442*/
-#line 33166 "texprof.w"
+#line 33175 "texprof.w"
 ;
 }
 else{
@@ -25323,7 +25332,7 @@ scan_pdf_ext_toks();
 #line 32868 "texprof.w"
 break;
 case pdf_outline_code:/*1828:*/
-#line 33178 "texprof.w"
+#line 33187 "texprof.w"
 
 {
 if(scan_keyword("attr"))scan_pdf_ext_toks();
@@ -25341,13 +25350,13 @@ case pdf_refximage_node:scan_int();break;
 case pdf_snap_ref_point_node:break;
 case pdf_snapy_comp_node:scan_int();break;
 case pdf_snapy_node:break;
-case pdf_start_link_node:scan_action();break;
-case pdf_start_thread_node:scan_thread_id();break;
-case pdf_thread_node:scan_thread_id();break;
+case pdf_start_link_node:scan_annot();scan_action();break;
+case pdf_start_thread_node:scan_annot();scan_thread_id();break;
+case pdf_thread_node:scan_annot();scan_thread_id();break;
 case pdf_trailer_code:scan_pdf_ext_toks();break;
 case pdf_trailer_id_code:scan_pdf_ext_toks();break;
 case pdf_xform_code:/*1829:*/
-#line 33186 "texprof.w"
+#line 33195 "texprof.w"
 
 {
 if(scan_keyword("attr"))scan_pdf_ext_toks();

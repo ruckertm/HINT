@@ -138,6 +138,9 @@ texprof.fmt:  install_bin ../aux/texprof.ini
 latexprof.fmt: install_bin ../aux/latexprof.ini
 	$(BINDIR)/texprof -ini -etex -ltx ../aux/latexprof.ini
 
+pdftexprof.fmt:  install_bin ../aux/pdftexprof.ini
+	$(BINDIR)/texprof -ini -etex -pdf ../aux/pdftexprof.ini
+
 ### Step 6: Installing the format files
 
 # if it does not exist we make the format directory
