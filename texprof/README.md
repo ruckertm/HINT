@@ -1,5 +1,17 @@
 # The TeX Macro Profiler
 
+## News
+
+- The program `texprof` now has a -pdf option that makes texprof implement
+(a large subset of) pdftex primitives. Using this option you can profile
+macros that usually are executed only when running pdftex.
+
+- The format files of `texprof` now store file and line information for
+all sources used to generate the format file. The profiler can then
+point you to the expensive lines in these source files.
+
+- The program `tprof` was renamed to `texprofile`.
+
 ## Description
 This repository implements two programs: `texprof` and `texprofile`.
 
