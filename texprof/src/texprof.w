@@ -32490,7 +32490,7 @@ primitive("pdfcolorstackinit", convert, pdf_colorstack_init_code);@/
 
 @ The usual code for printing:
 
-@<Cases of |convert| for |print_cmd_chr|@>
+@<Cases of |convert| for |print_cmd_chr|@>=
   case pdftex_revision_code: print_esc("pdftexrevision");@+break;
   case pdftex_banner_code: print_esc("pdftexbanner");@+break;
   case pdf_font_name_code: print_esc("pdffontname");@+break;

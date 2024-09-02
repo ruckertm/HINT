@@ -164,6 +164,8 @@ install_fmt: $(FMTDIR) $(FORMATS)
 # the first run of tex produces texprof.toc, the table of content
 # so we run tex twice
 
+
+
 texprof.pdf texprof.toc: texprof.tex texprof.scn texprof.idx
 	$(PDFTEX) texprof
 	$(PDFTEX) texprof
@@ -182,6 +184,8 @@ texprofile.hnt: texprofile.tex texprofile.scn texprofile.idx
 	TEXINPUTS=".:../aux:" $(HITEX) texprofile
 	TEXINPUTS=".:../aux:" $(HITEX) texprofile
 
+install_doc: texprof.pdf texprof.hnt texprofile.pdf texprofile.hnt
+	mv $? ../doc
 
 
 ### Cleaning up
