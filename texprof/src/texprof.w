@@ -30459,15 +30459,14 @@ static void print_file_line(void)
 }
 
 @*1 The Format File.
-Most of the time \TeX\ is not running as \.{initex} or \.{virtex},
+Most of the time \TeX\ is not running as \.{initex} 
 but it runs with a format file preloaded.
 To set the format name, we first check if the format name was given on the
 command line with an ``\.{\AM}'' prefix,
 second we might check the first line of the input file,
-and last, we check if the program is an initex or virtex program.
+and last, we check if the program is an initex program.
 
-If we still don't have a format,
-we use a plain format if running as a virtex, otherwise the program
+If we still don't have a format, the program
 name is our best guess.
 There is no need to check for an extension, because the
 \.{kpathsearch} library will take care of that.
@@ -30479,9 +30478,7 @@ if (parsefirstlinep && !dump_name)
   parse_first_line (main_input_file);
 if (!main_input_file && argv[1] && argv[1][0] == '&')
   dump_name = argv[1] + 1;
-if (strcmp(kpse_program_name, "kinitex")==0) iniversion = true;
-else if (strcmp(kpse_program_name, "kvirtex")==0 && !dump_name)
-  dump_name = "ktex";
+if (strcmp(kpse_program_name, "initexprof")==0) iniversion = true;
 if (!dump_name)
   dump_name = kpse_program_name;
 if (!dump_name)
@@ -30515,7 +30512,7 @@ static void parse_first_line(char*filename)
       while (*s!=0 && *s!=' ' && *s!='\r' && *s!='\n') s++;
       *s=0;
       if (dump_name==NULL) {
-        char *f_name = concat (r, ".fmt");
+        char *f_name = concat (r, format_extension);
         char *d_name = kpse_find_file (f_name,kpse_fmt_format, false);
         if (d_name && kpse_readable_file (d_name)) {
             dump_name = xstrdup (r);

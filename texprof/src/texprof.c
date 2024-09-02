@@ -27,7 +27,7 @@ static int argument_is(struct option*opt,char*s)
 #define ARGUMENT_IS(S) argument_is(long_options+option_index,S)
 
 /*:1699*//*1736:*/
-#line 30771 "texprof.w"
+#line 30768 "texprof.w"
 
 #include <time.h> 
 static time_t start_time= ((time_t)-1);
@@ -36,7 +36,7 @@ static char*source_date_epoch,*force_source_date;
 #if defined(_MSC_VER) && _MSC_VER < 1800
 #define strtoull _strtoui64
 #endif
-#line 30779 "texprof.w"
+#line 30776 "texprof.w"
 
 static struct tm*tl_now(void)
 {struct tm*tp;
@@ -64,7 +64,7 @@ return tp;
 }
 
 /*:1736*//*1737:*/
-#line 30807 "texprof.w"
+#line 30804 "texprof.w"
 
 #define TIME_STR_SIZE 30
 static char time_str[TIME_STR_SIZE];
@@ -2461,7 +2461,7 @@ static void recorder_change_filename(const char*new_name);
 static void recorder_record_input(const char*fname);
 
 /*:1714*//*1730:*/
-#line 30583 "texprof.w"
+#line 30580 "texprof.w"
 
 static int input_command_line(void);
 
@@ -3420,19 +3420,19 @@ static char*full_source_filename_stack0[max_in_open]= {NULL},**const full_source
 static char*full_name_of_file= NULL;
 
 /*:1725*//*1741:*/
-#line 30999 "texprof.w"
+#line 30996 "texprof.w"
 
 static int profile_on= false;
 
 /*:1741*//*1745:*/
-#line 31050 "texprof.w"
+#line 31047 "texprof.w"
 
 static uint8_t input_file_num0[max_in_open],
 *const input_file_num= input_file_num0-1;
 static uint8_t read_file_num[20];
 
 /*:1745*//*1746:*/
-#line 31063 "texprof.w"
+#line 31060 "texprof.w"
 
 #define FILE_NUM_BITS 8
 #define MAX_FILE_NUM ((1<<FILE_NUM_BITS)-1)
@@ -3448,20 +3448,20 @@ static int file_num;
 static uint32_t cur_file_line= 0;
 
 /*:1746*//*1754:*/
-#line 31160 "texprof.w"
+#line 31157 "texprof.w"
 
 static uint32_t fl_mem0[mem_max-mem_min+1],
 *const fl_mem= fl_mem0-mem_min;
 
 /*:1754*//*1755:*/
-#line 31187 "texprof.w"
+#line 31184 "texprof.w"
 
 static long start_nsec,start_sec,diff_nsec;
 struct timespec ts;
 static int time_error;
 
 /*:1755*//*1758:*/
-#line 31238 "texprof.w"
+#line 31235 "texprof.w"
 
 #define MAX_STAMPS 80000000
 #define MAX_MACRO_STACK  40000
@@ -3474,7 +3474,7 @@ static int prof_cmd= 0;
 static uint32_t prof_file_line= 0;
 
 /*:1758*//*1772:*/
-#line 31544 "texprof.w"
+#line 31541 "texprof.w"
 
 static uint64_t macro_stack[MAX_MACRO_STACK]= {0};
 static int prof_depth;
@@ -3483,12 +3483,12 @@ static int unchanged_depth;
 static int prof_max_depth;
 
 /*:1772*//*1797:*/
-#line 32082 "texprof.w"
+#line 32079 "texprof.w"
 
 static int pdf_on= false;
 
 /*:1797*//*1801:*/
-#line 32150 "texprof.w"
+#line 32147 "texprof.w"
 
 static int
 pdf_last_obj,
@@ -3844,7 +3844,7 @@ sa_chain= null;sa_level= level_zero;
 page_disc= null;split_disc= null;
 
 /*:1530*//*1751:*/
-#line 31127 "texprof.w"
+#line 31124 "texprof.w"
 
 file_num_name[unknown_file]= "unknown";
 file_num_name[system_file]= "system";
@@ -4073,7 +4073,7 @@ for(k= ROM_undefined_primitive+1;k<=ROM_size;k++)
 ROM[k]= ROM[ROM_undefined_primitive];
 
 /*:1581*//*1807:*/
-#line 32416 "texprof.w"
+#line 32413 "texprof.w"
 
 dimen_par(pdf_h_origin_code)= 4736287;
 dimen_par(pdf_v_origin_code)= 4736287;
@@ -4652,7 +4652,7 @@ succumb;
 }
 
 /*:94*//*1813:*/
-#line 32629 "texprof.w"
+#line 32626 "texprof.w"
 
 static void pdf_error(char*t,char*p)
 {
@@ -6925,7 +6925,7 @@ case saving_hyph_codes_code:print_esc("savinghyphcodes");break;
 case expand_depth_code:print_esc("expanddepth");break;
 
 /*:1539*//*1805:*/
-#line 32363 "texprof.w"
+#line 32360 "texprof.w"
 
 case pdf_output_code:print_esc("pdfoutput");break;
 case pdf_compress_level_code:print_esc("pdfcompresslevel");break;
@@ -7032,7 +7032,7 @@ if(pdf_on)print_esc("pdfpageheight");
 else print_esc("pageheight");
 break;
 /*1806:*/
-#line 32401 "texprof.w"
+#line 32398 "texprof.w"
 
 case pdf_h_origin_code:print_esc("pdfhorigin");break;
 case pdf_v_origin_code:print_esc("pdfvorigin");break;
@@ -7103,7 +7103,7 @@ case every_cr_loc:print_esc("everycr");break;
 case every_eof_loc:print_esc("everyeof");break;
 
 /*:1388*//*1804:*/
-#line 32357 "texprof.w"
+#line 32354 "texprof.w"
 
 case pdf_pages_attr_loc:print_esc("pdfpagesattr");break;
 case pdf_page_attr_loc:print_esc("pdfpageattr");break;
@@ -7416,7 +7416,7 @@ else print_esc("lastypos");
 break;
 
 /*:1672*//*1800:*/
-#line 32137 "texprof.w"
+#line 32134 "texprof.w"
 
 case pdftex_version_code:print_esc("pdftexversion");break;
 case pdf_last_obj_code:print_esc("pdflastobj");break;
@@ -7903,13 +7903,13 @@ if(pdf_on)print_esc("pdfsavepos");
 else print_esc("savepos");
 break;
 /*:1677*//*1743:*/
-#line 31015 "texprof.w"
+#line 31012 "texprof.w"
 
 case profile_on_code:print_esc("profileon");break;
 case profile_off_code:print_esc("profileoff");break;
 
 /*:1743*//*1815:*/
-#line 32801 "texprof.w"
+#line 32798 "texprof.w"
 
 case pdf_annot_node:print_esc("pdfannot");break;
 case pdf_catalog_code:print_esc("pdfcatalog");break;
@@ -9125,7 +9125,7 @@ if(t>=macro)
 if(t==macro)param_start= param_ptr;
 else{
 /*1777:*/
-#line 31589 "texprof.w"
+#line 31586 "texprof.w"
 
 uint32_t macro_fl= fl_mem[p];
 int macro_cs= undefined_control_sequence+t;
@@ -9147,7 +9147,7 @@ default:print_cmd_chr(assign_toks,t-output_text+output_routine_loc);
 print("->");token_show(p);end_diagnostic(false);
 }
 /*1775:*/
-#line 31573 "texprof.w"
+#line 31570 "texprof.w"
 
 macro_depth++;
 cur_depth= macro_depth;
@@ -9355,7 +9355,7 @@ if(state!=token_list)
 {get_cur_chr:if(loc<=limit)
 {cur_chr= buffer[loc];incr(loc);
 /*1752:*/
-#line 31137 "texprof.w"
+#line 31134 "texprof.w"
 
 if(terminal_input)
 cur_file_line= FILE_LINE(terminal_file,0);
@@ -9585,7 +9585,7 @@ if(name> 17)/*361:*/
 
 {incr(line);first= start;
 /*1747:*/
-#line 31077 "texprof.w"
+#line 31074 "texprof.w"
 
 if(line>=MAX_LINE)overflow("too many input lines",MAX_LINE);
 
@@ -9635,7 +9635,7 @@ first= limit+1;loc= start;
 else{if(!terminal_input)
 {cur_cmd= 0;cur_chr= 0;
 /*1753:*/
-#line 31146 "texprof.w"
+#line 31143 "texprof.w"
 
 cur_file_line= FILE_LINE(read_file_num[name-1],0);
 
@@ -9806,7 +9806,7 @@ small_number save_scanner_status;
 pointer save_warning_index;
 ASCII_code match_chr;
 /*1774:*/
-#line 31565 "texprof.w"
+#line 31562 "texprof.w"
 
 uint32_t macro_fl= fl_mem[cur_chr];
 int macro_cs= cur_cs;
@@ -10044,7 +10044,7 @@ param_ptr= param_ptr+n;
 ;
 end:scanner_status= save_scanner_status;warning_index= save_warning_index;
 /*1775:*/
-#line 31573 "texprof.w"
+#line 31570 "texprof.w"
 
 macro_depth++;
 cur_depth= macro_depth;
@@ -11125,7 +11125,7 @@ delete_glue_ref(q);
 }
 
 /*:1485*//*1802:*/
-#line 32163 "texprof.w"
+#line 32160 "texprof.w"
 
 case pdftex_version_code:cur_val= pdftex_version;break;
 case pdf_last_obj_code:cur_val= pdf_last_obj;break;
@@ -12425,7 +12425,7 @@ cur_val= unif_rand(cur_val);
 case normal_deviate_code:cur_val= norm_rand();break;
 
 /*:1664*//*1810:*/
-#line 32523 "texprof.w"
+#line 32520 "texprof.w"
 
 case pdftex_revision_code:do_nothing;break;
 case pdftex_banner_code:do_nothing;break;
@@ -12582,7 +12582,7 @@ case uniform_deviate_code:print_int(cur_val);break;
 case normal_deviate_code:print_int(cur_val);break;
 
 /*:1665*//*1812:*/
-#line 32604 "texprof.w"
+#line 32601 "texprof.w"
 
 case pdftex_revision_code:print(pdftex_revision);break;
 case pdftex_banner_code:print("This is pdfTeX, Version 3.141592653");break;
@@ -13495,10 +13495,10 @@ if(full_source_filename_stack[in_open]!=NULL)
 free(full_source_filename_stack[in_open]);
 full_source_filename_stack[in_open]= strdup(full_name_of_file);
 /*1749:*/
-#line 31092 "texprof.w"
+#line 31089 "texprof.w"
 
 /*1748:*/
-#line 31083 "texprof.w"
+#line 31080 "texprof.w"
 
 if(file_num>=MAX_FILE_NUM)overflow("file number",file_num);
 else file_num++;
@@ -13506,7 +13506,7 @@ file_num_name[file_num]= strdup(full_name_of_file);
 file_from_cmd[file_num]= cmd_count;
 
 /*:1748*/
-#line 31093 "texprof.w"
+#line 31090 "texprof.w"
 
 cur_file_num= file_num;
 
@@ -13515,7 +13515,7 @@ cur_file_num= file_num;
 
 
 {/*1776:*/
-#line 31583 "texprof.w"
+#line 31580 "texprof.w"
 
 uint32_t macro_fl= FILE_LINE(cur_file_num,0);
 int macro_cs= 0;
@@ -13525,7 +13525,7 @@ int macro_depth= cur_depth;
 #line 10892 "texprof.w"
 
 /*1775:*/
-#line 31573 "texprof.w"
+#line 31570 "texprof.w"
 
 macro_depth++;
 cur_depth= macro_depth;
@@ -14684,7 +14684,7 @@ int j,k;
 int s;
 int old_setting;
 /*1766:*/
-#line 31393 "texprof.w"
+#line 31390 "texprof.w"
 
 int tmp_cmd;
 int tmp_file_line;
@@ -14694,17 +14694,17 @@ int tmp_depth;
 #line 13217 "texprof.w"
 
 /*1771:*/
-#line 31442 "texprof.w"
+#line 31439 "texprof.w"
 
 if(profile_on)
 {/*1761:*/
-#line 31310 "texprof.w"
+#line 31307 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1779:*/
-#line 31656 "texprof.w"
+#line 31653 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -14718,14 +14718,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31669 "texprof.w"
+#line 31666 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1779*/
-#line 31314 "texprof.w"
+#line 31311 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -14737,52 +14737,52 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31325 "texprof.w"
+#line 31322 "texprof.w"
  cmd_count++;
 /*1756:*/
-#line 31198 "texprof.w"
+#line 31195 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31202 "texprof.w"
+#line 31199 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31204 "texprof.w"
+#line 31201 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31206 "texprof.w"
+#line 31203 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31208 "texprof.w"
+#line 31205 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31210 "texprof.w"
+#line 31207 "texprof.w"
 
 /*:1756*/
-#line 31326 "texprof.w"
+#line 31323 "texprof.w"
 
 /*1757:*/
-#line 31215 "texprof.w"
+#line 31212 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31220 "texprof.w"
+#line 31217 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1757*/
-#line 31327 "texprof.w"
+#line 31324 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1761*/
-#line 31444 "texprof.w"
+#line 31441 "texprof.w"
 
 tmp_file_line= prof_file_line;
 tmp_cmd= prof_cmd;
@@ -14907,17 +14907,17 @@ print_int(hi_mem_min-lo_mem_max-1);print_ln();
 #line 13241 "texprof.w"
 ;
 /*1768:*/
-#line 31409 "texprof.w"
+#line 31406 "texprof.w"
 
 if(profile_on)
 {/*1761:*/
-#line 31310 "texprof.w"
+#line 31307 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1779:*/
-#line 31656 "texprof.w"
+#line 31653 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -14931,14 +14931,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31669 "texprof.w"
+#line 31666 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1779*/
-#line 31314 "texprof.w"
+#line 31311 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -14950,52 +14950,52 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31325 "texprof.w"
+#line 31322 "texprof.w"
  cmd_count++;
 /*1756:*/
-#line 31198 "texprof.w"
+#line 31195 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31202 "texprof.w"
+#line 31199 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31204 "texprof.w"
+#line 31201 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31206 "texprof.w"
+#line 31203 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31208 "texprof.w"
+#line 31205 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31210 "texprof.w"
+#line 31207 "texprof.w"
 
 /*:1756*/
-#line 31326 "texprof.w"
+#line 31323 "texprof.w"
 
 /*1757:*/
-#line 31215 "texprof.w"
+#line 31212 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31220 "texprof.w"
+#line 31217 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1757*/
-#line 31327 "texprof.w"
+#line 31324 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1761*/
-#line 31411 "texprof.w"
+#line 31408 "texprof.w"
 
 prof_file_line= tmp_file_line;
 prof_cmd= tmp_cmd;
@@ -18873,7 +18873,7 @@ int j,k,t;
 int r,s;
 two_halves h;
 /*1766:*/
-#line 31393 "texprof.w"
+#line 31390 "texprof.w"
 
 int tmp_cmd;
 int tmp_file_line;
@@ -18883,17 +18883,17 @@ int tmp_depth;
 #line 19461 "texprof.w"
 
 /*1769:*/
-#line 31419 "texprof.w"
+#line 31416 "texprof.w"
 
 if(profile_on)
 {/*1761:*/
-#line 31310 "texprof.w"
+#line 31307 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1779:*/
-#line 31656 "texprof.w"
+#line 31653 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -18907,14 +18907,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31669 "texprof.w"
+#line 31666 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1779*/
-#line 31314 "texprof.w"
+#line 31311 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -18926,52 +18926,52 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31325 "texprof.w"
+#line 31322 "texprof.w"
  cmd_count++;
 /*1756:*/
-#line 31198 "texprof.w"
+#line 31195 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31202 "texprof.w"
+#line 31199 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31204 "texprof.w"
+#line 31201 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31206 "texprof.w"
+#line 31203 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31208 "texprof.w"
+#line 31205 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31210 "texprof.w"
+#line 31207 "texprof.w"
 
 /*:1756*/
-#line 31326 "texprof.w"
+#line 31323 "texprof.w"
 
 /*1757:*/
-#line 31215 "texprof.w"
+#line 31212 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31220 "texprof.w"
+#line 31217 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1757*/
-#line 31327 "texprof.w"
+#line 31324 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1761*/
-#line 31421 "texprof.w"
+#line 31418 "texprof.w"
 
 tmp_file_line= prof_file_line;
 tmp_cmd= prof_cmd;
@@ -19051,17 +19051,17 @@ trie_char(0)= qi('?');
 ;
 trie_not_ready= false;
 /*1768:*/
-#line 31409 "texprof.w"
+#line 31406 "texprof.w"
 
 if(profile_on)
 {/*1761:*/
-#line 31310 "texprof.w"
+#line 31307 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1779:*/
-#line 31656 "texprof.w"
+#line 31653 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -19075,14 +19075,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31669 "texprof.w"
+#line 31666 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1779*/
-#line 31314 "texprof.w"
+#line 31311 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -19094,52 +19094,52 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31325 "texprof.w"
+#line 31322 "texprof.w"
  cmd_count++;
 /*1756:*/
-#line 31198 "texprof.w"
+#line 31195 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31202 "texprof.w"
+#line 31199 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31204 "texprof.w"
+#line 31201 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31206 "texprof.w"
+#line 31203 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31208 "texprof.w"
+#line 31205 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31210 "texprof.w"
+#line 31207 "texprof.w"
 
 /*:1756*/
-#line 31326 "texprof.w"
+#line 31323 "texprof.w"
 
 /*1757:*/
-#line 31215 "texprof.w"
+#line 31212 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31220 "texprof.w"
+#line 31217 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1757*/
-#line 31327 "texprof.w"
+#line 31324 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1761*/
-#line 31411 "texprof.w"
+#line 31408 "texprof.w"
 
 prof_file_line= tmp_file_line;
 prof_cmd= tmp_cmd;
@@ -19182,7 +19182,7 @@ int c;
 #line 16606 "texprof.w"
 
 /*1766:*/
-#line 31393 "texprof.w"
+#line 31390 "texprof.w"
 
 int tmp_cmd;
 int tmp_file_line;
@@ -19192,17 +19192,17 @@ int tmp_depth;
 #line 16607 "texprof.w"
 
 /*1767:*/
-#line 31398 "texprof.w"
+#line 31395 "texprof.w"
 
 if(profile_on)
 {/*1761:*/
-#line 31310 "texprof.w"
+#line 31307 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1779:*/
-#line 31656 "texprof.w"
+#line 31653 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -19216,14 +19216,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31669 "texprof.w"
+#line 31666 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1779*/
-#line 31314 "texprof.w"
+#line 31311 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -19235,52 +19235,52 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31325 "texprof.w"
+#line 31322 "texprof.w"
  cmd_count++;
 /*1756:*/
-#line 31198 "texprof.w"
+#line 31195 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31202 "texprof.w"
+#line 31199 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31204 "texprof.w"
+#line 31201 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31206 "texprof.w"
+#line 31203 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31208 "texprof.w"
+#line 31205 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31210 "texprof.w"
+#line 31207 "texprof.w"
 
 /*:1756*/
-#line 31326 "texprof.w"
+#line 31323 "texprof.w"
 
 /*1757:*/
-#line 31215 "texprof.w"
+#line 31212 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31220 "texprof.w"
+#line 31217 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1757*/
-#line 31327 "texprof.w"
+#line 31324 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1761*/
-#line 31400 "texprof.w"
+#line 31397 "texprof.w"
 
 tmp_file_line= prof_file_line;
 tmp_cmd= prof_cmd;
@@ -19799,17 +19799,17 @@ q= cur_p;
 ;
 pack_begin_line= 0;
 /*1768:*/
-#line 31409 "texprof.w"
+#line 31406 "texprof.w"
 
 if(profile_on)
 {/*1761:*/
-#line 31310 "texprof.w"
+#line 31307 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1779:*/
-#line 31656 "texprof.w"
+#line 31653 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -19823,14 +19823,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31669 "texprof.w"
+#line 31666 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1779*/
-#line 31314 "texprof.w"
+#line 31311 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -19842,52 +19842,52 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31325 "texprof.w"
+#line 31322 "texprof.w"
  cmd_count++;
 /*1756:*/
-#line 31198 "texprof.w"
+#line 31195 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31202 "texprof.w"
+#line 31199 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31204 "texprof.w"
+#line 31201 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31206 "texprof.w"
+#line 31203 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31208 "texprof.w"
+#line 31205 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31210 "texprof.w"
+#line 31207 "texprof.w"
 
 /*:1756*/
-#line 31326 "texprof.w"
+#line 31323 "texprof.w"
 
 /*1757:*/
-#line 31215 "texprof.w"
+#line 31212 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31220 "texprof.w"
+#line 31217 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1757*/
-#line 31327 "texprof.w"
+#line 31324 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1761*/
-#line 31411 "texprof.w"
+#line 31408 "texprof.w"
 
 prof_file_line= tmp_file_line;
 prof_cmd= tmp_cmd;
@@ -20825,7 +20825,7 @@ int pi;
 int n;
 scaled delta,h,w;
 /*1766:*/
-#line 31393 "texprof.w"
+#line 31390 "texprof.w"
 
 int tmp_cmd;
 int tmp_file_line;
@@ -20836,17 +20836,17 @@ int tmp_depth;
 
 if((link(contrib_head)==null)||output_active)return;
 /*1770:*/
-#line 31430 "texprof.w"
+#line 31427 "texprof.w"
 
 if(profile_on)
 {/*1761:*/
-#line 31310 "texprof.w"
+#line 31307 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1779:*/
-#line 31656 "texprof.w"
+#line 31653 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -20860,14 +20860,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31669 "texprof.w"
+#line 31666 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1779*/
-#line 31314 "texprof.w"
+#line 31311 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -20879,52 +20879,52 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31325 "texprof.w"
+#line 31322 "texprof.w"
  cmd_count++;
 /*1756:*/
-#line 31198 "texprof.w"
+#line 31195 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31202 "texprof.w"
+#line 31199 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31204 "texprof.w"
+#line 31201 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31206 "texprof.w"
+#line 31203 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31208 "texprof.w"
+#line 31205 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31210 "texprof.w"
+#line 31207 "texprof.w"
 
 /*:1756*/
-#line 31326 "texprof.w"
+#line 31323 "texprof.w"
 
 /*1757:*/
-#line 31215 "texprof.w"
+#line 31212 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31220 "texprof.w"
+#line 31217 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1757*/
-#line 31327 "texprof.w"
+#line 31324 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1761*/
-#line 31432 "texprof.w"
+#line 31429 "texprof.w"
 
 tmp_file_line= prof_file_line;
 tmp_cmd= prof_cmd;
@@ -21166,17 +21166,17 @@ if((c==awful_bad)||(pi<=eject_penalty))
 {fire_up(p);
 if(output_active)
 {/*1768:*/
-#line 31409 "texprof.w"
+#line 31406 "texprof.w"
 
 if(profile_on)
 {/*1761:*/
-#line 31310 "texprof.w"
+#line 31307 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1779:*/
-#line 31656 "texprof.w"
+#line 31653 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -21190,14 +21190,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31669 "texprof.w"
+#line 31666 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1779*/
-#line 31314 "texprof.w"
+#line 31311 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -21209,52 +21209,52 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31325 "texprof.w"
+#line 31322 "texprof.w"
  cmd_count++;
 /*1756:*/
-#line 31198 "texprof.w"
+#line 31195 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31202 "texprof.w"
+#line 31199 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31204 "texprof.w"
+#line 31201 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31206 "texprof.w"
+#line 31203 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31208 "texprof.w"
+#line 31205 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31210 "texprof.w"
+#line 31207 "texprof.w"
 
 /*:1756*/
-#line 31326 "texprof.w"
+#line 31323 "texprof.w"
 
 /*1757:*/
-#line 31215 "texprof.w"
+#line 31212 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31220 "texprof.w"
+#line 31217 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1757*/
-#line 31327 "texprof.w"
+#line 31324 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1761*/
-#line 31411 "texprof.w"
+#line 31408 "texprof.w"
 
 prof_file_line= tmp_file_line;
 prof_cmd= tmp_cmd;
@@ -21352,17 +21352,17 @@ else contrib_tail= contrib_head
 #line 20070 "texprof.w"
 ;
 /*1768:*/
-#line 31409 "texprof.w"
+#line 31406 "texprof.w"
 
 if(profile_on)
 {/*1761:*/
-#line 31310 "texprof.w"
+#line 31307 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1779:*/
-#line 31656 "texprof.w"
+#line 31653 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -21376,14 +21376,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31669 "texprof.w"
+#line 31666 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1779*/
-#line 31314 "texprof.w"
+#line 31311 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -21395,52 +21395,52 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31325 "texprof.w"
+#line 31322 "texprof.w"
  cmd_count++;
 /*1756:*/
-#line 31198 "texprof.w"
+#line 31195 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31202 "texprof.w"
+#line 31199 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31204 "texprof.w"
+#line 31201 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31206 "texprof.w"
+#line 31203 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31208 "texprof.w"
+#line 31205 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31210 "texprof.w"
+#line 31207 "texprof.w"
 
 /*:1756*/
-#line 31326 "texprof.w"
+#line 31323 "texprof.w"
 
 /*1757:*/
-#line 31215 "texprof.w"
+#line 31212 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31220 "texprof.w"
+#line 31217 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1757*/
-#line 31327 "texprof.w"
+#line 31324 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1761*/
-#line 31411 "texprof.w"
+#line 31408 "texprof.w"
 
 prof_file_line= tmp_file_line;
 prof_cmd= tmp_cmd;
@@ -23940,10 +23940,10 @@ pack_cur_name(".tex");
 if(a_open_in(&read_file[n]))
 {read_open[n]= just_open;
 /*1750:*/
-#line 31097 "texprof.w"
+#line 31094 "texprof.w"
 
 /*1748:*/
-#line 31083 "texprof.w"
+#line 31080 "texprof.w"
 
 if(file_num>=MAX_FILE_NUM)overflow("file number",file_num);
 else file_num++;
@@ -23951,7 +23951,7 @@ file_num_name[file_num]= strdup(full_name_of_file);
 file_from_cmd[file_num]= cmd_count;
 
 /*:1748*/
-#line 31098 "texprof.w"
+#line 31095 "texprof.w"
 
 read_file_num[n]= file_num;
 
@@ -24437,7 +24437,7 @@ dump_int(k);dump_int(qo(trie_used[k]));
 #line 24567 "texprof.w"
 ;
 /*1788:*/
-#line 31909 "texprof.w"
+#line 31906 "texprof.w"
 
 {two_halves hw;
 int i,j;
@@ -24480,7 +24480,7 @@ print(" file names dumped; total size ");print_int(word_count*8);
 #line 24568 "texprof.w"
 ;
 /*1790:*/
-#line 31995 "texprof.w"
+#line 31992 "texprof.w"
 
 {int word_count= 0;
 k= hi_mem_min;
@@ -24489,7 +24489,7 @@ while(k<=mem_end)
 halfword e;
 int word_count= 0;
 /*1791:*/
-#line 32013 "texprof.w"
+#line 32010 "texprof.w"
 
 if(fl_mem[k]!=0)e= fl_mem[k++]|0x80000000;
 else
@@ -24501,13 +24501,13 @@ e= i;
 }
 
 /*:1791*/
-#line 32002 "texprof.w"
+#line 31999 "texprof.w"
 
 hw.rh= e;
 if(k> mem_end)e= 0;
 else
 {/*1791:*/
-#line 32013 "texprof.w"
+#line 32010 "texprof.w"
 
 if(fl_mem[k]!=0)e= fl_mem[k++]|0x80000000;
 else
@@ -24519,7 +24519,7 @@ e= i;
 }
 
 /*:1791*/
-#line 32006 "texprof.w"
+#line 32003 "texprof.w"
 }
 hw.lh= e;
 dump_hh(hw);word_count++;
@@ -24577,7 +24577,7 @@ write_stream(tail)= cur_val;
 }
 
 /*:1349*//*1811:*/
-#line 32591 "texprof.w"
+#line 32588 "texprof.w"
 
 static void scan_pdf_ext_toks(void)
 {scan_toks(false,true);
@@ -24590,7 +24590,7 @@ flush_list(def_ref);
 
 
 /*:1811*//*1819:*/
-#line 32920 "texprof.w"
+#line 32917 "texprof.w"
 
 static void scan_action(void)
 {int pdf_action;
@@ -24660,7 +24660,7 @@ pdf_action_new_window= 1;
 }
 
 /*:442*/
-#line 32982 "texprof.w"
+#line 32979 "texprof.w"
 ;}
 else if(scan_keyword("nonewwindow")){
 pdf_action_new_window= 2;
@@ -24671,7 +24671,7 @@ pdf_action_new_window= 2;
 }
 
 /*:442*/
-#line 32985 "texprof.w"
+#line 32982 "texprof.w"
 ;}
 else
 pdf_action_new_window= 0;
@@ -24684,7 +24684,7 @@ pdf_error("ext1",
 }
 
 /*:1819*//*1821:*/
-#line 33058 "texprof.w"
+#line 33055 "texprof.w"
 
 static void scan_alt_rule(void)
 {
@@ -24713,7 +24713,7 @@ scan_pdf_ext_toks();
 
 
 /*:1821*//*1823:*/
-#line 33095 "texprof.w"
+#line 33092 "texprof.w"
 
 static void read_expand_font(void)
 {int shrink_limit,stretch_limit,font_step;
@@ -24736,13 +24736,13 @@ if(scan_keyword("autoexpand")){
 }
 
 /*:442*/
-#line 33110 "texprof.w"
+#line 33107 "texprof.w"
 ;
 }
 }
 
 /*:1823*//*1824:*/
-#line 33115 "texprof.w"
+#line 33112 "texprof.w"
 
 static void pdf_include_chars(void)
 {str_number s;
@@ -24757,7 +24757,7 @@ scan_pdf_ext_toks();
 }
 
 /*:1824*//*1830:*/
-#line 33204 "texprof.w"
+#line 33201 "texprof.w"
 
 static void scan_thread_id(void)
 {if(scan_keyword("num"))scan_int();
@@ -24765,7 +24765,7 @@ else if(scan_keyword("name"))scan_pdf_ext_toks();
 }
 
 /*:1830*//*1831:*/
-#line 33211 "texprof.w"
+#line 33208 "texprof.w"
 
 static void scan_pdf_box_spec(void)
 {
@@ -24890,36 +24890,36 @@ write_tokens(tail)= null;
 break;
 
 /*:1678*//*1744:*/
-#line 31019 "texprof.w"
+#line 31016 "texprof.w"
 
 case profile_on_code:
 if(!profile_on)
 {profile_on= true;
 /*1763:*/
-#line 31353 "texprof.w"
+#line 31350 "texprof.w"
 
 /*1756:*/
-#line 31198 "texprof.w"
+#line 31195 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31202 "texprof.w"
+#line 31199 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31204 "texprof.w"
+#line 31201 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31206 "texprof.w"
+#line 31203 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31208 "texprof.w"
+#line 31205 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31210 "texprof.w"
+#line 31207 "texprof.w"
 
 /*:1756*/
-#line 31354 "texprof.w"
+#line 31351 "texprof.w"
 
 diff_nsec= 0;
 start_nsec= ts.tv_nsec;
@@ -24928,11 +24928,11 @@ prof_file_line= cur_file_line;
 prof_cmd= system_profile_on;
 prof_depth= cur_depth;
 /*1778:*/
-#line 31651 "texprof.w"
+#line 31648 "texprof.w"
 
 if(unchanged_depth<prof_depth)
 /*1780:*/
-#line 31676 "texprof.w"
+#line 31673 "texprof.w"
 
 {int i;
 if(last_depth> unchanged_depth)
@@ -24944,7 +24944,7 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(unchanged_depth);
 print_char('}');print_ln();
 #endif
-#line 31687 "texprof.w"
+#line 31684 "texprof.w"
  cmd_count++;
 }
 if(st_count+2*(prof_depth-unchanged_depth)> MAX_STAMPS)
@@ -24958,7 +24958,7 @@ print_char('<');print_int(CALL_DEPTH(macro_stack[i]));
 print_char(':');print_cs(CALL_EQTB(macro_stack[i]));
 print_char(']');print_ln();
 #endif
-#line 31700 "texprof.w"
+#line 31697 "texprof.w"
  cmd_count++;
 stamp[st_count++]= CALL_CFL(macro_stack[i]);
 stamp[st_count++]= CALL_DE(macro_stack[i]);
@@ -24969,33 +24969,33 @@ if(prof_depth> prof_max_depth)prof_max_depth= prof_depth;
 
 
 /*:1780*/
-#line 31653 "texprof.w"
+#line 31650 "texprof.w"
 
 
 
 /*:1778*/
-#line 31361 "texprof.w"
+#line 31358 "texprof.w"
 
 
 /*:1763*/
-#line 31023 "texprof.w"
+#line 31020 "texprof.w"
 
 }
 break;
 case profile_off_code:
 if(profile_on)
 {/*1762:*/
-#line 31339 "texprof.w"
+#line 31336 "texprof.w"
 
 prof_file_line= cur_file_line;
 prof_cmd= system_profile_off;
 prof_depth= cur_depth;
 /*1778:*/
-#line 31651 "texprof.w"
+#line 31648 "texprof.w"
 
 if(unchanged_depth<prof_depth)
 /*1780:*/
-#line 31676 "texprof.w"
+#line 31673 "texprof.w"
 
 {int i;
 if(last_depth> unchanged_depth)
@@ -25007,7 +25007,7 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(unchanged_depth);
 print_char('}');print_ln();
 #endif
-#line 31687 "texprof.w"
+#line 31684 "texprof.w"
  cmd_count++;
 }
 if(st_count+2*(prof_depth-unchanged_depth)> MAX_STAMPS)
@@ -25021,7 +25021,7 @@ print_char('<');print_int(CALL_DEPTH(macro_stack[i]));
 print_char(':');print_cs(CALL_EQTB(macro_stack[i]));
 print_char(']');print_ln();
 #endif
-#line 31700 "texprof.w"
+#line 31697 "texprof.w"
  cmd_count++;
 stamp[st_count++]= CALL_CFL(macro_stack[i]);
 stamp[st_count++]= CALL_DE(macro_stack[i]);
@@ -25032,21 +25032,21 @@ if(prof_depth> prof_max_depth)prof_max_depth= prof_depth;
 
 
 /*:1780*/
-#line 31653 "texprof.w"
+#line 31650 "texprof.w"
 
 
 
 /*:1778*/
-#line 31343 "texprof.w"
+#line 31340 "texprof.w"
 
 /*1761:*/
-#line 31310 "texprof.w"
+#line 31307 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1779:*/
-#line 31656 "texprof.w"
+#line 31653 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -25060,14 +25060,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31669 "texprof.w"
+#line 31666 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1779*/
-#line 31314 "texprof.w"
+#line 31311 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -25079,66 +25079,66 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31325 "texprof.w"
+#line 31322 "texprof.w"
  cmd_count++;
 /*1756:*/
-#line 31198 "texprof.w"
+#line 31195 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31202 "texprof.w"
+#line 31199 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31204 "texprof.w"
+#line 31201 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31206 "texprof.w"
+#line 31203 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31208 "texprof.w"
+#line 31205 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31210 "texprof.w"
+#line 31207 "texprof.w"
 
 /*:1756*/
-#line 31326 "texprof.w"
+#line 31323 "texprof.w"
 
 /*1757:*/
-#line 31215 "texprof.w"
+#line 31212 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31220 "texprof.w"
+#line 31217 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1757*/
-#line 31327 "texprof.w"
+#line 31324 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1761*/
-#line 31344 "texprof.w"
+#line 31341 "texprof.w"
 
 
 /*:1762*/
-#line 31028 "texprof.w"
+#line 31025 "texprof.w"
 
 profile_on= false;
 }
 break;
 
 /*:1744*//*1816:*/
-#line 32850 "texprof.w"
+#line 32847 "texprof.w"
 
 case pdf_annot_node:/*1817:*/
-#line 32897 "texprof.w"
+#line 32894 "texprof.w"
 
 {if(scan_keyword("reserveobjnum")){/*442:*/
 #line 9230 "texprof.w"
@@ -25147,7 +25147,7 @@ case pdf_annot_node:/*1817:*/
 }
 
 /*:442*/
-#line 32898 "texprof.w"
+#line 32895 "texprof.w"
 ;}
 else{
 if(scan_keyword("useobjnum")){scan_int();}
@@ -25157,20 +25157,20 @@ scan_pdf_ext_toks();
 }
 
 /*:1817*/
-#line 32851 "texprof.w"
+#line 32848 "texprof.w"
 break;
 case pdf_catalog_code:/*1818:*/
-#line 32906 "texprof.w"
+#line 32903 "texprof.w"
 
 {scan_pdf_ext_toks();
 if(scan_keyword("openaction"))scan_action();
 }
 
 /*:1818*/
-#line 32852 "texprof.w"
+#line 32849 "texprof.w"
 break;
 case pdf_dest_node:/*1820:*/
-#line 33007 "texprof.w"
+#line 33004 "texprof.w"
 
 {int pdf_dest_type;
 if(scan_keyword("struct")){
@@ -25221,7 +25221,7 @@ pdf_error("ext1","destination type missing");
 }
 
 /*:442*/
-#line 33050 "texprof.w"
+#line 33047 "texprof.w"
 ;
 if(pdf_dest_type==pdf_dest_fitr){
 scan_alt_rule();
@@ -25231,12 +25231,12 @@ scan_alt_rule();
 
 
 /*:1820*/
-#line 32853 "texprof.w"
+#line 32850 "texprof.w"
 break;
 case pdf_end_link_node:break;
 case pdf_end_thread_node:break;
 case pdf_font_attr_code:/*1822:*/
-#line 33085 "texprof.w"
+#line 33082 "texprof.w"
 
 {
 scan_font_ident();
@@ -25246,13 +25246,13 @@ scan_pdf_ext_toks();
 }
 
 /*:1822*/
-#line 32856 "texprof.w"
+#line 32853 "texprof.w"
 break;
 case pdf_font_expand_code:read_expand_font();break;
 case pdf_include_chars_code:pdf_include_chars();break;
 case pdf_info_code:scan_pdf_ext_toks();break;
 case pdf_literal_node:/*1825:*/
-#line 33128 "texprof.w"
+#line 33125 "texprof.w"
 
 {int k;
 if(scan_keyword("shipout"))k= pdf_lateliteral_node;
@@ -25265,10 +25265,10 @@ else scan_pdf_ext_late_toks();
 }
 
 /*:1825*/
-#line 32860 "texprof.w"
+#line 32857 "texprof.w"
 break;
 case pdf_colorstack_node:/*1826:*/
-#line 33147 "texprof.w"
+#line 33144 "texprof.w"
 
 {int i;
 scan_int();
@@ -25295,7 +25295,7 @@ scan_pdf_ext_toks();
 }
 
 /*:1826*/
-#line 32861 "texprof.w"
+#line 32858 "texprof.w"
 break;
 case pdf_setmatrix_node:scan_pdf_ext_toks();break;
 case pdf_save_node:break;
@@ -25304,7 +25304,7 @@ case pdf_map_file_code:scan_pdf_ext_toks();break;
 case pdf_map_line_code:scan_pdf_ext_toks();break;
 case pdf_names_code:scan_pdf_ext_toks();break;
 case pdf_obj_code:/*1827:*/
-#line 33172 "texprof.w"
+#line 33169 "texprof.w"
 
 {
 if(scan_keyword("reserveobjnum")){
@@ -25315,7 +25315,7 @@ if(scan_keyword("reserveobjnum")){
 }
 
 /*:442*/
-#line 33175 "texprof.w"
+#line 33172 "texprof.w"
 ;
 }
 else{
@@ -25329,10 +25329,10 @@ scan_pdf_ext_toks();
 }
 
 /*:1827*/
-#line 32868 "texprof.w"
+#line 32865 "texprof.w"
 break;
 case pdf_outline_code:/*1828:*/
-#line 33187 "texprof.w"
+#line 33184 "texprof.w"
 
 {
 if(scan_keyword("attr"))scan_pdf_ext_toks();
@@ -25342,7 +25342,7 @@ scan_pdf_ext_toks();
 }
 
 /*:1828*/
-#line 32869 "texprof.w"
+#line 32866 "texprof.w"
 break;
 case pdf_refobj_node:scan_int();break;
 case pdf_refxform_node:scan_int();break;
@@ -25356,7 +25356,7 @@ case pdf_thread_node:scan_annot();scan_thread_id();break;
 case pdf_trailer_code:scan_pdf_ext_toks();break;
 case pdf_trailer_id_code:scan_pdf_ext_toks();break;
 case pdf_xform_code:/*1829:*/
-#line 33195 "texprof.w"
+#line 33192 "texprof.w"
 
 {
 if(scan_keyword("attr"))scan_pdf_ext_toks();
@@ -25365,7 +25365,7 @@ scan_register_num();
 }
 
 /*:1829*/
-#line 32881 "texprof.w"
+#line 32878 "texprof.w"
 break;
 case pdf_ximage_code:scan_image();break;
 case pdf_glyph_to_unicode_code:scan_pdf_ext_toks();scan_pdf_ext_toks();break;
@@ -25588,15 +25588,15 @@ static void main_control(void)
 {
 int t;
 /*1759:*/
-#line 31267 "texprof.w"
+#line 31264 "texprof.w"
 
 /*1773:*/
-#line 31551 "texprof.w"
+#line 31548 "texprof.w"
 
 {int macro_depth= -1,macro_cs= 0;
 uint32_t macro_fl= FILE_LINE(terminal_file,0);
 /*1775:*/
-#line 31573 "texprof.w"
+#line 31570 "texprof.w"
 
 macro_depth++;
 cur_depth= macro_depth;
@@ -25607,7 +25607,7 @@ if(macro_depth<=unchanged_depth)
 unchanged_depth= macro_depth-1;
 
 /*:1775*/
-#line 31554 "texprof.w"
+#line 31551 "texprof.w"
 
 cmd_count++;
 stamp[st_count++]= CALL_CFL(macro_stack[0]);
@@ -25616,16 +25616,16 @@ last_depth= unchanged_depth= prof_depth= 0;
 }
 
 /*:1773*/
-#line 31268 "texprof.w"
+#line 31265 "texprof.w"
 
 prof_cmd= system_cmd;
 prof_file_line= FILE_LINE(system_file,system_start);
 /*1778:*/
-#line 31651 "texprof.w"
+#line 31648 "texprof.w"
 
 if(unchanged_depth<prof_depth)
 /*1780:*/
-#line 31676 "texprof.w"
+#line 31673 "texprof.w"
 
 {int i;
 if(last_depth> unchanged_depth)
@@ -25637,7 +25637,7 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(unchanged_depth);
 print_char('}');print_ln();
 #endif
-#line 31687 "texprof.w"
+#line 31684 "texprof.w"
  cmd_count++;
 }
 if(st_count+2*(prof_depth-unchanged_depth)> MAX_STAMPS)
@@ -25651,7 +25651,7 @@ print_char('<');print_int(CALL_DEPTH(macro_stack[i]));
 print_char(':');print_cs(CALL_EQTB(macro_stack[i]));
 print_char(']');print_ln();
 #endif
-#line 31700 "texprof.w"
+#line 31697 "texprof.w"
  cmd_count++;
 stamp[st_count++]= CALL_CFL(macro_stack[i]);
 stamp[st_count++]= CALL_DE(macro_stack[i]);
@@ -25662,12 +25662,12 @@ if(prof_depth> prof_max_depth)prof_max_depth= prof_depth;
 
 
 /*:1780*/
-#line 31653 "texprof.w"
+#line 31650 "texprof.w"
 
 
 
 /*:1778*/
-#line 31271 "texprof.w"
+#line 31268 "texprof.w"
 
 #if 0
 clock_getres(CLOCK_MONOTONIC,&ts);
@@ -25682,29 +25682,29 @@ printf("CLOCK_PROCESS_CPUTIME_ID: %ld %ld\n",ts.tv_sec,ts.tv_nsec);
 clock_getres(CLOCK_THREAD_CPUTIME_ID,&ts);
 printf("CLOCK_THREAD_CPUTIME_ID: %ld %ld\n",ts.tv_sec,ts.tv_nsec);
 #endif
-#line 31285 "texprof.w"
+#line 31282 "texprof.w"
 /*1756:*/
-#line 31198 "texprof.w"
+#line 31195 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31202 "texprof.w"
+#line 31199 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31204 "texprof.w"
+#line 31201 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31206 "texprof.w"
+#line 31203 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31208 "texprof.w"
+#line 31205 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31210 "texprof.w"
+#line 31207 "texprof.w"
 
 /*:1756*/
-#line 31285 "texprof.w"
+#line 31282 "texprof.w"
 
 diff_nsec= 0;
 start_nsec= ts.tv_nsec;
@@ -25716,13 +25716,13 @@ start_sec= ts.tv_sec;
 if(every_job!=null)begin_token_list(every_job,every_job_text);
 big_switch:
 /*1761:*/
-#line 31310 "texprof.w"
+#line 31307 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1779:*/
-#line 31656 "texprof.w"
+#line 31653 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -25736,14 +25736,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31669 "texprof.w"
+#line 31666 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1779*/
-#line 31314 "texprof.w"
+#line 31311 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -25755,45 +25755,45 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31325 "texprof.w"
+#line 31322 "texprof.w"
  cmd_count++;
 /*1756:*/
-#line 31198 "texprof.w"
+#line 31195 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31202 "texprof.w"
+#line 31199 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31204 "texprof.w"
+#line 31201 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31206 "texprof.w"
+#line 31203 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31208 "texprof.w"
+#line 31205 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31210 "texprof.w"
+#line 31207 "texprof.w"
 
 /*:1756*/
-#line 31326 "texprof.w"
+#line 31323 "texprof.w"
 
 /*1757:*/
-#line 31215 "texprof.w"
+#line 31212 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31220 "texprof.w"
+#line 31217 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1757*/
-#line 31327 "texprof.w"
+#line 31324 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
@@ -25805,18 +25805,18 @@ stamp[st_count++]= diff_nsec;
 get_x_token();
 big_reswitch:
 /*1765:*/
-#line 31380 "texprof.w"
+#line 31377 "texprof.w"
 
 if(profile_on)
 {prof_cmd= cur_cmd;
 prof_depth= cur_depth;
 prof_file_line= cur_file_line;
 /*1778:*/
-#line 31651 "texprof.w"
+#line 31648 "texprof.w"
 
 if(unchanged_depth<prof_depth)
 /*1780:*/
-#line 31676 "texprof.w"
+#line 31673 "texprof.w"
 
 {int i;
 if(last_depth> unchanged_depth)
@@ -25828,7 +25828,7 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(unchanged_depth);
 print_char('}');print_ln();
 #endif
-#line 31687 "texprof.w"
+#line 31684 "texprof.w"
  cmd_count++;
 }
 if(st_count+2*(prof_depth-unchanged_depth)> MAX_STAMPS)
@@ -25842,7 +25842,7 @@ print_char('<');print_int(CALL_DEPTH(macro_stack[i]));
 print_char(':');print_cs(CALL_EQTB(macro_stack[i]));
 print_char(']');print_ln();
 #endif
-#line 31700 "texprof.w"
+#line 31697 "texprof.w"
  cmd_count++;
 stamp[st_count++]= CALL_CFL(macro_stack[i]);
 stamp[st_count++]= CALL_DE(macro_stack[i]);
@@ -25853,12 +25853,12 @@ if(prof_depth> prof_max_depth)prof_max_depth= prof_depth;
 
 
 /*:1780*/
-#line 31653 "texprof.w"
+#line 31650 "texprof.w"
 
 
 
 /*:1778*/
-#line 31385 "texprof.w"
+#line 31382 "texprof.w"
 
 }
 
@@ -25911,61 +25911,61 @@ goto big_reswitch;
 case vmode+stop:
 if(its_all_over())
 {/*1764:*/
-#line 31366 "texprof.w"
+#line 31363 "texprof.w"
 
 /*1760:*/
-#line 31294 "texprof.w"
+#line 31291 "texprof.w"
 
 prof_cmd= cur_cmd;
 prof_file_line= cur_file_line;
 prof_depth= 0;
 profile_on= true;
 /*1756:*/
-#line 31198 "texprof.w"
+#line 31195 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31202 "texprof.w"
+#line 31199 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31204 "texprof.w"
+#line 31201 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31206 "texprof.w"
+#line 31203 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31208 "texprof.w"
+#line 31205 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31210 "texprof.w"
+#line 31207 "texprof.w"
 
 /*:1756*/
-#line 31299 "texprof.w"
+#line 31296 "texprof.w"
 
 /*1757:*/
-#line 31215 "texprof.w"
+#line 31212 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31220 "texprof.w"
+#line 31217 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1757*/
-#line 31300 "texprof.w"
+#line 31297 "texprof.w"
 
 /*1761:*/
-#line 31310 "texprof.w"
+#line 31307 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1779:*/
-#line 31656 "texprof.w"
+#line 31653 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -25979,14 +25979,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31669 "texprof.w"
+#line 31666 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1779*/
-#line 31314 "texprof.w"
+#line 31311 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -25998,57 +25998,57 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31325 "texprof.w"
+#line 31322 "texprof.w"
  cmd_count++;
 /*1756:*/
-#line 31198 "texprof.w"
+#line 31195 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31202 "texprof.w"
+#line 31199 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31204 "texprof.w"
+#line 31201 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31206 "texprof.w"
+#line 31203 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31208 "texprof.w"
+#line 31205 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31210 "texprof.w"
+#line 31207 "texprof.w"
 
 /*:1756*/
-#line 31326 "texprof.w"
+#line 31323 "texprof.w"
 
 /*1757:*/
-#line 31215 "texprof.w"
+#line 31212 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31220 "texprof.w"
+#line 31217 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1757*/
-#line 31327 "texprof.w"
+#line 31324 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
 
 
 /*:1761*/
-#line 31301 "texprof.w"
+#line 31298 "texprof.w"
 
 
 
 /*:1760*/
-#line 31367 "texprof.w"
+#line 31364 "texprof.w"
 
 
 /*:1764*/
@@ -26405,13 +26405,13 @@ any_mode(extension):do_extension();
 goto big_switch;
 main_loop:
 /*1761:*/
-#line 31310 "texprof.w"
+#line 31307 "texprof.w"
 
 if(profile_on)
 {if(st_count+3> MAX_STAMPS)
 overflow("profile data",MAX_STAMPS);
 /*1779:*/
-#line 31656 "texprof.w"
+#line 31653 "texprof.w"
 
 if(last_depth> prof_depth)
 {if(last_depth==prof_depth+1)
@@ -26425,14 +26425,14 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(prof_depth);
 print_char('}');print_ln();
 #endif
-#line 31669 "texprof.w"
+#line 31666 "texprof.w"
  cmd_count++;
 last_depth= unchanged_depth= prof_depth;
 }
 
 
 /*:1779*/
-#line 31314 "texprof.w"
+#line 31311 "texprof.w"
 
 stamp[st_count++]= (prof_cmd<<24)|prof_file_line;
 prof_cmd= prof_cmd&~POP_BIT;
@@ -26444,45 +26444,45 @@ print_int(prof_cmd&~POP_BIT);
 print_char(':');print_int(prof_depth);
 print_char('>');print_ln();
 #endif
-#line 31325 "texprof.w"
+#line 31322 "texprof.w"
  cmd_count++;
 /*1756:*/
-#line 31198 "texprof.w"
+#line 31195 "texprof.w"
 
 #if GETTIME==0
 time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #elif GETTIME==1
-#line 31202 "texprof.w"
+#line 31199 "texprof.w"
  time_error= clock_gettime(CLOCK_PROCESS_CPUTIME_ID,&ts);
 #elif GETTIME==2
-#line 31204 "texprof.w"
+#line 31201 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC_RAW,&ts);
 #elif GETTIME==3
-#line 31206 "texprof.w"
+#line 31203 "texprof.w"
  time_error= clock_gettime(CLOCK_MONOTONIC,&ts);
 #else
-#line 31208 "texprof.w"
+#line 31205 "texprof.w"
  time_error= clock_gettime(CLOCK_THREAD_CPUTIME_ID,&ts);
 #endif
-#line 31210 "texprof.w"
+#line 31207 "texprof.w"
 
 /*:1756*/
-#line 31326 "texprof.w"
+#line 31323 "texprof.w"
 
 /*1757:*/
-#line 31215 "texprof.w"
+#line 31212 "texprof.w"
 
 diff_nsec= (ts.tv_sec-start_sec)*1000000000+(ts.tv_nsec-start_nsec);
 #if 0
 printf("time: %ld %ld %ld\n",diff_nsec,(ts.tv_sec),(ts.tv_nsec));
 #endif
-#line 31220 "texprof.w"
+#line 31217 "texprof.w"
 
 start_nsec= ts.tv_nsec;
 start_sec= ts.tv_sec;
 
 /*:1757*/
-#line 31327 "texprof.w"
+#line 31324 "texprof.w"
 
 stamp[st_count++]= diff_nsec;
 }
@@ -26492,18 +26492,18 @@ stamp[st_count++]= diff_nsec;
 #line 20711 "texprof.w"
 
 /*1765:*/
-#line 31380 "texprof.w"
+#line 31377 "texprof.w"
 
 if(profile_on)
 {prof_cmd= cur_cmd;
 prof_depth= cur_depth;
 prof_file_line= cur_file_line;
 /*1778:*/
-#line 31651 "texprof.w"
+#line 31648 "texprof.w"
 
 if(unchanged_depth<prof_depth)
 /*1780:*/
-#line 31676 "texprof.w"
+#line 31673 "texprof.w"
 
 {int i;
 if(last_depth> unchanged_depth)
@@ -26515,7 +26515,7 @@ print_char(':');print_int(last_depth);
 print_char('>');print_int(unchanged_depth);
 print_char('}');print_ln();
 #endif
-#line 31687 "texprof.w"
+#line 31684 "texprof.w"
  cmd_count++;
 }
 if(st_count+2*(prof_depth-unchanged_depth)> MAX_STAMPS)
@@ -26529,7 +26529,7 @@ print_char('<');print_int(CALL_DEPTH(macro_stack[i]));
 print_char(':');print_cs(CALL_EQTB(macro_stack[i]));
 print_char(']');print_ln();
 #endif
-#line 31700 "texprof.w"
+#line 31697 "texprof.w"
  cmd_count++;
 stamp[st_count++]= CALL_CFL(macro_stack[i]);
 stamp[st_count++]= CALL_DE(macro_stack[i]);
@@ -26540,12 +26540,12 @@ if(prof_depth> prof_max_depth)prof_max_depth= prof_depth;
 
 
 /*:1780*/
-#line 31653 "texprof.w"
+#line 31650 "texprof.w"
 
 
 
 /*:1778*/
-#line 31385 "texprof.w"
+#line 31382 "texprof.w"
 
 }
 
@@ -27009,7 +27009,7 @@ trie_not_ready= false
 #line 24597 "texprof.w"
 ;
 /*1789:*/
-#line 31947 "texprof.w"
+#line 31944 "texprof.w"
 
 
 {two_halves hw;
@@ -27048,7 +27048,7 @@ free(buf);
 #line 24598 "texprof.w"
 ;
 /*1792:*/
-#line 32023 "texprof.w"
+#line 32020 "texprof.w"
 
 k= hi_mem_min;
 while(k<=mem_end)
@@ -27057,7 +27057,24 @@ halfword e;
 undump_hh(hw);
 e= hw.rh;
 /*1793:*/
-#line 32037 "texprof.w"
+#line 32034 "texprof.w"
+
+if(e&0x80000000)
+fl_mem[k++]= e&~0x80000000;
+else
+{int i;
+i= e;
+while(i> 0)
+{i--;k++;}
+}
+
+/*:1793*/
+#line 32027 "texprof.w"
+
+if(k<=mem_end)
+{e= hw.lh;
+/*1793:*/
+#line 32034 "texprof.w"
 
 if(e&0x80000000)
 fl_mem[k++]= e&~0x80000000;
@@ -27070,23 +27087,6 @@ while(i> 0)
 
 /*:1793*/
 #line 32030 "texprof.w"
-
-if(k<=mem_end)
-{e= hw.lh;
-/*1793:*/
-#line 32037 "texprof.w"
-
-if(e&0x80000000)
-fl_mem[k++]= e&~0x80000000;
-else
-{int i;
-i= e;
-while(i> 0)
-{i--;k++;}
-}
-
-/*:1793*/
-#line 32033 "texprof.w"
 
 }
 }
@@ -27126,7 +27126,7 @@ static void close_files_and_terminate(void)
 for(k= 0;k<=15;k++)if(write_open[k])a_close(&write_file[k]);
 
 /*:1377*//*1781:*/
-#line 31720 "texprof.w"
+#line 31717 "texprof.w"
 
 {FILE*prof;
 pack_job_name(".tprof");
@@ -27136,16 +27136,16 @@ else{
 int i;
 prof_file_line= cur_file_line;
 /*1782:*/
-#line 31743 "texprof.w"
+#line 31740 "texprof.w"
 
 fputs("TEX PROF",prof);
 
 
 /*:1782*/
-#line 31728 "texprof.w"
+#line 31725 "texprof.w"
 
 /*1783:*/
-#line 31767 "texprof.w"
+#line 31764 "texprof.w"
 
 PUT2(file_num+1);
 {int n,m;
@@ -27171,19 +27171,19 @@ PUT2(prof_max_depth);
 
 
 /*:1783*/
-#line 31729 "texprof.w"
+#line 31726 "texprof.w"
 
 /*1782:*/
-#line 31743 "texprof.w"
+#line 31740 "texprof.w"
 
 fputs("TEX PROF",prof);
 
 
 /*:1782*/
-#line 31730 "texprof.w"
+#line 31727 "texprof.w"
 
 /*1784:*/
-#line 31793 "texprof.w"
+#line 31790 "texprof.w"
 
 for(i= 0;i<=file_num;i++)
 {fputs(file_num_name[i],prof);
@@ -27191,19 +27191,19 @@ PUT1(0);
 }
 
 /*:1784*/
-#line 31731 "texprof.w"
+#line 31728 "texprof.w"
 
 /*1782:*/
-#line 31743 "texprof.w"
+#line 31740 "texprof.w"
 
 fputs("TEX PROF",prof);
 
 
 /*:1782*/
-#line 31732 "texprof.w"
+#line 31729 "texprof.w"
 
 /*1785:*/
-#line 31804 "texprof.w"
+#line 31801 "texprof.w"
 
 for(i= hash_base;i<undefined_control_sequence;i++)
 if(text(i)!=0)
@@ -27216,19 +27216,19 @@ PUT1(0);
 
 
 /*:1785*/
-#line 31733 "texprof.w"
+#line 31730 "texprof.w"
 
 /*1782:*/
-#line 31743 "texprof.w"
+#line 31740 "texprof.w"
 
 fputs("TEX PROF",prof);
 
 
 /*:1782*/
-#line 31734 "texprof.w"
+#line 31731 "texprof.w"
 
 /*1787:*/
-#line 31852 "texprof.w"
+#line 31849 "texprof.w"
 
 
 i= 0;
@@ -27239,12 +27239,12 @@ while(i<st_count)
 if(c==system_macro_pop)
 {int n= stamp[i]&0xFFFF;
 /*1786:*/
-#line 31832 "texprof.w"
+#line 31829 "texprof.w"
 
 #if SHOW_WRITE_TIMING
 printf("!%d:%d:%d>%d\n",j++,i,last_depth,last_depth-n);
 #endif
-#line 31836 "texprof.w"
+#line 31833 "texprof.w"
  if(n<=10)
 PUT1(system_macro_pop_0+n);
 else if(n<=255)
@@ -27258,7 +27258,7 @@ PUT2(n);
 last_depth= last_depth-n;
 
 /*:1786*/
-#line 31861 "texprof.w"
+#line 31858 "texprof.w"
 
 i++;
 }
@@ -27267,12 +27267,12 @@ else if(c==system_macro_push)
 if(d<=last_depth)
 {int n= last_depth-d+1;
 /*1786:*/
-#line 31832 "texprof.w"
+#line 31829 "texprof.w"
 
 #if SHOW_WRITE_TIMING
 printf("!%d:%d:%d>%d\n",j++,i,last_depth,last_depth-n);
 #endif
-#line 31836 "texprof.w"
+#line 31833 "texprof.w"
  if(n<=10)
 PUT1(system_macro_pop_0+n);
 else if(n<=255)
@@ -27286,7 +27286,7 @@ PUT2(n);
 last_depth= last_depth-n;
 
 /*:1786*/
-#line 31868 "texprof.w"
+#line 31865 "texprof.w"
 
 
 
@@ -27299,7 +27299,7 @@ print_char(':');print_int(d);
 print_char(':');print_cs(stamp[i+1]&0xffff);
 print_char(']');print_ln();
 #endif
-#line 31880 "texprof.w"
+#line 31877 "texprof.w"
  PUT4(stamp[i]);i++;
 PUT2(stamp[i]);i++;
 last_depth= d;
@@ -27311,12 +27311,12 @@ if(c&POP_BIT)
 #if SHOW_WRITE_TIMING
 printf("!%d:%d:%d>%d}\n",j++,i,last_depth+1,last_depth);
 #endif
-#line 31891 "texprof.w"
+#line 31888 "texprof.w"
 }
 #if SHOW_WRITE_TIMING
 printf("!%d:%d:%d:%d>\n",j++,i,stamp[i]>>24,last_depth);
 #endif
-#line 31895 "texprof.w"
+#line 31892 "texprof.w"
  PUT4(stamp[i]);i++;
 PUT4(stamp[i]);i++;
 }
@@ -27324,16 +27324,16 @@ PUT4(stamp[i]);i++;
 }
 
 /*:1787*/
-#line 31735 "texprof.w"
+#line 31732 "texprof.w"
 
 /*1782:*/
-#line 31743 "texprof.w"
+#line 31740 "texprof.w"
 
 fputs("TEX PROF",prof);
 
 
 /*:1782*/
-#line 31736 "texprof.w"
+#line 31733 "texprof.w"
 
 fclose(prof);
 }
@@ -28337,7 +28337,7 @@ primitive("setlanguage",extension,set_language_code);
 
 
 /*:1343*//*1742:*/
-#line 31009 "texprof.w"
+#line 31006 "texprof.w"
 
 primitive("profileon",extension,profile_on_code);
 
@@ -28345,7 +28345,7 @@ primitive("profileoff",extension,profile_off_code);
 
 
 /*:1742*//*1799:*/
-#line 32112 "texprof.w"
+#line 32109 "texprof.w"
 
 if(pdf_on)
 {
@@ -28370,7 +28370,7 @@ primitive("pdflastlink",last_item,pdf_last_link_code);
 }
 
 /*:1799*//*1803:*/
-#line 32239 "texprof.w"
+#line 32236 "texprof.w"
 
 if(pdf_on)
 {
@@ -28488,7 +28488,7 @@ primitive("ifpdfprimitive",if_test,if_primitive_code);
 }
 
 /*:1803*//*1808:*/
-#line 32457 "texprof.w"
+#line 32454 "texprof.w"
 
 if(pdf_on)
 {
@@ -28527,7 +28527,7 @@ primitive("pdfcolorstackinit",convert,pdf_colorstack_init_code);
 }
 
 /*:1808*//*1814:*/
-#line 32701 "texprof.w"
+#line 32698 "texprof.w"
 
 if(pdf_on)
 {
@@ -29409,12 +29409,12 @@ static struct option long_options[]= {
 {"file-line-error",0,&filelineerrorstylep,1},
 {"no-file-line-error",0,&filelineerrorstylep,0},
 /*1740:*/
-#line 30996 "texprof.w"
+#line 30993 "texprof.w"
 
 {"prof",0,&profile_on,1},
 
 /*:1740*//*1796:*/
-#line 32079 "texprof.w"
+#line 32076 "texprof.w"
 
 {"pdf",0,0,0},
 
@@ -29505,13 +29505,13 @@ fprintf(stdout,"Options:\n"/*1693:*/
 
 
 /*:1693*//*1739:*/
-#line 30990 "texprof.w"
+#line 30987 "texprof.w"
 
 " -prof                 "
 "\t enable profiling\n"
 
 /*:1739*//*1794:*/
-#line 32061 "texprof.w"
+#line 32058 "texprof.w"
 
 " -pdf                 "
 "\t pretend to be pdftex; requires -ini; implies -ltx\n"
@@ -29703,7 +29703,7 @@ return value&&(*value=='t'||*value=='y'||*value=='1');
 }
 
 /*:1724*//*1728:*/
-#line 30501 "texprof.w"
+#line 30498 "texprof.w"
 
 static void parse_first_line(char*filename)
 {FILE*f= NULL;
@@ -29721,7 +29721,7 @@ r= s;
 while(*s!=0&&*s!=' '&&*s!='\r'&&*s!='\n')s++;
 *s= 0;
 if(dump_name==NULL){
-char*f_name= concat(r,".fmt");
+char*f_name= concat(r,format_extension);
 char*d_name= kpse_find_file(f_name,kpse_fmt_format,false);
 if(d_name&&kpse_readable_file(d_name)){
 dump_name= xstrdup(r);
@@ -29735,7 +29735,7 @@ free(t);
 }
 
 /*:1728*//*1729:*/
-#line 30550 "texprof.w"
+#line 30547 "texprof.w"
 
 static void input_add_char(unsigned int c)
 {if(last>=max_buf_stack)
@@ -29754,7 +29754,7 @@ overflow("buffer size",buf_size);
 }
 
 /*:35*/
-#line 30555 "texprof.w"
+#line 30552 "texprof.w"
 ;
 }
 buffer[last]= xord[c];incr(last);
@@ -29784,7 +29784,7 @@ return(loc<last);
 }
 
 /*:1729*//*1732:*/
-#line 30659 "texprof.w"
+#line 30656 "texprof.w"
 
 static void update_name_of_file(const char*s,int k)
 {int j;
@@ -29795,7 +29795,7 @@ name_of_file[name_length+1]= 0;
 }
 
 /*:1732*//*1733:*/
-#line 30673 "texprof.w"
+#line 30670 "texprof.w"
 
 static FILE*open_in(char*filename,kpse_file_format_type t,const char*rwb)
 {char*fname= NULL;
@@ -29833,7 +29833,7 @@ return f->f!=NULL&&ferror(f->f)==0;
 }
 
 /*:1733*//*1738:*/
-#line 30825 "texprof.w"
+#line 30822 "texprof.w"
 
 
 static void
@@ -29897,11 +29897,11 @@ static void get_creation_date(void)
 static struct _stat file_stat;
 #define GET_FILE_STAT _stat(fname,&file_stat)
 #else
-#line 30888 "texprof.w"
+#line 30885 "texprof.w"
  static struct stat file_stat;
 #define GET_FILE_STAT stat(fname,&file_stat)
 #endif
-#line 30891 "texprof.w"
+#line 30888 "texprof.w"
 
 
 static char*find_input_file(void)
@@ -30113,15 +30113,13 @@ parsefirstlinep= texmf_yesno("parse_first_line");
 #line 29797 "texprof.w"
 
 /*1727:*/
-#line 30477 "texprof.w"
+#line 30476 "texprof.w"
 
 if(parsefirstlinep&&!dump_name)
 parse_first_line(main_input_file);
 if(!main_input_file&&argv[1]&&argv[1][0]=='&')
 dump_name= argv[1]+1;
-if(strcmp(kpse_program_name,"kinitex")==0)iniversion= true;
-else if(strcmp(kpse_program_name,"kvirtex")==0&&!dump_name)
-dump_name= "ktex";
+if(strcmp(kpse_program_name,"initexprof")==0)iniversion= true;
 if(!dump_name)
 dump_name= kpse_program_name;
 if(!dump_name)
@@ -30138,7 +30136,7 @@ exit(1);
 #line 29798 "texprof.w"
 
 /*1735:*/
-#line 30739 "texprof.w"
+#line 30736 "texprof.w"
 
 kpse_set_program_enabled(kpse_tfm_format,MAKE_TEX_TFM_BY_DEFAULT,
 kpse_src_compile);
@@ -30218,7 +30216,7 @@ else if(ARGUMENT_IS("cnf-line"))
 add_cnf_line(optarg);
 
 /*:1717*//*1795:*/
-#line 32071 "texprof.w"
+#line 32068 "texprof.w"
 
 else if(ARGUMENT_IS("pdf"))
 if(iniversion)pdf_on= ltxp= true;
@@ -30250,7 +30248,7 @@ output_directory= getenv("TEXMF_OUTPUT_DIRECTORY");
 }
 
 /*:1696*//*1731:*/
-#line 30598 "texprof.w"
+#line 30595 "texprof.w"
 
 static FILE*open_out(const char*file_name,const char*file_mode)
 {FILE*f= NULL;
@@ -30299,11 +30297,11 @@ static bool w_open_out(word_file*f)
 return f->f!=NULL&&ferror(f->f)==0;
 }
 #endif
-#line 30646 "texprof.w"
+#line 30643 "texprof.w"
 
 
 /*:1731*//*1734:*/
-#line 30716 "texprof.w"
+#line 30713 "texprof.w"
 
 static bool open_fmt_file(void)
 {int j= loc;

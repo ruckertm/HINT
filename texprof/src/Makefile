@@ -120,26 +120,31 @@ BINDIR=$(SYSVAR:/texmf-var=/bin/x86_64-linux)
 
 install_bin: texprof texprofile
 	install -t $(BINDIR) --mode=755 texprof texprofile
+	ln -s -f $(BINDIR)/texprofile $(LINKDIR)texprofile
+	ln -s -f $(BINDIR)/texprof $(LINKDIR)initexprof
 	ln -s -f $(BINDIR)/texprof $(LINKDIR)latexprof
 	ln -s -f $(BINDIR)/texprof $(LINKDIR)texprof
-	ln -s -f $(BINDIR)/texprofile $(LINKDIR)texprofile
+	ln -s -f $(BINDIR)/texprof $(LINKDIR)pdflatexprof
+	ln -s -f $(BINDIR)/texprof $(LINKDIR)pdftexprof
 	mv texprof texprofile ../bin
 	touch install_bin
 
 
 ### Step 5: Building the format files
 
-plain.fmt: install_bin
-	$(BINDIR)/texprof -ini plain.tex \\dump
+FORMATS=texprof.fmt latexprof.fmt pdftexprof.fmt pdflatexprof.fmt
 
 texprof.fmt:  install_bin ../aux/texprof.ini
-	$(BINDIR)/texprof -ini -etex -ltx ../aux/texprof.ini \\dump
+	$(BINDIR)/texprof -ini ../aux/texprof.ini
 
 latexprof.fmt: install_bin ../aux/latexprof.ini
 	$(BINDIR)/texprof -ini -etex -ltx ../aux/latexprof.ini
 
 pdftexprof.fmt:  install_bin ../aux/pdftexprof.ini
-	$(BINDIR)/texprof -ini -etex -pdf ../aux/pdftexprof.ini
+	$(BINDIR)/texprof -ini -pdf ../aux/pdftexprof.ini
+
+pdflatexprof.fmt: install_bin ../aux/pdflatexprof.ini
+	$(BINDIR)/texprof -ini -etex -pdf ../aux/pdflatexprof.ini
 
 ### Step 6: Installing the format files
 
@@ -147,11 +152,10 @@ pdftexprof.fmt:  install_bin ../aux/pdftexprof.ini
 $(FMTDIR):
 	if [ ! -d "$(FMTDIR)" ]; then install -d -C $(FMTDIR) ; fi
 
-install_fmt: plain.fmt latexprof.fmt $(FMTDIR)
-	mv plain.fmt texprof.fmt
-	install -t $(FMTDIR) --mode=644  texprof.fmt latexprof.fmt
+install_fmt: $(FMTDIR) $(FORMATS)
+	install -t $(FMTDIR) --mode=644  $(FORMATS)
 	$(BINDIR)/mktexlsr
-	mv texprof.fmt latexprof.fmt ../fmt
+	mv $(FORMATS) ../fmt
 	touch install_fmt
 
 
