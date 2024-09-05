@@ -302,7 +302,9 @@
 %\def\5{\hfil\penalty-1\hskip 0pt minus 6pt\hfilneg\kern2.5em\copy\bakk\ignorespaces}% optional break
 \def\5{\hfil\penalty10\hfilneg\hskip 0pt minus 6pt\kern2.5em\copy\bakk\ignorespaces}% optional break
 \def\J{}% dont show @& in the tex output
-\def\Y{\par\yskip}
+
+
+\def\Y{\par\setsecstartref\yskip}
 
 % start sections
 \def\stsec{\rightskip=0pt % get out of C mode (cf. \B)
@@ -320,16 +322,32 @@
 %\Y\noindent{\hfill%
 %    \baselineskip10pt\tiny#1~\ifacro{\pdfnote#2.}\else#2\fi.\par}}
 
+% put the section number to the right
+\newif\ifshowsecstartref \showsecstartreffalse
+\newif\ifsetsecstartref \setsecstartreffalse
+
+\def\secstartref{% used in \MN
+  \ifshowsecstartref
+  \vadjust{\vtop to 0pt{\vss\hbox to \hsize{\hfill\tiny(\secstar)}\kern 0pt}}
+  \global\showsecstartreffalse
+  \fi
+}
+
+\def\setsecstartref{% used in \Y
+  \ifsetsecstartref
+  \codedest
+  \global\setsecstartreffalse
+  \fi
+}
+
+
 %other styles make this minus 10pt
 \def\B{\rightskip=0pt plus 100pt minus 0pt % go into C mode
   \sfcode`;=3000
   \pretolerance 10000
   \hyphenpenalty 1000 % so strings can be broken (discretionary \ is inserted)
   \exhyphenpenalty 1000
-  \codedest
   \global\ind=2 \1\ \unskip
-%  removing the extra section number because it conflicts with comments 
-  \vadjust{\vtop to 0pt{\vss\hbox to \hsize{\hfill\tiny(\secstar)}\kern 0pt}}
 }
 
 % formating of C comments
@@ -347,7 +365,7 @@
 \def\MN#1{\smallskip
  {\xdef\secstar{#1}\let\*=\empty\xdef\secno{#1}}%
   \gdef\thecode{#1}% common code for \M, \N
-  \ontrue}
+  \ontrue\showsecstartreftrue\setsecstartreftrue}
 
 % Used in section text
 \def\U{\rightnote{Used in}} % xref for use of a section
@@ -363,8 +381,10 @@
      \penalty1000\discretionary{}{\hbox{}}{\kern 4em}\penalty1000\hfill
      \hskip -4em plus 4em\hbox{\tiny #1~\codenote#2.}.}
 
-\def\X#1:#2\X{\ifmmode\gdef\XX{\null$\null}\else\gdef\XX{}\fi %$% section name
-  \XX$\langle\,${\let\I=\ne#2\kern.5em\coderef{#1}$\,\rangle$\XX}}
+\def\X#1:#2\X{\setsecstartref
+  \ifmmode\gdef\XX{\null$\null}\else\gdef\XX{}\fi %$% section name
+  \XX$\langle\,${\let\I=\ne#2\kern.5em\coderef{#1}$\rangle$\XX}%
+  \secstartref}
 
 
 % how to display hex numbers
@@ -1244,7 +1264,7 @@
 %
 
 %The number is set be \M and \N and stored as \secno
-%The destination is set in \B where we go into C mode
+%The destination is set in \X when we go into C mode
 \def\codedest{%
 \ifbook\else
 \ifhint\HINTdest num \thecode top\relax
@@ -1254,7 +1274,7 @@
 }
 \def\coderef#1{% used in \X
 \ifbook${}_{#1}$\else
-\ifhint\HINTstartlink goto num #1 \hbox{${}_{#1}$}\HINTendlink
+\ifhint\HINTstartlink goto num #1\lower 1.5pt\hbox{\sevenrm #1}\,\HINTendlink
 \else\ifpdf{\eightrm\pdfnote#1.}
 \else${}_{#1}$\fi\fi\fi
 }

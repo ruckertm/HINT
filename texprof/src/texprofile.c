@@ -19,6 +19,8 @@
 
 #define POP_BIT 0x80 \
 
+#define VERSION_STR "texprofile version 1.0" \
+
 #define max_command 100 \
 
 #define system_cmd (max_command+1) 
@@ -171,8 +173,8 @@ int edges_count,edges_num;
 #line 1546 "texprofile.w"
 
 bool opt_graph= false;
-/*:89*//*101:*/
-#line 1743 "texprofile.w"
+/*:89*//*107:*/
+#line 1796 "texprofile.w"
 
 static char*cmd_name[]= {
 "relax",
@@ -338,18 +340,27 @@ static char*every_name[]= {
 };
 
 static const int sys_line_num= sizeof(line_name)/sizeof(*line_name);
-/*:101*/
+/*:107*/
 #line 207 "texprofile.w"
 
-/*98:*/
-#line 1694 "texprofile.w"
+/*104:*/
+#line 1743 "texprofile.w"
 
 int error(char*msg)
-{fprintf(stderr,"ERROR: %s\n",msg);
+{fprintf(stderr,"texprofile: %s\n",msg);
 exit(1);
 return 0;
 }
-/*:98*/
+/*:104*//*105:*/
+#line 1754 "texprofile.w"
+
+int commandline_error(char*msg)
+{fprintf(stderr,"texprofile: %s\n",msg);
+fprintf(stderr,"Try 'texprofile --help' for more information.\n");
+exit(1);
+return 0;
+}
+/*:105*/
 #line 208 "texprofile.w"
 
 /*5:*/
@@ -641,17 +652,27 @@ edges[e].T+= dt-dT;
 }
 edges[e].a--;
 }
-/*:87*//*99:*/
-#line 1704 "texprofile.w"
+/*:87*//*97:*/
+#line 1680 "texprofile.w"
 
-void explain_usage(char*msg)
-{fprintf(stderr,"ERROR: %s\n",msg);
-fprintf(stderr,/*96:*/
-#line 1656 "texprofile.w"
-
+void explain_usage(void)
+{fprintf(stderr,
 "Use: "
 "texprofile [-options] <input file>\n"
 "options:\n"
+/*99:*/
+#line 1705 "texprofile.w"
+
+"-?        display this help and exit\n"
+"--help    display this help and exit\n"
+/*:99*//*103:*/
+#line 1735 "texprofile.w"
+
+"--version output version information and exit\n"
+/*:103*/
+#line 1686 "texprofile.w"
+
+"\n"
 /*32:*/
 #line 791 "texprofile.w"
 
@@ -693,7 +714,7 @@ fprintf(stderr,/*96:*/
 
 "-A    show all tables (equal to -TGFC) tables\n"
 /*:94*/
-#line 1660 "texprofile.w"
+#line 1688 "texprofile.w"
 
 "\n"
 /*22:*/
@@ -718,15 +739,14 @@ fprintf(stderr,/*96:*/
 
 "-t<n> replace 10 by n (2<=n<=100, default 10) for the top 10 input lines\n"
 /*:79*/
-#line 1662 "texprofile.w"
+#line 1690 "texprofile.w"
 
-/*:96*/
-#line 1707 "texprofile.w"
+"\n"
 );
 exit(1);
 }
-/*:99*//*100:*/
-#line 1716 "texprofile.w"
+/*:97*//*106:*/
+#line 1769 "texprofile.w"
 
 void check_file_marker(char*msg)
 {char marker[8];
@@ -735,14 +755,14 @@ error("Unexpected end of input");
 if(strncmp(marker,FILE_MARKER,8)!=0)
 error(msg);
 }
-/*:100*/
+/*:106*/
 #line 209 "texprofile.w"
 
 
 int main(int argc,char*argv[])
 {int i,k;
-/*97:*/
-#line 1665 "texprofile.w"
+/*96:*/
+#line 1655 "texprofile.w"
 
 i= 1;
 while(i<argc)
@@ -792,7 +812,7 @@ case'L':opt_lines= true;break;
 case'p':{char*endptr;
 percent_limit= strtod(option+1,&endptr);
 if(endptr==option+1)
-explain_usage("-pMM<n> without a numeric argument <n>");
+commandline_error("-p<n> without a numeric argument <n>");
 else
 option= endptr-1;
 }
@@ -804,9 +824,9 @@ case'T':opt_top_ten= true;break;
 case't':{char*endptr;
 tt= strtol(option+1,&endptr,10)+1;
 if(endptr==option+1)
-explain_usage("-t<n> without a numeric argument <n>");
+commandline_error("-t<n> without a numeric argument <n>");
 else if(tt<2||tt> 101)
-explain_usage("-t<n> with n out of bounds");
+commandline_error("-t<n> with <n> out of bounds");
 option= endptr-1;
 }
 break;
@@ -820,10 +840,36 @@ case'G':opt_graph= true;break;
 case'A':opt_files= opt_summary= 
 opt_cmd= opt_top_ten= 
 opt_graph= true;break;
-/*:93*/
-#line 1673 "texprofile.w"
+/*:93*//*98:*/
+#line 1700 "texprofile.w"
 
-default:explain_usage("unknown option");
+case'h':
+case'?':explain_usage();break;
+/*:98*//*100:*/
+#line 1712 "texprofile.w"
+
+case'-':
+option++;
+/*101:*/
+#line 1720 "texprofile.w"
+
+if(strcmp(option,"help")==0)explain_usage();
+/*:101*//*102:*/
+#line 1728 "texprofile.w"
+
+if(strcmp(option,"version")==0)
+{printf(VERSION_STR"\n");
+exit(1);
+}
+/*:102*/
+#line 1715 "texprofile.w"
+
+else commandline_error("unknown long option");
+break;
+/*:100*/
+#line 1663 "texprofile.w"
+
+default:commandline_error("unknown option");
 }
 option++;
 }
@@ -831,17 +877,17 @@ option++;
 else if(input_file_name==NULL)
 input_file_name= argv[i];
 else
-explain_usage("multiple input files given");
+commandline_error("multiple input files given");
 i++;
 }
-/*:97*/
+/*:96*/
 #line 213 "texprofile.w"
 
 /*3:*/
 #line 235 "texprofile.w"
 
 if(input_file_name==NULL)
-explain_usage("no input file given");
+commandline_error("no input file given");
 in= fopen(input_file_name,"rb");
 if(in==NULL)
 {char*tmp= malloc(strlen(input_file_name)+7);

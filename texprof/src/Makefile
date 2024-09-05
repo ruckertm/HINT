@@ -176,16 +176,16 @@ texprof.hnt: texprof.tex texprof.scn texprof.idx
 
 texprofile.pdf texprofile.aux: texprofile.tex texprofile.scn texprofile.idx
 	touch texprofile.toc
-	TEXINPUTS=".:../aux:" $(PDFTEX) texprofile
-	TEXINPUTS=".:../aux:" $(PDFTEX) texprofile
+	$(PDFTEX) texprofile
+	$(PDFTEX) texprofile
 
 texprofile.hnt: texprofile.tex texprofile.scn texprofile.idx
 	touch texprofile.toc
-	TEXINPUTS=".:../aux:" $(HITEX) texprofile
-	TEXINPUTS=".:../aux:" $(HITEX) texprofile
+	$(HITEX) texprofile
+	$(HITEX) texprofile
 
 install_doc: texprof.pdf texprof.hnt texprofile.pdf texprofile.hnt
-	mv $? ../doc
+	cp $? ../doc
 
 
 ### Cleaning up
