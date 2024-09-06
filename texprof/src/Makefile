@@ -45,7 +45,10 @@ KPATHSEA_LIB_DIR=/usr/local/lib/x86_64-pc-linux-gnu/
 TEX=tex
 PDFTEX=pdftex
 HITEX=hitex
+PDFLATEX=pdflatex
+HILATEX=hilatex
 MKINDEX=mkindex
+LATEX2MAN=/usr/local/texlive/2023/bin/x86_64-linux/latex2man
 
 
 ## Tools to install the binaries and format files
@@ -184,7 +187,17 @@ texprofile.hnt: texprofile.tex texprofile.scn texprofile.idx
 	$(HITEX) texprofile
 	$(HITEX) texprofile
 
-install_doc: texprof.pdf texprof.hnt texprofile.pdf texprofile.hnt
+texprofileman.pdf: texprofileman.tex
+	$(PDFLATEX) texprofileman
+
+texprofileman.hnt: texprofileman.tex
+	$(HILATEX) texprofileman
+
+texprofile.1: texprofileman.tex
+	$(LATEX2MAN) texprofileman.tex texprofile.1
+
+install_doc: texprof.pdf texprof.hnt texprofile.pdf texprofile.hnt \
+	texprofileman.pdf texprofileman.hnt texprofile.1
 	cp $? ../doc
 
 
