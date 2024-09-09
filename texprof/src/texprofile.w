@@ -1,5 +1,5 @@
 % This file is part of HINT
-% Copyright 2017-2021 Martin Ruckert,
+% Copyright 2017-2024 Martin Ruckert,
 % Hochschule Muenchen, Lothstrasse 64, 80336 Muenchen
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,8 +25,7 @@
 % dealings in this Software without prior written authorization from the
 % copyright holders.
 
-%\input btxmac.tex
-\input profilemac.tex
+\input texprofilemac.tex
 
 %% defining how to display certain C identifiers
 
@@ -151,7 +150,6 @@ Germany.
 %ISBN-13: 979-854992684-4\par
 \medskip
 %First printing: August 2019\par
-%Second edition: August 2021\par
 \medskip
 %Last commit: \input lastcommit.tex
 \par
@@ -742,10 +740,11 @@ The table of |cmd_name|s is defined in the appendix.
 
 
 @<read a macro call@>=
-      int f=fget1();
-      int l=fget2();
-      int n=fget2();
-      int m=get_macro_def(f, l, n);
+      int f,l,n,m;
+      f=fget1();
+      l=fget2();
+      n=fget2();
+      m=get_macro_def(f, l, n);
       stamps[i].c=system_macro_push;
       stamps[i].f=f;
       stamps[i].l=l;
