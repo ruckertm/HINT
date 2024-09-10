@@ -193,11 +193,11 @@ texprofileman.pdf: texprofileman.tex
 texprofileman.hnt: texprofileman.tex
 	$(HILATEX) texprofileman
 
-texprofile.1: texprofileman.tex
-	$(LATEX2MAN) texprofileman.tex texprofile.1
+texprofile.man: texprofileman.tex
+	$(LATEX2MAN) texprofileman.tex texprofile.man
 
 install_doc: texprof.pdf texprof.hnt texprofile.pdf texprofile.hnt \
-	texprofileman.pdf texprofileman.hnt texprofile.1
+	texprofileman.pdf texprofileman.hnt texprofile.man
 	cp $? ../doc
 
 
