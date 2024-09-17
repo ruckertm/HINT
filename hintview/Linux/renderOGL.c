@@ -251,6 +251,7 @@ static void mkRuleTexture() /* the texture used for rules */
   //LOG("mkRuleTexture Done\n");
 }
 
+static ColorSet *cur_colorset=NULL;
 
 void nativeInit(void)
 { GLuint VertexArrayID;
@@ -296,7 +297,7 @@ void nativeInit(void)
   glUniform1i(IsImageID, 0);
   glUniform4f(FGcolorID, 0.0, 0.0, 0.0,1.0); // black as default foreground
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // white as default background
-
+  cur_colorset=color_defaults;
    /* 1rst attribute buffer : XYs */
   glEnableVertexAttribArray(xyID);
   glBindBuffer(GL_ARRAY_BUFFER, xybuffer);
@@ -345,7 +346,7 @@ void nativeSetGamma(double gamma)
   checkGlError("glsetgamma");
 }
 
-static ColorSet *cur_colorset=NULL;
+
 static uint32_t cur_fg=0;
 
 static void nativeSetForeground(uint32_t fg)
