@@ -20626,7 +20626,7 @@ pace through the other combinations of possibilities.
 
 @<Cases of |main_control| that are not part of the inner loop@>=
 any_mode(relax): case vmode+spacer: case mmode+spacer:
-  case mmode+no_boundary: do_nothing;
+  case mmode+no_boundary: do_nothing;@+break;
 any_mode(ignore_spaces): {@+@<Get the next non-blank non-call...@>;
   goto reswitch;
   }
@@ -24994,31 +24994,32 @@ to hold the string numbers for name, area, and extension.
 @d ignore_info(A)    type(A+1)
 @d ignore_list(A)    link(A+1)
 
-@d label_node hitex_ext+17 /* represents a link to a another location */
+@d color_node hitex_ext+17 /* represent a color node */
+@d end_color_node hitex_ext+18 /* represent an end color node */
+@d default_color_node hitex_ext+19 /* set default colors*/
+@d link_color_node hitex_ext+20 /* set link colors */
+@d default_link_color_node hitex_ext+21 /* set default link colors */
+@d no_color_node  hitex_ext+22 /* a deleted end color node */
+@d color_node_size small_node_size
+@d color_ref(A)  type(A+1) /* reference to the color set */
+@d color_link(A)     link(A+1) /* pointer down the color stack */
+
+@d label_node hitex_ext+23 /* represents a link to a another location */
 @d label_node_size 2
 @d label_has_name(A)  type(A+1) /* 1 for a name , 0 for a number */
 @d label_where(A)  subtype(A+1) /* 1 for top, 2 for bot, 3 for mid */
 @d label_ptr(A) link(A+1) /* hitex: a name (token list) or a number */
-@d label_ref(A) link(A+1) /* hintview: the label number */
 
-@d start_link_node hitex_ext+18 /* represents a link to a another location */
-@d end_link_node hitex_ext+19 /* represents a link to a another location */
-@d link_node_size 2 /* second word like a |label_node| */
-@d link_color(A)  label_where(A) /* a color reference instead of where */
+@d start_link_node hitex_ext+24 /* represents a link to another location */
+@d end_link_node hitex_ext+25 /* represents a link to another location */
+@d link_node_size 3 /* second word like a |color_node| */
+@d as_label(A) ((A)+1) /* third word like a |label_node| */
 
-@d outline_node hitex_ext+20 /* represents an outline item */
-@d outline_node_size 4 /* second word like a |label_node| */
+@d outline_node hitex_ext+26 /* represents an outline item */
+@d outline_node_size 3 /* second word like a |label_node| */
 @d outline_ptr(A)   link(A+2) /* text to be displayed */
-@d outline_depth(A) mem[A+3].i /* depth of sub items */
+@d outline_depth(A) info(A+2) /* depth of sub items */
 
-@d color_node hitex_ext+21 /* represent a color set node */
-@d end_color_node hitex_ext+22 /* represent an end color set node */
-@d default_color_node hitex_ext+23 /* set default colors*/
-@d link_color_node hitex_ext+24 /* set link colors */
-@d default_link_color_node hitex_ext+25 /* set default link colors */
-@d color_node_size small_node_size
-@d color_node_ref(A)  type(A+1) /* reference to the color set */
-@d color_link(A)     link(A+1) /* pointer to the next color node */
 
 @ The sixteen possible \.{\\write} streams are represented by the |write_file|
 array. The |j|th file is open if and only if |write_open[j]==true|. The last
@@ -25069,6 +25070,7 @@ case extension: switch (chr_code) {
   case image_node: print_esc("HINTimage");@+break;
   case color_node: print_esc("HINTcolor");@+break;
   case end_color_node: print_esc("HINTendcolor");@+break;
+  case no_color_node: print_esc("HINTendcolor ignored");@+break;
   case default_color_node: print_esc("HINTdefaultcolor");@+break;
   case link_color_node: print_esc("HINTlinkcolor");@+break;
   case default_link_color_node: print_esc("HINTdefaultlinkcolor");@+break;
@@ -25124,21 +25126,27 @@ case vset_node:
 case align_node: @+break;@#
 case image_node:@/
 {@+ pointer p;
+  scaled iw=0,ih=0;
+  double ia=0.0;
   scan_optional_equals();
   scan_file_name();
   p=new_image_node(cur_name,cur_area,cur_ext);
   loop {
     if (scan_keyword("width"))
-    {@+scan_normal_dimen; image_xwidth(p)=new_xdimen(cur_val,cur_hfactor,cur_vfactor); }
+    {@+scan_normal_dimen; image_xwidth(p)=new_xdimen(cur_val,cur_hfactor,cur_vfactor);
+     if (cur_hfactor==0 && cur_vfactor==0) iw=cur_val;
+    }
     else if (scan_keyword("height"))
-    {@+scan_normal_dimen; image_xheight(p)=new_xdimen(cur_val,cur_hfactor,cur_vfactor); }
+    {@+scan_normal_dimen; image_xheight(p)=new_xdimen(cur_val,cur_hfactor,cur_vfactor);
+      if (cur_hfactor==0 && cur_vfactor==0) ih=cur_val;
+    }
     else
       break;
   }
-  { scaled iw,ih;
-    double ia;
+  {
     pointer r,q;
-    hextract_image_dimens(image_no(p),&ia,&iw,&ih);
+    if (ih!=0 && iw!=0 ) ia=(double)iw/ih;
+    else hextract_image_dimens(image_no(p),&ia,&iw,&ih);
     image_aspect(p)=round(ia*ONE);
     r=image_xwidth(p);
     q=image_xheight(p);
@@ -25150,8 +25158,8 @@ case image_node:@/
       else if (iw<0)
       { MESSAGE("Unable to determine size of image %s; using 72dpi.\n",
 		dir[image_no(p)].file_name);
-	image_xwidth(p)=r=new_xdimen(-iw*ONE,0,0);
-        image_xheight(p)=q=new_xdimen(-ih*ONE,0,0);
+	image_xwidth(p)=r=new_xdimen(-iw,0,0);
+        image_xheight(p)=q=new_xdimen(-ih,0,0);
       }
       else
       { MESSAGE("Unable to determine size of image %s; using 100pt x 100pt\n",
@@ -25180,14 +25188,15 @@ case color_node:
     { ColorSet c;
       new_whatsit(color_node,color_node_size);
       scan_color_spec(c,0);
-      color_node_ref(tail)=next_colorset(c);
+      color_ref(tail)=next_colorset(c);
       color_link(tail)=null;
       default_color_frozen=true;
     }
     break;
+case no_color_node: break;
 case end_color_node:
     { new_whatsit(end_color_node,color_node_size);
-      color_node_ref(tail)=0xFF;
+      color_ref(tail)=0xFF;
       color_link(tail)=null;
     }
     break;
@@ -25224,8 +25233,8 @@ case start_link_node:
     fatal_error("HINTstartlink cannot be used in vertical mode");
   else
   { new_whatsit(start_link_node,link_node_size);
-    scan_label(tail);
-    link_color(tail)=cur_link_color;
+    scan_label(as_label(tail));
+    color_ref(tail)=cur_link_color;
   }
   break;
 case end_link_node:
@@ -25233,7 +25242,7 @@ case end_link_node:
     fatal_error("HINTendlink cannot be used in vertical mode");
   else
   { new_whatsit(end_link_node,link_node_size);
-    link_color(tail)=0xFF;
+    color_ref(tail)=0xFF;
   }
   break;
 case label_node:
@@ -25407,7 +25416,10 @@ case image_node:
   if (dir[image_no(p)].file_name!=NULL) {print(", "); print(dir[image_no(p)].file_name);}
   break;
 case color_node:
-  print_esc("HINTcolor ");print_int(color_node_ref(p));
+  print_esc("HINTcolor ");print_int(color_ref(p));
+  break;
+case no_color_node:
+  print_esc("HINTendcolor ignored");
   break;
 case end_color_node:
   print_esc("HINTendcolor ");
@@ -25426,12 +25438,12 @@ case ignore_node:
   break;
 case start_link_node:
   print_esc("HINTstartlink ");
-  print_label(p);
-  if (link_color(p)!=1) { print("color "); print_int(link_color(p)); }
+  print_label(as_label(p));
+  if (color_ref(p)!=1) { print("color "); print_int(color_ref(p)); }
   break;
 case end_link_node:
   print_esc("HINTendlink ");
-  if (link_color(p)!=0) { print("color "); print_int(link_color(p)); }
+  if (color_ref(p)!=0xFF) { print("color "); print_int(color_ref(p)); }
   break;
 case label_node:
   print_esc("HINTdest ");
@@ -25510,6 +25522,7 @@ case image_node:
     words=image_node_size-1;
     break;
 case color_node:
+case no_color_node:
 case end_color_node:
     r=get_node(color_node_size);
     words=color_node_size;
@@ -25548,7 +25561,7 @@ case ignore_node:
   break;
 case start_link_node:
     r=get_node(link_node_size);
-    if (label_has_name(p)) add_token_ref(label_ptr(p));
+    if (label_has_name(as_label(p))) add_token_ref(label_ptr(as_label(p)));
     words=link_node_size;
     break;
 case end_link_node:
@@ -25564,6 +25577,7 @@ case outline_node:
     r=get_node(outline_node_size);
     if (label_has_name(p)) add_token_ref(label_ptr(p));
     outline_ptr(r)=copy_node_list(outline_ptr(p));
+    outline_depth(r)=outline_depth(p);
     words=outline_node_size-1;
     break;
 case stream_node:
@@ -25608,6 +25622,7 @@ case image_node:
   flush_node_list(image_alt(p));
   free_node(p,image_node_size);@+break;
 case color_node:
+case no_color_node:
 case end_color_node:
   free_node(p,color_node_size);@+break;
 case align_node:
@@ -25634,7 +25649,7 @@ case ignore_node:
   flush_node_list(ignore_list(p));
   free_node(p,ignore_node_size); @+break;
 case start_link_node:
-  if (label_has_name(p)) delete_token_ref(label_ptr(p));
+  if (label_has_name(as_label(p))) delete_token_ref(label_ptr(as_label(p)));
   free_node(p,link_node_size);@+break;
 case end_link_node:
   free_node(p,link_node_size);@+break;

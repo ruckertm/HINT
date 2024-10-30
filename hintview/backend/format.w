@@ -190,7 +190,7 @@ routines proved to be insufficient when I implemented a ``page up''
 button because it did not support reading the page content
 ``backwards''. As a consequence, I developed a compact binary file
 format that could be parsed easily in both directions. The \HINT\ 
-short file format war born. I stopped an initial attempt at
+short file format was born. I stopped an initial attempt at
 eliminating the old textual format because it was so much nicer when
 debugging. Instead, I converted the long textual format into the short
 binary format as a preliminary step in the viewer. This was not a long
@@ -4645,9 +4645,9 @@ like glue\index{glue}. They could stretch (or shrink) together with
 the surrounding glue to fill a horizontal or vertical box.  While I
 thought this would be in line with \TeX's concepts, it proved to be a
 bad decission because images, as opposed to glue, would stretch or
-shrink horizontaly {\it and} vertically at the same time.
+shrink horizontally {\it and} vertically at the same time.
 This would require a two pass algorithm to pack boxes: first to
-determine the glue setting and a secondf pass to determine the proper
+determine the glue setting and a second pass to determine the proper
 image dimensions. Otherwise incorrect width or height values would
 propagate all the way through a sequence of nested boxes. Even worse
 so, this two pass algorithm would be needed in the viewer if images
@@ -4759,7 +4759,7 @@ This is not allways a desirable effect. It would be possible to
 eliminate information about the image size when writing the long format
 if that information can be derived from the image file. The latter
 solution might have the disadvantage, that infomation about a
-desired image size might get lost when editing a image file.
+desired image size might get lost when editing an image file.
 
 \writecode
 @<write functions@>=
@@ -4876,18 +4876,22 @@ with the data supplied in the long format.
 static Info hput_image_dimens(int n,float32_t a, Dimen w, Dimen h)
 { Dimen iw,ih;
   double ia;
+  if (w>0 && h>0)
+  {  HPUT32(w); HPUT32(h); return b011; }
+  else if (a>0 && w>0)
+  { hput_float32((float32_t)a); HPUT32(w); return b010; }
+  else if (a>0 && h>0)
+  { hput_float32((float32_t)a); HPUT32(h); return b001; }
   hextract_image_dimens(n,&ia,&iw,&ih);
   @<merge stored image dimensions with dimensions given@>@;
-  if (w!=0 && h!=0)
-  { HPUT32(iw); HPUT32(ih); return b011; }
-  else if (a!=0.0)
-  { if (h!=0)
-    { hput_float32((float32_t)ia); HPUT32(ih); return b001; }
-    else
-    { hput_float32((float32_t)ia); HPUT32(iw); return b010; }
-  }
+  if (iw>0)
+  { hput_float32((float32_t)ia); HPUT32(iw); return b010; }
+  else if (ih>0)
+  { hput_float32((float32_t)ia); HPUT32(ih); return b001; }
   else 
-  { HPUT32(iw); HPUT32(ih); return b011; }
+  { iw=-iw; ih=-h; /*we accept the default resolution*/
+    HPUT32(iw); HPUT32(ih); return b011;
+  }
 }
 @
 
@@ -4898,26 +4902,29 @@ the long format.
 It is considered an error, if the function |hextract_image_dimens|
 can not extract the aspect ratio. Absolute width and height values,
 however, might be missing. If the aspect ratio is computed from the
-number of horizontal and vertical pixels, these values are negated and
-returned instead of absolute width and height values.
-Hi\TeX\ for example, will use these values to guess the image size
-assuming square pixels and a fixed resolution of 72.27 dpi.
+number of horizontal and vertical pixels, |hextract_image_dimens|
+makes the reasonable assumption that the intended resolution
+is 72dpi and converts the image dimensions to scaled points.
+It negates these values to indicate
+that the resolution is just a guess. This allows other programs
+to used different default resolutions if desired.
 
 @<merge stored image dimensions with dimensions given@>=
 { if (ia==0.0)
   { if (a!=0.0) ia=a;
     else if(w!=0 && h!=0) ia=(double)w/(double)h;
-    else QUIT("Unable to determine dimensions of image %s",dir[n].file_name);
+    else QUIT("Unable to determine aspect ratio of image %s",dir[n].file_name);
   }
-  if (w==0 && h==0)
+  /* here the aspect ratio |ia| is known */ 
+  if (w==0 && h==0) /*neither width nor height specified*/
   { if (ih>0) iw=round(ih * ia);
     else if (iw>0) ih=round(iw/ia);
   }
-  else if (h==0) 
+  else if (h==0) /*width specified*/
   { iw=w;@+ ih=round(w/ia);@+ }
-  else if (w==0) 
+  else if (w==0) /*height specified*/
   { ih=h;@+ iw=round(h*ia);@+}
-  else 
+  else /* both specified */
   { ih = h;@+
     iw = w;@+
   }
@@ -5035,7 +5042,7 @@ static bool get_PNG_info(FILE *f, char *fn, double *a, Dimen *w, Dimen *h)
     img_buf_size=0;
     GET_IMG_BUF(17);
     size=BigEndian32(0);
-    if (Match4(4,'p', 'H', 'Y', 's'))
+    if (Match4(4,'p', 'H', 'Y', 's')) /*must occur before IDAT chunk*/
     { xppu =(double)BigEndian32(8);  
       yppu =(double)BigEndian32(12);
       unit=img_buf[16];
@@ -5060,8 +5067,9 @@ static bool get_PNG_info(FILE *f, char *fn, double *a, Dimen *w, Dimen *h)
     else
       pos=pos+12+size;
   }
-  *w=-wpx;
-  *h=-hpx;
+  /*we assume 72dpi and negate the results*/
+  *w=-floor(0.5+ONE*72.27*wpx/72.0);
+  *h=-floor(0.5+ONE*72.27*hpx/72.0);
   *a =wpx/hpx;
   return true;
 }
@@ -5112,8 +5120,8 @@ static bool get_JPG_info(FILE *f, char *fn,  double *a, Dimen *w, Dimen *h)
       wpx =(double)BigEndian16(7);
       if (unit==0)
       { *a = (wpx/xppu)/(hpx/yppu);
-        *w=-wpx;
-	*h=-hpx;
+        *w=-floor(0.5+ONE*72.27*wpx/xppu);
+	*h=-floor(0.5+ONE*72.27*hpx/yppu);
         return true;
       }
       else if (unit==1)
@@ -5683,14 +5691,30 @@ content section and resemble pretty much what we have seen for other
 content nodes. Let's look at them next.
 When reading a short format link node,
 we use again the |b001| info bit to indicate a 16 bit reference
-number to a label. The |b010| info bit indicates a ``start'' link.
+number to a label.
+
 To help a reader tell a link from ordinary text, links should be
 visualy different. This is supported in the \HINT\ file format
-by associating  different color schemes to links and ordinary texts.
+by associating  a different color scheme to a link.
 In the short format, the |b100| bit indicates that a color set reference
 (see section~\secref{colors}) follows after the label reference.
 A color reference to 1 in the start node and to |0xFF| in the end node
 is the default and is omitted.
+
+Because color changes are local to the enclosing box or paragraph,
+a link is local as well. Without further mentioning, here and
+in the following, when we say ``box'' it also mean ``paragraph''. 
+A link starts with a ``start'' link and ends with either an ``end''
+link or the end of the enclosing box. Links must not be nested.
+It is an error to have two start links in the same box without
+an end link between them.
+An application can choose to continue a link in the next box
+by inserting a copy of the start link node at the begining of
+the new box.
+In short: ``end'' links are mandatory when separating two links
+but optional if they just preceede the end of the box.
+The |b010| info bit indicates a ``start'' link;
+otherwise it is an ``end'' link. 
 
 \gdef\subcodetitle{Links}
 \getcode
@@ -6005,10 +6029,9 @@ There is only one exception to this concept: When a new box starts,
 the current colors will be those of the enclosing box. These colors
 can be restored after a color change by using the \<color off> command.
 
-The limited complexity is necessary to simplifies the spliting of boxes, for example by
-the line breaking routine. Repeating the last color node
-before the split just after the split is sufficient.
-
+The limited complexity is necessary to simplifies the spliting of
+boxes, for example by the line breaking routine. Repeating the last
+color node before the split just after the split is sufficient.
 
 Inside a horizontal list, a background color will extend from
 top to bottom; inside a vertical list a background color will extend
@@ -6104,6 +6127,10 @@ and the whole page is filled with the background color for normal text.
 For links, by default the color set with number one is used.
 Section ~\secref{colordefault} specifies default values for both
 color sets; the default colors can be overwritten.
+The color sets with reference numbers zero and one are not stored in the
+definition section of a short format file if they are the same as the default values.
+This makes files not using colors compatible with older versions of the \HINT\ file
+format.
 
 Now we are ready for the implementation.
 
@@ -6212,7 +6239,7 @@ color_set: color_tripple color_tripple;
 color_set: color_tripple color_unset color_unset color_unset;
 
 def_node: start COLOR ref { HPUT8(6); color_init(); } color_set END
-        { DEF($$,color_kind,$3); hput_tags($1,hput_color_set($3)); };
+        { DEF($$,color_kind,$3); hput_color_def($1,$3); };
 @
 
 @<put functions@>=
@@ -6222,7 +6249,7 @@ void color_init(void)
   colors_i=0;
 }
 
-Tag hput_color_set(int n)
+static Tag hput_color_set(int n)
 { static bool first_color=true;
   int i;
   if (n==0)
@@ -6236,7 +6263,28 @@ Tag hput_color_set(int n)
   for (i=0;i<sizeof(ColorSet)/4;i++) HPUT32(colors_n[i]);
   return TAG(color_kind,b000);
 }
+@
 
+The |hput_color_def| checks if color sets zero or one need to be written.
+If not, the function will reset |hpos| to undo the writing of the tag
+and the number of colors in the set.
+
+@<put functions@>=
+static bool colors_equal(ColorSet a, ColorSet b)
+{ int i;
+  for (i=0;i<sizeof(ColorSet)/4;i++)
+    if (a[i]!=b[i]) return false;
+  return true;
+}
+
+void hput_color_def(uint32_t pos, int n)
+{ if ((n==0 && colors_equal(color_defaults[0], colors_n)) || 
+      (n==1 && colors_equal(color_defaults[1], colors_n)))
+  { hpos=hstart+pos;
+    return;
+  }
+  hput_tags(pos,hput_color_set(n));
+}
 @
 
 Compared to the definitions, the content nodes are pretty simple.
@@ -6306,7 +6354,7 @@ void hget_color_set(uint32_t node_pos, ColorSet cs)
      ColorSet c;
      static bool first_color=true;
      k=HGET8;
-     if (k!=6) 
+     if (k<6) 
        QUIT("Definition %d of color set needs 6 color pairs only %d given\n",n,k);
      hget_color_set(node_pos,c);
      if (n==0)
@@ -11494,7 +11542,7 @@ extern Info hput_image_spec(uint32_t n, float32_t a, uint32_t wr, Xdimen *w, uin
 extern int colors_i;
 extern ColorSet colors_0, colors_n;
 extern void color_init(void);
-extern Tag hput_color_set(int n);
+extern void hput_color_def(uint32_t pos, int n);
 extern void hput_string(char *str);
 extern void hput_range(uint8_t pg, bool on);
 extern void hput_max_definitions(void);
