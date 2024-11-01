@@ -1372,7 +1372,7 @@ static pointer hget_color_ref(uint8_t n)
   else
   { subtype(p)=color_node; REF_RNG(color_kind,n);
   }
-  color_node_ref(p)=n;
+  color_ref(p)=n;
   return p;
 }
 
@@ -3015,18 +3015,17 @@ if (par_ptr!=null)
 {@+if (par_label_ref>=0)
   {@+pointer p;
     p=get_node(link_node_size);  type(p)=whatsit_node;
-    subtype(p)=start_link_node; label_ref(p)=par_label_ref;
-    label_has_name(p)=0;
+    subtype(p)=start_link_node; label_ref(as_label(p))=par_label_ref;
     link(p)=par_ptr;
-    if (par_color>=0) link_color(p)=par_color;
-    else link_color(p)=0xFF; /* this should not happen */
+    if (par_color>=0) color_ref(as_color(p))=par_color;
+    else color_ref(as_color(p))=0xFF; /* this should not happen */
     par_ptr=p;
   }
   else if (par_color>=0)
   {@+pointer p;
     p=get_node(color_node_size);
     type(p)=whatsit_node; subtype(p)=color_node;
-    color_node_ref(p)=par_color;
+    color_ref(p)=par_color;
     link(p)=par_ptr;
     par_ptr=p;
   }
@@ -3565,12 +3564,11 @@ set to zero, because the label names are not stored as token lists.
 { @+pointer p;\
   p=get_node(link_node_size);  type(p)=whatsit_node;\
   if (I&b010) subtype(p)=start_link_node; else subtype(p)=end_link_node;\
-  if (I&b001) HGET16(label_ref(p));@+ else label_ref(p)=HGET8; \
-  if (I&b100) link_color(p)=HGET8; else link_color(p)=(I&b010)?1:0xFF;\
-  RNG("label",label_ref(p),0,max_ref[label_kind]);\
-  if (link_color(p)!=0xFF)\
-    RNG("label color",link_color(p),0,max_ref[color_kind]);\
-  label_has_name(p)=0;\
+  if (I&b001) HGET16(label_ref(as_label(p)));@+ else label_ref(as_label(p))=HGET8; \
+  if (I&b100) color_ref(as_color(p))=HGET8; else color_ref(as_color(p))=(I&b010)?1:0xFF;\
+  RNG("label",label_ref(as_label(p)),0,max_ref[label_kind]);\
+  if (color_ref(as_color(p))!=0xFF)\
+    RNG("label color",color_ref(as_color(p)),0,max_ref[color_kind]);\
   tail_append(p);}
 @
 
@@ -3579,12 +3577,11 @@ set to zero, because the label names are not stored as token lists.
 { @+pointer p;\
   p=get_node(link_node_size);  type(p)=whatsit_node;\
   if (I&b010) subtype(p)=start_link_node; else subtype(p)=end_link_node;\
-  if (I&b100) link_color(p)=HTEG8; else link_color(p)=(I&b010)?1:0xFF;\
-  if (I&b001) HTEG16(label_ref(p));@+ else label_ref(p)=HTEG8; \
-  RNG("label",label_ref(p),0,max_ref[label_kind]);\
-  if (link_color(p)!=0xFF)\
-    RNG("label color",link_color(p),0,max_ref[color_kind]);\
-  label_has_name(p)=0;\
+  if (I&b100) color_ref(as_color(p))=HTEG8; else color_ref(as_color(p))=(I&b010)?1:0xFF;\
+  if (I&b001) HTEG16(label_ref(as_label(p)));@+ else label_ref(as_label(p))=HTEG8; \
+  RNG("label",label_ref(as_label(p)),0,max_ref[label_kind]);\
+  if (color_ref(as_color(p))!=0xFF)\
+    RNG("label color",color_ref(as_color(p)),0,max_ref[color_kind]);\
   tail_append(p);}
 @
 
@@ -5870,7 +5867,7 @@ static int cur_link=-1;
 @
 
 @<handle a start link node@>=
-local_link=label_ref(p);
+local_link=label_ref(as_label(p));
 add_new_link(local_link,this_box,cur_h,cur_v);
 @
 
@@ -6749,7 +6746,7 @@ render_c:
        switch (subtype(p))
        { case ignore_node: @<handle an ignore node@>@;break;
  	 case color_node:
- 	   cur_color=color_node_ref(p);
+ 	   cur_color=color_ref(p);
            nativeSetColor(color_def+cur_color);
            @<handle a horizontal change in the background color@>@;
 	   break;
@@ -6759,14 +6756,14 @@ render_c:
 	   break;
          case start_link_node:
 	   @<handle a start link node@>@;
-           cur_color = link_color(p);
+           cur_color = color_ref(as_color(p));
 	   if (cur_color==0xFF) cur_color=list_color;
            nativeSetColor(color_def+cur_color);
 	   @<handle a horizontal change in the background color@>@;
 	   break;
          case end_link_node:
 	   @<handle an end link node@>@;
-           cur_color = link_color(p);
+           cur_color = color_ref(as_color(p));
 	   if (cur_color==0xFF) cur_color=list_color;
            nativeSetColor(color_def+cur_color);
 	   @<handle a horizontal change in the background color@>@;
@@ -6937,7 +6934,7 @@ while(p!=null)
       case whatsit_node:
         switch (subtype(p))
         { case color_node:
- 	    cur_color=color_node_ref(p);
+ 	    cur_color=color_ref(p);
 	    nativeSetColor(color_def+cur_color);
             @<handle a vertical change in the background color@>@;
 	    break;
@@ -6947,14 +6944,14 @@ while(p!=null)
 	    break;
 	  case start_link_node:
 	    @<handle a start link node@>@;
-	    cur_color = link_color(p);
+	    cur_color = color_ref(as_color(p));
 	    if (cur_color==0xFF) cur_color=list_color;
 	    nativeSetColor(color_def+cur_color);
             @<handle a vertical change in the background color@>
 	    break;
           case end_link_node:
 	    @<handle an end link node@>@;
-	    cur_color = link_color(p);
+	    cur_color = color_ref(as_color(p));
 	    if (cur_color==0xFF) cur_color=list_color;
 	    nativeSetColor(color_def+cur_color);
             @<handle a vertical change in the background color@>

@@ -2722,8 +2722,7 @@ the places that would otherwise account for the most calls of |get_avail|.
 one-word nodes that starts at position |p|.
 @^inner loop@>
 
-@(htex.c@>=
-static void flush_list(pointer @!p) /*makes list of single-word nodes
+@p static void flush_list(pointer @!p) /*makes list of single-word nodes
   available*/
 {@+pointer @!q, @!r; /*list traversers*/
 if (p!=null)
@@ -3985,8 +3984,7 @@ otherwise the count should be decreased by one.
 
 @d token_ref_count(A) info(A) /*reference count preceding a token list*/
 
-@(htex.c@>=
-static void delete_token_ref(pointer @!p) /*|p| points to the reference count
+@p static void delete_token_ref(pointer @!p) /*|p| points to the reference count
   of a token list that is losing one reference*/
 {@+if (token_ref_count(p)==null) flush_list(p);
 else decr(token_ref_count(p));
@@ -17470,17 +17468,16 @@ if (cur_p!=null)
 {  if (just_label>=0)
   { q = get_node(link_node_size);
     type(q)=whatsit_node; subtype(q)=start_link_node;
-    label_ref(q)=just_label;
-    label_has_name(q)=0;
-    if (just_color>=0) link_color(q)=just_color;
-    else  link_color(q)=0xFF; /* this should not happen*/
+    label_ref(as_label(q))=just_label;
+    if (just_color>=0) color_ref(as_color(q))=just_color;
+    else  color_ref(as_color(q))=0xFF; /* this should not happen*/
     link(q)=link(temp_head);
     link(temp_head)=q;
   }
   else if (just_color>=0)
   { q = get_node(color_node_size);
     type(q)=whatsit_node; subtype(q)=color_node;
-    color_node_ref(q)=just_color;
+    color_ref(q)=just_color;
     link(q)=link(temp_head);
     link(temp_head)=q;
   }
@@ -20626,7 +20623,7 @@ pace through the other combinations of possibilities.
 
 @<Cases of |main_control| that are not part of the inner loop@>=
 any_mode(relax): case vmode+spacer: case mmode+spacer:
-  case mmode+no_boundary: do_nothing;@+break;
+  case mmode+no_boundary: do_nothing;
 any_mode(ignore_spaces): {@+@<Get the next non-blank non-call...@>;
   goto reswitch;
   }
@@ -25006,13 +25003,12 @@ to hold the string numbers for name, area, and extension.
 
 @d label_node hitex_ext+23 /* represents a link to a another location */
 @d label_node_size 2
-@d label_has_name(A)  type(A+1) /* 1 for a name , 0 for a number */
-@d label_where(A)  subtype(A+1) /* 1 for top, 2 for bot, 3 for mid */
-@d label_ptr(A) link(A+1) /* hitex: a name (token list) or a number */
+@d label_ref(A) link(A+1) /* hint: a reference to a label */
 
 @d start_link_node hitex_ext+24 /* represents a link to another location */
 @d end_link_node hitex_ext+25 /* represents a link to another location */
-@d link_node_size 3 /* second word like a |color_node| */
+@d link_node_size 3
+@d as_color(A) (A)     /* second word like a |color_node| */
 @d as_label(A) ((A)+1) /* third word like a |label_node| */
 
 @d outline_node hitex_ext+26 /* represents an outline item */
@@ -25234,7 +25230,7 @@ case start_link_node:
   else
   { new_whatsit(start_link_node,link_node_size);
     scan_label(as_label(tail));
-    color_ref(tail)=cur_link_color;
+    color_ref(as_color(tail))=cur_link_color;
   }
   break;
 case end_link_node:
@@ -25242,15 +25238,12 @@ case end_link_node:
     fatal_error("HINTendlink cannot be used in vertical mode");
   else
   { new_whatsit(end_link_node,link_node_size);
-    color_ref(tail)=0xFF;
+    color_ref(as_color(tail))=0xFF;
   }
   break;
 case label_node:
   new_whatsit(label_node,label_node_size);
     scan_destination(tail);
-    if (scan_keyword("top")) label_where(tail)=1;
-    else if (scan_keyword("bot")) label_where(tail)=2;
-    else label_where(tail)=3;
     scan_spaces();
   break;
 case outline_node:
@@ -25339,9 +25332,7 @@ other extensions might, of course, involve more subtlety here.
 @<Basic printing...@>=
 static void print_mark(int @!p);
 static void print_label(pointer @!p)
-{ print("goto ");
-  if (label_has_name(p)) { print("name "); print_mark(label_ptr(p));}
-  else { print("num "); print_int(label_ptr(p));}
+{ print("goto *"); print_int(label_ref(p));}
 }
 
 static void print_write_whatsit(char *@!s, pointer @!p)
@@ -25439,19 +25430,15 @@ case ignore_node:
 case start_link_node:
   print_esc("HINTstartlink ");
   print_label(as_label(p));
-  if (color_ref(p)!=1) { print("color "); print_int(color_ref(p)); }
+  if (color_ref(as_color(p))!=1) { print("color "); print_int(color_ref(as_color(p))); }
   break;
 case end_link_node:
   print_esc("HINTendlink ");
-  if (color_ref(p)!=0xFF) { print("color "); print_int(color_ref(p)); }
+  if (color_ref(as_color(p))!=0xFF) { print("color "); print_int(color_ref(as_color(p))); }
   break;
 case label_node:
   print_esc("HINTdest ");
   print_label(p);
-  if (label_where(p)==1) print("top");
-  else if (label_where(p)==2) print("bot");
-  else if (label_where(p)==3) print("mid");
-  else print("undefined");
   break;
 case outline_node:
   print_esc("HINToutline");
@@ -25561,7 +25548,6 @@ case ignore_node:
   break;
 case start_link_node:
     r=get_node(link_node_size);
-    if (label_has_name(as_label(p))) add_token_ref(label_ptr(as_label(p)));
     words=link_node_size;
     break;
 case end_link_node:
@@ -25570,12 +25556,10 @@ case end_link_node:
     break;
 case label_node:
     r=get_node(label_node_size);
-    if (label_has_name(p)) add_token_ref(label_ptr(p));
     words=label_node_size;
     break;
 case outline_node:
     r=get_node(outline_node_size);
-    if (label_has_name(p)) add_token_ref(label_ptr(p));
     outline_ptr(r)=copy_node_list(outline_ptr(p));
     outline_depth(r)=outline_depth(p);
     words=outline_node_size-1;
@@ -25649,15 +25633,12 @@ case ignore_node:
   flush_node_list(ignore_list(p));
   free_node(p,ignore_node_size); @+break;
 case start_link_node:
-  if (label_has_name(as_label(p))) delete_token_ref(label_ptr(as_label(p)));
   free_node(p,link_node_size);@+break;
 case end_link_node:
   free_node(p,link_node_size);@+break;
 case label_node:
-  if (label_has_name(p)) delete_token_ref(label_ptr(p));
   free_node(p,label_node_size);@+break;
 case outline_node:
-  if (label_has_name(p)) delete_token_ref(label_ptr(p));
   flush_node_list(outline_ptr(p));
   free_node(p,outline_node_size);@+break;
 case stream_node:
@@ -25682,15 +25663,15 @@ if (subtype(p)==image_node)
   x= x+image_width(p);
 }
 else if (subtype(p)==color_node)
-  just_color=color_node_ref(p);
+  just_color=color_ref(p);
 else if (subtype(p)==end_color_node)
   just_color=-1;
 else if (subtype(p)==start_link_node)
-{ just_label=label_ref(p); just_color=link_color(p);
+{ just_label=label_ref(as_label(p)); just_color=color_ref(as_color(p));
   if (just_color==0xFF) just_color=-1;
 }
 else if (subtype(p)==end_link_node)
-{ just_label=-1; just_color=link_color(p);
+{ just_label=-1; just_color=color_ref(as_color(p));
   if (just_color==0xFF) just_color=-1;
 }
 
