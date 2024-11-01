@@ -252,7 +252,7 @@ static void mkRuleTexture() /* the texture used for rules */
   //LOG("mkRuleTexture Done\n");
 }
 
-static ColorSet *cur_colorset;
+static ColorSet *cur_colorset=NULL;
 
 void nativeInit(void)
 { GLuint VertexArrayID;
@@ -565,6 +565,9 @@ void nativeSetFreeType(struct gcache_s *g)
 */
 {GLtexture(g);}
 
+/* to experiment with pixel rounding, the windows version separates
+   rounding vertical and  horizontal
+*/
 int round_to_pixel_h=1, round_to_pixel_v=1; /* makes sense only if using the native dpi, if using a multiple its of not much use*/
 double pixel_size_threshold= 72.27/200; /*round to pixel only if pixel size in pt is above threshold*/
 void nativeGlyph(double x, double dx, double y, double dy, double w, double h, struct gcache_s *g, int s)
