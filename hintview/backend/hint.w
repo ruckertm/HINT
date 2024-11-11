@@ -386,7 +386,7 @@ free(integer_def); integer_def=NULL;
 @
 
 @<\HINT\ auxiliar functions@>=
-static int32_t hget_integer_def(uint8_t a) 
+static int32_t hget_integer_def(uint8_t a)
 {@+ if (INFO(a)==1) {@+ int8_t n=HGET8; @+return n;@+}
   else  if (INFO(a)==2) {@+ int16_t n;@+ HGET16(n);@+ return n;@+}
   else if (INFO(a)==4) {@+int32_t n;@+ HGET32(n);@+ return n;@+}
@@ -8375,7 +8375,7 @@ the \HINT\ rendering functions.
 \rightskip 0pt plus 1fil
 \def\bfblrm{\small\rm}%
 \def\bblem{\small\it}%
-\bibliography{hint}
+\bibliography{../hint.bib}
 \bibliographystyle{plain}
 }
 
