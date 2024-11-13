@@ -1,0 +1,13 @@
+*~
+\#*\#
+.\#*
+*.ncb
+*.user
+Debug/
+Release/
+x64/
+.vs/
+debug/
+release/
+.lib
+tmp/

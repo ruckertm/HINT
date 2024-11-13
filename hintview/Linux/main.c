@@ -173,7 +173,7 @@ static int find_monitor(int x, int y)
       if (x <= mx+mode->width && y<=my+mode->height)
       { m_width=mode->width; m_height=mode->height;
         glfwGetMonitorPhysicalSize(monitors[i], &width_mm, &height_mm);
-        LOG("Monitor pos: %d x %d, size: %d x %d, %dmm x %dmm\n",mx,my,m_width,m_height,width_mm, height_mm);
+        //LOG("Monitor pos: %d x %d, size: %d x %d, %dmm x %dmm\n",mx,my,m_width,m_height,width_mm, height_mm);
         return i;
       }
     }
@@ -191,8 +191,8 @@ void set_dpi(GLFWwindow* window, int px, int py)
   find_monitor(wx,wy);
   x_dpi=25.5*px*m_width/width_mm/ww;
   y_dpi=25.5*py*m_height/height_mm/wh;
-  LOG("Window pos:  %d x %d, size: %d x %d,  %dpx x %dpx\n",wx, wy,ww,wh,px,py);
-  LOG("dpi: %f x %f\n",x_dpi,y_dpi);
+  //LOG("Window pos:  %d x %d, size: %d x %d,  %dpx x %dpx\n",wx, wy,ww,wh,px,py);
+  //LOG("dpi: %f x %f\n",x_dpi,y_dpi);
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int w, int h)
@@ -357,7 +357,8 @@ int command_line(int argc, char *argv[])
       { case '-':
 	    if (strcmp(argv[i]+2,"help")==0) return help();
 	    else if (strcmp(argv[i]+2,"version")==0)
-	      { fprintf(stdout,"hintview version %d.%d.%d\n", VERSION, REVISION, PATCHLEVEL);
+	      { fprintf(stdout,"hintview version %d.%d.%d\nHINT file format version %d.%d\n", 
+			VERSION, REVISION, PATCHLEVEL, HINT_VERSION, HINT_MINOR_VERSION);
 	        return 0;
 	      }
 	    else
@@ -527,6 +528,21 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
   }      
 }
 
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+  if (yoffset > 0.0)
+  {
+    pos=hint_page_prev();
+    hint_page();
+    clear_cursor();
+  } else if (yoffset < 0.0)
+  {
+    pos=hint_page_next();
+    hint_page();
+    clear_cursor();
+  }
+}
+
 void cursor_enter_callback(GLFWwindow* window, int entered)
 { if (entered && autoreload && new_file_time())
     reload_file();
@@ -572,6 +588,7 @@ int create_window(void)
   glfwSetKeyCallback(window, key_callback);
   glfwSetCursorEnterCallback(window,cursor_enter_callback);
   glfwSetMouseButtonCallback(window, mouse_button_callback);
+  glfwSetScrollCallback(window, scroll_callback);
   glfwSetCursorPosCallback(window, cursor_position_callback);
 
   glfwSetCursorPos(window, px_h/2, px_v/2);

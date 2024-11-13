@@ -25483,17 +25483,23 @@ if (subtype(p)==image_node)
   x= x+image_width(p);
 }
 
-@ @<Let |d| be the width of the whatsit |p|@>=d=0
+@ @<Let |d| be the width of the whatsit |p|@>=
+d=((subtype(p)==image_node)?image_width(p):0)
 
 @ @d adv_past(A) {}
 
 @<Advance \(p)past a whatsit node in the \(l)|line_break| loop@>=@+
+if (subtype(cur_p)==image_node)act_width=act_width+image_width(cur_p);
 adv_past(cur_p)
 
 @ @<Advance \(p)past a whatsit node in the \(p)pre-hyphenation loop@>=@+
 adv_past(s)
 
 @ @<Prepare to move whatsit |p| to the current page, then |goto contribute|@>=
+if (subtype(p)==image_node)
+{@+page_total=page_total+page_depth+image_height(p);
+page_depth=0;
+}
 goto contribute
 
 @ @<Process whatsit |p| in |vert_break| loop, |goto not_found|@>=

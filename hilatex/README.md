@@ -22,18 +22,24 @@ through the various App Stores or on the HintView home page:
 http://hint.userweb.mwn.de/hint/hintview.html 
 
 ## Directories
-base - for supplemental tex files that should go to the TeX Live
+base - for supplemental tex files. Stable versions should go to the TeX Live
 distribution in directory texlive/20XX/texmf-dist/tex/hitex/base/
 
 doc - for documentation
 
-examples - for examples used as test cases
+tests - for short tex and latex files used as test cases
 
 format - for format files
 
-win32 - for WIN32 executables
+bin - for binaries
+     Especially if branches will require experimental extension of hitex
+     and the hintview viewing applications, these directories will contain
+     binaries with these extensions. To support experimenting without going
+     through the process of compiling binaries.
 
-linux - for linux binaries
+bin/win32 - for WIN32 executables
+
+bin/linux - for linux binaries
 
 ## Roadmap
 The repository will target first the hyperref package of LaTeX with

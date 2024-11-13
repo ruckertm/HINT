@@ -1,0 +1,41 @@
+
+%% Testing for engine alternatively \input iftex
+\newif\ifhint
+
+% HINT
+\ifx\HINTversion\undefined
+  \hintfalse
+\else 
+  \hinttrue
+\fi
+
+
+%% Text labels
+
+\def\txtlink#1#2{% #1 is a number
+\ifhint\HINTstartlink goto name {#1} \hbox{\rm #2}\HINTendlink
+\else\hbox{\rm #1}\fi
+}
+
+\def\txttarget#1{%
+\ifhint\HINTdest name {#1}\relax
+\else\relax
+\fi
+}
+
+Goto number \txtlink{one}{1}.
+Goto number \txtlink{two}{2}.
+Goto number \txtlink{three}{3}.
+
+\vfill\break
+\txttarget{one}One.
+
+\vfill\break
+\txttarget{two}Two.
+
+\vfill\break
+\txttarget{three}Three.
+
+\bye
+
+

@@ -39,12 +39,6 @@
 %\makefigindex
 \titletrue
 
-
-\def\setrevision$#1: #2 ${\gdef\lastrevision{#2}}
-\setrevision$Revision: 2846 $
-\def\setdate$#1(#2) ${\gdef\lastdate{#2}}
-\setdate$Date: 2023-02-15 16:11:38 +0100 (Wed, 15 Feb 2023) $
-
 \null
 
 \input titlepage.tex
@@ -3888,7 +3882,7 @@ void hloc_clear(void)
 
 bool hloc_next(void)
 { @+int i=cur_loc;
-  if (LOC_POS(page_loc[cur_loc])>=hend-hstart) 
+  if (hstart+LOC_POS(page_loc[cur_loc])>=hend) 
     return false;
   NEXT_PAGE(i);
   if (i==hi_loc) 

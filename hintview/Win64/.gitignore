@@ -1,0 +1,9 @@
+*~
+\#*\#
+*.ncb
+*.aps
+*.user
+Debug/
+Release/
+Backup/
+x64/

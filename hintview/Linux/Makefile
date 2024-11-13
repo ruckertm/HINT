@@ -82,7 +82,7 @@ MANDIR=/usr/local/man
 install: hintview
 	strip hintview
 	install -t $(BINDIR) --mode=755 hintview
-	install -t $(MANDIR)/man1 --mode=644 ../man/hintview.1
+	install -t $(MANDIR)/man1 --mode=644 hintview.1
 
 .PHONY: clean
 clean:

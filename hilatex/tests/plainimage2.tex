@@ -1,0 +1,52 @@
+\input ifhint
+
+% run with hitex or pdftex to compare
+
+\ifhint
+\setbox0=\hbox{\HINTimage{A.jpg}}
+\else
+\setbox0=\hbox{\pdfximage{A.jpg}\pdfrefximage\pdflastximage} 
+\fi
+\showthe\wd0
+\showthe\ht0
+\box0
+
+\ifhint
+\setbox0=\hbox{\HINTimage{example-image.jpg}}
+\else
+\setbox0=\hbox{\pdfximage{example-image.jpg}\pdfrefximage\pdflastximage}
+\fi
+\showthe\wd0
+\showthe\ht0
+\box0
+
+\ifhint
+\setbox0=\hbox{\HINTimage {example-image.jpg} width 100pt}
+\else
+\setbox0=\hbox{\pdfximage width 100pt {example-image.jpg}\pdfrefximage\pdflastximage}
+\fi
+\showthe\wd0
+\showthe\ht0
+\box0
+
+\ifhint
+\setbox0=\hbox{\HINTimage {example-image.jpg} height 100pt}
+\else
+\setbox0=\hbox{\pdfximage height 100pt {example-image.jpg}\pdfrefximage\pdflastximage}
+\fi
+\showthe\wd0
+\showthe\ht0
+\box0
+
+\ifhint
+\setbox0=\hbox{\HINTimage {example-image.jpg} height 100pt width 50pt}
+\else
+\setbox0=\hbox{\pdfximage height 100pt width 50pt {example-image.jpg}\pdfrefximage\pdflastximage}
+\fi
+\showthe\wd0
+\showthe\ht0
+\box0
+
+
+\bye
+

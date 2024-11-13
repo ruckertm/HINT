@@ -36,21 +36,28 @@
 #include "hfonts.h"
 #include "hrender.h"
 #include "rendernative.h"
+#define STBI_ONLY_JPEG
+#define STBI_ONLY_PNG
+#define STBI_ONLY_BMP
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 
 #ifdef DEBUG
-static void printGLString(const char *name, GLenum s) {
-    const char *v = (const char *) glGetString(s);
-    LOG("GL %s = %s\n", name, v);
-}
 
-static void checkGlError(const char *op) 
+static void checkGlError(const char *op)
 { GLint error;
   while( (error= glGetError())!= GL_NO_ERROR)
 	  MESSAGE("OGL Error after %s: 0x%x\n", op, error);
 }
+
+static void printGLString(const char *name, GLenum s) {
+  const GLubyte *v;
+  v = glGetString(s);
+  checkGlError(name);
+  LOG("GL %s = %s\n", name, v);
+}
+
 #else
 #define printGLString(N,S)	(void)0
 #define checkGlError(OP)	(void)0
@@ -58,6 +65,7 @@ static void checkGlError(const char *op)
 
 #define MAX_INFOLOG 512
 static 	GLuint ProgramID, MatrixID, RuleID, GammaID, FGcolorID, IsImageID, ImageID=0;
+static unsigned char *last_b=NULL;
 
 #define xyID 0
 #define uvID 1
@@ -95,11 +103,11 @@ static const char FragmentShader[]=
 
   "void main()\n"
   "{ vec4 texColor = texture2D( theTexture, UV );\n"
-    "if (IsImage==1) color = texColor;\n"
-    "else\n"
-    "{ color.a = pow(texColor.r,Gamma);\n"
+    "if (IsImage==0) {\n"
+      "color.a = pow(texColor.r,Gamma);\n"
       "color.rgb = FGcolor;\n"
     "}\n"
+    "else color = texColor;\n"
   "}\n"
 ;
 
@@ -145,25 +153,29 @@ static GLuint loadShader(GLenum type, char const *source)
 static void createProgram(void)
 { GLuint vertexID=loadShader(GL_VERTEX_SHADER,VertexShader);
   GLuint fragmentID=loadShader(GL_FRAGMENT_SHADER,FragmentShader);
-  GLint result =GL_FALSE;
+  GLint result=GL_FALSE;
 
   if (!vertexID  || !fragmentID) return;
 
   /* Create, linking, and check the program */
   ProgramID = glCreateProgram();
-  glAttachShader(ProgramID, vertexID);
-  glAttachShader(ProgramID, fragmentID);
-  glLinkProgram(ProgramID);
-  glGetProgramiv(ProgramID, GL_LINK_STATUS, &result);
-  if (!result)
-  { char InfoLog[MAX_INFOLOG];
-    glGetProgramInfoLog(ProgramID, MAX_INFOLOG, NULL, InfoLog);
-    QUIT("Error linking shader program: %s\n", InfoLog);
+  if (ProgramID) {
+    glAttachShader(ProgramID, vertexID);
+    checkGlError("glAttachShader");
+    glAttachShader(ProgramID, fragmentID);
+    checkGlError("glAttachShader");
+    glLinkProgram(ProgramID);
+    glGetProgramiv(ProgramID, GL_LINK_STATUS, &result);
+    if (!result)
+    { char InfoLog[MAX_INFOLOG];
+      glGetProgramInfoLog(ProgramID, MAX_INFOLOG, NULL, InfoLog);
+      glDeleteProgram(ProgramID);
+      ProgramID = 0;
+      QUIT("Error linking shader program: %s\n", InfoLog);
+    }
+    glDetachShader(ProgramID, vertexID);
+    glDetachShader(ProgramID, fragmentID);
   }
-	
-  glDetachShader(ProgramID, vertexID);
-  glDetachShader(ProgramID, fragmentID);
-	
   glDeleteShader(vertexID);
   glDeleteShader(fragmentID);
   //LOG("createProgram Done\n");
@@ -215,7 +227,7 @@ static void mkRuleTexture() /* the texture used for rules */
   rule[1][1][1]=0xFF; // green bottom right
 #endif
 	// Create one OpenGL texture
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // select byte alignment
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   checkGlError("glPixelStorei");
 
   glGenTextures(1, &RuleID);
@@ -238,7 +250,7 @@ static void mkRuleTexture() /* the texture used for rules */
 }
 
 
-void nativeInit(void)
+extern void nativeInit(void)
 { GLuint VertexArrayID;
   static int glewInitialized=0;
   /* Initialize GLEW */
@@ -252,12 +264,12 @@ void nativeInit(void)
   printGLString("Version", GL_VERSION);
   printGLString("Vendor", GL_VENDOR);
   printGLString("Renderer", GL_RENDERER);
-  printGLString("Extensions", GL_EXTENSIONS);
 
     /* Create the vertex array object (VAO) */
   glGenVertexArrays(1, &VertexArrayID);
+  checkGlError("glGenVertexArrays");
   glBindVertexArray(VertexArrayID);
-
+  checkGlError("glBindVertexArray");
   createProgram();
 
   MatrixID = glGetUniformLocation(ProgramID, "MVP");
@@ -310,6 +322,7 @@ void nativeInit(void)
   hint_clear_fonts(true);
   mkRuleTexture();
   ImageID=0;
+  last_b=NULL;
   //LOG("nativeInit Done\n");
 }
 
@@ -319,15 +332,14 @@ void nativeClear(void)
   glDeleteBuffers(1, &uvbuffer);
   glDeleteProgram(ProgramID);
   glDeleteTextures(1, &RuleID);
-   if (ImageID != 0) {
+  if (ImageID != 0) {
         glDeleteTextures(1, &ImageID);
-        ImageID = 0;
-   }
+        ImageID = 0; last_b=NULL;
+  }
 }
 
 void nativeBlank(void)
 { glClear(GL_COLOR_BUFFER_BIT);
-  //LOG("nativeBlank Done\n");
 }
 
 void nativeSetGamma(double gamma)
@@ -414,18 +426,14 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
    x, y, w, h are given in point
 */
 {
-  static unsigned char *last_b=NULL;
-  GLenum format, internal_format;
+  GLenum format;
   int width, height, nrChannels;
-
-
-
   if (b!=last_b||ImageID==0)
   { unsigned char *data;
     static unsigned char grey[4]={0,0x80,0x80,0x80};
-    if (ImageID != 0)
-    { glDeleteTextures(1, &ImageID);
-      ImageID = 0;
+    if (ImageID != 0) {
+        glDeleteTextures(1, &ImageID);
+        ImageID = 0;
     }
     last_b=b;
     data = stbi_load_from_memory(b, (int) (e - b), &width, &height, &nrChannels, 0);
@@ -433,21 +441,24 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
     { LOG("Unable to display image\n");
       data=grey; width=height=1; nrChannels=4;
     }
-    //LOG("nativeImage %d chanels\n",nrChannels);	
-    internal_format=GL_SRGB;
+    //LOG("nativeImage %d chanels\n",nrChannels);
+    format = GL_RGBA;
     if (nrChannels == 4)
-    { format = GL_RGBA; internal_format=GL_SRGB_ALPHA;}
+        format = GL_RGBA; 
     else if (nrChannels == 3) 
-      format = GL_RGB;
+        format = GL_RGB;
     else if (nrChannels == 2) 
-      format = GL_RG;
+        format = GL_LUMINANCE_ALPHA;
     else
-      format = GL_RED;
+        format = GL_LUMINANCE;
     glGenTextures(1, &ImageID);
     glBindTexture(GL_TEXTURE_2D, ImageID);
     checkGlError("glBindTexture ImageID");
-
-    glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0,
+		   format, GL_UNSIGNED_BYTE, data);
+    if (glGetError()!= GL_NO_ERROR)
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
+    		  format, GL_UNSIGNED_BYTE, data);
     checkGlError("glTexImage2D(image)");
     if (data!=grey) stbi_image_free(data);
     glGenerateMipmap(GL_TEXTURE_2D);
@@ -477,7 +488,7 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
 
 }
 
-
+int to_nearest=1;
 static void GLtexture(Gcache *g) {
     unsigned texID;
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -506,8 +517,14 @@ static void GLtexture(Gcache *g) {
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  if (to_nearest) 
+  { glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  }
+  else
+  { glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  }
 
   g->GLtexture = texID;
   //MESSAGE("Generated GL texture %d",g->GLtexture);

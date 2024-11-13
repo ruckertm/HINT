@@ -1,0 +1,19 @@
+\documentclass[10pt]{article}
+\usepackage{iftex}
+\ifhint
+% requires hhitex.def to be found by kpathseach
+\usepackage[customdriver=hhitex]{hyperref}
+\else
+\usepackage{hyperref}
+\fi
+
+\begin{document}
+
+For \TeX\ see \cite{DK:texbook} and  \cite{DK:tex},
+for METAFONT see  \cite{DK:mfb}; and for literate programming see  \cite{DK:lp}.  
+\newpage
+\bibliography{ltxlinks3} 
+\bibliographystyle{ieeetr}
+
+\end{document}
+

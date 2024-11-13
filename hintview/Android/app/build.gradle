@@ -1,0 +1,51 @@
+apply plugin: 'com.android.application'
+
+android {
+    signingConfigs {
+        release {
+        storeFile file('C:\\somewhere\\HintViewUploadkey.jks')
+            storePassword 'some password'
+            keyAlias 'some alias'
+            keyPassword 'some password'
+        }
+    }
+    compileSdk 33
+    defaultConfig {
+        applicationId 'edu.hm.cs.hintview'
+        minSdkVersion 21
+        targetSdkVersion 33
+        versionCode 8
+        versionName "2.0.2"
+        externalNativeBuild {
+            cmake {
+                // Available arguments are inside ${SDK}/cmake/.../android.toolchain.cmake file
+                arguments '-DANDROID_STL=c++_static'
+            }
+        }
+        signingConfig signingConfigs.debug
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled = false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'),
+                          'proguard-rules.pro'
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            version '3.6.0'
+            path 'src/main/cpp/CMakeLists.txt'
+        }
+    }
+    dependencies {
+        implementation "androidx.appcompat:appcompat:1.1.0"
+    }
+    lint {
+        ignoreWarnings true
+    }
+    namespace 'edu.hm.cs.hintview'
+    ndkVersion '21.4.7075529'
+}
+
+

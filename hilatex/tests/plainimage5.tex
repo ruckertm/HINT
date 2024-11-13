@@ -1,0 +1,12 @@
+\input ifhint
+
+% run with hitex or pdftex to compare
+\ifhint
+\HINTimage=gamma-sRGBA.png width 425pt height 200pt\relax
+\else
+\pdfximage width 425pt height 200pt {gamma-sRGBA.png}\pdfrefximage\pdflastximage
+\fi
+
+
+\vfill
+\bye

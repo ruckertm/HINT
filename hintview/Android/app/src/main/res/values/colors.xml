@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="toolbar_color">#80CCCCCC</color>
+    <color name="toolbar_dark_color">#80444444</color>
+    <color name="foreground_color">#000000</color>
+    <color name="foreground_dark_color">#EEEEEE</color>
+    <color name="hintview_background">#3DDC84</color>
+</resources>

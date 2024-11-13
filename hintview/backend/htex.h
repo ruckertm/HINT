@@ -1,5 +1,5 @@
 /*1410:*/
-#line 25710 "htex.w"
+#line 25716 "htex.w"
 
 #define banner "This is TeX, Version 3.141592653 (HINT)" \
 
@@ -1724,7 +1724,7 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define end_write_token cs_token_flag+end_write \
 
 
-#line 25711 "htex.w"
+#line 25717 "htex.w"
 
 enum{/*11:*/
 #line 374 "htex.w"
@@ -1768,7 +1768,7 @@ file_name_size= 1024,
 empty_string= 256
 
 /*:11*/
-#line 25712 "htex.w"
+#line 25718 "htex.w"
 };
 /*18:*/
 #line 514 "htex.w"
@@ -1802,9 +1802,11 @@ typedef int8_t small_number;
 #if __SIZEOF_FLOAT__==4
 typedef float float32_t;
 #else
+#line 2421 "htex.w"
 #error  float type must have size 4
 #endif
-typedef float glue_ratio;
+#line 2423 "htex.w"
+ typedef float glue_ratio;
 
 /*:113*//*117:*/
 #line 2526 "htex.w"
@@ -1890,7 +1892,7 @@ typedef uint16_t trie_pointer;
 typedef int16_t hyph_pointer;
 
 /*:949*/
-#line 25713 "htex.w"
+#line 25719 "htex.w"
 
 extern void list_init(void);
 extern void hpack_page(void);
