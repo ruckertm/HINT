@@ -25,75 +25,68 @@
  * dealings in this Software without prior written authorization from the
  * copyright holders.
  */
-//
-//  renderegl.m
-//  iOSHintView
-//
-//  Created by Martin Ruckert on 10.10.22.
-//
 
-#include <Foundation/Foundation.h>
-#include <OpenGLES/ES2/gl.h>
-#include <OpenGLES/ES2/glext.h>
-#include <ft2build.h>
+// OpenGL ES 2.0 code
 
-#include FT_FREETYPE_H
 
+#include "basetypes.h"
 #include "error.h"
+#include FT_FREETYPE_H
 #include "hint.h"
 #include "hfonts.h"
 #include "hrender.h"
-
 #include "rendernative.h"
-
-
-
-
+#define STBI_ONLY_JPEG
+#define STBI_ONLY_PNG
+#define STBI_ONLY_BMP
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-
-
-static void printGLString(const char *name, GLenum s) {
-    const char *v = (const char *) glGetString(s);
-    LOG("GL %s = %s\n", name, v);
-}
-
+#if 1
 static void checkGlError(const char *op) {
     for (GLint error = glGetError(); error; error = glGetError()) {
         LOG("after %s() glError (0x%x)\n", op, error);
     }
 }
 
-static GLuint gProgram;
-static GLuint gvPositionHandle;
-static GLuint ourColorLocation, isImageLocation;
+static void printGLString(const char *name, GLenum s) {
+    const char *v = (const char *) glGetString(s);
+    LOG("GL %s = %s\n", name, v);
+}
+#else
 
-static char *gVertexShader =
+#define printGLString(N,S)	(void)0
+#define checkGlError(OP)	(void)0
+#endif
+
+static GLuint gvPositionHandle;
+static GLuint ProgramID, RuleID, ourColorLocation, isImageID;
+static unsigned char *last_b=NULL;
+
+static const char *VertexShader =
         "#version 100\n"
         "attribute vec4 vPosition;\n"
-        "varying vec2 TexCoord;\n"
-        "uniform mat4 projection;\n"
+        "varying vec2 UV;\n"
+        "uniform mat4 MVP;\n"
         "void main() {\n"
-        "  gl_Position = projection*vec4(vPosition.x,vPosition.y,1.0,1.0);\n"
-        "  TexCoord=vec2(vPosition.z,vPosition.w);\n"
+        "  gl_Position = MVP*vec4(vPosition.x,vPosition.y,1.0,1.0);\n"
+        "  UV=vec2(vPosition.z,vPosition.w);\n"
         "}\n";
 
-static char *gFragmentShader =
+static const char *FragmentShader =
         "precision mediump float;\n"
-        "varying vec2 TexCoord;\n"
-        "uniform sampler2D ourTexture;\n"
-        "uniform vec4 ourColor;\n"
-        "uniform int isImage;\n"
-        "void main() {\n"
-        "  if(isImage==0) { \n"
-        "     vec4 c =  texture2D(ourTexture,TexCoord); \n"
-        "     gl_FragColor.rgb = ourColor.rgb;\n"
-        "     gl_FragColor.a = c.a;\n"
-        "  } else {\n"
-        "     vec4 c =  texture2D(ourTexture,TexCoord); \n"
-        "     gl_FragColor.rgb = c.rgb;\n"
-        "     gl_FragColor.a = c.a;\n"
-        "  } \n"
+        "varying vec2 UV;\n"
+        "uniform sampler2D theTexture;\n"
+        "uniform vec4 FGcolor;\n"
+        "uniform float Gamma;\n"
+        "uniform int IsImage;\n"
+        "void main()\n"
+        "{ vec4 texColor = texture2D(theTexture, UV);\n"
+          "if(IsImage==0) {\n"
+             "gl_FragColor.a = texColor.a;\n"
+             "gl_FragColor.rgb = FGcolor.rgb;\n"
+          "}\n"
+          "else gl_FragColor = texColor;\n"
         "}\n";
 
 static GLuint loadShader(GLenum shaderType, const char *pSource) {
@@ -161,7 +154,6 @@ static GLuint createProgram(const char *pVertexSource, const char *pFragmentSour
 }
 
 
-static GLuint RuleTexture;
 
 static void mkRuleTexture() { /* the texture used for rules */
 #define NO_TEST 1
@@ -178,9 +170,9 @@ static void mkRuleTexture() { /* the texture used for rules */
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     checkGlError("glPixelStorei");
-    glGenTextures(1, &RuleTexture);
-    glBindTexture(GL_TEXTURE_2D, RuleTexture);
-    checkGlError("glBindTexture RuleTexture");
+    glGenTextures(1, &RuleID);
+    glBindTexture(GL_TEXTURE_2D, RuleID);
+    checkGlError("glBindTexture RuleID");
 #if NO_TEST
   glTexImage2D(GL_TEXTURE_2D, 0,GL_ALPHA, 1, 1 , 0, GL_ALPHA, GL_UNSIGNED_BYTE, rule);
 #else
@@ -202,23 +194,23 @@ void nativeInit(void) {
  //   printGLString("Vendor", GL_VENDOR);
  //   printGLString("Renderer", GL_RENDERER);
 
-    gProgram = createProgram(gVertexShader, gFragmentShader);
-    if (!gProgram) {
+    ProgramID = createProgram(VertexShader, FragmentShader);
+    if (!ProgramID) {
         NSLog(@"Could not create program.");
         return;
     }
-    gvPositionHandle = glGetAttribLocation(gProgram, "vPosition");
+    gvPositionHandle = glGetAttribLocation(ProgramID, "vPosition");
     checkGlError("glGetAttribLocation");
     //LOGI("glGetAttribLocation(\"vPosition\") = %d\n", gvPositionHandle);
 
     glEnableVertexAttribArray(gvPositionHandle);
     checkGlError("glEnableVertexAttribArray");
 
-    ourColorLocation = glGetUniformLocation(gProgram, "ourColor");
-    isImageLocation = glGetUniformLocation(gProgram, "isImage");
+    ourColorLocation = glGetUniformLocation(ProgramID, "FGcolor");
+    isImageID = glGetUniformLocation(ProgramID, "IsImage");
 
-    //int ourProjectionLocation = glGetUniformLocation(gProgram, "projection");
-    glUseProgram(gProgram);
+    //int ourProjectionLocation = glGetUniformLocation(ProgramID, "MVP");
+    glUseProgram(ProgramID);
 
     mkRuleTexture();
     //hint_clear_fonts(true);
@@ -285,7 +277,7 @@ void nativeSetSize(int px_h, int px_v, double xdpi, double ydpi)
    // NSLog(@"native SetSize to %f pt x %f pt (%d px x %d px)", pt_h, pt_v, px_h, px_v);
 
     // GL Coordinates are in points
-    ourProjectionLocation = glGetUniformLocation(gProgram, "projection");
+    ourProjectionLocation = glGetUniformLocation(ProgramID, "MVP");
 
     GLfloat MVP[4][4]= {{0}};
     MVP[0][0]=2.0/pt_h; // x: scale to -1 to +1
@@ -405,17 +397,17 @@ void nativeRule(double x, double y, double w, double h)
                        (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
                        (GLfloat) (x + w), (GLfloat) y, 1.0f, 1.0f
     };
-    glBindTexture(GL_TEXTURE_2D, RuleTexture);
+    glBindTexture(GL_TEXTURE_2D, RuleID);
     checkGlError("glBindTexture");
     glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
     checkGlError("glVertexAttribPointer");
 #if !NO_TEST
-    glUniform1i(isImageLocation, 1);
+    glUniform1i(isImageID, 1);
 #endif
     glDrawArrays(GL_TRIANGLES, 0, 6);
     checkGlError("glDrawArrays");
 #if !NO_TEST
-    glUniform1i(isImageLocation, 0);
+    glUniform1i(isImageID, 0);
 #endif
 }
 
@@ -492,10 +484,10 @@ nativeImage(double x, double y, double w, double h, unsigned char *b, unsigned c
         glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
         checkGlError("glVertexAttribPointer");
         // make sure that image is always rendered in correct colors
-        glUniform1i(isImageLocation, 1);
+        glUniform1i(isImageID, 1);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         checkGlError("glDrawArrays");
-        glUniform1i(isImageLocation, 0);
+        glUniform1i(isImageID, 0);
       
 }
 

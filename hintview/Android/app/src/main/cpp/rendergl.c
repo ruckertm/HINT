@@ -32,6 +32,7 @@
 #include <android/log.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
+
 #include "basetypes.h"
 #include "error.h"
 #include <ft2build.h>
@@ -78,6 +79,7 @@ static void printGLString(const char *name, GLenum s) {
 static GLuint gvPositionHandle;
 static GLuint ProgramID, MatrixID, RuleID, GammaID, FGcolorID, IsImageID, ImageID=0;
 static unsigned char *last_b=NULL;
+
 static const char *VertexShader =
         "#version 100\n"
         "attribute vec4 vPosition;\n"
@@ -96,7 +98,7 @@ static const char *FragmentShader =
         "uniform float Gamma;\n"
         "uniform int IsImage;\n"
         "void main()\n"
-        "{ vec4 texColor = texture2D( theTexture, UV );\n"
+        "{ vec4 texColor = texture2D(theTexture, UV);\n"
           "if(IsImage==0) {\n"
              "gl_FragColor.a = pow(texColor.a*FGcolor.a,Gamma);\n"
              "gl_FragColor.r = FGcolor.r;\n"
