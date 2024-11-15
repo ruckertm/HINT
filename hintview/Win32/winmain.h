@@ -37,11 +37,15 @@ extern int autoreload;
 
 extern double gamma;
 
+#define GET_R(C) GetRValue(C)
+#define GET_G(C) GetGValue(C)
+#define GET_B(C) GetBValue(C)
+
 /* colors foreground and background for day and night mode */
 #define FG_DAY RGB(0x00,0x00,0x00) /* black */
 #define BG_DAY RGB(0xFF,0xFF,0xFF) /* white */
-#define FG_NIGHT RGB(0xFF,0xFF,230) /* warm white */
-#define BG_NIGHT RGB(0x00,0x00,0x00) /* dark blue */
+#define FG_NIGHT RGB(0xFF,0xFF,0xEE) /* warm white */
+#define BG_NIGHT RGB(0x00,0x00,0x00) /* black */
 
 #define BF_ON_DAY RGB(0xD0,0xD0,0xD0) /* lighter grey */
 #define BF_OFF_DAY RGB(0xA0,0xA0,0xA0) /* light grey */
