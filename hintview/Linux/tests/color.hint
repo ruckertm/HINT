@@ -1,0 +1,147 @@
+HINT 2.1 created by stretch
+<directory 4
+<section 3 '/usr/local/texlive/2023/texmf-dist/fonts/tfm/public/cm/cmssdc10.tfm'
+>
+<section 4 '/usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmssdc10.pfb'>
+>
+<definitions
+<max
+ <font 0>
+ <glue 15>
+ <language 0>
+ <baseline 1>
+ <stream 2>
+ <page 2>
+ <color 3>
+ <int 23>>
+<color *0 (dark blue on light yellow, light yellow on dark blue)
+ <<<0x00 0x00 0x10> <0xFF 0xFF 0xCC>>> <<<0xFF 0xFF 0x88> <0 0 0x10>>>>
+<color *1 (transparent green/blue, transparent red/yellow)
+ <<<0x00 0xFF 0 0x80> <0x40 0x40 0xFF 0x80>>>
+ <<<0xFF 0 0 0x80> <0xFF 0xFF 0 0x80>>>>  
+<color *2 (dark green/grey,  light red/grey)
+ <<<0x00 0x40 0> <80 80 80>>> <<<0xFF 0x40 0x40>  <80 80 80>>>>  
+<color *3 (dark gray/mediumgrey,  medium gey/dark grey)
+ <<<0x40 0x40 0x40 0x80> <0x80 0x80 0x80 0x80>>> <<<0x80 0x80 0x80 0x80>  <0x40 0x40 0x40 0x80>>>>  
+<language *0 'unknown'>
+<font *0 'titlefont' 40pt 3 4
+ <glue 0xC.AAApt plus 0x6.554Fpt minus 0x4.38E1pt>
+ <disc !
+  <
+   <glyph '-' *0 (titlefont)>>>>
+<int *1 +1000>
+<int *2 +2000>
+<int *17 +804>
+<int *18 +8>
+<int *19 +1>
+<int *20 +2024>
+<int *22 +0>
+<int *23 -10000>
+<dimen *1 320pt>
+<dimen *2 400pt>
+<dimen *4 4pt>
+<dimen *5 7pt>
+<dimen *7 16pt>
+<dimen *8 20pt>
+<dimen *9 20pt>
+<glue *12 17pt>
+<glue *15 0pt plus 1fill>
+<baseline *1 0pt
+ <glue 30pt>
+ <glue 1pt>>
+<page *2 'plain' 20
+ <glue *11> 4pt
+ <xdimen 10pt+1v>
+ <xdimen 10pt+1h>
+ <
+  <color *3>
+  <rule 5pt 0pt 200pt>
+  <stream *1>
+  <stream *0>
+  <stream *2>>
+ <stream *1
+  <xdimen 0x3FFF.FFFFpt> 1000 * * 0 <>
+  <xdimen 0pt+1h>
+  <glue *0> <>
+  <glue *0>>
+ <stream *2
+  <xdimen 0x242.28F5pt> 1000 * * 0
+  <
+   <glue 12pt plus 4pt minus 4pt>
+   <kern ! -3pt>
+   <rule 0x0.6666pt 0pt 0x90.8A3Dpt>
+   <kern ! 0x2.999Apt>>
+  <xdimen 0pt+1h>
+  <glue *0> <>
+  <glue 12pt plus 4pt minus 4pt>>>
+<page *1 'basic' 10
+ <glue *11> 4pt
+ <xdimen -9pt+1.25v>
+ <xdimen -9pt+1.25h>
+ <
+  <stream *1>
+  <stream *0>
+  <stream *2>>
+ <stream *2
+  <xdimen 0pt+1v> 1000 * * 0
+  <
+   <glue 12pt plus 4pt minus 4pt>
+   <kern ! -3pt>
+   <rule 0x0.6666pt 0pt 0x90.8A3Dpt>
+   <kern ! 0x2.999Apt>>
+  <xdimen 300pt>
+  <glue *0> <>
+  <glue 12pt plus 4pt minus 4pt>>
+ <stream *1
+  <xdimen 0x3FFF.FFFFpt> 1000 *0 * 0 <>
+  <xdimen 0pt+1h>
+  <glue *0> <>
+  <glue *0>>>
+>
+<content
+<label *0 top>
+<language *0>
+<hbox 0x20.C71Dpt 0pt 0x76.D4EBpt 
+ <
+  <color *0>
+  <glyph 'A' *0 (tenrm)>
+  <kern -20pt>
+  <color *1>
+  <glyph 'B' *0 (tenrm)>
+  <color off>
+  <glyph 'A' *0 (tenrm)>
+  <color *2>
+  <kern -20pt>
+  <glyph 'C' *0 (tenrm)>
+  <glue *15>>>
+  <rule 2pt 0pt _>
+<kern 6pt>  
+<vbox 142pt 0pt 100pt shifted 30pt
+ <
+  <rule 2pt 0pt _>
+  <kern 18pt>
+  <color *1>
+  <rule 2pt 0pt _>
+  <kern 18pt>
+  <color *0>
+  <rule 2pt 0pt _>
+  <kern 18pt>
+  <color off>
+  <rule 2pt 0pt _>
+  <kern 18pt>
+  <color off>
+  <rule 2pt 0pt _>
+  <kern 18pt>
+  <color off>
+  <rule 2pt 0pt _>
+  <kern 18 pt>
+  <color off>
+  <rule 2pt 0pt _>
+  <kern 18 pt>
+ >
+>
+<kern 6pt>
+<rule 2pt 0pt _>
+<glue *15>
+<penalty *23>
+>

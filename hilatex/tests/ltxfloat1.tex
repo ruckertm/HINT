@@ -5,30 +5,42 @@
 %% works with \topinsert \endinsert 
 %% but not yet with \begin{figure}[t] \end{figure}
 
+\ifhint
+\def\bfig{\topinsert}
+\def\efig{\endinsert}
+\def\caption#1{\hbox{\it #1}}
+\else
+\def\bfig{\begin{figure}[t]}
+\def\efig{\end{figure}}
+\fi
+
 This document has a figure.
 
 %\begin{figure}[t]
-\topinsert
+%\topinsert
+\bfig
   \vbox to 1in {\hrule
     \vfill
     \hbox{A Figure}
     \vfill
     \hrule}
   \caption{The Figure.}
-\endinsert
+\efig
 %\end{figure}
 
 And another figure.
 
 %\begin{figure}[t]
-\topinsert
+%\topinsert
+\bfig
   \vbox to 1in {\hrule
     \vfill
-    \hbox{An other Figure}
+    \hbox{Another Figure}
     \vfill
     \hrule}
   \caption{The second Figure.}
-\endinsert
+\efig
+%\endinsert
 %\end{figure}
 
 \vfill

@@ -1,0 +1,36 @@
+\documentclass[10pt]{article}
+\usepackage{iftex}
+\ifhint
+% requires hhitex.def to be found by kpathseach
+\usepackage[customdriver=hhitex]{hyperref}
+\else
+\usepackage{hyperref}
+\fi
+
+\begin{document}
+
+%% Text labels
+
+Goto number \hyperlink{one}{1}.
+Goto number \hyperlink{two}{2}.
+Goto number \hyperlink{three}{3}.
+
+%\vbox to 90pt
+{
+  \hrule
+  \vskip 6pt
+  \hyperlink{one}{this is\vadjust{\vfill\eject}%
+    \hfill\penalty-500 some text}
+}
+
+\newpage
+\hypertarget{one}One.
+
+\newpage
+\hypertarget{two}Two.
+
+\newpage
+\hypertarget{three}Three.
+
+\end{document}
+

@@ -1,25 +1,25 @@
-	/*529:*/
-	#line 10921 "format.w"
+	/*548:*/
+	#line 11404 "format.w"
 
 	/*1:*/
 	#line 326 "format.w"
 
 typedef struct{uint32_t c;uint8_t f;}Glyph;
 	/*:1*/	/*114:*/
-	#line 2177 "format.w"
+	#line 2179 "format.w"
 
 typedef struct{
 Dimen h,d,w;
 }Rule;
 	/*:114*/	/*123:*/
-	#line 2291 "format.w"
+	#line 2293 "format.w"
 
 typedef struct{
 bool x;
 Xdimen d;
 }Kern;
 	/*:123*/	/*141:*/
-	#line 2714 "format.w"
+	#line 2716 "format.w"
 
 typedef struct{
 Tag t;
@@ -27,25 +27,25 @@ uint32_t p;
 uint32_t s;
 }List;
 	/*:141*/	/*149:*/
-	#line 3140 "format.w"
+	#line 3142 "format.w"
 
 typedef enum{txt_font= 0x00,txt_global= 0x08,txt_local= 0x11,
 txt_cc= 0x1D,txt_node= 0x1E,txt_hyphen= 0x1F,
 txt_glue= 0x20,txt_ignore= 0xFB}Txt;
 	/*:149*/	/*160:*/
-	#line 3440 "format.w"
+	#line 3442 "format.w"
 
 typedef struct{Dimen h,d,w,a;float32_t r;int8_t s,o;List l;}Box;
 	/*:160*/	/*187:*/
-	#line 4025 "format.w"
+	#line 4027 "format.w"
 
 typedef struct{uint8_t f;List l;}Lig;
 	/*:187*/	/*195:*/
-	#line 4142 "format.w"
+	#line 4144 "format.w"
 
 typedef struct{bool x;List p,q;uint8_t r;}Disc;
 	/*:195*/	/*228:*/
-	#line 4697 "format.w"
+	#line 4699 "format.w"
 
 typedef struct{
 uint16_t n;
@@ -54,7 +54,7 @@ Xdimen w,h;
 uint8_t wr,hr;
 }Image;
 	/*:228*/	/*272:*/
-	#line 5750 "format.w"
+	#line 5796 "format.w"
 
 typedef struct{
 uint8_t*t;
@@ -62,20 +62,20 @@ int s;
 int d;
 uint16_t r;
 }Outline;
-	/*:272*/	/*308:*/
-	#line 6760 "format.w"
+	/*:272*/	/*323:*/
+	#line 7173 "format.w"
 
 typedef
 struct{uint8_t pg;uint32_t pos;bool on;int link;}RangePos;
-	/*:308*/	/*397:*/
-	#line 8772 "format.w"
+	/*:323*/	/*412:*/
+	#line 9196 "format.w"
 
 typedef struct{Kind k;int n;}Ref;
-	/*:397*/
-	#line 10922 "format.w"
+	/*:412*/
+	#line 11405 "format.w"
 
-	/*342:*/
-	#line 7504 "format.w"
+	/*357:*/
+	#line 7917 "format.w"
 
 typedef struct{
 uint64_t pos;
@@ -85,17 +85,17 @@ char*file_name;
 uint8_t*buffer;
 uint32_t bsize;
 }Entry;
-	/*:342*/
-	#line 10923 "format.w"
+	/*:357*/
+	#line 11406 "format.w"
 
 	/*38:*/
-	#line 1073 "format.w"
+	#line 1075 "format.w"
 
 #define HGET_STRING(S) S= (char*)hpos;\
  while(hpos<hend && *hpos!=0) { RNG("String character",*hpos,0x20,0x7E); hpos++;}\
  hpos++;
 	/*:38*/	/*147:*/
-	#line 2883 "format.w"
+	#line 2885 "format.w"
 
 #define HGET_LIST(I,L) \
   if (((I)&0x3)==0) {uint8_t n= HGET8; REF_RNG(KIND((L).t),n); (L).s= 0;}\
@@ -105,8 +105,8 @@ uint32_t bsize;
     { uint32_t s= hget_list_size(I); \
       if (s!=(L).s) \
       QUIT("List sizes at 0x%x and " SIZE_F " do not match 0x%x != 0x%x",node_pos+1,hpos-hstart-I-1,(L).s,s);}}
-	/*:147*/	/*328:*/
-	#line 7105 "format.w"
+	/*:147*/	/*343:*/
+	#line 7518 "format.w"
 
 #define HGET_ERROR  QUIT("HGET overrun in section %d at " SIZE_F "\n",section_no,hpos-hstart)
 #define HEND   ((hpos<=hend)?0:(HGET_ERROR,0))
@@ -116,8 +116,8 @@ uint32_t bsize;
 #define HGET24(X) ((X)= (hpos[0]<<16)+(hpos[1]<<8)+hpos[2],hpos+= 3,HEND)
 #define HGET32(X) ((X)= (hpos[0]<<24)+(hpos[1]<<16)+(hpos[2]<<8)+hpos[3],hpos+= 4,HEND)
 #define HGETTAG(A) A= HGET8,DBGTAG(A,hpos-1)
-	/*:328*/	/*353:*/
-	#line 7732 "format.w"
+	/*:343*/	/*368:*/
+	#line 8146 "format.w"
 
 #define HGET_SIZE(I) \
   if ((I)&b100) { \
@@ -140,8 +140,8 @@ uint32_t bsize;
   HGET16(i); HGET_SIZE(I); HGET_STRING(file_name); \
   hset_entry(&(E),i,s,xs,file_name); \
 }
-	/*:353*/	/*477:*/
-	#line 10156 "format.w"
+	/*:368*/	/*495:*/
+	#line 10627 "format.w"
 
 #define HBACK(X) ((hpos-(X)<hstart)?(QUIT("HTEG underflow\n"),NULL):(hpos-= (X)))
 
@@ -150,8 +150,8 @@ uint32_t bsize;
 #define HTEG24(X) (HBACK(3),(X)= (hpos[0]<<16)+(hpos[1]<<8)+hpos[2])
 #define HTEG32(X) (HBACK(4),(X)= (hpos[0]<<24)+(hpos[1]<<16)+(hpos[2]<<8)+hpos[3])
 #define HTEGTAG(X) X= HTEG8,DBGTAG(X,hpos)
-	/*:477*/
-	#line 10924 "format.w"
+	/*:495*/
+	#line 11407 "format.w"
 
 
 extern Entry*dir;
@@ -174,6 +174,7 @@ extern void hget_entry(Entry*e);
 extern void hget_directory(void);
 extern void hclear_dir(void);
 extern bool hcheck_banner(char*magic);
+extern int max_range;
 
 extern void hget_max_definitions(void);
 extern uint32_t hget_utf8(void);
@@ -195,4 +196,4 @@ extern void hteg_size_boundary(Info info);
 
 #endif
 
-	/*:529*/
+	/*:548*/
