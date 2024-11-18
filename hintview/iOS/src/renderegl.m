@@ -36,13 +36,13 @@
 #include <OpenGLES/ES2/gl.h>
 #include <OpenGLES/ES2/glext.h>
 #include <ft2build.h>
+#include FT_FREETYPE_H
 
 // OpenGL ES 2.0 code
 
 
 #include "basetypes.h"
 #include "error.h"
-#include FT_FREETYPE_H
 #include "hint.h"
 #include "hfonts.h"
 #include "hrender.h"
@@ -242,6 +242,38 @@ void nativeInit(void) {
     checkGlError("glBlendFunc");
 
   //  NSLog(@"nativeInit done\n");
+}
+
+
+void nativeSetGamma(double gamma)
+{ glUniform1f(GammaID, 1.0/gamma);
+  checkGlError("glsetgamma");
+}
+
+#if 1
+
+static uint32_t cur_fg=0;
+
+static void nativeSetForeground(uint32_t fg)
+/* set foreground rgba colors */
+{ if (fg!=cur_fg)
+  { uint8_t r,g,b,a;
+    cur_fg=fg;
+    a=fg&0xFF;fg=fg>>8;
+    b=fg&0xFF;fg=fg>>8;
+    g=fg&0xFF;fg=fg>>8;
+    r=fg&0xFF;
+    glUniform4f(FGcolorID, r/255.0f,g/255.0f,b/255.0f,a/255.0f);
+  }
+}
+
+void nativeBackground(double x, double y, double w, double h)
+{ uint32_t bg, fg;
+  fg=cur_colorset[0][cur_mode*6+cur_style*2];
+  bg=cur_colorset[0][cur_mode*6+cur_style*2+1];
+  nativeSetForeground(bg);
+  nativeRule(x,y,w,h);
+  nativeSetForeground(fg);
 }
 
 static GLfloat curfr=0.0f, curfg=0.0f, curfb=0.0f;
