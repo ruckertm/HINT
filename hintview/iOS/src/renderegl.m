@@ -407,21 +407,27 @@ void  nativeGlyph(double x,double dx,double y,double dy,double w,double h,struct
                        (GLfloat) (x + w), (GLfloat) y, 1.0f, 0.0f
     };
     glBindTexture(GL_TEXTURE_2D, g->GLtexture);
-    checkGlError("glBindTexture");
+    checkGlError("glBindTexture g->GLtexture");
+
+#if 1
+  nativeSetForeground(cur_colorset[0][cur_mode*6+s*2]);
+#else
+  if (s!=last_style)
+  { if (s&FOCUS_BIT)
+      glUniform3f(FGcolorID, 0.0f, 1.0f, 0.0f);
+    else if (s&MARK_BIT)
+      glUniform3f(FGcolorID, 1.0f, 0.0f, 0.0f);
+    else if (s&LINK_BIT)
+      glUniform3f(FGcolorID, 0.0f, 0.0f, 1.0f);
+    else
+      glUniform3f(FGcolorID, curfr, curfg,curfb);
+    last_style=s;
+  }
+#endif
+    
     glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
     checkGlError("glVertexAttribPointer");
-    if (s!=last_style)
-    { if (s&FOCUS_BIT)
-           glUniform4f(ourColorLocation, 0.0f, 1.0f, 0.0f, 1.0f);
-      else if (s&MARK_BIT)
-            glUniform4f(ourColorLocation, 1.0f, 0.0f, 0.0f, 1.0f);
-      else if (s&LINK_BIT)
-           glUniform4f(ourColorLocation, lnkr, lnkg, lnkb, 1.0f);
-      else
-           glUniform4f(ourColorLocation, curfr, curfg,curfb, 1.0f);
-        last_style=s;
-    }
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glDrawArrays(GL_TRIANGLES, 0, 2*3);
     checkGlError("glDrawArrays");
 }
 
