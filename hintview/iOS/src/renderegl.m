@@ -25,6 +25,17 @@
  * dealings in this Software without prior written authorization from the
  * copyright holders.
  */
+//
+//  renderegl.m
+//  iOSHintView
+//
+//  Created by Martin Ruckert on 10.10.22.
+//
+
+#include <Foundation/Foundation.h>
+#include <OpenGLES/ES2/gl.h>
+#include <OpenGLES/ES2/glext.h>
+#include <ft2build.h>
 
 // OpenGL ES 2.0 code
 
