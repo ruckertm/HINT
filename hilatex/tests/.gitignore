@@ -1,7 +1,11 @@
 *.aux
+*.out
+*.toc
+*.lof
 *.dvi
 *.log
 *.hnt
 *.hint
 *.hnt
 *.pdf
+*.blg

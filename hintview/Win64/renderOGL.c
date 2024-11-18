@@ -98,17 +98,19 @@ static const char FragmentShader[]=
   "out vec4 color;\n"
   /* Constants for the current triangles */
   "uniform sampler2D theTexture;\n"
-  "uniform vec3 FGcolor;\n"
+  "uniform vec4 FGcolor;\n"
   "uniform float Gamma;\n"
   "uniform int IsImage;\n"
 
   "void main()\n"
   "{ vec4 texColor = texture2D( theTexture, UV );\n"
-    "if (IsImage==1) color = texColor;\n"
-    "else\n"
-    "{ color.a = pow(texColor.r,Gamma);\n"
-      "color.rgb = FGcolor;\n"
+    "if (IsImage==0) {\n"
+      "color.a = pow(texColor.r*FGcolor.a,Gamma);\n"
+      "color.r = FGcolor.r;\n"
+      "color.g = FGcolor.g;\n"
+      "color.b = FGcolor.b;\n"
     "}\n"
+    "else color = texColor;\n"
   "}\n"
 ;
 
@@ -228,7 +230,7 @@ static void mkRuleTexture() /* the texture used for rules */
   rule[1][1][1]=0xFF; // green bottom right
 #endif
 	// Create one OpenGL texture
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // select byte alignment
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   checkGlError("glPixelStorei");
 
   glGenTextures(1, &RuleID);
@@ -250,6 +252,7 @@ static void mkRuleTexture() /* the texture used for rules */
   //LOG("mkRuleTexture Done\n");
 }
 
+static ColorSet *cur_colorset=NULL;
 
 void nativeInit(void)
 { GLuint VertexArrayID;
@@ -293,9 +296,9 @@ void nativeInit(void)
   glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
   glUniform1f(GammaID, 1.0f/2.2f);
   glUniform1i(IsImageID, 0);
-  glUniform3f(FGcolorID, 0.0, 0.0, 0.0); // black as default foreground
-  glClearColor(1.0f, 1.0f, 1.0f, 0.0f); // white as default background
-
+  glUniform4f(FGcolorID, 0.0, 0.0, 0.0,1.0); // black as default foreground
+  glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // white as default background
+  cur_colorset=color_defaults;
    /* 1rst attribute buffer : XYs */
   glEnableVertexAttribArray(xyID);
   glBindBuffer(GL_ARRAY_BUFFER, xybuffer);
@@ -339,46 +342,62 @@ void nativeClear(void)
   }
 }
 
-void nativeBlank(void)
-{ glClear(GL_COLOR_BUFFER_BIT);
-}
-
 void nativeSetGamma(double gamma)
 { glUniform1f(GammaID, 1.0/gamma);
   checkGlError("glsetgamma");
 }
 
-static GLfloat curfr=0.0f, curfg=0.0f, curfb=0.0f;
-static uint8_t last_style=0;
-static void nativeSetColors(GLfloat fr, GLfloat fg, GLfloat fb, GLfloat br, GLfloat bg, GLfloat bb)
-/* set foreground and background rgb colors */
-{
-  glClearColor(br, bg, bb, 1.0f);
-  curfr=fr; curfg=fg; curfb=fb;
-  glUniform3f(FGcolorID, fr, fg, fb);
-  last_style=0;
+
+static uint32_t cur_fg=0;
+
+static void nativeSetForeground(uint32_t fg)
+/* set foreground rgba colors */
+{ if (fg!=cur_fg)
+  { uint8_t r,g,b,a;
+    cur_fg=fg;
+    a=fg&0xFF;fg=fg>>8;
+    b=fg&0xFF;fg=fg>>8;
+    g=fg&0xFF;fg=fg>>8;
+    r=fg&0xFF;
+    glUniform4f(FGcolorID, r/255.0f,g/255.0f,b/255.0f,a/255.0f);
+  }
 }
 
+void nativeBackground(double x, double y, double w, double h)
+{ uint32_t bg, fg;
+  fg=cur_colorset[0][cur_mode*6+cur_style*2];
+  bg=cur_colorset[0][cur_mode*6+cur_style*2+1];
+  nativeSetForeground(bg);
+  nativeRule(x,y,w,h);
+  nativeSetForeground(fg);
+}
 
 void nativeSetDark(int on)
-{   if (on) {
-        nativeSetColors(
-			GET_R(FG_NIGHT)/255.0f, 
-			GET_G(FG_NIGHT)/255.0f, 
-			GET_B(FG_NIGHT)/255.0f, 
-			GET_R(BG_NIGHT)/255.0f, 
-			GET_G(BG_NIGHT)/255.0f, 
-			GET_B(BG_NIGHT)/255.0f);
-    } else {
-        nativeSetColors(
-			GET_R(FG_DAY)/255.0f, 
-			GET_G(FG_DAY)/255.0f, 
-			GET_B(FG_DAY)/255.0f, 
-			GET_R(BG_DAY)/255.0f, 
-			GET_G(BG_DAY)/255.0f, 
-			GET_B(BG_DAY)/255.0f);
-     }
+{ uint32_t fg;
+  cur_mode=on?1:0;
+  fg=cur_colorset[0][cur_mode*6+cur_style*2];
+  nativeSetForeground(fg);
 }
+
+void nativeSetColor(ColorSet *cs)
+{ cur_colorset=cs;
+  nativeSetDark(cur_mode);
+}
+
+void nativeBlank(void)
+{ uint32_t bg;
+  uint8_t r,g,b,a;
+  if (cur_colorset==NULL)
+    QUIT("Calling nativeBlank without calling nativeSetColor");
+  bg=cur_colorset[0][cur_mode*6+1];
+  a=bg&0xFF;bg=bg>>8;
+  b=bg&0xFF;bg=bg>>8;
+  g=bg&0xFF;bg=bg>>8;
+  r=bg&0xFF;
+  glClearColor(	r/255.0f,g/255.0f,b/255.0f,a/255.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+}
+
 
 static float pt_h=600.0, pt_v=800.0;
 
@@ -422,6 +441,7 @@ void nativeRule(double x, double y, double w, double h)
   //LOG("nativeRule %f@%f %fx%f Done\n",x,y,w,h);
 }
 
+
 void nativeImage(double x, double y, double w, double h, unsigned char *b, unsigned char *e)
 /* render the image found between *b and *e at x,y with size w,h.
    x, y, w, h are given in point
@@ -461,7 +481,7 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
     		  format, GL_UNSIGNED_BYTE, data);
     checkGlError("glTexImage2D(image)");
-    if (data!=grey) stbi_image_free(data);
+    if (data!=grey) { stbi_image_free(data); data=NULL; }
     glGenerateMipmap(GL_TEXTURE_2D);
     checkGlError("glGenerateMipmap(image)");
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -545,9 +565,12 @@ void nativeSetFreeType(struct gcache_s *g)
 */
 {GLtexture(g);}
 
+/* to experiment with pixel rounding, the windows version separates
+   rounding vertical and  horizontal
+*/
 int round_to_pixel_h=1, round_to_pixel_v=1; /* makes sense only if using the native dpi, if using a multiple its of not much use*/
 double pixel_size_threshold= 72.27/200; /*round to pixel only if pixel size in pt is above threshold*/
-void nativeGlyph(double x, double dx, double y, double dy, double w, double h, struct gcache_s *g, uint8_t s)
+void nativeGlyph(double x, double dx, double y, double dy, double w, double h, struct gcache_s *g, int s)
 /* given glyph g, display g at position x,y in size w,h. x, y, w, h are given in point */
 {  
 	if (g->GLtexture == 0)
@@ -581,18 +604,9 @@ void nativeGlyph(double x, double dx, double y, double dy, double w, double h, s
 
     glBindTexture(GL_TEXTURE_2D, g->GLtexture);
     checkGlError("glBindTexture g->GLtexture");
-    
-	if (s!=last_style)
-	{ if (s&FOCUS_BIT)
-	      glUniform3f(FGcolorID, 0.0, 1.0,0.0); 
-	  else if (s&MARK_BIT)
- 	      glUniform3f(FGcolorID, 1.0, 0.0,0.0); 
-	  else if (s&LINK_BIT)
- 	      glUniform3f(FGcolorID, 0.0, 0.0,1.0); 
-	  else
-  	      glUniform3f(FGcolorID, curfr, curfg,curfb);
-	  last_style=s;
-	}
+
+    nativeSetForeground(cur_colorset[0][cur_mode*6+s*2]);
+
     glBindBuffer(GL_ARRAY_BUFFER, xybuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(xy), xy, GL_STREAM_DRAW);
     glDrawArrays(GL_TRIANGLES, 0, 2*3);

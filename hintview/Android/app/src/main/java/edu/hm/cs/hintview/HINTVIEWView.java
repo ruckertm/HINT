@@ -80,7 +80,8 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         ydpi = metrics.ydpi;
 
         setEGLContextFactory(new ContextFactory());
-        setEGLConfigChooser(new ConfigChooser(5, 6, 5, 0, 0, 0));
+        // the following call will cause a null Configuration so I removed it mr
+        // setEGLConfigChooser(new ConfigChooser(5, 6, 5, 0, 0, 0));
 
         // Add gesture detector
         touchGestureDetector = new GestureDetector(context, new TouchGestureHandler(this));
@@ -219,6 +220,8 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
                     continue;
 
                 // We want an *exact* match for red/green/blue/alpha
+
+                // may be I should return here a best match...
                 int r = findConfigAttrib(egl, display, config,
                         EGL10.EGL_RED_SIZE, 0);
                 int g = findConfigAttrib(egl, display, config,

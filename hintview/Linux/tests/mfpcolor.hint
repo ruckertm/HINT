@@ -1,0 +1,2060 @@
+HINT 2.0 created by stretch
+<directory 12
+<section 3 '/usr/local/texlive/2023/texmf-dist/fonts/tfm/public/cm/cmssdc10.tfm'>
+<section 4 '/usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmssdc10.pfb'>
+<section 5 '/usr/local/texlive/2023/texmf-dist/fonts/tfm/public/cmextra/cmman.tfm'>
+<section 6 '/home/ruckert/.texlive2023/texmf-var/fonts/pk/ljfour/public/cmextra/cmman.600pk'>
+<section 7 '/usr/local/texlive/2023/texmf-dist/fonts/tfm/public/cm/cmr8.tfm'>
+<section 8 '/usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb'>
+<section 9 '/usr/local/texlive/2023/texmf-dist/fonts/tfm/public/cm/cmr10.tfm'>
+<section 10 '/usr/local/texlive/2023/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb'>
+<section 11 '/usr/local/texlive/2023/texmf-dist/fonts/tfm/public/knuth-lib/manfnt.tfm'>
+<section 12 '/usr/local/texlive/2023/texmf-dist/fonts/type1/hoekwater/manfnt-font/manfnt.pfb'>
+>
+<definitions
+<max
+ <param 1>
+ <xdimen 3>
+ <font 4>
+ <dimen 18>
+ <glue 25>
+ <disc 11>
+ <language 0>
+ <baseline 1>
+ <stream 2>
+ <page 1>
+ <color 2>>
+<color *0 (dark blue on light yellow, light yellow on dark blue)
+ <<<0x00 0x00 0x10> <0xFF 0xFF 0xCC>>> <<<0xFF 0xFF 0x88> <0 0 0x10>>>>
+<color *1 (transparent green/blue, transparent red/yellow)
+ <<<0x00 0xFF 0 0x80> <0x40 0x40 0xFF 0x80>>>
+ <<<0xFF 0 0 0x80> <0xFF 0xFF 0 0x80>>>>  
+<color *2 (dark green/grey,  light red/grey)
+ <<<0x00 0x40 0> <80 80 80>>> <<<0xFF 0x40 0x40>  <80 80 80>>>>  
+<language *0 'unknown'>
+<font *0 'titlefont' 40pt 3 4
+ <glue 0xC.AAApt plus 0x6.554Fpt minus 0x4.38E1pt>
+ <disc !
+  <
+   <glyph '-' *0 (titlefont)>>>>
+<font *1 'cmman' 10pt 5 6
+ <glue *0>
+ <disc !>>
+<font *2 'eightrm' 8pt 7 8
+ <glue 0x2.D558pt plus 0x1.6AACpt minus 0x0.F1C8pt>
+ <disc !
+  <
+   <glyph '-' *2 (eightrm)>>>>
+<font *3 'tenrm' 10pt 9 10
+ <glue 0x3.5555pt plus 0x1.AAAApt minus 0x1.1C72pt>
+ <disc !
+  <
+   <glyph '-' *3 (tenrm)>>>>
+<font *4 'manual' 10pt 11 12
+ <glue 0x2.9631pt plus 0x1.369Ept minus 0x0.CF13pt>
+ <disc !
+  <
+   <glyph '-' *4 (manual)>>>>
+<int *1 +1000>
+<int *2 +2000>
+<int *17 +663>
+<int *18 +11>
+<int *19 +1>
+<int *20 +2024>
+<int *22 +0>
+<dimen *1 426pt>
+<dimen *2 651pt>
+<dimen *4 0x2.3333pt>
+<dimen *5 0x3FFF.FFFFpt>
+<dimen *7 16pt>
+<dimen *8 0xA.0001pt>
+<dimen *9 0xA.0001pt>
+<dimen *10 -0x0.B556pt>
+<dimen *11 -0x0.3C72pt>
+<dimen *12 -0x0.471Dpt>
+<dimen *13 0x0.471Dpt>
+<dimen *14 -0x0.D556pt>
+<dimen *15 -0x0.8E39pt>
+<dimen *16 -0x0.38E4pt>
+<dimen *17 -0x0.71C7pt>
+<dimen *18 -0x0.4CCCpt>
+<xdimen *3 96pt>
+<glue *5 6pt plus 3pt minus 1pt>
+<glue *6 6pt plus 3pt minus 1pt>
+<glue *8 4pt plus 3pt>
+<glue *12 10pt>
+<glue *15 0pt plus 1fil minus 1fil>
+<glue *16 0pt plus -1pt>
+<glue *17 0pt plus 1pt>
+<glue *18 -36pt>
+<glue *19 0pt plus 1fill>
+<glue *20 -16pt>
+<glue *21 0x3.5555pt plus 0x1.AA3Cpt minus 0x1.1CBApt>
+<glue *22 0x3.5555pt plus 0x1.AAAApt minus 0x1.1C72pt>
+<glue *23 0x3.5555pt plus 0x2.7FFFpt minus 0x0.BDA1pt>
+<glue *24 0x4.71C7pt plus 0x4.FFFEpt minus 0x0.5EDpt>
+<glue *25 0x3.5555pt plus 0x2.1554pt minus 0x0.E38Ept>
+<baseline *1 0pt
+ <glue 12pt>
+ <glue 1pt>>
+<param *1
+ <dimen *6 36pt>
+ <int *21 -2>>
+<disc *0
+ <
+  <glyph '-' *2 (eightrm)>>>
+<disc *1 2
+ <
+  <glyph 'A' *2 (eightrm)>
+  <glyph '-' *2 (eightrm)>>>
+<disc *2
+ <
+  <glyph '-' *3 (tenrm)>>>
+<disc *3 2
+ <
+  <glyph 'n' *3 (tenrm)>
+  <glyph '-' *3 (tenrm)>>>
+<disc *4 2
+ <
+  <glyph 'v' *3 (tenrm)>
+  <glyph '-' *3 (tenrm)>>>
+<disc *5 2
+ <
+  <glyph 'h' *3 (tenrm)>
+  <glyph '-' *3 (tenrm)>>>
+<disc *6 !>
+<disc *7 2
+ <
+  <glyph 'm' *3 (tenrm)>
+  <glyph '-' *3 (tenrm)>>>
+<disc *8 1
+ <
+  <glyph 'f' *3 (tenrm)>
+  <glyph '-' *3 (tenrm)>>
+ <
+  <glyph 'i' *3 (tenrm)>>>
+<disc *9 2
+ <
+  <glyph 'o' *3 (tenrm)>
+  <glyph '-' *3 (tenrm)>>>
+<disc *10 2
+ <
+  <glyph 'k' *3 (tenrm)>
+  <glyph '-' *3 (tenrm)>>>
+<disc *11 !
+ <
+  <glyph '-' *3 (tenrm)>>>
+<page *1 'basic' 10
+ <glue *12> 4pt
+ <xdimen -9pt+1.25v>
+ <xdimen -9pt+1.25h>
+ <
+  <stream *1>
+  <stream *0>
+  <stream *2>>
+ <stream *2
+  <xdimen 0pt+1v> 1000 * * 0
+  <
+   <glue 12pt plus 4pt minus 4pt>
+   <kern ! -3pt>
+   <rule 0x0.6666pt 0pt 0x90.8A3Dpt>
+   <kern ! 0x2.999Apt>>
+  <xdimen 300pt>
+  <glue *0> <>
+  <glue 12pt plus 4pt minus 4pt>>
+ <stream *1
+  <xdimen 0x3FFF.FFFFpt> 1000 *0 * 0 <>
+  <xdimen 0pt+1h>
+  <glue *0> <>
+  <glue *0>>>
+>
+<content
+<label *0 top>
+<language *0>
+<vpack to *3
+ <
+  <hset 0x1B.C71Dpt 0pt 0x76.D4EBpt plus 1fil minus 1fil *1
+   <
+    
+    <color *2>
+    <glyph 'P' *0 (titlefont)>
+    <glyph 'r' *0 (titlefont)>
+    <glue *15>
+    <color *0>
+    <kern -10pt>
+    <color *1>
+    <glyph 'e' *0 (titlefont)>
+    <glyph 'f' *0 (titlefont)>
+    <glyph 'a' *0 (titlefont)>
+    <glyph 'c' *0 (titlefont)>
+    <glyph 'e' *0 (titlefont)>
+    <kern -25pt>>>
+  <glue *15>>>
+<glue *16>
+<glue *17>
+<baseline *1>
+<par *1 *1
+ <1814
+  <color *2>
+  <hbox 0pt 0pt 0pt
+   <
+    <hbox 0x12.F1C7pt 0pt 0pt shifted 12pt plus 0x10.8E3Cfill
+     <
+      <glue *18>
+      <glyph 'G' *1 (cmman)>
+      <glue *19>>>>>
+  <glue *20>
+  <glyph 'E' *2 (eightrm)>
+  <glyph 'N' *2 (eightrm)>
+  <disc *0>
+  <glyph 'E' *2 (eightrm)>
+  <glyph 'R' *2 (eightrm)>
+  <disc *0>
+  <disc *1>
+  <glyph 'A' *2 (eightrm)>
+  <kern *10>
+  <glyph 'T' *2 (eightrm)>
+  <glyph 'I' *2 (eightrm)>
+  <glyph 'O' *2 (eightrm)>
+  <glyph 'N' *2 (eightrm)>
+  <glue *21>
+  <glyph 'O' *2 (eightrm)>
+  <glyph 'F' *2 (eightrm)>
+  <glue *21>
+  <glyph 'L' *2 (eightrm)>
+  <glyph 'E' *2 (eightrm)>
+  <glyph 'T' *2 (eightrm)>
+  <disc *0>
+  <glyph 'T' *2 (eightrm)>
+  <glyph 'E' *2 (eightrm)>
+  <glyph 'R' *2 (eightrm)>
+  <disc *0>
+  <glyph 'F' *2 (eightrm)>
+  <kern *11>
+  <glyph 'O' *2 (eightrm)>
+  <glyph 'R' *2 (eightrm)>
+  <glyph 'M' *2 (eightrm)>
+  <glyph 'S' *2 (eightrm)>
+  <glue *21>
+  <rule 8.5pt 3.5pt 0pt>
+  <glyph 'b' *3 (tenrm)>
+  <kern *12>
+  <glyph 'y' *3 (tenrm)>
+  <glue *22>
+  <color *1>
+  <rule 8.5pt 3.5pt 0pt>
+  <glyph 'm' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <disc *2>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <glyph 'm' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <disc *2>
+  <glyph 'i' *3 (tenrm)>
+  <disc *2>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glue *22>
+  <glyph 'm' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <rule 8.5pt 3.5pt 0pt>
+  <color off>
+  <glue *22>
+  <glyph 'w' *3 (tenrm)>
+  <kern *12>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <ligature *3 12 "\C102\\C105\">
+  <glyph 'r' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <glue *22>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <ligature *3 12 "\C102\\C105\">
+  <glyph 'f' *3 (tenrm)>
+  <disc *2>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <kern *12>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glue *22>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *3>
+  <glyph 'n' *3 (tenrm)>
+  <kern *12>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'y' *3 (tenrm)>
+  <glyph ';' *3 (tenrm)>
+  <glue *23>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glue *22>
+  <glyph 'b' *3 (tenrm)>
+  <kern *13>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'm' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'p' *3 (tenrm)>
+  <kern *13>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'p' *3 (tenrm)>
+  <disc *2>
+  <glyph 'u' *3 (tenrm)>
+  <disc *2>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glue *22>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'x' *3 (tenrm)>
+  <disc *2>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <kern *12>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <glue *22>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *4>
+  <glyph 'v' *3 (tenrm)>
+  <kern *12>
+  <glyph 'e' *3 (tenrm)>
+  <disc *3>
+  <glyph 'n' *3 (tenrm)>
+  <kern *12>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <kern *12>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glue *22>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *3>
+  <glyph 'n' *3 (tenrm)>
+  <kern *12>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glyph ';' *3 (tenrm)>
+  <glue *23>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <glue *22>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glue *22>
+  <glyph 'w' *3 (tenrm)>
+  <kern *12>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'b' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <disc *2>
+  <glyph 'd' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <glue *22>
+  <glyph '(' *3 (tenrm)>
+  <glyph 'f' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glue *22>
+  <glyph 'g' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <kern *13>
+  <glyph 'o' *3 (tenrm)>
+  <kern *13>
+  <glyph 'd' *3 (tenrm)>
+  <glue *22>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <disc *2>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glyph ')' *3 (tenrm)>
+  <glue *22>
+  <glyph 'd' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <disc *2>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'g' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'g' *3 (tenrm)>
+  <disc *5>
+  <glyph 'h' *3 (tenrm)>
+  <kern *12>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <kern *12>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glue *22>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *3>
+  <glyph 'n' *3 (tenrm)>
+  <kern *12>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'y' *3 (tenrm)>
+  <kern *14>
+  <glyph '.' *3 (tenrm)>
+  <glue *24>
+  <glyph 'P' *3 (tenrm)>
+  <kern *12>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <disc *2>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'p' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <kern *12>
+  <glyph 'w' *3 (tenrm)>
+  <kern *12>
+  <glyph 'e' *3 (tenrm)>
+  <disc *3>
+  <glyph 'n' *3 (tenrm)>
+  <kern *12>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <disc *2>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glue *22>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *3>
+  <glyph 'n' *3 (tenrm)>
+  <kern *12>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'y' *3 (tenrm)>
+  <glue *22>
+  <glyph 'w' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glue *22>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glue *22>
+  <glyph 'b' *3 (tenrm)>
+  <kern *13>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'g' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <kern *12>
+  <glyph 't' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'm' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'f' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glue *22>
+  <glyph 'm' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'k' *3 (tenrm)>
+  <kern *12>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glue *22>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'm' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <glyph 'b' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'c' *3 (tenrm)>
+  <kern *12>
+  <glyph 'k' *3 (tenrm)>
+  <glyph ',' *3 (tenrm)>
+  <glue *25>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <kern *12>
+  <glyph 'w' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glue *22>
+  <glyph 'm' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <disc *2>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <glyph 'm' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <disc *2>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <disc *2>
+  <glyph 'v' *3 (tenrm)>
+  <kern *15>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <glue *22>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'm' *3 (tenrm)>
+  <disc *2>
+  <glyph 'p' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <disc *2>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'b' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glue *22>
+  <glyph 'd' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <disc *2>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <disc *2>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <disc *2>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glyph '.' *3 (tenrm)>
+  <penalty *10>
+  <glue *14>>>
+<glue *17>
+<baseline *1>
+<par *1 *0
+ <2897
+  <hbox 0pt 0pt 36pt <>>
+  <glyph 'M' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <kern *13>
+  <glyph 'd' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glue *22>
+  <glyph 'p' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <kern *12>
+  <glyph 't' *3 (tenrm)>
+  <disc *2>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'g' *3 (tenrm)>
+  <glue *22>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'q' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'p' *3 (tenrm)>
+  <disc *2>
+  <glyph 'm' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <kern *12>
+  <glyph 't' *3 (tenrm)>
+  <glue *22>
+  <glyph 'b' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <glue *22>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glue *22>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glue *22>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <ligature *3 '|' "\-\-\-">
+  <disc *6>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glue *22>
+  <glyph 'w' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'c' *3 (tenrm)>
+  <kern *12>
+  <glyph 'h' *3 (tenrm)>
+  <glue *22>
+  <glyph 'm' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glue *22>
+  <ligature *3 '\' "\C96\\C96\">
+  <glyph 't' *3 (tenrm)>
+  <kern *12>
+  <glyph 'y' *3 (tenrm)>
+  <glyph 'p' *3 (tenrm)>
+  <kern *13>
+  <glyph 'e' *3 (tenrm)>
+  <ligature *3 '"' "\C39\\C39\">
+  <glue *22>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 'b' *3 (tenrm)>
+  <kern *13>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glue *22>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <glyph 'p' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <glue *22>
+  <glyph 'b' *3 (tenrm)>
+  <kern *12>
+  <glyph 'y' *3 (tenrm)>
+  <glue *22>
+  <glyph 'p' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'y' *3 (tenrm)>
+  <glue *22>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <disc *7>
+  <glyph 'm' *3 (tenrm)>
+  <kern *12>
+  <glyph 'b' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <disc *2>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <disc *2>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <disc *2>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glue *22>
+  <glyph 'p' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <disc *2>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'f' *3 (tenrm)>
+  <glue *22>
+  <glyph 'z' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <kern *13>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <glue *22>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glue *22>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'p' *3 (tenrm)>
+  <kern *13>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'c' *3 (tenrm)>
+  <disc *2>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'f' *3 (tenrm)>
+  <glyph 'y' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'd' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <glue *22>
+  <glyph 'p' *3 (tenrm)>
+  <kern *13>
+  <glyph 'o' *3 (tenrm)>
+  <disc *2>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <disc *2>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glue *22>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'f' *3 (tenrm)>
+  <glue *22>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'k' *3 (tenrm)>
+  <glue *22>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glue *22>
+  <glyph 'd' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <disc *2>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'w' *3 (tenrm)>
+  <kern *12>
+  <glyph 'a' *3 (tenrm)>
+  <kern *12>
+  <glyph 'y' *3 (tenrm)>
+  <ligature *3 '|' "\-\-\-">
+  <disc *6>
+  <glyph 'm' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'k' *3 (tenrm)>
+  <kern *12>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 'm' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <disc *2>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <glyph 'm' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <disc *2>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <glue *22>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'm' *3 (tenrm)>
+  <disc *2>
+  <glyph 'p' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glue *22>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <disc *2>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <disc *2>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <disc *2>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'g' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'y' *3 (tenrm)>
+  <glue *22>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <disc *2>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <glyph 'v' *3 (tenrm)>
+  <kern *15>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <kern *12>
+  <glyph 't' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glue *22>
+  <glyph 'p' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <kern *12>
+  <glyph 't' *3 (tenrm)>
+  <disc *2>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'g' *3 (tenrm)>
+  <glyph '.' *3 (tenrm)>
+  <glue *24>
+  <glyph 'W' *3 (tenrm)>
+  <kern *14>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <kern *12>
+  <glyph 'w' *3 (tenrm)>
+  <glue *22>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <kern *12>
+  <glyph 'v' *3 (tenrm)>
+  <kern *12>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'b' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <disc *2>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <kern *12>
+  <glyph 'y' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glue *22>
+  <glyph 'g' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'v' *3 (tenrm)>
+  <kern *12>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glue *22>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'm' *3 (tenrm)>
+  <disc *2>
+  <glyph 'p' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'y' *3 (tenrm)>
+  <glue *22>
+  <glyph 'p' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'd' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *8>
+  <ligature *3 12 "\C102\\C105\">
+  <disc *2>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <disc *2>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glue *22>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'f' *3 (tenrm)>
+  <glue *22>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <disc *2>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glue *22>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'p' *3 (tenrm)>
+  <kern *13>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glue *22>
+  <glyph 'w' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glue *22>
+  <glyph 'p' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <disc *9>
+  <glyph 'o' *3 (tenrm)>
+  <kern *13>
+  <glyph 'd' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <disc *2>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *3>
+  <glyph 'n' *3 (tenrm)>
+  <kern *12>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'y' *3 (tenrm)>
+  <glue *22>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'q' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <disc *4>
+  <glyph 'v' *3 (tenrm)>
+  <kern *15>
+  <glyph 'a' *3 (tenrm)>
+  <disc *2>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <kern *12>
+  <glyph 't' *3 (tenrm)>
+  <glue *22>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glue *22>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph '-' *3 (tenrm)>
+  <disc *6>
+  <glyph 'b' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <glue *22>
+  <glyph 'm' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <disc *2>
+  <glyph 'c' *3 (tenrm)>
+  <kern *12>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glyph '.' *3 (tenrm)>
+  <glue *24>
+  <glyph 'M' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <glyph 'o' *3 (tenrm)>
+  <kern *12>
+  <glyph 'v' *3 (tenrm)>
+  <kern *12>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph ',' *3 (tenrm)>
+  <glue *25>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'p' *3 (tenrm)>
+  <kern *13>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glue *22>
+  <glyph 'b' *3 (tenrm)>
+  <kern *13>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'd' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <ligature *3 12 "\C102\\C105\">
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <glue *22>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'm' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'f' *3 (tenrm)>
+  <glue *22>
+  <glyph 'v' *3 (tenrm)>
+  <kern *15>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <disc *2>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'b' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'p' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <disc *2>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'm' *3 (tenrm)>
+  <disc *2>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glyph ';' *3 (tenrm)>
+  <glue *23>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'm' *3 (tenrm)>
+  <disc *2>
+  <glyph 'p' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <disc *2>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glue *22>
+  <ligature *3 '\' "\C96\\C96\">
+  <glyph 'd' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <kern *12>
+  <glyph 'w' *3 (tenrm)>
+  <ligature *3 '"' "\C39\\C39\">
+  <glue *22>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'w' *3 (tenrm)>
+  <glue *22>
+  <glyph 'f' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <kern *12>
+  <glyph 't' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'f' *3 (tenrm)>
+  <glue *22>
+  <glyph 'c' *3 (tenrm)>
+  <kern *12>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <disc *2>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'c' *3 (tenrm)>
+  <disc *2>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glue *22>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'c' *3 (tenrm)>
+  <disc *2>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glyph ',' *3 (tenrm)>
+  <glue *25>
+  <glyph 'm' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'k' *3 (tenrm)>
+  <disc *2>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'g' *3 (tenrm)>
+  <glue *22>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glue *22>
+  <glyph 'p' *3 (tenrm)>
+  <kern *13>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <disc *2>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <disc *2>
+  <glyph 'b' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'f' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glue *22>
+  <glyph 'd' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'g' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <disc *2>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glue *22>
+  <glyph 'p' *3 (tenrm)>
+  <kern *13>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <disc *2>
+  <glyph 'f' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'm' *3 (tenrm)>
+  <glue *22>
+  <glyph 'v' *3 (tenrm)>
+  <kern *15>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <disc *2>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'b' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'x' *3 (tenrm)>
+  <disc *2>
+  <glyph 'p' *3 (tenrm)>
+  <kern *13>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <disc *2>
+  <glyph 'i' *3 (tenrm)>
+  <disc *2>
+  <glyph 'm' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <kern *12>
+  <glyph 't' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glue *22>
+  <glyph 'w' *3 (tenrm)>
+  <kern *12>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'p' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <glyph 'v' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <disc *2>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'y' *3 (tenrm)>
+  <glue *22>
+  <glyph 'u' *3 (tenrm)>
+  <disc *3>
+  <glyph 'n' *3 (tenrm)>
+  <kern *12>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <disc *10>
+  <glyph 'k' *3 (tenrm)>
+  <kern *15>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'b' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph '.' *3 (tenrm)>
+  <penalty *10>
+  <glue *14>>>
+<glue *17>
+<baseline *1>
+<par *1 *0
+ <2247
+  <hbox 0pt 0pt 36pt <>>
+  <glyph 'M' *4 (manual)>
+  <glyph 'E' *4 (manual)>
+  <glyph 'T' *4 (manual)>
+  <kern *16>
+  <glyph 'A' *4 (manual)>
+  <disc *11>
+  <glyph 'F' *4 (manual)>
+  <kern *17>
+  <glyph 'O' *4 (manual)>
+  <glyph 'N' *4 (manual)>
+  <glyph 'T' *4 (manual)>
+  <glue *22>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glue *22>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'y' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <disc *2>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'm' *3 (tenrm)>
+  <glue *22>
+  <glyph 'f' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'd' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'g' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glue *22>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'f' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <disc *2>
+  <glyph 'p' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <disc *2>
+  <glyph 'b' *3 (tenrm)>
+  <kern *13>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glue *22>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph '-' *3 (tenrm)>
+  <disc *6>
+  <glyph 'b' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <glue *22>
+  <glyph 'd' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <glyph 'v' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glue *22>
+  <glyph 'p' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <kern *12>
+  <glyph 't' *3 (tenrm)>
+  <glue *22>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glue *22>
+  <glyph 'd' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <disc *2>
+  <glyph 'p' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <kern *12>
+  <glyph 'y' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'x' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glyph '.' *3 (tenrm)>
+  <glue *24>
+  <glyph 'T' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'c' *3 (tenrm)>
+  <kern *12>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <disc *2>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'c' *3 (tenrm)>
+  <disc *2>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glue *22>
+  <glyph 'y' *3 (tenrm)>
+  <kern *12>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <disc *2>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'g' *3 (tenrm)>
+  <glue *22>
+  <glyph 'w' *3 (tenrm)>
+  <kern *12>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glue *22>
+  <glyph 'd' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'g' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <glue *22>
+  <glyph 'w' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glue *22>
+  <glyph 'M' *4 (manual)>
+  <glyph 'E' *4 (manual)>
+  <glyph 'T' *4 (manual)>
+  <kern *16>
+  <glyph 'A' *4 (manual)>
+  <disc *11>
+  <glyph 'F' *4 (manual)>
+  <kern *17>
+  <glyph 'O' *4 (manual)>
+  <glyph 'N' *4 (manual)>
+  <glyph 'T' *4 (manual)>
+  <kern ! *18>
+  <glyph ',' *3 (tenrm)>
+  <glue *22>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glue *22>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'm' *3 (tenrm)>
+  <disc *2>
+  <glyph 'p' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'y' *3 (tenrm)>
+  <glue *22>
+  <glyph 'p' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'w' *3 (tenrm)>
+  <kern *12>
+  <glyph 'a' *3 (tenrm)>
+  <kern *12>
+  <glyph 'y' *3 (tenrm)>
+  <glyph ';' *3 (tenrm)>
+  <glue *23>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'y' *3 (tenrm)>
+  <glue *22>
+  <glyph 'w' *3 (tenrm)>
+  <kern *12>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'd' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <glyph 'v' *3 (tenrm)>
+  <kern *12>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <disc *2>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'p' *3 (tenrm)>
+  <kern *13>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <glue *22>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glue *22>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'y' *3 (tenrm)>
+  <glue *22>
+  <glyph 'b' *3 (tenrm)>
+  <kern *12>
+  <glyph 'y' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <disc *2>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glue *22>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'f' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'y' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <disc *2>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'm' *3 (tenrm)>
+  <glyph ',' *3 (tenrm)>
+  <glue *25>
+  <glyph 'w' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glue *22>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glue *22>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'k' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'm' *3 (tenrm)>
+  <disc *2>
+  <glyph 'a' *3 (tenrm)>
+  <disc *2>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glue *22>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 'c' *3 (tenrm)>
+  <kern *12>
+  <glyph 'h' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'g' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glyph '.' *3 (tenrm)>
+  <glue *24>
+  <glyph 'I' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glue *22>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'm' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glue *22>
+  <glyph 'f' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <disc *2>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glue *22>
+  <glyph 'w' *3 (tenrm)>
+  <kern *12>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'k' *3 (tenrm)>
+  <glue *22>
+  <glyph 'w' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glue *22>
+  <glyph 'M' *4 (manual)>
+  <glyph 'E' *4 (manual)>
+  <glyph 'T' *4 (manual)>
+  <kern *16>
+  <glyph 'A' *4 (manual)>
+  <disc *11>
+  <glyph 'F' *4 (manual)>
+  <kern *17>
+  <glyph 'O' *4 (manual)>
+  <glyph 'N' *4 (manual)>
+  <glyph 'T' *4 (manual)>
+  <glue *22>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'p' *3 (tenrm)>
+  <kern *13>
+  <glyph 'o' *3 (tenrm)>
+  <disc *2>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *3>
+  <glyph 'n' *3 (tenrm)>
+  <kern *12>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glue *22>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'f' *3 (tenrm)>
+  <glue *22>
+  <glyph 'p' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <disc *9>
+  <glyph 'o' *3 (tenrm)>
+  <kern *13>
+  <glyph 'd' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 'c' *3 (tenrm)>
+  <disc *2>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'g' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <kern *12>
+  <glyph 'y' *3 (tenrm)>
+  <glyph 'p' *3 (tenrm)>
+  <kern *13>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <glyph 'f' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'f' *3 (tenrm)>
+  <glue *22>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glue *22>
+  <kern ! *0>
+  <glyph 'b' *3 (tenrm)>
+  <kern *13>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <kern *12>
+  <glyph 'y' *3 (tenrm)>
+  <kern *14>
+  <glyph '.' *3 (tenrm)>
+  <glue *24>
+  <glyph 'T' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 'm' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <disc *3>
+  <glyph 'n' *3 (tenrm)>
+  <kern *12>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glue *22>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 's' *3 (tenrm)>
+  <glue *22>
+  <glyph 'b' *3 (tenrm)>
+  <kern *13>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glue *22>
+  <glyph 'w' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <disc *2>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glue *22>
+  <glyph 'f' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glue *22>
+  <glyph 'p' *3 (tenrm)>
+  <kern *13>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <disc *2>
+  <glyph 'p' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'w' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glue *22>
+  <glyph 'w' *3 (tenrm)>
+  <kern *12>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'u' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <glue *22>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'k' *3 (tenrm)>
+  <kern *12>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'o' *3 (tenrm)>
+  <glue *22>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glyph 'p' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'd' *3 (tenrm)>
+  <disc *2>
+  <glyph 'v' *3 (tenrm)>
+  <kern *15>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'r' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glue *22>
+  <glyph 'o' *3 (tenrm)>
+  <glyph 'f' *3 (tenrm)>
+  <glue *22>
+  <glyph 'm' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <glyph 'h' *3 (tenrm)>
+  <disc *2>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <glyph 'm' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 't' *3 (tenrm)>
+  <disc *2>
+  <glyph 'i' *3 (tenrm)>
+  <disc *2>
+  <glyph 'c' *3 (tenrm)>
+  <glyph 'a' *3 (tenrm)>
+  <glyph 'l' *3 (tenrm)>
+  <glue *22>
+  <glyph 't' *3 (tenrm)>
+  <kern *12>
+  <glyph 'y' *3 (tenrm)>
+  <glyph 'p' *3 (tenrm)>
+  <kern *13>
+  <glyph 'e' *3 (tenrm)>
+  <glue *22>
+  <glyph 'd' *3 (tenrm)>
+  <glyph 'e' *3 (tenrm)>
+  <disc *2>
+  <glyph 's' *3 (tenrm)>
+  <glyph 'i' *3 (tenrm)>
+  <glyph 'g' *3 (tenrm)>
+  <glyph 'n' *3 (tenrm)>
+  <glyph '.' *3 (tenrm)>
+  <penalty *10>
+  <glue *14>>>
+>

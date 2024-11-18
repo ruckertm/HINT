@@ -1,4 +1,9 @@
 *~
 \#*\#
 *.o
+*.pdf
 hintview
+format.w
+hint.w
+htex.w
+.depend

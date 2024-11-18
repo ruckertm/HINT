@@ -39,8 +39,8 @@
 #include <GLFW/glfw3.h>
 
 #define VERSION 1
-#define REVISION 3
-#define PATCHLEVEL 1
+#define REVISION 4
+#define PATCHLEVEL 0
 
 #include "error.h"
 #include "basetypes.h"
@@ -604,6 +604,7 @@ int main(int argc, char *argv[])
     return 1;
    if (!create_window())
     return 1;
+  nativeSetColor(color_defaults);
   nativeSetDark(dark);
   hint_resize(px_h,px_v,scale*x_dpi,scale*y_dpi);
   if (!open_file(home))
@@ -615,7 +616,7 @@ int main(int argc, char *argv[])
       glfwWaitEvents();
     } // Check if the ESC key was pressed or the window was closed
     while(glfwWindowShouldClose(window) == 0 );
-  nativeClear();
+  //  nativeClear();
   glfwDestroyWindow(window); // part of glfwTerminate
   glfwTerminate();
   return 0;

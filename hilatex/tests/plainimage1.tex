@@ -11,7 +11,7 @@
 
 
 %% images
-
+\ifhint
 \hbox{\HINTimage = A.jpg }% needs a space to terminate the name
 \hbox{\HINTimage A.jpg }% needs a space to terminate the name
 \hbox{\HINTimage = A.jpg\relax} %\relax terminates
@@ -20,6 +20,14 @@
 \hbox{\HINTimage{A.jpg}}
 \hbox{\HINTimage = {./A.jpg}}
 \hbox{\HINTimage = ./A.jpg\relax}
+\else
+{\pdfximage{A.jpg}}% needs a space to terminate the name
+\hbox{\pdfrefximage\pdflastximage}
+{\pdfximage{"A.jpg"}} % needs a terminating space or \relax if quoted
+\hbox{\pdfrefximage\pdflastximage}
+{\pdfximage{./A.jpg}}
+\hbox{\pdfrefximage\pdflastximage}
+\fi
 
 \bye
 

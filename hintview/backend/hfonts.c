@@ -1,5 +1,5 @@
-/*386:*/
-#line 7702 "hint.w"
+/*403:*/
+#line 8333 "hint.w"
 
 #include "basetypes.h"
 #include "error.h"
@@ -9,34 +9,42 @@
 #include <ft2build.h> 
 #include FT_FREETYPE_H
 #include "hfonts.h"
+#include "hint.h"
 #include "hrender.h"
 #include "rendernative.h"
 
-/*317:*/
-#line 5789 "hint.w"
+/*329:*/
+#line 6171 "hint.w"
 
 static Font*fonts[0x100]= {NULL};
-/*:317*//*324:*/
-#line 5925 "hint.w"
+/*:329*//*335:*/
+#line 6302 "hint.w"
 
 static Gcache g_undefined= {0};
-/*:324*//*359:*/
-#line 7085 "hint.w"
+/*:335*//*376:*/
+#line 7713 "hint.w"
 
 static FT_Library ft_library= NULL;
-/*:359*/
-#line 7714 "hint.w"
+/*:376*/
+#line 8346 "hint.w"
 
 /*35:*/
-#line 571 "hint.w"
+#line 697 "hint.w"
 
 extern uint16_t hglyph_section(uint8_t f);
 extern int32_t font_at_size(uint8_t f);
 /*:35*/
-#line 7715 "hint.w"
+#line 8347 "hint.w"
 
-/*323:*/
-#line 5882 "hint.w"
+/*342:*/
+#line 6548 "hint.w"
+
+extern void render_char(int x,int y,uint8_t f,uint32_t cc,int s);
+/*:342*/
+#line 8348 "hint.w"
+
+/*334:*/
+#line 6259 "hint.w"
 
 #define G0_BITS 7
 #define G0_SIZE (1<<G0_BITS)
@@ -70,8 +78,8 @@ else if(f->g0)
 return f->g0[cc];
 return NULL;
 }
-/*:323*//*325:*/
-#line 5929 "hint.w"
+/*:334*//*336:*/
+#line 6306 "hint.w"
 
 static Gcache*hnew_g(Gcache**g)
 {if(*g==NULL)
@@ -125,41 +133,41 @@ else if(cc<G123_SIZE*G123_SIZE*G0_SIZE)return hnew_g2(&(f->g2),cc);
 else if(cc<G123_SIZE*G123_SIZE*G123_SIZE*G0_SIZE)return hnew_g3(&(f->g3),cc);
 else return&g_undefined;
 }
-/*:325*/
-#line 7716 "hint.w"
+/*:336*/
+#line 8349 "hint.w"
 
 
-/*363:*/
-#line 7119 "hint.w"
+/*380:*/
+#line 7747 "hint.w"
 
 
 int unpack_ft_file(Font*f)
 {int e;
-/*360:*/
-#line 7089 "hint.w"
+/*377:*/
+#line 7717 "hint.w"
 
 if(ft_library==NULL)
 {int e= FT_Init_FreeType(&ft_library);
 if(e)QUIT("Unable to initialize the FreeType library");
 }
-/*:360*/
-#line 7123 "hint.w"
+/*:377*/
+#line 7751 "hint.w"
 
 f->hpxs= 72.27/xdpi;
 f->vpxs= 72.27/ydpi;
 e= FT_New_Memory_Face(ft_library,
 f->font_data,f->data_size,0,&(f->tt.face));
 if(e)return 0;
-/*364:*/
-#line 7144 "hint.w"
+/*381:*/
+#line 7772 "hint.w"
 
 e= FT_Select_Charmap(f->tt.face,FT_ENCODING_ADOBE_CUSTOM);
 if(e)LOG("Unable to select custom encoding for font %d\n",f->n);
-/*:364*/
-#line 7129 "hint.w"
+/*:381*/
+#line 7757 "hint.w"
 
-/*365:*/
-#line 7152 "hint.w"
+/*382:*/
+#line 7780 "hint.w"
 
 e= FT_Set_Char_Size(
 f->tt.face,
@@ -169,14 +177,14 @@ f->tt.face,
 72.27/f->vpxs);
 if(e)QUIT("Unable to set FreeType glyph size");
 FT_Set_Transform(f->tt.face,0,0);
-/*:365*/
-#line 7130 "hint.w"
+/*:382*/
+#line 7758 "hint.w"
 
 f->ff= ft_format;
 return 1;
 }
-/*:363*//*366:*/
-#line 7175 "hint.w"
+/*:380*//*383:*/
+#line 7803 "hint.w"
 
 static void ft_unpack_glyph(Font*f,Gcache*g,uint32_t cc)
 {int e,i;
@@ -200,23 +208,23 @@ g->ff= ft_format;
 nativeSetFreeType(g);
 }
 
-/*:366*/
-#line 7718 "hint.w"
+/*:383*/
+#line 8351 "hint.w"
 
 
-/*351:*/
-#line 6790 "hint.w"
+/*368:*/
+#line 7418 "hint.w"
 
-#define PK_READ_1_BYTE() (data[i++])
-#define PK_READ_2_BYTE() (k= PK_READ_1_BYTE(),k= k<<8,k= k+data[i++],k)
-#define PK_READ_3_BYTE() (k= PK_READ_2_BYTE(),k= k<<8,k= k+data[i++],k)
-#define PK_READ_4_BYTE() (k= PK_READ_3_BYTE(),k= k<<8,k= k+data[i++],k)
-/*:351*//*353:*/
-#line 6817 "hint.w"
+#define PK_READ_1_BYTE() (pk_data[i++])
+#define PK_READ_2_BYTE() (k= PK_READ_1_BYTE(),k= k<<8,k= k+pk_data[i++],k)
+#define PK_READ_3_BYTE() (k= PK_READ_2_BYTE(),k= k<<8,k= k+pk_data[i++],k)
+#define PK_READ_4_BYTE() (k= PK_READ_3_BYTE(),k= k<<8,k= k+pk_data[i++],k)
+/*:368*//*370:*/
+#line 7445 "hint.w"
 
-#define read_nybble(P) ((P).j&1?((P).data[(P).j++>>1]&0xF):(((P).data[(P).j++>>1]>>4)&0xF))
-/*:353*//*354:*/
-#line 6843 "hint.w"
+#define read_nybble(P) ((P).j&1?((P).pk_data[(P).j++>>1]&0xF):(((P).pk_data[(P).j++>>1]>>4)&0xF))
+/*:370*//*371:*/
+#line 7471 "hint.w"
 
 static int packed_number(PKparse*p)
 {int i,k;
@@ -234,10 +242,10 @@ else p->r= 1;
 return packed_number(p);
 }
 }
-/*:354*//*355:*/
-#line 6872 "hint.w"
+/*:371*//*372:*/
+#line 7500 "hint.w"
 
-static void pk_runlength(Gcache*g,unsigned char*data){
+static void pk_runlength(Gcache*g,unsigned char*pk_data){
 PKparse p;
 int x,y;
 unsigned char*bits;
@@ -248,7 +256,7 @@ if(bits==NULL){g->w= g->h= 0;return;}
 p.j= 0;
 p.r= 0;
 p.f= g->pk.flag>>4;
-p.data= data;
+p.pk_data= pk_data;
 n= 0;
 if((g->pk.flag>>3)&1)gray= 0x00;
 else gray= 0xff;
@@ -276,10 +284,10 @@ y++;
 }
 }
 }
-/*:355*//*356:*/
-#line 6924 "hint.w"
+/*:372*//*373:*/
+#line 7552 "hint.w"
 
-static void pk_bitmap(Gcache*g,unsigned char*data){
+static void pk_bitmap(Gcache*g,unsigned char*pk_data){
 unsigned char*bits;
 int x,y;
 unsigned char mask;
@@ -289,29 +297,28 @@ if(bits==NULL){g->w= g->h= 0;return;}
 mask= 0x80;
 for(y= 0;y<g->h;y++)
 for(x= 0;x<g->w;x++)
-{if(*data&mask)
+{if(*pk_data&mask)
 bits[y*g->w+x]= 0x00;
 else
 bits[y*g->w+x]= 0xFF;
 mask= mask>>1;
-if(mask==0){data++;mask= 0x80;}
+if(mask==0){pk_data++;mask= 0x80;}
 }
 }
-/*:356*//*357:*/
-#line 6947 "hint.w"
+/*:373*//*374:*/
+#line 7575 "hint.w"
 
 
 static void pkunpack_glyph(Gcache*g)
 {int i,k;
-unsigned char*data;
+unsigned char*pk_data;
 if(g==NULL||g->pk.encoding==NULL)return;
 g->ff= pk_format;
 if(g->bits!=NULL)return;
 #if 0
 DBG(DBGRENDER,"Unpacking glyph %c (0x%x)",g->cc,g->cc);
 #endif
-#line 6958 "hint.w"
- data= g->pk.encoding;
+pk_data= g->pk.encoding;
 i= 0;
 if((g->pk.flag&7)<4)
 {i= i+3;
@@ -337,12 +344,12 @@ g->h= PK_READ_4_BYTE();
 g->hoff= (signed int)PK_READ_4_BYTE();
 g->voff= (signed int)PK_READ_4_BYTE();
 }
-if((g->pk.flag>>4)==14)pk_bitmap(g,data+i);
-else pk_runlength(g,data+i);
+if((g->pk.flag>>4)==14)pk_bitmap(g,pk_data+i);
+else pk_runlength(g,pk_data+i);
 nativeSetPK(g);
 }
-/*:357*//*358:*/
-#line 6992 "hint.w"
+/*:374*//*375:*/
+#line 7620 "hint.w"
 
 
 static Gcache*hnew_glyph(Font*pk,unsigned int cc);
@@ -365,11 +372,11 @@ int unpack_pk_file(Font*pk)
 {int i,j;
 unsigned int k;
 unsigned char flag;
-unsigned char*data;
-data= pk->font_data;
+unsigned char*pk_data;
+pk_data= pk->font_data;
 i= 0;
 while(i<pk->data_size)
-switch(flag= data[i++])
+switch(flag= pk_data[i++])
 {case PK_XXX1:j= PK_READ_1_BYTE();i= i+j;break;
 case PK_XXX2:j= PK_READ_2_BYTE();i= i+j;break;
 case PK_XXX3:j= PK_READ_3_BYTE();i= i+j;break;
@@ -395,7 +402,6 @@ pk->vpxs*= m;
 #if 0    
 pk->comment[csize]= 0;
 #endif
-#line 7044 "hint.w"
 }
 break;
 case PK_POST:break;
@@ -419,7 +425,7 @@ pl= pl+((flag&3)<<8);
 }
 g= hnew_glyph(pk,cc);
 g->pk.flag= flag;
-g->pk.encoding= data+i;
+g->pk.encoding= pk_data+i;
 g->bits= NULL;
 i= i+pl;
 }
@@ -428,14 +434,14 @@ break;
 return 1;
 }
 
-/*:358*/
-#line 7720 "hint.w"
+/*:375*/
+#line 8353 "hint.w"
 
 
-/*318:*/
-#line 5795 "hint.w"
+/*330:*/
+#line 6177 "hint.w"
 
-struct font_s*hget_font(unsigned char f)
+static struct font_s*hget_font(uint8_t f)
 {Font*fp;
 if(fonts[f]!=NULL)return fonts[f];
 DBG(DBGFONT,"Decoding new font %d\n",f);
@@ -454,15 +460,15 @@ fp->data_size= hend-hstart;
 hpos= spos;hstart= sstart;hend= send;
 }
 fp->s= font_at_size(f)/(double)(1<<16);
-/*348:*/
-#line 6727 "hint.w"
+/*365:*/
+#line 7355 "hint.w"
 
 if(fp->font_data[0]==0xF7&&fp->font_data[1]==0x59)
 {fp->ff= pk_format;
 if(!unpack_pk_file(fp)){free(fp);fp= NULL;}
 }
-/*:348*//*367:*/
-#line 7202 "hint.w"
+/*:365*//*384:*/
+#line 7830 "hint.w"
 
 else if(unpack_ft_file(fp))
 fp->ff= ft_format;
@@ -470,14 +476,14 @@ else
 {QUIT("Font format not supported for font %d\n",fp->n);
 free(fp);fp= NULL;
 }
-/*:367*/
-#line 5815 "hint.w"
+/*:384*/
+#line 6197 "hint.w"
 
 fonts[f]= fp;
 return fonts[f];
 }
-/*:318*//*320:*/
-#line 5833 "hint.w"
+/*:330*//*331:*/
+#line 6210 "hint.w"
 
 static void hfree_glyph_cache(Font*f,bool rm);
 
@@ -490,8 +496,8 @@ if(fonts[f]!=NULL)
 if(rm){free(fonts[f]);fonts[f]= NULL;}
 }
 }
-/*:320*//*326:*/
-#line 5993 "hint.w"
+/*:331*//*337:*/
+#line 6370 "hint.w"
 
 static void hfree_g0(struct gcache_s**g,bool rm)
 {int i;
@@ -555,8 +561,8 @@ if(f->g3!=NULL)
 if(rm){free(f->g3);f->g3= NULL;}
 }
 }
-/*:326*//*328:*/
-#line 6119 "hint.w"
+/*:337*//*339:*/
+#line 6496 "hint.w"
 
 Gcache*hget_glyph(Font*f,unsigned int cc)
 {
@@ -575,24 +581,25 @@ else QUIT("Font format not supported");
 }
 return g;
 }
-/*:328*//*330:*/
-#line 6151 "hint.w"
+/*:339*//*341:*/
+#line 6530 "hint.w"
 
-void render_char(int x,int y,struct font_s*f,uint32_t cc,uint8_t s)
+void render_char(int x,int y,uint8_t f,uint32_t cc,int style)
 
 {double w,h,dx,dy;
-Gcache*g= hget_glyph(f,cc);
+Font*fp= hget_font(f);
+Gcache*g= hget_glyph(fp,cc);
 if(g==NULL)return;
 
-dx= (double)g->hoff*f->hpxs;
-dy= (double)g->voff*f->vpxs;
-w= (double)g->w*f->hpxs;
-h= (double)g->h*f->vpxs;
-nativeGlyph(SP2PT(x),dx,SP2PT(y),dy,w,h,g,s);
+dx= (double)g->hoff*fp->hpxs;
+dy= (double)g->voff*fp->vpxs;
+w= (double)g->w*fp->hpxs;
+h= (double)g->h*fp->vpxs;
+nativeGlyph(SP2PT(x),dx,SP2PT(y),dy,w,h,g,style);
 }
 
-/*:330*/
-#line 7722 "hint.w"
+/*:341*/
+#line 8355 "hint.w"
 
 
-/*:386*/
+/*:403*/
