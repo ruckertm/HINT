@@ -268,7 +268,7 @@
 				550C78DA2910014700FDBDA4 /* ft2build.h */,
 			);
 			name = freetype;
-			path = "freetype-2.12.1";
+			path = "../external/freetype-2.12.1";
 			sourceTree = "<group>";
 		};
 		557A9BAA28F445B7004772FE = {
