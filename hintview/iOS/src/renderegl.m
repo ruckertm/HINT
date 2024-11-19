@@ -32,14 +32,13 @@
 //  Created by Martin Ruckert on 10.10.22.
 //
 
+// OpenGL ES 2.0 code
+
 #include <Foundation/Foundation.h>
 #include <OpenGLES/ES2/gl.h>
 #include <OpenGLES/ES2/glext.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
-
-// OpenGL ES 2.0 code
-
 
 #include "basetypes.h"
 #include "error.h"
@@ -47,10 +46,7 @@
 #include "hfonts.h"
 #include "hrender.h"
 #include "rendernative.h"
-#define STBI_ONLY_JPEG
-#define STBI_ONLY_PNG
-#define STBI_ONLY_BMP
-#define STB_IMAGE_IMPLEMENTATION
+
 #include "stb_image.h"
 
 #if 1
@@ -107,8 +103,8 @@ static const char *FragmentShader =
              "gl_FragColor.g = FGcolor.g;\n"
              "gl_FragColor.b = FGcolor.b;\n"
           "}\n"
-          "else gl_FragColor = texColor;\n"
-        "}\n";
+         "else gl_FragColor = texColor;\n"
+"}\n";
 
 static GLuint loadShader(GLenum shaderType, const char *pSource) {
     GLuint shaderID;
@@ -406,49 +402,57 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
 /* render the image found between *b and *e at x,y with size w,h.
    x, y, w, h are given in point
 */
-{ GLenum format;
+{ GLenum format, internal_format;
   int width, height, nrChannels;
-
   if (b!=last_b||ImageID==0)
   { unsigned char *data;
-    static unsigned char grey[4]={0,0x80,0x80,0x80};
+    static unsigned char grey[4]={0x80,0x80,0x80,0x80};
     if (ImageID != 0) {
         glDeleteTextures(1, &ImageID);
         ImageID = 0;
     }
     last_b=b;
-    data = stbi_load_from_memory(b, (int) (e - b), &width, &height, &nrChannels, 0);
+    data = stbi_load_from_memory(b, (int) (e - b), &width, &height, &nrChannels, 0 );
+      /* Possibly use 4 instead of 0 above for the number of desired chanels
+        and set format=internal_format=GL_RGBA
+      */
     if (data == NULL)
     { LOG("Unable to display image\n");
       data=grey; width=height=1; nrChannels=4;
     }
     LOGI("image width=%d, height=%d nrChannels=%d\n", width, height, nrChannels);
-
-
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    checkGlError("glPixelStorei");
     glGenTextures(1, &ImageID);
     // "Bind" the newly created texture : all future texture functions will modify this texture
     glBindTexture(GL_TEXTURE_2D, ImageID);
     checkGlError("glBindTexture ImageID");
 
+
       // Give the image to OpenGL
-    format = GL_RGBA;
+      internal_format = GL_RGBA;
+      format = GL_RGBA;
+
     if (nrChannels == 4)
-        format = GL_RGBA;
+        internal_format = format = GL_RGBA;
     else if (nrChannels == 3)
-        format = GL_RGB;
-    else if (nrChannels == 2)
+        internal_format = format = GL_RGB;
+    else if (nrChannels == 2) /* I need test cases for this */
         format = GL_LUMINANCE_ALPHA;
     else if (nrChannels == 1)
-        format = GL_LUMINANCE;
+        format = GL_ALPHA;
+      
     LOGI("image format=%d\n", format);
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0,
+    glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0,
                  format, GL_UNSIGNED_BYTE, data);
-    if (glGetError()!= GL_NO_ERROR)
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
-    		  format, GL_UNSIGNED_BYTE, data);
+//    if (glGetError()!= GL_NO_ERROR)
+//      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
+//    		  format, GL_UNSIGNED_BYTE, data);
     checkGlError("glTexImage2D(image)");
     if (data!=grey) { stbi_image_free(data); data=NULL; }
     glGenerateMipmap(GL_TEXTURE_2D);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   }
@@ -466,7 +470,7 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
                            (GLfloat) (x + w), (GLfloat) y, 1.0f, 1.0f
         };
 
-  glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
+  glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), gQuad);
   checkGlError("glVertexAttribPointer");
 
   glUniform1i(IsImageID, 1);
