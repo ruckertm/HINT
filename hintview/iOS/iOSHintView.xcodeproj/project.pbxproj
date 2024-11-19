@@ -554,6 +554,10 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				"WARNING_CFLAGS[arch=*]" = (
+					"-Wno-documentation",
+					"-Wno-shorten-64-to-32",
+				);
 			};
 			name = Debug;
 		};
@@ -570,6 +574,10 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				"WARNING_CFLAGS[arch=*]" = (
+					"-Wno-documentation",
+					"-Wno-shorten-64-to-32",
+				);
 			};
 			name = Release;
 		};
