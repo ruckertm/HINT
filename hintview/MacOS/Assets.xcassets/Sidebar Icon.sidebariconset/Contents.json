@@ -1,0 +1,53 @@
+{
+  "images" : [
+    {
+      "filename" : "HINTLogoBuchGrey16.png",
+      "idiom" : "mac",
+      "scale" : "1x",
+      "size" : "16x16"
+    },
+    {
+      "filename" : "HINTLogoBuchGrey32-1.png",
+      "idiom" : "mac",
+      "scale" : "2x",
+      "size" : "16x16"
+    },
+    {
+      "idiom" : "mac",
+      "scale" : "1x",
+      "size" : "18x18"
+    },
+    {
+      "idiom" : "mac",
+      "scale" : "2x",
+      "size" : "18x18"
+    },
+    {
+      "idiom" : "mac",
+      "scale" : "1x",
+      "size" : "24x24"
+    },
+    {
+      "filename" : "HINTLogoBuchGrey48.png",
+      "idiom" : "mac",
+      "scale" : "2x",
+      "size" : "24x24"
+    },
+    {
+      "filename" : "HINTLogoBuchGrey32.png",
+      "idiom" : "mac",
+      "scale" : "1x",
+      "size" : "32x32"
+    },
+    {
+      "filename" : "HINTLogoBuchGrey64.png",
+      "idiom" : "mac",
+      "scale" : "2x",
+      "size" : "32x32"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

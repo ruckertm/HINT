@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <title>Preferences</title>
+        <meta name="robots" content="preferences, options, anchors" />
+        <meta name="description" content="HintView Preferences" />
+        <meta name="keywords" content="preferences, HINT file" />
+    </head>
+    <body>
+        <a name="preferences"></a>
+
+        <H1><img style="margin: 0.0px 12.0px 0.0px 0.0px;" height="32.0" src="HINTLogoBuchGrey256.png" width="32.0" />Preferences</H1>
+
+    <p>
+    The preferences pane allows persistent of the following settings.
+    The Hintview application will cache the settings and may update the user preferces database
+    at a later time. The settings are saved when the application is closed and take
+    effect when the next instance of Hintview is started. If multiple instances of the Hintview
+    application are running, the effect of changing settings in multiple instances of
+    the preferences pane may lead to unexpected behaviour. Most of the time, the application that
+    terminates last will overwrite settings of applications terminating earlier.
+    <ul>
+        <li><b>Start on Home Page</b><br>
+            Open a new document on the "home" page. The home page is a location specified by
+            the document author as a good starting point for reading the document.
+            If not set, a new document is opened on the first page of the document.
+            <p>
+            See also the <b>&#8984;H</b> and the <b>Home</b> key.
+            <p>
+        <li><b>Start with Autoreload enabled</b><br>
+            If in autoreload mode, the  viewer  will  reload
+            the displayed HINT file each time the cursor enters the window.
+            The viewer attempts to position the new file at about the same position as the old
+            file. This attempt might fail if large scale changes have  been  made  to  the
+            file.
+            <p>
+            See also the <b>&#8984;A</b> and <b>&#8984;R</b>  key.
+            <p>
+        
+        <li><b>Start with Search Field shown</b><br>
+            To enter a search text, the Hintviewer can display a Search Field as part of
+            the window header. Because this reduces the space available for displaying
+            the document, it is shown only on request.
+            <p>
+            See also the <b>&#8984;F</b> key.
+            <p>
+        <li><b>Open Files in new Window</b><br>
+            The code of Hintview reuses large parts of the TeX typesetting engine
+            which was written in the1980's.
+            As a consequence, it can not handle multiple documents
+            using the same window. So a new document will either replace the current
+            document or it will require a new window.
+            Currently dragging a file onto the Hintviewer will always replace the existing
+            document while opening a file by doubble clicking it or opening it using
+            the File - Open ... menu entry will open a new window if this is setting is
+            enabled. Using the <b>&#8984;O</b> key is equivalent to using the Menu.
+            <p>
+        <li><b>Gamma</b><br>
+            Generating the fonts used to display the documents uses (in most cases) a
+            technique called "anti-aliasing". Pixels that are outside the boundary curve
+            of a letter (technically called a glyph) are usualy white and inside they are
+            black. But if the pixel is neither completely inside nor competely outside, because
+            the boundary curve runs straight through the pixel, it gets a grey color
+            according to the relation of the black area to the white area of the pixel.
+            <p>
+            The human perception of darkness is, however, not a linear function of
+            of this black to white relation. Therefore the grey value of the
+            pixel that is perceived by the human eye is computed from the black to white
+            ratio using a special "gamma-function". The parameter for this function,
+            the gamma value, can be adjusted with a slider.
+            <p>
+            But don't worry about all this
+            theory. Changing the slider will immediatly adjust the appearance of the
+            document. So just move the slider to a position where you like the
+            documents appearance best. Good gamma values are usually between 1.8 and 2.2
+            but they depend to a lage part on your monitor and personal taste.
+            To fine tune the gamma setting, you can use the Left or Right Arrow keys
+            to decrement or increment the gamma vale in steps of 0.01 (or 0.1 if the
+            Shift key is pressed simultaneously).
+            <p>
+        </ul>
+    <p>
+    
+    Persistent settings that are not determined by the settings in this window:
+    <ul>
+        <li>Night mode</b><br>
+            You can select beween night and day mode using the View menu or the <b>&#8984;N</b> key.
+    This choce is made persistent when the viewer window is closed.
+    So the next Hintview window you open will be opened in the current mode.
+        <p>
+        <li>Zoom factor</b><br>
+            You can adjust the current zoom factor by dragging with the mouse
+    in the top-left to bottom-right direction. You can reset the zoom
+    factor using the View menu or the <b>&#8984;Z</b> key.
+    This choce is made persistent when the viewer window is closed.
+    So the next Hintview window you open will be opened with the current zoom factor.
+        <p>
+     </u>
+    </body>
+</html>
+
