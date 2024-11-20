@@ -27,6 +27,7 @@
  */
 
 #include "basetypes.h"
+#include "main.h"
 #include "error.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -34,31 +35,36 @@
 #include "hfonts.h"
 #include "hrender.h"
 #include "rendernative.h"
-#include "main.h"
+#define STBI_ONLY_JPEG
+#define STBI_ONLY_PNG
+#define STBI_ONLY_BMP
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-#define GL_SILENCE_DEPRECATION 1
-#include <OpenGL/gl3.h>
-#include <OpenGL/glext.h>
-#include <OpenGL/OpenGL.h>
-#include <OpenGL/CGLContext.h>
 
-
-
-#define DEBUG
 
 #ifdef DEBUG
-static void checkGlError(const char *op) 
+
+static void checkGlError(const char *op)
 { GLint error;
   while( (error= glGetError())!= GL_NO_ERROR)
 	  MESSAGE("OGL Error after %s: 0x%x\n", op, error);
 }
+
+static void printGLString(const char *name, GLenum s) {
+  const GLubyte *v;
+  v = glGetString(s);
+  checkGlError(name);
+  LOG("GL %s = %s\n", name, v);
+}
+
 #else
+#define printGLString(N,S)	(void)0
 #define checkGlError(OP)	(void)0
 #endif
 
 #define MAX_INFOLOG 512
-static 	GLuint ProgramID, MatrixID, RuleID, GammaID, FGcolorID, ImageID, PictureID=0;
+static GLuint ProgramID, MatrixID, RuleID, GammaID, FGcolorID, IsImageID, ImageID=0;
+static unsigned char *last_b=NULL;
 
 #define xyID 0
 #define uvID 1
@@ -67,7 +73,6 @@ static 	GLuint ProgramID, MatrixID, RuleID, GammaID, FGcolorID, ImageID, Picture
 #define QUOTE(X) #X
 static const char VertexShader[]=
   "#version 330 core\n"
-
   /* Input */
   "layout(location = " STR(xyID) ") in vec2 vertexXY;\n"
   "layout(location = " STR(uvID) ") in vec2 vertexUV;\n"
@@ -76,8 +81,7 @@ static const char VertexShader[]=
   /* Constants for the current triangles */
   "uniform mat4 MVP;\n"
 
-  "void main()\n"
-  "{\n"
+  "void main() {\n"
       "gl_Position = MVP * vec4(vertexXY,-1.0f,1.0f);\n"
       "UV = vertexUV;\n"
   "}\n";
@@ -92,17 +96,19 @@ static const char FragmentShader[]=
   "out vec4 color;\n"
   /* Constants for the current triangles */
   "uniform sampler2D theTexture;\n"
-  "uniform vec3 FGcolor;\n"
+  "uniform vec4 FGcolor;\n"
   "uniform float Gamma;\n"
-  "uniform int Image;\n"
+  "uniform int IsImage;\n"
 
   "void main()\n"
-  "{ vec4 texColor = texture( theTexture, UV );\n"
-    "if (Image==1) color = texColor;\n"
-    "else\n"
-    "{ color.a = pow(texColor.r,Gamma);\n"
-      "color.rgb = FGcolor;\n"
+  "{ vec4 texColor = texture2D( theTexture, UV );\n"
+    "if (IsImage==0) {\n"
+      "color.a = pow(texColor.r*FGcolor.a,Gamma);\n"
+      "color.r = FGcolor.r;\n"
+      "color.g = FGcolor.g;\n"
+      "color.b = FGcolor.b;\n"
     "}\n"
+    "else color = texColor;\n"
   "}\n"
 ;
 
@@ -134,45 +140,43 @@ static GLuint loadShader(GLenum type, char const *source)
 
   /* Compile and check vertex shader */
   shaderID = glCreateShader(type);
-  checkGlError("glCreateShader");
   glShaderSource(shaderID, 1, &source , NULL);
-  checkGlError("glShaderSource");
   glCompileShader(shaderID);
-  checkGlError("glCompileShader");
   glGetShaderiv(shaderID, GL_COMPILE_STATUS, &result);
   if (!result)
   { char InfoLog[MAX_INFOLOG];
     glGetShaderInfoLog(shaderID, MAX_INFOLOG, NULL, InfoLog);
     LOG("Error compiling shader (%d): %s\n", type, InfoLog);
   }
-  checkGlError("loadShader");
   return shaderID;
 }
 
 static void createProgram(void)
-{ GLint result =GL_FALSE;
-  GLuint vertexID, fragmentID;
-  vertexID  =loadShader(GL_VERTEX_SHADER,VertexShader);
-  fragmentID=loadShader(GL_FRAGMENT_SHADER,FragmentShader);
-  
+{ GLuint vertexID=loadShader(GL_VERTEX_SHADER,VertexShader);
+  GLuint fragmentID=loadShader(GL_FRAGMENT_SHADER,FragmentShader);
+  GLint result=GL_FALSE;
 
-	
+  if (!vertexID  || !fragmentID) return;
+
   /* Create, linking, and check the program */
   ProgramID = glCreateProgram();
-  checkGlError("glCreateProgram");
-  glAttachShader(ProgramID, vertexID);
-  glAttachShader(ProgramID, fragmentID);
-  glLinkProgram(ProgramID);
-  glGetProgramiv(ProgramID, GL_LINK_STATUS, &result);
-  if (!result)
-  { char InfoLog[MAX_INFOLOG];
-    glGetProgramInfoLog(ProgramID, MAX_INFOLOG, NULL, InfoLog);
-    QUIT("Error linking shader program: %s\n", InfoLog);
+  if (ProgramID) {
+    glAttachShader(ProgramID, vertexID);
+    checkGlError("glAttachShader");
+    glAttachShader(ProgramID, fragmentID);
+    checkGlError("glAttachShader");
+    glLinkProgram(ProgramID);
+    glGetProgramiv(ProgramID, GL_LINK_STATUS, &result);
+    if (!result)
+    { char InfoLog[MAX_INFOLOG];
+      glGetProgramInfoLog(ProgramID, MAX_INFOLOG, NULL, InfoLog);
+      glDeleteProgram(ProgramID);
+      ProgramID = 0;
+      QUIT("Error linking shader program: %s\n", InfoLog);
+    }
+    glDetachShader(ProgramID, vertexID);
+    glDetachShader(ProgramID, fragmentID);
   }
-	
-  glDetachShader(ProgramID, vertexID);
-  glDetachShader(ProgramID, fragmentID);
-	
   glDeleteShader(vertexID);
   glDeleteShader(fragmentID);
   //LOG("createProgram Done\n");
@@ -224,7 +228,7 @@ static void mkRuleTexture() /* the texture used for rules */
   rule[1][1][1]=0xFF; // green bottom right
 #endif
 	// Create one OpenGL texture
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // select byte alignment
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   checkGlError("glPixelStorei");
 
   glGenTextures(1, &RuleID);
@@ -242,27 +246,26 @@ static void mkRuleTexture() /* the texture used for rules */
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-  //LOG("mkRuleTexture Done\n");
 }
 
+static ColorSet *cur_colorset=NULL;
 
-void nativeInit(void)
+extern void nativeInit(void)
 { GLuint VertexArrayID;
   while(glGetError()!= GL_NO_ERROR)
     continue; /* ignore errors in glewInit */
   checkGlError("starting nativeInit");
   /* Create the vertex array object (VAO) */
   glGenVertexArrays(1, &VertexArrayID);
+  checkGlError("glGenVertexArrays");
   glBindVertexArray(VertexArrayID);
-
-    
+  checkGlError("glBindVertexArray");
   createProgram();
-  checkGlError("createProgram"); 
+
   MatrixID = glGetUniformLocation(ProgramID, "MVP");
-  FGcolorID  = glGetUniformLocation(ProgramID, "FGcolor");
+  FGcolorID = glGetUniformLocation(ProgramID, "FGcolor");
   GammaID  = glGetUniformLocation(ProgramID, "Gamma");
-  ImageID  = glGetUniformLocation(ProgramID, "Image");
+  IsImageID = glGetUniformLocation(ProgramID, "IsImage");
   checkGlError("get IDs"); 
 
   glGenBuffers(1, &xybuffer);
@@ -278,10 +281,10 @@ void nativeInit(void)
 
   glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
   glUniform1f(GammaID, 1.0f/2.2f);
-  glUniform1i(ImageID, 0);
-  glUniform3f(FGcolorID, 0.0, 0.0, 0.0); // black as default foreground
-  glClearColor(1.0f, 1.0f, 1.0f, 0.0f); // white as default background
-
+  glUniform1i(IsImageID, 0);
+  glUniform4f(FGcolorID, 0.0, 0.0, 0.0, 1.0); // black as default foreground
+  glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // white as default background
+  cur_colorset=color_defaults;
    /* 1rst attribute buffer : XYs */
   glEnableVertexAttribArray(xyID);
   glBindBuffer(GL_ARRAY_BUFFER, xybuffer);
@@ -312,24 +315,21 @@ void nativeInit(void)
             
   hint_clear_fonts(false);
   mkRuleTexture();
-  //LOG("nativeInit Done\n");
+  ImageID=0;
+  last_b=NULL;
+  //LOG("nativeInit done\n");
 }
+
 
 void nativeClear(void)
 { glDeleteBuffers(1, &xybuffer);
   glDeleteBuffers(1, &uvbuffer);
   glDeleteProgram(ProgramID);
   glDeleteTextures(1, &RuleID);
-   if (PictureID != 0) {
-        glDeleteTextures(1, &PictureID);
-        PictureID = 0;
-   }
-}
-
-void nativeBlank(void)
-{ glClear(GL_COLOR_BUFFER_BIT);
-  checkGlError("glClear");
-    //LOG("nativeBlank Done\n");
+  if (ImageID != 0) {
+        glDeleteTextures(1, &ImageID);
+        ImageID = 0; last_b=NULL;
+  }
 }
 
 void nativeSetGamma(double gamma)
@@ -337,63 +337,64 @@ void nativeSetGamma(double gamma)
   checkGlError("glsetgamma");
 }
 
-static GLfloat curfr, curfg, curfb;
-static uint8_t last_style=0;
-static void nativeSetColors(GLfloat fr, GLfloat fg, GLfloat fb, GLfloat br, GLfloat bg, GLfloat bb)
-/* set foreground and background rgb colors */
-{
-  glClearColor(br, bg, bb, 1.0f);
-  curfr=fr; curfg=fg; curfb=fb;
-  glUniform3f(FGcolorID, curfr, curfg, curfb);
-  last_style=0;
+
+static uint32_t cur_fg=0;
+
+static void nativeSetForeground(uint32_t fg)
+/* set foreground rgba colors */
+{ if (fg!=cur_fg)
+  { uint8_t r,g,b,a;
+    cur_fg=fg;
+    a=fg&0xFF;fg=fg>>8;
+    b=fg&0xFF;fg=fg>>8;
+    g=fg&0xFF;fg=fg>>8;
+    r=fg&0xFF;
+    glUniform4f(FGcolorID, r/255.0f,g/255.0f,b/255.0f,a/255.0f);
+  }
 }
 
-static int dark_mode;
-/* colors foreground and background for day and night mode */
-#define RGB(R,G,B) (((((R)<<8)| G)<<8) | B)
-#define GET_R(C) (((C)>>16)&0xFF)
-#define GET_G(C) (((C)>>8)&0xFF)
-#define GET_B(C) ((C)&0xFF)
-#define FG_DAY RGB(0x00,0x00,0x00) /* black */
-#define BG_DAY RGB(0xFF,0xFF,0xFF) /* white */
-#define FG_NIGHT RGB(0xFF,0xFF,0xE8) /* warm white */
-#define BG_NIGHT RGB(0x00,0x00,0x08) /* dark blue */
-
-#define BF_ON_DAY RGB(0xD0,0xD0,0xD0) /* lighter grey */
-#define BF_OFF_DAY RGB(0xA0,0xA0,0xA0) /* light grey */
-#define BF_ON_NIGHT RGB(0x90,0x90, 0x90) /* medium grey */
-#define BF_OFF_NIGHT RGB(0x60,0x60, 0x60) /* dark grey */
+void nativeBackground(double x, double y, double w, double h)
+{ uint32_t bg, fg;
+  fg=cur_colorset[0][cur_mode*6+cur_style*2];
+  bg=cur_colorset[0][cur_mode*6+cur_style*2+1];
+  nativeSetForeground(bg);
+  nativeRule(x,y,w,h);
+  nativeSetForeground(fg);
+}
 
 void nativeSetDark(int on)
-{   if (on) {
-        dark_mode = true;
-        nativeSetColors(
-			GET_R(FG_NIGHT)/255.0f, 
-			GET_G(FG_NIGHT)/255.0f, 
-			GET_B(FG_NIGHT)/255.0f, 
-			GET_R(BG_NIGHT)/255.0f, 
-			GET_G(BG_NIGHT)/255.0f, 
-			GET_B(BG_NIGHT)/255.0f);
-    } else {
-        dark_mode = false;
-        nativeSetColors(
-			GET_R(FG_DAY)/255.0f, 
-			GET_G(FG_DAY)/255.0f, 
-			GET_B(FG_DAY)/255.0f, 
-			GET_R(BG_DAY)/255.0f, 
-			GET_G(BG_DAY)/255.0f, 
-			GET_B(BG_DAY)/255.0f);
-        
-     }
+{ uint32_t fg;
+  cur_mode=on?1:0;
+  fg=cur_colorset[0][cur_mode*6+cur_style*2];
+  nativeSetForeground(fg);
 }
+
+void nativeSetColor(ColorSet *cs)
+{ cur_colorset=cs;
+  nativeSetDark(cur_mode);
+}
+
+void nativeBlank(void)
+{ uint32_t bg;
+  uint8_t r,g,b,a;
+  if (cur_colorset==NULL)
+    QUIT("Calling nativeBlank without calling nativeSetColor");
+  bg=cur_colorset[0][cur_mode*6+1];
+  a=bg&0xFF;bg=bg>>8;
+  b=bg&0xFF;bg=bg>>8;
+  g=bg&0xFF;bg=bg>>8;
+  r=bg&0xFF;
+  glClearColor(	r/255.0f,g/255.0f,b/255.0f,a/255.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+}
+
 
 static float pt_h=600.0, pt_v=800.0;
 
 void nativeSetSize(int px_h, int px_v, double x_dpi, double y_dpi)
 {  //LOG("xdpi=%f, ydpi=%f\n",x_dpi,y_dpi);
    pt_h = px_h * 72.27 / x_dpi;
-   pt_v = px_v * 72.27 / y_dpi;
-   glViewport(0, 0, px_h, px_v);
+   pt_v = px_v * 72.27 / y_dpi; 
    page_h = round(pt_h * (1 << 16));
    page_v = round(pt_v * (1 << 16));
    MVP[0][0]=2.0/pt_h; // x: scale to -1 to +1
@@ -404,9 +405,10 @@ void nativeSetSize(int px_h, int px_v, double x_dpi, double y_dpi)
    //MVP[3][2]=-1.0f; // don't care
    //MVP[3][3]=1.0f; // w: identity, already there
    glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+   glViewport(0, 0, px_h, px_v);
 }
 
-void nativeRule(double x, double y, double w, double h)
+extern void nativeRule(double x, double y, double w, double h)
 /* Using GL to render a rule (a black rectangle)
    Coordinates in points, origin bottom left, x and w right, y and h up
    x,y position
@@ -433,25 +435,34 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
 /* render the image found between *b and *e at x,y with size w,h.
    x, y, w, h are given in point
 */
-{
-  static unsigned char *last_b=NULL;
-  GLenum format, internal_format;
+{ GLenum format;
   int width, height, nrChannels;
-  unsigned char *data;
-  static unsigned char grey[4]={0,0,0,0x80};
-  if (b!=last_b)
-  { if (PictureID != 0) {
-        glDeleteTextures(1, &PictureID);
-        PictureID = 0;
+
+  if (b!=last_b||ImageID==0)
+  { unsigned char *data;
+    static unsigned char grey[4]={0,0x80,0x80,0x80};
+    if (ImageID != 0) {
+        glDeleteTextures(1, &ImageID);
+        ImageID = 0;
     }
     last_b=b;
     data = stbi_load_from_memory(b, (int) (e - b), &width, &height, &nrChannels, 0);
     if (data == NULL)
-      {
-      LOG("Unable to display image\n");
+    { LOG("Unable to display image\n");
       data=grey; width=height=1; nrChannels=4;
     }
-    //LOG("nativeImage %d chanels\n",nrChannels);	
+    //LOG("nativeImage %d chanels\n",nrChannels);
+#if 1    
+    format = GL_RGBA;
+    if (nrChannels == 4)
+        format = GL_RGBA;
+    else if (nrChannels == 3)
+        format = GL_RGB;
+    else if (nrChannels == 2)
+        format = GL_LUMINANCE_ALPHA;
+    else if (nrChannels == 1)
+        format = GL_LUMINANCE;
+#else
     internal_format=GL_SRGB;
     if (nrChannels == 4)
     { format = GL_RGBA; internal_format=GL_SRGB_ALPHA;}
@@ -461,21 +472,25 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
       format = GL_RG;
     else
       format = GL_RED;
-    glGenTextures(1, &PictureID);
-    glBindTexture(GL_TEXTURE_2D, PictureID);
-    checkGlError("glBindTexture PictureID");
-
-    glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+#endif
+    glGenTextures(1, &ImageID);
+    glBindTexture(GL_TEXTURE_2D, ImageID);
+    checkGlError("glBindTexture ImageID");
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0,
+                 format, GL_UNSIGNED_BYTE, data);
+    if (glGetError()!= GL_NO_ERROR)
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
+    		  format, GL_UNSIGNED_BYTE, data);
     checkGlError("glTexImage2D(image)");
-    if (data!=grey) stbi_image_free(data);
+    if (data!=grey) { stbi_image_free(data); data=NULL; }
     glGenerateMipmap(GL_TEXTURE_2D);
     checkGlError("glGenerateMipmap(image)");
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   }
   else
-  {  glBindTexture(GL_TEXTURE_2D, PictureID);
-     checkGlError("glBindTexture old PictureID");
+  {  glBindTexture(GL_TEXTURE_2D, ImageID);
+     checkGlError("glBindTexture old ImageID");
   }
 
   xy[0][0]=x;	  xy[0][1]=y;
@@ -489,13 +504,12 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
   glBindBuffer(GL_ARRAY_BUFFER, xybuffer);
   glBufferData(GL_ARRAY_BUFFER, sizeof(xy), xy, GL_STREAM_DRAW);
 
-  glUniform1i(ImageID, 1);
+  glUniform1i(IsImageID, 1);
   glDrawArrays(GL_TRIANGLES, 0, 2*3);
-  glUniform1i(ImageID, 0);
-
+  glUniform1i(IsImageID, 0);
 }
 
-
+static const int to_nearest=1;
 static void GLtexture(Gcache *g) {
     unsigned texID;
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -504,12 +518,10 @@ static void GLtexture(Gcache *g) {
     checkGlError("glGenTextures");
     glBindTexture(GL_TEXTURE_2D, texID);
     checkGlError("glBindTexture texID");
-	
-
     /* the first element in g->bits corresponds to the lower left pixel,
      * the last element in g->bits to the upper right pixel. */
-  glTexImage2D(
-	    GL_TEXTURE_2D,
+    glTexImage2D(
+            GL_TEXTURE_2D,
             0,
             GL_R8,
             g->w,
@@ -518,83 +530,71 @@ static void GLtexture(Gcache *g) {
             GL_RED,
             GL_UNSIGNED_BYTE,
             g->bits
-  );
-  checkGlError("glTeXImage2D Glyph");
-    
+    );
+    checkGlError("glTeXImage2D Glyph");
 
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    if (to_nearest) 
+    { glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    }
+    else
+    { glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    }
 
-  g->GLtexture = texID;
-  //MESSAGE("Generated GL texture %d",g->GLtexture);
+    g->GLtexture = texID;
+    //MESSAGE("Generated GL texture %d",g->GLtexture);
 }
 
+void nativeSetPK(struct gcache_s*g)
+{GLtexture(g); /* can I free g->bits ? */}
 
-
-void nativeSetPK(struct gcache_s *g)
-/* the bits, w and h fields in g are already set, but the rows needs to be DWORD aligned
-   the bitmap is already bottom up */
-{ GLtexture(g);
-}
-
-void nativeSetFreeType(struct gcache_s *g)
-/* the bits, w and h fields in g are already set, but the rows needs to be DWORD aligned
-   and converted to a bottom up DIB
-*/
+void nativeSetFreeType(struct gcache_s*g)
 {GLtexture(g);}
 extern int drag;
 int round_to_pixel=1; /* makes sense only if using the native dpi, if using a multiple its of not much use*/
-double pixel_size_threshold= 72.27/100; /*round to pixel only if pixel size in pt is below threshold*/
-void nativeGlyph(double x, double dx, double y, double dy, double w, double h, struct gcache_s *g, uint8_t s)
+double pixel_size_threshold= 72.27/200; /*round to pixel only if pixel size in pt is above threshold*/
+void nativeGlyph(double x, double dx, double y, double dy, double w, double h, struct gcache_s *g, int s)
 /* given glyph g, display g at position x,y in size w,h. x, y, w, h are given in point */
 {  
-	if (g->GLtexture == 0)
-        GLtexture(g);
-	x=x-dx;
-	y=y+h-dy;
-	if (round_to_pixel && !drag)
-	{ double pxs;
-	  pxs = 72.27/xdpi; /* pixel size in point */
-	  if (pxs>=pixel_size_threshold)
-	  { x=x/pxs;
-	    x=floor(x+0.5);
-	    x=x*pxs;
-	  }
-	  pxs = 72.27/ydpi; /* pixel size in point */
-	  if (pxs>=pixel_size_threshold)
-	  { y=y/pxs;
-	    y=floor(y+0.5);
-	    y=y*pxs;
-	  }
-	}
-  	xy[0][0]=x;	  xy[0][1]=y;
-	xy[1][0]=x;	  xy[1][1]=y-h;
-	xy[2][0]=x+w;     xy[2][1]=y-h;
+  if (g->GLtexture == 0)
+    GLtexture(g);
+  x=x-dx;
+  y=y+h-dy;
+  if (round_to_pixel && !drag)
+  { double pxs;
+    pxs = 72.27/xdpi; /* pixel size in point */
+    if (pxs>=pixel_size_threshold)
+    { x=x/pxs;
+      x=floor(x+0.5);
+      x=x*pxs;
+    }
+    pxs = 72.27/ydpi; /* pixel size in point */
+    if (pxs>=pixel_size_threshold)
+    { y=y/pxs;
+      y=floor(y+0.5);
+      y=y*pxs;
+    }
+  }
+  xy[0][0]=x;	  xy[0][1]=y;
+  xy[1][0]=x;	  xy[1][1]=y-h;
+  xy[2][0]=x+w;     xy[2][1]=y-h;
 
-	xy[3][0]=x+w;	  xy[3][1]=y;
-	xy[4][0]=x;       xy[4][1]=y;
-	xy[5][0]=x+w;     xy[5][1]=y-h;
+  xy[3][0]=x+w;	  xy[3][1]=y;
+  xy[4][0]=x;       xy[4][1]=y;
+  xy[5][0]=x+w;     xy[5][1]=y-h;
 
-    glBindTexture(GL_TEXTURE_2D, g->GLtexture);
-    checkGlError("glBindTexture g->GLtexture");
-    
-	if (s!=last_style)
-	{ if (s&FOCUS_BIT)
-	      glUniform3f(FGcolorID, 0.0, 1.0,0.0); 
-	  else if (s&MARK_BIT)
- 	      glUniform3f(FGcolorID, 1.0, 0.0,0.0); 
-	  else if (s&LINK_BIT)
- 	      glUniform3f(FGcolorID, 0.0, 0.0,1.0); 
-	  else
-  	      glUniform3f(FGcolorID, curfr, curfg,curfb);
-	  last_style=s;
-	}
-    glBindBuffer(GL_ARRAY_BUFFER, xybuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(xy), xy, GL_STREAM_DRAW);
-    glDrawArrays(GL_TRIANGLES, 0, 2*3);
-    //LOG("nativeGlyph %f@%f %fx%f Done\n",x,y,w,h);
+  glBindTexture(GL_TEXTURE_2D, g->GLtexture);
+  checkGlError("glBindTexture g->GLtexture");
+
+  nativeSetForeground(cur_colorset[0][cur_mode*6+s*2]);
+
+  glBindBuffer(GL_ARRAY_BUFFER, xybuffer);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(xy), xy, GL_STREAM_DRAW);
+  glDrawArrays(GL_TRIANGLES, 0, 2*3);
+  //checkGlError("glDrawArrays");
 }
 
 void nativeFreeGlyph(struct gcache_s*g)
