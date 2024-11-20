@@ -8,4 +8,6 @@
 *.hint
 *.hnt
 *.pdf
+*.toc
+*.lof
 *.blg

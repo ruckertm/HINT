@@ -335,7 +335,7 @@ static void hget_range_def(uint8_t a, uint8_t pg);
 static void hget_page_def(uint8_t a, uint8_t n);
 static void hget_outline_or_label_def(Info i, int n);
 static void hget_unknown_def(void);
-static void hget_font_metrics();
+static void hget_font_metrics(void);
 static void hget_color_def(uint8_t a, int n);
 static pointer hget_definition(uint8_t a);
 static int hget_label_ref(void);
@@ -1460,7 +1460,7 @@ HGETTAG(a);
 
 @<read and check the end byte |z|@>=
 HGETTAG(z);@+
-if (a!=z) tag_mismatch(a,z,node_pos, hpos-hstart-1);
+if (a!=z) tag_mismatch(a,z,node_pos, (uint32_t)(hpos-hstart-1));
 @
 
 The identifier |node_pos| is defined as a macro; it denotes a field on
@@ -1530,11 +1530,11 @@ The next macros read and check start and end byte.
 
 @<read the end byte |z|@>=
   uint8_t a,z; /* the start and the end byte*/
-  z=HTEG8,DBGTAG(z,hpos);
+  z=HTEG8;DBGTAG(z,hpos);
 @
 
 @<read and check the start byte |a|@>=
-  a=HTEG8,DBGTAG(a,hpos);
+  a=HTEG8;DBGTAG(a,hpos);
   if (z!=a) tag_mismatch(a,z,hpos-hstart,node_pos);
 @
 
@@ -7897,6 +7897,16 @@ extern int hint_error(char *title, char *msg);
 #define MESSAGE(...)  __android_log_print(ANDROID_LOG_INFO,__FILE__, __VA_ARGS__)
 #define ERROR_MESSAGE __android_log_print(ANDROID_LOG_ERROR,__FILE__,"ERROR: %s\n", hint_error_string)
 
+#endif
+
+#ifdef __APPLE__
+extern void hint_log(const char*format,...);
+extern void hint_message(const char*format,...);
+extern int hint_error(const char*title,const char*msg);
+#define LOG(...) hint_log(__VA_ARGS__)
+#define MESSAGE(...) (snprintf(hint_error_string,MAX_HINT_ERROR-1,__VA_ARGS__),\
+                      hint_error("Warning",hint_error_string))
+#define ERROR_MESSAGE hint_error("ERROR",hint_error_string)
 #endif
 
 #ifndef LOG

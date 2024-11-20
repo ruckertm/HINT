@@ -1,0 +1,132 @@
+\input size.tex
+A\HINTdefaultcolor{ fg {0.8 0.25 0.5} bg {0.8 0.8 1 0}} X\par
+\vfill
+\def\dayrose{\HINTcolor{ fg {1 0.5 0.123 1} bg {1 1 0 0} FG {1 "AB 0 255} bg {1 1 0 0}}}
+\def\nightmagenta{\HINTcolor{ FG {0 0 0 "FF} dark FG {"FF "00 "FF "FF}}}
+\def\yellow{{"FF "FF 0 "80}}%
+
+\def\home#1{\HINTstartlink goto name {HINT.home}\relax #1\HINTendlink}
+
+A \dayrose B \HINTendcolor C \vadjust{\HINTcolor{ FG{0 0 0} BG \yellow}\vskip 3pt}\HINTendcolor D \HINTendcolor E
+
+A \nightmagenta B \dayrose C \HINTendcolor D \HINTendcolor E \HINTendcolor F\strut
+
+\HINTcolor{ FG{0 0 0} BG \yellow}
+
+L \home{A A \nightmagenta B} B \dayrose C  D  E \HINTendcolor F \HINTendcolor G\strut
+
+\HINTendcolor
+
+L  \dayrose K \home{A \nightmagenta B B} B C \HINTendcolor D \HINTendcolor E \HINTendcolor F
+\medskip
+
+\vbox{
+\hsize=2in
+
+A \dayrose B \HINTendcolor C \HINTendcolor D \HINTendcolor E
+
+A \nightmagenta B \dayrose C \HINTendcolor D \HINTendcolor E \HINTendcolor F
+
+
+
+L \home{A A \nightmagenta B} B \dayrose C  D  E \HINTendcolor F \HINTendcolor G
+
+
+L  \dayrose K \home{A \nightmagenta B B} B C \HINTendcolor D \HINTendcolor E \HINTendcolor F
+}
+
+%\setbox200=
+\vbox{
+\hsize=0.5in
+
+A \dayrose B \HINTendcolor C \HINTendcolor D \HINTendcolor E
+
+A \nightmagenta B \dayrose C \HINTendcolor D \HINTendcolor E \HINTendcolor F\strut
+
+\HINTcolor{ FG{0 0 0} BG \yellow}
+L \home{A A \nightmagenta B} B \dayrose C  D  E \HINTendcolor F \HINTendcolor G\strut
+
+\HINTendcolor
+
+L  \dayrose K \home{A \nightmagenta B B} B C \HINTendcolor D \HINTendcolor E \HINTendcolor F
+}
+
+%\vsplit200 to 8em
+%\vskip 1pt
+\hrule
+%\vsplit200 to 1.5em
+\HINTcolor{ fg {0 1 0}}\hrule height 2pt\HINTendcolor
+\box200
+
+
+Changing the \dayrose default\HINTendcolor\ colors\HINTendcolor\ for foreground to pink on light blue:
+
+
+
+Application
+Ap\-pli\-c{\dayrose}a\-ti\-on in ``day rose''
+
+% error: \HINTdefaultcolor fg{1 0.7 1 0} 
+
+
+Ap\-pli\-c{\nightmagenta}ation  in ``night magenta''
+\HINTcolor{ FG {0 0 0 "FF} dark FG {0 0 0 255}}%
+and ``night black''
+%
+\def\magenta{"FF 0 "FF}%
+\def\bggreen{bg{0 0.5 0}}%
+\def\dark{dark}%
+\def\red{\HINTcolor{ FG {"FF 0 0} dark FG {"FF 0 0}}}%
+\count255="60%
+\HINTcolor{ FG \yellow \bggreen \dark FG{0 0 \the\count255}}%
+yellow on green /dark blue=0x60
+\advance\count255 by "60%
+\HINTcolor{ FG{0 0 0} BG \yellow \dark FG{0 0 \the\count255}}%
+black on yellow/dark blue=0xC0\HINTendcolor\ End color
+
+Link with change to red:
+\HINTstartlink goto name {HINT.home}\relax
+Ap\-pl\red i\-cat\-ion\HINTendlink\ End \HINTendcolor\ Link
+\dayrose
+and day rose \HINTendcolor again \HINTendcolor and \HINTendcolor again.
+\HINTdefaultlinkcolor{ fg {0 0 0.25}}
+And another link color
+\HINTlinkcolor{ fg {0 0 1} BG \yellow} 
+and another link
+% error \HINTdefaultlinkcolor{ fg {0 0 0.25}}
+Link with change to red: \HINTstartlink goto name {HINT.home}\relax
+Ap\-pli\-\hbox{\red cat}\-ion\HINTendlink\ End Link
+\par
+%\penalty 0
+\HINTcolor{ fg{0 0 1 0.6} bg {1 1 0 0.1}}
+\hrule
+\hbox{\strut This is\HINTendcolor\ some\HINTendcolor\ Text}
+\vbox to 0.3\hsize{\hrule \strut Text\vfill \strut Text\hrule}
+
+\strut A\par
+\HINTcolor{ FG{0 0 0} BG \yellow \dark FG{0 0 \the\count255}}
+\HINTcolor{ FG \yellow \bggreen \dark FG{0 0 \the\count255}}
+\hrule height 5pt
+\kern 2pt
+\vskip 2pt
+\vskip 20pt
+\penalty -500
+\vskip 20pt
+\HINTendcolor
+\vskip 20pt
+\kern 2pt
+\vskip 2pt
+\kern 10pt
+\HINTendcolor
+\kern 10pt
+\HINTendcolor
+\kern 10pt
+\HINTendcolor
+\hrule height 5pt
+\HINTendcolor
+\hbox{}
+\kern 10pt
+\hrule height 5pt
+\vfill
+\eject
+\end

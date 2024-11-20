@@ -1,5 +1,5 @@
 /*399:*/
-#line 8234 "hint.w"
+#line 8244 "hint.w"
 
 #include "basetypes.h"
 #include <string.h> 
@@ -237,7 +237,7 @@ tail_append(p);}
     RNG("label color",color_ref(as_color(p)),0,max_ref[color_kind]);\
   tail_append(p);}
 /*:213*/
-#line 8247 "hint.w"
+#line 8257 "hint.w"
 
 /*94:*/
 #line 1605 "hint.w"
@@ -438,7 +438,7 @@ tail_append(p);}
     RNG("label color",color_ref(as_color(p)),0,max_ref[color_kind]);\
   tail_append(p);}
 /*:214*/
-#line 8248 "hint.w"
+#line 8258 "hint.w"
 
 
 /*21:*/
@@ -469,7 +469,7 @@ typedef struct ParamDef{
 struct ParamDef*next;
 Param p;}ParamDef;
 /*:37*/
-#line 8250 "hint.w"
+#line 8260 "hint.w"
 
 
 /*2:*/
@@ -583,12 +583,12 @@ int page_v,page_h,offset_v,offset_h;
 hint_Link*hint_links= NULL;
 int max_link= -1;
 /*:320*//*386:*/
-#line 7929 "hint.w"
+#line 7939 "hint.w"
 
 jmp_buf hint_error_exit;
 char hint_error_string[MAX_HINT_ERROR];
 /*:386*/
-#line 8252 "hint.w"
+#line 8262 "hint.w"
 
 /*3:*/
 #line 327 "hint.w"
@@ -603,7 +603,7 @@ static void hget_range_def(uint8_t a,uint8_t pg);
 static void hget_page_def(uint8_t a,uint8_t n);
 static void hget_outline_or_label_def(Info i,int n);
 static void hget_unknown_def(void);
-static void hget_font_metrics();
+static void hget_font_metrics(void);
 static void hget_color_def(uint8_t a,int n);
 static pointer hget_definition(uint8_t a);
 static int hget_label_ref(void);
@@ -635,7 +635,7 @@ static pointer hteg_list_pointer(void);
 
 static scaled hget_xdimen_node(void);
 /*:132*/
-#line 8253 "hint.w"
+#line 8263 "hint.w"
 
 /*35:*/
 #line 697 "hint.w"
@@ -643,7 +643,7 @@ static scaled hget_xdimen_node(void);
 extern uint16_t hglyph_section(uint8_t f);
 extern int32_t font_at_size(uint8_t f);
 /*:35*/
-#line 8254 "hint.w"
+#line 8264 "hint.w"
 
 /*9:*/
 #line 388 "hint.w"
@@ -731,7 +731,7 @@ f->p[n]= hget_definition(a);
 #line 1461 "hint.w"
 
 HGETTAG(z);
-if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
+if(a!=z)tag_mismatch(a,z,node_pos,(uint32_t)(hpos-hstart-1));
 /*:83*/
 #line 660 "hint.w"
 
@@ -799,7 +799,7 @@ else TAGERR(a);
 #line 1461 "hint.w"
 
 HGETTAG(z);
-if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
+if(a!=z)tag_mismatch(a,z,node_pos,(uint32_t)(hpos-hstart-1));
 /*:83*/
 #line 780 "hint.w"
 
@@ -830,7 +830,7 @@ p= hget_param_list(a);
 #line 1461 "hint.w"
 
 HGETTAG(z);
-if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
+if(a!=z)tag_mismatch(a,z,node_pos,(uint32_t)(hpos-hstart-1));
 /*:83*/
 #line 797 "hint.w"
 
@@ -964,7 +964,7 @@ s->h= hget_glue_spec();
 #line 1461 "hint.w"
 
 HGETTAG(z);
-if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
+if(a!=z)tag_mismatch(a,z,node_pos,(uint32_t)(hpos-hstart-1));
 /*:83*/
 #line 992 "hint.w"
 
@@ -1106,7 +1106,7 @@ else tag_expected(TAG(xdimen_kind,0),a,node_pos);
 #line 1461 "hint.w"
 
 HGETTAG(z);
-if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
+if(a!=z)tag_mismatch(a,z,node_pos,(uint32_t)(hpos-hstart-1));
 /*:83*/
 #line 1652 "hint.w"
 
@@ -1129,7 +1129,7 @@ else tag_expected(TAG(xdimen_kind,0),a,node_pos);
 #line 1461 "hint.w"
 
 HGETTAG(z);
-if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
+if(a!=z)tag_mismatch(a,z,node_pos,(uint32_t)(hpos-hstart-1));
 /*:83*/
 #line 1661 "hint.w"
 
@@ -1162,7 +1162,7 @@ scaled hteg_xdimen_node(void)
 #line 1531 "hint.w"
 
 uint8_t a,z;
-z= HTEG8,DBGTAG(z,hpos);
+z= HTEG8;DBGTAG(z,hpos);
 /*:88*/
 #line 1687 "hint.w"
 
@@ -1173,7 +1173,7 @@ tag_expected(TAG(xdimen_kind,0),z,node_pos);
 /*89:*/
 #line 1536 "hint.w"
 
-a= HTEG8,DBGTAG(a,hpos);
+a= HTEG8;DBGTAG(a,hpos);
 if(z!=a)tag_mismatch(a,z,hpos-hstart,node_pos);
 /*:89*/
 #line 1692 "hint.w"
@@ -1189,7 +1189,7 @@ static pointer hteg_rule_node(void)
 #line 1531 "hint.w"
 
 uint8_t a,z;
-z= HTEG8,DBGTAG(z,hpos);
+z= HTEG8;DBGTAG(z,hpos);
 /*:88*/
 #line 1843 "hint.w"
 
@@ -1198,7 +1198,7 @@ else tag_expected(TAG(rule_kind,0),z,node_pos);
 /*89:*/
 #line 1536 "hint.w"
 
-a= HTEG8,DBGTAG(a,hpos);
+a= HTEG8;DBGTAG(a,hpos);
 if(z!=a)tag_mismatch(a,z,hpos-hstart,node_pos);
 /*:89*/
 #line 1846 "hint.w"
@@ -1224,7 +1224,7 @@ else
 #line 1461 "hint.w"
 
 HGETTAG(z);
-if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
+if(a!=z)tag_mismatch(a,z,node_pos,(uint32_t)(hpos-hstart-1));
 /*:83*/
 #line 1922 "hint.w"
 
@@ -1257,7 +1257,7 @@ else
 /*89:*/
 #line 1536 "hint.w"
 
-a= HTEG8,DBGTAG(a,hpos);
+a= HTEG8;DBGTAG(a,hpos);
 if(z!=a)tag_mismatch(a,z,hpos-hstart,node_pos);
 /*:89*/
 #line 1949 "hint.w"
@@ -1320,7 +1320,7 @@ node_pos+1,hpos-hstart-s-1,s,t);
 #line 1461 "hint.w"
 
 HGETTAG(z);
-if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
+if(a!=z)tag_mismatch(a,z,node_pos,(uint32_t)(hpos-hstart-1));
 /*:83*/
 #line 2010 "hint.w"
 
@@ -1398,7 +1398,7 @@ while(list_start<hpos)
 #line 1531 "hint.w"
 
 uint8_t a,z;
-z= HTEG8,DBGTAG(z,hpos);
+z= HTEG8;DBGTAG(z,hpos);
 /*:88*/
 #line 2093 "hint.w"
 
@@ -1414,7 +1414,7 @@ DBG(DBGTAGS,"Defining %s %d\n",definition_name[KIND(z)],q->n);
 /*89:*/
 #line 1536 "hint.w"
 
-a= HTEG8,DBGTAG(a,hpos);
+a= HTEG8;DBGTAG(a,hpos);
 if(z!=a)tag_mismatch(a,z,hpos-hstart,node_pos);
 /*:89*/
 #line 2103 "hint.w"
@@ -1447,7 +1447,7 @@ static pointer hteg_hbox_node(void)
 #line 1531 "hint.w"
 
 uint8_t a,z;
-z= HTEG8,DBGTAG(z,hpos);
+z= HTEG8;DBGTAG(z,hpos);
 /*:88*/
 #line 2232 "hint.w"
 
@@ -1457,7 +1457,7 @@ HTEG_BOX(INFO(z));
 /*89:*/
 #line 1536 "hint.w"
 
-a= HTEG8,DBGTAG(a,hpos);
+a= HTEG8;DBGTAG(a,hpos);
 if(z!=a)tag_mismatch(a,z,hpos-hstart,node_pos);
 /*:89*/
 #line 2236 "hint.w"
@@ -1470,7 +1470,7 @@ static pointer hteg_vbox_node(void)
 #line 1531 "hint.w"
 
 uint8_t a,z;
-z= HTEG8,DBGTAG(z,hpos);
+z= HTEG8;DBGTAG(z,hpos);
 /*:88*/
 #line 2241 "hint.w"
 
@@ -1480,7 +1480,7 @@ HTEG_BOX(INFO(z));
 /*89:*/
 #line 1536 "hint.w"
 
-a= HTEG8,DBGTAG(a,hpos);
+a= HTEG8;DBGTAG(a,hpos);
 if(z!=a)tag_mismatch(a,z,hpos-hstart,node_pos);
 /*:89*/
 #line 2245 "hint.w"
@@ -1615,7 +1615,7 @@ HGET_DISC(INFO(a));
 #line 1461 "hint.w"
 
 HGETTAG(z);
-if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
+if(a!=z)tag_mismatch(a,z,node_pos,(uint32_t)(hpos-hstart-1));
 /*:83*/
 #line 2755 "hint.w"
 
@@ -1738,7 +1738,7 @@ node_pos+1,hpos-hstart-s-1,s,t);
 #line 1461 "hint.w"
 
 HGETTAG(z);
-if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
+if(a!=z)tag_mismatch(a,z,node_pos,(uint32_t)(hpos-hstart-1));
 /*:83*/
 #line 2958 "hint.w"
 
@@ -1852,7 +1852,7 @@ node_pos+1,hpos-hstart-s-1,s,t);
 #line 1461 "hint.w"
 
 HGETTAG(z);
-if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
+if(a!=z)tag_mismatch(a,z,node_pos,(uint32_t)(hpos-hstart-1));
 /*:83*/
 #line 2958 "hint.w"
 
@@ -1936,7 +1936,7 @@ hget_paragraph(x,offset,q);
 #line 1461 "hint.w"
 
 HGETTAG(z);
-if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
+if(a!=z)tag_mismatch(a,z,node_pos,(uint32_t)(hpos-hstart-1));
 /*:83*/
 #line 3148 "hint.w"
 
@@ -2200,7 +2200,7 @@ trv_string[trv_string_size]= 0;
 return trv_string;
 }
 /*:293*//*396:*/
-#line 8163 "hint.w"
+#line 8173 "hint.w"
 
 static pointer leaks[1<<16]= {0};
 
@@ -2241,7 +2241,7 @@ fprintf(stderr,"ERROR:leak final: p=%d, s=%d\n",i,leaks[i]);
 #endif
 }
 /*:396*/
-#line 8255 "hint.w"
+#line 8265 "hint.w"
 
 /*1:*/
 #line 231 "hint.w"
@@ -2264,7 +2264,7 @@ if(k==unknown_kind&&INFO(a)==b100)
 #line 1461 "hint.w"
 
 HGETTAG(z);
-if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
+if(a!=z)tag_mismatch(a,z,node_pos,(uint32_t)(hpos-hstart-1));
 /*:83*/
 #line 239 "hint.w"
 
@@ -2279,7 +2279,7 @@ while(hpos<hend&&*hpos!=a)hpos++;
 #line 1461 "hint.w"
 
 HGETTAG(z);
-if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
+if(a!=z)tag_mismatch(a,z,node_pos,(uint32_t)(hpos-hstart-1));
 /*:83*/
 #line 247 "hint.w"
 
@@ -2309,7 +2309,7 @@ n,definition_name[k],max_fixed[k]+1,max_ref[k]);
 #line 1461 "hint.w"
 
 HGETTAG(z);
-if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
+if(a!=z)tag_mismatch(a,z,node_pos,(uint32_t)(hpos-hstart-1));
 /*:83*/
 #line 270 "hint.w"
 
@@ -2712,7 +2712,7 @@ else tag_expected(TAG(rule_kind,0),a,node_pos);
 #line 1461 "hint.w"
 
 HGETTAG(z);
-if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
+if(a!=z)tag_mismatch(a,z,node_pos,(uint32_t)(hpos-hstart-1));
 /*:83*/
 #line 1835 "hint.w"
 
@@ -2737,7 +2737,7 @@ HGET_BOX(INFO(a));
 #line 1461 "hint.w"
 
 HGETTAG(z);
-if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
+if(a!=z)tag_mismatch(a,z,node_pos,(uint32_t)(hpos-hstart-1));
 /*:83*/
 #line 2211 "hint.w"
 
@@ -2763,7 +2763,7 @@ HGET_BOX(INFO(a));
 #line 1461 "hint.w"
 
 HGETTAG(z);
-if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
+if(a!=z)tag_mismatch(a,z,node_pos,(uint32_t)(hpos-hstart-1));
 /*:83*/
 #line 2223 "hint.w"
 
@@ -2867,7 +2867,7 @@ node_pos+1,hpos-hstart-s-1,s,t);
 #line 1461 "hint.w"
 
 HGETTAG(z);
-if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
+if(a!=z)tag_mismatch(a,z,node_pos,(uint32_t)(hpos-hstart-1));
 /*:83*/
 #line 2958 "hint.w"
 
@@ -2881,7 +2881,7 @@ if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
 return par_ptr;
 }
 /*:176*/
-#line 8256 "hint.w"
+#line 8266 "hint.w"
 
 /*90:*/
 #line 1547 "hint.w"
@@ -3130,7 +3130,7 @@ void hteg_content(void)
 #line 1531 "hint.w"
 
 uint8_t a,z;
-z= HTEG8,DBGTAG(z,hpos);
+z= HTEG8;DBGTAG(z,hpos);
 /*:88*/
 #line 1558 "hint.w"
 
@@ -3139,7 +3139,7 @@ hteg_node(z);
 /*89:*/
 #line 1536 "hint.w"
 
-a= HTEG8,DBGTAG(a,hpos);
+a= HTEG8;DBGTAG(a,hpos);
 if(z!=a)tag_mismatch(a,z,hpos-hstart,node_pos);
 /*:89*/
 #line 1561 "hint.w"
@@ -3162,7 +3162,7 @@ pointer hteg_disc_node(void)
 #line 1531 "hint.w"
 
 uint8_t a,z;
-z= HTEG8,DBGTAG(z,hpos);
+z= HTEG8;DBGTAG(z,hpos);
 /*:88*/
 #line 2763 "hint.w"
 
@@ -3173,7 +3173,7 @@ HTEG_DISC(INFO(z));
 /*89:*/
 #line 1536 "hint.w"
 
-a= HTEG8,DBGTAG(a,hpos);
+a= HTEG8;DBGTAG(a,hpos);
 if(z!=a)tag_mismatch(a,z,hpos-hstart,node_pos);
 /*:89*/
 #line 2768 "hint.w"
@@ -3208,7 +3208,7 @@ p= hget_paragraph_initial(x,hstart+node_pos+offset);
 #line 1461 "hint.w"
 
 HGETTAG(z);
-if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
+if(a!=z)tag_mismatch(a,z,node_pos,(uint32_t)(hpos-hstart-1));
 /*:83*/
 #line 3240 "hint.w"
 
@@ -3246,7 +3246,7 @@ line_break_params= save_lbp;
 }
 
 /*:186*/
-#line 8257 "hint.w"
+#line 8267 "hint.w"
 
 
 
@@ -3581,7 +3581,7 @@ hget_node(a);
 #line 1461 "hint.w"
 
 HGETTAG(z);
-if(a!=z)tag_mismatch(a,z,node_pos,hpos-hstart-1);
+if(a!=z)tag_mismatch(a,z,node_pos,(uint32_t)(hpos-hstart-1));
 /*:83*/
 #line 1505 "hint.w"
 
@@ -4050,7 +4050,7 @@ p= link(p);
 }
 }
 /*:291*/
-#line 8260 "hint.w"
+#line 8270 "hint.w"
 
 
 /*:399*/

@@ -33,6 +33,16 @@ extern int hint_error(char*title,char*msg);
 
 #endif
 
+#ifdef __APPLE__
+extern void hint_log(const char*format,...);
+extern void hint_message(const char*format,...);
+extern int hint_error(const char*title,const char*msg);
+#define LOG(...) hint_log(__VA_ARGS__)
+#define MESSAGE(...) (snprintf(hint_error_string,MAX_HINT_ERROR-1,__VA_ARGS__),\
+                      hint_error("Warning",hint_error_string))
+#define ERROR_MESSAGE hint_error("ERROR",hint_error_string)
+#endif
+
 #ifndef LOG
 #define LOG(...) (fprintf(hlog,__VA_ARGS__),fflush(hlog))
 #endif

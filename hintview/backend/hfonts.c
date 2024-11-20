@@ -1,5 +1,5 @@
 /*403:*/
-#line 8333 "hint.w"
+#line 8343 "hint.w"
 
 #include "basetypes.h"
 #include "error.h"
@@ -26,7 +26,7 @@ static Gcache g_undefined= {0};
 
 static FT_Library ft_library= NULL;
 /*:376*/
-#line 8346 "hint.w"
+#line 8356 "hint.w"
 
 /*35:*/
 #line 697 "hint.w"
@@ -34,14 +34,14 @@ static FT_Library ft_library= NULL;
 extern uint16_t hglyph_section(uint8_t f);
 extern int32_t font_at_size(uint8_t f);
 /*:35*/
-#line 8347 "hint.w"
+#line 8357 "hint.w"
 
 /*342:*/
 #line 6548 "hint.w"
 
 extern void render_char(int x,int y,uint8_t f,uint32_t cc,int s);
 /*:342*/
-#line 8348 "hint.w"
+#line 8358 "hint.w"
 
 /*334:*/
 #line 6259 "hint.w"
@@ -134,7 +134,7 @@ else if(cc<G123_SIZE*G123_SIZE*G123_SIZE*G0_SIZE)return hnew_g3(&(f->g3),cc);
 else return&g_undefined;
 }
 /*:336*/
-#line 8349 "hint.w"
+#line 8359 "hint.w"
 
 
 /*380:*/
@@ -209,7 +209,7 @@ nativeSetFreeType(g);
 }
 
 /*:383*/
-#line 8351 "hint.w"
+#line 8361 "hint.w"
 
 
 /*368:*/
@@ -435,7 +435,7 @@ return 1;
 }
 
 /*:375*/
-#line 8353 "hint.w"
+#line 8363 "hint.w"
 
 
 /*330:*/
@@ -599,7 +599,7 @@ nativeGlyph(SP2PT(x),dx,SP2PT(y),dy,w,h,g,style);
 }
 
 /*:341*/
-#line 8355 "hint.w"
+#line 8365 "hint.w"
 
 
 /*:403*/

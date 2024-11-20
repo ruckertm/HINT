@@ -1,5 +1,5 @@
 /*401:*/
-#line 8302 "hint.w"
+#line 8312 "hint.w"
 
 #include "basetypes.h"
 #include "error.h"
@@ -17,7 +17,7 @@
 
 extern void render_char(int x,int y,uint8_t f,uint32_t cc,int s);
 /*:342*/
-#line 8314 "hint.w"
+#line 8324 "hint.w"
 
 
 /*255:*/
@@ -71,7 +71,7 @@ int cur_color= 0,cur_mode= 0,cur_style= 0,next_style= 0;
 static scaled cur_h,cur_v;
 static scaled rule_ht,rule_dp,rule_wd;
 /*:350*/
-#line 8316 "hint.w"
+#line 8326 "hint.w"
 
 /*256:*/
 #line 4508 "hint.w"
@@ -1723,6 +1723,6 @@ int hint_print(unsigned char*bits)
 {return nativePrint(bits);
 }
 /*:355*/
-#line 8317 "hint.w"
+#line 8327 "hint.w"
 
 /*:401*/

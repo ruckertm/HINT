@@ -1,5 +1,5 @@
 /*402:*/
-#line 8322 "hint.w"
+#line 8332 "hint.w"
 
 #ifndef _HFONTS_H
 #define _HFONTS_H
@@ -93,7 +93,7 @@ FTglyph tt;
 };
 typedef struct gcache_s Gcache;
 /*:338*/
-#line 8326 "hint.w"
+#line 8336 "hint.w"
 
 
 

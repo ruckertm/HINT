@@ -1,5 +1,5 @@
 /*398:*/
-#line 8221 "hint.w"
+#line 8231 "hint.w"
 
 #ifndef _HINT_H_
 #define _HINT_H_
@@ -165,12 +165,12 @@ extern int max_link;
 extern int hint_find_link(scaled x,scaled y,scaled precission);
 extern uint64_t hint_link_page(int i);
 /*:324*//*397:*/
-#line 8204 "hint.w"
+#line 8214 "hint.w"
 
 extern void leak_in(pointer p,int s);
 extern void leak_out(pointer p,int s);
 /*:397*/
-#line 8228 "hint.w"
+#line 8238 "hint.w"
 
 
 #endif

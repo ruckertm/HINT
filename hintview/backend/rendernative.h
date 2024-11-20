@@ -1,5 +1,5 @@
 /*404:*/
-#line 8363 "hint.w"
+#line 8373 "hint.w"
 
 #ifndef _RENDERNATIVE_H
 #define _RENDERNATIVE_H
@@ -53,7 +53,7 @@ extern void nativeSetFreeType(struct gcache_s*g);
 
 void nativeFreeGlyph(struct gcache_s*g);
 /*:364*/
-#line 8366 "hint.w"
+#line 8376 "hint.w"
 
 #endif
 /*:404*/

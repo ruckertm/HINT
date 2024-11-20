@@ -1,5 +1,5 @@
 /*400:*/
-#line 8265 "hint.w"
+#line 8275 "hint.w"
 
 #ifndef _HRENDER_H
 #define _HRENDER_H
@@ -8,7 +8,7 @@
 
 #define SP2PT(X) ((X)/(double)(1<<16))
 /*:340*/
-#line 8268 "hint.w"
+#line 8278 "hint.w"
 
 
 extern int cur_mode,cur_style;
