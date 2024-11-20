@@ -56,7 +56,7 @@ extern double scale, hgamma;
 extern uint64_t pos; /* position of current page */
 
 
-extern int hint_log(const char *fmt, ... );
+extern void hint_log(const char *fmt, ... );
 extern void hint_message(const char*format,...);
 extern int hint_error(const char*title,const char*msg);
 
