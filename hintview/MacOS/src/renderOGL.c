@@ -40,7 +40,13 @@
 #define STBI_ONLY_BMP
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#define GL_SILENCE_DEPRECATION 1
+#include <OpenGL/gl3.h>
+#include <OpenGL/glext.h>
+#include <OpenGL/OpenGL.h>
+#include <OpenGL/CGLContext.h>
 
+#define DEBUG 1
 
 #ifdef DEBUG
 
@@ -101,7 +107,7 @@ static const char FragmentShader[]=
   "uniform int IsImage;\n"
 
   "void main()\n"
-  "{ vec4 texColor = texture2D( theTexture, UV );\n"
+  "{ vec4 texColor = texture( theTexture, UV );\n"
     "if (IsImage==0) {\n"
       "color.a = pow(texColor.r*FGcolor.a,Gamma);\n"
       "color.r = FGcolor.r;\n"
@@ -459,9 +465,9 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
     else if (nrChannels == 3)
         format = GL_RGB;
     else if (nrChannels == 2)
-        format = GL_LUMINANCE_ALPHA;
+        format = GL_RG;
     else if (nrChannels == 1)
-        format = GL_LUMINANCE;
+        format = GL_RED;
 #else
     internal_format=GL_SRGB;
     if (nrChannels == 4)

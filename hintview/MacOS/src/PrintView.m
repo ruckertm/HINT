@@ -7,6 +7,7 @@
 
 #import "PrintView.h"
 #import "HintOpenGLView.h"
+#include "hint.h"
 #include "rendernative.h"
 #include "hrender.h"
 #import "main.h"

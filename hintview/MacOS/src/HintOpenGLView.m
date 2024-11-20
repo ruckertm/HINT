@@ -7,8 +7,8 @@
 #define DEBUG
 #define GL_SILENCE_DEPRECATION 1
 #include <OpenGL/gl3.h>
-#include "rendernative.h"
 #include "hint.h"
+#include "rendernative.h"
 #include "hrender.h"
 #include "main.h"
 
