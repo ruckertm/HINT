@@ -1,0 +1,69 @@
+\let\MFmanual=\!
+
+\input manmac.tex
+
+\pagewidth=\hsize \pageheight=\vsize \def\onepageout#1{\shipout\vbox{ % here we define one page of output
+    \offinterlineskip % butt the boxes together
+%    \vbox to 3pc{ % this part goes on top of the 44pc pages
+%      \iftitle % the next is used for title pages
+%        \global\titlefalse % reset the titlepage switch
+%        \setcornerrules % for camera alignment
+%      \else\ifodd\pageno \rightheadline\else\leftheadline\fi\fi
+%      \vfill} % this completes the \vbox to 3pc
+    \vbox to \pageheight{
+      \ifvoid\margin\else % marginal info is present
+        \rlap{\kern31pc\vbox to\z@{\kern4pt\box\margin \vss}}\fi
+      #1 % now insert the main information
+      \ifvoid\footins\else % footnote info is present
+        \vskip\skip\footins \kern-3pt
+        \hrule height\ruleht width\pagewidth \kern-\ruleht \kern3pt
+        \unvbox\footins\fi
+      \boxmaxdepth=\maxdepth
+      } % this completes the \vbox to \pageheight
+    }
+  \advancepageno}
+
+\proofmodefalse
+
+\ifproofmode\message{Proof mode is on!}\fi
+\titlepage
+\def\rhead{Preface}
+\vbox to 8pc{
+\rightline{\titlefont Preface}\vss}
+%{\topskip 9pc % this makes equal sinkage throughout the Preface
+\vskip-\parskip
+\tenpoint
+\noindent\hang\hangafter-2
+\smash{\lower12pt\hbox to 0pt{\hskip-\hangindent\cmman G\hfill}}\hskip-16pt
+{\sc ENERATION} {\sc OF} {\sc LETTERFORMS} \strut by mathematical means
+was first tried in the fifteenth century; it became popular in the
+sixteenth and seventeenth centuries; and it was abandoned (for good
+reasons) during the eighteenth century. Perhaps the twentieth century
+will turn out to be the right time for this idea to make a comeback,
+now that mathematics has advanced and computers are able to
+do the calculations.
+
+%} % end of the special \topskip
+
+Modern printing equipment based on raster lines---in which metal ``type''
+has been replaced by purely combinatorial patterns of zeroes and ones
+that specify the desired position of ink in a discrete way---makes
+mathematics and computer science increasingly relevant to printing.
+We now have the ability to give a completely precise definition of letter
+shapes that will produce essentially equivalent results on all raster-based
+machines. Moreover, the shapes can be defined in terms of variable
+parameters; computers can ``draw'' new fonts of characters
+in seconds, making it possible for designers to perform valuable experiments
+that were previously unthinkable.
+
+\MF\ is a system for the design of alphabets suited to raster-based
+devices that print or display text. The characters that you are reading
+were all designed with \MF\!, in a completely precise way; and they
+were developed rather hastily by the author of the system, who is a rank
+amateur at such things. It seems clear that further work with \MF\ has
+the potential of producing typefaces of real ^{beauty}. This manual has
+been written for people who would like to help advance the art of
+mathematical type design.
+
+\vfil
+\end

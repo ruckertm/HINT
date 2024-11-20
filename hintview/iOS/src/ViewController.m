@@ -36,9 +36,9 @@
 #import "AppDelegate.h"
 #import "UniformTypeIdentifiers/UniformTypeIdentifiers.h"
 #include "error.h"
-#include "rendernative.h"
 #include "hint.h"
 #include "hrender.h"
+#include "rendernative.h"
 #include "main.h"
 
 @interface ViewController ()
@@ -136,7 +136,7 @@ static void setFileFPos(void)
 
 static void setFileURL(NSURL *url)
 { NSUserDefaults *pref = [NSUserDefaults standardUserDefaults];
-    NSError *e;
+  //  NSError *e;
   NSData *bookmark = [url
                       bookmarkDataWithOptions:  0
                       includingResourceValuesForKeys:nil

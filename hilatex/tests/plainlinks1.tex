@@ -12,20 +12,42 @@
 
 %% Text labels
 
-\def\txtlink#1#2{% #1 is a number
-\ifhint\HINTstartlink goto name {#1} \hbox{\rm #2}\HINTendlink
-\else\hbox{\rm #1}\fi
+\def\txtlink#1#2{% #1 is a label
+\ifhint
+\HINTstartlink goto name {#1} \hbox{\rm #2} \HINTendlink\kern 5pt \vrule width 5pt
+\else
+\pdfstartlink goto name {#1} \hbox{\rm #2}\pdfendlink
+\fi
 }
 
 \def\txttarget#1{%
 \ifhint\HINTdest name {#1}\relax
-\else\relax
+\else
+\pdfdest name {#1} fit
 \fi
 }
 
 Goto number \txtlink{one}{1}.
 Goto number \txtlink{two}{2}.
 Goto number \txtlink{three}{3}.
+\vbox to 90pt {
+\hrule
+\vfill
+\hbox{
+\ifhint\HINTstartlink\else\pdfstartlink\fi goto name {two}}
+\vfill
+This paragraph goes to label Two.
+\vfill
+\hrule
+\vfill
+More Text
+\hbox{final box \ifhint\HINTendlink\else\pdfendlink\fi}
+\vfill
+\hrule
+\vfill
+End
+}
+
 
 \vfill\break
 \txttarget{one}One.
@@ -35,6 +57,7 @@ Goto number \txtlink{three}{3}.
 
 \vfill\break
 \txttarget{three}Three.
+
 
 \bye
 

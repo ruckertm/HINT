@@ -51,6 +51,13 @@ all: hintview
 %.c: %.w
 	echo running ctangle disabled
 
+-include .depend
+
+.depend: main.c  renderOGL.c 
+	$(CC) -I../backend -MM *.c  > $@ || true
+
+
+
 main.o: main.c
 	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
 
@@ -69,7 +76,9 @@ hfonts.o: ../backend/hfonts.c
 %.o: ../backend/%.c 
 	$(CC) $(CFLAGS) -o $@ -c $<
 
+# copy the .w files for gdb
 hintview: $(OBJ)
+	cp ../backend/*.w .
 	$(CC) $(LDFLAGS) $(OBJ) $(LIBS) $(GTK_LIBS) -o $@ 
 
 SRC= $(OBJ:.o=.c) $(HFILES) main.h stb_image.h Makefile CMakeLists.txt
