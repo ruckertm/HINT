@@ -39,9 +39,116 @@
 %\makefigindex
 \titletrue
 
+
+
 \null
 
-\input titlepage.tex
+\font\largetitlefont=cmssbx10 scaled\magstep4
+\font\Largetitlefont=cmssbx10 at 40pt
+\font\hugetitlefont=cmssbx10 at 48pt
+\font\smalltitlefontit=cmbxti10 scaled\magstep3
+\font\smalltitlefont=cmssbx10 scaled\magstep3
+
+%halftitle
+\def\raggedleft{\leftskip=0pt plus 5em\parfillskip=0pt
+\spaceskip=.3333em \xspaceskip=0.5em \emergencystretch=1em\relax
+\hyphenpenalty=1000\exhyphenpenalty=1000\pretolerance=10000\linepenalty=5000
+}
+\hbox{}
+\vskip 0pt plus 1fill
+{ \baselineskip=60pt
+  \hugetitlefont\hfill HINT\par
+  \Largetitlefont\raggedleft The Viewer\par
+}
+\vskip 0pt plus 2fill
+\eject
+% verso of half title
+\titletrue
+\null
+\vfill
+\eject
+
+% title
+\titletrue
+\hbox{}
+\vskip 1in
+{
+  \baselineskip=1cm\parindent=0pt
+  \leftline{\largetitlefont\raggedright HINT}
+  \vskip 0.5in
+  \leftline{\smalltitlefont The Viewer} 
+  \vskip 1.5in
+  \rightline{\it F\"ur Beatriz \hskip 2cm}
+  \vfill
+  \raggedright\baselineskip=12pt
+  {\bf MARTIN RUCKERT} \ {\it Munich University of Applied Sciences}\par
+  \bigskip
+  \leftline{First edition}
+  \bigskip
+%  \leftline{\bf Eigendruck im Selbstverlag}
+%  \bigskip
+}
+\eject
+
+% verso of title
+% copyright page (ii)
+\titletrue
+\begingroup
+\figrm
+\parindent=0pt
+%\null
+{\raggedright\advance\rightskip 3.5pc
+The author has taken care in the preparation of this book,
+but makes no expressed or implied warranty of any kind and assumes no
+responsibility for errors or omissions. No liability is assumed for
+incidental or consequential damages in connection with or arising out
+of the use of the information or programs contained herein.
+
+\bigskip
+{\figtt\obeylines\obeyspaces\baselineskip=11pt
+Ruckert, Martin.
+  HINT
+  Includes index.
+  ISBN 1-548-58234-4
+}
+\bigskip
+
+{\raggedright\advance\rightskip 3.5pc
+\def\:{\discretionary{}{}{}}
+Internet page  {\tt http:\://hint.\:userweb.\:mwn.\:de/\:hint/\:format.html}
+may contain current information about this book, downloadable software,
+and news. 
+
+\vfill
+Copyright $\copyright$ 2019 by Martin Ruckert
+\smallskip
+All rights reserved.
+Printed using CreateSpace.
+This publication is protected by copyright, and permission must be
+obtained prior to any prohibited reproduction, storage in
+a~retrieval system, or transmission in any form or by any means, electronic,
+mechanical, photocopying, recording, or likewise. 
+To obtain permission to use material from this work, please submit a written 
+request to Martin Ruckert, 
+Hochschule M\"unchen, 
+Fakult\"at f\"ur Informatik und Mathematik,
+Lothstrasse 64, 
+80335 M\"unchen, 
+Germany.
+\medskip
+{\tt ruckert\:@@cs.hm.edu}
+\medskip
+ISBN-10: 0-000-00000-0
+
+ISBN-13: 000-0000000000
+\medskip
+First printing, August 2019\par
+\medskip
+Last commit: \input lastcommit.tex
+\par
+}
+}
+\endgroup
 
 
 \frontmatter
@@ -62,28 +169,32 @@ August 20, 2019 \hfill Martin Ruckert}
 
 \section{Introduction}\label{intro}
 This program has three main parts:
-The first part reads a \HINT\ file\cite{MR:format} and reconstructs \TeX's contribution list\cite{Knuth:tex}.
-The routines found in this part translate data structures found in a \HINT\ file 
-into \TeX's internal data structures. 
-Some data structures, notably paragraph nodes, will require substantial
-processing before moving the results to the contribution list; for example, paragraph nodes
-are transformed into a sequence of lines by using \TeX's line breaking routine.
+The first part reads a \HINT\ file\cite{MR:format} and reconstructs
+\TeX's contribution list\cite{Knuth:tex}.  The routines found in this
+part translate data structures found in a \HINT\ file into \TeX's
+internal data structures.  Some data structures, notably paragraph
+nodes, will require substantial processing before moving the results
+to the contribution list; for example, paragraph nodes are transformed
+into a sequence of lines by using \TeX's line breaking routine.
 
-The line breaking routine is an example of code that belongs to the second part of this program:
-routines that are taken from \TeX\cite{Knuth:tex} with little or no modification.
-These routines are extracted using a change file (see~\cite{Knuth:cweb}) 
-from a translation of \TeX's sources to {\tt cweb}\cite{MR:webtocweb}\cite{MR:web2w}.
-For debugging purposes, even \TeX's output routines can be used to produce 
-normal {\tt dvi} files as output. In general, however, the output is generated
-by the routines of part three.
+The line breaking routine is an example of code that belongs to the
+second part of this program: routines that are taken from
+\TeX\cite{Knuth:tex} with little or no modification.  These routines
+are extracted using a change file (see~\cite{Knuth:cweb}) from a
+translation of \TeX's sources to {\tt
+cweb}\cite{MR:webtocweb}\cite{MR:web2w}.  For debugging purposes, even
+\TeX's output routines can be used to produce normal {\tt dvi} files
+as output. In general, however, the output is generated by the
+routines of part three.
 
-The third and final part of this program consists of routines that display ``the page'',
-a data structure produced by \TeX's page builder (or variations of it) on a computer screen.
-Further routines  let the user manipulate what is shown on the screen.
-All routines in this third part of the program are highly system dependent. 
-They need to be rewritten for different operating systems 
-and different API's of the graphics subsystem. The present implementation
-is based on the Windows\raise.5ex\hbox{\registered} operating system and its 32 Bit API\cite{ECMA-234}.
+The third and final part of this program consists of routines that
+display ``the page'', a data structure produced by \TeX's page builder
+(or variations of it), on a computer screen. The core of part three is
+written in OpenGL and can be used with slight modifications on a
+variety of operating systems.
+Further routines let the user manipulate what is shown on the screen;
+These routines are highly system dependent. They need to
+be rewritten for different operating systems.
 
 
 \section{Reading Definitions}
@@ -109,8 +220,8 @@ In parameter lists only integers, dimensions, extended dimensions, and
 glues are allowed.  In font descriptions, we have penalties, kerns,
 ligatures, hyphens, glue, math, rule, and image nodes.  In the
 definition section, pretty much everything is allowed, we just test if
-the parameter number is less or equal to |max_ref| and set |max_ref|
-accordingly in |hget_max_definitions|.
+the parameter number is less or equal to |max_ref| which is set in
+|hget_max_definitions|.
 
 
 \subsection{Definitions}
@@ -123,8 +234,19 @@ void hget_def_node(void)
   int n;
   @<read the start byte |a|@>@;
   k=KIND(a);
+  if (k==unknown_kind && INFO(a)==b100)
+  {  hget_unknown_def();
+     @<read and check the end byte |z|@>@;
+     return;
+  }
   if (k==label_kind && (INFO(a)&b001)) HGET16(n);
-  else n=HGET8; 
+  else n=HGET8;
+  if (max_fixed[k]>max_default[k]) 
+  { MESSAGE("Definitions for kind %s not supported\n", definition_name[k]);
+    while (hpos<hend && *hpos!=a) hpos++;
+    @<read and check the end byte |z|@>@;
+    return;
+  }
   if (k!=range_kind) REF_RNG(k,n);
   DBG(DBGTAGS,"Defining %s %d\n", definition_name[KIND(a)],n);
   switch(KIND(a))
@@ -139,13 +261,12 @@ void hget_def_node(void)
     case range_kind: hget_range_def(a,n); break;
     case page_kind: hget_page_def(a,n); break;
     case label_kind: hget_outline_or_label_def(INFO(a),n); break;
+    case color_kind: hget_color_def(INFO(a),n); break;
     default:  pointer_def[KIND(a)][n]=hget_definition(a); break;
   }
-  if (max_fixed[k]>max_default[k]) 
-    QUIT("Definitions for kind %s not supported", definition_name[k]);
   if(n>max_ref[k] || n <= max_fixed[k]) 
     QUIT("Definition %d for %s out of range [%d - %d]",@|
-        n, definition_name[k],max_fixed[k]+1,max_ref[k]);
+         n, definition_name[k],max_fixed[k]+1,max_ref[k]);
   @<read and check the end byte |z|@>@;
 }
 
@@ -174,6 +295,7 @@ void hset_default_definitions(void)
     baseline_def[i].ls=hset_glue(&(baseline_defaults[i].ls));
     baseline_def[i].lsl=baseline_defaults[i].lsl;
   }
+  hset_default_colors();
 }
 
 void free_definitions(void)
@@ -212,8 +334,12 @@ static ParamDef *hget_param_list(uint8_t a);
 static void hget_range_def(uint8_t a, uint8_t pg);
 static void hget_page_def(uint8_t a, uint8_t n);
 static void hget_outline_or_label_def(Info i, int n);
-static void hget_font_metrics();
+static void hget_unknown_def(void);
+static void hget_font_metrics(void);
+static void hget_color_def(uint8_t a, int n);
 static pointer hget_definition(uint8_t a);
+static int hget_label_ref(void);
+static int hget_link_color(void);
 @
 
 
@@ -761,6 +887,7 @@ RangeDef *range_def;
 @
 @<allocate definitions@>=
 ALLOCATE(range_def, max_ref[range_kind]+1, RangeDef);
+max_range=-1;
 @
 
 @<free definitions@>=
@@ -769,22 +896,21 @@ free(range_def); range_def=NULL;
 
 @<\HINT\ auxiliar functions@>=
 static void hget_range_def(uint8_t a, uint8_t pg)
-{ static uint8_t n=0;
-  uint32_t f, t; 
+{ uint32_t f, t;
+  max_range++;
   REF_RNG(page_kind,pg);
-  REF_RNG(range_kind,n);
+  REF_RNG(range_kind,max_range);
   if (INFO(a)&b100) @+
   { @+ if (INFO(a)&b001) HGET32(f); @+else HGET16(f); @+}
   else f=0;
   if (INFO(a)&b010) @+
   { @+if (INFO(a)&b001) HGET32(t); @+else HGET16(t); @+}
   else t=HINT_NO_POS;
-  range_def[n].pg=pg;
-  range_def[n].f=f;
-  range_def[n].t=t;
+  range_def[max_range].pg=pg;
+  range_def[max_range].f=f;
+  range_def[max_range].t=t;
   DBG(DBGRANGE,"Range *%d from 0x%x\n",pg,f);
   DBG(DBGRANGE,"Range *%d to 0x%x\n",pg,t);
-  n++;
 }
 #if 0
 /* currently not used */
@@ -1101,13 +1227,124 @@ else
 #if 1   
    pos=((uint64_t)labels[n].pos<<32)+@|(labels[n].pos-labels[n].pos0);
 #else
-   pos=((uint64_t)labels[n].pos0<<32); /* offsets still dont work in all cases and need fixing */
+   pos=((uint64_t)labels[n].pos0<<32);
+   /* offsets still dont work in all cases and need fixing */
 #endif
 }
 @
 
 
 The function |hlist_to_string| is defined in section~\secref{listtraversal}.
+
+\subsection{Colors}
+To store colors, we use the same data type that is used for the
+|color_defaults| and give it the name |ColorSet|.
+
+@<\HINT\ |extern|@>=
+typedef uint32_t ColorSet[12];
+extern ColorSet *color_def;
+extern ColorSet color_defaults[];
+@
+
+
+
+We define a dynamic array for color sets based on |max_ref[color_kind]|.
+
+@<\HINT\ variables@>=
+ColorSet *color_def=NULL;
+static bool first_color=true;
+@
+
+@<allocate definitions@>=
+if (color_def!=NULL) { free(color_def); color_def=NULL; }
+ALLOCATE(color_def,max_ref[color_kind]+1, ColorSet);
+first_color=true;
+@
+
+@<free definitions@>=
+free(color_def); color_def=NULL;
+@
+
+Now we can copy the color defaults to |color_def|.
+
+@<\HINT\ auxiliar functions@>=
+void hset_default_colors(void)
+{ int i;
+  for (i=0; i<=MAX_COLOR_DEFAULT; i++)
+    memcpy(color_def+i,color_defaults+i,sizeof(ColorSet));
+}
+@
+
+From now on the colors in |color_def[0]| serve as default colors.
+Whenever a page is rendered, the rendering starts with the colors from
+|color_def[0]| and the background of the entire page is painted
+with the  background color for normal text in |color_def[0]|.
+
+All color definitions, including  |color_def[0]|, can be changed
+by the definitions in  the \HINT\ file. If you change |color_def[0]|
+it must come first.
+
+@<get functions@>=
+static void hget_color_def(uint8_t a, int i)
+{@+int j,k;
+  if (INFO(a)!=b000)
+    QUIT("Color Definition %d with Info value %d!=000",i,INFO(a));
+  k=HGET8;
+  if (k!=6) 
+    QUIT("Definition %d of color set needs 6 color pairs %d given\n",i,k);
+  if (i==0 && !first_color)
+    QUIT("Definition of color 0 must come first");
+  first_color=false;  
+  for (j=0;j<6*2;j++)
+    HGET32(color_def[i][j]);
+}
+@
+
+Because glyphs, rules, and images must be rendered on top of the
+background, we have to consider the order in which we render things.
+If we render glyphs first and then render the background as a
+rectangle with an opaque color over it, the glyphes will just
+disappear under the background.  There are several ways to approach
+this problem.  Let us discuss the alternatives for the case of single
+colored word text in an horizontal box. The other cases are similar.
+
+Any color change in an horizontal list is restricted to that list.  It
+is caused by a |color_node|, a |link_node|, an |end_color_node|, or an
+|end_link_node|. We exemplify the effects of such a color change
+considering a |color_node|.
+
+When the renderer encounters the |color node| it knows the height and
+depth of the enclosing box, which is equal to the height and depth of
+the background change, but the width of the background change, which
+is equal to the distance between the first |color_node| and the next
+|color_node| is still unknown.  It is possible to traverse the node
+list up to the next |color_node| and compute its position using the
+same method that the renderer uses to compute all positions. Computing
+the width of glue nodes requires the use of the |glue_ratio| of the
+enclosing box; all other width-calculations are quite simple. While
+computing the distance is not difficult, it is an unwanted overhead,
+and other more performant alternatives exist.
+
+For example, it is possible to cache the information about which
+glyphs and rules to write at which locations in an array until the
+next |color_node| is found. Then we can first render the background
+and after that pass the whole array in a single write operation to the
+graphic card. Writing a large chunk of information to the graphic card
+is usually faster than writing many small chunks of data.
+
+To summarize:
+The first method requires traversing the node list twice.  The code is
+lengthy but it is just a simplified variation of the normal rendering
+procedure.  The runtime overhead is small but not zero.  The second
+method would even improve the performance, but requires a more complex
+code in the native rendering engine.  Unless one is willing to
+implement the changes in the native renderer because of its better
+performance, the first method is probably the better alternative.
+
+% Using the depth buffer on the graphics card does not work,
+% because it would descard entire fragments and not just pixels.
+% Using the stencil buffer will not work because there is no
+% blending of forground and background alongh the outline of the glyph. 
 
 \subsection{References}
 There are only a few functions that still need to be defined.
@@ -1127,6 +1364,19 @@ static pointer hget_image_ref(uint16_t n)
   return copy_node_list(pointer_def[image_kind][n]);
 }
 
+static pointer hget_color_ref(uint8_t n) 
+{@+pointer p;
+  p=get_node(color_node_size);
+  type(p)=whatsit_node;
+  if (n==0xFF) subtype(p)=end_color_node;
+  else
+  { subtype(p)=color_node; REF_RNG(color_kind,n);
+  }
+  color_ref(p)=n;
+  return p;
+}
+
+
 static pointer hget_hyphen_ref(uint8_t n)
 { @+REF_RNG(disc_kind,n);
   return copy_node_list(pointer_def[disc_kind][n]);
@@ -1136,11 +1386,39 @@ static pointer hget_leaders_ref(uint8_t n)
 { @+REF_RNG(leaders_kind,n);
   return copy_node_list(pointer_def[leaders_kind][n]);
 }
-
-
-
-
 @
+
+\subsection{Unknown Extensions}
+@<get functions@>=
+static void hget_unknown_def(void)
+{ Tag t; signed char i;
+  t=HGET8;
+  i=HGET8;
+  if (i==0)
+    QUIT("Zero not allowed for unknown node size at 0x%x\n",(uint32_t)(hpos-hstart-2));
+  if (hnode_size[t]==0)
+  { hnode_size[t]=i;
+    DBG(DBGTAGS,"Defining node size %d,%d for tag 0x%x (%s)\n",NODE_HEAD(i),NODE_TAIL(i),t,content_name[KIND(t)]);
+  }
+}
+@
+
+The |hget_unknown| funktion tries to process a unknown node with the help of
+an entry in the |hnode_size| array. The definition section can be used to provide
+this extra information. If successful the function returns 1 else 0.
+
+@<get functions@>=
+int hget_unknown(Tag a)
+{ DBG(DBGTAGS,"Trying unknown tag 0x%x at 0x%x\n",a,(uint32_t)(hpos-hstart-1));
+  hpos--;
+  hff_hpos();
+  hpos--;
+  return 1;
+}
+@
+
+
+
 
 \section{Reading Content Nodes}
 The following section explains how to read the content section and convert
@@ -1182,7 +1460,7 @@ HGETTAG(a);
 
 @<read and check the end byte |z|@>=
 HGETTAG(z);@+
-if (a!=z) tag_mismatch(a,z,node_pos, hpos-hstart-1);
+if (a!=z) tag_mismatch(a,z,node_pos, (uint32_t)(hpos-hstart-1));
 @
 
 The identifier |node_pos| is defined as a macro; it denotes a field on
@@ -1214,7 +1492,9 @@ static void hget_node(uint8_t a)
   {@+ 
     @<cases to get content@>@;@t\1@>@/
     default:
-      TAGERR(a);@t\2@>@/
+      if (!hget_unknown(a))
+        TAGERR(a);
+      break;@t\2@>@/
   }
 }
 
@@ -1250,11 +1530,11 @@ The next macros read and check start and end byte.
 
 @<read the end byte |z|@>=
   uint8_t a,z; /* the start and the end byte*/
-  z=HTEG8,DBGTAG(z,hpos);
+  z=HTEG8;DBGTAG(z,hpos);
 @
 
 @<read and check the start byte |a|@>=
-  a=HTEG8,DBGTAG(a,hpos);
+  a=HTEG8;DBGTAG(a,hpos);
   if (z!=a) tag_mismatch(a,z,hpos-hstart,node_pos);
 @
 
@@ -2689,7 +2969,9 @@ Otherwise we remove unwanted space from the beginning of the list.
 @<\HINT\ auxiliar functions@>=
 pointer hget_paragraph_final(scaled x, uint8_t *from)
 {@+uint8_t *to;
+  int par_color,par_label_ref;
   @<prepare for reading the paragraph list@>@;
+  @<check for a color change in the initial section of the paragraph@>@;
   hpos=from; to=list_end;
   @<read the paragraph list@>@;
   if (link(head)!=null && !is_char_node(link(head)))
@@ -2699,7 +2981,54 @@ pointer hget_paragraph_final(scaled x, uint8_t *from)
       hprune_unwanted_nodes(); 
   }
   @<finalize reading the  the paragraph list@>@;
+  @<add a color change node if necessary@>@;
   return par_ptr;
+}
+@
+
+In the initial paragraph there might be a color change, which might affect
+the color in the remaining paragraph. So we scan for it and set |par_color|
+acoordingly.
+
+@<check for a color change in the initial section of the paragraph@>=
+par_color=-1; par_label_ref=-1;
+while (hpos<from)
+{ if (hpos[0]==TAG(color_kind,b000)) par_color=hpos[1];
+  else if (KIND(hpos[0])==link_kind)
+  { if (INFO(hpos[0]) & b010)
+    { par_label_ref=hget_label_ref();par_color=hget_link_color(); }
+    else
+    { par_color=hget_link_color();
+      par_label_ref=-1;
+    }
+  }
+  if (par_color==0xFF) par_color=-1;
+  hff_hpos();
+}
+@
+
+If a color change was found we add a copy to the begin of the remaining
+paragraph.
+
+@<add a color change node if necessary@>=
+if (par_ptr!=null)
+{@+if (par_label_ref>=0)
+  {@+pointer p;
+    p=get_node(link_node_size);  type(p)=whatsit_node;
+    subtype(p)=start_link_node; label_ref(as_label(p))=par_label_ref;
+    link(p)=par_ptr;
+    if (par_color>=0) color_ref(as_color(p))=par_color;
+    else color_ref(as_color(p))=0xFF; /* this should not happen */
+    par_ptr=p;
+  }
+  else if (par_color>=0)
+  {@+pointer p;
+    p=get_node(color_node_size);
+    type(p)=whatsit_node; subtype(p)=color_node;
+    color_ref(p)=par_color;
+    link(p)=par_ptr;
+    par_ptr=p;
+  }
 }
 @
 
@@ -3194,15 +3523,52 @@ case TAG(image_kind,b110): @+ HTEG_IMAGE(b110);@+break;
 case TAG(image_kind,b111): @+ HTEG_IMAGE(b111);@+break;
 @
 
+\subsection{Colors}
+@<cases to get content@>=
+case TAG(color_kind,b000): @+ tail_append(hget_color_ref(HGET8)); @+break;
+@
+@<cases to teg content@>=
+case TAG(color_kind,b000): @+ tail_append(hget_color_ref(HTEG8)); @+break;
+@
+
 \subsection{Links}
+
+Here are the cases for link nodes:
+
+@<cases to get content@>=
+case TAG(link_kind,b000): @+ HGET_LINK(b000); break;
+case TAG(link_kind,b001): @+ HGET_LINK(b001); break;
+case TAG(link_kind,b010): @+ HGET_LINK(b010); break;
+case TAG(link_kind,b011): @+ HGET_LINK(b011); break;
+case TAG(link_kind,b100): @+ HGET_LINK(b100); break;
+case TAG(link_kind,b101): @+ HGET_LINK(b101); break;
+case TAG(link_kind,b110): @+ HGET_LINK(b110); break;
+case TAG(link_kind,b111): @+ HGET_LINK(b111); break;
+@
+@<cases to teg content@>=
+case TAG(link_kind,b000): @+ HTEG_LINK(b000); break;
+case TAG(link_kind,b001): @+ HTEG_LINK(b001); break;
+case TAG(link_kind,b010): @+ HTEG_LINK(b010); break;
+case TAG(link_kind,b011): @+ HTEG_LINK(b011); break;
+case TAG(link_kind,b100): @+ HTEG_LINK(b100); break;
+case TAG(link_kind,b101): @+ HTEG_LINK(b101); break;
+case TAG(link_kind,b110): @+ HTEG_LINK(b110); break;
+case TAG(link_kind,b111): @+ HTEG_LINK(b111); break;
+@
+
+We use the following macros. Note that |label_has_name(p)| is
+set to zero, because the label names are not stored as token lists.
+
 @<GET macros@>=
 #define @[HGET_LINK(I)@] @/\
 { @+pointer p;\
   p=get_node(link_node_size);  type(p)=whatsit_node;\
   if (I&b010) subtype(p)=start_link_node; else subtype(p)=end_link_node;\
-  if (I&b001) HGET16(label_ref(p));@+ else label_ref(p)=HGET8; \
-  RNG("label",label_ref(p),0,max_ref[label_kind]);\
-  label_has_name(p)=0;\
+  if (I&b001) HGET16(label_ref(as_label(p)));@+ else label_ref(as_label(p))=HGET8; \
+  if (I&b100) color_ref(as_color(p))=HGET8; else color_ref(as_color(p))=(I&b010)?1:0xFF;\
+  RNG("label",label_ref(as_label(p)),0,max_ref[label_kind]);\
+  if (color_ref(as_color(p))!=0xFF)\
+    RNG("label color",color_ref(as_color(p)),0,max_ref[color_kind]);\
   tail_append(p);}
 @
 
@@ -3211,23 +3577,34 @@ case TAG(image_kind,b111): @+ HTEG_IMAGE(b111);@+break;
 { @+pointer p;\
   p=get_node(link_node_size);  type(p)=whatsit_node;\
   if (I&b010) subtype(p)=start_link_node; else subtype(p)=end_link_node;\
-  if (I&b001) HTEG16(label_ref(p));@+ else label_ref(p)=HTEG8; \
-  RNG("label",label_ref(p),0,max_ref[label_kind]);\
-  label_has_name(p)=0;\
+  if (I&b100) color_ref(as_color(p))=HTEG8; else color_ref(as_color(p))=(I&b010)?1:0xFF;\
+  if (I&b001) HTEG16(label_ref(as_label(p)));@+ else label_ref(as_label(p))=HTEG8; \
+  RNG("label",label_ref(as_label(p)),0,max_ref[label_kind]);\
+  if (color_ref(as_color(p))!=0xFF)\
+    RNG("label color",color_ref(as_color(p)),0,max_ref[color_kind]);\
   tail_append(p);}
 @
 
-@<cases to get content@>=
-case TAG(link_kind,b000): @+ HGET_LINK(b000); break;
-case TAG(link_kind,b001): @+ HGET_LINK(b001); break;
-case TAG(link_kind,b010): @+ HGET_LINK(b010); break;
-case TAG(link_kind,b011): @+ HGET_LINK(b011); break;
-@
-@<cases to teg content@>=
-case TAG(link_kind,b000): @+ HTEG_LINK(b000); break;
-case TAG(link_kind,b001): @+ HTEG_LINK(b001); break;
-case TAG(link_kind,b010): @+ HTEG_LINK(b010); break;
-case TAG(link_kind,b011): @+ HTEG_LINK(b011); break;
+When links are lengthy texts, they may be broken accross line and
+page boundaries.
+In this case, the node starting the link needs to be replicated on
+the start of the new line or page.
+For this case we have the following function
+reading the reference to the label from a link node at |hpos|.
+
+@<\HINT\ auxiliar functions@>=
+static int hget_label_ref(void)
+{ if (INFO(hpos[0])&b001) return (hpos[1]<<8)+hpos[2];
+  else return hpos[1];
+}
+static int hget_link_color(void)
+{ if (INFO(hpos[0]&b100))
+  { if (INFO(hpos[0]&b001)) return hpos[3];
+    else return hpos[2];
+  }
+  else
+  { if (INFO(hpos[0]&b010)) return 1; else return 0xFF; }
+}
 @
 
 \section{Routines from \TeX}
@@ -3827,9 +4204,11 @@ This value is used to indicate that a variable contains no valid location.
 @
 
 @<\HINT\ auxiliar functions@>=
-
 uint64_t hlocation(pointer p)
-{ @+return PAGE_LOC(map[p],map[p+1]);@+
+{ @+ uint64_t h=PAGE_LOC(map[p],map[p+1]);
+   while (h==0 && link(p)!=null) /* search the list if necessary */
+   { p=link(p); h=PAGE_LOC(map[p],map[p+1]); }   
+   return h;
 }
 @  
 
@@ -4132,6 +4511,7 @@ void hint_resize(int px_h, int px_v, double x_dpi, double y_dpi)
 #if 0
   /* this optimization causes the android viewer to display a blank page
      after opening a new file. To be investigated!
+     using local static variables is discouraged.
   */
   static int old_px_h=0, old_px_v=0;
   static double old_xdpi=0.0, old_ydpi=0.0;
@@ -4284,7 +4664,7 @@ until the margin becomes zero for a page that is merely 1 inch wide.
 
 
 @<\HINT\ auxiliar functions@>=
- static void hset_margins(void)
+static void hset_margins(void)
 {  if (cur_page==&(page_def[0])) {
    offset_h=page_h/8- 0x48000;
    if (offset_h<0) offset_h=0;
@@ -4443,7 +4823,7 @@ return (double)LOC_POS(page_loc[cur_loc])@|/(double)(hend-hstart);
  }
 @
 
-To implement |hint_set_fpos| we use |hff_pos| to ``fast forward''
+To implement |hint_set_fpos| we use |hff_hpos| to ``fast forward''
 to the desired position. If this position is inside a paragraph,
 we compute the closest offset that is a possible line break.
 
@@ -5084,18 +5464,15 @@ matching strings on the current page. The marking itself is the
 responsibility of the graphical user interface.  The backend just needs
 to indicate which glyphs must be marked.  For this
 purpose, every call to |nativeGlyph| passes a style parameter.
-For searching, two style bits are defined: |MARK_BIT| and |FOCUS_BIT|.
-@<render definitions@>=
-#define MARK_BIT 0x1
-#define FOCUS_BIT 0x2
-@
+For searching, two styles are defined: |cur_style==1| for marked text
+and |cur_style==2| for focus text.
 
 Calling the function |hint_set_mark(char *m, int s)| will cause the
-|MARK_BIT| to be set in the style parameter for all glyphs on the
+style to be one for all glyphs on the
 current page that belong to a character string matching |m| of length
-|s|.  If |m==NULL|, the |MARK_BIT| will be zero for all glyphs.  The
+|s|.  If |m==NULL|, the style will be zero for all glyphs.  The
 ``focus'' can be associated with one occurence of the marked string;
-its glyphs will have the |FOCUS_BIT| set.
+its glyphs will use two as a style value.
 To set or to move the focus, two functions are available: 
 |hint_next_mark| and |hint_prev_mark|.
 |hint_next_mark| moves the focus to the next occurence, or to the
@@ -5317,59 +5694,57 @@ void hmark_page(void)
 {return; }
 @
 
-When the renderer traverses the page two more variables are needed.
+When the renderer traverses the page more variables are needed.
 @<render variables@>=
 static bool c_ignore;
-static int m_style;
 @
-|m_style| will have the |MARK_BIT| set while rendering a marked sequence
+
+|cur_style| will be non zero while rendering a marked sequence
 of characters and it will be zero while rendering non-marked
-characters. |c_ignore| will be |true| while rendering characters
+characters. |c_ignore| will be |true| while rendering characters that
+do not count for matching or non-matching characters, for example characters
 that were introduced by the pre- and post-lists of discretionary hyphens.
 |m_d| will contain the number of characters left in the current stretch
 of marked or unmarked characters.
 |m_ptr| will point to the value in the |m_dist| array that we will need
 for the next stretch of unmarked characters
 
-At the start of the renderer, we set |m_ptr=m_d=0| and |m_style=MARK_BIT|.
-The renderer will then assume it is at the end of a marked sequence of glyphs,
-read the first entry from |m_dist| (which might be zero) and starts with
-the appropriate number of non-marked glyphs.
+At the start of the renderer, we set |m_ptr=0| and |cur_style=0|;
+The distance |m_d| to the first marked glyph is set by calling |m_get()|.
 
 @<initialize marking@>=
-m_ptr=0; m_d=0;m_style=MARK_BIT;c_ignore=false; cur_style=0;
+m_ptr=0; m_d=m_get(); c_ignore=false; cur_style=next_style=0;
 @
 
 Whenever the renderer encounters a character, it will need to
-update |m_style|.
+update |cur_style|.
 
-@<update |m_style|@>=
+@<update |cur_style|@>=
 { while (m_d==0)
-  { m_style^=MARK_BIT;
-    if (m_style&MARK_BIT)
-    { if (m_ptr==m_focus) m_style|=FOCUS_BIT; else  m_style&=~FOCUS_BIT;
+  { cur_style=cur_style>0?0:1;
+    if (cur_style>0)
+    { if (m_ptr==m_focus) cur_style=2;
       m_d=m_chars;
     }
     else
-    { m_style&=~FOCUS_BIT;
       m_d=m_get();
-    }
   }
   m_d--;
 }
 @
 
 When rendering a ligature, we consider for the purpose of marking
-the characters that generated the ligature.
+the characters which generated the ligature.
 If any of these characters is marked, the whole ligature is marked.
 @<account for the characters that generated the ligature@>=
+
 if (!c_ignore)
 { pointer q;
-  cur_style=cur_style&~(MARK_BIT|FOCUS_BIT);
+  next_style=0;
   q=lig_ptr(p);
   while (q!=null)
-  { @<update |m_style|@>@;
-    cur_style|=m_style;
+  { @<update |cur_style|@>@;
+    if (cur_style>next_style) next_style=cur_style;
     q=link(q);
   }
 }
@@ -5378,18 +5753,17 @@ if (!c_ignore)
 When the renderer encounters an ignore node with |ignore_info(p)==1|
 it should ignore all the following characters until
 it encounters the matching ignore node with |ignore_info(p)==0|.
+Instead, it uses the characters in |ignore_list(p)|.
 This is done by setting |c_ignore|.
 
 @<handle an ignore node@>=
-if (subtype(p)==ignore_node)
-{ if (ignore_info(p)==1)
-  { cur_style=cur_style&~(MARK_BIT|FOCUS_BIT);
-    c_ignore_list(ignore_list(p));
-    c_ignore=true;
-  }
-  else
-    c_ignore=false;
+if (ignore_info(p)==1)
+{ next_style=0;
+  c_ignore_list(ignore_list(p));
+  c_ignore=true;
 }
+else
+  c_ignore=false;
 @
 
 Instead of the ignored nodes, the renderer considers the characters
@@ -5399,7 +5773,7 @@ we will mark the whole replacement if any part of the ignore
 list is marked.
 Because the |ignore_list| may contain boxes, traversing it
 is inherently recursive and we start with a function that
-traverses a list of nodes accounting for |m_style| changes
+traverses a list of nodes accounting for |cur_style| changes
 but without rendering them. We assume that the |ignore_list|
 consists (recursively!) entirely of character, kern, box, rule, and ligature nodes.
 
@@ -5407,8 +5781,8 @@ consists (recursively!) entirely of character, kern, box, rule, and ligature nod
 void c_ignore_list(pointer p)
 { while(p!=null)
   { if(is_char_node(p))
-    { @<update |m_style|@>@;
-      cur_style|=m_style;
+    { @<update |cur_style|@>@;
+      if (cur_style>next_style) next_style=cur_style;
     }
     else
     { switch(type(p)) 
@@ -5417,8 +5791,8 @@ void c_ignore_list(pointer p)
         case ligature_node:
         { pointer q=lig_ptr(p);
           while (q!=null)
-          { @<update |m_style|@>@;
-            cur_style|=m_style;
+          { @<update |cur_style|@>@;
+            if (cur_style>next_style) next_style=cur_style;         
             q=link(q);
           }
         }
@@ -5474,34 +5848,32 @@ bool hint_next_mark(void)
 \subsection{Links}\label{links}
 Internal links are part of the displayed document and can be activated to
 navigate to a different location in the document.
-Similar to marked characters, characters that belong to a link get
-a style bit set.
-@<render definitions@>=
-#define LINK_BIT 0x4
-@
-The renderer can switch the |LINK_BIT| on and off when it encounters a link node.
+Characters that belong to a link usualy get a different color.
+
 Because of line breaking, a link might be spread over multiple
 lines or even pages. To detect an unfinished link
 at the end of a horizontal list, the local variable |local_link| is used;
-the current link is then recorded in |cur_link|.
+the current link is recorded in |cur_link|. If there is no current
+link, |cur_link| is negative.
 To collect data about all links on a page, the renderer calls |add_new_link|
 when a link starts and |end_new_link| when it ends.
+It is not allowed to nest links. So between two occurences of a start link
+there must be an end link. If the end link is missing, it is silently assumed
+that the second start link is preceeded by an end link. An extra end link
+is silently ignored.
 
 @<render variables@>=
 static int cur_link=-1;
 @
 
-@<handle a link node@>=
-if (subtype(p)==start_link_node)
-{ cur_style|=LINK_BIT;
-  local_link=label_ref(p);
-  add_new_link(local_link,this_box,cur_h,cur_v);
-}
-else if (subtype(p)==end_link_node)
-{  cur_style&=~LINK_BIT;
-   end_new_link(local_link,this_box,cur_h,cur_v);
-   local_link=-1;
-}
+@<handle a start link node@>=
+local_link=label_ref(as_label(p));
+add_new_link(local_link,this_box,cur_h,cur_v);
+@
+
+@<handle an end link node@>=
+end_new_link(local_link,this_box,cur_h,cur_v);
+local_link=-1;
 @
 
 If at the end of a horizontal list |local_link| is |true| an additional
@@ -5527,8 +5899,8 @@ if (cur_link>=0)
 
 To enable the user interface to take action if a link is clicked or
 if the mouse moves over a link, the backend supplies
-the necessary information in the |hint_links| and |max_links| variables.
-|hint_links| is a dynamic array, indexed from 0 to |max_links|.
+the necessary information in the |hint_links| and |max_link| variables.
+|hint_links| is a dynamic array, indexed from 0 to |max_link|.
 If |max_links| is negative, no links are available.
 
 
@@ -5567,8 +5939,10 @@ void add_new_link(int n, pointer p, scaled h, scaled v)
      { links_allocated=links_allocated*1.4142136+0.5; /* $\sqrt 2$ */
         REALLOCATE(hint_links,links_allocated,hint_Link);
      }
+     DBG(DBGLABEL,"Links allocated %d\n",links_allocated);
   }
   t=hint_links+max_link;
+  DBG(DBGLABEL,"Link add %d\n",max_link);
   REF_RNG(label_kind,n);
   @<get |where| and |pos| from label |n|@>@;
   t->where=where;
@@ -5590,7 +5964,9 @@ void add_new_link(int n, pointer p, scaled h, scaled v)
 
 void end_new_link(int n, pointer p, scaled h, scaled v)
 { hint_Link *t;
+  if (max_link<0) return;
   t=hint_links+max_link;
+  DBG(DBGLABEL,"Link end %d\n",max_link);
   if (type(p)==hlist_node)
     t->right=h;
   else
@@ -5640,22 +6016,25 @@ static scaled hlink_distance(scaled x,scaled y, hint_Link *t)
 
 }
 
+static int last_hit_link=-1;
+
 int hint_find_link(scaled x, scaled y,scaled precission)
-{ static int last_hit=-1;
-  int i;
+{ int i;
   hint_Link *t;
   if (max_link<0) return -1;
-  if (last_hit<0 || last_hit>max_link) last_hit=max_link/2;
-  i=last_hit;
+  if (last_hit_link<0 || last_hit_link>max_link) last_hit_link=max_link/2;
+  i=last_hit_link;
   t=hint_links+i;
+  DBG(DBGLABEL,"Link find %d\n",max_link);
   if (hlink_distance(x,y,t)<=precission)
     return i;
   else if (y<t->top) /* search up */
   { while (i>0)
     { i--;
       t=hint_links+i;
+      DBG(DBGLABEL,"Link up %d\n",max_link);
       if(hlink_distance(x,y,t)<=precission)
-      { last_hit=i;  return i; }
+      { last_hit_link=i;  return i; }
     }
     return -1;
   }
@@ -5667,12 +6046,13 @@ int hint_find_link(scaled x, scaled y,scaled precission)
     { i=i+1;
       if (i>max_link) i=0;
       t=hint_links+i;
+      DBG(DBGLABEL,"Link scan %d\n",max_link);
       d=hlink_distance(x,y,t);
       if (d<min_d)
       { min_d=d; min_i=i;}
     }
-    last_hit=min_i;
-    return last_hit;
+    last_hit_link=min_i;
+    return last_hit_link;
   }
 }
 @
@@ -5686,6 +6066,7 @@ As a shortcut, it can call this function:
 {@+ uint64_t h;
   uint8_t w;
   if (i<0||i>max_link) return  hint_page_get();
+  DBG(DBGLABEL,"Link page %d\n",max_link);
   h=hint_links[i].pos;
   w=hint_links[i].where;
   if (w==LABEL_TOP) return hint_page_top(h);
@@ -5730,7 +6111,8 @@ and |nativeSetGamma|
 
 @<render functions@>=
 void hint_dark(int dark)
-{ nativeSetDark(dark);
+{ nativeSetColor(color_def!=NULL?color_def:color_defaults);
+  nativeSetDark(dark);
 }
 void hint_gamma(double gamma)
 { nativeSetGamma(gamma);
@@ -5793,7 +6175,7 @@ static Font *fonts[0x100]={NULL};
 Given a font number |f| the following function returns a pointer to the 
 corresponding font structure, extracting the necessary information from the \HINT\ file if necessary.
 @<font functions@>=
-struct font_s *hget_font(unsigned char f)
+static struct font_s *hget_font(uint8_t f)
 { Font *fp;
   if (fonts[f]!=NULL) return fonts[f];
   DBG(DBGFONT,"Decoding new font %d\n",f);
@@ -5816,11 +6198,6 @@ struct font_s *hget_font(unsigned char f)
   fonts[f]=fp;
   return fonts[f];
 }
-@
-This function is used in the renderer, so it is exported and returns an
-opaque pointer type to the font structure.
-@<font |extern|@>=
-extern struct font_s *hget_font(unsigned char f);
 @
 
 To initialize the |fonts| table and remove all fonts form memory, the
@@ -6136,36 +6513,40 @@ Gcache *hget_glyph(Font *f, unsigned int cc)
 }
 @
 
-Rendering a glyph is the most complex rendering procedure. But with all the preparations,
-it boils down to a pretty short function to display a glyph, given by its charcter code |cc|,
-its font |f|, and its position and size  |x|, |y|, and |s| given as scaled points.
-Most of the function deals with the conversion of \TeX's measuring system,
-that is scaled points stored as 32 bit integers,
-into a representation that is more convenient for non \TeX{nical} sytems,
-namely regular points stored as |double| values. The latter is used by
-the native rendering functions. Most of the conversion is done by the macro |SP2PT|.
+Rendering a glyph is the most complex rendering procedure. But with
+all the preparations, it boils down to a pretty short function to
+display a glyph, given by its charcter code |cc|, its font |f|, and
+its position and size |x|, |y|, and |s| given as scaled points.  Most
+of the function deals with the conversion of \TeX's measuring system,
+that is scaled points stored as 32 bit integers, into a representation
+that is more convenient for non \TeX{nical} sytems, namely regular
+points stored as |double| values. The latter is used by the native
+rendering functions.
+The conversion is done by the macro |SP2PT|.
 
 @<render definitions@>=
 #define SP2PT(X) ((X)/(double)(1<<16))
 @
 @<font functions@>=
-void render_char(int x, int y, struct font_s *f, uint32_t cc, uint8_t s)
+void render_char(int x, int y, uint8_t f, uint32_t cc, int style)
 
 { double w, h, dx, dy;
-  Gcache *g=hget_glyph(f,cc);
+  Font *fp=hget_font(f);
+  Gcache *g=hget_glyph(fp,cc);
   if (g==NULL) return;
 
-  dx=(double)g->hoff*f->hpxs;
-  dy=(double)g->voff*f->vpxs;@/
-  w =(double)g->w*f->hpxs;
-  h =(double)g->h*f->vpxs;
-  nativeGlyph(SP2PT(x),dx,SP2PT(y),dy,w,h,g,s);
+  dx=(double)g->hoff*fp->hpxs;
+  dy=(double)g->voff*fp->vpxs;@/
+  w =(double)g->w*fp->hpxs;
+  h =(double)g->h*fp->vpxs;
+  nativeGlyph(SP2PT(x),dx,SP2PT(y),dy,w,h,g,style);
 }
 
 @
 \goodbreak
-@<font |extern|@>=
-extern void render_char(int x, int y, struct font_s *f, uint32_t cc, uint8_t s);
+The above function is used in the rendering. So we export it.
+@<|extern| font functions@>=
+extern void render_char(int x, int y, uint8_t f, uint32_t cc, int s);
 @
 
 \subsection{Rules}
@@ -6194,6 +6575,47 @@ void render_image(int x, int y, int w, int h, uint32_t n)
 }
 @
 
+\subsection{Colors}
+When a color node occurs on a page, we pass the pointer
+to the color set definition to the renderer using the
+|nativeSetColor| function. Further the background might
+change, which requires a computation of the area of the change and
+a call to |nativeBackground|.
+
+@<native rendering definitions@>=
+extern void nativeSetColor(ColorSet *cs);
+extern void nativeBackground(double x, double y, double h, double w);
+@
+
+@<render variables@>=
+int cur_color=0, cur_mode=0, cur_style=0, next_style=0;
+@
+
+@<handle a horizontal change in the background color@>=
+if (cur_color!=list_color &&
+    (BG(CURCOLOR(cur_mode,cur_style,color_def[cur_color]))&0xFF)>0)
+{ scaled x,y,w,h;
+  x=cur_h;
+  y=cur_v+depth(this_box);
+  w=hcolor_distance(link(p),g_sign,g_order,glue_set(this_box));
+  h=height(this_box)+depth(this_box);
+  if (w>0 && h>0)
+    nativeBackground(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h));
+}
+@
+
+@<handle a vertical change in the background color@>=
+if (cur_color!=list_color &&
+    (BG(CURCOLOR(cur_mode,cur_style,color_def[cur_color]))&0xFF)>0)
+{ scaled x,y,w,h;
+  x=left_edge;
+  h=vcolor_distance(link(p),g_sign,g_order,glue_set(this_box));
+  y=cur_v+h;
+  w=width(this_box);
+  if (w>0 && h>0)
+    nativeBackground(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h));
+}
+@
 
 
 \subsection{Pages}
@@ -6203,7 +6625,8 @@ document, but its reponsibilities are listed in section~\secref{native}.
 
 @<render functions@>=
 uint64_t hint_blank(void)
-{ nativeBlank();
+{ nativeSetColor(color_def!=NULL?color_def:color_defaults);
+  nativeBlank();
   return 0;
 }
 @
@@ -6215,20 +6638,21 @@ functions that write DVI files. They share a few global static
 variables that implement the current state of the renderer: |cur_h|
 and |cur_v| contain the current horizontal and vertical position;
 |rule_ht|, |rule_dp|, and |rule_wd| contain the height, depth, and
-width of a rule that should be output next; |cur_f| and |cur_fp|
-contain the current font number and current font pointer.
+width of a rule that should be output next.
+|cur_color| contains the current color set;
+|cur_mode| and |cur_style| the current color mode and style.
 
 @<render variables@>=
 static scaled cur_h, cur_v;
 static scaled rule_ht, rule_dp, rule_wd; 
-static int cur_f; 
-static struct font_s *cur_fp;
-static uint8_t cur_style=0;
 @
 
 @<render functions@>=
 static void vlist_render(pointer this_box);
-
+static scaled hcolor_distance(pointer p,
+    uint8_t g_sign,glue_ord g_order,glue_ratio g_set);
+static scaled vcolor_distance(pointer p,
+    uint8_t g_sign,glue_ord g_order,glue_ratio g_set);
 static void hlist_render(pointer this_box)
 { scaled base_line;
 scaled left_edge;
@@ -6243,6 +6667,7 @@ scaled edge;
 double glue_temp;
 double cur_glue;
 scaled cur_g;
+int list_color=cur_color;
 int local_link=-1;
 uint8_t f;
 uint32_t c;
@@ -6273,23 +6698,16 @@ if(link(p)==0xffff)
     { f= font(p);
       c= character(p);
       if (!c_ignore && c!=' ')
-      { cur_style=cur_style&~(MARK_BIT|FOCUS_BIT);
-        @<update |m_style|@>@;
-        cur_style|=m_style;
+      { @<update |cur_style|@>@;
+        next_style=cur_style;
       }
-
 render_c:        
-      if(f!=cur_f)
-      {
 #ifdef DEBUG
         if(f> max_ref[font_kind])
            QUIT("Undefined Font %d mem[0x%x]=0x%x\n",
                 f,p,mem[p].i);
 #endif
-        cur_fp=hget_font(f);
-        cur_f= f;
-      }
-      render_char(cur_h, cur_v, cur_fp,c,cur_style);
+      render_char(cur_h, cur_v, f,c,next_style);
       cur_h= cur_h+char_width(f, char_info(f, c));
 #ifdef DEBUG
       if(link(p)==0xffff)
@@ -6309,12 +6727,15 @@ render_c:
 #endif
        if(list_ptr(p)==null) cur_h= cur_h+width(p);
        else
-	   { cur_v= base_line+shift_amount(p);
+       { int cur_c=cur_color;
+         cur_v= base_line+shift_amount(p);
          edge= cur_h;
          if(type(p)==vlist_node) 
-			 vlist_render(p);
-		 else 
-			 hlist_render(p);
+           vlist_render(p);
+         else 
+           hlist_render(p);
+         if (cur_color!=cur_c)
+         { cur_color=cur_c; nativeSetColor(color_def+cur_color); }
          cur_h= edge+width(p);cur_v= base_line;
        }
        break;
@@ -6322,14 +6743,39 @@ render_c:
        rule_ht= height(p);rule_dp= depth(p);rule_wd= width(p);
        goto fin_rule;
      case whatsit_node:
-       @<handle an ignore node@>@;
-       else @<handle a link node@>@;
-       else if (subtype(p)==image_node)
-       { scaled h,w;
-         w=image_width(p);
-         h=image_height(p);
-         render_image(cur_h, cur_v, w, h,image_no(p));
-         cur_h= cur_h+w; 
+       switch (subtype(p))
+       { case ignore_node: @<handle an ignore node@>@;break;
+ 	 case color_node:
+ 	   cur_color=color_ref(p);
+           nativeSetColor(color_def+cur_color);
+           @<handle a horizontal change in the background color@>@;
+	   break;
+ 	 case end_color_node:
+	   cur_color=list_color;
+           nativeSetColor(color_def+cur_color);
+	   break;
+         case start_link_node:
+	   @<handle a start link node@>@;
+           cur_color = color_ref(as_color(p));
+	   if (cur_color==0xFF) cur_color=list_color;
+           nativeSetColor(color_def+cur_color);
+	   @<handle a horizontal change in the background color@>@;
+	   break;
+         case end_link_node:
+	   @<handle an end link node@>@;
+           cur_color = color_ref(as_color(p));
+	   if (cur_color==0xFF) cur_color=list_color;
+           nativeSetColor(color_def+cur_color);
+	   @<handle a horizontal change in the background color@>@;
+	   break;
+         case image_node:
+         { scaled h,w;
+           w=image_width(p);
+           h=image_height(p);
+           render_image(cur_h, cur_v, w, h,image_no(p));
+           cur_h= cur_h+w; 
+         } break;
+         default: break;
        }
        break;
      case glue_node:
@@ -6376,17 +6822,20 @@ render_c:
           }
           while(cur_h+leader_wd<=edge)
 		  /*Output a leader box at |cur_h|,...*/
-          { cur_v= base_line+shift_amount(leader_box);
-		    h_save=cur_h;
-                    c_ignore=true;
-			if(type(leader_box)==vlist_node)
-				vlist_render(leader_box);
-			else 
-				hlist_render(leader_box);
-                     c_ignore=false;
-			cur_v= base_line;
-			cur_h= h_save+leader_wd+lx;
-		  }
+          { int cur_c=cur_color;
+	    cur_v= base_line+shift_amount(leader_box);
+	    h_save=cur_h;
+            c_ignore=true;
+	    if(type(leader_box)==vlist_node)
+	      vlist_render(leader_box);
+	    else 
+	      hlist_render(leader_box);
+            if (cur_color!=cur_c)
+            { cur_color=cur_c; nativeSetColor(color_def+cur_color); }
+            c_ignore=false;
+	    cur_v= base_line;
+	    cur_h= h_save+leader_wd+lx;
+	  }
           cur_h= edge-10;goto next_p;
         }
       }
@@ -6442,8 +6891,9 @@ scaled edge;
 double glue_temp;
 double cur_glue;
 scaled cur_g;
-
+int local_link=-1;
 cur_g= 0;cur_glue= float_constant(0);
+int list_color=cur_color;
 g_order= glue_order(this_box);
 g_sign= glue_sign(this_box);p= list_ptr(this_box);
 #ifdef DEBUG
@@ -6465,12 +6915,16 @@ while(p!=null)
                 p,mem[p].i,list_ptr(p));
 #endif                
         if(list_ptr(p)==null) cur_v= cur_v+height(p)+depth(p);
-	    else
-	    { cur_v= cur_v+height(p);save_v= cur_v;
+	else
+	{ int cur_c=cur_color;
+	  cur_v= cur_v+height(p);save_v= cur_v;
           cur_h= left_edge+shift_amount(p);
-          if(type(p)==vlist_node)vlist_render(p);
+          if(type(p)==vlist_node)
+	    vlist_render(p);
 	  else
-           hlist_render(p);
+            hlist_render(p);
+          if (cur_color!=cur_c)
+          { cur_color=cur_c; nativeSetColor(color_def+cur_color); }
           cur_v= save_v+depth(p);cur_h= left_edge;
         }
         break;
@@ -6478,13 +6932,40 @@ while(p!=null)
 	    rule_ht= height(p);rule_dp= depth(p);rule_wd= width(p);
         goto fin_rule;
       case whatsit_node:
-              if (subtype(p)==image_node)
-		{ scaled h,w;
-		  w=image_width(p);
-		  h=image_height(p);
-		  cur_v= cur_v+h; 
-  		  render_image(cur_h, cur_v, w, h,image_no(p));
-		}
+        switch (subtype(p))
+        { case color_node:
+ 	    cur_color=color_ref(p);
+	    nativeSetColor(color_def+cur_color);
+            @<handle a vertical change in the background color@>@;
+	    break;
+ 	  case end_color_node:
+	    cur_color=list_color;
+            nativeSetColor(color_def+cur_color);
+	    break;
+	  case start_link_node:
+	    @<handle a start link node@>@;
+	    cur_color = color_ref(as_color(p));
+	    if (cur_color==0xFF) cur_color=list_color;
+	    nativeSetColor(color_def+cur_color);
+            @<handle a vertical change in the background color@>
+	    break;
+          case end_link_node:
+	    @<handle an end link node@>@;
+	    cur_color = color_ref(as_color(p));
+	    if (cur_color==0xFF) cur_color=list_color;
+	    nativeSetColor(color_def+cur_color);
+            @<handle a vertical change in the background color@>
+	    break;
+         case image_node:
+          { scaled h,w;
+	    w=image_width(p);
+	    h=image_height(p);
+	    cur_v= cur_v+h; 
+  	    render_image(cur_h, cur_v, w, h, image_no(p));
+	  }
+          break;
+          default: break;
+        }
         break;
       case glue_node:
 	  { pointer g= glue_ptr(p);rule_ht= width(g)-cur_g;
@@ -6513,7 +6994,7 @@ while(p!=null)
 	      if((leader_ht> 0)&&(rule_ht> 0))
 	      { rule_ht= rule_ht+10;
 	        edge= cur_v+rule_ht;lx= 0;
-            if(subtype(p)==a_leaders)
+                if(subtype(p)==a_leaders)
 	        { save_v= cur_v;
 	          cur_v= top_edge+leader_ht*((cur_v-top_edge)/leader_ht);
 	          if(cur_v<save_v)cur_v= cur_v+leader_ht;
@@ -6528,19 +7009,22 @@ while(p!=null)
 		      }
 		    }
 		    while(cur_v+leader_ht<=edge)
-		    { cur_h= left_edge+shift_amount(leader_box);
+		    { int cur_c=cur_color;
+		      cur_h= left_edge+shift_amount(leader_box);
 		      cur_v= cur_v+height(leader_box);save_v= cur_v;
                       c_ignore=true;
 		      if (type(leader_box)==vlist_node) 
-				  vlist_render(leader_box);
-			  else 
-				  hlist_render(leader_box);
+		        vlist_render(leader_box);
+		      else 
+		        hlist_render(leader_box);
+		      if (cur_color!=cur_c)
+         	      { cur_color=cur_c; nativeSetColor(color_def+cur_color); }
                       c_ignore=false;
 		      cur_h= left_edge;
 		      cur_v= save_v-height(leader_box)+leader_ht+lx;
 		    }
     		cur_v= edge-10;goto next_p;
-		  }
+	      }
 	    }
 	  }
 	    goto move_past;
@@ -6577,18 +7061,161 @@ move_past:
 
 @
 
+A simplified version of |hlist_render| is used to determine
+the distance to the next color change.
+
+@<render functions@>=
+static scaled hcolor_distance(pointer p,uint8_t g_sign,glue_ord g_order,glue_ratio g_set)
+{ scaled dist=0; /* the distance */
+  double cur_glue=0.0; /*glue seen so far*/
+  scaled cur_g=0;  /*rounded equivalent of |cur_glue| times the glue ratio*/
+  double glue_temp;  /*glue value before rounding*/
+  uint8_t f;
+  uint32_t c;
+while(p!=null)
+{ if(is_char_node(p))
+  { do
+    { f= font(p);
+      c= character(p);
+render_c:        
+      dist= dist+char_width(f, char_info(f, c));
+      p= link(p);
+    } while(is_char_node(p));
+  }
+  else
+  { switch(type(p)) 
+    { case hlist_node:
+      case vlist_node:
+      case rule_node:
+      case kern_node:
+      case math_node:
+        dist= dist+width(p);
+        break;
+      case ligature_node:
+        f= font(lig_char(p));
+        c= character(lig_char(p));
+        goto render_c;
+      case whatsit_node:
+        switch (subtype(p))
+        { case start_link_node: 
+          case end_link_node: 
+	  case color_node:
+	  case end_color_node:
+	    return dist;
+          case image_node:
+            dist= dist+image_width(p);
+            break;
+          default: break;
+        }
+        break;
+      case glue_node:
+      { pointer g;
+        scaled wd;
+        g=glue_ptr(p);wd= width(g)-cur_g;
+        if(g_sign!=normal)
+        { if(g_sign==stretching)
+          { if(stretch_order(g)==g_order)
+            { cur_glue= cur_glue+stretch(g);
+              vet_glue(g_set*cur_glue);
+              cur_g= round(glue_temp);
+            }
+          }
+          else if(shrink_order(g)==g_order)
+          { cur_glue= cur_glue-shrink(g);
+            vet_glue(g_set*cur_glue);
+            cur_g= round(glue_temp);
+          }
+        }
+        wd= wd+cur_g;
+        dist= dist+wd;
+      }
+      break;
+      default:;
+    }
+    p= link(p);
+  }
+} /* end |while| */
+return dist;
+} /* end |hcolor_distance| */
+
+@
+
+@<render functions@>=
+static scaled vcolor_distance(pointer p,uint8_t g_sign,glue_ord g_order,glue_ratio g_set)
+{ scaled dist=0; /* the distance */
+  double cur_glue=0.0; /*glue seen so far*/
+  scaled cur_g=0;  /*rounded equivalent of |cur_glue| times the glue ratio*/
+  double glue_temp;  /*glue value before rounding*/
+
+while(p!=null)
+{ if(is_char_node(p)) DBG(DBGTEX,"Glyph in vertical list ignored");
+  else
+  { switch(type(p)) 
+    { case hlist_node:
+      case vlist_node:
+      case rule_node:
+ 	dist= dist+height(p)+depth(p);
+        break;
+      case kern_node:
+ 	dist= dist+width(p);
+        break;
+      case whatsit_node:
+        switch (subtype(p))
+        { case start_link_node: 
+          case end_link_node: 
+	  case color_node:
+	  case end_color_node:
+	    return dist;
+          case image_node:
+            dist= dist+image_height(p);
+            break;
+          default: break;
+        }
+        break;
+      case glue_node:
+      { pointer g;
+        scaled wd;
+        g=glue_ptr(p);wd= width(g)-cur_g;
+        if(g_sign!=normal)
+        { if(g_sign==stretching)
+          { if(stretch_order(g)==g_order)
+            { cur_glue= cur_glue+stretch(g);
+              vet_glue(g_set*cur_glue);
+              cur_g= round(glue_temp);
+            }
+          }
+          else if(shrink_order(g)==g_order)
+          { cur_glue= cur_glue-shrink(g);
+            vet_glue(g_set*cur_glue);
+            cur_g= round(glue_temp);
+          }
+        }
+        wd= wd+cur_g;
+        dist= dist+wd;
+      }
+      break;
+      default:;
+    }
+    p= link(p);
+  }
+} /* end |while| */
+return dist;
+} /* end |hcolor_distance| */
+
+@
 
 We conclude this section with the function that must be called after the page builder has finished
 the page: the |hint_render| function.
 @<render functions@>=
 
 void hint_render(void)
-{  nativeBlank();
+{  cur_color=0;
+   nativeSetColor(color_def!=NULL?color_def:color_defaults);
+   nativeBlank();
    if (streams==NULL || streams[0].p==null) return;
    cur_h= 0;
    cur_v= height(streams[0].p);
-   cur_f=-1;cur_fp=NULL;
-   cur_link=-1; max_link=-1;
+   cur_link=-1; max_link=-1; last_hit_link=-1;
    @<initialize marking@>@;
    if(type(streams[0].p)==vlist_node)
      vlist_render(streams[0].p);
@@ -6663,7 +7290,8 @@ extern void nativeSetDark(int dark);
 extern void nativeSetGamma(double gamma);
 @
 
-To  render an empty page call |nativeBlank|.
+To  render an empty page make sure that |nativeSetColor| ist called to
+establish a valid color schema and then call |nativeBlank|.
 @<native rendering definitions@>=
 extern void nativeBlank(void); 
 @
@@ -6677,7 +7305,7 @@ at position $(|x|,|y|)$ with width |w| and height |h| and style |s| call:
 @<native rendering definitions@>=
 typedef struct gcache_s *gcache_s_ptr;
 
-extern void nativeGlyph(double x, double dx, double y, double dy, double w, double h, struct gcache_s *g, uint8_t s);
+extern void nativeGlyph(double x, double dx, double y, double dy, double w, double h, struct gcache_s *g, int style);
 @
 For an explanation of the style parameter see section~\secref{search}.
 
@@ -6788,10 +7416,10 @@ and one to unpack a font when it is needed for the first time, we define four pr
 reading operations as macros.
 
 @<PK font functions@>=
-#define PK_READ_1_BYTE() (data[i++])
-#define PK_READ_2_BYTE() (k=PK_READ_1_BYTE(),k=k<<8,k=k+data[i++],k)
-#define PK_READ_3_BYTE() (k=PK_READ_2_BYTE(),k=k<<8,k=k+data[i++],k)
-#define PK_READ_4_BYTE() (k=PK_READ_3_BYTE(),k=k<<8,k=k+data[i++],k)
+#define PK_READ_1_BYTE() (pk_data[i++])
+#define PK_READ_2_BYTE() (k=PK_READ_1_BYTE(),k=k<<8,k=k+pk_data[i++],k)
+#define PK_READ_3_BYTE() (k=PK_READ_2_BYTE(),k=k<<8,k=k+pk_data[i++],k)
+#define PK_READ_4_BYTE() (k=PK_READ_3_BYTE(),k=k<<8,k=k+pk_data[i++],k)
 @
 
 Here is the function to unpack a single glyph. 
@@ -6805,17 +7433,17 @@ We store this state as a |PKparse|.
 
 @<definitions of format specific types@>=
 typedef struct {
-int j; /* position of next nybble in data */
+int j; /* position of next nybble in |pk_data| */
 int r; /* current repeat count */
 int f; /* dynamic f value */
-unsigned char *data; /* array of data bytes */
+unsigned char *pk_data; /* array of data bytes */
 } PKparse;
 @
 Given a parse state |P|, we read the next nybble
 with the following macro:
 
 @<PK font functions@>=
-#define read_nybble(P) ((P).j&1?((P).data[(P).j++>>1]&0xF):(((P).data[(P).j++>>1]>>4)&0xF))
+#define read_nybble(P) ((P).j&1?((P).pk_data[(P).j++>>1]&0xF):(((P).pk_data[(P).j++>>1]>>4)&0xF))
 @
 
 The pixel data stored in a PK file can be considered as a long sequence
@@ -6861,16 +7489,16 @@ static int packed_number(PKparse *p)
 
 Now here is the function, that reads a bitmap encoded using
 run counts and repeat counts.
-The |data| array contains the run counts and repeat counts for a bitmap of height |g->h| and
+The |pk_data| array contains the run counts and repeat counts for a bitmap of height |g->h| and
 width |g->w| as a top-down bitmap, where the first bit corresponds to the
 top left pixel and the last bit to the bottom right pixel.
 The function will produce a bottom-up bitmap with one byte per pixel
 to conform to the format that is used by the FreeType library.
-We traverse the |data| nybbles sequentially in top-down order.
+We traverse the |pk_data| nybbles sequentially in top-down order.
 The horizontal position |x| and the vertical position |y| in the
 target bitmap start at 0 and |g->h-1|.
 @<PK font functions@>=
-static void pk_runlength(Gcache *g, unsigned char *data) {
+static void pk_runlength(Gcache *g, unsigned char *pk_data) {
     PKparse p;
     int x, y; /* position in target bitmap */
     unsigned char *bits; /* target bitmap */
@@ -6881,7 +7509,7 @@ static void pk_runlength(Gcache *g, unsigned char *data) {
     p.j = 0; /* nybble position to start of data */
     p.r = 0; /* repeat count = 0 */
     p.f = g->pk.flag >> 4; /* dynamic f value */
-    p.data=data; /* data bytes */
+    p.pk_data=pk_data; /* data bytes */
     n = 0;
     if ((g->pk.flag >> 3) & 1) gray=0x00;
     else gray=0xff;
@@ -6912,17 +7540,17 @@ static void pk_runlength(Gcache *g, unsigned char *data) {
 @
 
 Very small bitmaps can be encoded simply using one bit per pixel.
-The |data| array contains a 1 bit per pixel bitmap of height |g->h| and
+The |pk_data| array contains a 1 bit per pixel bitmap of height |g->h| and
 width |g->w| as a top-down bitmap, where the first bit corresponds to the
 top left pixel and the last bit to the bottom right pixel.
 The function will produce a bottom-up bitmap with one byte per pixel
 to conform to the format that is used by the FreeType library.
-We traverse the |data| bits sequentially in top-down order
-using a |mask| to get the next bit and incrementing |data| when necessary.
+We traverse the |pk_data| bits sequentially in top-down order
+using a |mask| to get the next bit and incrementing |pk_data| when necessary.
 The horizontal position |x| and the vertical position |y| in the
 target bitmap start at 0 and |g->h-1|.
 @<PK font functions@>=
-static void pk_bitmap(Gcache *g, unsigned char *data) {
+static void pk_bitmap(Gcache *g, unsigned char *pk_data) {
     unsigned char *bits; /* 1 bit per pixel */
     int x, y; /* position in target bitmap */
     unsigned char mask; /* bitmask for the next bit */
@@ -6932,12 +7560,12 @@ static void pk_bitmap(Gcache *g, unsigned char *data) {
     mask=0x80;
     for (y=0; y<g->h; y++)
       for (x=0; x<g->w; x++)
-        { if (*data & mask)
+        { if (*pk_data & mask)
             bits[y*g->w+x] = 0x00; /* black */
           else
             bits[y*g->w+x] = 0xFF; /* white */
           mask=mask>>1;
-          if (mask==0) { data++; mask=0x80; }
+          if (mask==0) { pk_data++; mask=0x80; }
         }
 }
 @
@@ -6948,14 +7576,14 @@ unpacking functions just defined.
 
 static void pkunpack_glyph(Gcache *g)
 { int i,k;
-  unsigned char *data;
+  unsigned char *pk_data;
   if (g==NULL || g->pk.encoding==NULL) return; /* no glyph, no data */
   g->ff=pk_format;
   if (g->bits!=NULL) return; /* already unpacked */
 #if 0  
   DBG(DBGRENDER,"Unpacking glyph %c (0x%x)",g->cc,g->cc);
 #endif 
-  data=g->pk.encoding;
+  pk_data=g->pk.encoding;
   i=0;
   if ((g->pk.flag&7)<4)  /* short form */
   { i=i+3; /* skip the TeX font metrics */
@@ -6981,8 +7609,8 @@ static void pkunpack_glyph(Gcache *g)
 	g->hoff=(signed int)PK_READ_4_BYTE();
 	g->voff=(signed int)PK_READ_4_BYTE();
   }
-  if ((g->pk.flag>>4)==14) pk_bitmap(g,data+i);
-  else pk_runlength(g,data+i);
+  if ((g->pk.flag>>4)==14) pk_bitmap(g,pk_data+i);
+  else pk_runlength(g,pk_data+i);
   nativeSetPK(g);
 }
 @
@@ -7007,15 +7635,15 @@ static Gcache *hnew_glyph(Font *pk, unsigned int cc);
 
 
 int unpack_pk_file(Font *pk)
-/* scan |pk->data| and extract information. Do not unpack glyphs, these are unpacked on demand. */
+/* scan |pk->pk_data| and extract information. Do not unpack glyphs, these are unpacked on demand. */
 {   int i,j;
     unsigned int k;
 	unsigned char flag;
-	unsigned char *data;
-    data=pk->font_data;
+	unsigned char *pk_data;
+    pk_data=pk->font_data;
     i=0;
 	while (i< pk->data_size)
-	  switch(flag=data[i++])
+	  switch(flag=pk_data[i++])
 	{ case PK_XXX1: j=PK_READ_1_BYTE(); i=i+j; break;
 	  case PK_XXX2: j=PK_READ_2_BYTE(); i=i+j;  break;
 	  case PK_XXX3: j=PK_READ_3_BYTE(); i=i+j;  break;
@@ -7064,7 +7692,7 @@ int unpack_pk_file(Font *pk)
 		}
 		g = hnew_glyph(pk,cc);
 		g->pk.flag=flag;
-		g->pk.encoding=data+i;
+		g->pk.encoding=pk_data+i;
 		g->bits=NULL;
 		i=i+pl;
 	  }
@@ -7269,6 +7897,16 @@ extern int hint_error(char *title, char *msg);
 #define MESSAGE(...)  __android_log_print(ANDROID_LOG_INFO,__FILE__, __VA_ARGS__)
 #define ERROR_MESSAGE __android_log_print(ANDROID_LOG_ERROR,__FILE__,"ERROR: %s\n", hint_error_string)
 
+#endif
+
+#ifdef __APPLE__
+extern void hint_log(const char*format,...);
+extern void hint_message(const char*format,...);
+extern int hint_error(const char*title,const char*msg);
+#define LOG(...) hint_log(__VA_ARGS__)
+#define MESSAGE(...) (snprintf(hint_error_string,MAX_HINT_ERROR-1,__VA_ARGS__),\
+                      hint_error("Warning",hint_error_string))
+#define ERROR_MESSAGE hint_error("ERROR",hint_error_string)
 #endif
 
 #ifndef LOG
@@ -7610,22 +8248,24 @@ typedef int scaled;
 #include <zlib.h>@#
 #include "error.h"
 #include "format.h"
+#include "hint.h"
 #include "hrender.h"
+#include "rendernative.h"
 #include "get.h"
 #include "htex.h"
-#include "hint.h"
 
 @<GET macros@>@;
 @<TEG macros@>@;
 
 @<\HINT\ types@>@;
 
-
 @<\HINT\ variables@>@;
 @<\HINT\ declarations@>@;
+@<\HINT\ font access functions@>@;
 @<\HINT\ auxiliar functions@>@;
 @<get functions@>@;
 @<teg functions@>@;
+
 
 @<\HINT\ functions@>@;
 
@@ -7637,6 +8277,7 @@ typedef int scaled;
 #define _HRENDER_H
 @<render definitions@>@;
 
+extern int cur_mode, cur_style;
 extern int page_h, page_v;
 extern double xdpi, ydpi;
 extern uint64_t hint_blank(void);
@@ -7675,12 +8316,12 @@ extern int hint_print(unsigned char *bits);
 #include <string.h>
 #include <math.h>
 #include "get.h"
+#include "hint.h"
 #include "hrender.h"
 #include "rendernative.h"
 #include "htex.h"
-#include "hint.h"
 
-@<font |extern|@>@;
+@<|extern| font functions@>
 
 @<render variables@>@;
 @<render functions@>@;
@@ -7708,11 +8349,13 @@ extern int hint_print(unsigned char *bits);
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include "hfonts.h"
+#include "hint.h"
 #include "hrender.h"
 #include "rendernative.h"
 
 @<font variables@>@;
 @<\HINT\ font access functions@>@;
+@<|extern| font functions@>@;
 @<auxiliar font functions@>@;
 
 @<FreeType font functions@>@;
@@ -7730,9 +8373,7 @@ the \HINT\ rendering functions.
 @(rendernative.h@>=
 #ifndef _RENDERNATIVE_H
 #define _RENDERNATIVE_H
-
 @<native rendering definitions@>@;
-
 #endif 
 @
 
@@ -7744,7 +8385,7 @@ the \HINT\ rendering functions.
 \rightskip 0pt plus 1fil
 \def\bfblrm{\small\rm}%
 \def\bblem{\small\it}%
-\bibliography{hint}
+\bibliography{../hint.bib}
 \bibliographystyle{plain}
 }
 

@@ -1,5 +1,5 @@
 /*1410:*/
-#line 25716 "htex.w"
+#line 25908 "htex.w"
 
 #define banner "This is TeX, Version 3.141592653 (HINT)" \
 
@@ -1699,21 +1699,30 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define ignore_info(A) type(A+1) 
 #define ignore_list(A) link(A+1)  \
 
-#define label_node hitex_ext+17
+#define color_node hitex_ext+17
+#define end_color_node hitex_ext+18
+#define default_color_node hitex_ext+19
+#define link_color_node hitex_ext+20
+#define default_link_color_node hitex_ext+21
+#define no_color_node hitex_ext+22
+#define color_node_size small_node_size
+#define color_ref(A) type(A+1) 
+#define color_link(A) link(A+1)  \
+
+#define label_node hitex_ext+23
 #define label_node_size 2
-#define label_has_name(A) type(A+1) 
-#define label_where(A) subtype(A+1) 
-#define label_ptr(A) link(A+1) 
 #define label_ref(A) link(A+1)  \
 
-#define start_link_node hitex_ext+18
-#define end_link_node hitex_ext+19
-#define link_node_size 2 \
+#define start_link_node hitex_ext+24
+#define end_link_node hitex_ext+25
+#define link_node_size 3
+#define as_color(A) (A) 
+#define as_label(A) ((A) +1)  \
 
-#define outline_node hitex_ext+20
-#define outline_node_size 4
+#define outline_node hitex_ext+26
+#define outline_node_size 3
 #define outline_ptr(A) link(A+2) 
-#define outline_depth(A) mem[A+3].i \
+#define outline_depth(A) info(A+2)  \
  \
 
 #define immediate_code 4
@@ -1724,7 +1733,7 @@ str_pool[k+2]= si(qo(w.b2) ) ;str_pool[k+3]= si(qo(w.b3) )  \
 #define end_write_token cs_token_flag+end_write \
 
 
-#line 25717 "htex.w"
+#line 25909 "htex.w"
 
 enum{/*11:*/
 #line 374 "htex.w"
@@ -1768,7 +1777,7 @@ file_name_size= 1024,
 empty_string= 256
 
 /*:11*/
-#line 25718 "htex.w"
+#line 25910 "htex.w"
 };
 /*18:*/
 #line 514 "htex.w"
@@ -1802,11 +1811,9 @@ typedef int8_t small_number;
 #if __SIZEOF_FLOAT__==4
 typedef float float32_t;
 #else
-#line 2421 "htex.w"
 #error  float type must have size 4
 #endif
-#line 2423 "htex.w"
- typedef float glue_ratio;
+typedef float glue_ratio;
 
 /*:113*//*117:*/
 #line 2526 "htex.w"
@@ -1837,12 +1844,12 @@ four_quarters qqqq;
 typedef struct{FILE*f;memory_word d;}word_file;
 
 /*:117*//*155:*/
-#line 3257 "htex.w"
+#line 3256 "htex.w"
 
 typedef int8_t glue_ord;
 
 /*:155*//*221:*/
-#line 4420 "htex.w"
+#line 4418 "htex.w"
 
 typedef struct{int16_t mode_field;
 pointer head_field,tail_field;
@@ -1858,12 +1865,12 @@ memory_word aux_field;
 }list_state_record;
 
 /*:221*//*279:*/
-#line 6009 "htex.w"
+#line 6007 "htex.w"
 
 typedef int8_t group_code;
 
 /*:279*//*310:*/
-#line 6588 "htex.w"
+#line 6586 "htex.w"
 
 typedef struct{
 quarterword state_field,index_field;
@@ -1871,28 +1878,28 @@ halfword start_field,loc_field,limit_field,name_field;
 }in_state_record;
 
 /*:310*//*558:*/
-#line 10870 "htex.w"
+#line 10868 "htex.w"
 
 typedef uint8_t internal_font_number;
 typedef uint16_t font_index;
 
 /*:558*//*605:*/
-#line 12062 "htex.w"
+#line 12060 "htex.w"
 
 typedef int8_t dvi_index;
 
 /*:605*//*944:*/
-#line 18331 "htex.w"
+#line 18350 "htex.w"
 
 typedef uint16_t trie_pointer;
 
 /*:944*//*949:*/
-#line 18400 "htex.w"
+#line 18419 "htex.w"
 
 typedef int16_t hyph_pointer;
 
 /*:949*/
-#line 25719 "htex.w"
+#line 25911 "htex.w"
 
 extern void list_init(void);
 extern void hpack_page(void);

@@ -1,9 +1,9 @@
 #include "basetypes.h"
 #include "format.h"
 
-const char *content_name[32]={"list", "param", "range", "xdimen", "adjust", "glyph", "kern", "glue", "ligature", "disc", "language", "rule", "image", "leaders", "baseline", "hbox", "vbox", "par", "math", "table", "item", "hset", "vset", "hpack", "vpack", "stream", "page", "link", "undefined1", "undefined2", "undefined3", "penalty"};
+const char *content_name[32]={"list", "param", "range", "xdimen", "adjust", "glyph", "kern", "glue", "ligature", "disc", "language", "rule", "image", "leaders", "baseline", "hbox", "vbox", "par", "math", "table", "item", "hset", "vset", "hpack", "vpack", "stream", "page", "link", "color", "undefined1", "undefined2", "penalty"};
 
-const char *definition_name[32]={"list", "param", "range", "xdimen", "adjust", "font", "dimen", "glue", "ligature", "disc", "language", "rule", "image", "leaders", "baseline", "hbox", "vbox", "par", "math", "table", "item", "hset", "vset", "hpack", "vpack", "stream", "page", "label", "undefined1", "undefined2", "undefined3", "int"};
+const char *definition_name[32]={"list", "param", "range", "xdimen", "adjust", "font", "dimen", "glue", "ligature", "disc", "language", "rule", "image", "leaders", "baseline", "hbox", "vbox", "par", "math", "table", "item", "hset", "vset", "hpack", "vpack", "stream", "page", "label", "color", "undefined1", "undefined2", "int"};
 
 int max_outline=-1;
 
@@ -33,13 +33,27 @@ Xdimen xdimen_defaults[MAX_XDIMEN_DEFAULT+1]={{0x0, 0.0, 0.0}, {0x0, 1.0, 0.0}, 
 
 Baseline baseline_defaults[MAX_BASELINE_DEFAULT+1]={{{{0x0, 0.000000, 0.000000},{0.000000, 0},{0.000000, 0}}, {{0x0, 0.000000, 0.000000},{0.000000, 0},{0.000000, 0}}, 0x0}};
 
-Label label_defaults[MAX_LABEL_DEFAULT+1]={{0,LABEL_TOP,true,0,0,0}};
+Label label_defaults[MAX_LABEL_DEFAULT+1]={{0,0,LABEL_TOP,true,0,0}};
 
-int max_fixed[32]= {0, 0, 0, 2, 65536, -1, 0, 2, -1, -1, -1, -1, -1, -1, 0, 65536, 65536, 65536, 65536, 65536, 65536, 65536, 65536, 65536, 65536, 0, 0, -1, 65536, 65536, 65536, 0};
+ColorSet  color_defaults[MAX_COLOR_DEFAULT+1]=
+{{0x000000FF, 0xFFFFFF00,
+  0xEE0000FF, 0xFFFFFF00,
+  0x00EE00FF, 0xFFFFFF00,
+  0xFFFFFFFF, 0x00000000,  0xFF1111FF, 0x00000000,
+  0x11FF11FF, 0x00000000},
+ {0x0000EEFF, 0xFFFFFF00,
+  0xEE0000FF, 0xFFFFFF00,
+  0x00EE00FF, 0xFFFFFF00,
+  0x1111FFFF, 0x00000000,
+  0xFF1111FF, 0x00000000,
+  0x11FF11FF, 0x00000000
+}};
 
-int max_default[32]= {0, 0, 0, 2, -1, -1, 9, 14, -1, -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, -1, -1, -1, 22};
+int max_fixed[32]= {0, 0, 0, 2, 65536, -1, 0, 2, -1, -1, -1, -1, -1, -1, 0, 65536, 65536, 65536, 65536, 65536, 65536, 65536, 65536, 65536, 65536, 0, 0, -1, -1, 65536, 65536, 0};
 
-int max_ref[32]= {0, 0, 0, 2, -1, -1, 9, 14, -1, -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, -1, -1, -1, 22};
+int max_default[32]= {0, 0, 0, 2, -1, -1, 9, 14, -1, -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 1, -1, -1, 22};
+
+int max_ref[32]= {0, 0, 0, 2, -1, -1, 9, 14, -1, -1, -1, -1, -1, -1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 1, -1, -1, 22};
 
 signed char hnode_size[0x100]= {
 0,0,0,0,0,0,0,0, /* list */
@@ -69,10 +83,10 @@ signed char hnode_size[0x100]= {
 -4*6+0,-4*6+0,-4*10+0,-4*10+0,-4*5+1,-4*5+1,-4*9+1,-4*9+1, /* vpack */
 -4*3+0,0,-4*2+1,0,3,0,0,0, /* stream */
 0,0,0,0,0,0,0,0, /* page */
-3,4,3,4,0,0,0,0, /* link */
+3,4,3,4,4,5,4,5, /* link */
+3,0,0,0,0,0,0,0, /* color */
 0,0,0,0,0,0,0,0, /* undefined1 */
 0,0,0,0,0,0,0,0, /* undefined2 */
-0,0,0,0,0,0,0,0, /* undefined3 */
 3,3,4,6,0,0,0,0}; /* penalty */
 
 
@@ -104,9 +118,9 @@ uint8_t content_known[32]= {
 0xFF, /* vpack */
 0x15, /* stream */
 0x00, /* page */
-0x0F, /* link */
+0xFF, /* link */
+0x01, /* color */
 0x00, /* undefined1 */
 0x00, /* undefined2 */
-0x00, /* undefined3 */
 0x0F}; /* penalty */
 
