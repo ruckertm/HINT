@@ -169,7 +169,6 @@
 		557A9BD228F4488F004772FE /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		557A9BD428F4489D004772FE /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
 		55CA193F291E896B00B30B11 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
-		55CDFDB329D2E086003D40D3 /* one.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = one.h; sourceTree = "<group>"; };
 		55CDFDB429D2E0B1003D40D3 /* rendernative.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = rendernative.h; sourceTree = "<group>"; };
 		55CDFDB629D2E0CB003D40D3 /* stb_image.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stb_image.h; sourceTree = "<group>"; };
 		55CDFDB729D2E0CE003D40D3 /* tables.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = tables.c; sourceTree = "<group>"; };
@@ -336,7 +335,6 @@
 				55CDFDBA29D2E0DF003D40D3 /* htex.c */,
 				55CDFDBB29D2E0E2003D40D3 /* get.c */,
 				55CDFDBC29D2E0EA003D40D3 /* get.h */,
-				55CDFDB329D2E086003D40D3 /* one.h */,
 				55CDFDBD29D2E0ED003D40D3 /* hfonts.c */,
 				55CDFDBE29D2E0F0003D40D3 /* hfonts.h */,
 				55CDFDBF29D2E0F4003D40D3 /* hint.c */,
