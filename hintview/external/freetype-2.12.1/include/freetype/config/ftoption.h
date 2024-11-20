@@ -180,7 +180,7 @@ FT_BEGIN_HEADER
    *
    *   Define this macro if you want to enable this 'feature'.
    */
-#define FT_CONFIG_OPTION_USE_LZW
+#undef FT_CONFIG_OPTION_USE_LZW
 
 
   /**************************************************************************
@@ -195,7 +195,7 @@ FT_BEGIN_HEADER
    *   Define this macro if you want to enable this 'feature'.  See also the
    *   macro `FT_CONFIG_OPTION_SYSTEM_ZLIB` below.
    */
-#define FT_CONFIG_OPTION_USE_ZLIB
+#undef FT_CONFIG_OPTION_USE_ZLIB
 
 
   /**************************************************************************
@@ -255,7 +255,7 @@ FT_BEGIN_HEADER
    * stream support, in the cases where file stream support is not necessary
    * such as memory loading of font files.
    */
-/* #define FT_CONFIG_OPTION_DISABLE_STREAM_SUPPORT */
+#define FT_CONFIG_OPTION_DISABLE_STREAM_SUPPORT 
 
 
   /**************************************************************************
@@ -361,7 +361,7 @@ FT_BEGIN_HEADER
    *
    *   Note that the 'FOND' resource isn't checked.
    */
-#define FT_CONFIG_OPTION_MAC_FONTS
+#undef FT_CONFIG_OPTION_MAC_FONTS
 
 
   /**************************************************************************
@@ -393,7 +393,7 @@ FT_BEGIN_HEADER
    * incrementally as the document is parsed, such as the Ghostscript
    * interpreter for the PostScript language.
    */
-#define FT_CONFIG_OPTION_INCREMENTAL
+/* #define FT_CONFIG_OPTION_INCREMENTAL */
 
 
   /**************************************************************************
@@ -538,7 +538,7 @@ FT_BEGIN_HEADER
    *
    *   More details on the hooks can be found in file `otsvg.h`.
    */
-#define FT_CONFIG_OPTION_SVG
+#undef FT_CONFIG_OPTION_SVG
 
 
   /**************************************************************************
@@ -578,7 +578,7 @@ FT_BEGIN_HEADER
    * outlines (from the 'COLR'/'CPAL' tables) in all formats using the 'sfnt'
    * module (namely TrueType~& OpenType).
    */
-#define TT_CONFIG_OPTION_COLOR_LAYERS
+#undef TT_CONFIG_OPTION_COLOR_LAYERS
 
 
   /**************************************************************************
@@ -647,7 +647,7 @@ FT_BEGIN_HEADER
    * Do not `#undef` this macro here, since the build system might define it
    * for certain configurations only.
    */
-#define TT_CONFIG_OPTION_BYTECODE_INTERPRETER
+/* #define TT_CONFIG_OPTION_BYTECODE_INTERPRETER */
 
 
   /**************************************************************************
@@ -912,7 +912,7 @@ FT_BEGIN_HEADER
    * Compile 'autofit' module with CJK (Chinese, Japanese, Korean) script
    * support.
    */
-#define AF_CONFIG_OPTION_CJK
+#undef AF_CONFIG_OPTION_CJK
 
 
   /**************************************************************************
