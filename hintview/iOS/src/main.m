@@ -57,14 +57,13 @@ void hint_unmap(void) /* unmap */
 }
 
 
-int hint_log(const char * fmt, ... )
+void hint_log(const char * fmt, ... )
 {
   va_list  ap;
   va_start( ap, fmt );
     NSLogv([NSString stringWithUTF8String:fmt],ap);
   //vfprintf( stderr, fmt, ap );
   va_end( ap );
-    return 0;
 }
 
 
