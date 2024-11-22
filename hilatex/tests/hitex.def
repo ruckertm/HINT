@@ -18,20 +18,40 @@
 \ProvidesFile{hitex.def}
   [2023/04/17 v0.1a Graphics/color driver for hitex]
 
+\def\c@lor@arg#1{%
+  \dimen@#1\p@
+  \ifdim\dimen@<\z@\dimen@\maxdimen\fi
+  \ifdim\dimen@>\p@
+    \PackageError{color}{Argument `#1' not in range [0,1]}\@ehd
+  \fi}
 
+\global\def\current@color{0 0 0}
+\def\msg#1#2{\message{a: #1 b: #2 :}}
 \def\set@color{%
- \special{}%
- \hi@color@warn
+ \message{Set:\current@color.}\HINTcolor{fg{\current@color}}%
  \aftergroup\reset@color}
-\def\reset@color{\special{}}%
+ 
+\def\set@page@color{%
+ \message{Set bg:\current@color.}\HINTcolor{fg{\current@color}}%
+ \aftergroup\reset@color}
+
+
+\def\reset@color{\message{Reset()}\HINTendcolor}%
 
 \def\hi@color@warn{%
   \PackageWarning{color}{color not supported\@gobble}%
   \global\let\hi@color@warn\relax}
   
+%\def\color@named#1#2{\message{Named: #1 #2.}}
 
-\def\color@rgb#1#2{\def#1{}}
-
+%\def\color@rgb#1#2{\message{rgb: #1 #2.}\def#1{}}
+\def\color@rgb#1#2{\c@lor@@rgb#2\@@#1}
+\def\c@lor@@rgb#1,#2,#3\@@#4{%
+  \c@lor@arg{#1}%
+  \c@lor@arg{#2}%
+  \c@lor@arg{#3}%
+  \edef#4{#1 #2 #3}%
+  }
 \def\Gin@extensions{.png,.jpg}
 \@namedef{Gin@rule@.png}#1{{png}{.png}{#1}}
 \@namedef{Gin@rule@.jpg}#1{{jpg}{.jpg}{#1}}
