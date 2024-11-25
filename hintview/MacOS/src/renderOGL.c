@@ -441,7 +441,7 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
 /* render the image found between *b and *e at x,y with size w,h.
    x, y, w, h are given in point
 */
-{ GLenum format;
+{ GLenum format, internal_format;
   int width, height, nrChannels;
 
   if (b!=last_b||ImageID==0)
@@ -452,13 +452,13 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
         ImageID = 0;
     }
     last_b=b;
-    data = stbi_load_from_memory(b, (int) (e - b), &width, &height, &nrChannels, 0);
+    data = stbi_load_from_memory(b, (int) (e - b), &width, &height, &nrChannels, 4);
     if (data == NULL)
     { LOG("Unable to display image\n");
       data=grey; width=height=1; nrChannels=4;
     }
     //LOG("nativeImage %d chanels\n",nrChannels);
-#if 1    
+#if 0
     format = GL_RGBA;
     if (nrChannels == 4)
         format = GL_RGBA;
@@ -467,26 +467,17 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
     else if (nrChannels == 2)
         format = GL_RG;
     else if (nrChannels == 1)
-        format = GL_RED;
+        format = GL_ALPHA;
 #else
-    internal_format=GL_SRGB;
-    if (nrChannels == 4)
-    { format = GL_RGBA; internal_format=GL_SRGB_ALPHA;}
-    else if (nrChannels == 3) 
-      format = GL_RGB;
-    else if (nrChannels == 2) 
-      format = GL_RG;
-    else
-      format = GL_RED;
+    /* this works with setting the number of channels to 4 above */
+    internal_format=GL_SRGB_ALPHA;
+    format=GL_RGBA;
 #endif
     glGenTextures(1, &ImageID);
     glBindTexture(GL_TEXTURE_2D, ImageID);
     checkGlError("glBindTexture ImageID");
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0,
+    glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0,
                  format, GL_UNSIGNED_BYTE, data);
-    if (glGetError()!= GL_NO_ERROR)
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
-    		  format, GL_UNSIGNED_BYTE, data);
     checkGlError("glTexImage2D(image)");
     if (data!=grey) { stbi_image_free(data); data=NULL; }
     glGenerateMipmap(GL_TEXTURE_2D);
