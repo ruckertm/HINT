@@ -412,7 +412,7 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
         ImageID = 0;
     }
     last_b=b;
-    data = stbi_load_from_memory(b, (int) (e - b), &width, &height, &nrChannels, 0 );
+    data = stbi_load_from_memory(b, (int) (e - b), &width, &height, &nrChannels, 4 );
       /* Possibly use 4 instead of 0 above for the number of desired chanels
         and set format=internal_format=GL_RGBA
       */
@@ -432,7 +432,7 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
       // Give the image to OpenGL
       internal_format = GL_RGBA;
       format = GL_RGBA;
-
+#if 0
     if (nrChannels == 4)
         internal_format = format = GL_RGBA;
     else if (nrChannels == 3)
@@ -441,7 +441,7 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
         format = GL_LUMINANCE_ALPHA;
     else if (nrChannels == 1)
         format = GL_ALPHA;
-      
+#endif
     LOGI("image format=%d\n", format);
     glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0,
                  format, GL_UNSIGNED_BYTE, data);
