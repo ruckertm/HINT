@@ -547,7 +547,7 @@
 					"FT2_BUILD_LIBRARY=1",
 					"$(inherited)",
 				);
-				HEADER_SEARCH_PATHS = "freetype-2.12.1/include";
+				HEADER_SEARCH_PATHS = "../external/freetype-2.12.1/include/**";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -567,7 +567,7 @@
 				DEVELOPMENT_TEAM = Y8DAR84XLS;
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_PREPROCESSOR_DEFINITIONS = "FT2_BUILD_LIBRARY=1 ";
-				HEADER_SEARCH_PATHS = "freetype-2.12.1/include";
+				HEADER_SEARCH_PATHS = "../external/freetype-2.12.1/include/**";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -705,7 +705,7 @@
 					"$(inherited)",
 				);
 				GENERATE_INFOPLIST_FILE = YES;
-				"HEADER_SEARCH_PATHS[arch=*]" = "$(SRCROOT)/freetype-2.12.1/include/";
+				"HEADER_SEARCH_PATHS[arch=*]" = "../external/freetype-2.12.1/include/";
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
 				INFOPLIST_KEY_NSDownloadsFolderUsageDescription = "";
@@ -736,7 +736,7 @@
 				DEVELOPMENT_TEAM = Y8DAR84XLS;
 				GCC_PREPROCESSOR_DEFINITIONS = "GLES_SILENCE_DEPRECATION=1";
 				GENERATE_INFOPLIST_FILE = YES;
-				"HEADER_SEARCH_PATHS[arch=*]" = "$(SRCROOT)/freetype-2.12.1/include/";
+				"HEADER_SEARCH_PATHS[arch=*]" = "../external/freetype-2.12.1/include/";
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
 				INFOPLIST_KEY_NSDownloadsFolderUsageDescription = "";

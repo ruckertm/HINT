@@ -58,7 +58,6 @@
 
 - (void) setSize: (CGSize)size;
 - (void) setDarkMode;
-- (void) showAlert;
 - (void) getPreferences;
 @end
 
