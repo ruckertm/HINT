@@ -1,0 +1,49 @@
+\documentclass[10pt]{article}
+\usepackage{iftex}
+\usepackage[x11names,svgnames,dvipsnames]{xcolor}
+
+\begin{document}
+
+Standard colors:
+\color{red} red
+\color{green} green
+\color{yellow} yellow
+
+x11 colors:
+\color{Chartreuse4} Chartreuse4
+\color{DarkGoldenrod3} DarkGoldenrod3
+\color{Tomato4} Tomato4
+
+svg colors:
+\color{BlanchedAlmond} BlanchedAlmond
+\color{Chocolate} Chocolate
+\color{DarkOliveGreen} DarkOliveGreen
+
+dvips colors:
+\color{Bittersweet} Bittersweet
+\color{BrickRed} BrickRed
+\color{Plum} Plum
+\color{JungleGreen} JungleGreen 
+
+Custom colors:
+\definecolor{mypink1}{rgb}{0.858, 0.188, 0.478}
+\definecolor{mypink2}{RGB}{219, "30, 122}
+
+\indent
+\color{mypink1} mypink1: rgb 0.858, 0.188, 0.478
+
+\indent
+\color{mypink2} mypink2: RGB 219, "30, 122
+
+\indent
+\definecolor{mygray}{gray}{0.2}%
+\color{mygray} mygray: 0.2
+
+\indent
+%\tracingmacros=1
+\definecolor{mypink3}{cmyk}{0, 0.7808, 0.4429, 0.1412}%
+\color{mypink3} mypink3: cmyk 0, 0.7808, 0.4429, 0.1412
+%\tracingmacros=0
+
+\end{document}
+

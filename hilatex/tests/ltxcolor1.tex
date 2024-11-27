@@ -1,0 +1,67 @@
+\documentclass[10pt]{article}
+\usepackage{iftex}
+% use new ...
+%\usepackage{color}% works without the color name options
+%\usepackage[x11names]{xcolor}
+\usepackage[dvipsnames]{xcolor}
+
+%dvipsnames doe not work. uses cmyk
+%
+\begin{document}
+\begin{itemize}
+\color{blue}
+\item First item
+\item Second item
+\end{itemize}
+
+\noindent
+%{\color{red} \rule{\linewidth}{0.5mm}}% \linewidth is an extended dimension
+{\color{Salmon} \rule{100pt}{0.5mm}}
+
+\definecolor{mypink1}{rgb}{0.858, 0.188, 0.478}
+\definecolor{mypink2}{RGB}{219, 48, 122}
+\definecolor{mypink3}{cmyk}{0, 0.7808, 0.4429, 0.1412}
+
+\indent{\color{mypink1}Hello world!}
+
+\indent{\color{mypink2}Hello world!}
+
+\indent{\color{mypink3}Hello world!}
+
+Black \color{blue} Blue
+
+\vbox%works completely in vmode
+{\HINTcolor{fg{1 0 0}}
+
+  \rule{1in}{2mm}
+
+}
+
+{\HINTcolor{fg{1 0 1}}\aftergroup\HINTendcolor%works in vmode
+
+  \rule{1in}{2mm}
+
+}
+
+
+\vbox%works as a box
+{\color{green}
+
+  \rule{1in}{2mm}
+
+}
+
+{\color{red}\rule{1in}{2mm}}% red color remains because
+%the color changes in vmode before the paragraph and
+%the group ends before ending the paragraph
+%How to start a paragraph in TeX without sideeffects?
+
+\hbox{\color{green}\rule{1in}{2mm}}% has no indentation
+
+And here still Blue.
+
+Change x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x the color: \textcolor{red}{easily} locally.
+Use an \colorbox{green}{yellow x x x x x x x x x x x x\color{black} x x x x x x x x x x x x x x x x x x x x x x background} and then continue.
+
+\end{document}
+

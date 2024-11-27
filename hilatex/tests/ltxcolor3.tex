@@ -1,0 +1,47 @@
+\documentclass[10pt]{article}
+\usepackage{iftex}
+\usepackage{xcolor}
+
+\begin{document}
+Interaction with rules
+
+Black
+
+%Example 1:
+%\hrule will keep TeX in vertical mode. The grouping ends the color
+{\color{blue}
+\hrule height 2pt width 100pt
+}
+
+Black
+
+%Example 2:
+%\rule will start a paragraph.
+%The end of the group is part of the paragraph
+%and will not end the color blue in the vertical list.
+%see also ltxcolor2.tex for colors and paragraphs.
+%an extra blank line after the rule will move the end of the group
+%to the vertical list and solve the problem.
+%An \indent before the beginning of the group will move the
+%beginning of the group into the paragraph and solve the problem.
+{\color{blue}
+\rule{100pt}{2pt}
+}
+
+Black
+
+\color{black}
+
+%Example 3: Starting the paragraph before the color change
+%will make the grouping work again.
+Black
+
+{\indent\color{blue}
+\rule{100pt}{2pt}
+}
+
+Black
+
+
+\end{document}
+
