@@ -38,8 +38,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#define VERSION 1
-#define REVISION 4
+#define VERSION 2
+#define REVISION 1
 #define PATCHLEVEL 0
 
 #include "error.h"
@@ -51,19 +51,19 @@
 #include "rendernative.h"
 
 /* Error Handling */
-int hint_error(const char *title, const char *message)
+static int hint_error(const char *title, const char *message)
 { fprintf(stderr,"ERROR %s: %s\n",title,message);
   return 0;
 }
 
-int hmessage(char *title, char *format, ...)
+static int hmessage(char *title, char *format, ...)
 { va_list vargs;
   va_start(vargs,format);
   vfprintf(stderr, format, vargs);
   return 0;
 }
 
-void error_callback(int error, const char* description)
+static void error_callback(int error, const char* description)
 { hint_error("OpenGL",description);
   longjmp(hint_error_exit,1);
 }
