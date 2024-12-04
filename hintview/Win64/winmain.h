@@ -28,7 +28,7 @@
 #ifndef WINMAIN_H
 #define WINMAIN_H
 
-#define VERSION "Version 2.0.0"
+#define VERSION "Version 2.1.0"
 
 #if 0
 extern HDC hDCMain;  

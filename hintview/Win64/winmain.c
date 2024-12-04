@@ -760,9 +760,9 @@ WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst,
 	if (autoreload) SendMessage(hMainWnd,WM_COMMAND,ID_KEY_START_AUTORELOAD,0);
 	hAccel = LoadAccelerators(hInst, MAKEINTRESOURCE(IDR_ACCELERATOR));
 
-    ShowWindow(hMainWnd, SW_SHOW);
+    
 	HINT_TRY render_file();
-
+	ShowWindow(hMainWnd, SW_SHOW);
 	//SetFocus(hMainWnd);
 	 //BringWindowToTop(hMainWnd);
     //SetWindowPos(hMainWnd,HWND_TOP,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_SHOWWINDOW);
