@@ -14,8 +14,8 @@ android {
         applicationId 'edu.hm.cs.hintview'
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 8
-        versionName "2.0.2"
+        versionCode 9
+        versionName "2.1.0"
         externalNativeBuild {
             cmake {
                 // Available arguments are inside ${SDK}/cmake/.../android.toolchain.cmake file
