@@ -31,7 +31,7 @@
 #include "main.h"
 #include "error.h"
 #include <ft2build.h>
-#include FT_FREETYPE_H
+#include <freetype/freetype.h>
 #include "hint.h"
 #include "hfonts.h"
 #include "hrender.h"
