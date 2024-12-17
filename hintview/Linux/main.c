@@ -56,12 +56,15 @@ static int hint_error(const char *title, const char *message)
   return 0;
 }
 
+#if 0
+/* currently not used */
 static int hmessage(char *title, char *format, ...)
 { va_list vargs;
   va_start(vargs,format);
   vfprintf(stderr, format, vargs);
   return 0;
 }
+#endif
 
 static void error_callback(int error, const char* description)
 { hint_error("OpenGL",description);

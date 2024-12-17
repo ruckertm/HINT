@@ -1,0 +1,31 @@
+\documentclass[10pt]{article}
+\usepackage{iftex}
+\usepackage{graphicx}
+\ifhint
+% requires hhitex.def to be found by kpathseach
+\usepackage[customdriver=hhitex]{hyperref}
+\textwidth=\hsize % this is important because otherwise
+                  % reflow will not work.
+\else
+\usepackage{hyperref}
+\fi
+\begin{document}
+\listoffigures
+
+%% figures with other options than [h] e.g top or bottom dont work yet
+
+%\newpage
+Here you can see Figure~\ref{firstfig}.
+\par % For reasons unclear to me, the following figure
+     % will disappear if there is no \par here
+     % either explicitely or through an empty line.
+\begin{figure}[h]
+  \centering
+  \includegraphics[height=48pt]{A.jpg}
+  % For reasons unclear to me, the caption is not centered.
+  \caption{First Figure.} 
+  \label{firstfig}
+\end{figure}
+% Uncommenting this test gives a LaTeX Error: This may be a LaTeX bug.
+\end{document}
+
