@@ -136,6 +136,14 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
 
     public void setQueryString(String query) {
         queryString = query;
+        HINTVIEWLib.setSearchString(queryString);
+    }
+
+    public void nextSearch() {
+        HINTVIEWLib.searchNext();
+    }
+    public void prevSearch() {
+        HINTVIEWLib.searchPrev();
     }
 
 
@@ -343,9 +351,8 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
 
         public void onDrawFrame(GL10 gl) {
 
-            HINTVIEWLib.setMode(darkMode);
-            HINTVIEWLib.setQueryString(queryString);
-            HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi); /* needed for zooming */
+            //HINTVIEWLib.setMode(darkMode);
+            //HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi); /* needed for zooming */
             if (clearFonts) { clearFonts =false; HINTVIEWLib.clearFonts(); }
             if (HINTVIEWView.Page_prev) {
                 HINTVIEWLib.prev();
@@ -365,8 +372,8 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
             width = w;
             height = h;
             // already in onDrawFrame
-            //HINTVIEWLib.setMode(darkMode);
-            //HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi);
+            HINTVIEWLib.setMode(darkMode);
+            HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi);
             //render_OK();
         }
 

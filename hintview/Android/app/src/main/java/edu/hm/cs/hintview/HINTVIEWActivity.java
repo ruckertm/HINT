@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.WindowInsets;
 
 import android.app.Dialog;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
@@ -305,23 +306,27 @@ public class HINTVIEWActivity extends AppCompatActivity {
 
         final SearchView.OnQueryTextListener queryTextListener = new SearchView.OnQueryTextListener() {
             @Override
-            public boolean onQueryTextChange(String newText) {
+            public boolean onQueryTextChange(String query) {
+                mView.setQueryString(query);
+                mView.requestRender();
                 return true;
             }
 
             @Override
             public boolean onQueryTextSubmit(String query) {
-                mView.setQueryString(query);
+                mView.nextSearch();
                 mView.requestRender();
-                return true;
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(mView.getWindowToken(), 0);
+                 return true;
             }
         };
 
         final SearchView.OnCloseListener closeListener = new SearchView.OnCloseListener(){
             @Override
             public boolean onClose() {
-                mView.setQueryString(null);
-                mView.requestRender();
+                //mView.setQueryString(null);
+                //mView.requestRender();
                 return true;
             }
         };

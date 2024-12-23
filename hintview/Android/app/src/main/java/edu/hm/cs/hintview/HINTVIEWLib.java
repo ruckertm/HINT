@@ -33,7 +33,9 @@ public class HINTVIEWLib {
     public static native void setPos(long pos);
 
     public static native void setMode(boolean mode);
-    public static native void setQueryString(String queryString);
+    public static native void setSearchString(String queryString);
+    public static native void searchNext();
+    public static native void searchPrev();
 
     public static native void home();
 

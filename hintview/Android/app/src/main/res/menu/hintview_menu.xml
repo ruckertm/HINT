@@ -23,9 +23,8 @@
         android:id="@+id/search"
         android:actionViewClass="android.widget.SearchView"
         android:icon="@drawable/ic_search"
-        android:showAsAction="ifRoom|collapseActionView"
-        android:title="@string/search"
+        android:showAsAction="always|collapseActionView"
         android:textColorHint="@color/foreground_color"
-    />
+        android:title="@string/search" />
 
 </menu>

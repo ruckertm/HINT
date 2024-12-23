@@ -273,11 +273,35 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_home(JNIEnv *env, jclass obj) {
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_setQueryString(JNIEnv *env, jclass clazz, jstring query_string) {
+Java_edu_hm_cs_hintview_HINTVIEWLib_setSearchString(JNIEnv *env, jclass clazz, jstring query_string) {
     char *convertedValue = NULL;
     if (query_string != NULL) {
         jboolean isCopy;
         convertedValue = const_cast<char *>((env)->GetStringUTFChars(query_string, &isCopy));
+        hint_set_mark(convertedValue,strlen(convertedValue));
     }
-    //  set_search(&convertedValue[0]);
+    else
+        hint_set_mark(NULL,0);
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_searchNext(JNIEnv *env, jclass obj) {
+    // go to next mark
+    bool has_next;
+    uint64_t h=hint_page_get();
+    LOGI("hint_next_mark()\n");
+    HINT_TRY has_next=hint_next_mark(); HINT_CATCH("next mark");
+    if (!has_next)
+        hint_page_top(h); // return to the start page if nothing found
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_edu_hm_cs_hintview_HINTVIEWLib_searchPrev(JNIEnv *env, jclass obj) {
+    // go to prev mark
+    bool has_prev;
+    uint64_t h=hint_page_get();
+    LOGI("hint_prev_mark()\n");
+    HINT_TRY has_prev=hint_prev_mark(); HINT_CATCH("prev mark");
+    if (!has_prev)
+        hint_page_top(h); // return to the start page if nothing found
 }
