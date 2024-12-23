@@ -9,12 +9,12 @@ android {
             keyPassword 'some password'
         }
     }
-    compileSdk 33
+    compileSdk 34
     defaultConfig {
         applicationId 'edu.hm.cs.hintview'
         minSdkVersion 21
-        targetSdkVersion 33
-        versionCode 9
+        targetSdkVersion 34
+        versionCode 10
         versionName "2.1.0"
         externalNativeBuild {
             cmake {

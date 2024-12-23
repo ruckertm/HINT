@@ -1,7 +1,7 @@
 
 package edu.hm.cs.hintview;
 
-//import android.app.SearchManager;
+import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 //import android.content.DialogInterface;
@@ -25,6 +25,9 @@ import android.view.WindowInsets;
 import android.app.Dialog;
 import android.widget.Button;
 import android.view.View.OnClickListener;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.text.method.LinkMovementMethod;
 //import android.widget.TextView;
@@ -41,7 +44,9 @@ import java.io.IOException;
 public class HINTVIEWActivity extends AppCompatActivity {
     private static final String TAG = "HINTVIEWActivity";
     private HINTVIEWView mView;
-    private static Toolbar toolbar;
+    private static Toolbar toolbar = null;
+    private static SearchView searchView = null;
+    private static Menu searchMenu = null;
     private SharedPreferences sharedPref;
     private boolean darkMode = false;
 
@@ -147,6 +152,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
         toolbar.setBackgroundColor(toolbar_color);
         toolbar.setTitleTextColor(text_color);
         setOverflowButtonColor(text_color);
+        setSearchWidgetColor(text_color);
     }
 
     private void setOverflowButtonColor(final int color) {
@@ -158,6 +164,69 @@ public class HINTVIEWActivity extends AppCompatActivity {
         }
     }
 
+    private void setSearchWidgetColor (final int color) {
+        if (searchView != null) {
+            MenuItem searchItem = searchMenu.findItem(R.id.search);
+            Drawable drawable = searchItem.getIcon();
+            if (drawable != null) {
+                drawable = DrawableCompat.wrap(drawable);
+                DrawableCompat.setTint(drawable.mutate(), color);
+                searchItem.setIcon(drawable);
+            }
+
+            //drawable.setColorFilter(BlendModeColorFilterCompat.createBlendModeColorFilterCompat(color, BlendModeCompat.SRC_ATOP));
+            EditText searchText = (EditText) searchView.findViewById(searchView.getContext()
+                    .getResources()
+                    .getIdentifier("android:id/search_src_text", null, null));
+            //AutoCompleteTextView searchText = (AutoCompleteTextView) searchView.findViewById(R.id.search_src_text);
+
+            if (searchText != null) {
+                searchText.setHintTextColor(color);
+                searchText.setTextColor(color);
+                searchText.setHighlightColor(color);
+                searchText.setLinkTextColor(color);
+            }
+
+            ImageView searchIcon = (ImageView) searchView.findViewById(searchView.getContext()
+                    .getResources()
+                    .getIdentifier("android:id/search_go_btn", null, null));
+
+            if (searchIcon != null) {
+                searchIcon.setColorFilter(color);
+            }
+            searchIcon = (ImageView) searchView.findViewById(searchView.getContext()
+                    .getResources()
+                    .getIdentifier("android:id/search_close_btn", null, null));
+
+            if (searchIcon != null) {
+                searchIcon.setColorFilter(color);
+            }
+
+            searchIcon = (ImageView) searchView.findViewById(searchView.getContext()
+                    .getResources()
+                    .getIdentifier("android:id/search_mag_icon", null, null));
+
+            if (searchIcon != null) {
+                searchIcon.setColorFilter(color);
+            }
+
+            searchIcon = (ImageView) searchView.findViewById(searchView.getContext()
+                    .getResources()
+                    .getIdentifier("android:id/search_button", null, null));
+
+            if (searchIcon != null) {
+                searchIcon.setColorFilter(color);
+            }
+
+            searchIcon = (ImageView) searchView.findViewById(searchView.getContext()
+                    .getResources()
+                    .getIdentifier("android:id/search_voice_btn", null, null));
+
+            if (searchIcon != null) {
+                searchIcon.setColorFilter(color);
+            }
+        }
+    }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
@@ -223,19 +292,51 @@ public class HINTVIEWActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+	 searchMenu = menu;
         new MenuInflater(this).inflate(R.menu.hintview_menu, menu);
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        searchView =
+                (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getComponentName()));
+        searchView.setSubmitButtonEnabled(true);
+
+        final SearchView.OnQueryTextListener queryTextListener = new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                mView.setQueryString(query);
+                mView.requestRender();
+                return true;
+            }
+        };
+
+        final SearchView.OnCloseListener closeListener = new SearchView.OnCloseListener(){
+            @Override
+            public boolean onClose() {
+                mView.setQueryString(null);
+                mView.requestRender();
+                return true;
+            }
+        };
+
+        searchView.setOnQueryTextListener(queryTextListener);
+        searchView.setOnCloseListener(closeListener);
+
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        boolean hideToolbar = true, success=true;
         super.onOptionsItemSelected(item);
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                hideToolbar(mView, false);
-            }
-        }, 80);
+
         switch (item.getItemId()) {
             case R.id.about: {
                 final Dialog dialog = new Dialog(this);
@@ -258,7 +359,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
                 linkTextView.setMovementMethod(LinkMovementMethod.getInstance());
                 dialog.show();
             }
-             return true;
+            break;
             case R.id.dark:
                 darkMode = !item.isChecked();
                 //Log.d(TAG, "onOptionsItemSelected: dark=" + darkMode);
@@ -266,25 +367,38 @@ public class HINTVIEWActivity extends AppCompatActivity {
                 item.setChecked(darkMode);
                 setToolbar(darkMode);
                 mView.requestRender();
-                return true;
+                break;
             case R.id.fileChooser:
                 //Log.d(TAG, "onOptionsItemSelected: File Chooser");
                 openFileChooser();
-                return true;
+                break;
             case R.id.toHome:
                 //Log.d(TAG, "to first page");
                 HINTVIEWLib.home();
                 mView.requestRender();
-                return true;
+                break;
             case R.id.scaleOne:
                 //Log.d(TAG, "scale one");
                 mView.setScale(1.0);
-                mView.clearFonts =true;
+                mView.clearFonts = true;
                 mView.requestRender();
-                return true;
+                break;
+            case R.id.search:
+                hideToolbar = false;
+                break;
             default:
-                return false;
+                success=false;
+                break;
         }
+        if (hideToolbar) {
+            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    hideToolbar(mView, false);
+                }
+            }, 80);
+        }
+        return success;
     }
 
     public void openFileChooser() {
