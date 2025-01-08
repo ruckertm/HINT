@@ -1,0 +1,24 @@
+\documentclass{article}
+\usepackage{iftex}
+\usepackage[linkcolor=green,urlcolor=red]{hyperref}
+\usepackage[dvipsnames]{xcolor}
+
+\begin{document}
+The color of links and url's:
+
+\begin{equation}
+\label{eq:1}
+\sum_{i=0}^{\infty} a_i x^i
+\end{equation}
+
+The equation \ref{eq:1}
+shows a sum that is divergent.
+For further references see
+\href{http://www.overleaf.com}{Something  Linky}. 
+Or look into
+\tracingmacros=1
+\href{run:./file.txt}{File.txt}.
+\tracingmacros=0
+End of document.
+
+\end{document}

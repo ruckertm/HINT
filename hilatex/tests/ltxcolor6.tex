@@ -1,0 +1,17 @@
+\documentclass{article}
+\usepackage{iftex}
+\usepackage[linkcolor=green,urlcolor=red]{hyperref}
+\usepackage[dvipsnames]{xcolor}
+
+\begin{document}
+\makeatletter
+\def\testclr#1#{\@testclr{#1}}
+\def\@testclr#1#2{{\fboxsep\z@\fbox{\colorbox#1{#2}{\phantom{XX}}}}}
+\makeatother
+
+Mixing colors:
+How does a mixture of 40\% green and 60\% yellow look like?
+\verb/\color{green!40!yellow}/ 
+Answer: 40\% \testclr{green} $+$ 60\% \testclr{yellow} $=$ \testclr{green!40!yellow}
+
+\end{document}

@@ -1,0 +1,43 @@
+\documentclass[10pt]{article}
+\usepackage{iftex}
+% use new ...
+\usepackage{xcolor}
+
+\begin{document}
+Interaction of grouping with paragraphs:
+
+% Example 1:
+% Color change is local to paragraph. The end of the group is ignored.
+% This example is probably OK. No one should need to write such code.
+
+Black { \color{blue} Blue
+
+Blue } Black
+
+%Example 2:
+% When the group starts TeX is in vertical mode.
+% The color change is part of the vertical list.
+% Then end of the group is inside the paragraph and
+% The \HINTendcolor will not find a color change in the
+% paragraph to pop. So its ignored.
+% The following paragraph is still blue.
+% This is unfortunate!
+
+{\color{blue} Blue} Black
+
+Black
+
+
+% Back to black.
+\color{black}
+
+% Example 3:
+% This version works. The \indent puts TeX into horizontal mode
+% and starts the paragraph before starting the group and changing
+% the color.
+\indent {\color{blue} Blue} Black
+
+Black
+
+\end{document}
+

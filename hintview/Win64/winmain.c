@@ -280,7 +280,7 @@ static void open_file(void)
 	SetNavigationTree();
   }
   else
-    hint_message("Unknown File Type","I dont know how to open this file");
+    hint_message("Unknown File Type","I dont know how to open this file:\n%s",hin_name);
   SetWindowText(hMainWnd,title_name);
 }
 
@@ -656,7 +656,7 @@ static int do_command_line(char *c)
 	  /* scan filename */
 	  if (*c=='"') { c++; quoted=true; }
       i=0;
-      while (*c!=0 && !isspace(*c) && i<MAX_PATH)
+      while (*c!=0 && (!isspace(*c)||quoted) && i<MAX_PATH)
 	    new_name[i++]=*c++;
 	  if (quoted && new_name[i-1]=='"') i--;
       new_name[i]=0;
@@ -718,7 +718,6 @@ WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst,
 #else
 	hlog=stderr;
 #endif 
-
 	SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
 	if (!InitInstance (hCurrentInst)) return FALSE;
 	InitGLextensions(); 
@@ -752,6 +751,7 @@ WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst,
 
 	read_regtab(); 
 	do_command_line(lpCmdLine);
+
 	SetWindowText(hMainWnd,title_name);
 	printer_init();
 	init_button_class();
@@ -760,9 +760,9 @@ WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst,
 	if (autoreload) SendMessage(hMainWnd,WM_COMMAND,ID_KEY_START_AUTORELOAD,0);
 	hAccel = LoadAccelerators(hInst, MAKEINTRESOURCE(IDR_ACCELERATOR));
 
-    ShowWindow(hMainWnd, SW_SHOW);
+    
 	HINT_TRY render_file();
-
+	ShowWindow(hMainWnd, SW_SHOW);
 	//SetFocus(hMainWnd);
 	 //BringWindowToTop(hMainWnd);
     //SetWindowPos(hMainWnd,HWND_TOP,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_SHOWWINDOW);
