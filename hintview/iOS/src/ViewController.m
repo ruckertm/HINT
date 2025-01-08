@@ -337,7 +337,7 @@ void redisplay(void)
 
 
 - (IBAction)theOpenButton:(UIBarButtonItem *)sender {
-    UTType *hint =  [UTType typeWithIdentifier:@"edu.hm.cs.hint.hintview.hnt"]; // defined in Info.plist
+    UTType *hint =  [UTType typeWithIdentifier:@"edu.hm.cs.hintview.hnt"]; // defined in Info.plist
     UIDocumentPickerViewController *pick =[[UIDocumentPickerViewController alloc]
     initForOpeningContentTypes: @[hint]];
     pick.delegate = self;
@@ -409,7 +409,7 @@ BOOL open_file(NSURL *url)
 
 /* Droping Files */
 - (BOOL)dropInteraction:(UIDropInteraction *)interaction canHandleSession:(id<UIDropSession>)session {
-    BOOL ok= [session hasItemsConformingToTypeIdentifiers:@[@"edu.hm.cs.hint.hintview.hnt"]];
+    BOOL ok= [session hasItemsConformingToTypeIdentifiers:@[@"edu.hm.cs.hintview.hnt"]];
     //NSLog(@"session: %d",ok);
     return ok;
 }
@@ -426,7 +426,7 @@ BOOL open_file(NSURL *url)
 { //Used when dropping a file onto HintView
     if (session.items.count == 0) return;
     NSItemProvider *p = [session.items firstObject].itemProvider;
-    [p loadInPlaceFileRepresentationForTypeIdentifier:@"edu.hm.cs.hint.hintview.hnt"
+    [p loadInPlaceFileRepresentationForTypeIdentifier:@"edu.hm.cs.hintview.hnt"
         completionHandler:^(NSURL * _Nullable url, BOOL isInPlace, NSError * _Nullable error) {
         NSLog(@"Drop Path %@",url);
         open_file(url);

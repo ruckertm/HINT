@@ -226,7 +226,7 @@
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" utility="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="-3063" y="172" width="480" height="256"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1280" height="775"/>
+            <rect key="screenRect" x="-2560" y="0.0" width="2560" height="1415"/>
             <view key="contentView" id="n56-fI-i8J" customClass="PrefView">
                 <rect key="frame" x="0.0" y="0.0" width="480" height="256"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -317,7 +317,7 @@
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" utility="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="-3063" y="172" width="276" height="378"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1280" height="775"/>
+            <rect key="screenRect" x="-2560" y="0.0" width="2560" height="1415"/>
             <view key="contentView" id="Mwj-YW-ZZ6">
                 <rect key="frame" x="0.0" y="0.0" width="276" height="378"/>
                 <autoresizingMask key="autoresizingMask"/>
@@ -370,7 +370,7 @@
                             </subviews>
                         </clipView>
                         <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="s2G-r7-nam">
-                            <rect key="frame" x="1" y="362" width="275" height="16"/>
+                            <rect key="frame" x="1" y="363" width="275" height="15"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                         <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="hMZ-qB-VEL">

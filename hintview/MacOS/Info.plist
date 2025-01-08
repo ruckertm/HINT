@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleDisplayName</key>
@@ -19,7 +21,7 @@
 			<string>Default</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>edu.hm.cs.hint.hintview.hnt</string>
+				<string>edu.hm.cs.hintview.hnt</string>
 			</array>
 		</dict>
 	</array>
@@ -53,7 +55,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleSignature</key>
-	<string>????</string>
+	<string>macOS</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -62,12 +64,13 @@
 			<key>CFBundleURLIconFile</key>
 			<string>HINTLogoBuchGrey128.png</string>
 			<key>CFBundleURLName</key>
-			<string>edu.hm.cs.hint.hintview.hnt</string>
+			<string>edu.hm.cs.hintview.hnt</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>*.hnt</string>
+				<string>hnt</string>
 			</array>
 		</dict>
+		<dict/>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
@@ -102,7 +105,7 @@
 				<string>HINT</string>
 			</dict>
 			<key>UTTypeIdentifier</key>
-			<string>edu.hm.cs.hint.hintview.hnt</string>
+			<string>edu.hm.cs.hintview.hnt</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -131,7 +134,7 @@
 				<string>HINT</string>
 			</dict>
 			<key>UTTypeIdentifier</key>
-			<string>edu.hm.cs.hint.hintview.hnt</string>
+			<string>edu.hm.cs.hintview.hnt</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>

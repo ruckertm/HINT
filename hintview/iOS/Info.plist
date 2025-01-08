@@ -2,29 +2,25 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>UISupportsDocumentBrowser</key>
-	<true/>
-	<key>UIFileSharingEnabled</key>
-	<true/>
-	<key>LSSupportsOpeningDocumentsInPlace</key>
-	<true/>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
 			<key>CFBundleTypeIconFile</key>
 			<string>HINT.icns</string>
-			<key>CFBundleTypeRole</key>
-			<string>Viewer</string>
 			<key>CFBundleTypeName</key>
 			<string>HINT Document</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
 			<key>LSHandlerRank</key>
 			<string>Owner</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>edu.hm.cs.hint.hintview.hnt</string>
+				<string>edu.hm.cs.hintview.hnt</string>
 			</array>
 		</dict>
 	</array>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -44,6 +40,8 @@
 			</array>
 		</dict>
 	</dict>
+	<key>UIFileSharingEnabled</key>
+	<false/>
 	<key>UTExportedTypeDeclarations</key>
 	<array>
 		<dict>
@@ -59,7 +57,7 @@
 				<string>HINT.icns</string>
 			</array>
 			<key>UTTypeIdentifier</key>
-			<string>edu.hm.cs.hint.hintview.hnt</string>
+			<string>edu.hm.cs.hintview.hnt</string>
 			<key>UTTypeReferenceURL</key>
 			<string>https://hint.userweb.mwn.de/hint/hintview.html</string>
 			<key>UTTypeTagSpecification</key>
@@ -88,7 +86,7 @@
 			<key>UTTypeIconFiles</key>
 			<array/>
 			<key>UTTypeIdentifier</key>
-			<string>edu.hm.cs.hint.hintview.hnt</string>
+			<string>edu.hm.cs.hintview.hnt</string>
 			<key>UTTypeReferenceURL</key>
 			<string>https://hint.userweb.mwn.de/hint/hintview.html</string>
 			<key>UTTypeTagSpecification</key>

@@ -262,6 +262,7 @@
 		55004CF6285CAC15002FF214 /* libfreetype.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libfreetype.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		5504FB8528646FF30023DBDE /* PrefView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PrefView.m; sourceTree = "<group>"; };
 		5504FB87286470570023DBDE /* PrefView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PrefView.h; sourceTree = "<group>"; };
+		5528AFA92CFE00C4002F1612 /* hintviewRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = hintviewRelease.entitlements; sourceTree = "<group>"; };
 		556150532869D0E50049FDCB /* Sections.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Sections.h; sourceTree = "<group>"; };
 		556150542869D0E50049FDCB /* Sections.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Sections.m; sourceTree = "<group>"; };
 		558EA12E285219B100595100 /* app.help */ = {isa = PBXFileReference; lastKnownFileType = folder; path = app.help; sourceTree = "<group>"; };
@@ -379,6 +380,7 @@
 		29B97314FDCFA39411CA2CEA /* Cocoa OpenGL */ = {
 			isa = PBXGroup;
 			children = (
+				5528AFA92CFE00C4002F1612 /* hintviewRelease.entitlements */,
 				55004BDD285C9AF5002FF214 /* freetype */,
 				55004B9A285C80C6002FF214 /* zlibstatic */,
 				55004B9728573E0E002FF214 /* HINTLogoBuchGrey128.png */,
@@ -1053,24 +1055,29 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "3rd Party Mac Developer Application";
+				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2.1.0;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = Y8DAR84XLS;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = V3Q8F4UF64;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				"HEADER_SEARCH_PATHS[arch=*]" = "../external/freetype-2.12.1/include";
 				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Applications";
+				INFOPLIST_KEY_CFBundleDisplayName = HintView;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INSTALL_PATH = /Applications;
 				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
-				MARKETING_VERSION = "Version 2.0";
+				MARKETING_VERSION = 2.1.0;
 				"PRELINK_LIBS[arch=*]" = "";
-				PRODUCT_BUNDLE_IDENTIFIER = edu.hm.cs.hint.hintview;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.hm.cs.hintview;
 				PRODUCT_NAME = hintview;
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = HintView;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = HintView;
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = YES;
@@ -1084,26 +1091,32 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
+				CODE_SIGN_ENTITLEMENTS = hintviewRelease.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "3rd Party Mac Developer Application";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 2.1.0;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = Y8DAR84XLS;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = V3Q8F4UF64;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				"HEADER_SEARCH_PATHS[arch=*]" = "../external/freetype-2.12.1/include";
 				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Applications";
+				INFOPLIST_KEY_CFBundleDisplayName = HintView;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INSTALL_PATH = /Applications;
 				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
-				MARKETING_VERSION = "Version 2.0";
+				MARKETING_VERSION = 2.1.0;
 				"OTHER_LDFLAGS[arch=*]" = (
 					"-lfreetype",
 					"-lz",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = edu.hm.cs.hint.hintview;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.hm.cs.hintview;
 				PRODUCT_NAME = hintview;
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = HintView;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = HintView;
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
 			};
@@ -1131,6 +1144,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CURRENT_PROJECT_VERSION[sdk=*]" = 2.1.0;
 				DEAD_CODE_STRIPPING = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -1178,6 +1192,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CURRENT_PROJECT_VERSION[sdk=*]" = 2.1.0;
 				DEAD_CODE_STRIPPING = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
