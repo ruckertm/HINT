@@ -230,8 +230,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_clearFonts(JNIEnv *env, jclass obj) {
     hint_clear_fonts(true);
 }
 
-
-    extern "C" JNIEXPORT void JNICALL
+extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_next(JNIEnv *env, jclass obj) {
     LOGI("hint_next_page\n");
     HINT_TRY hint_page_next();HINT_CATCH("next");
@@ -271,7 +270,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_home(JNIEnv *env, jclass obj) {
     LOGI("hint_home_page()\n");
     HINT_TRY hint_page_home();HINT_CATCH("home page");
 }
-
+static uint64_t Search_start_pos=HINT_NO_POS;
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_setSearchString(JNIEnv *env, jclass clazz, jstring query_string) {
     char *convertedValue = NULL;
@@ -282,17 +281,34 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_setSearchString(JNIEnv *env, jclass clazz, j
     }
     else
         hint_set_mark(NULL,0);
+    Search_start_pos=HINT_NO_POS;
 }
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_searchNext(JNIEnv *env, jclass obj) {
     // go to next mark
+
+    static bool wrap=true, found= false;
     bool has_next;
-    uint64_t h=hint_page_get();
+
+    if (Search_start_pos==HINT_NO_POS) {
+        Search_start_pos = hint_page_get();
+        wrap = true; found=false;
+    }
     LOGI("hint_next_mark()\n");
     HINT_TRY has_next=hint_next_mark(); HINT_CATCH("next mark");
-    if (!has_next)
-        hint_page_top(h); // return to the start page if nothing found
+    if (!has_next && wrap)
+    { hint_page_top(0); // return to the first page
+      HINT_TRY has_next=hint_next_mark(); HINT_CATCH("next mark");
+      wrap = false;
+    }
+    if (!wrap && (!has_next || Search_start_pos < hint_page_get()))
+    { if (!found)
+        hint_page_top(Search_start_pos); // return to the start page if nothing found
+      Search_start_pos=HINT_NO_POS;
+    }
+    if (has_next)
+      found=true;
 }
 
 extern "C" JNIEXPORT void JNICALL

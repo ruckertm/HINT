@@ -24,6 +24,7 @@ public class ScaleGestureHandler extends ScaleGestureDetector.SimpleOnScaleGestu
         HINTVIEWView.clearFonts =true;
         //Log.w(TAG, "onScaleEnd "+ detector.isInProgress());
         view.requestRender();
+        HINTVIEWView.ZoomOn=false;
        }
     @Override
     public boolean onScale(ScaleGestureDetector detector) {

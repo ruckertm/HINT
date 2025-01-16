@@ -36,6 +36,7 @@ import android.text.method.LinkMovementMethod;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 
 import java.io.FileNotFoundException;
@@ -140,14 +141,14 @@ public class HINTVIEWActivity extends AppCompatActivity {
     }
 
     void setToolbar(boolean darkMode) {
-        int toolbar_color = mView.getContext().getResources().getColor(R.color.toolbar_color);
-        int text_color = mView.getContext().getResources().getColor(R.color.foreground_color);
+        int toolbar_color = ContextCompat.getColor(mView.getContext(),R.color.toolbar_color);
+        int text_color = ContextCompat.getColor(mView.getContext(),R.color.foreground_color);
         int nightModeFlags = mView.getContext().getResources().getConfiguration().uiMode &
                 Configuration.UI_MODE_NIGHT_MASK;
 
         if (darkMode && (nightModeFlags == Configuration.UI_MODE_NIGHT_NO)) {
-            toolbar_color = mView.getContext().getResources().getColor(R.color.toolbar_dark_color);
-            text_color = mView.getContext().getResources().getColor(R.color.foreground_dark_color);
+            toolbar_color = ContextCompat.getColor(mView.getContext(),R.color.toolbar_dark_color);
+            text_color = ContextCompat.getColor(mView.getContext(),R.color.foreground_dark_color);
         }
 
         toolbar.setBackgroundColor(toolbar_color);
@@ -314,8 +315,10 @@ public class HINTVIEWActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextSubmit(String query) {
-                mView.nextSearch();
+                HINTVIEWView.Search_next=true;
                 mView.requestRender();
+                //mView.nextSearch();
+                //mView.requestRender();
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(mView.getWindowToken(), 0);
                  return true;

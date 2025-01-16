@@ -98,4 +98,5 @@ typedef struct gcache_s Gcache;
 
 
 #endif
+#line 8340 "hint.w"
 /*:402*/
