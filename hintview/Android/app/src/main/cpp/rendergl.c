@@ -79,6 +79,7 @@ static void printGLString(const char *name, GLenum s) {
 static GLuint gvPositionHandle;
 static GLuint ProgramID, MatrixID, RuleID, GammaID, FGcolorID, IsImageID, ImageID=0;
 static unsigned char *last_b=NULL;
+static uint32_t cur_fg=0;
 
 static const char *VertexShader =
         "#version 100\n"
@@ -228,6 +229,7 @@ extern void nativeInit(void)
   glUniform1f(GammaID, 1.0f/2.2f);
   glUniform1i(IsImageID, 0);
   glUniform4f(FGcolorID, 0.0, 0.0, 0.0, 1.0); // black as default foreground
+  cur_fg=0xFF;
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // white as default background
   cur_colorset=color_defaults;
 
@@ -274,7 +276,7 @@ void nativeSetGamma(double gamma)
 
 #if 1
 
-static uint32_t cur_fg=0;
+
 
 static void nativeSetForeground(uint32_t fg)
 /* set foreground rgba colors */

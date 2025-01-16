@@ -52,8 +52,9 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
     private static int width, height;
     protected Renderer fileRenderer;
     private static boolean darkMode = false;
+    private static String queryString;
     protected static boolean ZoomOn = false, clearFonts = false, Zooming = false;
-    protected static boolean Page_next = false, Page_prev = false;
+    protected static boolean Page_next = false, Page_prev = false, Search_next = false;
     private GestureDetector touchGestureDetector;
     private ScaleGestureDetector scaleGestureDetector;
     protected final Context context;
@@ -133,6 +134,17 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         darkMode = mode;
     }
 
+    public void setQueryString(String query) {
+        queryString = query;
+        HINTVIEWLib.setSearchString(queryString);
+    }
+
+    public void nextSearch() {
+        HINTVIEWLib.searchNext();
+    }
+    public void prevSearch() {
+        HINTVIEWLib.searchPrev();
+    }
 
 
     private static class ContextFactory implements GLSurfaceView.EGLContextFactory {
@@ -338,18 +350,25 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         }
 
         public void onDrawFrame(GL10 gl) {
-
             HINTVIEWLib.setMode(darkMode);
-            HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi); /* needed for zooming */
+            if (Zooming) {
+                HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi); /* needed for zooming */
+                Zooming=false;
+            }
             if (clearFonts) { clearFonts =false; HINTVIEWLib.clearFonts(); }
-            if (HINTVIEWView.Page_prev) {
+            if (Page_prev) {
                 HINTVIEWLib.prev();
-                HINTVIEWView.Page_prev = false;
+                Page_prev = false;
             }
-            if (HINTVIEWView.Page_next) {
+            if (Page_next) {
                 HINTVIEWLib.next();
-                HINTVIEWView.Page_next = false;
+                Page_next = false;
             }
+            if (Search_next) {
+                HINTVIEWLib.searchNext();
+                Search_next = false;
+            }
+
             if (!render_OK()) return;
 
             HINTVIEWLib.draw();
@@ -359,10 +378,9 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         public void onSurfaceChanged(GL10 gl, int w, int h) {
             width = w;
             height = h;
-            // already in onDrawFrame
-            //HINTVIEWLib.setMode(darkMode);
-            //HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi);
-            //render_OK();
+            HINTVIEWLib.setMode(darkMode);
+            HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi);
+            render_OK();
         }
 
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {

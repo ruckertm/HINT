@@ -56,4 +56,5 @@ void nativeFreeGlyph(struct gcache_s*g);
 #line 8376 "hint.w"
 
 #endif
+#line 8378 "hint.w"
 /*:404*/
