@@ -19,7 +19,7 @@
 
 #define POP_BIT 0x80 \
 
-#define VERSION_STR "texprofile version 1.0" \
+#define VERSION_STR "1.1" \
 
 #define max_command 100 \
 
@@ -109,59 +109,59 @@ int*file_line;
 int*cmd_freq;
 int cur_depth;
 /*:24*//*29:*/
-#line 779 "texprofile.w"
+#line 781 "texprofile.w"
 
 bool opt_raw= false;
 bool opt_raw_stack= false;
 bool opt_raw_num= false;
 /*:29*//*35:*/
-#line 843 "texprofile.w"
+#line 845 "texprofile.w"
 
 bool opt_stack= false;
 /*:35*//*39:*/
-#line 882 "texprofile.w"
+#line 884 "texprofile.w"
 
 bool opt_summary= true;
 /*:39*//*43:*/
-#line 915 "texprofile.w"
+#line 917 "texprofile.w"
 
 bool opt_machine= false;
 #define Mprintf(...) opt_machine?(void)0:printf(__VA_ARGS__)
 /*:43*//*48:*/
-#line 965 "texprofile.w"
+#line 967 "texprofile.w"
 
 bool opt_files= false;
 /*:48*//*52:*/
-#line 999 "texprofile.w"
+#line 1001 "texprofile.w"
 
 bool opt_cmd= false;
 /*:52*//*57:*/
-#line 1057 "texprofile.w"
+#line 1059 "texprofile.w"
 
 bool opt_macro= false;
 /*:57*//*66:*/
-#line 1182 "texprofile.w"
+#line 1184 "texprofile.w"
 
 int line_num= 0;
 /*:66*//*68:*/
-#line 1204 "texprofile.w"
+#line 1206 "texprofile.w"
 
 static uint64_t*line_time= NULL;
 static int*line_freq= NULL;
 /*:68*//*70:*/
-#line 1241 "texprofile.w"
+#line 1243 "texprofile.w"
 
 double percent_limit= 1.0;
 bool opt_lines= false;
 /*:70*//*75:*/
-#line 1308 "texprofile.w"
+#line 1310 "texprofile.w"
 
 static uint64_t*tt_time;
 static int*tt_file,*tt_line;
 static int tt= 10+1,tt_count;;
 bool opt_top_ten;
 /*:75*//*82:*/
-#line 1440 "texprofile.w"
+#line 1442 "texprofile.w"
 
 struct edge{
 uint16_t child,sibling;
@@ -170,11 +170,11 @@ uint64_t T,L,ts,Ts;
 }*edges;
 int edges_count,edges_num;
 /*:82*//*88:*/
-#line 1546 "texprofile.w"
+#line 1548 "texprofile.w"
 
 bool opt_graph= false;
 /*:88*//*106:*/
-#line 1796 "texprofile.w"
+#line 1798 "texprofile.w"
 
 static char*cmd_name[]= {
 "relax",
@@ -344,7 +344,7 @@ static const int sys_line_num= sizeof(line_name)/sizeof(*line_name);
 #line 205 "texprofile.w"
 
 /*103:*/
-#line 1743 "texprofile.w"
+#line 1745 "texprofile.w"
 
 int error(char*msg)
 {fprintf(stderr,"texprofile: %s\n",msg);
@@ -352,7 +352,7 @@ exit(1);
 return 0;
 }
 /*:103*//*104:*/
-#line 1754 "texprofile.w"
+#line 1756 "texprofile.w"
 
 int commandline_error(char*msg)
 {fprintf(stderr,"texprofile: %s\n",msg);
@@ -463,7 +463,7 @@ void print_macro(int i)
 if(opt_macro_id)printf(" [%d,%d]",macro_defs[i].f,macro_defs[i].l);
 }
 /*:23*//*46:*/
-#line 929 "texprofile.w"
+#line 931 "texprofile.w"
 
 char*time_str(double t)
 {static char str[20];
@@ -482,7 +482,7 @@ snprintf(str,20,"  %7.2f s",t/1000000000.0);
 return str;
 }
 /*:46*//*47:*/
-#line 951 "texprofile.w"
+#line 953 "texprofile.w"
 
 void print_fl(int f,int l)
 {if(f==system_file&&!opt_machine)
@@ -491,7 +491,7 @@ else
 printf("%4d\t%5d",f,l);
 }
 /*:47*//*63:*/
-#line 1118 "texprofile.w"
+#line 1120 "texprofile.w"
 
 void sort_edges(uint16_t p)
 {int i,j,k;
@@ -515,7 +515,7 @@ edges[k].sibling= j;
 macro_defs[p].e= edges[0].sibling;
 }
 /*:63*//*65:*/
-#line 1148 "texprofile.w"
+#line 1150 "texprofile.w"
 
 void sort_macros(void)
 {int i,k,j;
@@ -540,13 +540,13 @@ sort_edges(i);
 sorted= true;
 }
 /*:65*//*69:*/
-#line 1216 "texprofile.w"
+#line 1218 "texprofile.w"
 
 void collect_line_time(void)
 {int i,cur_f= -1,cur_l= -1;
 if(line_time!=NULL)return;
 /*67:*/
-#line 1187 "texprofile.w"
+#line 1189 "texprofile.w"
 
 line_num= 0;
 for(i= 0;i<file_num;i++)
@@ -556,20 +556,20 @@ line_num= line_num+fl+1;
 }
 file_line[file_num]= line_num;
 /*:67*/
-#line 1221 "texprofile.w"
+#line 1223 "texprofile.w"
 
 ALLOCATE(line_time,line_num);
 ALLOCATE(line_freq,line_num);
 for(i= 0;i<stamp_num;i++)
 {/*34:*/
-#line 834 "texprofile.w"
+#line 836 "texprofile.w"
 
 uint32_t t= stamps[i].t;
 uint16_t l= stamps[i].l;
 uint8_t f= stamps[i].f;
 uint8_t c= stamps[i].c;
 /*:34*/
-#line 1225 "texprofile.w"
+#line 1227 "texprofile.w"
 
 if(c<=system_profile_off)
 {line_time[file_line[f]+l]+= t;
@@ -581,7 +581,7 @@ cur_f= f;cur_l= l;
 }
 }
 /*:69*//*84:*/
-#line 1458 "texprofile.w"
+#line 1460 "texprofile.w"
 
 uint16_t new_edge(void)
 {if(edges_count<edges_num)
@@ -590,7 +590,7 @@ REALLOC(edges,edges_count,edges_num);
 return edges_count++;
 }
 /*:84*//*85:*/
-#line 1476 "texprofile.w"
+#line 1478 "texprofile.w"
 
 void start_child(int p,int c)
 {int e= macro_defs[p].e;
@@ -626,7 +626,7 @@ edges[e].Ts+= edges[i].T;
 }
 }
 /*:85*//*86:*/
-#line 1516 "texprofile.w"
+#line 1518 "texprofile.w"
 
 void end_child(int p,int c)
 {uint16_t e= macro_defs[p].e;
@@ -653,7 +653,7 @@ edges[e].T+= dt-dT;
 edges[e].a--;
 }
 /*:86*//*96:*/
-#line 1680 "texprofile.w"
+#line 1682 "texprofile.w"
 
 void explain_usage(void)
 {fprintf(stderr,
@@ -661,60 +661,60 @@ void explain_usage(void)
 "texprofile [-options] <input file>\n"
 "options:\n"
 /*98:*/
-#line 1705 "texprofile.w"
+#line 1707 "texprofile.w"
 
 "-?        display this help and exit\n"
 "--help    display this help and exit\n"
 /*:98*//*102:*/
-#line 1735 "texprofile.w"
+#line 1737 "texprofile.w"
 
 "--version output version information and exit\n"
 /*:102*/
-#line 1686 "texprofile.w"
+#line 1688 "texprofile.w"
 
 "\n"
 /*31:*/
-#line 791 "texprofile.w"
+#line 793 "texprofile.w"
 
 "-R    show the table of raw time stamps\n"
 /*:31*//*37:*/
-#line 851 "texprofile.w"
+#line 853 "texprofile.w"
 
 "-S    show the table of macro stack changes\n"
 /*:37*//*41:*/
-#line 890 "texprofile.w"
+#line 892 "texprofile.w"
 
 "-N    do not show the table of global information\n"
 /*:41*//*50:*/
-#line 973 "texprofile.w"
+#line 975 "texprofile.w"
 
 "-F    show all files\n"
 /*:50*//*54:*/
-#line 1007 "texprofile.w"
+#line 1009 "texprofile.w"
 
 "-C    show table of command summaries\n"
 /*:54*//*59:*/
-#line 1065 "texprofile.w"
+#line 1067 "texprofile.w"
 
 "-M    show the table of all macros called\n"
 /*:59*//*72:*/
-#line 1258 "texprofile.w"
+#line 1260 "texprofile.w"
 
 "-L    show the table of times per input line\n"
 /*:72*//*77:*/
-#line 1328 "texprofile.w"
+#line 1330 "texprofile.w"
 
 "-T    show the table of the top 10 input lines\n"
 /*:77*//*90:*/
-#line 1554 "texprofile.w"
+#line 1556 "texprofile.w"
 
 "-G    show the table of the  macro call graph\n"
 /*:90*//*93:*/
-#line 1635 "texprofile.w"
+#line 1637 "texprofile.w"
 
 "-A    show all tables (equal to -TGFC) tables\n"
 /*:93*/
-#line 1688 "texprofile.w"
+#line 1690 "texprofile.w"
 
 "\n"
 /*22:*/
@@ -722,31 +722,31 @@ void explain_usage(void)
 
 "-i    add the macros file and line numbers after the macro name\n"
 /*:22*//*32:*/
-#line 793 "texprofile.w"
+#line 795 "texprofile.w"
 
 "-s    show the changes of the macro stack\n"
 "-n    show the time stamp numbers\n"
 /*:32*//*45:*/
-#line 924 "texprofile.w"
+#line 926 "texprofile.w"
 
 "-m    optimize output for machine readability\n"
 /*:45*//*73:*/
-#line 1260 "texprofile.w"
+#line 1262 "texprofile.w"
 
 "-p<n> don't show information for items with cumulative time below <n> percent\n"
 /*:73*//*78:*/
-#line 1330 "texprofile.w"
+#line 1332 "texprofile.w"
 
 "-t<n> replace 10 by n (2<=n<=100, default 10) for the top 10 input lines\n"
 /*:78*/
-#line 1690 "texprofile.w"
+#line 1692 "texprofile.w"
 
 "\n"
 );
-exit(1);
+exit(0);
 }
 /*:96*//*105:*/
-#line 1769 "texprofile.w"
+#line 1771 "texprofile.w"
 
 void check_file_marker(char*msg)
 {char marker[8];
@@ -762,7 +762,7 @@ error(msg);
 int main(int argc,char*argv[])
 {int i,k;
 /*95:*/
-#line 1655 "texprofile.w"
+#line 1657 "texprofile.w"
 
 i= 1;
 while(i<argc)
@@ -776,37 +776,37 @@ while(*option!=0)
 
 case'i':opt_macro_id= true;break;
 /*:21*//*30:*/
-#line 785 "texprofile.w"
+#line 787 "texprofile.w"
 
 case'R':opt_raw= true;break;
 case's':opt_raw_stack= true;break;
 case'n':opt_raw_num= true;break;
 /*:30*//*36:*/
-#line 847 "texprofile.w"
+#line 849 "texprofile.w"
 
 case'S':opt_stack= true;break;
 /*:36*//*40:*/
-#line 886 "texprofile.w"
+#line 888 "texprofile.w"
 
 case'N':opt_summary= false;break;
 /*:40*//*44:*/
-#line 920 "texprofile.w"
+#line 922 "texprofile.w"
 
 case'm':opt_machine= true;opt_summary= false;break;
 /*:44*//*49:*/
-#line 969 "texprofile.w"
+#line 971 "texprofile.w"
 
 case'F':opt_files= true;break;
 /*:49*//*53:*/
-#line 1003 "texprofile.w"
+#line 1005 "texprofile.w"
 
 case'C':opt_cmd= true;break;
 /*:53*//*58:*/
-#line 1061 "texprofile.w"
+#line 1063 "texprofile.w"
 
 case'M':opt_macro= true;break;
 /*:58*//*71:*/
-#line 1246 "texprofile.w"
+#line 1248 "texprofile.w"
 
 case'L':opt_lines= true;break;
 case'p':{char*endptr;
@@ -818,7 +818,7 @@ option= endptr-1;
 }
 break;
 /*:71*//*76:*/
-#line 1315 "texprofile.w"
+#line 1317 "texprofile.w"
 
 case'T':opt_top_ten= true;break;
 case't':{char*endptr;
@@ -831,43 +831,43 @@ option= endptr-1;
 }
 break;
 /*:76*//*89:*/
-#line 1550 "texprofile.w"
+#line 1552 "texprofile.w"
 
 case'G':opt_graph= true;break;
 /*:89*//*92:*/
-#line 1629 "texprofile.w"
+#line 1631 "texprofile.w"
 
 case'A':opt_files= opt_summary= 
 opt_cmd= opt_top_ten= 
 opt_graph= true;break;
 /*:92*//*97:*/
-#line 1700 "texprofile.w"
+#line 1702 "texprofile.w"
 
 case'h':
 case'?':explain_usage();break;
 /*:97*//*99:*/
-#line 1712 "texprofile.w"
+#line 1714 "texprofile.w"
 
 case'-':
 option++;
 /*100:*/
-#line 1720 "texprofile.w"
+#line 1722 "texprofile.w"
 
 if(strcmp(option,"help")==0)explain_usage();
 /*:100*//*101:*/
-#line 1728 "texprofile.w"
+#line 1730 "texprofile.w"
 
 if(strcmp(option,"version")==0)
-{printf(VERSION_STR"\n");
-exit(1);
+{printf("texprofile version "VERSION_STR"\n");
+exit(0);
 }
 /*:101*/
-#line 1715 "texprofile.w"
+#line 1717 "texprofile.w"
 
 else commandline_error("unknown long option");
 break;
 /*:99*/
-#line 1663 "texprofile.w"
+#line 1665 "texprofile.w"
 
 default:commandline_error("unknown option");
 }
@@ -939,7 +939,7 @@ macro_def_num= 16;
 macro_def_count= 1;
 ALLOCATE(macro_defs,macro_def_num);
 /*:17*//*83:*/
-#line 1452 "texprofile.w"
+#line 1454 "texprofile.w"
 
 edges_num= 1024;
 edges_count= 1;
@@ -1002,15 +1002,15 @@ ALLOCATE(cmd_time,cmd_num);
 ALLOCATE(file_line,file_num+1);
 ALLOCATE(cmd_freq,cmd_num);
 
-
 cur_depth= -1;
 total_time= 0;
 total_num= 0;
 macro_defs[0].a= 1;
 i= 0;
-{fget1();
+
+{uint8_t c= fget1();
 /*28:*/
-#line 742 "texprofile.w"
+#line 744 "texprofile.w"
 
 int f,l,n,m;
 f= fget1();
@@ -1027,13 +1027,15 @@ printf("[%d:%d<%d:",i,cur_depth,cur_depth+1);
 print_macro(m);
 printf("]\n");
 #endif
-#line 758 "texprofile.w"
+#line 760 "texprofile.w"
  i++;
 /*:28*/
 #line 640 "texprofile.w"
 
+if(c!=system_macro_push)
+error("Timing data must start with an initial push command");
 /*60:*/
-#line 1072 "texprofile.w"
+#line 1074 "texprofile.w"
 
 cur_depth++;
 macro_stack[cur_depth]= m;
@@ -1043,7 +1045,7 @@ if(macro_defs[m].a==1)
 {macro_defs[m].s= total_time;
 }
 /*:60*/
-#line 641 "texprofile.w"
+#line 643 "texprofile.w"
 
 }
 while(i<stamp_num)
@@ -1062,16 +1064,16 @@ case system_macro_pop_0+9:
 case system_macro_pop_0+10:
 {int d= c-system_macro_pop_0;
 /*27:*/
-#line 731 "texprofile.w"
+#line 733 "texprofile.w"
 
 stamps[i].c= system_macro_pop;
 stamps[i].d= cur_depth-d;
 #ifdef DEBUG
 printf("{%d:%d:%d>%d}\n",i,system_macro_pop,cur_depth+d,cur_depth);
 #endif
-#line 737 "texprofile.w"
+#line 739 "texprofile.w"
 /*61:*/
-#line 1084 "texprofile.w"
+#line 1086 "texprofile.w"
 
 while(cur_depth> stamps[i].d)
 {int m= macro_stack[cur_depth];
@@ -1083,27 +1085,27 @@ cur_depth--;
 }
 
 /*:61*/
-#line 737 "texprofile.w"
+#line 739 "texprofile.w"
 
 i++;
 /*:27*/
-#line 658 "texprofile.w"
+#line 660 "texprofile.w"
 
 break;
 }
 case system_macro_pop_small:
 {int d= fget1();
 /*27:*/
-#line 731 "texprofile.w"
+#line 733 "texprofile.w"
 
 stamps[i].c= system_macro_pop;
 stamps[i].d= cur_depth-d;
 #ifdef DEBUG
 printf("{%d:%d:%d>%d}\n",i,system_macro_pop,cur_depth+d,cur_depth);
 #endif
-#line 737 "texprofile.w"
+#line 739 "texprofile.w"
 /*61:*/
-#line 1084 "texprofile.w"
+#line 1086 "texprofile.w"
 
 while(cur_depth> stamps[i].d)
 {int m= macro_stack[cur_depth];
@@ -1115,27 +1117,27 @@ cur_depth--;
 }
 
 /*:61*/
-#line 737 "texprofile.w"
+#line 739 "texprofile.w"
 
 i++;
 /*:27*/
-#line 663 "texprofile.w"
+#line 665 "texprofile.w"
 
 break;
 }
 case system_macro_pop:
 {int d= fget2();
 /*27:*/
-#line 731 "texprofile.w"
+#line 733 "texprofile.w"
 
 stamps[i].c= system_macro_pop;
 stamps[i].d= cur_depth-d;
 #ifdef DEBUG
 printf("{%d:%d:%d>%d}\n",i,system_macro_pop,cur_depth+d,cur_depth);
 #endif
-#line 737 "texprofile.w"
+#line 739 "texprofile.w"
 /*61:*/
-#line 1084 "texprofile.w"
+#line 1086 "texprofile.w"
 
 while(cur_depth> stamps[i].d)
 {int m= macro_stack[cur_depth];
@@ -1147,17 +1149,17 @@ cur_depth--;
 }
 
 /*:61*/
-#line 737 "texprofile.w"
+#line 739 "texprofile.w"
 
 i++;
 /*:27*/
-#line 668 "texprofile.w"
+#line 670 "texprofile.w"
 
 break;
 }
 case system_macro_push:
 {/*28:*/
-#line 742 "texprofile.w"
+#line 744 "texprofile.w"
 
 int f,l,n,m;
 f= fget1();
@@ -1174,10 +1176,10 @@ printf("[%d:%d<%d:",i,cur_depth,cur_depth+1);
 print_macro(m);
 printf("]\n");
 #endif
-#line 758 "texprofile.w"
+#line 760 "texprofile.w"
  i++;
 /*:28*/
-#line 672 "texprofile.w"
+#line 674 "texprofile.w"
 
 cur_depth++;
 macro_stack[cur_depth]= m;
@@ -1193,16 +1195,16 @@ default:
 if(c&POP_BIT)
 {int d= 1;
 /*27:*/
-#line 731 "texprofile.w"
+#line 733 "texprofile.w"
 
 stamps[i].c= system_macro_pop;
 stamps[i].d= cur_depth-d;
 #ifdef DEBUG
 printf("{%d:%d:%d>%d}\n",i,system_macro_pop,cur_depth+d,cur_depth);
 #endif
-#line 737 "texprofile.w"
+#line 739 "texprofile.w"
 /*61:*/
-#line 1084 "texprofile.w"
+#line 1086 "texprofile.w"
 
 while(cur_depth> stamps[i].d)
 {int m= macro_stack[cur_depth];
@@ -1214,11 +1216,11 @@ cur_depth--;
 }
 
 /*:61*/
-#line 737 "texprofile.w"
+#line 739 "texprofile.w"
 
 i++;
 /*:27*/
-#line 686 "texprofile.w"
+#line 688 "texprofile.w"
 
 c= c&~POP_BIT;
 }
@@ -1247,7 +1249,7 @@ i++;
 #ifdef DEBUG
 printf("<%d:%d:%d> %s\n",i-1,c,cur_depth,cmd_name[c]);
 #endif
-#line 714 "texprofile.w"
+#line 716 "texprofile.w"
  break;
 }
 }
@@ -1261,7 +1263,7 @@ macro_defs[0].l= 0;
 #ifdef DEBUG
 printf("Finished reading %d commands, depth=%d\n",i,cur_depth);
 #endif
-#line 727 "texprofile.w"
+#line 729 "texprofile.w"
 /*:26*/
 #line 261 "texprofile.w"
 
@@ -1271,10 +1273,10 @@ fclose(in);
 #line 212 "texprofile.w"
 
 /*94:*/
-#line 1639 "texprofile.w"
+#line 1641 "texprofile.w"
 
 /*33:*/
-#line 804 "texprofile.w"
+#line 806 "texprofile.w"
 
 if(opt_raw)
 {Mprintf("\nAll time stamps in order of appearance:\n");
@@ -1283,14 +1285,14 @@ Mprintf("file\t line\ttime/ns\tcommand\t                level\tmacro\n");
 for(i= 1;i<stamp_num;i++)
 {int m= stamps[i].m;
 /*34:*/
-#line 834 "texprofile.w"
+#line 836 "texprofile.w"
 
 uint32_t t= stamps[i].t;
 uint16_t l= stamps[i].l;
 uint8_t f= stamps[i].f;
 uint8_t c= stamps[i].c;
 /*:34*/
-#line 811 "texprofile.w"
+#line 813 "texprofile.w"
 
 if(c<=system_profile_off)
 {if(opt_raw_num)printf("%6d\t",i);
@@ -1309,10 +1311,10 @@ printf("\n");
 }
 }
 /*:33*/
-#line 1640 "texprofile.w"
+#line 1642 "texprofile.w"
 
 /*38:*/
-#line 855 "texprofile.w"
+#line 857 "texprofile.w"
 
 if(opt_stack)
 {int c,d,m;
@@ -1331,15 +1333,15 @@ printf("\n");
 }
 }
 /*:38*/
-#line 1641 "texprofile.w"
+#line 1643 "texprofile.w"
 
 /*55:*/
-#line 1012 "texprofile.w"
+#line 1014 "texprofile.w"
 
 if(opt_cmd)
 {int*cmd_link= NULL;
 /*56:*/
-#line 1038 "texprofile.w"
+#line 1040 "texprofile.w"
 
 ALLOCATE(cmd_link,cmd_num+1);
 cmd_link[cmd_num]= -1;
@@ -1352,7 +1354,7 @@ cmd_link[i]= cmd_link[l];
 cmd_link[l]= i;
 }
 /*:56*/
-#line 1015 "texprofile.w"
+#line 1017 "texprofile.w"
 
 Mprintf("\nCommand summary:\n");
 Mprintf(" cmd\t        time\tpercent\t count\t      average\tname\n");
@@ -1368,10 +1370,10 @@ CMD_NAME(i));
 free(cmd_link);
 }
 /*:55*/
-#line 1642 "texprofile.w"
+#line 1644 "texprofile.w"
 
 /*51:*/
-#line 980 "texprofile.w"
+#line 982 "texprofile.w"
 
 if(opt_files)
 {Mprintf("\nFiles in the order of appearance:\n");
@@ -1387,10 +1389,10 @@ full_file_names[i]);
 }
 }
 /*:51*/
-#line 1643 "texprofile.w"
+#line 1645 "texprofile.w"
 
 /*74:*/
-#line 1265 "texprofile.w"
+#line 1267 "texprofile.w"
 
 if(opt_lines)
 {uint64_t limit= total_time*percent_limit/100.0;
@@ -1427,15 +1429,15 @@ printf("\n");
 }
 }
 /*:74*/
-#line 1644 "texprofile.w"
+#line 1646 "texprofile.w"
 
 /*81:*/
-#line 1375 "texprofile.w"
+#line 1377 "texprofile.w"
 
 if(opt_top_ten)
 {collect_line_time();
 /*79:*/
-#line 1335 "texprofile.w"
+#line 1337 "texprofile.w"
 
 ALLOCATE(tt_time,tt);
 ALLOCATE(tt_file,tt);
@@ -1453,7 +1455,7 @@ for(f= l= 0;f<file_num;f++)
 {uint32_t t= line_time[l];
 if(t> tt_time[tt_count-1])
 /*80:*/
-#line 1359 "texprofile.w"
+#line 1361 "texprofile.w"
 
 {
 if(tt_count<tt)tt_count++;
@@ -1469,13 +1471,13 @@ tt_file[i]= f;
 tt_line[i]= l-file_line[f];
 }
 /*:80*/
-#line 1351 "texprofile.w"
+#line 1353 "texprofile.w"
 
 }
 }
 }
 /*:79*/
-#line 1378 "texprofile.w"
+#line 1380 "texprofile.w"
 
 Mprintf("\nThe top ten lines:\n");
 Mprintf("  file\t  line\tpercent\t     absolute"
@@ -1491,10 +1493,10 @@ printf("\t%6d\t%s\t%s\n",freq,time_str(t/freq),file_names[tt_file[i]]);
 }
 }
 /*:81*/
-#line 1645 "texprofile.w"
+#line 1647 "texprofile.w"
 
 /*62:*/
-#line 1096 "texprofile.w"
+#line 1098 "texprofile.w"
 
 if(opt_macro)
 {sort_macros();
@@ -1511,10 +1513,10 @@ i= macro_defs[i].link;
 }while(i!=0);
 }
 /*:62*/
-#line 1646 "texprofile.w"
+#line 1648 "texprofile.w"
 
 /*91:*/
-#line 1558 "texprofile.w"
+#line 1560 "texprofile.w"
 
 if(opt_graph)
 {sort_macros();
@@ -1579,10 +1581,10 @@ i= macro_defs[i].link;
 }while(i!=0);
 }
 /*:91*/
-#line 1647 "texprofile.w"
+#line 1649 "texprofile.w"
 
 /*42:*/
-#line 895 "texprofile.w"
+#line 897 "texprofile.w"
 
 if(opt_summary)
 {printf("\n"
@@ -1595,7 +1597,7 @@ printf("Total number of macros:        %5d\n",macro_num);
 printf("Maximum stack nesting depth:   %5d\n",depth_num);
 }
 /*:42*/
-#line 1648 "texprofile.w"
+#line 1650 "texprofile.w"
 
 /*:94*/
 #line 213 "texprofile.w"

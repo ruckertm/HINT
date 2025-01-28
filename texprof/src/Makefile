@@ -200,9 +200,36 @@ install_doc: texprof.pdf texprof.hnt texprofile.pdf texprofile.hnt \
 	texprofileman.pdf texprofileman.hnt texprofile.man
 	cp $? ../doc
 
+.PHONY: check
+check:  install_bin
+	@ echo ; echo TESTING texprof hello.tex
+	texprof hello.tex
+	texprofile hello.tprof > hello.txt
+	texprofile -R -m hello.tprof > hello.txt
+	@LINES=`wc -l hello.txt` ; \
+         if [ "$$LINES" != "1 hello.txt" ] ; \
+	 then echo "ERROR: wc -l hello.txt is $$LINES not 1" ; exit 1 ; \
+	 else echo "OK" ; fi
+	@ echo ; echo TESTING texprof -prof hello.tex
+	texprof -prof hello.tex
+	texprofile -R -m hello.tprof > hello.txt
+	@LINES=`wc -l hello.txt` ; \
+         if [ "$$LINES" != "48 hello.txt" ] ; \
+	 then echo "ERROR: wc -l hello.txt is $$LINES not 48" ; exit 1 ; \
+	 else echo "OK" ; fi
+	@ echo ; echo TESTING latexprof -prof sample2e.tex
+	latexprof -prof sample2e.tex
+	texprofile -R -m sample2e.tprof > sample2e.txt
+	@LINES=`wc -l sample2e.txt` ; \
+         if [ "$$LINES" != "14515 sample2e.txt" ] ; \
+	 then echo "ERROR: wc -l sample2e.txt is $$LINES not 14515" ; exit 1 ; \
+	 else echo "OK" ; fi
+
+
+
 
 ### Cleaning up
-
+.PHONY: clean
 clean:
 	rm -f texprofile.tex texprof.tex texprofile.c texprof.c
 	rm -f *.o texprof texprofile
