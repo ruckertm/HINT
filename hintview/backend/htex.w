@@ -19747,7 +19747,7 @@ default:confusion("page");
 else page_contents=box_there;
 temp_ptr=new_spec(pointer_def[glue_kind][top_skip_no]);
 q=new_glue(temp_ptr);glue_ref_count(temp_ptr)=null;
-{ uint64_t h=page_loc[cur_loc]; store_map(q,LOC_POS0(h),LOC_OFF(h)); }
+{ uint64_t h=hlocation(p); store_map(q,LOC_POS0(h),LOC_OFF(h)); }
 if (width(temp_ptr) > height(p)) width(temp_ptr)=width(temp_ptr)-height(p);
 else width(temp_ptr)=0;
 link(q)=p;link(contrib_head)=q;goto resume;
@@ -20623,7 +20623,7 @@ pace through the other combinations of possibilities.
 
 @<Cases of |main_control| that are not part of the inner loop@>=
 any_mode(relax): case vmode+spacer: case mmode+spacer:
-  case mmode+no_boundary: do_nothing;
+  case mmode+no_boundary: do_nothing;@+break;
 any_mode(ignore_spaces): {@+@<Get the next non-blank non-call...@>;
   goto reswitch;
   }

@@ -2993,7 +2993,7 @@ case hlist_node:case vlist_node:case rule_node:if(page_contents<box_there)
 else page_contents= box_there;
 temp_ptr= new_spec(pointer_def[glue_kind][top_skip_no]);
 q= new_glue(temp_ptr);glue_ref_count(temp_ptr)= null;
-{uint64_t h= page_loc[cur_loc];store_map(q,LOC_POS0(h),LOC_OFF(h));}
+{uint64_t h= hlocation(p);store_map(q,LOC_POS0(h),LOC_OFF(h));}
 if(width(temp_ptr)> height(p))width(temp_ptr)= width(temp_ptr)-height(p);
 else width(temp_ptr)= 0;
 link(q)= p;link(contrib_head)= q;goto resume;

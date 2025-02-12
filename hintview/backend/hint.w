@@ -1483,7 +1483,14 @@ static void tag_mismatch(uint8_t a, uint8_t z, uint32_t a_pos, uint32_t z_pos);
 
 The |hget_node| function gets the next node from the input based on the tag byte |a|
 and adds it to the current list. The function is used in |hget_content| to read a content node
-but also in the function |hget_definition| to get the content of a definition. 
+but also in the function |hget_definition| to get the content of a definition.
+
+For nodes that can cause a page break, the function |store_map| is called to
+store their position in the input file, which later may become the start of the
+next page. This is also done for box and rule nodes because in rare cases,
+for example if the page is filled with insertions, the topskip
+glue inserted before them might cause a page break. The page builder will then
+associate the position of the box or rule node with the start of the new page.
 
 @<\HINT\ functions@>=
 
@@ -1503,8 +1510,11 @@ void hget_content(void)
   node_pos=(hpos-hstart)-1;
   hget_node(a);
   @<read and check the end byte |z|@>@;
-  if (nest_ptr==0 && tail!=head && (type(tail)==penalty_node || type(tail)==glue_node || type(tail)==kern_node))
-      store_map(tail,node_pos,0);
+  if (nest_ptr==0 && tail!=head &&
+       (type(tail)==penalty_node || type(tail)==glue_node || type(tail)==kern_node ||
+        type(tail)==hlist_node || type(tail)==vlist_node || type(tail)==rule_node) 
+     )
+     store_map(tail,node_pos,0);
 }
 
 static pointer hget_definition(uint8_t a)
@@ -3474,7 +3484,8 @@ if ((I)&b100) { a=hget_float32();\
 else if((I)==b011) {HGET32(w);HGET32(h);} \
 else if((I)==b010) { a=hget_float32(); HGET32(w); h=round(w/a);}\
 else if((I)==b001){ a=hget_float32(); HGET32(h); w=round(h*a);}\
-if (w==0 || h==0) QUIT("Incomplete dimensions in image %d",image_no(p));\
+if (w==0 || h==0) {MESSAGE("Incomplete dimensions in image %d",image_no(p));\
+  if (w!=0) h=w; else if (h!=0) w=h; else w=h=100*ONE; }\
 image_width(p)=w; image_height(p)=h;\
 image_alt(p)=hget_list_pointer();\
 tail_append(p);}
@@ -3497,7 +3508,8 @@ else if((I)==b011) {HTEG32(h);HTEG32(w);} \
 else if((I)==b010) {  HTEG32(w); a=hteg_float32(); h=round(w/a);}\
 else if((I)==b001){ HTEG32(h); a=hteg_float32();  w=round(h*a);}\
 HTEG16(image_no(p));RNG("Section number",image_no(p),3,max_section_no);  \
-if (w==0 || h==0) QUIT("Incomplete dimensions in image %d",image_no(p));\
+if (w==0 || h==0) {MESSAGE("Incomplete dimensions in image %d",image_no(p));\
+  if (w!=0) h=w; else if (h!=0) w=h; else w=h=100*ONE; }\
 image_width(p)=w; image_height(p)=h;\
 tail_append(p);}
 @

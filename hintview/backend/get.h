@@ -1,5 +1,5 @@
 	/*548:*/
-	#line 11404 "format.w"
+	#line 11415 "format.w"
 
 	/*1:*/
 	#line 326 "format.w"
@@ -54,7 +54,7 @@ Xdimen w,h;
 uint8_t wr,hr;
 }Image;
 	/*:228*/	/*272:*/
-	#line 5796 "format.w"
+	#line 5807 "format.w"
 
 typedef struct{
 uint8_t*t;
@@ -63,19 +63,19 @@ int d;
 uint16_t r;
 }Outline;
 	/*:272*/	/*323:*/
-	#line 7173 "format.w"
+	#line 7184 "format.w"
 
 typedef
 struct{uint8_t pg;uint32_t pos;bool on;int link;}RangePos;
 	/*:323*/	/*412:*/
-	#line 9196 "format.w"
+	#line 9207 "format.w"
 
 typedef struct{Kind k;int n;}Ref;
 	/*:412*/
-	#line 11405 "format.w"
+	#line 11416 "format.w"
 
 	/*357:*/
-	#line 7917 "format.w"
+	#line 7928 "format.w"
 
 typedef struct{
 uint64_t pos;
@@ -86,7 +86,7 @@ uint8_t*buffer;
 uint32_t bsize;
 }Entry;
 	/*:357*/
-	#line 11406 "format.w"
+	#line 11417 "format.w"
 
 	/*38:*/
 	#line 1075 "format.w"
@@ -106,7 +106,7 @@ uint32_t bsize;
       if (s!=(L).s) \
       QUIT("List sizes at 0x%x and " SIZE_F " do not match 0x%x != 0x%x",node_pos+1,hpos-hstart-I-1,(L).s,s);}}
 	/*:147*/	/*343:*/
-	#line 7518 "format.w"
+	#line 7529 "format.w"
 
 #define HGET_ERROR  QUIT("HGET overrun in section %d at " SIZE_F "\n",section_no,hpos-hstart)
 #define HEND   ((hpos<=hend)?0:(HGET_ERROR,0))
@@ -117,7 +117,7 @@ uint32_t bsize;
 #define HGET32(X) ((X)= (hpos[0]<<24)+(hpos[1]<<16)+(hpos[2]<<8)+hpos[3],hpos+= 4,HEND)
 #define HGETTAG(A) A= HGET8,DBGTAG(A,hpos-1)
 	/*:343*/	/*368:*/
-	#line 8146 "format.w"
+	#line 8157 "format.w"
 
 #define HGET_SIZE(I) \
   if ((I)&b100) { \
@@ -141,7 +141,7 @@ uint32_t bsize;
   hset_entry(&(E),i,s,xs,file_name); \
 }
 	/*:368*/	/*495:*/
-	#line 10627 "format.w"
+	#line 10638 "format.w"
 
 #define HBACK(X) ((hpos-(X)<hstart)?(QUIT("HTEG underflow\n"),NULL):(hpos-= (X)))
 
@@ -151,7 +151,7 @@ uint32_t bsize;
 #define HTEG32(X) (HBACK(4),(X)= (hpos[0]<<24)+(hpos[1]<<16)+(hpos[2]<<8)+hpos[3])
 #define HTEGTAG(X) X= HTEG8,DBGTAG(X,hpos)
 	/*:495*/
-	#line 11407 "format.w"
+	#line 11418 "format.w"
 
 
 extern Entry*dir;
