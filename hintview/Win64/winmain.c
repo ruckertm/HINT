@@ -760,7 +760,7 @@ WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst,
 	if (autoreload) SendMessage(hMainWnd,WM_COMMAND,ID_KEY_START_AUTORELOAD,0);
 	hAccel = LoadAccelerators(hInst, MAKEINTRESOURCE(IDR_ACCELERATOR));
 
-    
+	HINT_TRY hint_resize(client_width, client_height, dpi_x * scale, dpi_y * scale);
 	HINT_TRY render_file();
 	ShowWindow(hMainWnd, SW_SHOW);
 	//SetFocus(hMainWnd);
