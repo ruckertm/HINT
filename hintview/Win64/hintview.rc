@@ -126,7 +126,7 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,65,70,50,14
     CTEXT           "HintView",IDC_STATIC,0,10,185,8
     CTEXT           "Version x.y",IDC_VERSION,0,25,185,8
-    CTEXT           "© Martin Ruckert 2021, 2024",IDC_STATIC,0,50,185,8
+    CTEXT           "© Martin Ruckert 2021, 2024",IDC_COPYRIGHT,0,50,185,8
     ICON            IDI_ICON,IDC_STATIC,146,6,20,20,SS_CENTERIMAGE
     CTEXT           "HINT Format Version x.y",IDC_HINT_VERSION,0,37,185,8
 END

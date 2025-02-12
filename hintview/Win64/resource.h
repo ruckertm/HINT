@@ -6,6 +6,8 @@
 #define IDD_SETTINGS                    101
 #define IDD_ABOUT                       102
 #define IDI_ICON                        103
+#define IDM_ABOUT                       104
+#define IDM_EXIT                        105
 #define IDB_LOGO48                      110
 #define IDR_TOOLBAR                     112
 #define IDB_TOOLBAR                     114
@@ -41,10 +43,9 @@
 #define IDC_EDIT_GAMMA                  1026
 #define IDC_SPIN_GAMMA                  1027
 #define IDC_ROUND_TO_PIXEL_H            1028
+#define IDC_COPYRIGHT                   1028
 #define IDC_ROUND_TO_NEAREST            1029
 #define IDC_TO_NEAREST                  1029
-#define IDM_EXIT                        105
-#define IDM_ABOUT                       104
 #define ID_FILE_SAVE_IMAGE              40001
 #define ID_OPTIONS_ZOOM_100             40002
 #define ID_OPTIONS_NIGHT                40003
@@ -73,9 +74,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        121
+#define _APS_NEXT_RESOURCE_VALUE        122
 #define _APS_NEXT_COMMAND_VALUE         40029
-#define _APS_NEXT_CONTROL_VALUE         1028
+#define _APS_NEXT_CONTROL_VALUE         1029
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

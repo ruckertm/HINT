@@ -28,7 +28,8 @@
 #ifndef WINMAIN_H
 #define WINMAIN_H
 
-#define VERSION "Version 2.1.0"
+#define VERSION "Version 2.1.1"
+#define COPYRIGHT "© Martin Ruckert 2021, 2024, 2025"
 
 #if 0
 extern HDC hDCMain;  
