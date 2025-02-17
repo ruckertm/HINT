@@ -374,7 +374,7 @@ static int set_hin_name(const char *fn)
   }
   sl=strlen(hin_name);
   if (sl>4 && strncmp(hin_name+sl-4,".hnt",4)!=0)
-  {  //herror("Unknown File Type,I dont know how to open this file", hin_name);
+  {  hint_error("Unknown File Type,I dont know how to open this file", hin_name);
     return 0;
   }
   return 1;
@@ -391,7 +391,7 @@ BOOL open_file(NSURL *url)
   hint_clear_fonts(true);
   //NSLog(@"hint begin %s",hin_name);
   if (!hint_begin()) /* this reads the file */
-  {  hint_error("Error opening file","This is not a HINT file");
+  {  hint_error("Error: Not a HINT file",[url path].UTF8String);
       [url stopAccessingSecurityScopedResource]; return NO; }
   setFileURL(url);
   [url stopAccessingSecurityScopedResource];

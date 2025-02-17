@@ -89,7 +89,7 @@ int hint_error(const char*title,const char*msg){
         [alert addAction:defaultAction];
         if (presenting==0)
         {  presenting =1;
-          [theViewControler presentViewController:alert animated:YES completion:nil];
+          [theViewControler presentViewController:alert animated:NO completion:nil];
         }
     }
     return 0;

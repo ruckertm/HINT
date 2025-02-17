@@ -36,14 +36,14 @@ static int set_hin_name(const char *fn)
   if (hin_name!=NULL) { free(hin_name); hin_name=NULL; }
   { hin_name=malloc(strlen(fn)+1);
     if (hin_name==NULL)
-    { //hint_error("Out of memory for file name", fn);
+    { hint_error("Out of memory for file name", fn);
       return 0;
     }
     strcpy(hin_name,fn);
   }
   sl=strlen(hin_name);
   if (sl>4 && strncmp(hin_name+sl-4,".hnt",4)!=0)
-  {  //hint_error("Unknown File Type,I dont know how to open this file", hin_name);
+  { hint_error("File Extension '.hnt' expected. I dont know how to open this file", hin_name);
     return 0;
   }
   return 1;
@@ -76,7 +76,7 @@ static int set_hin_name(const char *fn)
     LSLaunchURLSpec launchSpec;
     CFArrayRef itemURLs;
     NSURL *s = [NSURL fileURLWithPath:filename];
-    //hint_error("New application:openFile:", filename.UTF8String);
+    //hint_message("New application:openFile: %s", filename.UTF8String);
     launchSpec.appURL = NULL;
     itemURLs = CFArrayCreate(NULL, (const void **)&s, 1, &kCFTypeArrayCallBacks);
     launchSpec.itemURLs = itemURLs; // CFBridgingRetain([NSURL fileURLWithPath: filename]);
