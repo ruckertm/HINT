@@ -63,6 +63,7 @@ static HintOpenGLView * main_view=nil;
     [super prepareOpenGL];
     [[self openGLContext] setValues:&swapInt forParameter:NSOpenGLCPSwapInterval]; // set to vbl sync
     nativeInit();
+    hint_clear_fonts(false);
     main_view=self;
     [self nightMode:nil];
     [self autoReloadFile:nil];

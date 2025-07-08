@@ -1,7 +1,10 @@
 
 # testing gtk options
 ifndef WITH_GTK
-WITH_GTK=0
+WITH_GTK = $(shell pkg-config --exists gtk+-3.0 && echo 3 || echo 0)
+ifeq ($(WITH_GTK),0)
+WITH_GTK = $(shell pkg-config --exists gtk+-2.0 && echo 2 || echo 0)
+endif
 endif
 
 ifeq ($(WITH_GTK),0)
@@ -17,7 +20,7 @@ PKGCONFIG = $(shell which pkg-config)
 GTK_CFLAGS = $(shell $(PKGCONFIG) --cflags gtk+-3.0) -DWITH_GTK=3
 GTK_LIBS = $(shell $(PKGCONFIG) --libs gtk+-3.0)
 else
-$(error "Valid values for WITH_GTK are 0, 2 or 3")
+$(error "Valid values for WITH_GTK are 0, 2 or 3 not $(WITH_GTK)!")
 endif
 
 CC = gcc
@@ -26,7 +29,7 @@ CFLAGS = -g -O0 -ggdb -DDEBUG -Wall -I../backend
 LDFLAGS = -g -Og -ggdb
 else
 CFLAGS = -O2 -Wall -I../backend
-LDFLAGS =
+LDFLAGS = -O2
 endif
 #GL_DEFINES = -DGLEW_STATIC -DTW_NO_DIRECT3D -DTW_NO_LIB_PRAGMA -DTW_STATIC -D_CRT_SECURE_NO_WARNINGS
 
@@ -34,12 +37,12 @@ FT_INCLUDES = -I/usr/include/freetype2
 GL_INCLUDES = $(FT_INCLUDES)
 
 
-HFILES =     hint.h htex.h format.h get.h basetypes.h error.h \
-	     hrender.h rendernative.h hfonts.h
+HFILES =     format.h get.h basetypes.h error.h \
+	     hint.h rendernative.h
 
-WFILES =     format.w hint.w htex.ch btex.w
+WFILES =     format.w hint.w
 
-OBJ=main.o  renderOGL.o get.o hint.o tables.o htex.o hrender.o hfonts.o
+OBJ=main.o  renderOGL.o get.o hint.o tables.o
 
 ifeq (Msys,$(shell uname -o))
 LIBS= ../external/glfw-3.1.2/msys.build/src/libglfw3.a ../external/libglew.a  -lfreetype \
@@ -67,19 +70,13 @@ main.o: main.c
 	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
 
 hint.o: ../backend/hint.c
-	$(CC) $(CFLAGS) -Wno-unused-but-set-variable -o $@ -c $<
-
-htex.o: ../backend/htex.c
-	$(CC) $(CFLAGS) -Wno-parentheses -Wno-unused-but-set-variable -Wno-maybe-uninitialized -o $@ -c $<
+	$(CC) $(CFLAGS) $(FT_INCLUDES) -o $@ -c $<
 
 renderOGL.o: renderOGL.c
 	$(CC) $(FT_INCLUDES) $(CFLAGS) -o $@ -c $<
 
-hfonts.o: ../backend/hfonts.c
-	$(CC) $(CFLAGS) $(FT_INCLUDES) -o $@ -c $<
-
 %.o: ../backend/%.c 
-	$(CC) $(CFLAGS) -o $@ -c $<
+	$(CC) $(CFLAGS) $(FT_INCLUDES)  -o $@ -c $<
 
 # copy the .w files for gdb
 hintview: $(OBJ)

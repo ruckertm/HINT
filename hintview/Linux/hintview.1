@@ -1,4 +1,4 @@
-.TH HINTVIEW 1 "4 December 2024" "Version 2.1"
+.TH HINTVIEW 1 "4 December 2024" "Version 2.1.1"
 .\"=====================================================================
 .if n .ds MF Metafont
 .if t .ds MF Metafont
@@ -112,19 +112,10 @@ option and the
 .B Ctrl-R
 key.
 .TP
-.B Ctrl-S
-Open the
-.B Search
-dialog. NOT YET IMPLEMENTED.
-.TP
 .B Ctrl-F
 Open the
 .B File
 dialog. Requires GTK+ 2.0 or GTK+ 3.0. 
-.TP
-.BR Home , \ Ctrl-H
-Move to the "home" page. The home page is a location specified by the 
-document author as a good starting point for reading the document.
 .TP
 .B Ctrl-N
 Toggle between night and day mode. See also the
@@ -134,11 +125,8 @@ option.
 .B Ctrl-O
 Show a clickable outline of the content. NOT YET IMPLEMENTED.
 .TP
-.B Page-Down
-Move to the next page.
-.TP
-.B Page-Up
-Move to the previous page.
+.B Ctrl-Q
+Quit. Terminate the program.
 .TP
 .B Ctrl-R
 Reload the content. The file is reloaded and the viewer
@@ -150,10 +138,25 @@ key and the
 .B -a
 option.
 .TP
+.B Ctrl-S
+Open the
+.B Search
+dialog. NOT YET IMPLEMENTED.
+.TP
 .B Ctrl-Z
 Zoom to 100%. See also the
 .B -z
 option.
+.TP
+.BR Home , \ Ctrl-H
+Move to the "home" page. The home page is a location specified by the 
+document author as a good starting point for reading the document.
+.TP
+.B Page-Down
+Move to the next page.
+.TP
+.B Page-Up
+Move to the previous page.
 .\"=====================================================================
 .SH MOUSE ACTIONS
 The following actions are executed using the 
@@ -170,6 +173,9 @@ Dragging in the opposite direction decreases the zoom factor. See also the
 key and the
 .B -z
 option.
+.TP
+.B Scroll wheel (EXPERIMENTAL)
+Using the scroll wheel is a fast way of paging forward and backward.
 .\"=====================================================================
 .SH NOTES
 This is a simple, bare-bone implementation of a program to render 

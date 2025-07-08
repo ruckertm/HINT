@@ -196,6 +196,7 @@ Further routines let the user manipulate what is shown on the screen;
 These routines are highly system dependent. They need to
 be rewritten for different operating systems.
 
+Part One
 
 \section{Reading Definitions}
 This chapter starts with the reimplementation of the parser for
@@ -229,7 +230,7 @@ The following function reads a single definition and stores it.
 By default, we store definitions as pointers to \TeX's data structures.
 
 @<get functions@>=
-void hget_def_node(void)
+static void hget_def_node(void)
 { Kind k;
   int n;
   @<read the start byte |a|@>@;
@@ -250,7 +251,7 @@ void hget_def_node(void)
   if (k!=range_kind) REF_RNG(k,n);
   DBG(DBGTAGS,"Defining %s %d\n", definition_name[KIND(a)],n);
   switch(KIND(a))
-  { case language_kind: { char *t;  HGET_STRING(t); break; }
+  { case language_kind: { char *t;  HGET_STRING(t); (void)t; break; }
     case font_kind: hget_font_def(a,n); break;
     case int_kind: integer_def[n]=hget_integer_def(a); break;
     case dimen_kind: dimen_def[n]=hget_dimen_def(a); break;
@@ -270,7 +271,7 @@ void hget_def_node(void)
   @<read and check the end byte |z|@>@;
 }
 
-pointer hset_glue(Glue *g)
+static pointer hset_glue(Glue *g)
 { if (ZERO_GLUE(*g)) 
   { add_glue_ref(zero_glue); 
     return zero_glue;
@@ -284,7 +285,7 @@ pointer hset_glue(Glue *g)
   } 
 }
 
-void hset_default_definitions(void)
+static void hset_default_definitions(void)
 { int i;
   for (i=0; i<=MAX_INT_DEFAULT; i++) integer_def[i]= int_defaults[i];
   for (i=0; i<=MAX_DIMEN_DEFAULT; i++) dimen_def[i]= dimen_defaults[i];
@@ -298,11 +299,11 @@ void hset_default_definitions(void)
   hset_default_colors();
 }
 
-void free_definitions(void)
+static void free_definitions(void)
 { @<free definitions@>@;
 }
 
-void hget_definition_section(void)
+static void hget_definition_section(void)
 { DBG(DBGDEF,"Definitions\n");
   hget_section(1);
   DBG(DBGDEF,"Reading list of maximum values\n");
@@ -320,7 +321,7 @@ void hget_definition_section(void)
 
 
 @<\HINT\ variables@>=
-pointer *pointer_def[32]={NULL};
+static pointer *pointer_def[32]={NULL};
 @
 
 
@@ -373,7 +374,7 @@ We start with the data types.
 \subsubsection{Integers}
 \noindent
 @<\HINT\ variables@>=
-int32_t *integer_def;
+static int32_t *integer_def;
 @
 
 
@@ -403,7 +404,7 @@ static int32_t hget_integer_ref(uint8_t n)
 \subsubsection{Dimensions}
 
 @<\HINT\ variables@>=
-scaled *dimen_def;
+static scaled *dimen_def;
 @
 
 @<allocate definitions@>=
@@ -433,7 +434,7 @@ static scaled hget_dimen_def(uint8_t a)
 \subsubsection{Extended Dimensions}
 
 @<\HINT\ variables@>=
-Xdimen *xdimen_def;
+static Xdimen *xdimen_def;
 @
 
 @<allocate definitions@>=
@@ -454,10 +455,8 @@ static scaled hget_xdimen_ref(uint8_t n)
 @
 
 The printing routine for whatsit nodes requires a function to print extended dimensions. Since
-\HINT\ never allocates a extended dimension node, the following function will suffice:
-@<\HINT\ functions@>=
-void print_xdimen(int i)
-{}
+\HINT\ never allocates an extended dimension node, the following function will suffice:
+|void print_xdimen(pointer p){}|.
 @
 
 
@@ -503,7 +502,7 @@ typedef struct { pointer bs, ls; scaled lsl;} BaselineSkip;
 @
 
 @<\HINT\ variables@>=
-BaselineSkip *baseline_def=NULL;
+static BaselineSkip *baseline_def=NULL;
 @
 
 @<allocate definitions@>=
@@ -522,7 +521,7 @@ static void hget_baseline_def(uint8_t a, uint8_t n)
   baseline_def[n].lsl=cur_lsl;
 }
 
-void hget_baseline_ref(uint8_t n)
+static void hget_baseline_ref(uint8_t n)
 { REF_RNG(baseline_kind,n);
   cur_bs=baseline_def[n].bs;
   cur_ls=baseline_def[n].ls;
@@ -595,20 +594,24 @@ static pointer hprepend_to_vlist(pointer b);
 
 
 \subsection{Fonts}\label{fonts}
-\TeX\ gets ist knowlegde about fonts from font metric files. \HINT\ will not need all of that
-information, but for now, the complete \TeX\ font metric file is included inside the \HINT\ file,
-and we can load all that information by calling the procedure |read_font_info| defined by \TeX.
-Because \TeX\ reads the font metric file using a special |fget| macro, only a few modifications,
-as explained below, are necessary.
+\TeX\ gets ist knowlegde about fonts from font metric files. \HINT\
+will not need all of that information, but for now, the complete \TeX\
+font metric file is included inside the \HINT\ file.
+The procedure |read_font_info| of \TeX\ is modified to load
+only those parts that are needed.
 
-When rendering fonts, we will need to find the section containing the actual glyphs.
+When rendering fonts, we will need to find the section containing the
+actual glyphs. For OpenType and TrueType fonts,
+there might be no font metric file. For these files the metric
+data is extracted from the same font file that contains the glyphs
+using the FreeType library.
 
-So we store the font name |n|, the section number for the font metrics |m| and the glyphs |q|, 
-the ``at size'' |s| (which might be different from the design size),
-the pointer to the font glue |g|,
-the pointer to the font hyphen |h|, and the font parameters |p|.
+We store the font name |n|, the section number for the font metrics
+|m| and the glyphs |q|, the ``at size'' |s| (which might be different
+from the design size), the pointer to the font glue |g|, the pointer
+to the font hyphen |h|, and the font parameters |p|.
 
-@<\HINT\ types@>=
+@<\HINT\ private types@>=
 typedef struct {
 char *n;
 uint16_t m,q;
@@ -617,11 +620,10 @@ pointer g;
 pointer h;
 pointer p[MAX_FONT_PARAMS+1];
 } FontDef;
-extern FontDef *font_def;
 @
 
 @<\HINT\ variables@>=
-FontDef *font_def;
+static FontDef *font_def;
 @
 
 @<allocate definitions@>=
@@ -632,15 +634,34 @@ ALLOCATE(font_def, max_ref[font_kind]+1, FontDef);
 free(font_def); font_def=NULL;
 @
 
+The function |hget_font_def| is called with two different values of
+|INFO(a)|: If the value is |b000|, there is also a section for the
+\.{.TFM} file; otherwise, the font metrics need to be extracted from
+the same section as the glyphs. In the latter case, we set the section
+number |m| for the font metrics and the |width_base| for the font to
+zero.  Either value can be tested to see whether traditional font
+metrcis are available or not.
+Freetype font faces were loaded in the \HINT\ viewer only when
+the first glyph from the font face was needed by the renderer.
+This is now possibly too late because the font metrics are
+needed much earlier.
+Because the viewer only displays a single page, we still will
+do ``on demand'' loading of font file information.
+After a font face is loaded the |font_face| array contains
+a valid |FT_Face| pointer. 
+
+
 
 @<\HINT\ auxiliar functions@>=
-static void hget_font_def(uint8_t a, uint8_t n)
+static void hget_font_def(uint8_t a, uint8_t i)
 { char *t;
-  FontDef *f=font_def+n;
+  FontDef *f=font_def+i;
   HGET_STRING(t);f->n=strdup(t); 
-  DBG(DBGDEF,"Font %d: %s\n", n, t); 
+  DBG(DBGDEF,"Font %d: %s\n", i, t); 
   HGET32(f->s); @+RNG("Font size",f->s,1,0x7fffffff);
-  HGET16(f->m); @+RNG("Font metrics",f->m,3,max_section_no);
+  if (INFO(a)==b000)
+  {  HGET16(f->m); @+RNG("Font metrics",f->m,3,max_section_no);}
+  else width_base[i]=f->m=0;
   HGET16(f->q); @+RNG("Font glyphs",f->q,3,max_section_no);
   f->g=hget_glue_spec(); 
   f->h=hget_disc_node();
@@ -663,41 +684,45 @@ static void hget_font_def(uint8_t a, uint8_t n)
 }
 @
 
-After reading the definition section, we need to move the information from the \TeX\ font metric
-files included into \TeX's data structures.
+After reading the definition section, we need to move the information
+from the \TeX\ font metric files included into \TeX's data
+structures. Here we only load the font metric information from \.{.TFM}
+files, while the font faces from extended fonts are loaded on demand.
+If the ``on demand'' loading works, this should also be done for
+the \.{.TFM} files.
 
 @<\HINT\ auxiliar functions@>=
 static void hget_font_metrics(void)
-{ int i;
-  for (i=0; i<=max_ref[font_kind]; i++)
-    if (font_def[i].m!=0)
-    { int s; /* optional at size */
-      hget_section(font_def[i].m);
-      s = font_def[i].s;
-      if (s==0) s=-1000;
-      read_font_info(i,font_def[i].n,s);
-      font_def[i].s=font_size[i];
+{ int f;
+  font_ptr=max_ref[font_kind];
+  for (f=0; f<=max_ref[font_kind]; f++)
+    if (font_def[f].m!=0)
+    { hget_section(font_def[f].m);
+      read_font_info(f,font_def[f].n,font_def[f].s);
     }
+    else
+      font_size[f]=font_def[f].s;
 }
 @
 
-We export the font section and at-size using two functions
-to be used in {\tt hfonts.c}.
+The above code sets the |font_ptr| variable needed by \TeX.
 
-@<\HINT\ functions@>=
-uint16_t hglyph_section(uint8_t f)
+@<\HINT\ |static|@>=
+static uint8_t font_ptr;
+@
+
+
+We export the font section and at-size using two functions
+to be used in {\tt hfonts.c}, as well as the |font_nom| for
+use in printing font names.
+
+@<render functions@>=
+static uint16_t hglyph_section(uint8_t f)
 {   return font_def[f].q;
 }
 
-int32_t font_at_size(uint8_t f)
-{  return font_def[f].s; /* at size */
-}
 @
 
-@<\HINT\ font access functions@>=
-extern uint16_t hglyph_section(uint8_t f);
-extern int32_t font_at_size(uint8_t f);
-@
 
 We used:
 
@@ -726,7 +751,7 @@ Param p; } ParamDef;
 
 
 @<\HINT\ variables@>=
-ParamDef **param_def;
+static ParamDef **param_def;
 @
 
 @<allocate definitions@>=
@@ -788,7 +813,7 @@ static ParamDef *hget_param_list(uint8_t a)
   return p;
 }
 
-ParamDef *hget_param_list_node(void)
+static ParamDef *hget_param_list_node(void)
 { @+if (KIND(*hpos)!=param_kind) return NULL;
   else 
   { @+ParamDef *p;
@@ -849,7 +874,7 @@ static void hset_param(uint8_t k, uint8_t n, int32_t v)
   { q->v=  pointer_def[glue_kind][q->n];@+ pointer_def[glue_kind][q->n]=(pointer)v; }
 }
 
-void hset_param_list(ParamDef *p)
+static void hset_param_list(ParamDef *p)
 { hset_param(SAVE_BOUNDARY,0,0);
   while (p!=NULL)
   { hset_param(p->p.k,p->p.n,p->p.v);
@@ -857,7 +882,7 @@ void hset_param_list(ParamDef *p)
   }
 }
 
-void hrestore_param_list(void)
+static void hrestore_param_list(void)
 {
   while (par_save_ptr>0)
   { Param *q;
@@ -873,8 +898,8 @@ void hrestore_param_list(void)
   QUIT("Parameter save stack flow");
 }
 @
-@<\HINT\ |extern|@>=
-extern void hrestore_param_list(void);
+@<\HINT\ |static|@>=
+static void hrestore_param_list(void);
 @
 
 \subsection{Page Ranges}
@@ -883,7 +908,7 @@ typedef struct {
  uint8_t pg;
  uint32_t f,t;
 } RangeDef;
-RangeDef *range_def;
+static RangeDef *range_def;
 @
 @<allocate definitions@>=
 ALLOCATE(range_def, max_ref[range_kind]+1, RangeDef);
@@ -928,15 +953,15 @@ The variable |streams| is used to contain the stream records
 that store the main content and the content of insertions.
 These records replace the box registers of \TeX.
 
-@<\HINT\ |extern|@>=
-typedef struct { /* should go to hint.h */
+@<\HINT\ |static|@>=
+typedef struct {
 pointer p, t; /* head and tail */
 } Stream;
-extern Stream *streams;
+static Stream *streams;
 @
 
 @<\HINT\ variables@>=
-Stream *streams;
+static Stream *streams;
 @
  
 @<allocate definitions@>=
@@ -1032,8 +1057,8 @@ typedef struct {
   Xdimen v,h; /* the dimensions of the page */
   StreamDef *s; /* stream definitions */
 } PageDef;
-PageDef *page_def;
-PageDef *cur_page;
+static PageDef *page_def;
+static PageDef *cur_page;
 @
 
 @<allocate definitions@>=
@@ -1125,7 +1150,7 @@ static void hinsert_stream(uint8_t n)
 Now comes the top level function to fill a template:
 
 @<\HINT\ functions@>=
-void hfill_page_template(void)
+static void hfill_page_template(void)
 { pointer p;
   if (cur_page->t!=0)
   {
@@ -1145,8 +1170,8 @@ void hfill_page_template(void)
 }
 @
 
-@<\HINT\ |extern|@>=
-extern void hfill_page_template(void);
+@<\HINT\ |static|@>=
+static void hfill_page_template(void);
 @
 
 \subsection{Labels and Outlines}\label{labels}
@@ -1159,7 +1184,7 @@ variable |labels|.
 
 @<\HINT\ variables@>=
 hint_Outline *hint_outlines=NULL;
-int outline_no=-1;
+static int outline_no=-1;
 @
 
 @<allocate definitions@>=
@@ -1183,7 +1208,7 @@ definition from the definition section. The |b100| bit tells the
 difference.
 
 @<get functions@>=
-void hget_outline_or_label_def(Info i, int n)
+static void hget_outline_or_label_def(Info i, int n)
 { @+if (i&b100)
    @<get and store an outline@>@;
   else
@@ -1240,9 +1265,8 @@ The function |hlist_to_string| is defined in section~\secref{listtraversal}.
 To store colors, we use the same data type that is used for the
 |color_defaults| and give it the name |ColorSet|.
 
-@<\HINT\ |extern|@>=
+@<\HINT\ |static|@>=
 typedef uint32_t ColorSet[12];
-extern ColorSet *color_def;
 extern ColorSet color_defaults[];
 @
 
@@ -1251,24 +1275,24 @@ extern ColorSet color_defaults[];
 We define a dynamic array for color sets based on |max_ref[color_kind]|.
 
 @<\HINT\ variables@>=
-ColorSet *color_def=NULL;
+static ColorSet *color_def=color_defaults;
 static bool first_color=true;
 @
 
 @<allocate definitions@>=
-if (color_def!=NULL) { free(color_def); color_def=NULL; }
+if (color_def!=color_defaults) { free(color_def); color_def=color_defaults; }
 ALLOCATE(color_def,max_ref[color_kind]+1, ColorSet);
 first_color=true;
 @
 
 @<free definitions@>=
-free(color_def); color_def=NULL;
+if (color_def!=color_defaults) { free(color_def); color_def=color_defaults; }
 @
 
 Now we can copy the color defaults to |color_def|.
 
 @<\HINT\ auxiliar functions@>=
-void hset_default_colors(void)
+static void hset_default_colors(void)
 { int i;
   for (i=0; i<=MAX_COLOR_DEFAULT; i++)
     memcpy(color_def+i,color_defaults+i,sizeof(ColorSet));
@@ -1505,7 +1529,7 @@ static void hget_node(uint8_t a)
   }
 }
 
-void hget_content(void)
+static void hget_content(void)
 { @+@<read the start byte |a|@>@;
   node_pos=(hpos-hstart)-1;
   hget_node(a);
@@ -1529,8 +1553,8 @@ static pointer hget_definition(uint8_t a)
 }
 @
 
-@<\HINT\ |extern|@>=
-void hget_content(void);
+@<\HINT\ |static|@>=
+static void hget_content(void);
 @
 
 Now let's turn to the backwards version.
@@ -1564,7 +1588,7 @@ static void hteg_node(uint8_t z)
   }
 }
 
-void hteg_content(void)
+static void hteg_content(void)
 { @+@<read the end byte |z|@>@;
   node_pos=hpos-hstart;
   hteg_node(z);
@@ -1581,8 +1605,8 @@ void hteg_content(void)
 }
 @
 
-@<\HINT\ |extern|@>=
-extern void hteg_content(void);
+@<\HINT\ |static|@>=
+static void hteg_content(void);
 @
 
 Next we continue with basic data types and then progress from the most simple to 
@@ -1673,7 +1697,7 @@ static void hget_xdimen_def_node(Xdimen *x)
 @
 
 @<\HINT\ auxiliar  functions@>=
-scaled hteg_xdimen(uint8_t a)
+static scaled hteg_xdimen(uint8_t a)
 { @+Xdimen x;
   switch(a)
   { 
@@ -1692,7 +1716,7 @@ scaled hteg_xdimen(uint8_t a)
   return  xdimen(&x);
  }
 
-scaled hteg_xdimen_node(void)
+static scaled hteg_xdimen_node(void)
 { @+scaled x=0;
   @<read the end byte |z|@>@;
   if (KIND(z)==xdimen_kind)
@@ -1837,7 +1861,7 @@ case TAG(rule_kind,b111): @+{@+ HTEG_RULE(b111); tail_append(p); prev_height=ign
 
 
 @<get functions@>=
-pointer hget_rule_node(void)
+static pointer hget_rule_node(void)
 { @+ pointer q=null;
   @<read the start byte |a|@>@;
   if (KIND(a)==rule_kind) { HGET_RULE(INFO(a));q=p;}
@@ -2060,7 +2084,7 @@ static void hskip_list_back(void)
   }
 }
 
-pointer hteg_list_pointer(void)
+static pointer hteg_list_pointer(void)
 { uint8_t *list_start;
   pointer p;
   hskip_list_back();
@@ -2213,7 +2237,7 @@ case TAG(vbox_kind,b111): @+{pointer p;@+HTEG_BOX(b111);@+type(p)=vlist_node;@+h
 @
 
 @<get functions@>=
-pointer hget_hbox_node(void)
+static pointer hget_hbox_node(void)
 { @+  @<read the start byte |a|@>@;
    if (KIND(a)!=hbox_kind)  tag_expected(TAG(hbox_kind,0),a,node_pos);
    { @+pointer p;
@@ -2224,7 +2248,7 @@ pointer hget_hbox_node(void)
 }
 
 
-pointer hget_vbox_node(void)
+static pointer hget_vbox_node(void)
 {@+
   @<read the start byte |a|@>@;
   if (KIND(a)!=vbox_kind)  tag_expected(TAG(vbox_kind,0),a,node_pos);
@@ -2378,7 +2402,7 @@ the vertical list.
 
 @<\HINT\ auxiliar functions@>=
 
-void vset(pointer p, uint8_t sto, scaled st,
+static void vset(pointer p, uint8_t sto, scaled st,
 					uint8_t sho,scaled sh, scaled h)
 { @+scaled x;
   type(p)=vlist_node;
@@ -2439,7 +2463,7 @@ need to traverse the content list before we can set the glue.
 
 @<TEG macros@>=
 #define @[HTEG_PACK(K,I)@] @/\
-{ pointer p;@+ scaled x, s, d; @+ uint8_t m; \
+{ pointer p;@+ scaled x, s=0, d; @+ uint8_t m; \
  p=hteg_list_pointer();\
  if ((I)&b100) x=hteg_xdimen_node();@+  else x=hget_xdimen_ref(HTEG8);\
  if (K==vpack_kind) HTEG32(d); \
@@ -2448,6 +2472,7 @@ need to traverse the content list before we can set the glue.
  node_pos=hpos-hstart-1;\
  if (K==vpack_kind)  { if (d<=MAX_DIMEN && d>=-MAX_DIMEN) p=vpackage(p,x,m,d); else p=vtop(p,x,m,d); } \
  else p=hpack(p,x,m);\
+ shift_amount(p)=s;\
  hprepend_to_vlist(p);@+} 
 @
 
@@ -2769,7 +2794,8 @@ static pointer hget_disc_node(void)
 @
 
 @<teg functions@>=
-pointer hteg_disc_node(void)
+#if 0
+static pointer hteg_disc_node(void)
 {  @+@<read the end byte |z|@>@;
    if (KIND(z)!=disc_kind || INFO(z)==b000) 
      tag_expected(TAG(disc_kind,1),z,node_pos); 
@@ -2779,6 +2805,7 @@ pointer hteg_disc_node(void)
    return p;
    }
 }
+#endif
 @
 
 
@@ -2857,7 +2884,7 @@ static void transplant_pre_break_list(void)
 }
 
 
-void hprune_unwanted_nodes(void)
+static void hprune_unwanted_nodes(void)
 { @+pointer q, r=head;
   while (true)@+{@+q=link(r);
   if (q==null) goto done;
@@ -2872,8 +2899,8 @@ done: if (r!=head)
   } 
 } 
 @
-@<\HINT\ |extern|@>=
-extern void hprune_unwanted_nodes(void);
+@<\HINT\ |static|@>=
+static void hprune_unwanted_nodes(void);
 @
 
 Because paragraphs can be broken accross pages, we need to obtain
@@ -3113,12 +3140,12 @@ We provide a functions to set the parameters from this special variable,
 thus avoiding the export of the |ParamDef| type.
 
 @<\HINT\ functions@>=
-void set_line_break_params(void)
+static void set_line_break_params(void)
 { hset_param_list(line_break_params);
 }
 @
-@<\HINT\ |extern|@>=
-extern void set_line_break_params(void);
+@<\HINT\ |static|@>=
+static void set_line_break_params(void);
 @
 
 
@@ -3142,8 +3169,10 @@ pointer hget_paragraph(scaled x, uint32_t offset, ParamDef *q)
   line_break_params=save_lbp;  
   return par_head;
 }
+@
 
-void hget_par_node(uint32_t offset)
+@<render functions@>=
+static void hget_par_node(uint32_t offset)
 { @+ scaled x=0;
   ParamDef *q;
   @<read the start byte |a|@>@;
@@ -3158,8 +3187,10 @@ void hget_par_node(uint32_t offset)
   @<read and check the end byte |z|@>@;
 }
 @
-@<\HINT\ |extern|@>=
-extern void hget_par_node(uint32_t offset);
+@<\HINT\ |static|@>=
+#if 0
+static void hget_par_node(uint32_t offset);
+#endif
 @
 
 
@@ -3178,7 +3209,7 @@ paragraph---the |bs_pos| is set to |NULL|. Further we store the value of |prev_h
 to be able to restore it after line breaking.
 
 @<\HINT\ auxiliar functions@>=
-void hteg_paragraph(Info i)
+static void hteg_paragraph(Info i)
 {@+scaled x=0;
   ParamDef *q=null;
   pointer par_head;
@@ -3233,8 +3264,8 @@ At the end, we update the |tail| pointer and the |prev_height|.
 
 
 
-@<teg functions@>=
-void hteg_par_node(uint32_t offset)
+@<render functions@>=
+static void hteg_par_node(uint32_t offset)
 { @+ scaled x=0;
   ParamDef *save_lbp = line_break_params;
   pointer p;
@@ -3257,9 +3288,6 @@ void hteg_par_node(uint32_t offset)
   line_break_params=save_lbp;  
 }
 
-@
-@<\HINT\ |extern|@>=
-extern void hteg_par_node(uint32_t offset);
 @
 
 
@@ -3662,7 +3690,7 @@ named ``|x0|'' because it would be renamed into ``|152|''.
 
 
 Now let's see how to extract code from \TeX.
-\changestyle{texdef.tex}
+%\changestyle{texdef.tex}
 
 \subsection{Parameters}
 
@@ -3671,36 +3699,36 @@ any assignments. The functions of \TeX, however, use several of \TeX's variables
 as parameters. These are now found as part of \HINT's definitions.
 We modify the corresponding macros accordingly.
 
-\changestyle{params.tex}
+%\changestyle{params.tex}
 
 The variables containing the parameter definitions are declared |extern|.
 
-@<\HINT\ |extern|@>=
-extern pointer*pointer_def[32];
-extern scaled*dimen_def;
-extern int32_t*integer_def;
+@<\HINT\ |static|@>=
+static pointer*pointer_def[32];
+static scaled*dimen_def;
+static int32_t*integer_def;
 @
 
 
 \subsection{Diagnostic Output}
 
-\changestyle{hprint.tex}
+%\changestyle{hprint.tex}
 
 \subsection{Arithmetic}
 
-\changestyle{harith.tex}
+%\changestyle{harith.tex}
 
 \subsection{Memory}
 \TeX's main data structure is the |mem| array. In this section, we will extract the
 |mem| variable and the routines to allocate and deallocate nodes.
  
-\changestyle{hmem.tex}
+%\changestyle{hmem.tex}
 
 \subsection{Boxes and Friends}
 
 In this section we will export the functions that create structures in |mem|: boxes, rules, ligatures and more such things.
 
-\changestyle{hbox.tex}
+%\changestyle{hbox.tex}
 
 \subsection{Lists and Nesting}
 Most of \TeX's operations are performed on the ``current list''. 
@@ -3708,21 +3736,21 @@ When \HINT\ reads nodes from the input file, it will follow this principle and a
 to the current list. Lists can be nested and the list on the outermost level is the contribution list which we encounter again in section~\secref{texbuildpage}. 
 Now lets consider the modifications to \TeX's list handling.
  
-\changestyle{hlist.tex}
+%\changestyle{hlist.tex}
 
 \subsection{Line Breaking}
 
-\changestyle{hlinebreak.tex}
+%\changestyle{hlinebreak.tex}
 
 \subsection{Displayed Formulas}
-\changestyle{hdisplay.tex}
+%\changestyle{hdisplay.tex}
 
 \subsection{Packing Boxes}
-\changestyle{hpack.tex}
+%\changestyle{hpack.tex}
 
 \subsection{Page Building}\label{texbuildpage}
 
-\changestyle{hbuildpage.tex}
+%\changestyle{hbuildpage.tex}
 
 
 Above, we have used several variables and functions
@@ -3730,13 +3758,13 @@ that are yet undefined. Here is a list of all of them
 which we will put into a header file to force the compiler
 to check for consistent use accross compilation units.
 
-@<\HINT\ |extern|@>=
-extern Stream *streams;
-extern bool flush_pages(uint32_t pos); 
-extern pointer skip(uint8_t n);
-extern pointer *box_ptr(uint8_t n);
-extern int count(uint8_t n);
-extern scaled dimen(uint8_t n);
+@<\HINT\ |static|@>=
+static Stream *streams;
+static bool flush_pages(uint32_t pos); 
+static pointer skip(uint8_t n);
+static pointer *box_ptr(uint8_t n);
+static int count(uint8_t n);
+static scaled dimen(uint8_t n);
 @
 
 @<\HINT\ functions@>=
@@ -3765,7 +3793,7 @@ a new page.
 % do not set |prev_depth=ignore_depth; prev_graf=0;| otherwise baseline skips do not work properly
 
 @<\HINT\ functions@>=
-void hpage_init(void)
+static void hpage_init(void)
 { int i;
   if (streams==NULL||cur_page==NULL) return;
    for (i=0; i<=max_ref[stream_kind]; i++)
@@ -3787,8 +3815,8 @@ void hpage_init(void)
 }
 @
 
-@<\HINT\ |extern|@>=
-extern void hpage_init(void);
+@<\HINT\ |static|@>=
+static void hpage_init(void);
 @
 
 When the viewer does not follow the natural sequence of pages but wants to
@@ -3796,7 +3824,7 @@ move to an arbitrary location in the \HINT\ file, the contribution list needs to
 The rest is done by |hpage_init|.
 
 @<\HINT\ functions@>=
-void hflush_contribution_list(void)
+static void hflush_contribution_list(void)
 { if (link(contrib_head)!=null)
   { flush_node_list(link(contrib_head));
     link(contrib_head)=null; tail=contrib_head; 
@@ -3804,20 +3832,7454 @@ void hflush_contribution_list(void)
 }
 @
 
-@<\HINT\ |extern|@>=
-extern void hflush_contribution_list(void);
+@<\HINT\ |static|@>=
+static void hflush_contribution_list(void);
 @
 
 \subsection{Insertions}\label{texinsertions}
 To handle insertions in the page building process we extract code from \TeX.
 
-\changestyle{hinsert.tex}
+%\changestyle{hinsert.tex}
 
 \subsection{Font Metric Files}
 In section~\secref{fonts} we mentioned the \TeX\ function  |read_font_info|. 
 Now we see how to extract and modify this function from the \TeX\ sources.
 
-\changestyle{hfont.tex}
+%\changestyle{hfont.tex}
+
+
+Part Two
+\begingroup
+% This program is copyright (C) 1982 by D. E. Knuth; all rights are reserved.
+% Unlimited copying and redistribution of this file are permitted as long
+% as this file is not modified. Modifications are permitted, but only if
+% the resulting file is not named tex.web. (The WEB system provides
+% for alterations via an auxiliary file; the master file should stay intact.)
+% See Appendix H of the WEB manual for hints on how to install this program.
+% And see Appendix A of the TRIP manual for details about how to validate it.
+
+% TeX is a trademark of the American Mathematical Society.
+% METAFONT is a trademark of Addison-Wesley Publishing Company.
+
+% Version 0 was released in September 1982 after it passed a variety of tests.
+% Version 1 was released in November 1983 after thorough testing.
+% Version 1.1 fixed ``disappearing font identifiers'' et alia (July 1984).
+% Version 1.2 allowed `0' in response to an error, et alia (October 1984).
+% Version 1.3 made memory allocation more flexible and local (November 1984).
+% Version 1.4 fixed accents right after line breaks, et alia (April 1985).
+% Version 1.5 fixed \the\toks after other expansion in \edefs (August 1985).
+% Version 2.0 (almost identical to 1.5) corresponds to "Volume B" (April 1986).
+% Version 2.1 corrected anomalies in discretionary breaks (January 1987).
+% Version 2.2 corrected "(Please type...)" with null \endlinechar (April 1987).
+% Version 2.3 avoided incomplete page in premature termination (August 1987).
+% Version 2.4 fixed \noaligned rules in indented displays (August 1987).
+% Version 2.5 saved cur_order when expanding tokens (September 1987).
+% Version 2.6 added 10sp slop when shipping leaders (November 1987).
+% Version 2.7 improved rounding of negative-width characters (November 1987).
+% Version 2.8 fixed weird bug if no \patterns are used (December 1987).
+% Version 2.9 made \csname\endcsname's "relax" local (December 1987).
+% Version 2.91 fixed \outer\def\a0{}\a\a bug (April 1988).
+% Version 2.92 fixed \patterns, also file names with complex macros (May 1988).
+% Version 2.93 fixed negative halving in allocator when mem_min<0 (June 1988).
+% Version 2.94 kept open_log_file from calling fatal_error (November 1988).
+% Version 2.95 solved that problem a better way (December 1988).
+% Version 2.96 corrected bug in "Infinite shrinkage" recovery (January 1989).
+% Version 2.97 corrected blunder in creating 2.95 (February 1989).
+% Version 2.98 omitted save_for_after at outer level (March 1989).
+% Version 2.99 caught $$\begingroup\halign..$$ (June 1989).
+% Version 2.991 caught .5\ifdim.6... (June 1989).
+% Version 2.992 introduced major changes for 8-bit extensions (September 1989).
+% Version 2.993 fixed a save_stack synchronization bug et alia (December 1989).
+% Version 3.0 fixed unusual displays; was more \output robust (March 1990).
+% Version 3.1 fixed nullfont, disabled \write{\the\prevgraf} (September 1990).
+% Version 3.14 fixed unprintable font names and corrected typos (March 1991).
+% Version 3.141 more of same; reconstituted ligatures better (March 1992).
+% Version 3.1415 preserved nonexplicit kerns, tidied up (February 1993).
+% Version 3.14159 allowed fontmemsize to change; bulletproofing (March 1995).
+% Version 3.141592 fixed \xleaders, glueset, weird alignments (December 2002).
+% Version 3.1415926 was a general cleanup with minor fixes (February 2008).
+% Version 3.14159265 was similar (January 2014).
+% Version 3.141592653 was similar but more extensive (January 2021).
+
+% A reward of $327.68 will be paid to the first finder of any remaining bug.
+
+% Although considerable effort has been expended to make the TeX program
+% correct and reliable, no warranty is implied; the author disclaims any
+% obligation or liability for damages, including but not limited to
+% special, indirect, or consequential damages arising out of or in
+% connection with the use or performance of this software. This work has
+% been a ``labor of love'' and the author hopes that users enjoy it.
+
+% Here is TeX material that gets inserted after \input webmac
+\def\hang{\hangindent 3em\noindent\ignorespaces}
+\def\hangg#1 {\hang\hbox{#1 }}
+\def\textindent#1{\hangindent2.5em\noindent\hbox to2.5em{\hss#1 }\ignorespaces}
+\font\ninerm=cmr9
+\let\mc=\ninerm % medium caps for names like SAIL
+\def\PASCAL{Pascal}
+\def\ph{\hbox{Pascal-H}}
+\def\pct!{{\char`\%}} % percent sign in ordinary text
+\font\logo=logo10 % font used for the METAFONT logo
+\def\MF{{\logo META}\-{\logo FONT}}
+\def\<#1>{$\langle#1\rangle$}
+\def\section{\mathhexbox278}
+
+\def\(#1){} % this is used to make section names sort themselves better
+\def\9#1{} % this is used for sort keys in the index via @@:sort key}{entry@@>
+
+\let\@@=\relax % we want to be able to \write a \?
+
+\def\title{\TeX82}
+\def\topofcontents{\hsize 5.5in
+  \vglue 0pt plus 1fil minus 1.5in
+  \def\@@##1]{\hbox to 1in{\hfil##1.\ }}
+  }
+\def\botofcontents{\vskip 0pt plus 1fil minus 1.5in}
+\pageno=3
+\def\glob{13} % this should be the section number of "<Global...>"
+\def\gglob{20, 26} % this should be the next two sections of "<Global...>"
+
+\def\.#1{\leavevmode\hbox{\tentex % typewriter type for strings
+  \let\\=\BS % backslash in a string
+  \let\'=\RQ % right quote in a string
+  \let\`=\LQ % left quote in a string
+  \let\{=\LB % left brace in a string
+  \let\}=\RB % right brace in a string
+  \let\~=\TL % tilde in a string
+  \let\ =\SP % space in a string
+  \let\_=\UL % underline in a string
+  \let\&=\AM % ampersand in a string
+  #1\kern.05em}}
+\def\&#1{\leavevmode\hbox{\bf\def\_{\UL}%
+  #1\/\kern.05em}} % boldface type for reserved words
+\def\\#1{\leavevmode\hbox{\it\def\_{\UL}%
+  #1\/\kern.05em}} % italic type for identifiers
+\def\vb#1{{\rm #1}}
+\def\^{\ifmmode\mathchar"222 \else\char`^ \fi} % pointer or hat
+\def\LQ{{\tt\char'22}} % left quote in a string
+\def\RQ{{\tt\char'23}} % right quote in a string
+\def\UL{{\tt\char`\_}} % underline character in a C identifier
+\def\dotdot{\mathrel{.\,.}} % double dot, used only in math mode
+@s dotdot TeX
+@s alpha_file int
+@s byte_file int
+@s word_file int
+@* Introduction.
+This is \TeX, a document compiler intended to produce typesetting of high
+quality.
+The \PASCAL\ program that follows is the definition of \TeX82, a standard
+@:PASCAL}{\PASCAL@>
+@!@:TeX82}{\TeX82@>
+version of \TeX\ that is designed to be highly portable so that identical output
+will be obtainable on a great variety of computers.
+
+The main purpose of the following program is to explain the algorithms of \TeX\
+as clearly as possible. As a result, the program will not necessarily be very
+efficient when a particular \PASCAL\ compiler has translated it into a
+particular machine language. However, the program has been written so that it
+can be tuned to run efficiently in a wide variety of operating environments
+by making comparatively few changes. Such flexibility is possible because
+the documentation that follows is written in the \.{WEB} language, which is
+at a higher level than \PASCAL; the preprocessing step that converts \.{WEB}
+to \PASCAL\ is able to introduce most of the necessary refinements.
+Semi-automatic translation to other languages is also feasible, because the
+program below does not make extensive use of features that are peculiar to
+\PASCAL.
+
+A large piece of software like \TeX\ has inherent complexity that cannot
+be reduced below a certain level of difficulty, although each individual
+part is fairly simple by itself. The \.{WEB} language is intended to make
+the algorithms as readable as possible, by reflecting the way the
+individual program pieces fit together and by providing the
+cross-references that connect different parts. Detailed comments about
+what is going on, and about why things were done in certain ways, have
+been liberally sprinkled throughout the program.  These comments explain
+features of the implementation, but they rarely attempt to explain the
+\TeX\ language itself, since the reader is supposed to be familiar with
+{\sl The \TeX book}.
+@.WEB@>
+@:TeXbook}{\sl The \TeX book@>
+
+@ The present implementation has a long ancestry, beginning in the summer
+of~1977, when Michael~F. Plass and Frank~M. Liang designed and coded
+a prototype
+@^Plass, Michael Frederick@>
+@^Liang, Franklin Mark@>
+@^Knuth, Donald Ervin@>
+based on some specifications that the author had made in May of that year.
+This original proto\TeX\ included macro definitions and elementary
+manipulations on boxes and glue, but it did not have line-breaking,
+page-breaking, mathematical formulas, alignment routines, error recovery,
+or the present semantic nest; furthermore,
+it used character lists instead of token lists, so that a control sequence
+like \.{\\halign} was represented by a list of seven characters. A
+complete version of \TeX\ was designed and coded by the author in late
+1977 and early 1978; that program, like its prototype, was written in the
+{\mc SAIL} language, for which an excellent debugging system was
+available. Preliminary plans to convert the {\mc SAIL} code into a form
+somewhat like the present ``web'' were developed by Luis Trabb~Pardo and
+@^Trabb Pardo, Luis Isidoro@>
+the author at the beginning of 1979, and a complete implementation was
+created by Ignacio~A. Zabala in 1979 and 1980. The \TeX82 program, which
+@^Zabala Salelles, Ignacio Andr\'es@>
+was written by the author during the latter part of 1981 and the early
+part of 1982, also incorporates ideas from the 1979 implementation of
+@^Guibas, Leonidas Ioannis@>
+@^Sedgewick, Robert@>
+@^Wyatt, Douglas Kirk@>
+\TeX\ in {\mc MESA} that was written by Leonidas Guibas, Robert Sedgewick,
+and Douglas Wyatt at the Xerox Palo Alto Research Center.  Several hundred
+refinements were introduced into \TeX82 based on the experiences gained with
+the original implementations, so that essentially every part of the system
+has been substantially improved. After the appearance of ``Version 0'' in
+September 1982, this program benefited greatly from the comments of
+many other people, notably David~R. Fuchs and Howard~W. Trickey.
+A final revision in September 1989 extended the input character set to
+eight-bit codes and introduced the ability to hyphenate words from
+different languages, based on some ideas of Michael~J. Ferguson.
+@^Fuchs, David Raymond@>
+@^Trickey, Howard Wellington@>
+@^Ferguson, Michael John@>
+
+No doubt there still is plenty of room for improvement, but the author
+is firmly committed to keeping \TeX82 ``frozen'' from now on; stability
+and reliability are to be its main virtues.
+
+On the other hand, the \.{WEB} description can be extended without changing
+the core of \TeX82 itself, and the program has been designed so that such
+extensions are not extremely difficult to make.
+The |banner| string defined here should be changed whenever \TeX\
+undergoes any modifications, so that it will be clear which version of
+\TeX\ might be the guilty party when a problem arises.
+@^extensions to \TeX@>
+@^system dependencies@>
+
+If this program is changed, the resulting system should not be called
+`\TeX'; the official name `\TeX' by itself is reserved
+for software systems that are fully compatible with each other.
+A special test suite called the ``\.{TRIP} test'' is available for
+helping to determine whether a particular implementation deserves to be
+known as `\TeX' [cf.~Stanford Computer Science report CS1027,
+November 1984].
+
+@d Xbanner "This is TeX, Version 3.141592653 (HINT)" /*printed when \TeX\ starts*/
+
+@ Different \PASCAL s have slightly different conventions, and the present
+@!@:PASCAL H}{\ph@>
+program expresses \TeX\ in terms of the \PASCAL\ that was
+available to the author in 1982. Constructions that apply to
+this particular compiler, which we shall call \ph, should help the
+reader see how to make an appropriate interface for other systems
+if necessary. (\ph\ is Charles Hedrick's modification of a compiler
+@^Hedrick, Charles Locke@>
+for the DECsystem-10 that was originally developed at the University of
+Hamburg; cf.\ {\sl Software---Practice and Experience \bf6} (1976),
+29--42. The \TeX\ program below is intended to be adaptable, without
+extensive changes, to most other versions of \PASCAL, so it does not fully
+use the admirable features of \ph. Indeed, a conscious effort has been
+made here to avoid using several idiosyncratic features of standard
+\PASCAL\ itself, so that most of the code can be translated mechanically
+into other high-level languages. For example, the `\&{with}' and `\\{new}'
+features are not used, nor are pointer types, set types, or enumerated
+scalar types; there are no `\&{var}' parameters, except in the case of files;
+there are no tag fields on variant records; there are no assignments
+|double=int|; no procedures are declared local to other procedures.)
+
+The portions of this program that involve system-dependent code, where
+changes might be necessary because of differences between \PASCAL\ compilers
+and/or differences between
+operating systems, can be identified by looking at the sections whose
+numbers are listed under `system dependencies' in the index. Furthermore,
+the index entries for `dirty \PASCAL' list all places where the restrictions
+of \PASCAL\ have not been followed perfectly, for one reason or another.
+@!@^system dependencies@>
+@!@^dirty \PASCAL@>
+
+Incidentally, \PASCAL's standard |round| function can be problematical,
+because it disagrees with the IEEE floating-point standard.
+Many implementors have
+therefore chosen to substitute their own home-grown rounding procedure.
+
+@ The following is an outline of the program, whose
+components will be filled in later, using the conventions of \.{WEB}.
+@.WEB@>
+For example, the portion of the program called `\X\glob:Global
+variables\X' below will be replaced by a sequence of variable declarations
+that starts in $\section\glob$ of this documentation. In this way, we are able
+to define each individual global variable when we are prepared to
+understand what it means; we do not have to define all of the globals at
+once.  Cross references in $\section\glob$, where it says ``See also
+sections \gglob, \dots,'' also make it possible to look at the set of
+all global variables, if desired.  Similar remarks apply to the other
+portions of the program.
+
+@<\TeX\ functions@>=
+@<Selected global variables@>@;
+@#
+#ifdef HINTTYPE
+@<Basic printing procedures@>@;
+#endif
+@<Basic error handling procedures@>@;
+
+@ The overall \TeX\ program begins with the heading just shown, after which
+comes a bunch of procedure declarations and function declarations.
+Finally we will get to the main program, which begins with the
+comment `|start_here|'. If you want to skip down to the
+main program now, you can look up `|start_here|' in the index.
+But the author suggests that the best way to understand this program
+is to follow pretty much the order of \TeX's components as they appear in the
+\.{WEB} description you are now reading, since the present ordering is
+intended to combine the advantages of the ``bottom up'' and ``top down''
+approaches to the problem of understanding a somewhat complicated system.
+
+
+@ Some of the code below is intended to be used only when diagnosing the
+strange behavior that sometimes occurs when \TeX\ is being installed or
+when system wizards are fooling around with \TeX\ without quite knowing
+what they are doing. Such code will not normally be compiled; it is
+delimited by the codewords `$|@t\#\&{ifdef} \.{DEBUG}@>|\ldots|@t\#\&{endif}@>|$', with apologies
+to people who wish to preserve the purity of English.
+
+Similarly, there is some conditional code delimited by
+`$|@t\#\&{ifdef} \.{STAT}@>|\ldots|@t\#\&{endif}@>|$' that is intended for use when statistics are to be
+kept about \TeX's memory usage.  The |@t\#\&{ifdef} \.{STAT}@>| $\ldots$ |@t\#\&{endif}@>| code also
+implements diagnostic information for \.{\\tracingparagraphs},
+\.{\\tracingpages}, and \.{\\tracingrestores}.
+@^debugging@>
+
+@ Most of the external declarations needed are included using standard
+header files.
+
+@s uint8_t int
+@s int16_t int
+@s uint16_t int
+@s int32_t int
+@s uint32_t int
+@s halfword int
+@s nonnegative_integer int
+@s small_number int
+@s glue_ratio double
+@s in TeX
+@s line normal
+@s to   do
+
+
+@ Further it is necessary to define some build in primitives of
+\PASCAL\ that are otherwise not available in~\CEE/.
+@:PASCAL H}{\ph@>
+
+@d odd(X)       ((X)&1)
+@d abs(X)       ((X)>-(X)?(X):-(X))
+@d round(X)     ((int)((X)>=0.0?floor((X)+0.5):ceil((X)-0.5)))
+
+@ The following parameters can be changed at compile time to extend or
+reduce \TeX's capacity. They may have different values in \.{INITEX} and
+in production versions of \TeX.
+@.INITEX@>
+@^system dependencies@>
+
+@<Constants...@>=
+@!mem_max=65534, /*greatest index in \TeX's internal |mem| array;
+  must be strictly less than |max_halfword|;
+  must be equal to |mem_top| in \.{INITEX}, otherwise | >= mem_top|*/
+@!mem_min=0, /*smallest index in \TeX's internal |mem| array;
+  must be |min_halfword| or more;
+  must be equal to |mem_bot| in \.{INITEX}, otherwise | <= mem_bot|*/
+@!buf_size=2048, /*maximum number of characters simultaneously present in
+  current lines of open files and in control sequences between
+  \.{\\csname} and \.{\\endcsname}; must not exceed |max_halfword|*/
+@!error_line=72, /*width of context lines on terminal error messages*/
+@!half_error_line=42, /*width of first lines of contexts in terminal
+  error messages; should be between 30 and |error_line-15|*/
+@!max_print_line=79, /*width of longest text lines output; should be at least 60*/
+@!stack_size=200, /*maximum number of simultaneous input sources*/
+@!max_in_open=6, /*maximum number of input files and error insertions that
+  can be going on simultaneously*/
+@!font_max=255, /*maximum internal font number; must not exceed |max_quarterword|
+  and must be at most |font_base+256|*/
+@!font_mem_size=65535, /*number of words of |font_info| for all fonts*/
+@!param_size=60, /*maximum number of simultaneous macro parameters*/
+@!nest_size=400, /*maximum number of semantic levels simultaneously active*/
+@!max_strings=30000, /*maximum number of strings; must not exceed |max_halfword|*/
+@!string_vacancies=75000, /*the minimum number of characters that should be
+  available for the user's control sequences and font names,
+  after \TeX's own error messages are stored*/
+@!pool_size=400000, /*maximum number of characters in strings, including all
+  error messages and help texts, and the names of all fonts and
+  control sequences; must exceed |string_vacancies| by the total
+  length of \TeX's own strings, which is currently about 23000*/
+@!save_size=600, /*space for saving values outside of current group; must be
+  at most |max_halfword|*/
+@!trie_size=65534, /*space for hyphenation patterns; should be larger for
+  \.{INITEX} than it is in production versions of \TeX*/
+@!trie_op_size=65534, /*space for ``opcodes'' in the hyphenation patterns*/
+@!dvi_buf_size=8, /*size of the output buffer; must be a multiple of 8*/
+@!file_name_size=1024, /*file names shouldn't be longer than this*/
+@!empty_string=256 /*the empty string follows after 256 characters*/
+
+@ Like the preceding parameters, the following quantities can be changed
+at compile time to extend or reduce \TeX's capacity. But if they are changed,
+it is necessary to rerun the initialization program \.{INITEX}
+@.INITEX@>
+to generate new tables for the production \TeX\ program.
+One can't simply make helter-skelter changes to the following constants,
+since certain rather complex initialization
+numbers are computed from them. They are defined here using
+\.{WEB} macros, instead of being put into \PASCAL's |const| list, in order to
+emphasize this distinction.
+
+@d mem_bot 0 /*smallest index in the |mem| array dumped by \.{INITEX};
+  must not be less than |mem_min|*/
+@d mem_top mem_max /*largest index in the |mem| array dumped by \.{INITEX};
+  must be substantially larger than |mem_bot|
+  and not greater than |mem_max|*/
+@d font_base 0 /*smallest internal font number; must not be less
+  than |min_quarterword|*/
+@^system dependencies@>
+
+@ Labels are given symbolic names by the following definitions, so that
+occasional |goto| statements will be meaningful. We insert the label
+`|end|' just before the `\ignorespaces|} |\unskip' of a procedure in
+which we have used the `|goto end|' statement defined below; the label
+`|restart|' is occasionally used at the very beginning of a procedure; and
+the label `|reswitch|' is occasionally used just prior to a |case|
+statement in which some cases change the conditions and we wish to branch
+to the newly applicable case.  Loops that are set up with the |loop|
+construction defined below are commonly exited by going to `|done|' or to
+`|found|' or to `|not_found|', and they are sometimes repeated by going to
+`|resume|'.  If two or more parts of a subroutine start differently but
+end up the same, the shared code may be gathered together at
+`|common_ending|'.
+
+Incidentally, this program never declares a label that isn't actually used,
+because some fussy \PASCAL\ compilers will complain about redundant labels.
+
+@ Here are some macros for common programming idioms.
+
+@d incr(A) A=A+1 /*increase a variable by unity*/
+@d decr(A) A=A-1 /*decrease a variable by unity*/
+@d negate(A) A=-A /*change the sign of a variable*/
+@d loop @+while (true) @+ /*repeat over and over until a |goto| happens*/
+@f loop else
+   /*\.{WEB}'s |else| acts like `\ignorespaces|while true do|\unskip'*/
+@d do_nothing  /*empty statement*/
+@d empty 0 /*symbolic name for a null constant*/
+
+@* The character set.
+In order to make \TeX\ readily portable to a wide variety of
+computers, all of its input text is converted to an internal eight-bit
+code that includes standard ASCII, the ``American Standard Code for
+Information Interchange.''  This conversion is done immediately when each
+character is read in. Conversely, characters are converted from ASCII to
+the user's external representation just before they are output to a
+text file.
+
+Such an internal code is relevant to users of \TeX\ primarily because it
+governs the positions of characters in the fonts. For example, the
+character `\.A' has ASCII code $65=0101$, and when \TeX\ typesets
+this letter it specifies character number 65 in the current font.
+If that font actually has `\.A' in a different position, \TeX\ doesn't
+know what the real position is; the program that does the actual printing from
+\TeX's device-independent files is responsible for converting from ASCII to
+a particular font encoding.
+@^ASCII code@>
+
+\TeX's internal code also defines the value of constants
+that begin with a reverse apostrophe; and it provides an index to the
+\.{\\catcode}, \.{\\mathcode}, \.{\\uccode}, \.{\\lccode}, and \.{\\delcode}
+tables.
+
+@ Characters of text that have been converted to \TeX's internal form
+are said to be of type |ASCII_code|, which is a subrange of the integers.
+
+@<Types...@>=
+typedef uint8_t ASCII_code; /*eight-bit numbers*/
+
+@ The original \PASCAL\ compiler was designed in the late 60s, when six-bit
+character sets were common, so it did not make provision for lowercase
+letters. Nowadays, of course, we need to deal with both capital and small
+letters in a convenient way, especially in a program for typesetting;
+so the present specification of \TeX\ has been written under the assumption
+that the \PASCAL\ compiler and run-time system permit the use of text files
+with more than 64 distinguishable characters. More precisely, we assume that
+the character set contains at least the letters and symbols associated
+with ASCII codes 040 through 0176; all of these characters are now
+available on most computer terminals.
+
+Since we are dealing with more characters than were present in the first
+\PASCAL\ compilers, we have to decide what to call the associated data
+type. Some \PASCAL s use the original name |unsigned char| for the
+characters in text files, even though there now are more than 64 such
+characters, while other \PASCAL s consider |unsigned char| to be a 64-element
+subrange of a larger data type that has some other name.
+
+In order to accommodate this difference, we shall use the name |text_char|
+to stand for the data type of the characters that are converted to and
+from |ASCII_code| when they are input and output. We shall also assume
+that |text_char| consists of the elements |chr(first_text_char)| through
+|chr(last_text_char)|, inclusive. The following definitions should be
+adjusted if necessary.
+@^system dependencies@>
+
+@s text_char char
+@d text_char unsigned char /*the data type of characters in text files*/
+
+@* Input and output.
+The bane of portability is the fact that different operating systems treat
+input and output quite differently, perhaps because computer scientists
+have not given sufficient attention to this problem. People have felt somehow
+that input and output are not part of ``real'' programming. Well, it is true
+that some kinds of programming are more fun than others. With existing
+input/output conventions being so diverse and so messy, the only sources of
+joy in such parts of the code are the rare occasions when one can find a
+way to make the program a little less bad than it might have been. We have
+two choices, either to attack I/O now and get it over with, or to postpone
+I/O until near the end. Neither prospect is very attractive, so let's
+get it over with.
+
+The basic operations we need to do are (1)~inputting and outputting of
+text, to or from a file or the user's terminal; (2)~inputting and
+outputting of eight-bit bytes, to or from a file; (3)~instructing the
+operating system to initiate (``open'') or to terminate (``close'') input or
+output from a specified file; (4)~testing whether the end of an input
+file has been reached.
+
+\TeX\ needs to deal with two kinds of files.
+We shall use the term |alpha_file| for a file that contains textual data,
+and the term |byte_file| for a file that contains eight-bit binary information.
+These two types turn out to be the same on many computers, but
+sometimes there is a significant distinction, so we shall be careful to
+distinguish between them. Standard protocols for transferring
+such files from computer to computer, via high-speed networks, are
+now becoming available to more and more communities of users.
+
+The program actually makes use also of a third kind of file, called a
+|word_file|, when dumping and reloading base information for its own
+initialization.  We shall define a word file later; but it will be possible
+for us to specify simple operations on word files before they are defined.
+
+@<Types...@>=
+typedef uint8_t eight_bits; /*unsigned one-byte quantity*/
+typedef struct {@+FILE *f;@+text_char@,d;@+} alpha_file; /*files that contain textual data*/
+typedef struct {@+FILE *f;@+eight_bits@,d;@+} byte_file; /*files that contain binary data*/
+
+
+@* String handling.
+Control sequence names and diagnostic messages are variable-length strings
+of eight-bit characters. Since \PASCAL\ does not have a well-developed string
+mechanism, \TeX\ does all of its string processing by homegrown methods.
+
+Elaborate facilities for dynamic strings are not needed, so all of the
+necessary operations can be handled with a simple data structure.
+The array |str_pool| contains all of the (eight-bit) ASCII codes in all
+of the strings, and the array |str_start| contains indices of the starting
+points of each string. Strings are referred to by integer numbers, so that
+string number |s| comprises the characters |str_pool[j]| for
+|str_start[s] <= j < str_start[s+1]|. Additional integer variables
+|pool_ptr| and |str_ptr| indicate the number of entries used so far
+in |str_pool| and |str_start|, respectively; locations
+|str_pool[pool_ptr]| and |str_start[str_ptr]| are
+ready for the next string to be allocated.
+
+String numbers 0 to 255 are reserved for strings that correspond to single
+ASCII characters. This is in accordance with the conventions of \.{WEB},
+@.WEB@>
+which converts single-character strings into the ASCII code number of the
+single character involved, while it converts other strings into integers
+and builds a string pool file. Thus, when the string constant \.{"."} appears
+in the program below, \.{WEB} converts it into the integer 46, which is the
+ASCII code for a period, while \.{WEB} will convert a string like \.{"hello"}
+into some integer greater than~255. String number 46 will presumably be the
+single character `\..'; but some ASCII codes have no standard visible
+representation, and \TeX\ sometimes needs to be able to print an arbitrary
+ASCII character, so the first 256 strings are used to specify exactly what
+should be printed for each of the 256 possibilities.
+
+Elements of the |str_pool| array must be ASCII codes that can actually
+be printed; i.e., they must have an |xchr| equivalent in the local
+character set. (This restriction applies only to preloaded strings,
+not to those generated dynamically by the user.)
+
+Some \PASCAL\ compilers won't pack integers into a single byte unless the
+integers lie in the range |-128 dotdot 127|. To accommodate such systems
+we access the string pool only via macros that can easily be redefined.
+@^system dependencies@>
+
+@d so(A) A /*convert from |packed_ASCII_code| to |ASCII_code|*/
+
+@<Types...@>=
+typedef int32_t pool_pointer; /*for variables that point into |str_pool|*/
+typedef int16_t str_number; /*for variables that point into |str_start|*/
+typedef uint8_t packed_ASCII_code; /*elements of |str_pool| array*/
+
+@ The first 128 strings will contain 95 standard ASCII characters, and the
+other 33 characters will be printed in three-symbol form like `\.{\^\^A}'
+unless a system-dependent change is made here. Installations that have
+an extended character set, where for example |xchr[032]==@t\.{\'^^Z\'}@>|,
+would like string 032 to be the single character 032 instead of the
+three characters 0136, 0136, 0132 (\.{\^\^Z}). On the other hand,
+even people with an extended character set will want to represent string
+015 by \.{\^\^M}, since 015 is |carriage_return|; the idea is to
+produce visible strings instead of tabs or line-feeds or carriage-returns
+or bell-rings or characters that are treated anomalously in text files.
+
+Unprintable characters of codes 128--255 are, similarly, rendered
+\.{\^\^80}--\.{\^\^ff}.
+
+The boolean expression defined here should be |true| unless \TeX\
+internal code number~|k| corresponds to a non-troublesome visible
+symbol in the local character set.  An appropriate formula for the
+extended character set recommended in {\sl The \TeX book\/} would, for
+example, be `|k in[0, 010 dotdot 012, 014, 015, 033, 0177 dotdot 0377]|'.
+If character |k| cannot be printed, and |k < 0200|, then character |k+0100| or
+|k-0100| must be printable; moreover, ASCII codes |[041 dotdot 046,
+060 dotdot 071, 0136, 0141 dotdot 0146, 0160 dotdot 0171]| must be printable.
+Thus, at least 80 printable characters are needed.
+@:TeXbook}{\sl The \TeX book@>
+@^character set dependencies@>
+@^system dependencies@>
+
+@* On-line and off-line printing.
+
+@ Macro abbreviations for output to the terminal and to the log file are
+defined here for convenience. Some systems need special conventions
+for terminal output, and it is possible to adhere to those conventions
+by changing |wterm|, |wterm_ln|, and |wterm_cr| in this section.
+@^system dependencies@>
+
+@<Basic printing procedures@>=
+#define @[put(F)@]    @[fwrite(&((F).d)@],@[sizeof((F).d),1,(F).f)@]@;
+#define @[get(F)@]    @[(void)fread(&((F).d),sizeof((F).d),1,(F).f)@]
+
+#define @[reset(F,N,M)@]   @[((F).f=fopen((char *)(N)+1,M),\
+                                 (F).f!=NULL?get(F):0)@]
+#define @[rewrite(F,N,M)@] @[((F).f=fopen((char *)(N)+1,M))@]
+#define @[pascal_close(F)@]    @[fclose((F).f)@]
+#define @[eof(F)@]    @[feof((F).f)@]
+#define @[eoln(F)@]    @[((F).d=='\n'||eof(F))@]
+#define @[erstat(F)@]   @[((F).f==NULL?-1:ferror((F).f))@]
+
+#define @[pascal_read(F,X)@] @[((X)=(F).d,get(F))@]
+#define @[read_ln(F)@]  do get(F); while (!eoln(F))
+
+#define @[pascal_write(F, FMT,...)@]    @[fprintf(F.f,FMT,## __VA_ARGS__)@]
+#define @[write_ln(F,...)@]    @[pascal_write(F,__VA_ARGS__"\n")@]
+
+#define @[wterm(FMT,...)@] @[pascal_write(term_out,FMT, ## __VA_ARGS__)@]
+#define @[wterm_ln(FMT,...)@] @[wterm(FMT "\n", ## __VA_ARGS__)@]
+#define wterm_cr         @[pascal_write(term_out,"\n")@]
+
+#define @[wlog(FMT, ...)@]    @[fprintf(hlog,FMT, ## __VA_ARGS__)@]
+#define @[wlogc(C)@]          @[putc(C,hlog)@]
+#define @[wlog_ln(FMT, ...)@]  @[wlog(FMT "\n", ## __VA_ARGS__)@]
+#define wlog_cr           @[wlogc('\n')@]
+
+static int @!tally=0; /*the number of characters recently printed*/
+static int @!file_offset=0;/*the number of characters on the current file line*/
+static int @!depth_threshold; /*maximum nesting depth in box displays*/
+static int @!breadth_max; /*maximum number of items shown at the same list level*/
+static int depth_level=0; /*current nesting level of |show_node_list|*/
+static int nl_char='\n';
+
+
+static void print_ln(void) /*prints an end-of-line*/
+{ @+wlog_cr; file_offset=0;
+}
+
+static void print_char(ASCII_code @!s) /*prints a single character*/
+{@+if (s==nl_char)
+  {@+print_ln();return;
+  }
+  wlogc(s); file_offset++;
+  if (file_offset==max_print_line) print_ln();
+  tally++;
+}
+
+static void print(char *s) /* the simple version */
+{ while (*s!=0) print_char(*s++);@+
+}
+
+static void print_nl(char *@!s) /*prints string |s| at beginning of line*/
+{@+if (file_offset > 0) print_ln();
+  print(s);
+}
+
+static void print_esc(char *@!s) /*prints escape character, then |s|*/
+{@+print_char('\\');
+  print(s);
+}
+
+static void print_int(int @!n) /*prints an integer in decimal form*/
+{ file_offset+=fprintf(hlog,"%d",n);
+}
+
+static void begin_diagnostic(void) {}
+static void end_diagnostic(bool b){}
+
+
+@ Old versions of \TeX\ needed a procedure called |print_ASCII| whose function
+is now subsumed by |print|. We retain the old name here as a possible aid to
+future software arch\ae ologists.
+
+@d print_lc_hex(A)
+  if ((A) < 10) print_char((A)+'0');@+else print_char((A)-10+'a')
+@d print_ASCII(k)
+   if ( (k < ' ')||(k > '~'))
+    {@+print("^^");
+      if (k < 0100) print_char(k+0100);
+      else if (k < 0200) print_char(k-0100);
+      else {@+print_lc_hex(k/16);print_lc_hex(k%16); }
+    }
+    else print_char(k)
+
+@ The |print| subroutine will not print a string that is still being
+created. The following procedure will.
+
+@<Basic printing procedures@>=
+static void print_current_string(void) /*prints a yet-unmade string*/
+{@+int i;
+   for(i=0;i<depth_level;i++) @+
+     print_char('.');
+}
+
+@* Reporting errors.
+
+@ Since errors can be detected almost anywhere in \TeX, we want to declare the
+error procedures near the beginning of the program. But the error procedures
+in turn use some other procedures, which need to be declared |forward|
+before we get to |error| itself.
+
+It is possible for |error| to be called recursively if some error arises
+when |get_token| is being used to delete a token, and/or if some fatal error
+occurs while \TeX\ is trying to fix a non-fatal one. But such recursion
+@^recursion@>
+is never more than two levels deep.
+
+@ The |jump_out| procedure just cuts across all active procedure levels and
+goes to |end_of_TEX|. This is the only nontrivial |@!goto| statement in the
+whole program. It is used when there is no recovery from a particular error.
+
+Some \PASCAL\ compilers do not implement non-local |goto| statements.
+@^system dependencies@>
+In such cases the body of |jump_out| should simply be
+`|close_files_and_terminate|;\thinspace' followed by a call on some system
+procedure that quietly terminates the program.
+
+@ Here is the most dreaded error message.
+
+@<Basic error handling procedures@>=
+static void overflow(char *@!s, int @!n) /*stop due to finiteness*/
+{@+ QUIT("Capacity exceeded, sorry [%s=%d=0x%X]\n",s,n,n);@+
+}
+
+@ The program might sometime run completely amok, at which point there is
+no choice but to stop. If no previous error has been detected, that's bad
+news; a message is printed that is really intended for the \TeX\
+maintenance person instead of the user (unless the user has been
+particularly diabolical).  The index entries for `this can't happen' may
+help to pinpoint the problem.
+@^dry rot@>
+
+@<Basic error handling procedures@>=
+static void confusion(char *@!s)
+   /*consistency check violated; |s| tells where*/
+{@+ QUIT("This can't happen(%s)",s);@+ }
+
+
+@* Arithmetic with scaled dimensions.
+The principal computations performed by \TeX\ are done entirely in terms of
+integers less than $2^{31}$ in magnitude; and divisions are done only when both
+dividend and divisor are nonnegative. Thus, the arithmetic specified in this
+program can be carried out in exactly the same way on a wide variety of
+computers, including some small ones. Why? Because the arithmetic
+calculations need to be spelled out precisely in order to guarantee that
+\TeX\ will produce identical output on different machines. If some
+quantities were rounded differently in different implementations, we would
+find that line breaks and even page breaks might occur in different places.
+Hence the arithmetic of \TeX\ has been designed with care, and systems that
+claim to be implementations of \TeX82 should follow precisely the
+@:TeX82}{\TeX82@>
+calculations as they appear in the present program.
+
+(Actually there are three places where \TeX\ uses |/| with a possibly negative
+numerator. These are harmless; see |/| in the index. Also if the user
+sets the \.{\\time} or the \.{\\year} to a negative value, some diagnostic
+information will involve negative-numerator division. The same remarks
+apply for |%| as well as for |/|.)
+
+@ Here is a routine that calculates half of an integer, using an
+unambiguous convention with respect to signed odd numbers.
+
+@<\TeX\ functions@>=
+
+static int half(int @!x)
+{@+if (odd(x)) return(x+1)/2;
+else return x/2;
+}
+
+@ Fixed-point arithmetic is done on {\sl scaled integers\/} that are multiples
+of $2^{-16}$. In other words, a binary point is assumed to be sixteen bit
+positions from the right end of a binary computer word.
+
+@d unity 0200000 /*$2^{16}$, represents 1.00000*/
+@d two 0400000 /*$2^{17}$, represents 2.00000*/
+
+@<Types...@>=
+typedef int scaled; /*this type is used for scaled integers*/
+typedef int32_t nonnegative_integer; /*$0\le x<2^{31}$*/
+typedef int8_t small_number; /*this type is self-explanatory*/
+
+
+@ Conversely, here is a procedure analogous to |print_int|. If the output
+of this procedure is subsequently read by \TeX\ and converted by the
+|round_decimals| routine above, it turns out that the original value will
+be reproduced exactly; the ``simplest'' such decimal number is output,
+but there is always at least one digit following the decimal point.
+
+The invariant relation in the \&{repeat} loop is that a sequence of
+decimal digits yet to be printed will yield the original number if and only if
+they form a fraction~$f$ in the range $s-\delta\le 10\cdot2^{16}f<s$.
+We can stop if and only if $f=0$ satisfies this condition; the loop will
+terminate before $s$ can possibly become zero.
+
+@<Basic printing procedures@>=
+static void print_scaled(scaled @!s) /*prints scaled real, rounded to five
+  digits*/
+{@+scaled delta; /*amount of allowable inaccuracy*/
+if (s < 0)
+  {@+print_char('-');negate(s); /*print the sign, if negative*/
+  }
+print_int(s/unity); /*print the integer part*/
+print_char('.');
+s=10*(s%unity)+5;delta=10;
+@/do@+{if (delta > unity) s=s+0100000-50000; /*round the last digit*/
+print_char('0'+(s/unity));s=10*(s%unity);delta=delta*10;
+}@+ while (!(s <= delta));
+}
+
+static void print_xdimen(pointer p)
+{ print_scaled(xdimen_width(p));
+  if (xdimen_hfactor(p)!=0)
+  { print_char('+');print_scaled(xdimen_hfactor(p));print("*hsize");}
+  if (xdimen_vfactor(p)!=0)
+  { print_char('+');print_scaled(xdimen_vfactor(p));print("*vsize");}
+}
+
+static void print_label(pointer p)
+{ print("goto *"); print_int(label_ref(p));
+}
+
+@ Physical sizes that a \TeX\ user specifies for portions of documents are
+represented internally as scaled points. Thus, if we define an `sp' (scaled
+@^sp@>
+point) as a unit equal to $2^{-16}$ printer's points, every dimension
+inside of \TeX\ is an integer number of sp. There are exactly
+4,736,286.72 sp per inch.  Users are not allowed to specify dimensions
+larger than $2^{30}-1$ sp, which is a distance of about 18.892 feet (5.7583
+meters); two such quantities can be added without overflow on a 32-bit
+computer.
+
+The present implementation of \TeX\ does not check for overflow when
+@^overflow in arithmetic@>
+dimensions are added or subtracted. This could be done by inserting a
+few dozen tests of the form `\ignorespaces|if (x >= 010000000000)|
+\\{report\_overflow}', but the chance of overflow is so remote that
+such tests do not seem worthwhile.
+
+\TeX\ needs to do only a few arithmetic operations on scaled quantities,
+other than addition and subtraction, and the following subroutines do most of
+the work. A single computation might use several subroutine calls, and it is
+desirable to avoid producing multiple error messages in case of arithmetic
+overflow; so the routines set the global variable |arith_error| to |true|
+instead of reporting errors directly to the user. Another global variable,
+|rem|, holds the remainder after a division.
+
+@<\TeX\ functions@>=
+static bool @!arith_error; /*has arithmetic overflow occurred recently?*/
+static scaled @!rem; /*amount subtracted to get an exact division*/
+
+@ We also need to divide scaled dimensions by integers.
+
+@<\TeX\ functions@>=
+static scaled x_over_n(scaled @!x, int @!n)
+{@+bool negative; /*should |rem| be negated?*/
+scaled x_over_n;
+negative=false;
+if (n==0)
+  {@+arith_error=true;x_over_n=0;rem=x;
+  }
+else{@+if (n < 0)
+    {@+negate(x);negate(n);negative=true;
+    }
+  if (x >= 0)
+    {@+x_over_n=x/n;rem=x%n;
+    }
+  else{@+x_over_n=-((-x)/n);rem=-((-x)%n);
+    }
+  }
+if (negative) negate(rem);
+return x_over_n;}
+
+@ Then comes the multiplication of a scaled number by a fraction |n/(double)d|,
+where |n| and |d| are nonnegative integers | <= @t$2^{16}$@>| and |d| is
+positive. It would be too dangerous to multiply by~|n| and then divide
+by~|d|, in separate operations, since overflow might well occur; and it
+would be too inaccurate to divide by |d| and then multiply by |n|. Hence
+this subroutine simulates 1.5-precision arithmetic.
+
+@<\TeX\ functions@>=
+static scaled xn_over_d(scaled @!x, int @!n, int @!d)
+{@+bool positive; /*was |x >= 0|?*/
+nonnegative_integer @!t, @!u, @!v; /*intermediate quantities*/
+scaled xn_over_d;
+if (x >= 0) positive=true;
+else{@+negate(x);positive=false;
+  }
+t=(x%0100000)*n;
+u=(x/0100000)*n+(t/0100000);
+v=(u%d)*0100000+(t%0100000);
+if (u/d >= 0100000) arith_error=true;
+else u=0100000*(u/d)+(v/d);
+if (positive)
+  {@+xn_over_d=u;rem=v%d;
+  }
+else{@+xn_over_d=-u;rem=-(v%d);
+  }
+return xn_over_d;}
+
+@ The next subroutine is used to compute the ``badness'' of glue, when a
+total~|t| is supposed to be made from amounts that sum to~|s|.  According
+to {\sl The \TeX book}, the badness of this situation is $100(t/s)^3$;
+however, badness is simply a heuristic, so we need not squeeze out the
+last drop of accuracy when computing it. All we really want is an
+approximation that has similar properties.
+@:TeXbook}{\sl The \TeX book@>
+
+The actual method used to compute the badness is easier to read from the
+program than to describe in words. It produces an integer value that is a
+reasonably close approximation to $100(t/s)^3$, and all implementations
+of \TeX\ should use precisely this method. Any badness of $2^{13}$ or more is
+treated as infinitely bad, and represented by 10000.
+
+It is not difficult to prove that $$\hbox{|badness(t+1, s) >= badness(t, s)
+ >= badness(t, s+1)|}.$$ The badness function defined here is capable of
+computing at most 1095 distinct values, but that is plenty.
+
+@d inf_bad 10000 /*infinitely bad value*/
+
+@<\TeX\ functions@>=
+static halfword badness(scaled @!t, scaled @!s) /*compute badness, given |t >= 0|*/
+{@+int r; /*approximation to $\alpha t/s$, where $\alpha^3\approx
+  100\cdot2^{18}$*/
+if (t==0) return 0;
+else if (s <= 0) return inf_bad;
+else{@+if (t <= 7230584) r=(t*297)/s; /*$297^3=99.94\times2^{18}$*/
+  else if (s >= 1663497) r=t/(s/297);
+  else r=t;
+  if (r > 1290) return inf_bad; /*$1290^3<2^{31}<1291^3$*/
+  else return(r*r*r+0400000)/01000000;
+  }  /*that was $r^3/2^{18}$, rounded to the nearest integer*/
+}
+
+@ When \TeX\ ``packages'' a list into a box, it needs to calculate the
+proportionality ratio by which the glue inside the box should stretch
+or shrink. This calculation does not affect \TeX's decision making,
+so the precise details of rounding, etc., in the glue calculation are not
+of critical importance for the consistency of results on different computers.
+
+We shall use the type |glue_ratio| for such proportionality ratios.
+A glue ratio should take the same amount of memory as an
+|int| (usually 32 bits) if it is to blend smoothly with \TeX's
+other data structures. Thus |glue_ratio| should be equivalent to
+|short_real| in some implementations of \PASCAL. Alternatively,
+it is possible to deal with glue ratios using nothing but fixed-point
+arithmetic; see {\sl TUGboat \bf3},1 (March 1982), 10--27. (But the
+routines cited there must be modified to allow negative glue ratios.)
+@^system dependencies@>
+
+@d set_glue_ratio_zero(A) A=0.0 /*store the representation of zero ratio*/
+@d set_glue_ratio_one(A) A=1.0 /*store the representation of unit ratio*/
+@d unfix(A) ((double)(A)) /*convert from |glue_ratio| to type |double|*/
+@d fix(A) ((glue_ratio)(A)) /*convert from |double| to type |glue_ratio|*/
+@d float_constant(A) ((double)(A)) /*convert |int| constant to |double|*/
+
+@<Types...@>=
+#if __SIZEOF_FLOAT__==4
+typedef float float32_t;
+#else
+#error  @=float type must have size 4@>
+#endif
+typedef float @!glue_ratio; /*one-word representation of a glue expansion factor*/
+
+@* Packed data.
+In order to make efficient use of storage space, \TeX\ bases its major data
+structures on a |memory_word|, which contains either a (signed) integer,
+possibly scaled, or a (signed) |glue_ratio|, or a small number of
+fields that are one half or one quarter of the size used for storing
+integers.
+
+If |x| is a variable of type |memory_word|, it contains up to four
+fields that can be referred to as follows:
+$$\vbox{\halign{\hfil#&#\hfil&#\hfil\cr
+|x|&.|i|&(an |int|)\cr
+|x|&.|sc|\qquad&(a |scaled| integer)\cr
+|x|&.|gr|&(a |glue_ratio|)\cr
+|x.hh.lh|, |x.hh|&.|rh|&(two halfword fields)\cr
+|x.hh.b0|, |x.hh.b1|, |x.hh|&.|rh|&(two quarterword fields, one halfword
+  field)\cr
+|x.qqqq.b0|, |x.qqqq.b1|, |x.qqqq|&.|b2|, |x.qqqq.b3|\hskip-100pt
+  &\qquad\qquad\qquad(four quarterword fields)\cr}}$$
+This is somewhat cumbersome to write, and not very readable either, but
+macros will be used to make the notation shorter and more transparent.
+The \PASCAL\ code below gives a formal definition of |memory_word| and
+its subsidiary types, using packed variant records. \TeX\ makes no
+assumptions about the relative positions of the fields within a word.
+
+Since we are assuming 32-bit integers, a halfword must contain at least
+16 bits, and a quarterword must contain at least 8 bits.
+@^system dependencies@>
+But it doesn't hurt to have more bits; for example, with enough 36-bit
+words you might be able to have |mem_max| as large as 262142, which is
+eight times as much memory as anybody had during the first four years of
+\TeX's existence.
+
+N.B.: Valuable memory space will be dreadfully wasted unless \TeX\ is compiled
+by a \PASCAL\ that packs all of the |memory_word| variants into
+the space of a single integer. This means, for example, that |glue_ratio|
+words should be |short_real| instead of |double| on some computers. Some
+\PASCAL\ compilers will pack an integer whose subrange is `|0 dotdot 255|' into
+an eight-bit field, but others insist on allocating space for an additional
+sign bit; on such systems you can get 256 values into a quarterword only
+if the subrange is `|-128 dotdot 127|'.
+
+The present implementation tries to accommodate as many variations as possible,
+so it makes few assumptions. If integers having the subrange
+`|min_quarterword dotdot max_quarterword|' can be packed into a quarterword,
+and if integers having the subrange `|min_halfword dotdot max_halfword|'
+can be packed into a halfword, everything should work satisfactorily.
+
+It is usually most efficient to have |min_quarterword==min_halfword==0|,
+so one should try to achieve this unless it causes a severe problem.
+The values defined here are recommended for most 32-bit computers.
+
+@d min_quarterword 0 /*smallest allowable value in a |quarterword|*/
+@d min_halfword 0 /*smallest allowable value in a |halfword|*/
+@d max_halfword 65535 /*largest allowable value in a |halfword|*/
+
+
+@ The operation of adding or subtracting |min_quarterword| occurs quite
+frequently in \TeX, so it is convenient to abbreviate this operation
+by using the macros |qi| and |qo| for input and output to and from
+quarterword format.
+
+The inner loop of \TeX\ will run faster with respect to compilers
+that don't optimize expressions like `|x+0|' and `|x-0|', if these
+macros are simplified in the obvious way when |min_quarterword==0|.
+@^inner loop@>@^system dependencies@>
+
+@d qi(A) A+min_quarterword
+   /*to put an |eight_bits| item into a quarterword*/
+@d qo(A) A-min_quarterword
+   /*to take an |eight_bits| item out of a quarterword*/
+
+@ The reader should study the following definitions closely:
+@^system dependencies@>
+
+@d sc i /*|scaled| data is equivalent to |int|*/
+
+@<Types...@>=
+typedef uint8_t quarterword; /*1/4 of a word*/
+typedef uint16_t halfword; /*1/2 of a word*/
+typedef int8_t two_choices; /*used when there are two variants in a record*/
+typedef int8_t four_choices; /*used when there are four variants in a record*/
+typedef struct { @;@/
+  halfword @!rh;
+  union {
+  halfword @!lh;
+  struct { quarterword @!b0;quarterword @!b1;} ;
+  };} two_halves;
+typedef struct { @;@/
+  quarterword @!b0;
+  quarterword @!b1;
+  quarterword @!b2;
+  quarterword @!b3;
+  } four_quarters;
+typedef struct { @;@/
+  union {
+  int @!i;
+  glue_ratio @!gr;
+  two_halves @!hh;
+  four_quarters @!qqqq;
+  };} memory_word;
+typedef struct {@+FILE *f;@+memory_word@,d;@+} word_file;
+
+
+@* Dynamic memory allocation.
+The \TeX\ system does nearly all of its own memory allocation, so that it
+can readily be transported into environments that do not have automatic
+facilities for strings, garbage collection, etc., and so that it can be in
+control of what error messages the user receives. The dynamic storage
+requirements of \TeX\ are handled by providing a large array |mem| in
+which consecutive blocks of words are used as nodes by the \TeX\ routines.
+
+Pointer variables are indices into this array, or into another array
+called |eqtb| that will be explained later. A pointer variable might
+also be a special flag that lies outside the bounds of |mem|, so we
+allow pointers to assume any |halfword| value. The minimum halfword
+value represents a null pointer. \TeX\ does not assume that |mem[null]| exists.
+
+@s pointer int
+@d pointer halfword /*a flag or a location in |mem| or |eqtb|*/
+@d null min_halfword /*the null pointer*/
+
+@<Selected global variables@>=
+static pointer @!temp_ptr; /*a pointer variable for occasional emergency use*/
+
+@ The |mem| array is divided into two regions that are allocated separately,
+but the dividing line between these two regions is not fixed; they grow
+together until finding their ``natural'' size in a particular job.
+Locations less than or equal to |lo_mem_max| are used for storing
+variable-length records consisting of two or more words each. This region
+is maintained using an algorithm similar to the one described in exercise
+2.5--19 of {\sl The Art of Computer Programming}. However, no size field
+appears in the allocated nodes; the program is responsible for knowing the
+relevant size when a node is freed. Locations greater than or equal to
+|hi_mem_min| are used for storing one-word records; a conventional
+\.{AVAIL} stack is used for allocation in this region.
+
+Locations of |mem| between |mem_bot| and |mem_top| may be dumped as part
+of preloaded format files, by the \.{INITEX} preprocessor.
+@.INITEX@>
+Production versions of \TeX\ may extend the memory at both ends in order to
+provide more space; locations between |mem_min| and |mem_bot| are always
+used for variable-size nodes, and locations between |mem_top| and |mem_max|
+are always used for single-word nodes.
+
+The key pointers that govern |mem| allocation have a prescribed order:
+$$\advance\thickmuskip-2mu
+\hbox{|null <= mem_min <= mem_bot < lo_mem_max <
+  hi_mem_min < mem_top <= mem_end <= mem_max|.}$$
+
+Empirical tests show that the present implementation of \TeX\ tends to
+spend about 9\pct! of its running time allocating nodes, and about 6\pct!
+deallocating them after their use.
+
+@<Selected global variables@>=
+static memory_word @!mem0[mem_max-mem_min+1], *const @!mem = @!mem0-mem_min; /*the big dynamic storage area*/
+static pointer @!lo_mem_max; /*the largest location of variable-size memory in use*/
+static pointer @!hi_mem_min; /*the smallest location of one-word memory in use*/
+
+@ In order to study the memory requirements of particular applications, it
+is possible to prepare a version of \TeX\ that keeps track of current and
+maximum memory usage. When code between the delimiters |
+#ifdef @!STAT
+| $\ldots$
+|@t\#\&{endif}@>| is not ``commented out,'' \TeX\ will run a bit slower but it will
+report these statistics when |tracing_stats| is sufficiently large.
+
+@<Selected global variables@>=
+static int @!var_used, @!dyn_used; /*how much memory is in use*/
+#ifdef @!STAT
+#define incr_dyn_used @[incr(dyn_used)@]
+#define decr_dyn_used @[decr(dyn_used)@]
+#else
+#define incr_dyn_used
+#define decr_dyn_used
+#endif
+
+@ Let's consider the one-word memory region first, since it's the
+simplest. The pointer variable |mem_end| holds the highest-numbered location
+of |mem| that has ever been used. The free locations of |mem| that
+occur between |hi_mem_min| and |mem_end|, inclusive, are of type
+|two_halves|, and we write |info(p)| and |link(p)| for the |lh|
+and |rh| fields of |mem[p]| when it is of this type. The single-word
+free locations form a linked list
+$$|avail|,\;\hbox{|link(avail)|},\;\hbox{|link(link(avail))|},\;\ldots$$
+terminated by |null|.
+
+@d link(A) mem[A].hh.rh /*the |link| field of a memory word*/
+@d info(A) mem[A].hh.lh /*the |info| field of a memory word*/
+
+@d mem_end mem_top
+@<Selected global variables@>=
+static pointer @!avail; /*head of the list of available one-word nodes*/
+
+@ The function |get_avail| returns a pointer to a new one-word node whose
+|link| field is null. However, \TeX\ will halt if there is no more room left.
+@^inner loop@>
+
+If the available-space list is empty, i.e., if |avail==null|,
+we try first to increase |mem_end|. If that cannot be done, i.e., if
+|mem_end==mem_max|, we try to decrease |hi_mem_min|. If that cannot be
+done, i.e., if |hi_mem_min==lo_mem_max+1|, we have to quit.
+
+@<\TeX\ functions@>=
+static pointer get_avail(void) /*single-word node allocation*/
+{@+pointer p; /*the new node being got*/
+p=avail; /*get top location in the |avail| stack*/
+if (p!=null) avail=link(avail); /*and pop it off*/
+else{@+decr(hi_mem_min);p=hi_mem_min;
+  if (hi_mem_min <= lo_mem_max)
+    {@+
+    overflow("main memory size", mem_max+1-mem_min);
+       /*quit; all one-word nodes are busy*/
+@:TeX capacity exceeded main memory size}{\quad main memory size@>
+    }
+  }
+link(p)=null; /*provide an oft-desired initialization of the new node*/
+#ifdef @!STAT
+incr(dyn_used);
+#endif
+@; /*maintain statistics*/
+return p;
+}
+
+@ Conversely, a one-word node is recycled by calling |free_avail|.
+This routine is part of \TeX's ``inner loop,'' so we want it to be fast.
+@^inner loop@>
+
+@d free_avail(A)  /*single-word node liberation*/
+  {@+link(A)=avail;avail=A;
+  decr_dyn_used;
+  }
+
+
+@ The available-space list that keeps track of the variable-size portion
+of |mem| is a nonempty, doubly-linked circular list of empty nodes,
+pointed to by the roving pointer |rover|.
+
+Each empty node has size 2 or more; the first word contains the special
+value |max_halfword| in its |link| field and the size in its |info| field;
+the second word contains the two pointers for double linking.
+
+Each nonempty node also has size 2 or more. Its first word is of type
+|two_halves|\kern-1pt, and its |link| field is never equal to |max_halfword|.
+Otherwise there is complete flexibility with respect to the contents
+of its other fields and its other words.
+
+(We require |mem_max < max_halfword| because terrible things can happen
+when |max_halfword| appears in the |link| field of a nonempty node.)
+
+@d empty_flag max_halfword /*the |link| of an empty variable-size node*/
+@d is_empty(A) (link(A)==empty_flag) /*tests for empty node*/
+@d node_size(A) info(A) /*the size field in empty variable-size nodes*/
+@d llink(A) info(A+1) /*left link in doubly-linked list of empty nodes*/
+@d rlink(A) link(A+1) /*right link in doubly-linked list of empty nodes*/
+
+@<Selected global variables@>=
+static pointer @!rover; /*points to some node in the list of empties*/
+
+@ A call to |get_node| with argument |s| returns a pointer to a new node
+of size~|s|, which must be 2~or more. The |link| field of the first word
+of this new node is set to null. An overflow stop occurs if no suitable
+space exists.
+
+If |get_node| is called with $s=2^{30}$, it simply merges adjacent free
+areas and returns the value |max_halfword|.
+
+@<\TeX\ functions@>=
+static pointer get_node(int @!s) /*variable-size node allocation*/
+{@+
+pointer p; /*the node currently under inspection*/
+pointer @!q; /*the node physically after node |p|*/
+int @!r; /*the newly allocated node, or a candidate for this honor*/
+int @!t; /*temporary register*/
+restart: p=rover; /*start at some free node in the ring*/
+@/do@+{@<Try to allocate within node |p| and its physical successors, and
+|goto found| if allocation was possible@>;
+@^inner loop@>
+p=rlink(p); /*move to the next node in the ring*/
+}@+ while (!(p==rover)); /*repeat until the whole list has been traversed*/
+if (s==010000000000)
+  {@+return max_halfword;
+  }
+if (lo_mem_max+2 < hi_mem_min) if (lo_mem_max+2 <= mem_bot+max_halfword)
+  @<Grow more variable-size memory and |goto restart|@>;
+overflow("main memory size", mem_max+1-mem_min);
+   /*sorry, nothing satisfactory is left*/
+@:TeX capacity exceeded main memory size}{\quad main memory size@>
+found: link(r)=null; /*this node is now nonempty*/
+#ifdef @!STAT
+var_used=var_used+s; /*maintain usage statistics*/
+#endif
+@;@/
+leak_in(r,s);
+return r;
+}
+
+@ The lower part of |mem| grows by 1000 words at a time, unless
+we are very close to going under. When it grows, we simply link
+a new node into the available-space list. This method of controlled
+growth helps to keep the |mem| usage consecutive when \TeX\ is
+implemented on ``virtual memory'' systems.
+@^virtual memory@>
+
+@<Grow more variable-size memory and |goto restart|@>=
+{@+if (hi_mem_min-lo_mem_max >= 1998) t=lo_mem_max+1000;
+else t=lo_mem_max+1+(hi_mem_min-lo_mem_max)/2;
+   /*|lo_mem_max+2 <= t < hi_mem_min|*/
+p=llink(rover);q=lo_mem_max;rlink(p)=q;llink(rover)=q;@/
+if (t > mem_bot+max_halfword) t=mem_bot+max_halfword;
+rlink(q)=rover;llink(q)=p;link(q)=empty_flag;node_size(q)=t-lo_mem_max;@/
+lo_mem_max=t;link(lo_mem_max)=null;info(lo_mem_max)=null;
+rover=q;goto restart;
+}
+
+@ Empirical tests show that the routine in this section performs a
+node-merging operation about 0.75 times per allocation, on the average,
+after which it finds that |r > p+1| about 95\pct! of the time.
+
+@<Try to allocate...@>=
+q=p+node_size(p); /*find the physical successor*/
+@^inner loop@>
+while (is_empty(q))  /*merge node |p| with node |q|*/
+  {@+t=rlink(q);
+  if (q==rover) rover=t;
+  llink(t)=llink(q);rlink(llink(q))=t;@/
+  q=q+node_size(q);
+  }
+r=q-s;
+if (r > p+1) @<Allocate from the top of node |p| and |goto found|@>;
+if (r==p) if (rlink(p)!=p)
+  @<Allocate entire node |p| and |goto found|@>;
+node_size(p)=q-p /*reset the size in case it grew*/
+
+@ @<Allocate from the top...@>=
+{@+node_size(p)=r-p; /*store the remaining size*/
+@^inner loop@>
+rover=p; /*start searching here next time*/
+goto found;
+}
+
+@ Here we delete node |p| from the ring, and let |rover| rove around.
+
+@<Allocate entire...@>=
+{@+rover=rlink(p);t=llink(p);
+llink(rover)=t;rlink(t)=rover;
+goto found;
+}
+
+@ Conversely, when some variable-size node |p| of size |s| is no longer needed,
+the operation |free_node(p, s)| will make its words available, by inserting
+|p| as a new empty node just before where |rover| now points.
+@^inner loop@>
+
+@<\TeX\ functions@>=
+static void free_node(pointer @!p, halfword @!s) /*variable-size node
+  liberation*/
+{@+pointer q; /*|llink(rover)|*/
+leak_out(p,s);
+store_map(p,0,0);
+node_size(p)=s;link(p)=empty_flag;
+q=llink(rover);llink(p)=q;rlink(p)=rover; /*set both links*/
+llink(rover)=p;rlink(q)=p; /*insert |p| into the ring*/
+#ifdef @!STAT
+var_used=var_used-s;
+#endif
+@; /*maintain statistics*/
+}
+
+@* Data structures for boxes and their friends.
+From the computer's standpoint, \TeX's chief mission is to create
+horizontal and vertical lists. We shall now investigate how the elements
+of these lists are represented internally as nodes in the dynamic memory.
+
+A horizontal or vertical list is linked together by |link| fields in
+the first word of each node. Individual nodes represent boxes, glue,
+penalties, or special things like discretionary hyphens; because of this
+variety, some nodes are longer than others, and we must distinguish different
+kinds of nodes. We do this by putting a `|type|' field in the first word,
+together with the link and an optional `|subtype|'.
+
+@d type(A) mem[A].hh.b0 /*identifies what kind of node this is*/
+@d subtype(A) mem[A].hh.b1 /*secondary identification in some cases*/
+
+@ A |@!char_node|, which represents a single character, is the most important
+kind of node because it accounts for the vast majority of all boxes.
+Special precautions are therefore taken to ensure that a |char_node| does
+not take up much memory space. Every such node is one word long, and in fact
+it is identifiable by this property, since other kinds of nodes have at least
+two words, and they appear in |mem| locations less than |hi_mem_min|.
+This makes it possible to omit the |type| field in a |char_node|, leaving
+us room for two bytes that identify a |font| and a |character| within
+that font.
+
+Note that the format of a |char_node| allows for up to 256 different
+fonts and up to 256 characters per font; but most implementations will
+probably limit the total number of fonts to fewer than 75 per job,
+and most fonts will stick to characters whose codes are
+less than 128 (since higher codes
+are more difficult to access on most keyboards).
+
+Extensions of \TeX\ intended for oriental languages will need even more
+than $256\times256$ possible characters, when we consider different sizes
+@^oriental characters@>@^Chinese characters@>@^Japanese characters@>
+and styles of type.  It is suggested that Chinese and Japanese fonts be
+handled by representing such characters in two consecutive |char_node|
+entries: The first of these has |font==font_base|, and its |link| points
+to the second;
+the second identifies the font and the character dimensions.
+The saving feature about oriental characters is that most of them have
+the same box dimensions. The |character| field of the first |char_node|
+is a ``\\{charext}'' that distinguishes between graphic symbols whose
+dimensions are identical for typesetting purposes. (See the \MF\ manual.)
+Such an extension of \TeX\ would not be difficult; further details are
+left to the reader.
+
+In order to make sure that the |character| code fits in a quarterword,
+\TeX\ adds the quantity |min_quarterword| to the actual code.
+
+Character nodes appear only in horizontal lists, never in vertical lists.
+
+@d is_char_node(A) (A >= hi_mem_min)
+   /*does the argument point to a |char_node|?*/
+@d font(A) type(A) /*the font code in a |char_node|*/
+@d character(A) subtype(A) /*the character code in a |char_node|*/
+
+@ An |hlist_node| stands for a box that was made from a horizontal list.
+Each |hlist_node| is seven words long, and contains the following fields
+(in addition to the mandatory |type| and |link|, which we shall not
+mention explicitly when discussing the other node types): The |height| and
+|width| and |depth| are scaled integers denoting the dimensions of the
+box.  There is also a |shift_amount| field, a scaled integer indicating
+how much this box should be lowered (if it appears in a horizontal list),
+or how much it should be moved to the right (if it appears in a vertical
+list). There is a |list_ptr| field, which points to the beginning of the
+list from which this box was fabricated; if |list_ptr| is |null|, the box
+is empty. Finally, there are three fields that represent the setting of
+the glue:  |glue_set(p)| is a word of type |glue_ratio| that represents
+the proportionality constant for glue setting; |glue_sign(p)| is
+|stretching| or |shrinking| or |normal| depending on whether or not the
+glue should stretch or shrink or remain rigid; and |glue_order(p)|
+specifies the order of infinity to which glue setting applies (|normal|,
+|fil|, |fill|, or |filll|). The |subtype| field is not used.
+
+@d hlist_node 0 /*|type| of hlist nodes*/
+@d box_node_size 9 /*number of words to allocate for a box, set, or pack node*/
+@d width_offset 1 /*position of |width| field in a box node*/
+@d depth_offset 2 /*position of |depth| field in a box node*/
+@d height_offset 3 /*position of |height| field in a box node*/
+@d width(A) mem[A+width_offset].sc /*width of the box, in sp*/
+@d depth(A) mem[A+depth_offset].sc /*depth of the box, in sp*/
+@d height(A) mem[A+height_offset].sc /*height of the box, in sp*/
+@d shift_amount(A) mem[A+4].sc /*repositioning distance, in sp*/
+@d list_offset 5 /*position of |list_ptr| field in a box node*/
+@d list_ptr(A) link(A+list_offset) /*beginning of the list inside the box*/
+@d glue_order(A) subtype(A+list_offset) /*applicable order of infinity*/
+@d glue_sign(A) type(A+list_offset) /*stretching or shrinking*/
+@d normal 0 /*the most common case when several cases are named*/
+@d stretching 1 /*glue setting applies to the stretch components*/
+@d shrinking 2 /*glue setting applies to the shrink components*/
+@d glue_offset 6 /*position of |glue_set| in a box node*/
+@d glue_set(A) mem[A+glue_offset].gr
+   /*a word of type |glue_ratio| for glue setting*/
+
+@ The |new_null_box| function returns a pointer to an |hlist_node| in
+which all subfields have the values corresponding to `\.{\\hbox\{\}}'.
+(The |subtype| field is set to |min_quarterword|, for historic reasons
+that are no longer relevant.)
+
+@<\TeX\ functions@>=
+static pointer new_null_box(void) /*creates a new box node*/
+{@+pointer p; /*the new node*/
+p=get_node(box_node_size);type(p)=hlist_node;
+subtype(p)=min_quarterword;
+width(p)=0;depth(p)=0;height(p)=0;shift_amount(p)=0;list_ptr(p)=null;
+glue_sign(p)=normal;glue_order(p)=normal;set_glue_ratio_zero(glue_set(p));
+return p;
+}
+
+@ A |vlist_node| is like an |hlist_node| in all respects except that it
+contains a vertical list.
+
+@d vlist_node 1 /*|type| of vlist nodes*/
+
+@ A |rule_node| stands for a solid black rectangle; it has |width|,
+|depth|, and |height| fields just as in an |hlist_node|. However, if
+any of these dimensions is $-2^{30}$, the actual value will be determined
+by running the rule up to the boundary of the innermost enclosing box.
+This is called a ``running dimension.'' The |width| is never running in
+an hlist; the |height| and |depth| are never running in a~vlist.
+
+@d rule_node 2 /*|type| of rule nodes*/
+@d rule_node_size 4 /*number of words to allocate for a rule node*/
+@d null_flag -010000000000 /*$-2^{30}$, signifies a missing item*/
+@d is_running(A) (A==null_flag) /*tests for a running dimension*/
+
+@ A new rule node is delivered by the |new_rule| function. It
+makes all the dimensions ``running,'' so you have to change the
+ones that are not allowed to run.
+
+@<\TeX\ functions@>=
+static pointer new_rule(void)
+{@+pointer p; /*the new node*/
+p=get_node(rule_node_size);type(p)=rule_node;
+subtype(p)=0; /*the |subtype| is not used*/
+width(p)=null_flag;depth(p)=null_flag;height(p)=null_flag;
+return p;
+}
+
+@ Insertions are represented by |ins_node| records, where the |subtype|
+indicates the corresponding box number. For example, `\.{\\insert 250}'
+leads to an |ins_node| whose |subtype| is |250+min_quarterword|.
+The |height| field of an |ins_node| is slightly misnamed; it actually holds
+the natural height plus depth of the vertical list being inserted.
+The |depth| field holds the |split_max_depth| to be used in case this
+insertion is split, and the |split_top_ptr| points to the corresponding
+|split_top_skip|. The |float_cost| field holds the |floating_penalty| that
+will be used if this insertion floats to a subsequent page after a
+split insertion of the same class.  There is one more field, the
+|ins_ptr|, which points to the beginning of the vlist for the insertion.
+
+@d ins_node 3 /*|type| of insertion nodes*/
+@d ins_node_size 5 /*number of words to allocate for an insertion*/
+@d float_cost(A) mem[A+1].i /*the |floating_penalty| to be used*/
+@d ins_ptr(A) info(A+4) /*the vertical list to be inserted*/
+@d split_top_ptr(A) link(A+4) /*the |split_top_skip| to be used*/
+
+@ A |mark_node| has a |mark_ptr| field that points to the reference count
+of a token list that contains the user's \.{\\mark} text.
+This field occupies a full word instead of a halfword, because
+there's nothing to put in the other halfword; it is easier in \PASCAL\ to
+use the full word than to risk leaving garbage in the unused half.
+
+@d mark_node 4 /*|type| of a mark node*/
+@d small_node_size 2 /*number of words to allocate for most node types*/
+@d mark_ptr(A) mem[A+1].i /*head of the token list for a mark*/
+
+@ An |adjust_node|, which occurs only in horizontal lists,
+specifies material that will be moved out into the surrounding
+vertical list; i.e., it is used to implement \TeX's `\.{\\vadjust}'
+operation.  The |adjust_ptr| field points to the vlist containing this
+material.
+
+@d adjust_node 5 /*|type| of an adjust node*/
+@d adjust_ptr(A) mark_ptr(A) /*vertical list to be moved out of horizontal list*/
+
+@ A |ligature_node|, which occurs only in horizontal lists, specifies
+a character that was fabricated from the interaction of two or more
+actual characters.  The second word of the node, which is called the
+|lig_char| word, contains |font| and |character| fields just as in a
+|char_node|. The characters that generated the ligature have not been
+forgotten, since they are needed for diagnostic messages and for
+hyphenation; the |lig_ptr| field points to a linked list of character
+nodes for all original characters that have been deleted. (This list
+might be empty if the characters that generated the ligature were
+retained in other nodes.)
+
+The |subtype| field is 0, plus 2 and/or 1 if the original source of the
+ligature included implicit left and/or right boundaries.
+
+@d ligature_node 6 /*|type| of a ligature node*/
+@d lig_char(A) A+1 /*the word where the ligature is to be found*/
+@d lig_ptr(A) link(lig_char(A)) /*the list of characters*/
+
+@ The |new_ligature| function creates a ligature node having given
+contents of the |font|, |character|, and |lig_ptr| fields. We also have
+a |new_lig_item| function, which returns a two-word node having a given
+|character| field. Such nodes are used for temporary processing as ligatures
+are being created.
+
+@<\TeX\ functions@>=
+static pointer new_ligature(quarterword @!f, quarterword @!c, pointer @!q)
+{@+pointer p; /*the new node*/
+p=get_node(small_node_size);type(p)=ligature_node;
+font(lig_char(p))=f;character(lig_char(p))=c;lig_ptr(p)=q;
+subtype(p)=0;return p;
+}
+@#
+
+@ A |disc_node|, which occurs only in horizontal lists, specifies a
+``dis\-cretion\-ary'' line break. If such a break occurs at node |p|, the text
+that starts at |pre_break(p)| will precede the break, the text that starts at
+|post_break(p)| will follow the break, and text that appears in the next
+|replace_count(p)| nodes will be ignored. For example, an ordinary
+discretionary hyphen, indicated by `\.{\\-}', yields a |disc_node| with
+|pre_break| pointing to a |char_node| containing a hyphen, |post_break==null|,
+and |replace_count==0|. All three of the discretionary texts must be
+lists that consist entirely of character, kern, box, rule, and ligature nodes.
+
+If |pre_break(p)==null|, the |ex_hyphen_penalty| will be charged for this
+break.  Otherwise the |hyphen_penalty| will be charged.  The texts will
+actually be substituted into the list by the line-breaking algorithm if it
+decides to make the break, and the discretionary node will disappear at
+that time; thus, the output routine sees only discretionaries that were
+not chosen.
+
+@d disc_node 7 /*|type| of a discretionary node*/
+@d replace_count(A) (subtype(A)&0x7F) /*how many subsequent nodes to replace*/
+@d set_replace_count(A,B) (subtype(A)=(B)&0x7F)
+@d set_auto_disc(A) (subtype(A)|=0x80)
+@d is_auto_disc(A) (subtype(A)&0x80)
+@d pre_break(A) llink(A) /*text that precedes a discretionary break*/
+@d post_break(A) rlink(A) /*text that follows a discretionary break*/
+
+@<\TeX\ functions@>=
+static pointer new_disc(void) /*creates an empty |disc_node|*/
+{@+pointer p; /*the new node*/
+p=get_node(small_node_size);type(p)=disc_node;
+subtype(p)=0;pre_break(p)=null;post_break(p)=null;
+return p;
+}
+
+@ A |whatsit_node| is a wild card reserved for extensions to \TeX. The
+|subtype| field in its first word says what `\\{whatsit}' it is, and
+implicitly determines the node size (which must be 2 or more) and the
+format of the remaining words. When a |whatsit_node| is encountered
+in a list, special actions are invoked; knowledgeable people who are
+careful not to mess up the rest of \TeX\ are able to make \TeX\ do new
+things by adding code at the end of the program. For example, there
+might be a `\TeX nicolor' extension to specify different colors of ink,
+@^extensions to \TeX@>
+and the whatsit node might contain the desired parameters.
+
+The present implementation of \TeX\ treats the features associated with
+`\.{\\write}' and `\.{\\special}' as if they were extensions, in order to
+illustrate how such routines might be coded. We shall defer further
+discussion of extensions until the end of this program.
+
+@d whatsit_node 8 /*|type| of special extension nodes*/
+
+@ A |math_node|, which occurs only in horizontal lists, appears before and
+after mathematical formulas. The |subtype| field is |before| before the
+formula and |after| after it. There is a |width| field, which represents
+the amount of surrounding space inserted by \.{\\mathsurround}.
+
+@d math_node 9 /*|type| of a math node*/
+@d before 0 /*|subtype| for math node that introduces a formula*/
+@d after 1 /*|subtype| for math node that winds up a formula*/
+
+@<\TeX\ functions@>=
+static pointer new_math(scaled @!w, small_number @!s)
+{@+pointer p; /*the new node*/
+p=get_node(small_node_size);type(p)=math_node;
+subtype(p)=s;width(p)=w;return p;
+}
+
+@ \TeX\ makes use of the fact that |hlist_node|, |vlist_node|,
+|rule_node|, |ins_node|, |mark_node|, |adjust_node|, |ligature_node|,
+|disc_node|, |whatsit_node|, and |math_node| are at the low end of the
+type codes, by permitting a break at glue in a list if and only if the
+|type| of the previous node is less than |math_node|. Furthermore, a
+node is discarded after a break if its type is |math_node| or~more.
+
+@d precedes_break(A) (type(A) < math_node)
+@d non_discardable(A) (type(A) < math_node)
+
+@ A |glue_node| represents glue in a list. However, it is really only
+a pointer to a separate glue specification, since \TeX\ makes use of the
+fact that many essentially identical nodes of glue are usually present.
+If |p| points to a |glue_node|, |glue_ptr(p)| points to
+another packet of words that specify the stretch and shrink components, etc.
+
+Glue nodes also serve to represent leaders; the |subtype| is used to
+distinguish between ordinary glue (which is called |normal|) and the three
+kinds of leaders (which are called |a_leaders|, |c_leaders|, and |x_leaders|).
+The |leader_ptr| field points to a rule node or to a box node containing the
+leaders; it is set to |null| in ordinary glue nodes.
+
+Many kinds of glue are computed from \TeX's ``skip'' parameters, and
+it is helpful to know which parameter has led to a particular glue node.
+Therefore the |subtype| is set to indicate the source of glue, whenever
+it originated as a parameter. We will be defining symbolic names for the
+parameter numbers later (e.g., |line_skip_code==0|, |baseline_skip_code==1|,
+etc.); it suffices for now to say that the |subtype| of parametric glue
+will be the same as the parameter number, plus~one.
+
+In math formulas there are two more possibilities for the |subtype| in a
+glue node: |mu_glue| denotes an \.{\\mskip} (where the units are scaled \.{mu}
+instead of scaled \.{pt}); and |cond_math_glue| denotes the `\.{\\nonscript}'
+feature that cancels the glue node immediately following if it appears
+in a subscript.
+
+@d glue_node 10 /*|type| of node that points to a glue specification*/
+@d mu_glue 99 /*|subtype| for math glue*/
+@d a_leaders 100 /*|subtype| for aligned leaders*/
+@d c_leaders 101 /*|subtype| for centered leaders*/
+@d x_leaders 102 /*|subtype| for expanded leaders*/
+@d glue_ptr(A) llink(A) /*pointer to a glue specification*/
+@d leader_ptr(A) rlink(A) /*pointer to box or rule node for leaders*/
+
+@ A glue specification has a halfword reference count in its first word,
+@^reference counts@>
+representing |null| plus the number of glue nodes that point to it (less one).
+Note that the reference count appears in the same position as
+the |link| field in list nodes; this is the field that is initialized
+to |null| when a node is allocated, and it is also the field that is flagged
+by |empty_flag| in empty nodes.
+
+Glue specifications also contain three |scaled| fields, for the |width|,
+|stretch|, and |shrink| dimensions. Finally, there are two one-byte
+fields called |stretch_order| and |shrink_order|; these contain the
+orders of infinity (|normal|, |fil|, |fill|, or |filll|)
+corresponding to the stretch and shrink values.
+
+@d glue_spec_size 4 /*number of words to allocate for a glue specification*/
+@d glue_ref_count(A) link(A) /*reference count of a glue specification*/
+@d stretch(A) mem[A+2].sc /*the stretchability of this glob of glue*/
+@d shrink(A) mem[A+3].sc /*the shrinkability of this glob of glue*/
+@d stretch_order(A) type(A) /*order of infinity for stretching*/
+@d shrink_order(A) subtype(A) /*order of infinity for shrinking*/
+@d fil 1 /*first-order infinity*/
+@d fill 2 /*second-order infinity*/
+@d filll 3 /*third-order infinity*/
+
+@<Types...@>=
+typedef int8_t glue_ord; /*infinity to the 0, 1, 2, or 3 power*/
+
+@ Here is a function that returns a pointer to a copy of a glue spec.
+The reference count in the copy is |null|, because there is assumed
+to be exactly one reference to the new specification.
+
+@<\TeX\ functions@>=
+static pointer new_spec(pointer @!p) /*duplicates a glue specification*/
+{@+pointer q; /*the new spec*/
+q=get_node(glue_spec_size);@/
+mem[q]=mem[p];glue_ref_count(q)=null;@/
+width(q)=width(p);stretch(q)=stretch(p);shrink(q)=shrink(p);
+return q;
+}
+
+@ Glue nodes that are more or less anonymous are created by |new_glue|,
+whose argument points to a glue specification.
+
+@<\TeX\ functions@>=
+static pointer new_glue(pointer @!q)
+{@+pointer p; /*the new node*/
+p=get_node(small_node_size);type(p)=glue_node;subtype(p)=normal;
+leader_ptr(p)=null;glue_ptr(p)=q;incr(glue_ref_count(q));
+return p;
+}
+
+@ A |kern_node| has a |width| field to specify a (normally negative)
+amount of spacing. This spacing correction appears in horizontal lists
+between letters like A and V when the font designer said that it looks
+better to move them closer together or further apart. A kern node can
+also appear in a vertical list, when its `|width|' denotes additional
+spacing in the vertical direction. The |subtype| is either |normal| (for
+kerns inserted from font information or math mode calculations) or |explicit|
+(for kerns inserted from \.{\\kern} and \.{\\/} commands) or |acc_kern|
+(for kerns inserted from non-math accents) or |mu_glue| (for kerns
+inserted from \.{\\mkern} specifications in math formulas).
+
+@d kern_node 11 /*|type| of a kern node*/
+@d explicit 1 /*|subtype| of kern nodes from \.{\\kern} and \.{\\/}*/
+@d acc_kern 2 /*|subtype| of kern nodes from accents*/
+
+@ The |new_kern| function creates a kern node having a given width.
+
+@<\TeX\ functions@>=
+static pointer new_kern(scaled @!w)
+{@+pointer p; /*the new node*/
+p=get_node(small_node_size);type(p)=kern_node;
+subtype(p)=normal;
+width(p)=w;
+return p;
+}
+
+@ A |penalty_node| specifies the penalty associated with line or page
+breaking, in its |penalty| field. This field is a fullword integer, but
+the full range of integer values is not used: Any penalty | >= 10000| is
+treated as infinity, and no break will be allowed for such high values.
+Similarly, any penalty | <= -10000| is treated as negative infinity, and a
+break will be forced.
+
+@d penalty_node 12 /*|type| of a penalty node*/
+@d inf_penalty inf_bad /*``infinite'' penalty value*/
+@d eject_penalty (-inf_penalty) /*``negatively infinite'' penalty value*/
+@d penalty(A) mem[A+1].i /*the added cost of breaking a list here*/
+
+@ Anyone who has been reading the last few sections of the program will
+be able to guess what comes next.
+
+@<\TeX\ functions@>=
+static pointer new_penalty(int @!m)
+{@+pointer p; /*the new node*/
+p=get_node(small_node_size);type(p)=penalty_node;
+subtype(p)=0; /*the |subtype| is not used*/
+penalty(p)=m;return p;
+}
+
+@ You might think that we have introduced enough node types by now. Well,
+almost, but there is one more: An |unset_node| has nearly the same format
+as an |hlist_node| or |vlist_node|; it is used for entries in \.{\\halign}
+or \.{\\valign} that are not yet in their final form, since the box
+dimensions are their ``natural'' sizes before any glue adjustment has been
+made. The |glue_set| word is not present; instead, we have a |glue_stretch|
+field, which contains the total stretch of order |glue_order| that is
+present in the hlist or vlist being boxed.
+Similarly, the |shift_amount| field is replaced by a |glue_shrink| field,
+containing the total shrink of order |glue_sign| that is present.
+The |subtype| field is called |span_count|; an unset box typically
+contains the data for |qo(span_count)+1| columns.
+Unset nodes will be changed to box nodes when alignment is completed.
+
+@d unset_node 13 /*|type| for an unset node*/
+@d glue_stretch(A) mem[A+glue_offset].sc /*total stretch in an unset node*/
+@d glue_shrink(A) shift_amount(A) /*total shrink in an unset node*/
+@d span_count(A) subtype(A) /*indicates the number of spanned columns*/
+
+@ In fact, there are still more types coming. When we get to math formula
+processing we will see that a |style_node| has |type==14|; and a number
+of larger type codes will also be defined, for use in math mode only.
+
+@ Warning: If any changes are made to these data structure layouts, such as
+changing any of the node sizes or even reordering the words of nodes,
+the |copy_node_list| procedure and the memory initialization code
+below may have to be changed. Such potentially dangerous parts of the
+program are listed in the index under `data structure assumptions'.
+@!@^data structure assumptions@>
+However, other references to the nodes are made symbolically in terms of
+the \.{WEB} macro definitions above, so that format changes will leave
+\TeX's other algorithms intact.
+@^system dependencies@>
+
+@* Memory layout.
+Some areas of |mem| are dedicated to fixed usage, since static allocation is
+more efficient than dynamic allocation when we can get away with it. For
+example, locations |mem_bot| to |mem_bot+3| are always used to store the
+specification for glue that is `\.{0pt plus 0pt minus 0pt}'. The
+following macro definitions accomplish the static allocation by giving
+symbolic names to the fixed positions. Static variable-size nodes appear
+in locations |mem_bot| through |lo_mem_stat_max|, and static single-word nodes
+appear in locations |hi_mem_stat_min| through |mem_top|, inclusive. It is
+harmless to let |lig_trick| and |garbage| share the same location of |mem|.
+
+@d zero_glue mem_bot /*specification for \.{0pt plus 0pt minus 0pt}*/
+@d lo_mem_stat_max zero_glue+glue_spec_size-1 /*largest statically allocated word in the variable-size |mem|*/
+@#
+@d page_ins_head mem_top /*list of insertion data for current page*/
+@d contrib_head mem_top-1 /*vlist of items not yet on current page*/
+@d page_head mem_top-2 /*vlist for current page*/
+@d temp_head mem_top-3 /*head of a temporary list of some kind*/
+@d hold_head mem_top-4 /*head of a temporary list of another kind*/
+@d adjust_head mem_top-5 /*head of adjustment list returned by |hpack|*/
+@d active mem_top-7 /*head of active list in |line_break|, needs two words*/
+@d lig_trick mem_top-12 /*a ligature masquerading as a |char_node|*/
+@d hi_mem_stat_min mem_top-13 /*smallest statically allocated word in
+  the one-word |mem|*/
+@d hi_mem_stat_usage 14 /*the number of one-word nodes always present*/
+
+
+@ @<\TeX\ functions@>=
+static void mem_init(void)
+{ @+ int k;
+  @<Initialize |mem|@>@;
+}
+
+@ @<Initialize |mem|@>=
+for (k=mem_bot+1; k<=lo_mem_stat_max; k++) mem[k].sc=0;
+   /*all glue dimensions are zeroed*/
+@^data structure assumptions@>
+k=mem_bot;@+while (k <= lo_mem_stat_max)
+     /*set first words of glue specifications*/
+  {@+glue_ref_count(k)=null+1;
+  stretch_order(k)=normal;shrink_order(k)=normal;
+  k=k+glue_spec_size;
+  }
+rover=lo_mem_stat_max+1;
+link(rover)=empty_flag; /*now initialize the dynamic memory*/
+node_size(rover)=1000; /*which is a 1000-word available node*/
+llink(rover)=rover;rlink(rover)=rover;@/
+lo_mem_max=rover+1000;link(lo_mem_max)=null;info(lo_mem_max)=null;@/
+for (k=hi_mem_stat_min; k<=mem_top; k++)
+  mem[k]=mem[lo_mem_max]; /*clear list heads*/
+@<Initialize the special list heads and constant nodes@>;
+avail=null;
+hi_mem_min=hi_mem_stat_min; /*initialize the one-word memory*/
+var_used=lo_mem_stat_max+1-mem_bot;dyn_used=hi_mem_stat_usage;
+   /*initialize statistics*/
+
+
+@* Displaying boxes.
+We can reinforce our knowledge of the data structures just introduced
+by considering two procedures that display a list in symbolic form.
+The first of these, called |short_display|, is used in ``overfull box''
+messages to give the top-level description of a list. The other one,
+called |show_node_list|, prints a detailed description of exactly what
+is in the data structure.
+
+The philosophy of |short_display| is to ignore the fine points about exactly
+what is inside boxes, except that ligatures and discretionary breaks are
+expanded. As a result, |short_display| is a recursive procedure, but the
+recursion is never more than one level deep.
+@^recursion@>
+
+A global variable |font_in_short_display| keeps track of the font code that
+is assumed to be present when |short_display| begins; deviations from this
+font will be printed.
+
+@<Basic printing procedures@>=
+static int @!font_in_short_display; /*an internal font number*/
+
+@ Boxes, rules, inserts, whatsits, marks, and things in general that are
+sort of ``complicated'' are indicated only by printing `\.{[]}'.
+
+@<Basic printing procedures@>=
+static void short_display(int @!p) /*prints highlights of list |p|*/
+{@+int n; /*for replacement counts*/
+while (p > mem_min)
+  {@+if (is_char_node(p))
+    {@+if (p <= mem_end)
+      {@+if (font(p)!=font_in_short_display)
+        {@+if ((font(p) < font_base)||(font(p) > font_max))
+          print_char('*');
+@.*\relax@>
+        else@<Print the font identifier for |font(p)|@>;
+        print_char(' ');font_in_short_display=font(p);
+        }
+      print_ASCII(qo(character(p)));
+      }
+    }
+  else@<Print a short indication of the contents of node |p|@>;
+  p=link(p);
+  }
+}
+
+@ @<Print a short indication of the contents of node |p|@>=
+switch (type(p)) {
+case hlist_node: case vlist_node: case ins_node:
+  case whatsit_node: case mark_node: case adjust_node:
+  case unset_node: print("[]");@+break;
+case rule_node: print_char('|');@+break;
+case glue_node: if (glue_ptr(p)!=zero_glue) print_char(' ');@+break;
+case math_node: print_char('$');@+break;
+case ligature_node: short_display(lig_ptr(p));@+break;
+case disc_node: {@+short_display(pre_break(p));
+  short_display(post_break(p));@/
+  n=replace_count(p);
+  while (n > 0)
+    {@+if (link(p)!=null) p=link(p);
+    decr(n);
+    }
+  } @+break;
+default:do_nothing;
+}
+
+@ The |show_node_list| routine requires some auxiliary subroutines: one to
+print a font-and-character combination, one to print a token list without
+its reference count, and one to print a rule dimension.
+
+@<Basic printing procedures@>=
+static void print_font_and_char(int @!p) /*prints |char_node| data*/
+{@+if (p > mem_end) print_esc("CLOBBERED.");
+else{@<Print the font identifier for |font(p)|@>;
+  print_char(' ');print_ASCII(character(p));
+  }
+}
+@#
+static void print_mark(int @!p) /*prints token list data in braces*/
+{@+print_char('{');print_char('}');@+
+}
+@#
+static void print_rule_dimen(scaled @!d) /*prints dimension in rule node*/
+{@+if (is_running(d)) print_char('*');else print_scaled(d);
+@.*\relax@>
+}
+
+@ Then there is a subroutine that prints glue stretch and shrink, possibly
+followed by the name of finite units:
+
+@<Basic printing procedures@>=
+   static void print_glue(scaled @!d, int @!order, char *@!s)
+   /*prints a glue component*/
+{@+print_scaled(d);
+if ((order < normal)||(order > filll)) print("foul");
+else if (order > normal)
+  {@+print("fil");
+  while (order > fil)
+    {@+print_char('l');decr(order);
+    }
+  }
+else if (s!=0) print(s);
+}
+
+@ The next subroutine prints a whole glue specification.
+
+@<Basic printing procedures@>=
+  static void print_spec(int @!p, char *@!s)
+   /*prints a glue specification*/
+{@+if ((p < mem_min)||(p >= lo_mem_max)) print_char('*');
+@.*\relax@>
+else{@+print_scaled(width(p));
+  if (s!=0) print(s);
+  if (stretch(p)!=0)
+    {@+print(" plus ");print_glue(stretch(p), stretch_order(p), s);
+    }
+  if (shrink(p)!=0)
+    {@+print(" minus ");print_glue(shrink(p), shrink_order(p), s);
+    }
+  }
+}
+
+
+@ Since boxes can be inside of boxes, |show_node_list| is inherently recursive,
+@^recursion@>
+up to a given maximum number of levels.  The history of nesting is indicated
+by the current string, which will be printed at the beginning of each line;
+the length of this string, namely |cur_length|, is the depth of nesting.
+
+Recursive calls on |show_node_list| therefore use the following pattern:
+
+@d node_list_display(A)
+  {@+depth_level++;show_node_list(A);depth_level--;
+  }
+
+@ Now we are ready for |show_node_list| itself. This procedure has been
+written to be ``extra robust'' in the sense that it should not crash or get
+into a loop even if the data structures have been messed up by bugs in
+the rest of the program. You can safely call its parent routine
+|show_box(p)| for arbitrary values of |p| when you are debugging \TeX.
+However, in the presence of bad data, the procedure may
+@^dirty \PASCAL@>@^debugging@>
+fetch a |memory_word| whose variant is different from the way it was stored;
+for example, it might try to read |mem[p].hh| when |mem[p]|
+contains a scaled integer, if |p| is a pointer that has been
+clobbered or chosen at random.
+
+@ @<Basic printing procedures@>=
+static void show_node_list(int @!p) /*prints a node list symbolically*/
+{@+
+int n; /*the number of items already printed at this level*/
+double @!g; /*a glue ratio, as a floating point number*/
+if (depth_level > depth_threshold)
+  {@+if (p > null) print(" []");
+     /*indicate that there's been some truncation*/
+  return;
+  }
+n=0;
+while (p > mem_min)
+  {@+print_ln();print_current_string(); /*display the nesting history*/
+  if (p > mem_end)  /*pointer out of range*/
+    {@+print("Bad link, display aborted.");return;
+@.Bad link...@>
+    }
+  incr(n);if (n > breadth_max)  /*time to stop*/
+    {@+print("etc.");return;
+@.etc@>
+    }
+  @<Display node |p|@>;
+  p=link(p);
+  }
+
+}
+
+@ @<Display node |p|@>=
+if (is_char_node(p)) print_font_and_char(p);
+else switch (type(p)) {
+  case hlist_node: case vlist_node: case unset_node: @<Display box |p|@>@;@+break;
+  case rule_node: @<Display rule |p|@>@;@+break;
+  case ins_node: @<Display insertion |p|@>@;@+break;
+  case whatsit_node: @<Display the whatsit node |p|@>@;@+break;
+  case glue_node: @<Display glue |p|@>@;@+break;
+  case kern_node: @<Display kern |p|@>@;@+break;
+  case math_node: @<Display math node |p|@>@;@+break;
+  case ligature_node: @<Display ligature |p|@>@;@+break;
+  case penalty_node: @<Display penalty |p|@>@;@+break;
+  case disc_node: @<Display discretionary |p|@>@;@+break;
+  case adjust_node: @<Display adjustment |p|@>@;@+break;
+  default:print("Unknown node type!");
+  }
+
+@ @<Display box |p|@>=
+{@+if (type(p)==hlist_node) print_esc("h");
+else if (type(p)==vlist_node) print_esc("v");
+else print_esc("unset");
+print("box(");print_scaled(height(p));print_char('+');
+print_scaled(depth(p));print(")x");print_scaled(width(p));
+if (type(p)==unset_node)
+  @<Display special fields of the unset node |p|@>@;
+else{@+@<Display the value of |glue_set(p)|@>;
+  if (shift_amount(p)!=0)
+    {@+print(", shifted ");print_scaled(shift_amount(p));
+    }
+  }
+node_list_display(list_ptr(p)); /*recursive call*/
+}
+
+@ @<Display special fields of the unset node |p|@>=
+{@+if (span_count(p)!=min_quarterword)
+  {@+print(" (");print_int(qo(span_count(p))+1);
+  print(" columns)");
+  }
+if (glue_stretch(p)!=0)
+  {@+print(", stretch ");print_glue(glue_stretch(p), glue_order(p), 0);
+  }
+if (glue_shrink(p)!=0)
+  {@+print(", shrink ");print_glue(glue_shrink(p), glue_sign(p), 0);
+  }
+}
+
+@ The code will have to change in this place if |glue_ratio| is
+a structured type instead of an ordinary |double|. Note that this routine
+should avoid arithmetic errors even if the |glue_set| field holds an
+arbitrary random value. The following code assumes that a properly
+formed nonzero |double| number has absolute value $2^{20}$ or more when
+it is regarded as an integer; this precaution was adequate to prevent
+floating point underflow on the author's computer.
+@^system dependencies@>
+@^dirty \PASCAL@>
+
+@<Display the value of |glue_set(p)|@>=
+g=unfix(glue_set(p));
+if ((g!=float_constant(0))&&(glue_sign(p)!=normal))
+  {@+print(", glue set ");
+  if (glue_sign(p)==shrinking) print("- ");
+  if (abs(mem[p+glue_offset].i) < 04000000) print("?.?");
+  else if (abs(g) > float_constant(20000))
+    {@+if (g > float_constant(0)) print_char('>');
+    else print("< -");
+    print_glue(20000*unity, glue_order(p), 0);
+    }
+  else print_glue(round(unity*g), glue_order(p), 0);
+@^real multiplication@>
+  }
+
+@ @<Display rule |p|@>=
+{@+print_esc("rule(");print_rule_dimen(height(p));print_char('+');
+print_rule_dimen(depth(p));print(")x");print_rule_dimen(width(p));
+}
+
+@ @<Display insertion |p|@>=
+{@+print_esc("insert");print_int(qo(subtype(p)));
+print(", natural size ");print_scaled(height(p));
+print("; split(");print_spec(split_top_ptr(p), 0);
+print_char(',');print_scaled(depth(p));
+print("); float cost ");print_int(float_cost(p));
+node_list_display(ins_ptr(p)); /*recursive call*/
+}
+
+@ @<Display glue |p|@>=
+if (subtype(p) >= a_leaders) @<Display leaders |p|@>@;
+else{@+print_esc("glue "); print_spec(glue_ptr(p), 0);@+ }
+
+@ @<Display leaders |p|@>=
+{@+print_esc("");
+if (subtype(p)==c_leaders) print_char('c');
+else if (subtype(p)==x_leaders) print_char('x');
+print("leaders ");print_spec(glue_ptr(p), 0);
+node_list_display(leader_ptr(p)); /*recursive call*/
+}
+
+@ An ``explicit'' kern value is indicated implicitly by an explicit space.
+
+@<Display kern |p|@>=
+if (subtype(p)!=mu_glue)
+  {@+print_esc("kern");
+  print_char(' ');
+  print_scaled(width(p));
+  if (subtype(p)==acc_kern) print(" (for accent)");
+@.for accent@>
+  }
+else{@+print_esc("mkern");print_scaled(width(p));print("mu");
+  }
+
+@ @<Display math node |p|@>=
+{@+print_esc("math");
+if (subtype(p)==before) print("on");
+else print("off");
+if (width(p)!=0)
+  {@+print(", surrounded ");print_scaled(width(p));
+  }
+}
+
+@ @<Display ligature |p|@>=
+{@+print_font_and_char(lig_char(p));print(" (ligature ");
+if (subtype(p) > 1) print_char('|');
+font_in_short_display=font(lig_char(p));short_display(lig_ptr(p));
+if (odd(subtype(p))) print_char('|');
+print_char(')');
+}
+
+@ @<Display penalty |p|@>=
+{@+print_esc("penalty ");print_int(penalty(p));
+}
+
+@ The |post_break| list of a discretionary node is indicated by a prefixed
+`\.{\char'174}' instead of the `\..' before the |pre_break| list.
+
+@<Display discretionary |p|@>=
+{@+print_esc("discretionary");
+if (replace_count(p) > 0)
+  {@+print(" replacing ");print_int(replace_count(p));
+  }
+node_list_display(pre_break(p)); /*recursive call*/
+node_list_display(post_break(p)); /*recursive call*/
+}
+
+
+@ @<Display adjustment |p|@>=
+{@+print_esc("vadjust");node_list_display(adjust_ptr(p)); /*recursive call*/
+}
+
+@ The recursive machinery is started by calling |show_box|.
+@^recursion@>
+
+@<Basic printing procedures@>=
+static void show_box(pointer @!p)
+{@+depth_threshold=200; breadth_max=200;
+show_node_list(p); /*the show starts at |p|*/
+print_ln();
+}
+
+@* Destroying boxes.
+When we are done with a node list, we are obliged to return it to free
+storage, including all of its sublists. The recursive procedure
+|flush_node_list| does this for us.
+
+@ First, however, we shall consider two non-recursive procedures that do
+simpler tasks. The first of these, |delete_token_ref|, is called when
+a pointer to a token list's reference count is being removed. This means
+that the token list should disappear if the reference count was |null|,
+otherwise the count should be decreased by one.
+@^reference counts@>
+
+@d token_ref_count(A) info(A) /*reference count preceding a token list*/
+
+@ Similarly, |delete_glue_ref| is called when a pointer to a glue
+specification is being withdrawn.
+@^reference counts@>
+@d fast_delete_glue_ref(A) @t@>@;@/
+  {@+if (glue_ref_count(A)==null) free_node(A, glue_spec_size);
+  else decr(glue_ref_count(A));
+  }
+
+@<\TeX\ functions@>=
+static void delete_glue_ref(pointer @!p) /*|p| points to a glue specification*/
+fast_delete_glue_ref(p)
+static void delete_xdimen_ref(pointer @!p) /*|p| points to a xdimen specification*/
+{@+if (p==null) return;
+  if (xdimen_ref_count(p)==null) free_node(p, xdimen_node_size);
+  else decr(xdimen_ref_count(p));
+}
+
+@ Now we are ready to delete any node list, recursively.
+In practice, the nodes deleted are usually charnodes (about 2/3 of the time),
+and they are glue nodes in about half of the remaining cases.
+@^recursion@>
+
+@<\TeX\ functions@>=
+static void flush_node_list(pointer @!p) /*erase list of nodes starting at |p|*/
+{@+ /*go here when node |p| has been freed*/
+pointer q; /*successor to node |p|*/
+while (p!=null)
+@^inner loop@>
+  {@+q=link(p);
+  if (is_char_node(p)) free_avail(p)@;
+  else{@+switch (type(p)) {
+    case hlist_node: case vlist_node:
+  case unset_node: {@+flush_node_list(list_ptr(p));
+      free_node(p, box_node_size);goto done;
+      }
+    case rule_node: {@+free_node(p, rule_node_size);goto done;
+      }
+    case ins_node: {@+flush_node_list(ins_ptr(p));
+      delete_glue_ref(split_top_ptr(p));
+      free_node(p, ins_node_size);goto done;
+      }
+    case whatsit_node: @<Wipe out the whatsit node |p| and |goto done|@>@;
+    case glue_node: {@+fast_delete_glue_ref(glue_ptr(p));
+      if (leader_ptr(p)!=null) flush_node_list(leader_ptr(p));
+      } @+break;
+    case kern_node: case math_node: case penalty_node: do_nothing;@+break;
+    case ligature_node: flush_node_list(lig_ptr(p));@+break;
+    case disc_node: {@+flush_node_list(pre_break(p));
+      flush_node_list(post_break(p));
+      } @+break;
+    case adjust_node: flush_node_list(adjust_ptr(p));@+break;
+    default:QUIT("Confusion while flushing node list");
+@:this can't happen flushing}{\quad flushing@>
+    } @/
+    free_node(p, small_node_size);
+    done: ;}
+  p=q;
+  }
+}
+
+@* Copying boxes.
+Another recursive operation that acts on boxes is sometimes needed: The
+procedure |copy_node_list| returns a pointer to another node list that has
+the same structure and meaning as the original. Note that since glue
+specifications and token lists have reference counts, we need not make
+copies of them. Reference counts can never get too large to fit in a
+halfword, since each pointer to a node is in a different memory address,
+and the total number of memory addresses fits in a halfword.
+@^recursion@>
+@^reference counts@>
+
+(Well, there actually are also references from outside |mem|; if the
+|save_stack| is made arbitrarily large, it would theoretically be possible
+to break \TeX\ by overflowing a reference count. But who would want to do that?)
+
+@d add_token_ref(A) incr(token_ref_count(A)) /*new reference to a token list*/
+@d add_glue_ref(A) incr(glue_ref_count(A)) /*new reference to a glue spec*/
+@d add_xdimen_ref(A) if (A!=null) incr(xdimen_ref_count(A)) /*new reference to an xdimen*/
+
+@ The copying procedure copies words en masse without bothering
+to look at their individual fields. If the node format changes---for
+example, if the size is altered, or if some link field is moved to another
+relative position---then this code may need to be changed too.
+@^data structure assumptions@>
+
+@<\TeX\ functions@>=
+static pointer copy_node_list(pointer @!p) /*makes a duplicate of the
+  node list that starts at |p| and returns a pointer to the new list*/
+{@+pointer h; /*temporary head of copied list*/
+pointer @!q; /*previous position in new list*/
+pointer @!r; /*current node being fabricated for new list*/
+int @!words; /*number of words remaining to be copied*/
+h=get_avail();q=h;
+while (p!=null)
+  {@+@<Make a copy of node |p| in node |r|@>;
+  link(q)=r;q=r;p=link(p);
+  }
+link(q)=null;q=link(h);free_avail(h);
+return q;
+}
+
+@ @<Make a copy of node |p|...@>=
+words=1; /*this setting occurs in more branches than any other*/
+if (is_char_node(p)) r=get_avail();
+else@<Case statement to copy different types and set |words| to the number
+of initial words not yet copied@>;
+while (words > 0)
+  {@+decr(words);mem[r+words]=mem[p+words];
+  }
+
+@ @<Case statement to copy...@>=
+switch (type(p)) {
+case hlist_node: case vlist_node: case unset_node: {@+r=get_node(box_node_size);
+  mem[r+6]=mem[p+6];mem[r+5]=mem[p+5]; /*copy the last two words*/
+  list_ptr(r)=copy_node_list(list_ptr(p)); /*this affects |mem[r+5]|*/
+  words=5;
+  } @+break;
+case rule_node: {@+r=get_node(rule_node_size);words=rule_node_size;
+  } @+break;
+case ins_node: {@+r=get_node(ins_node_size);mem[r+4]=mem[p+4];
+  add_glue_ref(split_top_ptr(p));
+  ins_ptr(r)=copy_node_list(ins_ptr(p)); /*this affects |mem[r+4]|*/
+  words=ins_node_size-1;
+  } @+break;
+case whatsit_node: @<Make a partial copy of the whatsit node |p| and make
+|r| point to it; set |words| to the number of initial words not yet copied@>@;@+break;
+case glue_node: {@+r=get_node(small_node_size);add_glue_ref(glue_ptr(p));
+  glue_ptr(r)=glue_ptr(p);leader_ptr(r)=copy_node_list(leader_ptr(p));
+  } @+break;
+case kern_node: case math_node: case penalty_node: {@+r=get_node(small_node_size);
+  words=small_node_size;
+  } @+break;
+case ligature_node: {@+r=get_node(small_node_size);
+  mem[lig_char(r)]=mem[lig_char(p)]; /*copy |font| and |character|*/
+  lig_ptr(r)=copy_node_list(lig_ptr(p));
+  } @+break;
+case disc_node: {@+r=get_node(small_node_size);
+  pre_break(r)=copy_node_list(pre_break(p));
+  post_break(r)=copy_node_list(post_break(p));
+  } @+break;
+case mark_node: {@+r=get_node(small_node_size);add_token_ref(mark_ptr(p));
+  words=small_node_size;
+  } @+break;
+case adjust_node: {@+r=get_node(small_node_size);
+  adjust_ptr(r)=copy_node_list(adjust_ptr(p));
+  } @+break; /*|words==1==small_node_size-1|*/
+default:confusion("copying");
+@:this can't happen copying}{\quad copying@>
+}
+
+@* The command codes.
+Before we can go any further, we need to define symbolic names for the internal
+code numbers that represent the various commands obeyed by \TeX. These codes
+are somewhat arbitrary, but not completely so. For example, the command
+codes for character types are fixed by the language, since a user says,
+e.g., `\.{\\catcode \`\\\${} = 3}' to make \.{\char'44} a math delimiter,
+and the command code |math_shift| is equal to~3. Some other codes have
+been made adjacent so that |case| statements in the program need not consider
+cases that are widely spaced, or so that |case| statements can be replaced
+by |if| statements.
+
+At any rate, here is the list, for future reference. First come the
+``catcode'' commands, several of which share their numeric codes with
+ordinary commands when the catcode cannot emerge from \TeX's scanning routine.
+
+
+@d relax 0 /*do nothing ( \.{\\relax} )*/
+
+@ Next are the ordinary run-of-the-mill command codes.  Codes that are
+|min_internal| or more represent internal quantities that might be
+expanded by `\.{\\the}'.
+
+@d insert 37 /*vlist inserted in box ( \.{\\insert} )*/
+@d accent 45 /*attach accent in text ( \.{\\accent} )*/
+
+@ The next codes are special; they all relate to mode-independent
+assignment of values to \TeX's internal registers or tables.
+Codes that are |max_internal| or less represent internal quantities
+that might be expanded by `\.{\\the}'.
+
+@d max_command 100 /*the largest command code seen at |big_switch|*/
+
+@ The remaining command codes are extra special, since they cannot get through
+\TeX's scanner to the main control routine. They have been given values higher
+than |max_command| so that their special nature is easily discernible.
+The ``expandable'' commands come first.
+
+@d the (max_command+9) /*expand an internal quantity ( \.{\\the} )*/
+@d data (max_command+20) /*the equivalent is simply a halfword number*/
+
+@* The semantic nest.
+\TeX\ is typically in the midst of building many lists at once. For example,
+when a math formula is being processed, \TeX\ is in math mode and
+working on an mlist; this formula has temporarily interrupted \TeX\ from
+being in horizontal mode and building the hlist of a paragraph; and this
+paragraph has temporarily interrupted \TeX\ from being in vertical mode
+and building the vlist for the next page of a document. Similarly, when a
+\.{\\vbox} occurs inside of an \.{\\hbox}, \TeX\ is temporarily
+interrupted from working in restricted horizontal mode, and it enters
+internal vertical mode.  The ``semantic nest'' is a stack that
+keeps track of what lists and modes are currently suspended.
+
+At each level of processing we are in one of six modes:
+
+\yskip\hang|vmode| stands for vertical mode (the page builder);
+
+\hang|hmode| stands for horizontal mode (the paragraph builder);
+
+\hang|mmode| stands for displayed formula mode;
+
+\hang|-vmode| stands for internal vertical mode (e.g., in a \.{\\vbox});
+
+\hang|-hmode| stands for restricted horizontal mode (e.g., in an \.{\\hbox});
+
+\hang|-mmode| stands for math formula mode (not displayed).
+
+\yskip\noindent The mode is temporarily set to zero while processing \.{\\write}
+texts.
+
+Numeric values are assigned to |vmode|, |hmode|, and |mmode| so that
+\TeX's ``big semantic switch'' can select the appropriate thing to
+do by computing the value |abs(mode)+cur_cmd|, where |mode| is the current
+mode and |cur_cmd| is the current command code.
+
+@d vmode 1 /*vertical mode*/
+@d hmode (vmode+max_command+1) /*horizontal mode*/
+
+@ The state of affairs at any semantic level can be represented by
+five values:
+
+\yskip\hang|mode| is the number representing the semantic mode, as
+just explained.
+
+\yskip\hang|head| is a |pointer| to a list head for the list being built;
+|link(head)| therefore points to the first element of the list, or
+to |null| if the list is empty.
+
+\yskip\hang|tail| is a |pointer| to the final node of the list being
+built; thus, |tail==head| if and only if the list is empty.
+
+\yskip\hang|prev_graf| is the number of lines of the current paragraph that
+have already been put into the present vertical list.
+
+\yskip\hang|aux| is an auxiliary |memory_word| that gives further information
+that is needed to characterize the situation.
+
+\yskip\noindent
+In vertical mode, |aux| is also known as |prev_depth|; it is the scaled
+value representing the depth of the previous box, for use in baseline
+calculations, or it is | <= -1000|pt if the next box on the vertical list is to
+be exempt from baseline calculations.  In horizontal mode, |aux| is also
+known as |space_factor| and |clang|; it holds the current space factor used in
+spacing calculations, and the current language used for hyphenation.
+(The value of |clang| is undefined in restricted horizontal mode.)
+In math mode, |aux| is also known as |incompleat_noad|; if
+not |null|, it points to a record that represents the numerator of a
+generalized fraction for which the denominator is currently being formed
+in the current list.
+
+There is also a sixth quantity, |mode_line|, which correlates
+the semantic nest with the user's input; |mode_line| contains the source
+line number at which the current level of nesting was entered. The negative
+of this line number is the |mode_line| at the level of the
+user's output routine.
+
+In horizontal mode, the |prev_graf| field is used for initial language data.
+
+The semantic nest is an array called |nest| that holds the |mode|, |head|,
+|tail|, |prev_graf|, |aux|, and |mode_line| values for all semantic levels
+below the currently active one. Information about the currently active
+level is kept in the global quantities |mode|, |head|, |tail|, |prev_graf|,
+|aux|, and |mode_line|, which live in a \PASCAL\ record that is ready to
+be pushed onto |nest| if necessary.
+
+@d ignore_depth -65536000 /*|prev_depth| value that is ignored*/
+
+@<Types...@>=
+typedef struct { int16_t @!mode_field;@+
+  pointer @!head_field, @!tail_field;
+ int pg_field;
+ pointer bs_field,ls_field; /* baseline skip and line skip */
+ scaled lsl_field; /* line skip limit */
+ uint8_t *bs_pos; /* position of baseline skip node */
+ scaled hs_field; /* horizontal size */
+ scaled ds_field, dw_field, di_field; /*display size, width, and indent */
+ scaled ht_field; /* height of last box added to the list */
+ uint32_t np_field; /* position of current node */
+  memory_word @!aux_field;
+  } list_state_record;
+
+@ @d mode cur_list.mode_field /*current mode*/
+@d head cur_list.head_field /*header node of current list*/
+@d tail cur_list.tail_field /*final node on current list*/
+@d prev_graf cur_list.pg_field /*number of paragraph lines accumulated*/
+@d aux cur_list.aux_field /*auxiliary data about the current list*/
+@d prev_depth aux.sc /*the name of |aux| in vertical mode*/
+@d cur_bs cur_list.bs_field /*baseline skip glue specification*/
+@d cur_ls cur_list.ls_field /*line skip glue specification*/
+@d cur_lsl cur_list.lsl_field /*line skip limit*/
+@d needs_bs (cur_list.bs_pos!=NULL) /*is a baseline skip needed?*/
+@d prev_height cur_list.ht_field /* height of previous box */
+@d node_pos cur_list.np_field /*node position in the \HINT/ file or |NULL|*/
+@d node_pos1 (nest_ptr==0?0:nest[nest_ptr-1].np_field) /*position of enclosing node*/
+
+@<List variables@>=
+static list_state_record @!nest[nest_size+1];
+static int @!nest_ptr; /*first unused location of |nest|*/
+static int @!max_nest_stack; /*maximum of |nest_ptr| when pushing*/
+static list_state_record @!cur_list; /*the ``top'' semantic state*/
+
+@ Here is a common way to make the current list grow:
+
+@d tail_append(A) {@+link(tail)=A;tail=link(tail);
+  }
+
+@ We will see later that the vertical list at the bottom semantic level is split
+into two parts; the ``current page'' runs from |page_head| to |page_tail|,
+and the ``contribution list'' runs from |contrib_head| to |tail| of
+semantic level zero. The idea is that contributions are first formed in
+vertical mode, then ``contributed'' to the current page (during which time
+the page-breaking decisions are made). For now, we don't need to know
+any more details about the page-building process.
+
+@<\TeX\ functions@>=
+
+@<List variables@>@;
+
+static void list_init(void)
+{@+
+nest_ptr=0;max_nest_stack=0;@/
+memset(&cur_list,0,sizeof(cur_list));
+mode=vmode;head=contrib_head;tail=contrib_head;
+prev_height=prev_depth=ignore_depth;
+}
+
+@ When \TeX's work on one level is interrupted, the state is saved by
+calling |push_nest|. This routine changes |head| and |tail| so that
+a new (empty) list is begun; it does not change |mode| or |aux|.
+
+@s line mode_line
+@<\TeX\ functions@>=
+static void push_nest(void) /*enter a new semantic level, save the old*/
+{@+if (nest_ptr > max_nest_stack)
+  {@+max_nest_stack=nest_ptr;
+  if (nest_ptr==nest_size) overflow("semantic nest size", nest_size);
+@:TeX capacity exceeded semantic nest size}{\quad semantic nest size@>
+  }
+nest[nest_ptr]=cur_list; /*stack the record*/
+incr(nest_ptr);head=get_avail();tail=head;prev_graf=0;
+cur_list.bs_pos=NULL; cur_bs=baseline_skip; cur_ls=line_skip; cur_lsl=line_skip_limit;
+}
+
+@ Conversely, when \TeX\ is finished on the current level, the former
+state is restored by calling |pop_nest|. This routine will never be
+called at the lowest semantic level, nor will it be called unless |head|
+is a node that should be returned to free memory.
+
+@<\TeX\ functions@>=
+static void pop_nest(void) /*leave a semantic level, re-enter the old*/
+{@+free_avail(head);decr(nest_ptr);cur_list=nest[nest_ptr];
+}
+
+@* The table of equivalents.
+
+@ Region 3 of |eqtb| contains the 256 \.{\\skip} registers, as well as the
+glue parameters defined here. It is important that the ``muskip''
+parameters have larger numbers than the others.
+
+@d right_skip_code 8 /*glue at right of justified lines*/
+@#
+@d line_skip pointer_def[glue_kind][line_skip_no]
+@d baseline_skip pointer_def[glue_kind][baseline_skip_no]
+@d left_skip pointer_def[glue_kind][left_skip_no]
+@d right_skip pointer_def[glue_kind][right_skip_no]
+@d top_skip pointer_def[glue_kind][top_skip_no]
+@d split_top_skip pointer_def[glue_kind][split_top_skip_no]
+
+
+@ Region 4 of |eqtb| contains the local quantities defined here. The
+bulk of this region is taken up by five tables that are indexed by eight-bit
+characters; these tables are important to both the syntactic and semantic
+portions of \TeX. There are also a bunch of special things like font and
+token parameters, as well as the tables of \.{\\toks} and \.{\\box}
+registers.
+
+@d par_shape_ptr null
+@d box(A) (*box_ptr(A))
+
+
+@ Region 5 of |eqtb| contains the integer parameters and registers defined
+here, as well as the |del_code| table. The latter table differs from the
+|cat_code dotdot math_code| tables that precede it, since delimiter codes are
+fullword integers while the other kinds of codes occupy at most a
+halfword. This is what makes region~5 different from region~4. We will
+store the |eq_level| information in an auxiliary array of quarterwords
+that will be defined later.
+
+@d pretolerance integer_def[pretolerance_no]
+@d tolerance integer_def[tolerance_no]
+@d line_penalty integer_def[line_penalty_no]
+@d hyphen_penalty integer_def[hyphen_penalty_no]
+@d ex_hyphen_penalty integer_def[ex_hyphen_penalty_no]
+@d club_penalty integer_def[club_penalty_no]
+@d display_widow_penalty integer_def[display_widow_penalty_no]
+@d broken_penalty integer_def[broken_penalty_no]
+@d pre_display_penalty integer_def[pre_display_penalty_no]
+@d post_display_penalty integer_def[post_display_penalty_no]
+@d inter_line_penalty integer_def[inter_line_penalty_no]
+@d double_hyphen_demerits integer_def[double_hyphen_demerits_no]
+@d final_hyphen_demerits integer_def[final_hyphen_demerits_no]
+@d adj_demerits integer_def[adj_demerits_no]
+@d looseness integer_def[looseness_no]
+@d tracing_paragraphs (debugflags&DBGTEX)
+@d tracing_pages (debugflags&DBGPAGE)
+@d hang_after integer_def[hang_after_no]
+
+
+@ The final region of |eqtb| contains the dimension parameters defined
+here, and the 256 \.{\\dimen} registers.
+
+@d line_skip_limit dimen_def[line_skip_limit_no]
+@d max_depth dimen_def[max_depth_no]
+@d pre_display_size cur_list.ds_field
+@d display_width cur_list.dw_field
+@d display_indent cur_list.di_field
+@d hang_indent dimen_def[hang_indent_no]
+@d emergency_stretch dimen_def[emergency_stretch_no]
+
+
+@* The hash table.
+
+
+
+
+@ We will deal with the other primitives later, at some point in the program
+where their |eq_type| and |equiv| values are more meaningful.  For example,
+the primitives for math mode will be loaded when we consider the routines
+that deal with formulas. It is easy to find where each particular
+primitive was treated by looking in the index at the end; for example, the
+section where |"radical"| entered |eqtb| is listed under `\.{\\radical}
+primitive'. (Primitives consisting of a single nonalphabetic character,
+@!like `\.{\\/}', are listed under `Single-character primitives'.)
+@!@^Single-character primitives@>
+
+Meanwhile, this is a convenient place to catch up on something we were unable
+to do before the hash table was defined:
+
+@<Print the font identifier for |font(p)|@>=
+print_esc(font_def[font(p)].n);
+
+@* Saving and restoring equivalents.
+
+@ Here are the group codes that are used to discriminate between different
+kinds of groups. They allow \TeX\ to decide what special actions, if any,
+should be performed when a group ends.
+\def\grp{\.{\char'173...\char'175}}
+
+Some groups are not supposed to be ended by right braces. For example,
+the `\.\$' that begins a math formula causes a |math_shift_group| to
+be started, and this should be terminated by a matching `\.\$'. Similarly,
+a group that starts with \.{\\left} should end with \.{\\right}, and
+one that starts with \.{\\begingroup} should end with \.{\\endgroup}.
+
+
+@<Types...@>=
+typedef int8_t group_code; /*|save_level| for a level boundary*/
+
+
+
+
+@* Token lists.
+A \TeX\ token is either a character or a control sequence, and it is
+@^token@>
+represented internally in one of two ways: (1)~A character whose ASCII
+code number is |c| and whose command code is |m| is represented as the
+number $2^8m+c$; the command code is in the range |1 <= m <= 14|. (2)~A control
+sequence whose |eqtb| address is |p| is represented as the number
+|cs_token_flag+p|. Here |cs_token_flag==@t$2^{12}-1$@>| is larger than
+$2^8m+c$, yet it is small enough that |cs_token_flag+p < max_halfword|;
+thus, a token fits comfortably in a halfword.
+
+A token |t| represents a |left_brace| command if and only if
+|t < left_brace_limit|; it represents a |right_brace| command if and only if
+we have |left_brace_limit <= t < right_brace_limit|; and it represents a |match| or
+|end_match| command if and only if |match_token <= t <= end_match_token|.
+The following definitions take care of these token-oriented constants
+and a few others.
+
+@* Introduction to the syntactic routines.
+
+@* Input stacks and states.
+
+@ Let's look more closely now at the control variables
+(|state|,~|index|,~|start|,~|loc|,~|limit|,~|name|),
+assuming that \TeX\ is reading a line of characters that have been input
+from some file or from the user's terminal. There is an array called
+|buffer| that acts as a stack of all lines of characters that are
+currently being read from files, including all lines on subsidiary
+levels of the input stack that are not yet completed. \TeX\ will return to
+the other lines when it is finished with the present input file.
+
+(Incidentally, on a machine with byte-oriented addressing, it might be
+appropriate to combine |buffer| with the |str_pool| array,
+letting the buffer entries grow downward from the top of the string pool
+and checking that these two tables don't bump into each other.)
+
+The line we are currently working on begins in position |start| of the
+buffer; the next character we are about to read is |buffer[loc]|; and
+|limit| is the location of the last character present.  If |loc > limit|,
+the line has been completely read. Usually |buffer[limit]| is the
+|end_line_char|, denoting the end of a line, but this is not
+true if the current line is an insertion that was entered on the user's
+terminal in response to an error message.
+
+The |name| variable is a string number that designates the name of
+the current file, if we are reading a text file. It is zero if we
+are reading from the terminal; it is |n+1| if we are reading from
+input stream |n|, where |0 <= n <= 16|. (Input stream 16 stands for
+an invalid stream number; in such cases the input is actually from
+the terminal, under control of the procedure |read_toks|.)
+
+The |state| variable has one of three values, when we are scanning such
+files:
+$$\baselineskip 15pt\vbox{\halign{#\hfil\cr
+1) |state==mid_line| is the normal state.\cr
+2) |state==skip_blanks| is like |mid_line|, but blanks are ignored.\cr
+3) |state==new_line| is the state at the beginning of a line.\cr}}$$
+These state values are assigned numeric codes so that if we add the state
+code to the next character's command code, we get distinct values. For
+example, `|mid_line+spacer|' stands for the case that a blank
+space character occurs in the middle of a line when it is not being
+ignored; after this case is processed, the next value of |state| will
+be |skip_blanks|.
+
+@ However, all this discussion about input state really applies only to the
+case that we are inputting from a file. There is another important case,
+namely when we are currently getting input from a token list. In this case
+|state==token_list|, and the conventions about the other state variables
+are different:
+
+\yskip\hang|loc| is a pointer to the current node in the token list, i.e.,
+the node that will be read next. If |loc==null|, the token list has been
+fully read.
+
+\yskip\hang|start| points to the first node of the token list; this node
+may or may not contain a reference count, depending on the type of token
+list involved.
+
+\yskip\hang|token_type|, which takes the place of |index| in the
+discussion above, is a code number that explains what kind of token list
+is being scanned.
+
+\yskip\hang|name| points to the |eqtb| address of the control sequence
+being expanded, if the current token list is a macro.
+
+\yskip\hang|param_start|, which takes the place of |limit|, tells where
+the parameters of the current macro begin in the |param_stack|, if the
+current token list is a macro.
+
+\yskip\noindent The |token_type| can take several values, depending on
+where the current token list came from:
+
+\yskip\hang|parameter|, if a parameter is being scanned;
+
+\hang|u_template|, if the \<u_j> part of an alignment
+template is being scanned;
+
+\hang|v_template|, if the \<v_j> part of an alignment
+template is being scanned;
+
+\hang|backed_up|, if the token list being scanned has been inserted as
+`to be read again';
+
+\hang|inserted|, if the token list being scanned has been inserted as
+the text expansion of a \.{\\count} or similar variable;
+
+\hang|macro|, if a user-defined control sequence is being scanned;
+
+\hang|output_text|, if an \.{\\output} routine is being scanned;
+
+\hang|every_par_text|, if the text of \.{\\everypar} is being scanned;
+
+\hang|every_math_text|, if the text of \.{\\everymath} is being scanned;
+
+\hang|every_display_text|, if the text of \.{\\everydisplay} is being scanned;
+
+\hang|every_hbox_text|, if the text of \.{\\everyhbox} is being scanned;
+
+\hang|every_vbox_text|, if the text of \.{\\everyvbox} is being scanned;
+
+\hang|every_job_text|, if the text of \.{\\everyjob} is being scanned;
+
+\hang|every_cr_text|, if the text of \.{\\everycr} is being scanned;
+
+\hang|mark_text|, if the text of a \.{\\mark} is being scanned;
+
+\hang|write_text|, if the text of a \.{\\write} is being scanned.
+
+\yskip\noindent
+The codes for |output_text|, |every_par_text|, etc., are equal to a constant
+plus the corresponding codes for token list parameters |output_routine_loc|,
+|every_par_loc|, etc.  The token list begins with a reference count if and
+only if |token_type >= macro|.
+@^reference counts@>
+
+@d inserted 4 /*|token_type| code for inserted texts*/
+
+
+
+@ Here it is necessary to explain a little trick. We don't want to store a long
+string that corresponds to a token list, because that string might take up
+lots of memory; and we are printing during a time when an error message is
+being given, so we dare not do anything that might overflow one of \TeX's
+tables. So `pseudoprinting' is the answer: We enter a mode of printing
+that stores characters into a buffer of length |error_line|, where character
+$k+1$ is placed into \hbox{|trick_buf[k%error_line]|} if
+|k < trick_count|, otherwise character |k| is dropped. Initially we set
+|tally=0| and |trick_count=1000000|; then when we reach the
+point where transition from line 1 to line 2 should occur, we
+set |first_count=tally| and |trick_count=@tmax@>(error_line,
+tally+1+error_line-half_error_line)|. At the end of the
+pseudoprinting, the values of |first_count|, |tally|, and
+|trick_count| give us all the information we need to print the two lines,
+and all of the necessary text is in |trick_buf|.
+
+Namely, let |l| be the length of the descriptive information that appears
+on the first line. The length of the context information gathered for that
+line is |k==first_count|, and the length of the context information
+gathered for line~2 is $m=\min(|tally|, |trick_count|)-k$. If |l+k <= h|,
+where |h==half_error_line|, we print |trick_buf[0 dotdot k-1]| after the
+descriptive information on line~1, and set |n=l+k|; here |n| is the
+length of line~1. If $l+k>h$, some cropping is necessary, so we set |n=h|
+and print `\.{...}' followed by
+$$\hbox{|trick_buf[(l+k-h+3)dotdot k-1]|,}$$
+where subscripts of |trick_buf| are circular modulo |error_line|. The
+second line consists of |n|~spaces followed by |trick_buf[k dotdot(k+m-1)]|,
+unless |n+m > error_line|; in the latter case, further cropping is done.
+This is easier to program than to explain.
+
+
+@* Maintaining the input stacks.
+
+@* Getting the next token.
+
+
+@ The present point in the program is reached only when the |expand|
+routine has inserted a special marker into the input. In this special
+case, |info(loc)| is known to be a control sequence token, and |link(loc)==null|.
+
+
+@ Since |get_next| is used so frequently in \TeX, it is convenient
+to define three related procedures that do a little more:
+
+\yskip\hang|get_token| not only sets |cur_cmd| and |cur_chr|, it
+also sets |cur_tok|, a packed halfword version of the current token.
+
+\yskip\hang|get_x_token|, meaning ``get an expanded token,'' is like
+|get_token|, but if the current token turns out to be a user-defined
+control sequence (i.e., a macro call), or a conditional,
+or something like \.{\\topmark} or \.{\\expandafter} or \.{\\csname},
+it is eliminated from the input by beginning the expansion of the macro
+or the evaluation of the conditional.
+
+\yskip\hang|x_token| is like |get_x_token| except that it assumes that
+|get_next| has already been called.
+
+\yskip\noindent
+In fact, these three procedures account for almost every use of |get_next|.
+
+@* Expanding the next token.
+
+@* Basic scanning subroutines.
+
+@ Inside an \.{\\output} routine, a user may wish to look at the page totals
+that were present at the moment when output was triggered.
+
+@d max_dimen 07777777777 /*$2^{30}-1$*/
+
+
+@* Building token lists.
+
+@* Conditional processing.
+
+@* File names.
+It's time now to fret about file names.  Besides the fact that different
+operating systems treat files in different ways, we must cope with the
+fact that completely different naming conventions are used by different
+groups of people. The following programs show what is required for one
+particular operating system; similar routines for other systems are not
+difficult to devise.
+@^fingers@>
+@^system dependencies@>
+
+\TeX\ assumes that a file name has three parts: the name proper; its
+``extension''; and a ``file area'' where it is found in an external file
+system.  The extension of an input file or a write file is assumed to be
+`\.{.tex}' unless otherwise specified; it is `\.{.log}' on the
+transcript file that records each run of \TeX; it is `\.{.tfm}' on the font
+metric files that describe characters in the fonts \TeX\ uses; it is
+`\.{.dvi}' on the output files that specify typesetting information; and it
+is `\.{.fmt}' on the format files written by \.{INITEX} to initialize \TeX.
+The file area can be arbitrary on input files, but files are usually
+output to the user's current area.  If an input file cannot be
+found on the specified area, \TeX\ will look for it on a special system
+area; this special area is intended for commonly used input files like
+\.{webmac.tex}.
+
+Simple uses of \TeX\ refer only to file names that have no explicit
+extension or area. For example, a person usually says `\.{\\input} \.{paper}'
+or `\.{\\font\\tenrm} \.= \.{helvetica}' instead of `\.{\\input}
+\.{paper.new}' or `\.{\\font\\tenrm} \.= \.{<csd.knuth>test}'. Simple file
+names are best, because they make the \TeX\ source files portable;
+whenever a file name consists entirely of letters and digits, it should be
+treated in the same way by all implementations of \TeX. However, users
+need the ability to refer to other files in their environment, especially
+when responding to error messages concerning unopenable files; therefore
+we want to let them use the syntax that appears in their favorite
+operating system.
+
+The following procedures don't allow spaces to be part of
+file names; but some users seem to like names that are spaced-out.
+System-dependent changes to allow such things should probably
+be made with reluctance, and only when an entire file name that
+includes spaces is ``quoted'' somehow.
+
+
+
+@ The first 24 bytes (6 words) of a \.{TFM} file contain twelve 16-bit
+integers that give the lengths of the various subsequent portions
+of the file. These twelve integers are, in order:
+$$\vbox{\halign{\hfil#&$\null=\null$#\hfil\cr
+|lf|&length of the entire file, in words;\cr
+|lh|&length of the header data, in words;\cr
+|bc|&smallest character code in the font;\cr
+|ec|&largest character code in the font;\cr
+|nw|&number of words in the width table;\cr
+|nh|&number of words in the height table;\cr
+|nd|&number of words in the depth table;\cr
+|ni|&number of words in the italic correction table;\cr
+|nl|&number of words in the lig/kern table;\cr
+|nk|&number of words in the kern table;\cr
+|ne|&number of words in the extensible character table;\cr
+|np|&number of font parameter words.\cr}}$$
+They are all nonnegative and less than $2^{15}$. We must have |bc-1 <= ec <= 255|,
+and
+$$\hbox{|lf==6+lh+(ec-bc+1)+nw+nh+nd+ni+nl+nk+ne+np|.}$$
+Note that a font may contain as many as 256 characters (if |bc==0| and |ec==255|),
+and as few as 0 characters (if |bc==ec+1|).
+
+Incidentally, when two or more 8-bit bytes are combined to form an integer of
+16 or more bits, the most significant bytes appear first in the file.
+This is called BigEndian order.
+@!@^BigEndian order@>
+
+@ The rest of the \.{TFM} file may be regarded as a sequence of ten data
+arrays having the informal specification
+$$\def\arr$[#1]#2${\&{array} $[#1]$ \&{of} #2}
+\def\PB#1{\arr#1}
+\vbox{\halign{\hfil\\{#}&$\,:\,$#\hfil\cr
+header&|[0 dotdot lh-1]@t\\{stuff}@>|\cr
+char\_info&|[bc dotdot ec]char_info_word|\cr
+width&|[0 dotdot nw-1]fix_word|\cr
+height&|[0 dotdot nh-1]fix_word|\cr
+depth&|[0 dotdot nd-1]fix_word|\cr
+italic&|[0 dotdot ni-1]fix_word|\cr
+lig\_kern&|[0 dotdot nl-1]lig_kern_command|\cr
+kern&|[0 dotdot nk-1]fix_word|\cr
+exten&|[0 dotdot ne-1]extensible_recipe|\cr
+param&|[1 dotdot np]fix_word|\cr}}$$
+The most important data type used here is a |@!fix_word|, which is
+a 32-bit representation of a binary fraction. A |fix_word| is a signed
+quantity, with the two's complement of the entire word used to represent
+negation. Of the 32 bits in a |fix_word|, exactly 12 are to the left of the
+binary point; thus, the largest |fix_word| value is $2048-2^{-20}$, and
+the smallest is $-2048$. We will see below, however, that all but two of
+the |fix_word| values must lie between $-16$ and $+16$.
+
+@ The first data array is a block of header information, which contains
+general facts about the font. The header must contain at least two words,
+|header[0]| and |header[1]|, whose meaning is explained below.
+Additional header information of use to other software routines might
+also be included, but \TeX82 does not need to know about such details.
+For example, 16 more words of header information are in use at the Xerox
+Palo Alto Research Center; the first ten specify the character coding
+scheme used (e.g., `\.{XEROX text}' or `\.{TeX math symbols}'), the next five
+give the font identifier (e.g., `\.{HELVETICA}' or `\.{CMSY}'), and the
+last gives the ``face byte.'' The program that converts \.{DVI} files
+to Xerox printing format gets this information by looking at the \.{TFM}
+file, which it needs to read anyway because of other information that
+is not explicitly repeated in \.{DVI}~format.
+
+\yskip\hang|header[0]| is a 32-bit check sum that \TeX\ will copy into
+the \.{DVI} output file. Later on when the \.{DVI} file is printed,
+possibly on another computer, the actual font that gets used is supposed
+to have a check sum that agrees with the one in the \.{TFM} file used by
+\TeX. In this way, users will be warned about potential incompatibilities.
+(However, if the check sum is zero in either the font file or the \.{TFM}
+file, no check is made.)  The actual relation between this check sum and
+the rest of the \.{TFM} file is not important; the check sum is simply an
+identification number with the property that incompatible fonts almost
+always have distinct check sums.
+@^check sum@>
+
+\yskip\hang|header[1]| is a |fix_word| containing the design size of
+the font, in units of \TeX\ points. This number must be at least 1.0; it is
+fairly arbitrary, but usually the design size is 10.0 for a ``10 point''
+font, i.e., a font that was designed to look best at a 10-point size,
+whatever that really means. When a \TeX\ user asks for a font
+`\.{at} $\delta$ \.{pt}', the effect is to override the design size
+and replace it by $\delta$, and to multiply the $x$ and~$y$ coordinates
+of the points in the font image by a factor of $\delta$ divided by the
+design size.  {\sl All other dimensions in the\/ \.{TFM} file are
+|fix_word|\kern-1pt\ numbers in design-size units}, with the exception of
+|param[1]| (which denotes the slant ratio). Thus, for example, the value
+of |param[6]|, which defines the \.{em} unit, is often the |fix_word| value
+$2^{20}=1.0$, since many fonts have a design size equal to one em.
+The other dimensions must be less than 16 design-size units in absolute
+value; thus, |header[1]| and |param[1]| are the only |fix_word|
+entries in the whole \.{TFM} file whose first byte might be something
+besides 0 or 255.
+
+@ Next comes the |char_info| array, which contains one |@!char_info_word|
+per character. Each word in this part of the file contains six fields
+packed into four bytes as follows.
+
+\yskip\hang first byte: |@!width_index| (8 bits)\par
+\hang second byte: |@!height_index| (4 bits) times 16, plus |@!depth_index|
+  (4~bits)\par
+\hang third byte: |@!italic_index| (6 bits) times 4, plus |@!tag|
+  (2~bits)\par
+\hang fourth byte: |@!rem| (8 bits)\par
+\yskip\noindent
+The actual width of a character is \\{width}|[width_index]|, in design-size
+units; this is a device for compressing information, since many characters
+have the same width. Since it is quite common for many characters
+to have the same height, depth, or italic correction, the \.{TFM} format
+imposes a limit of 16 different heights, 16 different depths, and
+64 different italic corrections.
+
+@!@^italic correction@>
+The italic correction of a character has two different uses.
+(a)~In ordinary text, the italic correction is added to the width only if
+the \TeX\ user specifies `\.{\\/}' after the character.
+(b)~In math formulas, the italic correction is always added to the width,
+except with respect to the positioning of subscripts.
+
+Incidentally, the relation $\\{width}[0]=\\{height}[0]=\\{depth}[0]=
+\\{italic}[0]=0$ should always hold, so that an index of zero implies a
+value of zero.  The |width_index| should never be zero unless the
+character does not exist in the font, since a character is valid if and
+only if it lies between |bc| and |ec| and has a nonzero |width_index|.
+
+
+
+@ The final portion of a \.{TFM} file is the |param| array, which is another
+sequence of |fix_word| values.
+
+\yskip\hang|param[1]==slant| is the amount of italic slant, which is used
+to help position accents. For example, |slant==.25| means that when you go
+up one unit, you also go .25 units to the right. The |slant| is a pure
+number; it's the only |fix_word| other than the design size itself that is
+not scaled by the design size.
+
+\hang|param[2]==space| is the normal spacing between words in text.
+Note that character |' '| in the font need not have anything to do with
+blank spaces.
+
+\hang|param[3]==space_stretch| is the amount of glue stretching between words.
+
+\hang|param[4]==space_shrink| is the amount of glue shrinking between words.
+
+\hang|param[5]==x_height| is the size of one ex in the font; it is also
+the height of letters for which accents don't have to be raised or lowered.
+
+\hang|param[6]==quad| is the size of one em in the font.
+
+\hang|param[7]==extra_space| is the amount added to |param[2]| at the
+ends of sentences.
+
+\yskip\noindent
+If fewer than seven parameters are present, \TeX\ sets the missing parameters
+to zero. Fonts used for math symbols are required to have
+additional parameter information, which is explained later.
+
+@d quad_code 6
+
+@ So that is what \.{TFM} files hold. Since \TeX\ has to absorb such information
+about lots of fonts, it stores most of the data in a large array called
+|font_info|. Each item of |font_info| is a |memory_word|; the |fix_word|
+data gets converted into |scaled| entries, while everything else goes into
+words of type |four_quarters|.
+
+When the user defines \.{\\font\\f}, say, \TeX\ assigns an internal number
+to the user's font~\.{\\f}. Adding this number to |font_id_base| gives the
+|eqtb| location of a ``frozen'' control sequence that will always select
+the font.
+
+@<Types...@>=
+typedef uint8_t internal_font_number; /*|font| in a |char_node|*/
+typedef uint16_t font_index; /*index into |font_info|*/
+
+@
+
+@s font_index int
+@s str_number int
+@<\TeX\ functions@>=
+static memory_word @!font_info[font_mem_size+1];
+   /*the big collection of font data*/
+static font_index @!fmem_ptr=0; /*first unused word of |font_info|*/
+
+static void hclear_fonts(void)
+{ fmem_ptr=0;
+}
+static internal_font_number @!font_ptr; /*largest internal font number in use*/
+static scaled @!font_size0[font_max-font_base+1],
+  *const @!font_size = @!font_size0-font_base; /*``at'' size*/
+static eight_bits @!font_bc0[font_max-font_base+1],
+  *const @!font_bc = @!font_bc0-font_base;
+   /*beginning (smallest) character code*/
+static eight_bits @!font_ec0[font_max-font_base+1],
+  *const @!font_ec = @!font_ec0-font_base;
+   /*ending (largest) character code*/
+static pointer @!font_glue0[font_max-font_base+1],
+  *const @!font_glue = @!font_glue0-font_base;
+   /*glue specification for interword space, |null| if not allocated*/
+static int @!hyphen_char0[font_max-font_base+1],
+  *const @!hyphen_char = @!hyphen_char0-font_base;
+   /*current \.{\\hyphenchar} values*/
+
+@ Besides the arrays just enumerated, we have directory arrays that make it
+easy to get at the individual entries in |font_info|. For example, the
+|char_info| data for character |c| in font |f| will be in
+|font_info[char_base[f]+c].qqqq|; and if |w| is the |width_index|
+part of this word (the |b0| field), the width of the character is
+|font_info[width_base[f]+w].sc|. (These formulas assume that
+|min_quarterword| has already been added to |c| and to |w|, since \TeX\
+stores its quarterwords that way.)
+
+@<\TeX\ functions@>=
+static int @!char_base0[font_max-font_base+1],
+  *const @!char_base = @!char_base0-font_base;
+   /*base addresses for |char_info|*/
+static int @!width_base0[font_max-font_base+1],
+  *const @!width_base = @!width_base0-font_base;
+   /*base addresses for widths*/
+static int @!height_base0[font_max-font_base+1],
+  *const @!height_base = @!height_base0-font_base;
+   /*base addresses for heights*/
+static int @!depth_base0[font_max-font_base+1],
+  *const @!depth_base = @!depth_base0-font_base;
+   /*base addresses for depths*/
+static int @!param_base0[font_max-font_base+1],
+  *const @!param_base = @!param_base0-font_base;
+   /*base addresses for font parameters*/
+
+
+@ Of course we want to define macros that suppress the detail of how font
+information is actually packed, so that we don't have to write things like
+$$\hbox{|font_info[width_base[f]+font_info[char_base[f]+c].qqqq.b0].sc|}$$
+too often. The \.{WEB} definitions here make |char_info(f)(c)| the
+|four_quarters| word of font information corresponding to character
+|c| of font |f|. If |q| is such a word, |char_width(f)(q)| will be
+the character's width; hence the long formula above is at least
+abbreviated to
+$$\hbox{|char_width(f)(char_info(f)(c))|.}$$
+Usually, of course, we will fetch |q| first and look at several of its
+fields at the same time.
+
+The italic correction of a character will be denoted by
+|char_italic(f)(q)|, so it is analogous to |char_width|.  But we will get
+at the height and depth in a slightly different way, since we usually want
+to compute both height and depth if we want either one.  The value of
+|height_depth(q)| will be the 8-bit quantity
+$$b=|height_index|\times16+|depth_index|,$$ and if |b| is such a byte we
+will write |char_height(f)(b)| and |char_depth(f)(b)| for the height and
+depth of the character |c| for which |q==char_info(f)(c)|. Got that?
+
+The tag field will be called |char_tag(q)|; the remainder byte will be
+called |rem_byte(q)|, using a macro that we have already defined above.
+
+Access to a character's |width|, |height|, |depth|, and |tag| fields is
+part of \TeX's inner loop, so we want these macros to produce code that is
+as fast as possible under the circumstances.
+@^inner loop@>
+
+@d char_info(A, B) font_info[char_base[A]+B].qqqq
+@d char_width(A, B) (width_base[A]!=0?
+   font_info[width_base[A]+char_info(A,B).b0].sc:x_char_width(A,B))
+@d char_exists(A) (A.b0 > min_quarterword)
+@d height_depth(A) qo(A.b1)
+@d char_height(A, B) font_info[height_base[A]+(B)/16].sc
+@d char_depth(A, B) font_info[depth_base[A]+(B)%16].sc
+
+
+@ Font parameters are referred to as |slant(f)|, |space(f)|, etc.
+
+@d param_end(A) param_base[A]].sc
+@d param(A) font_info[A+param_end
+@d quad param(quad_code) /*one em*/
+
+@ \TeX\ checks the information of a \.{TFM} file for validity as the
+file is being read in, so that no further checks will be needed when
+typesetting is going on. The somewhat tedious subroutine that does this
+is called |read_font_info|. It has four parameters: the user font
+identifier~|u|, the file name and area strings |nom| and |aire|, and the
+``at'' size~|s|. If |s|~is negative, it's the negative of a scale factor
+to be applied to the design size; |s==-1000| is the normal case.
+Otherwise |s| will be substituted for the design size; in this
+case, |s| must be positive and less than $2048\rm\,pt$
+(i.e., it must be less than $2^{27}$ when considered as an integer).
+
+The subroutine opens and closes a global file variable called |tfm_file|.
+It returns the value of the internal font number that was just loaded.
+If an error is detected, an error message is issued and no font
+information is stored; |null_font| is returned in this case.
+
+@d abort goto bad_tfm /*do this when the \.{TFM} data is wrong*/
+
+@<\TeX\ functions@>=
+static void read_font_info(int f, char *@!nom, scaled @!s)
+{@+
+int k; /*index into |font_info|*/
+halfword @!lf, @!lh, @!bc, @!ec, @!nw, @!nh, @!nd, @!ni, @!nl, @!nk, @!ne, @!np;
+   /*sizes of subfiles*/
+eight_bits @!a, @!b, @!c, @!d; /*byte variables*/
+four_quarters @!qw;scaled @!sw; /*accumulators*/
+scaled @!z; /*the design size or the ``at'' size*/
+int @!alpha;int @!beta;
+   /*auxiliary quantities used in fixed-point multiplication*/
+@<Read and check the font data; |abort| if the \.{TFM} file is malformed;
+if there's no room for this font, say so and |goto done|; otherwise |incr(font_ptr)|
+and |goto done|@>;
+bad_tfm:  QUIT("Bad tfm file: %s\n", nom);
+done:;
+}
+
+@ @<Read and check...@>=
+@<Read the {\.{TFM}} size fields@>;
+@<Use size fields to allocate font information@>;
+@<Read the {\.{TFM}} header@>;
+@<Read character data@>;
+@<Read box dimensions@>;
+@<Read ligature/kern program@>;
+@<Read extensible character recipes@>;
+@<Read font parameters@>;
+@<Make final adjustments and |goto done|@>@;
+
+@ Note: A malformed \.{TFM} file might be shorter than it claims to be;
+thus |eof(tfm_file)| might be true when |read_font_info| refers to
+|tfm_file.d| or when it says |get(tfm_file)|. If such circumstances
+cause system error messages, you will have to defeat them somehow,
+for example by defining |fget| to be `\ignorespaces|{@+get(tfm_file);|
+|if (eof(tfm_file)) abort;} |\unskip'.
+@^system dependencies@>
+
+@d fget (hpos++)
+@d fskip(A) (hpos+=A)
+@d fskip_four fskip(4)
+@d fbyte (*hpos)
+@d read_sixteen(A) {@+A=fbyte;
+  if (A > 127) abort;
+  fget;A=A*0400+fbyte;
+  }
+@d store_four_quarters(A) {@+fget;a=fbyte;qw.b0=qi(a);
+  fget;b=fbyte;qw.b1=qi(b);
+  fget;c=fbyte;qw.b2=qi(c);
+  fget;d=fbyte;qw.b3=qi(d);
+  A=qw;
+  }
+
+@ @<Read the {\.{TFM}} size fields@>=
+{@+read_sixteen(lf);
+fget;read_sixteen(lh);
+fget;read_sixteen(bc);
+fget;read_sixteen(ec);
+if ((bc > ec+1)||(ec > 255)) abort;
+if (bc > 255)  /*|bc==256| and |ec==255|*/
+  {@+bc=1;ec=0;
+  }
+fget;read_sixteen(nw);
+fget;read_sixteen(nh);
+fget;read_sixteen(nd);
+fget;read_sixteen(ni);
+fget;read_sixteen(nl);
+fget;read_sixteen(nk);
+fget;read_sixteen(ne);
+fget;read_sixteen(np);
+if (lf!=6+lh+(ec-bc+1)+nw+nh+nd+ni+nl+nk+ne+np) abort;
+if ((nw==0)||(nh==0)||(nd==0)||(ni==0)) abort;
+}
+
+@ The preliminary settings of the index-offset variables |char_base|,
+|width_base|, |lig_kern_base|, |kern_base|, and |exten_base| will be
+corrected later by subtracting |min_quarterword| from them; and we will
+subtract 1 from |param_base| too. It's best to forget about such anomalies
+until later.
+
+@<Use size fields to allocate font information@>=
+lf=lf-6-lh; /*|lf| words should be loaded into |font_info|*/
+if (np < 7) lf=lf+7-np; /*at least seven parameters will appear*/
+if ((font_ptr==font_max)||(fmem_ptr+lf > font_mem_size))
+QUIT("Not enough room left for font %s\n",nom);
+char_base[f]=fmem_ptr-bc;
+width_base[f]=char_base[f]+ec+1;
+height_base[f]=width_base[f]+nw;
+depth_base[f]=height_base[f]+nh;
+param_base[f]=depth_base[f]+nd
+
+@ Only the first two words of the header are needed by \TeX82.
+
+@<Read the {\.{TFM}} header@>=
+{@+if (lh < 2) abort;
+fskip_four;
+fget;read_sixteen(z); /*this rejects a negative design size*/
+fget;z=z*0400+fbyte;fget;z=(z*020)+(fbyte/020);
+if (z < unity) abort;
+while (lh > 2)
+  {@+fget;fget;fget;fget;decr(lh); /*ignore the rest of the header*/
+  }
+if (s!=-1000)
+{ if (s >= 0) z=s;
+  else z=xn_over_d(z,-s, 1000);
+}
+font_size[f]=z;
+}
+
+@ @<Read character data@>=
+for (k=fmem_ptr; k<=width_base[f]-1; k++)
+  {@+store_four_quarters(font_info[k].qqqq);
+  if ((a >= nw)||(b/020 >= nh)||(b%020 >= nd))
+     abort;
+  }
+
+@ A |fix_word| whose four bytes are $(a,b,c,d)$ from left to right represents
+the number
+$$x=\left\{\vcenter{\halign{$#$,\hfil\qquad&if $#$\hfil\cr
+b\cdot2^{-4}+c\cdot2^{-12}+d\cdot2^{-20}&a=0;\cr
+-16+b\cdot2^{-4}+c\cdot2^{-12}+d\cdot2^{-20}&a=255.\cr}}\right.$$
+(No other choices of |a| are allowed, since the magnitude of a number in
+design-size units must be less than 16.)  We want to multiply this
+quantity by the integer~|z|, which is known to be less than $2^{27}$.
+If $|z|<2^{23}$, the individual multiplications $b\cdot z$,
+$c\cdot z$, $d\cdot z$ cannot overflow; otherwise we will divide |z| by 2,
+4, 8, or 16, to obtain a multiplier less than $2^{23}$, and we can
+compensate for this later. If |z| has thereby been replaced by
+$|z|^\prime=|z|/2^e$, let $\beta=2^{4-e}$; we shall compute
+$$\lfloor(b+c\cdot2^{-8}+d\cdot2^{-16})\,z^\prime/\beta\rfloor$$
+if $a=0$, or the same quantity minus $\alpha=2^{4+e}z^\prime$ if $a=255$.
+This calculation must be done exactly, in order to guarantee portability
+of \TeX\ between computers.
+
+@d store_scaled(A) {@+fget;a=fbyte;fget;b=fbyte;
+  fget;c=fbyte;fget;d=fbyte;@/
+  sw=(((((d*z)/0400)+(c*z))/0400)+(b*z))/beta;
+  if (a==0) A=sw;@+else if (a==255) A=sw-alpha;@+else abort;
+  }
+
+@<Read box dimensions@>=
+{@+@<Replace |z| by $|z|^\prime$ and compute $\alpha,\beta$@>;
+for (k=width_base[f]; k<=depth_base[f]+nd-1; k++)
+  store_scaled(font_info[k].sc);
+if (font_info[width_base[f]].sc!=0) abort; /*\\{width}[0] must be zero*/
+if (font_info[height_base[f]].sc!=0) abort; /*\\{height}[0] must be zero*/
+if (font_info[depth_base[f]].sc!=0) abort; /*\\{depth}[0] must be zero*/
+}
+fskip(4*ni)
+
+@ @<Replace |z|...@>=
+{@+alpha=16;
+while (z >= 040000000)
+  {@+z=z/2;alpha=alpha+alpha;
+  }
+beta=256/alpha;alpha=alpha*z;
+}
+
+@ @<Read ligature/kern program@>=
+fskip(4*(nl+nk));
+
+@ @<Read extensible character recipes@>=
+fskip(4*ne);
+
+@ We check to see that the \.{TFM} file doesn't end prematurely; but
+no error message is given for files having more than |lf| words.
+
+@<Read font parameters@>=
+{@+for (k=1; k<=np; k++)
+  if (k==1)  /*the |slant| parameter is a pure number*/
+    {@+fget;sw=fbyte;if (sw > 127) sw=sw-256;
+    fget;sw=sw*0400+fbyte;fget;sw=sw*0400+fbyte;
+    fget;font_info[param_base[f]].sc=
+      (sw*020)+(fbyte/020);
+    }
+  else store_scaled(font_info[param_base[f]+k-1].sc);
+if (hpos>=hend) abort;
+for (k=np+1; k<=7; k++) font_info[param_base[f]+k-1].sc=0;
+}
+
+@ Now to wrap it up, we have checked all the necessary things about the \.{TFM}
+file, and all we need to do is put the finishing touches on the data for
+the new font.
+
+@d adjust(A) A[f]=qo(A[f])
+   /*correct for the excess |min_quarterword| that was added*/
+
+@<Make final adjustments...@>=
+hyphen_char[f]=-1;
+font_bc[f]=bc;font_ec[f]=ec;font_glue[f]=null;
+adjust(char_base);adjust(width_base);
+decr(param_base[f]);
+fmem_ptr=fmem_ptr+lf; goto done
+
+@ Here is a function that returns a pointer to a character node for a
+given character in a given font. If that character doesn't exist,
+|null| is returned instead.
+
+@<\TeX\ functions@>=
+static pointer new_character(internal_font_number @!f, eight_bits @!c)
+{@+ pointer p; /*newly allocated node*/
+#ifdef DEBUG
+if (font_bc[f] > c || font_ec[f] < c ||
+ (width_base[f]!=0 && ! char_exists(char_info(f, qi(c)))) ||
+ (width_base[f]==0 && ! ft_exists(font_face[f], c)))
+  DBG(DBGFONT,"Warning: Character 0x%0X in font %d does not exist\n",c,f);
+#endif
+p=get_avail();font(p)=f;character(p)=qi(c);
+return p;
+}
+
+@* Device-independent file format.
+The most important output produced by a run of \TeX\ is the ``device
+independent'' (\.{DVI}) file that specifies where characters and rules
+are to appear on printed pages. The form of these files was designed by
+David R. Fuchs in 1979. Almost any reasonable typesetting device can be
+@^Fuchs, David Raymond@>
+@:DVI\_files}{\.{DVI} files@>
+driven by a program that takes \.{DVI} files as input, and dozens of such
+\.{DVI}-to-whatever programs have been written. Thus, it is possible to
+print the output of \TeX\ on many different kinds of equipment, using \TeX\
+as a device-independent ``front end.''
+
+A \.{DVI} file is a stream of 8-bit bytes, which may be regarded as a
+series of commands in a machine-like language. The first byte of each command
+is the operation code, and this code is followed by zero or more bytes
+that provide parameters to the command. The parameters themselves may consist
+of several consecutive bytes; for example, the `|set_rule|' command has two
+parameters, each of which is four bytes long. Parameters are usually
+regarded as nonnegative integers; but four-byte-long parameters,
+and shorter parameters that denote distances, can be
+either positive or negative. Such parameters are given in two's complement
+notation. For example, a two-byte-long distance parameter has a value between
+$-2^{15}$ and $2^{15}-1$. As in \.{TFM} files, numbers that occupy
+more than one byte position appear in BigEndian order.
+
+A \.{DVI} file consists of a ``preamble,'' followed by a sequence of one
+or more ``pages,'' followed by a ``postamble.'' The preamble is simply a
+|pre| command, with its parameters that define the dimensions used in the
+file; this must come first.  Each ``page'' consists of a |bop| command,
+followed by any number of other commands that tell where characters are to
+be placed on a physical page, followed by an |eop| command. The pages
+appear in the order that \TeX\ generated them. If we ignore |nop| commands
+and \\{fnt\_def} commands (which are allowed between any two commands in
+the file), each |eop| command is immediately followed by a |bop| command,
+or by a |post| command; in the latter case, there are no more pages in the
+file, and the remaining bytes form the postamble.  Further details about
+the postamble will be explained later.
+
+Some parameters in \.{DVI} commands are ``pointers.'' These are four-byte
+quantities that give the location number of some other byte in the file;
+the first byte is number~0, then comes number~1, and so on. For example,
+one of the parameters of a |bop| command points to the previous |bop|;
+this makes it feasible to read the pages in backwards order, in case the
+results are being directed to a device that stacks its output face up.
+Suppose the preamble of a \.{DVI} file occupies bytes 0 to 99. Now if the
+first page occupies bytes 100 to 999, say, and if the second
+page occupies bytes 1000 to 1999, then the |bop| that starts in byte 1000
+points to 100 and the |bop| that starts in byte 2000 points to 1000. (The
+very first |bop|, i.e., the one starting in byte 100, has a pointer of~$-1$.)
+
+@ The \.{DVI} format is intended to be both compact and easily interpreted
+by a machine. Compactness is achieved by making most of the information
+implicit instead of explicit. When a \.{DVI}-reading program reads the
+commands for a page, it keeps track of several quantities: (a)~The current
+font |f| is an integer; this value is changed only
+by \\{fnt} and \\{fnt\_num} commands. (b)~The current position on the page
+is given by two numbers called the horizontal and vertical coordinates,
+|h| and |v|. Both coordinates are zero at the upper left corner of the page;
+moving to the right corresponds to increasing the horizontal coordinate, and
+moving down corresponds to increasing the vertical coordinate. Thus, the
+coordinates are essentially Cartesian, except that vertical directions are
+flipped; the Cartesian version of |(h, v)| would be |(h,-v)|.  (c)~The
+current spacing amounts are given by four numbers |w|, |x|, |y|, and |z|,
+where |w| and~|x| are used for horizontal spacing and where |y| and~|z|
+are used for vertical spacing. (d)~There is a stack containing
+|(h, v, w, x, y, z)| values; the \.{DVI} commands |push| and |pop| are used to
+change the current level of operation. Note that the current font~|f| is
+not pushed and popped; the stack contains only information about
+positioning.
+
+The values of |h|, |v|, |w|, |x|, |y|, and |z| are signed integers having up
+to 32 bits, including the sign. Since they represent physical distances,
+there is a small unit of measurement such that increasing |h| by~1 means
+moving a certain tiny distance to the right. The actual unit of
+measurement is variable, as explained below; \TeX\ sets things up so that
+its \.{DVI} output is in sp units, i.e., scaled points, in agreement with
+all the |scaled| dimensions in \TeX's data structures.
+
+@ Here is a list of all the commands that may appear in a \.{DVI} file. Each
+command is specified by its symbolic name (e.g., |bop|), its opcode byte
+(e.g., 139), and its parameters (if any). The parameters are followed
+by a bracketed number telling how many bytes they occupy; for example,
+`|p[4]|' means that parameter |p| is four bytes long.
+
+\yskip\hang|set_char_0| 0. Typeset character number~0 from font~|f|
+such that the reference point of the character is at |(h, v)|. Then
+increase |h| by the width of that character. Note that a character may
+have zero or negative width, so one cannot be sure that |h| will advance
+after this command; but |h| usually does increase.
+
+\yskip\hang\\{set\_char\_1} through \\{set\_char\_127} (opcodes 1 to 127).
+Do the operations of |set_char_0|; but use the character whose number
+matches the opcode, instead of character~0.
+
+\yskip\hang|set1| 128 |c[1]|. Same as |set_char_0|, except that character
+number~|c| is typeset. \TeX82 uses this command for characters in the
+range |128 <= c < 256|.
+
+\yskip\hang|@!set2| 129 |c[2]|. Same as |set1|, except that |c|~is two
+bytes long, so it is in the range |0 <= c < 65536|. \TeX82 never uses this
+command, but it should come in handy for extensions of \TeX\ that deal
+with oriental languages.
+@^oriental characters@>@^Chinese characters@>@^Japanese characters@>
+
+\yskip\hang|@!set3| 130 |c[3]|. Same as |set1|, except that |c|~is three
+bytes long, so it can be as large as $2^{24}-1$. Not even the Chinese
+language has this many characters, but this command might prove useful
+in some yet unforeseen extension.
+
+\yskip\hang|@!set4| 131 |c[4]|. Same as |set1|, except that |c|~is four
+bytes long. Imagine that.
+
+\yskip\hang|set_rule| 132 |a[4]| |b[4]|. Typeset a solid black rectangle
+of height~|a| and width~|b|, with its bottom left corner at |(h, v)|. Then
+set |h=h+b|. If either |a <= 0| or |b <= 0|, nothing should be typeset. Note
+that if |b < 0|, the value of |h| will decrease even though nothing else happens.
+See below for details about how to typeset rules so that consistency with
+\MF\ is guaranteed.
+
+\yskip\hang|@!put1| 133 |c[1]|. Typeset character number~|c| from font~|f|
+such that the reference point of the character is at |(h, v)|. (The `put'
+commands are exactly like the `set' commands, except that they simply put out a
+character or a rule without moving the reference point afterwards.)
+
+\yskip\hang|@!put2| 134 |c[2]|. Same as |set2|, except that |h| is not changed.
+
+\yskip\hang|@!put3| 135 |c[3]|. Same as |set3|, except that |h| is not changed.
+
+\yskip\hang|@!put4| 136 |c[4]|. Same as |set4|, except that |h| is not changed.
+
+\yskip\hang|put_rule| 137 |a[4]| |b[4]|. Same as |set_rule|, except that
+|h| is not changed.
+
+\yskip\hang|nop| 138. No operation, do nothing. Any number of |nop|'s
+may occur between \.{DVI} commands, but a |nop| cannot be inserted between
+a command and its parameters or between two parameters.
+
+\yskip\hang|bop| 139 $c_0[4]$ $c_1[4]$ $\ldots$ $c_9[4]$ $p[4]$. Beginning
+of a page: Set |(h, v, w, x, y, z)=(0, 0, 0, 0, 0, 0)| and set the stack empty. Set
+the current font |f| to an undefined value.  The ten $c_i$ parameters hold
+the values of \.{\\count0} $\ldots$ \.{\\count9} in \TeX\ at the time
+\.{\\shipout} was invoked for this page; they can be used to identify
+pages, if a user wants to print only part of a \.{DVI} file. The parameter
+|p| points to the previous |bop| in the file; the first
+|bop| has $p=-1$.
+
+\yskip\hang|eop| 140.  End of page: Print what you have read since the
+previous |bop|. At this point the stack should be empty. (The \.{DVI}-reading
+programs that drive most output devices will have kept a buffer of the
+material that appears on the page that has just ended. This material is
+largely, but not entirely, in order by |v| coordinate and (for fixed |v|) by
+|h|~coordinate; so it usually needs to be sorted into some order that is
+appropriate for the device in question.)
+
+\yskip\hang|push| 141. Push the current values of |(h, v, w, x, y, z)| onto the
+top of the stack; do not change any of these values. Note that |f| is
+not pushed.
+
+\yskip\hang|pop| 142. Pop the top six values off of the stack and assign
+them respectively to |(h, v, w, x, y, z)|. The number of pops should never
+exceed the number of pushes, since it would be highly embarrassing if the
+stack were empty at the time of a |pop| command.
+
+\yskip\hang|right1| 143 |b[1]|. Set |h=h+b|, i.e., move right |b| units.
+The parameter is a signed number in two's complement notation, |-128 <= b < 128|;
+if |b < 0|, the reference point moves left.
+
+\yskip\hang|@!right2| 144 |b[2]|. Same as |right1|, except that |b| is a
+two-byte quantity in the range |-32768 <= b < 32768|.
+
+\yskip\hang|@!right3| 145 |b[3]|. Same as |right1|, except that |b| is a
+three-byte quantity in the range |@t$-2^{23}$@> <= b < @t$2^{23}$@>|.
+
+\yskip\hang|@!right4| 146 |b[4]|. Same as |right1|, except that |b| is a
+four-byte quantity in the range |@t$-2^{31}$@> <= b < @t$2^{31}$@>|.
+
+\yskip\hang|w0| 147. Set |h=h+w|; i.e., move right |w| units. With luck,
+this parameterless command will usually suffice, because the same kind of motion
+will occur several times in succession; the following commands explain how
+|w| gets particular values.
+
+\yskip\hang|w1| 148 |b[1]|. Set |w=b| and |h=h+b|. The value of |b| is a
+signed quantity in two's complement notation, |-128 <= b < 128|. This command
+changes the current |w|~spacing and moves right by |b|.
+
+\yskip\hang|@!w2| 149 |b[2]|. Same as |w1|, but |b| is two bytes long,
+|-32768 <= b < 32768|.
+
+\yskip\hang|@!w3| 150 |b[3]|. Same as |w1|, but |b| is three bytes long,
+|@t$-2^{23}$@> <= b < @t$2^{23}$@>|.
+
+\yskip\hang|@!w4| 151 |b[4]|. Same as |w1|, but |b| is four bytes long,
+|@t$-2^{31}$@> <= b < @t$2^{31}$@>|.
+
+\yskip\hang|x0| 152. Set |h=h+x|; i.e., move right |x| units. The `|x|'
+commands are like the `|w|' commands except that they involve |x| instead
+of |w|.
+
+\yskip\hang|x1| 153 |b[1]|. Set |x=b| and |h=h+b|. The value of |b| is a
+signed quantity in two's complement notation, |-128 <= b < 128|. This command
+changes the current |x|~spacing and moves right by |b|.
+
+\yskip\hang|@!x2| 154 |b[2]|. Same as |x1|, but |b| is two bytes long,
+|-32768 <= b < 32768|.
+
+\yskip\hang|@!x3| 155 |b[3]|. Same as |x1|, but |b| is three bytes long,
+|@t$-2^{23}$@> <= b < @t$2^{23}$@>|.
+
+\yskip\hang|@!x4| 156 |b[4]|. Same as |x1|, but |b| is four bytes long,
+|@t$-2^{31}$@> <= b < @t$2^{31}$@>|.
+
+\yskip\hang|down1| 157 |a[1]|. Set |v=v+a|, i.e., move down |a| units.
+The parameter is a signed number in two's complement notation, |-128 <= a < 128|;
+if |a < 0|, the reference point moves up.
+
+\yskip\hang|@!down2| 158 |a[2]|. Same as |down1|, except that |a| is a
+two-byte quantity in the range |-32768 <= a < 32768|.
+
+\yskip\hang|@!down3| 159 |a[3]|. Same as |down1|, except that |a| is a
+three-byte quantity in the range |@t$-2^{23}$@> <= a < @t$2^{23}$@>|.
+
+\yskip\hang|@!down4| 160 |a[4]|. Same as |down1|, except that |a| is a
+four-byte quantity in the range |@t$-2^{31}$@> <= a < @t$2^{31}$@>|.
+
+\yskip\hang|y0| 161. Set |v=v+y|; i.e., move down |y| units. With luck,
+this parameterless command will usually suffice, because the same kind of motion
+will occur several times in succession; the following commands explain how
+|y| gets particular values.
+
+\yskip\hang|y1| 162 |a[1]|. Set |y=a| and |v=v+a|. The value of |a| is a
+signed quantity in two's complement notation, |-128 <= a < 128|. This command
+changes the current |y|~spacing and moves down by |a|.
+
+\yskip\hang|@!y2| 163 |a[2]|. Same as |y1|, but |a| is two bytes long,
+|-32768 <= a < 32768|.
+
+\yskip\hang|@!y3| 164 |a[3]|. Same as |y1|, but |a| is three bytes long,
+|@t$-2^{23}$@> <= a < @t$2^{23}$@>|.
+
+\yskip\hang|@!y4| 165 |a[4]|. Same as |y1|, but |a| is four bytes long,
+|@t$-2^{31}$@> <= a < @t$2^{31}$@>|.
+
+\yskip\hang|z0| 166. Set |v=v+z|; i.e., move down |z| units. The `|z|' commands
+are like the `|y|' commands except that they involve |z| instead of |y|.
+
+\yskip\hang|z1| 167 |a[1]|. Set |z=a| and |v=v+a|. The value of |a| is a
+signed quantity in two's complement notation, |-128 <= a < 128|. This command
+changes the current |z|~spacing and moves down by |a|.
+
+\yskip\hang|@!z2| 168 |a[2]|. Same as |z1|, but |a| is two bytes long,
+|-32768 <= a < 32768|.
+
+\yskip\hang|@!z3| 169 |a[3]|. Same as |z1|, but |a| is three bytes long,
+|@t$-2^{23}$@> <= a < @t$2^{23}$@>|.
+
+\yskip\hang|@!z4| 170 |a[4]|. Same as |z1|, but |a| is four bytes long,
+|@t$-2^{31}$@> <= a < @t$2^{31}$@>|.
+
+\yskip\hang|fnt_num_0| 171. Set |f=0|. Font 0 must previously have been
+defined by a \\{fnt\_def} instruction, as explained below.
+
+\yskip\hang\\{fnt\_num\_1} through \\{fnt\_num\_63} (opcodes 172 to 234). Set
+|f=1|, \dots, \hbox{|f=63|}, respectively.
+
+\yskip\hang|fnt1| 235 |k[1]|. Set |f=k|. \TeX82 uses this command for font
+numbers in the range |64 <= k < 256|.
+
+\yskip\hang|@!fnt2| 236 |k[2]|. Same as |fnt1|, except that |k|~is two
+bytes long, so it is in the range |0 <= k < 65536|. \TeX82 never generates this
+command, but large font numbers may prove useful for specifications of
+color or texture, or they may be used for special fonts that have fixed
+numbers in some external coding scheme.
+
+\yskip\hang|@!fnt3| 237 |k[3]|. Same as |fnt1|, except that |k|~is three
+bytes long, so it can be as large as $2^{24}-1$.
+
+\yskip\hang|@!fnt4| 238 |k[4]|. Same as |fnt1|, except that |k|~is four
+bytes long; this is for the really big font numbers (and for the negative ones).
+
+\yskip\hang|xxx1| 239 |k[1]| |x[k]|. This command is undefined in
+general; it functions as a $(k+2)$-byte |nop| unless special \.{DVI}-reading
+programs are being used. \TeX82 generates |xxx1| when a short enough
+\.{\\special} appears, setting |k| to the number of bytes being sent. It
+is recommended that |x| be a string having the form of a keyword followed
+by possible parameters relevant to that keyword.
+
+\yskip\hang|@!xxx2| 240 |k[2]| |x[k]|. Like |xxx1|, but |0 <= k < 65536|.
+
+\yskip\hang|@!xxx3| 241 |k[3]| |x[k]|. Like |xxx1|, but |0 <= k < @t$2^{24}$@>|.
+
+\yskip\hang|xxx4| 242 |k[4]| |x[k]|. Like |xxx1|, but |k| can be ridiculously
+large. \TeX82 uses |xxx4| when sending a string of length 256 or more.
+
+\yskip\hang|fnt_def1| 243 |k[1]| |c[4]| |s[4]| |d[4]| |a[1]| |l[1]| |n[a+l]|.
+Define font |k|, where |0 <= k < 256|; font definitions will be explained shortly.
+
+\yskip\hang|@!fnt_def2| 244 |k[2]| |c[4]| |s[4]| |d[4]| |a[1]| |l[1]| |n[a+l]|.
+Define font |k|, where |0 <= k < 65536|.
+
+\yskip\hang|@!fnt_def3| 245 |k[3]| |c[4]| |s[4]| |d[4]| |a[1]| |l[1]| |n[a+l]|.
+Define font |k|, where |0 <= k < @t$2^{24}$@>|.
+
+\yskip\hang|@!fnt_def4| 246 |k[4]| |c[4]| |s[4]| |d[4]| |a[1]| |l[1]| |n[a+l]|.
+Define font |k|, where |@t$-2^{31}$@> <= k < @t$2^{31}$@>|.
+
+\yskip\hang|pre| 247 |i[1]| |num[4]| |den[4]| |mag[4]| |k[1]| |x[k]|.
+Beginning of the preamble; this must come at the very beginning of the
+file. Parameters |i|, |num|, |den|, |mag|, |k|, and |x| are explained below.
+
+\yskip\hang|post| 248. Beginning of the postamble, see below.
+
+\yskip\hang|post_post| 249. Ending of the postamble, see below.
+
+\yskip\noindent Commands 250--255 are undefined at the present time.
+
+@ Font definitions for a given font number |k| contain further parameters
+$$\hbox{|c[4]| |s[4]| |d[4]| |a[1]| |l[1]| |n[a+l]|.}$$
+The four-byte value |c| is the check sum that \TeX\ found in the \.{TFM}
+file for this font; |c| should match the check sum of the font found by
+programs that read this \.{DVI} file.
+@^check sum@>
+
+Parameter |s| contains a fixed-point scale factor that is applied to
+the character widths in font |k|; font dimensions in \.{TFM} files and
+other font files are relative to this quantity, which is called the
+``at size'' elsewhere in this documentation. The value of |s| is
+always positive and less than $2^{27}$. It is given in the same units
+as the other \.{DVI} dimensions, i.e., in sp when \TeX82 has made the
+file.  Parameter |d| is similar to |s|; it is the ``design size,'' and
+(like~|s|) it is given in \.{DVI} units. Thus, font |k| is to be used
+at $|mag|\cdot s/1000d$ times its normal size.
+
+The remaining part of a font definition gives the external name of the font,
+which is an ASCII string of length |a+l|. The number |a| is the length
+of the ``area'' or directory, and |l| is the length of the font name itself;
+the standard local system font area is supposed to be used when |a==0|.
+The |n| field contains the area in its first |a| bytes.
+
+Font definitions must appear before the first use of a particular font number.
+Once font |k| is defined, it must not be defined again; however, we
+shall see below that font definitions appear in the postamble as well as
+in the pages, so in this sense each font number is defined exactly twice,
+if at all. Like |nop| commands, font definitions can
+appear before the first |bop|, or between an |eop| and a |bop|.
+
+@ Sometimes it is desirable to make horizontal or vertical rules line up
+precisely with certain features in characters of a font. It is possible to
+guarantee the correct matching between \.{DVI} output and the characters
+generated by \MF\ by adhering to the following principles: (1)~The \MF\
+characters should be positioned so that a bottom edge or left edge that is
+supposed to line up with the bottom or left edge of a rule appears at the
+reference point, i.e., in row~0 and column~0 of the \MF\ raster. This
+ensures that the position of the rule will not be rounded differently when
+the pixel size is not a perfect multiple of the units of measurement in
+the \.{DVI} file. (2)~A typeset rule of height $a>0$ and width $b>0$
+should be equivalent to a \MF-generated character having black pixels in
+precisely those raster positions whose \MF\ coordinates satisfy
+|0 <= x < @t$\alpha$@>b| and |0 <= y < @t$\alpha$@>a|, where $\alpha$ is the number
+of pixels per \.{DVI} unit.
+@:METAFONT}{\MF@>
+@^alignment of rules with characters@>
+@^rules aligning with characters@>
+
+@ The last page in a \.{DVI} file is followed by `|post|'; this command
+introduces the postamble, which summarizes important facts that \TeX\ has
+accumulated about the file, making it possible to print subsets of the data
+with reasonable efficiency. The postamble has the form
+$$\vbox{\halign{\hbox{#\hfil}\cr
+  |post| |p[4]| |num[4]| |den[4]| |mag[4]| |l[4]| |u[4]| |s[2]| |t[2]|\cr
+  $\langle\,$font definitions$\,\rangle$\cr
+  |post_post| |q[4]| |i[1]| 223's$[{\G}4]$\cr}}$$
+Here |p| is a pointer to the final |bop| in the file. The next three
+parameters, |num|, |den|, and |mag|, are duplicates of the quantities that
+appeared in the preamble.
+
+Parameters |l| and |u| give respectively the height-plus-depth of the tallest
+page and the width of the widest page, in the same units as other dimensions
+of the file. These numbers might be used by a \.{DVI}-reading program to
+position individual ``pages'' on large sheets of film or paper; however,
+the standard convention for output on normal size paper is to position each
+page so that the upper left-hand corner is exactly one inch from the left
+and the top. Experience has shown that it is unwise to design \.{DVI}-to-printer
+software that attempts cleverly to center the output; a fixed position of
+the upper left corner is easiest for users to understand and to work with.
+Therefore |l| and~|u| are often ignored.
+
+Parameter |s| is the maximum stack depth (i.e., the largest excess of
+|push| commands over |pop| commands) needed to process this file. Then
+comes |t|, the total number of pages (|bop| commands) present.
+
+The postamble continues with font definitions, which are any number of
+\\{fnt\_def} commands as described above, possibly interspersed with |nop|
+commands. Each font number that is used in the \.{DVI} file must be defined
+exactly twice: Once before it is first selected by a \\{fnt} command, and once
+in the postamble.
+
+@ The last part of the postamble, following the |post_post| byte that
+signifies the end of the font definitions, contains |q|, a pointer to the
+|post| command that started the postamble.  An identification byte, |i|,
+comes next; this currently equals~2, as in the preamble.
+
+The |i| byte is followed by four or more bytes that are all equal to
+the decimal number 223 (i.e., 0337 in octal). \TeX\ puts out four to seven of
+these trailing bytes, until the total length of the file is a multiple of
+four bytes, since this works out best on machines that pack four bytes per
+word; but any number of 223's is allowed, as long as there are at least four
+of them. In effect, 223 is a sort of signature that is added at the very end.
+@^Fuchs, David Raymond@>
+
+This curious way to finish off a \.{DVI} file makes it feasible for
+\.{DVI}-reading programs to find the postamble first, on most computers,
+even though \TeX\ wants to write the postamble last. Most operating
+systems permit random access to individual words or bytes of a file, so
+the \.{DVI} reader can start at the end and skip backwards over the 223's
+until finding the identification byte. Then it can back up four bytes, read
+|q|, and move to byte |q| of the file. This byte should, of course,
+contain the value 248 (|post|); now the postamble can be read, so the
+\.{DVI} reader can discover all the information needed for typesetting the
+pages. Note that it is also possible to skip through the \.{DVI} file at
+reasonably high speed to locate a particular page, if that proves
+desirable. This saves a lot of time, since \.{DVI} files used in production
+jobs tend to be large.
+
+Unfortunately, however, standard \PASCAL\ does not include the ability to
+@^system dependencies@>
+access a random position in a file, or even to determine the length of a file.
+Almost all systems nowadays provide the necessary capabilities, so \.{DVI}
+format has been designed to work most efficiently with modern operating systems.
+But if \.{DVI} files have to be processed under the restrictions of standard
+\PASCAL, one can simply read them from front to back, since the necessary
+header information is present in the preamble and in the font definitions.
+(The |l| and |u| and |s| and |t| parameters, which appear only in the
+postamble, are ``frills'' that are handy but not absolutely necessary.)
+
+@* Shipping pages out.
+
+@ @d billion float_constant(1000000000)
+@d vet_glue(A) glue_temp=A;
+  if (glue_temp > billion)
+           glue_temp=billion;
+  else if (glue_temp < -billion)
+           glue_temp=-billion
+
+@* Packaging.
+We're essentially done with the parts of \TeX\ that are concerned with
+the input (|get_next|) and the output (|ship_out|). So it's time to
+get heavily into the remaining part, which does the real work of typesetting.
+
+After lists are constructed, \TeX\ wraps them up and puts them into boxes.
+Two major subroutines are given the responsibility for this task: |hpack|
+applies to horizontal lists (hlists) and |vpack| applies to vertical lists
+(vlists). The main duty of |hpack| and |vpack| is to compute the dimensions
+of the resulting boxes, and to adjust the glue if one of those dimensions
+is pre-specified. The computed sizes normally enclose all of the material
+inside the new box; but some items may stick out if negative glue is used,
+if the box is overfull, or if a \.{\\vbox} includes other boxes that have
+been shifted left.
+
+The subroutine call |hpack(p, w, m)| returns a pointer to an |hlist_node|
+for a box containing the hlist that starts at |p|. Parameter |w| specifies
+a width; and parameter |m| is either `|exactly|' or `|additional|'.  Thus,
+|hpack(p, w, exactly)| produces a box whose width is exactly |w|, while
+|hpack(p, w, additional)| yields a box whose width is the natural width plus
+|w|.  It is convenient to define a macro called `|natural|' to cover the
+most common case, so that we can say |hpack(p, natural)| to get a box that
+has the natural width of list |p|.
+
+Similarly, |vpack(p, w, m)| returns a pointer to a |vlist_node| for a
+box containing the vlist that starts at |p|. In this case |w| represents
+a height instead of a width; the parameter |m| is interpreted as in |hpack|.
+
+@d exactly 0 /*a box dimension is pre-specified*/
+@d additional 1 /*a box dimension is increased from the natural one*/
+@d natural 0, additional /*shorthand for parameters to |hpack| and |vpack|*/
+
+@ To figure out the glue setting, |hpack| and |vpack| determine how much
+stretchability and shrinkability are present, considering all four orders
+of infinity. The highest order of infinity that has a nonzero coefficient
+is then used as if no other orders were present.
+
+For example, suppose that the given list contains six glue nodes with
+the respective stretchabilities 3pt, 8fill, 5fil, 6pt, $-3$fil, $-8$fill.
+Then the total is essentially 2fil; and if a total additional space of 6pt
+is to be achieved by stretching, the actual amounts of stretch will be
+0pt, 0pt, 15pt, 0pt, $-9$pt, and 0pt, since only `fil' glue will be
+considered. (The `fill' glue is therefore not really stretching infinitely
+with respect to `fil'; nobody would actually want that to happen.)
+
+The arrays |total_stretch| and |total_shrink| are used to determine how much
+glue of each kind is present. A global variable |last_badness| is used
+to implement \.{\\badness}.
+
+@<Selected global variables@>=
+static scaled @!total_stretch0[filll-normal+1],
+  *const @!total_stretch = @!total_stretch0-normal,
+  @!total_shrink0[filll-normal+1], *const @!total_shrink = @!total_shrink0-normal;
+   /*glue found by |hpack| or |vpack|*/
+
+@ If the global variable |adjust_tail| is non-null, the |hpack| routine
+also removes all occurrences of |ins_node|, |mark_node|, and |adjust_node|
+items and appends the resulting material onto the list that ends at
+location |adjust_tail|.
+
+@<Selected global variables@>=
+static pointer @!adjust_tail=null; /*tail of adjustment list*/
+
+
+@ Here now is |hpack|, which contains few if any surprises.
+
+@<\TeX\ functions@>=
+static pointer hpack(pointer @!p, scaled @!w, small_number @!m)
+{@+
+pointer r; /*the box node that will be returned*/
+pointer @!q; /*trails behind |p|*/
+scaled @!h, @!d, @!x; /*height, depth, and natural width*/
+scaled @!s; /*shift amount*/
+pointer @!g; /*points to a glue specification*/
+glue_ord @!o; /*order of infinity*/
+internal_font_number @!f; /*the font in a |char_node|*/
+four_quarters @!i; /*font information about a |char_node|*/
+eight_bits @!hd; /*height and depth indices for a character*/
+r=get_node(box_node_size);type(r)=hlist_node;
+subtype(r)=min_quarterword;shift_amount(r)=0;
+q=r+list_offset;link(q)=p;@/
+h=0;@<Clear dimensions to zero@>;
+while (p!=null) @<Examine node |p| in the hlist, taking account of its effect
+on the dimensions of the new box, or moving it to the adjustment list; then
+advance |p| to the next node@>;
+if (adjust_tail!=null) link(adjust_tail)=null;
+height(r)=h;depth(r)=d;@/
+@<Determine the value of |width(r)| and the appropriate glue setting; then
+|return| or |goto common_ending|@>;
+end: return r;
+}
+
+@ @<Clear dimensions to zero@>=
+d=0;x=0;
+total_stretch[normal]=0;total_shrink[normal]=0;
+total_stretch[fil]=0;total_shrink[fil]=0;
+total_stretch[fill]=0;total_shrink[fill]=0;
+total_stretch[filll]=0;total_shrink[filll]=0
+
+@ @<Examine node |p| in the hlist, taking account of its effect...@>=
+@^inner loop@>
+{@+reswitch: while (is_char_node(p))
+  @<Incorporate character dimensions into the dimensions of the hbox that
+will contain~it, then move to the next node@>;
+if (p!=null)
+  {@+switch (type(p)) {
+  case hlist_node: case vlist_node: case rule_node:
+  case unset_node:
+    @<Incorporate box dimensions into the dimensions of the hbox that will
+contain~it@>@;@+break;
+  case ins_node: case mark_node: case adjust_node: if (adjust_tail!=null)
+    @<Transfer node |p| to the adjustment list@>@;@+break;
+  case whatsit_node: @<Incorporate a whatsit node into an hbox@>;@+break;
+  case glue_node: @<Incorporate glue into the horizontal totals@>@;@+break;
+  case kern_node: case math_node: x=x+width(p);@+break;
+  case ligature_node: @<Make node |p| look like a |char_node| and |goto reswitch|@>@;
+  default:do_nothing;
+  } @/
+  p=link(p);
+  }
+}
+
+
+@ @<Make node |p| look like a |char_node| and |goto reswitch|@>=
+{@+mem[lig_trick]=mem[lig_char(p)];link(lig_trick)=link(p);
+p=lig_trick;goto reswitch;
+}
+
+@ The code here implicitly uses the fact that running dimensions are
+indicated by |null_flag|, which will be ignored in the calculations
+because it is a highly negative number.
+
+@<Incorporate box dimensions into the dimensions of the hbox...@>=
+{@+x=x+width(p);
+if (type(p) >= rule_node) s=0;@+else s=shift_amount(p);
+if (height(p)-s > h) h=height(p)-s;
+if (depth(p)+s > d) d=depth(p)+s;
+}
+
+@ The following code is part of \TeX's inner loop; i.e., adding another
+character of text to the user's input will cause each of these instructions
+to be exercised one more time.
+@^inner loop@>
+
+@<Incorporate character dimensions into the dimensions of the hbox...@>=
+{@+f=font(p);
+ if (width_base[f]!=0)
+ { i=char_info(f, character(p));hd=height_depth(i);
+   x=x+char_width(f, character(p));
+   s=char_height(f, hd);@+if (s > h) h=s;
+   s=char_depth(f, hd);@+if (s > d) d=s;
+ }
+ else
+ { scaled ch, cd;
+   FT_Face ft_face=font_face[f];
+   if (ft_face==NULL)
+     ft_face=hload_font_face(f);
+   if (ft_face!=NULL)
+   { FT_UInt ft_gid = FT_Get_Char_Index(ft_face, character(p));
+     if (ft_gid!=0)
+     x=x+ft_glyph_width(ft_face, ft_gid,font_size[f]);
+     ft_glyph_height_depth(ft_face, ft_gid, &ch, &cd, font_size[f]);
+     if (ch > h) h=ch;
+     if (cd > d) d=cd;
+   }
+ }
+p=link(p);
+}
+
+@ Although node |q| is not necessarily the immediate predecessor of node |p|,
+it always points to some node in the list preceding |p|. Thus, we can delete
+nodes by moving |q| when necessary. The algorithm takes linear time, and the
+extra computation does not intrude on the inner loop unless it is necessary
+to make a deletion.
+@^inner loop@>
+
+@<Transfer node |p| to the adjustment list@>=
+{@+while (link(q)!=p) q=link(q);
+if (type(p)==adjust_node)
+  {@+link(adjust_tail)=adjust_ptr(p);
+  while (link(adjust_tail)!=null) adjust_tail=link(adjust_tail);
+  p=link(p);free_node(link(q), small_node_size);
+  }
+else{@+link(adjust_tail)=p;adjust_tail=p;p=link(p);
+  }
+link(q)=p;p=q;
+}
+
+@ @<Incorporate glue into the horizontal totals@>=
+{@+g=glue_ptr(p);x=x+width(g);@/
+o=stretch_order(g);total_stretch[o]=total_stretch[o]+stretch(g);
+o=shrink_order(g);total_shrink[o]=total_shrink[o]+shrink(g);
+if (subtype(p) >= a_leaders)
+  {@+g=leader_ptr(p);
+  if (height(g) > h) h=height(g);
+  if (depth(g) > d) d=depth(g);
+  }
+}
+
+@ When we get to the present part of the program, |x| is the natural width
+of the box being packaged.
+
+@<Determine the value of |width(r)| and the appropriate glue setting...@>=
+if (m==additional) w=x+w;
+width(r)=w;x=w-x; /*now |x| is the excess to be made up*/
+if (x==0)
+  {@+glue_sign(r)=normal;glue_order(r)=normal;
+  set_glue_ratio_zero(glue_set(r));
+  goto end;
+  }
+else if (x > 0) @<Determine horizontal glue stretch setting, then |return|
+or \hbox{|goto common_ending|}@>@;
+else@<Determine horizontal glue shrink setting, then |return| or \hbox{|goto
+common_ending|}@>@;
+
+@ @<Determine horizontal glue stretch setting...@>=
+{@+@<Determine the stretch order@>;
+glue_order(r)=o;glue_sign(r)=stretching;
+if (total_stretch[o]!=0) glue_set(r)=fix(x/(double)total_stretch[o]);
+@^real division@>
+else{@+glue_sign(r)=normal;
+  set_glue_ratio_zero(glue_set(r)); /*there's nothing to stretch*/
+  }
+goto end;
+}
+
+@ @<Determine the stretch order@>=
+if (total_stretch[filll]!=0) o=filll;
+else if (total_stretch[fill]!=0) o=fill;
+else if (total_stretch[fil]!=0) o=fil;
+else o=normal
+
+@ @<Determine horizontal glue shrink setting...@>=
+{@+@<Determine the shrink order@>;
+glue_order(r)=o;glue_sign(r)=shrinking;
+if (total_shrink[o]!=0) glue_set(r)=fix((-x)/(double)total_shrink[o]);
+@^real division@>
+else{@+glue_sign(r)=normal;
+  set_glue_ratio_zero(glue_set(r)); /*there's nothing to shrink*/
+  }
+if ((total_shrink[o] < -x)&&(o==normal)&&(list_ptr(r)!=null))
+  set_glue_ratio_one(glue_set(r)); /*use the maximum shrinkage*/
+goto end;
+}
+
+@ @<Determine the shrink order@>=
+if (total_shrink[filll]!=0) o=filll;
+else if (total_shrink[fill]!=0) o=fill;
+else if (total_shrink[fil]!=0) o=fil;
+else o=normal
+
+
+@ The |vpack| subroutine is actually a special case of a slightly more
+general routine called |vpackage|, which has four parameters. The fourth
+parameter, which is |max_dimen| in the case of |vpack|, specifies the
+maximum depth of the page box that is constructed. The depth is first
+computed by the normal rules; if it exceeds this limit, the reference
+point is simply moved down until the limiting depth is attained.
+
+@d vpack(A,B) @[vpackage(A,B, max_dimen)@] /*special case of unconstrained depth*/
+
+@<\TeX\ functions@>=
+static pointer vpackage(pointer @!p, scaled @!h, small_number @!m, scaled @!l)
+{@+
+pointer r; /*the box node that will be returned*/
+scaled @!w, @!d, @!x; /*width, depth, and natural height*/
+scaled @!s; /*shift amount*/
+pointer @!g; /*points to a glue specification*/
+glue_ord @!o; /*order of infinity*/
+r=get_node(box_node_size);type(r)=vlist_node;
+subtype(r)=min_quarterword;shift_amount(r)=0;
+list_ptr(r)=p;@/
+w=0;@<Clear dimensions to zero@>;
+while (p!=null) @<Examine node |p| in the vlist, taking account of its effect
+on the dimensions of the new box; then advance |p| to the next node@>;
+width(r)=w;
+if (d > l)
+  {@+x=x+d-l;depth(r)=l;
+  }
+else depth(r)=d;
+@<Determine the value of |height(r)| and the appropriate glue setting; then
+|return| or |goto common_ending|@>;
+end: return r;
+}
+
+@ @<Examine node |p| in the vlist, taking account of its effect...@>=
+{@+if (is_char_node(p)) confusion("vpack");
+@:this can't happen vpack}{\quad vpack@>
+else switch (type(p)) {
+  case hlist_node: case vlist_node: case rule_node:
+  case unset_node:
+    @<Incorporate box dimensions into the dimensions of the vbox that will
+contain~it@>@;@+break;
+  case whatsit_node: @<Incorporate a whatsit node into a vbox@>;@+break;
+  case glue_node: @<Incorporate glue into the vertical totals@>@;@+break;
+  case kern_node: {@+x=x+d+width(p);d=0;
+    } @+break;
+  default:do_nothing;
+  }
+p=link(p);
+}
+
+@ @<Incorporate box dimensions into the dimensions of the vbox...@>=
+{@+x=x+d+height(p);d=depth(p);
+if (type(p) >= rule_node) s=0;@+else s=shift_amount(p);
+if (width(p)+s > w) w=width(p)+s;
+}
+
+@ @<Incorporate glue into the vertical totals@>=
+{@+x=x+d;d=0;@/
+g=glue_ptr(p);x=x+width(g);@/
+o=stretch_order(g);total_stretch[o]=total_stretch[o]+stretch(g);
+o=shrink_order(g);total_shrink[o]=total_shrink[o]+shrink(g);
+if (subtype(p) >= a_leaders)
+  {@+g=leader_ptr(p);
+  if (width(g) > w) w=width(g);
+  }
+}
+
+@ When we get to the present part of the program, |x| is the natural height
+of the box being packaged.
+
+@<Determine the value of |height(r)| and the appropriate glue setting...@>=
+if (m==additional) h=x+h;
+height(r)=h;x=h-x; /*now |x| is the excess to be made up*/
+if (x==0)
+  {@+glue_sign(r)=normal;glue_order(r)=normal;
+  set_glue_ratio_zero(glue_set(r));
+  goto end;
+  }
+else if (x > 0) @<Determine vertical glue stretch setting, then |return| or
+\hbox{|goto common_ending|}@>@;
+else@<Determine vertical glue shrink setting, then |return| or \hbox{|goto
+common_ending|}@>@;
+
+@ @<Determine vertical glue stretch setting...@>=
+{@+@<Determine the stretch order@>;
+glue_order(r)=o;glue_sign(r)=stretching;
+if (total_stretch[o]!=0) glue_set(r)=fix(x/(double)total_stretch[o]);
+@^real division@>
+else{@+glue_sign(r)=normal;
+  set_glue_ratio_zero(glue_set(r)); /*there's nothing to stretch*/
+  }
+goto end;
+}
+
+
+@ @<Determine vertical glue shrink setting...@>=
+{@+@<Determine the shrink order@>;
+glue_order(r)=o;glue_sign(r)=shrinking;
+if (total_shrink[o]!=0) glue_set(r)=fix((-x)/(double)total_shrink[o]);
+@^real division@>
+else{@+glue_sign(r)=normal;
+  set_glue_ratio_zero(glue_set(r)); /*there's nothing to shrink*/
+  }
+if ((total_shrink[o] < -x)&&(o==normal)&&(list_ptr(r)!=null))
+  set_glue_ratio_one(glue_set(r)); /*use the maximum shrinkage*/
+goto end;
+}
+
+
+@ When a box is being appended to the current vertical list, the
+baselineskip calculation is handled by the |append_to_vlist| routine.
+
+@<Declare subprocedures for |line_break|@>=
+static pointer happend_to_vlist(pointer b);
+static void append_to_vlist(pointer @!b, uint32_t offset)
+{@+scaled d; /*deficiency of space between baselines*/
+pointer @!p; /*a new glue node*/
+if (prev_depth > ignore_depth)
+  {@+d=width(baseline_skip)-prev_depth-height(b);
+  if (d < line_skip_limit) p=new_glue(line_skip);
+  else{@+temp_ptr=new_spec(baseline_skip);
+       p=new_glue(temp_ptr);glue_ref_count(temp_ptr)=null;
+    width(temp_ptr)=d; /*|temp_ptr==glue_ptr(p)|*/
+    }
+   store_map(p, node_pos,offset);
+  link(tail)=p;tail=p;
+  }
+link(tail)=b;tail=b;prev_depth=depth(b);
+}
+
+@* Data structures for math mode.
+
+@* Subroutines for math mode.
+
+
+@d math_quad dimen_def[math_quad_no] /*\.{18mu}*/
+
+
+
+@* Alignment.
+
+@* Breaking paragraphs into lines.
+We come now to what is probably the most interesting algorithm of \TeX:
+the mechanism for choosing the ``best possible'' breakpoints that yield
+the individual lines of a paragraph. \TeX's line-breaking algorithm takes
+a given horizontal list and converts it to a sequence of boxes that are
+appended to the current vertical list. In the course of doing this, it
+creates a special data structure containing three kinds of records that are
+not used elsewhere in \TeX. Such nodes are created while a paragraph is
+being processed, and they are destroyed afterwards; thus, the other parts
+of \TeX\ do not need to know anything about how line-breaking is done.
+
+The method used here is based on an approach devised by Michael F. Plass and
+@^Plass, Michael Frederick@>
+@^Knuth, Donald Ervin@>
+the author in 1977, subsequently generalized and improved by the same two
+people in 1980. A detailed discussion appears in {\sl Software---Practice
+and Experience \bf11} (1981), 1119--1184, where it is shown that the
+line-breaking problem can be regarded as a special case of the problem of
+computing the shortest path in an acyclic network. The cited paper includes
+numerous examples and describes the history of line breaking as it has been
+practiced by printers through the ages. The present implementation adds two
+new ideas to the algorithm of 1980: Memory space requirements are considerably
+reduced by using smaller records for inactive nodes than for active ones,
+and arithmetic overflow is avoided by using ``delta distances'' instead of
+keeping track of the total distance from the beginning of the paragraph to the
+current point.
+
+@ The |line_break| procedure should be invoked only in horizontal mode; it
+leaves that mode and places its output into the current vlist of the
+enclosing vertical mode (or internal vertical mode).
+There is one explicit parameter:  |final_widow_penalty| is the amount of
+additional penalty to be inserted before the final line of the paragraph.
+
+There are also a number of implicit parameters: The hlist to be broken
+starts at |link(head)|, and it is nonempty. The value of |prev_graf| in the
+enclosing semantic level tells where the paragraph should begin in the
+sequence of line numbers, in case hanging indentation or \.{\\parshape}
+is in use; |prev_graf| is zero unless this paragraph is being continued
+after a displayed formula.  Other implicit parameters, such as the
+|par_shape_ptr| and various penalties to use for hyphenation, etc., appear
+in |eqtb|.
+
+After |line_break| has acted, it will have updated the current vlist and the
+value of |prev_graf|. Furthermore, the global variable |just_box| will
+point to the final box created by |line_break|, so that the width of this
+line can be ascertained when it is necessary to decide whether to use
+|above_display_skip| or |above_display_short_skip| before a displayed formula.
+
+@<Selected global variables@>=
+static pointer @!just_box; /*the |hlist_node| for the last line of the new paragraph*/
+static int @!just_color; /* the color at the end of a packed hbox */
+static int @!just_label; /* the label reference at the end of a packed hbox */
+
+@ Since |line_break| is a rather lengthy procedure---sort of a small world unto
+itself---we must build it up little by little, somewhat more cautiously
+than we have done with the simpler procedures of \TeX. Here is the
+general outline.
+
+@<\TeX\ functions@>=
+
+@<Declare subprocedures for |line_break|@>@;
+
+static void line_break(int final_widow_penalty, pointer par_ptr)
+{@+ scaled x=cur_list.hs_field; /* the |hsize| for this paragraph */
+@<Local variables for line breaking@>@;
+set_line_break_params(); just_color=-1; just_label=-1;
+@<Get ready to start line breaking@>;
+@<Find optimal breakpoints@>;
+@<Break the paragraph at the chosen breakpoints, justify the resulting lines
+to the correct widths, and append them to the current vertical list@>;
+@<Clean up the memory by removing the break nodes@>;
+hrestore_param_list();
+}
+
+@ The first task is to move the list from |head| to |temp_head| and go
+into the enclosing semantic level. We also append the \.{\\parfillskip}
+glue to the end of the paragraph, removing a space (or other glue node) if
+it was there, since spaces usually precede blank lines and instances of
+`\.{\$\$}'. The |par_fill_skip| is preceded by an infinite penalty, so
+it will never be considered as a potential breakpoint.
+
+This code assumes that a |glue_node| and a |penalty_node| occupy the
+same number of |mem|~words.
+@^data structure assumptions@>
+
+@<Get ready to start...@>=
+link(temp_head)=par_ptr;
+
+@ When looking for optimal line breaks, \TeX\ creates a ``break node'' for
+each break that is {\sl feasible}, in the sense that there is a way to end
+a line at the given place without requiring any line to stretch more than
+a given tolerance. A break node is characterized by three things: the position
+of the break (which is a pointer to a |glue_node|, |math_node|, |penalty_node|,
+or |disc_node|); the ordinal number of the line that will follow this
+breakpoint; and the fitness classification of the line that has just
+ended, i.e., |tight_fit|, |decent_fit|, |loose_fit|, or |very_loose_fit|.
+
+@d tight_fit 3 /*fitness classification for lines shrinking 0.5 to 1.0 of their
+  shrinkability*/
+@d loose_fit 1 /*fitness classification for lines stretching 0.5 to 1.0 of their
+  stretchability*/
+@d very_loose_fit 0 /*fitness classification for lines stretching more than
+  their stretchability*/
+@d decent_fit 2 /*fitness classification for all other lines*/
+
+@ The algorithm essentially determines the best possible way to achieve
+each feasible combination of position, line, and fitness. Thus, it answers
+questions like, ``What is the best way to break the opening part of the
+paragraph so that the fourth line is a tight line ending at such-and-such
+a place?'' However, the fact that all lines are to be the same length
+after a certain point makes it possible to regard all sufficiently large
+line numbers as equivalent, when the looseness parameter is zero, and this
+makes it possible for the algorithm to save space and time.
+
+An ``active node'' and a ``passive node'' are created in |mem| for each
+feasible breakpoint that needs to be considered. Active nodes are three
+words long and passive nodes are two words long. We need active nodes only
+for breakpoints near the place in the paragraph that is currently being
+examined, so they are recycled within a comparatively short time after
+they are created.
+
+@ An active node for a given breakpoint contains six fields:
+
+\yskip\hang|link| points to the next node in the list of active nodes; the
+last active node has |link==last_active|.
+
+\yskip\hang|break_node| points to the passive node associated with this
+breakpoint.
+
+\yskip\hang|line_number| is the number of the line that follows this
+breakpoint.
+
+\yskip\hang|fitness| is the fitness classification of the line ending at this
+breakpoint.
+
+\yskip\hang|type| is either |hyphenated| or |unhyphenated|, depending on
+whether this breakpoint is a |disc_node|.
+
+\yskip\hang|total_demerits| is the minimum possible sum of demerits over all
+lines leading from the beginning of the paragraph to this breakpoint.
+
+\yskip\noindent
+The value of |link(active)| points to the first active node on a linked list
+of all currently active nodes. This list is in order by |line_number|,
+except that nodes with |line_number > easy_line| may be in any order relative
+to each other.
+
+@d active_node_size 3 /*number of words in active nodes*/
+@d fitness(A) subtype(A) /*|very_loose_fit dotdot tight_fit| on final line for this break*/
+@d break_node(A) rlink(A) /*pointer to the corresponding passive node*/
+@d line_number(A) llink(A) /*line that begins at this breakpoint*/
+@d total_demerits(A) mem[A+2].i /*the quantity that \TeX\ minimizes*/
+@d unhyphenated 0 /*the |type| of a normal active break node*/
+@d hyphenated 1 /*the |type| of an active node that breaks at a |disc_node|*/
+@d last_active active /*the active list ends where it begins*/
+
+@ @<Initialize the special list heads...@>=
+type(last_active)=hyphenated;line_number(last_active)=max_halfword;
+subtype(last_active)=0; /*the |subtype| is never examined by the algorithm*/
+
+@ The passive node for a given breakpoint contains only four fields:
+
+\yskip\hang|link| points to the passive node created just before this one,
+if any, otherwise it is |null|.
+
+\yskip\hang|cur_break| points to the position of this breakpoint in the
+horizontal list for the paragraph being broken.
+
+\yskip\hang|prev_break| points to the passive node that should precede this
+one in an optimal path to this breakpoint.
+
+\yskip\hang|serial| is equal to |n| if this passive node is the |n|th
+one created during the current pass. (This field is used only when
+printing out detailed statistics about the line-breaking calculations.)
+
+\yskip\noindent
+There is a global variable called |passive| that points to the most
+recently created passive node. Another global variable, |printed_node|,
+is used to help print out the paragraph when detailed information about
+the line-breaking computation is being displayed.
+
+@d passive_node_size 2 /*number of words in passive nodes*/
+@d cur_break(A) rlink(A) /*in passive node, points to position of this breakpoint*/
+@d prev_break(A) llink(A) /*points to passive node that should precede this one*/
+@d serial(A) info(A) /*serial number for symbolic identification*/
+
+@<Selected global variables@>=
+static pointer @!passive; /*most recent node on passive list*/
+static pointer @!printed_node; /*most recent node that has been printed*/
+static halfword @!pass_number; /*the number of passive nodes allocated on this pass*/
+
+@ The active list also contains ``delta'' nodes that help the algorithm
+compute the badness of individual lines. Such nodes appear only between two
+active nodes, and they have |type==delta_node|. If |p| and |r| are active nodes
+and if |q| is a delta node between them, so that |link(p)==q| and |link(q)==r|,
+then |q| tells the space difference between lines in the horizontal list that
+start after breakpoint |p| and lines that start after breakpoint |r|. In
+other words, if we know the length of the line that starts after |p| and
+ends at our current position, then the corresponding length of the line that
+starts after |r| is obtained by adding the amounts in node~|q|. A delta node
+contains six scaled numbers, since it must record the net change in glue
+stretchability with respect to all orders of infinity. The natural width
+difference appears in |mem[q+1].sc|; the stretch differences in units of
+pt, fil, fill, and filll appear in |mem[q+2 dotdot q+5].sc|; and the shrink difference
+appears in |mem[q+6].sc|. The |subtype| field of a delta node is not used.
+
+@d delta_node_size 7 /*number of words in a delta node*/
+@d delta_node 2 /*|type| field in a delta node*/
+
+@ As the algorithm runs, it maintains a set of six delta-like registers
+for the length of the line following the first active breakpoint to the
+current position in the given hlist. When it makes a pass through the
+active list, it also maintains a similar set of six registers for the
+length following the active breakpoint of current interest. A third set
+holds the length of an empty line (namely, the sum of \.{\\leftskip} and
+\.{\\rightskip}); and a fourth set is used to create new delta nodes.
+
+When we pass a delta node we want to do operations like
+$$\hbox{\ignorespaces|for
+k=1 to 6 do cur_active_width[k]=cur_active_width[k]+mem[q+k].sc|};$$ and we
+want to do this without the overhead of |for| loops. The |do_all_six|
+macro makes such six-tuples convenient.
+
+@d do_all_six(A) A(1);A(2);A(3);A(4);A(5);A(6)
+
+@<Selected global variables@>=
+static scaled @!active_width0[6], *const @!active_width = @!active_width0-1;
+   /*distance from first active node to~|cur_p|*/
+static scaled @!cur_active_width0[6],
+  *const @!cur_active_width = @!cur_active_width0-1; /*distance from current active node*/
+static scaled @!background0[6], *const @!background = @!background0-1; /*length of an ``empty'' line*/
+static scaled @!break_width0[6], *const @!break_width = @!break_width0-1; /*length being computed after current break*/
+
+@ Let's state the principles of the delta nodes more precisely and concisely,
+so that the following programs will be less obscure. For each legal
+breakpoint~|p| in the paragraph, we define two quantities $\alpha(p)$ and
+$\beta(p)$ such that the length of material in a line from breakpoint~|p|
+to breakpoint~|q| is $\gamma+\beta(q)-\alpha(p)$, for some fixed $\gamma$.
+Intuitively, $\alpha(p)$ and $\beta(q)$ are the total length of material from
+the beginning of the paragraph to a point ``after'' a break at |p| and to a
+point ``before'' a break at |q|; and $\gamma$ is the width of an empty line,
+namely the length contributed by \.{\\leftskip} and \.{\\rightskip}.
+
+Suppose, for example, that the paragraph consists entirely of alternating
+boxes and glue skips; let the boxes have widths $x_1\ldots x_n$ and
+let the skips have widths $y_1\ldots y_n$, so that the paragraph can be
+represented by $x_1y_1\ldots x_ny_n$. Let $p_i$ be the legal breakpoint
+at $y_i$; then $\alpha(p_i)=x_1+y_1+\cdots+x_i+y_i$, and $\beta(p_i)=
+x_1+y_1+\cdots+x_i$. To check this, note that the length of material from
+$p_2$ to $p_5$, say, is $\gamma+x_3+y_3+x_4+y_4+x_5=\gamma+\beta(p_5)
+-\alpha(p_2)$.
+
+The quantities $\alpha$, $\beta$, $\gamma$ involve glue stretchability and
+shrinkability as well as a natural width. If we were to compute $\alpha(p)$
+and $\beta(p)$ for each |p|, we would need multiple precision arithmetic, and
+the multiprecise numbers would have to be kept in the active nodes.
+\TeX\ avoids this problem by working entirely with relative differences
+or ``deltas.'' Suppose, for example, that the active list contains
+$a_1\,\delta_1\,a_2\,\delta_2\,a_3$, where the |a|'s are active breakpoints
+and the $\delta$'s are delta nodes. Then $\delta_1=\alpha(a_1)-\alpha(a_2)$
+and $\delta_2=\alpha(a_2)-\alpha(a_3)$. If the line breaking algorithm is
+currently positioned at some other breakpoint |p|, the |active_width| array
+contains the value $\gamma+\beta(p)-\alpha(a_1)$. If we are scanning through
+the list of active nodes and considering a tentative line that runs from
+$a_2$ to~|p|, say, the |cur_active_width| array will contain the value
+$\gamma+\beta(p)-\alpha(a_2)$. Thus, when we move from $a_2$ to $a_3$,
+we want to add $\alpha(a_2)-\alpha(a_3)$ to |cur_active_width|; and this
+is just $\delta_2$, which appears in the active list between $a_2$ and
+$a_3$. The |background| array contains $\gamma$. The |break_width| array
+will be used to calculate values of new delta nodes when the active
+list is being updated.
+
+@ Glue nodes in a horizontal list that is being paragraphed are not supposed to
+include ``infinite'' shrinkability; that is why the algorithm maintains
+four registers for stretching but only one for shrinking. If the user tries to
+introduce infinite shrinkability, the shrinkability will be reset to finite
+and an error message will be issued. A boolean variable |no_shrink_error_yet|
+prevents this error message from appearing more than once per paragraph.
+
+@d check_shrinkage(A) if ((shrink_order(A)!=normal)&&(shrink(A)!=0))
+  {@+A=finite_shrink(A);
+  }
+
+@<Selected global variables@>=
+static bool @!no_shrink_error_yet; /*have we complained about infinite shrinkage?*/
+
+@ @<Declare subprocedures for |line_break|@>=
+static pointer finite_shrink(pointer @!p) /*recovers from infinite shrinkage*/
+{@+pointer q; /*new glue specification*/
+  QUIT("Infinite glue shrinkage found in a paragraph");
+q=new_spec(p);shrink_order(q)=normal;
+delete_glue_ref(p);return q;
+}
+
+@ @<Get ready to start...@>=
+no_shrink_error_yet=true;@/
+check_shrinkage(left_skip);check_shrinkage(right_skip);@/
+q=left_skip;r=right_skip;background[1]=width(q)+width(r);@/
+background[2]=0;background[3]=0;background[4]=0;background[5]=0;@/
+background[2+stretch_order(q)]=stretch(q);@/
+background[2+stretch_order(r)]=@|background[2+stretch_order(r)]+stretch(r);@/
+background[6]=shrink(q)+shrink(r);
+
+@ A pointer variable |cur_p| runs through the given horizontal list as we look
+for breakpoints. This variable is global, since it is used both by |line_break|
+and by its subprocedure |try_break|.
+
+Another global variable called |threshold| is used to determine the feasibility
+of individual lines: Breakpoints are feasible if there is a way to reach
+them without creating lines whose badness exceeds |threshold|.  (The
+badness is compared to |threshold| before penalties are added, so that
+penalty values do not affect the feasibility of breakpoints, except that
+no break is allowed when the penalty is 10000 or more.) If |threshold|
+is 10000 or more, all legal breaks are considered feasible, since the
+|badness| function specified above never returns a value greater than~10000.
+
+Up to three passes might be made through the paragraph in an attempt to find at
+least one set of feasible breakpoints. On the first pass, we have
+|threshold==pretolerance| and |second_pass==final_pass==false|.
+If this pass fails to find a
+feasible solution, |threshold| is set to |tolerance|, |second_pass| is set
+|true|, and an attempt is made to hyphenate as many words as possible.
+If that fails too, we add |emergency_stretch| to the background
+stretchability and set |final_pass==true|.
+
+@<Selected global variables@>=
+static pointer @!cur_p; /*the current breakpoint under consideration*/
+static bool @!second_pass; /*is this our second attempt to break this paragraph?*/
+static bool @!final_pass; /*is this our final attempt to break this paragraph?*/
+static int @!threshold; /*maximum badness on feasible lines*/
+
+@ The heart of the line-breaking procedure is `|try_break|', a subroutine
+that tests if the current breakpoint |cur_p| is feasible, by running
+through the active list to see what lines of text can be made from active
+nodes to~|cur_p|.  If feasible breaks are possible, new break nodes are
+created.  If |cur_p| is too far from an active node, that node is
+deactivated.
+
+The parameter |pi| to |try_break| is the penalty associated
+with a break at |cur_p|; we have |pi==eject_penalty| if the break is forced,
+and |pi==inf_penalty| if the break is illegal.
+
+The other parameter, |break_type|, is set to |hyphenated| or |unhyphenated|,
+depending on whether or not the current break is at a |disc_node|. The
+end of a paragraph is also regarded as `|hyphenated|'; this case is
+distinguishable by the condition |cur_p==null|.
+
+@d copy_to_cur_active(A) cur_active_width[A]=active_width[A]
+@<Declare subprocedures for |line_break|@>=
+static void try_break(int @!pi, small_number @!break_type)
+{@+
+pointer r; /*runs through the active list*/
+pointer @!prev_r; /*stays a step behind |r|*/
+halfword @!old_l; /*maximum line number in current equivalence class of lines*/
+bool @!no_break_yet; /*have we found a feasible break at |cur_p|?*/
+@<Other local variables for |try_break|@>@;
+@<Make sure that |pi| is in the proper range@>@;
+no_break_yet=true;prev_r=active;old_l=0;
+do_all_six(copy_to_cur_active);
+loop@+{@+resume: r=link(prev_r);
+  @<If node |r| is of type |delta_node|, update |cur_active_width|, set |prev_r|
+and |prev_prev_r|, then |goto continue|@>;
+  @<If a line number class has ended, create new active nodes for the best
+feasible breaks in that class; then |return| if |r=last_active|, otherwise
+compute the new |line_width|@>;
+  @<Consider the demerits for a line from |r| to |cur_p|; deactivate node
+|r| if it should no longer be active; then |goto continue| if a line from
+|r| to |cur_p| is infeasible, otherwise record a new feasible break@>;
+  }
+end: ;
+#ifdef @!STAT
+@<Update the value of |printed_node| for symbolic displays@>;
+#endif
+@;
+}
+
+@ @<Other local variables for |try_break|@>=
+pointer @!prev_prev_r=null; /*a step behind |prev_r|, if |type(prev_r)==delta_node|*/
+pointer @!s; /*runs through nodes ahead of |cur_p|*/
+pointer @!q; /*points to a new node being created*/
+pointer @!v; /*points to a glue specification or a node ahead of |cur_p|*/
+int @!t; /*node count, if |cur_p| is a discretionary node*/
+internal_font_number @!f; /*used in character width calculation*/
+halfword @!l; /*line number of current active node*/
+bool @!node_r_stays_active; /*should node |r| remain in the active list?*/
+scaled @!line_width=0; /*the current line will be justified to this width*/
+int @!fit_class; /*possible fitness class of test line*/
+halfword @!b; /*badness of test line*/
+int @!d; /*demerits of test line*/
+bool @!artificial_demerits; /*has |d| been forced to zero?*/
+#ifdef @!STAT
+pointer @!save_link; /*temporarily holds value of |link(cur_p)|*/
+#endif
+scaled @!shortfall; /*used in badness calculations*/
+
+@ @<Make sure that |pi| is in the proper range@>=
+if (abs(pi) >= inf_penalty)
+{ if (pi > 0) goto end; /*this breakpoint is inhibited by infinite penalty*/
+  else pi=eject_penalty; /*this breakpoint will be forced*/
+}
+
+@ The following code uses the fact that |type(last_active)!=delta_node|.
+
+@d update_width(A) @|
+  cur_active_width[A]=cur_active_width[A]+mem[r+A].sc
+
+@<If node |r|...@>=
+@^inner loop@>
+if (type(r)==delta_node)
+  {@+do_all_six(update_width);
+  prev_prev_r=prev_r;prev_r=r;goto resume;
+  }
+
+@ As we consider various ways to end a line at |cur_p|, in a given line number
+class, we keep track of the best total demerits known, in an array with
+one entry for each of the fitness classifications. For example,
+|minimal_demerits[tight_fit]| contains the fewest total demerits of feasible
+line breaks ending at |cur_p| with a |tight_fit| line; |best_place[tight_fit]|
+points to the passive node for the break before~|cur_p| that achieves such
+an optimum; and |best_pl_line[tight_fit]| is the |line_number| field in the
+active node corresponding to |best_place[tight_fit]|. When no feasible break
+sequence is known, the |minimal_demerits| entries will be equal to
+|awful_bad|, which is $2^{30}-1$. Another variable, |minimum_demerits|,
+keeps track of the smallest value in the |minimal_demerits| array.
+
+@d awful_bad 07777777777 /*more than a billion demerits*/
+
+@<Selected global variables@>=
+static int @!minimal_demerits0[tight_fit-very_loose_fit+1],
+  *const @!minimal_demerits = @!minimal_demerits0-very_loose_fit; /*best total
+  demerits known for current line class and position, given the fitness*/
+static int @!minimum_demerits; /*best total demerits known for current line class
+  and position*/
+static pointer @!best_place0[tight_fit-very_loose_fit+1],
+  *const @!best_place = @!best_place0-very_loose_fit; /*how to achieve
+  |minimal_demerits|*/
+static halfword @!best_pl_line0[tight_fit-very_loose_fit+1],
+  *const @!best_pl_line = @!best_pl_line0-very_loose_fit; /*corresponding
+  line number*/
+
+@ @<Get ready to start...@>=
+minimum_demerits=awful_bad;
+minimal_demerits[tight_fit]=awful_bad;
+minimal_demerits[decent_fit]=awful_bad;
+minimal_demerits[loose_fit]=awful_bad;
+minimal_demerits[very_loose_fit]=awful_bad;
+
+@ The first part of the following code is part of \TeX's inner loop, so
+we don't want to waste any time. The current active node, namely node |r|,
+contains the line number that will be considered next. At the end of the
+list we have arranged the data structure so that |r==last_active| and
+|line_number(last_active) > old_l|.
+@^inner loop@>
+
+@<If a line number class...@>=
+{@+l=line_number(r);
+if (l > old_l)
+  {@+ /*now we are no longer in the inner loop*/
+  if ((minimum_demerits < awful_bad)&&@|
+      ((old_l!=easy_line)||(r==last_active)))
+    @<Create new active nodes for the best feasible breaks just found@>;
+  if (r==last_active) goto end;
+  @<Compute the new line width@>;
+  }
+}
+
+@ It is not necessary to create new active nodes having |minimal_demerits|
+greater than
+|minimum_demerits+abs(adj_demerits)|, since such active nodes will never
+be chosen in the final paragraph breaks. This observation allows us to
+omit a substantial number of feasible breakpoints from further consideration.
+
+@<Create new active nodes...@>=
+{@+if (no_break_yet) @<Compute the values of |break_width|@>;
+@<Insert a delta node to prepare for breaks at |cur_p|@>;
+if (abs(adj_demerits) >= awful_bad-minimum_demerits)
+  minimum_demerits=awful_bad-1;
+else minimum_demerits=minimum_demerits+abs(adj_demerits);
+for (fit_class=very_loose_fit; fit_class<=tight_fit; fit_class++)
+  {@+if (minimal_demerits[fit_class] <= minimum_demerits)
+    @<Insert a new active node from |best_place[fit_class]| to |cur_p|@>;
+  minimal_demerits[fit_class]=awful_bad;
+  }
+minimum_demerits=awful_bad;
+@<Insert a delta node to prepare for the next active node@>;
+}
+
+@ When we insert a new active node for a break at |cur_p|, suppose this
+new node is to be placed just before active node |a|; then we essentially
+want to insert `$\delta\,|cur_p|\,\delta^\prime$' before |a|, where
+$\delta=\alpha(a)-\alpha(|cur_p|)$ and $\delta^\prime=\alpha(|cur_p|)-\alpha(a)$
+in the notation explained above.  The |cur_active_width| array now holds
+$\gamma+\beta(|cur_p|)-\alpha(a)$; so $\delta$ can be obtained by
+subtracting |cur_active_width| from the quantity $\gamma+\beta(|cur_p|)-
+\alpha(|cur_p|)$. The latter quantity can be regarded as the length of a
+line ``from |cur_p| to |cur_p|''; we call it the |break_width| at |cur_p|.
+
+The |break_width| is usually negative, since it consists of the background
+(which is normally zero) minus the width of nodes following~|cur_p| that are
+eliminated after a break. If, for example, node |cur_p| is a glue node, the
+width of this glue is subtracted from the background; and we also look
+ahead to eliminate all subsequent glue and penalty and kern and math
+nodes, subtracting their widths as well.
+
+Kern nodes do not disappear at a line break unless they are |explicit|.
+
+@d set_break_width_to_background(A) break_width[A]=background[A]
+
+@<Compute the values of |break...@>=
+{@+no_break_yet=false;do_all_six(set_break_width_to_background);
+s=cur_p;
+if (break_type > unhyphenated) if (cur_p!=null)
+  @<Compute the discretionary |break_width| values@>;
+while (s!=null)
+  {@+if (is_char_node(s)) goto done;
+  switch (type(s)) {
+  case glue_node: @<Subtract glue from |break_width|@>@;@+break;
+  case penalty_node: do_nothing;@+break;
+  case math_node: break_width[1]=break_width[1]-width(s);@+break;
+  case kern_node: if (subtype(s)!=explicit) goto done;
+    else break_width[1]=break_width[1]-width(s);@+break;
+  default:goto done;
+  } @/
+  s=link(s);
+  }
+done: ;}
+
+@ @<Subtract glue from |break...@>=
+{@+v=glue_ptr(s);break_width[1]=break_width[1]-width(v);
+break_width[2+stretch_order(v)]=break_width[2+stretch_order(v)]-stretch(v);
+break_width[6]=break_width[6]-shrink(v);
+}
+
+@ When |cur_p| is a discretionary break, the length of a line ``from |cur_p| to
+|cur_p|'' has to be defined properly so that the other calculations work out.
+Suppose that the pre-break text at |cur_p| has length $l_0$, the post-break
+text has length $l_1$, and the replacement text has length |l|. Suppose
+also that |q| is the node following the replacement text. Then length of a
+line from |cur_p| to |q| will be computed as $\gamma+\beta(q)-\alpha(|cur_p|)$,
+where $\beta(q)=\beta(|cur_p|)-l_0+l$. The actual length will be the background
+plus $l_1$, so the length from |cur_p| to |cur_p| should be $\gamma+l_0+l_1-l$.
+If the post-break text of the discretionary is empty, a break may also
+discard~|q|; in that unusual case we subtract the length of~|q| and any
+other nodes that will be discarded after the discretionary break.
+
+The value of $l_0$ need not be computed, since |line_break| will put
+it into the global variable |disc_width| before calling |try_break|.
+
+@<Selected global variables@>=
+static scaled @!disc_width; /*the length of discretionary material preceding a break*/
+
+@ @<Compute the discretionary |break...@>=
+{@+t=replace_count(cur_p);v=cur_p;s=post_break(cur_p);
+while (t > 0)
+  {@+decr(t);v=link(v);
+  @<Subtract the width of node |v| from |break_width|@>;
+  }
+while (s!=null)
+  {@+@<Add the width of node |s| to |break_width|@>;
+  s=link(s);
+  }
+break_width[1]=break_width[1]+disc_width;
+if (post_break(cur_p)==null) s=link(v);
+           /*nodes may be discardable after the break*/
+}
+
+@ Replacement texts and discretionary texts are supposed to contain
+only character nodes, kern nodes, ligature nodes, and box or rule nodes.
+
+@<Subtract the width of node |v|...@>=
+if (is_char_node(v))
+  {@+f=font(v);
+  break_width[1]=break_width[1]-char_width(f, character(v));
+  }
+else switch (type(v)) {
+  case ligature_node: {@+f=font(lig_char(v));@/
+    break_width[1]=@|break_width[1]-
+      char_width(f, character(lig_char(v)));
+    } @+break;
+  case hlist_node: case vlist_node: case rule_node:
+  case kern_node:
+    break_width[1]=break_width[1]-width(v);@+break;
+  default:confusion("disc1");
+@:this can't happen disc1}{\quad disc1@>
+  }
+
+@ @<Add the width of node |s| to |b...@>=
+if (is_char_node(s))
+  {@+f=font(s);
+  break_width[1]=@|break_width[1]+char_width(f, character(s));
+  }
+else switch (type(s)) {
+  case ligature_node: {@+f=font(lig_char(s));
+    break_width[1]=break_width[1]+
+      char_width(f, character(lig_char(s)));
+    } @+break;
+  case hlist_node: case vlist_node: case rule_node:
+  case kern_node:
+    break_width[1]=break_width[1]+width(s);@+break;
+  default:confusion("disc2");
+@:this can't happen disc2}{\quad disc2@>
+  }
+
+@ We use the fact that |type(active)!=delta_node|.
+
+@d convert_to_break_width(A) @|
+  mem[prev_r+A].sc=@|@t\hskip10pt@>mem[prev_r+A].sc
+  -cur_active_width[A]+break_width[A]
+@d store_break_width(A) active_width[A]=break_width[A]
+@d new_delta_to_break_width(A) @|
+  mem[q+A].sc=break_width[A]-cur_active_width[A]
+
+@<Insert a delta node to prepare for breaks at |cur_p|@>=
+if (type(prev_r)==delta_node)  /*modify an existing delta node*/
+  {@+do_all_six(convert_to_break_width);
+  }
+else if (prev_r==active)  /*no delta node needed at the beginning*/
+  {@+do_all_six(store_break_width);
+  }
+else{@+q=get_node(delta_node_size);link(q)=r;type(q)=delta_node;@/
+  subtype(q)=0; /*the |subtype| is not used*/
+  do_all_six(new_delta_to_break_width);
+  link(prev_r)=q;prev_prev_r=prev_r;prev_r=q;
+  }
+
+@ When the following code is performed, we will have just inserted at
+least one active node before |r|, so |type(prev_r)!=delta_node|.
+
+@d new_delta_from_break_width(A) @|mem[q+A].sc=
+    cur_active_width[A]-break_width[A]
+
+@<Insert a delta node to prepare for the next active node@>=
+if (r!=last_active)
+  {@+q=get_node(delta_node_size);link(q)=r;type(q)=delta_node;@/
+  subtype(q)=0; /*the |subtype| is not used*/
+  do_all_six(new_delta_from_break_width);
+  link(prev_r)=q;prev_prev_r=prev_r;prev_r=q;
+  }
+
+@ When we create an active node, we also create the corresponding
+passive node.
+
+@<Insert a new active node from |best_place[fit_class]| to |cur_p|@>=
+{@+q=get_node(passive_node_size);
+link(q)=passive;passive=q;cur_break(q)=cur_p;
+#ifdef @!STAT
+incr(pass_number);serial(q)=pass_number;
+#endif
+@;@/
+prev_break(q)=best_place[fit_class];@/
+q=get_node(active_node_size);break_node(q)=passive;
+line_number(q)=best_pl_line[fit_class]+1;
+fitness(q)=fit_class;type(q)=break_type;
+total_demerits(q)=minimal_demerits[fit_class];
+link(q)=r;link(prev_r)=q;prev_r=q;
+#ifdef @!STAT
+if (tracing_paragraphs > 0)
+  @<Print a symbolic description of the new break node@>;
+#endif
+@;@/
+}
+
+@ @<Print a symbolic description of the new break node@>=
+{@+print_nl("@@@@");print_int(serial(passive));
+@.\AT\AT@>
+print(": line ");print_int(line_number(q)-1);
+print_char('.');print_int(fit_class);
+if (break_type==hyphenated) print_char('-');
+print(" t=");print_int(total_demerits(q));
+print(" -> @@@@");
+if (prev_break(passive)==null) print_char('0');
+else print_int(serial(prev_break(passive)));
+}
+
+@ The length of lines depends on whether the user has specified
+\.{\\parshape} or \.{\\hangindent}. If |par_shape_ptr| is not null, it
+points to a $(2n+1)$-word record in |mem|, where the |info| in the first
+word contains the value of |n|, and the other $2n$ words contain the left
+margins and line lengths for the first |n| lines of the paragraph; the
+specifications for line |n| apply to all subsequent lines. If
+|par_shape_ptr==null|, the shape of the paragraph depends on the value of
+|n==hang_after|; if |n >= 0|, hanging indentation takes place on lines |n+1|,
+|n+2|, \dots, otherwise it takes place on lines 1, \dots, $\vert
+n\vert$. When hanging indentation is active, the left margin is
+|hang_indent|, if |hang_indent >= 0|, else it is 0; the line length is
+$|hsize|-\vert|hang_indent|\vert$. The normal setting is
+|par_shape_ptr==null|, |hang_after==1|, and |hang_indent==0|.
+Note that if |hang_indent==0|, the value of |hang_after| is irrelevant.
+@^length of lines@> @^hanging indentation@>
+
+@<Selected global variables@>=
+static halfword @!easy_line; /*line numbers | > easy_line| are equivalent in break nodes*/
+static halfword @!last_special_line; /*line numbers | > last_special_line| all have
+  the same width*/
+static scaled @!first_width; /*the width of all lines | <= last_special_line|, if
+  no \.{\\parshape} has been specified*/
+static scaled @!second_width; /*the width of all lines | > last_special_line|*/
+static scaled @!first_indent; /*left margin to go with |first_width|*/
+static scaled @!second_indent; /*left margin to go with |second_width|*/
+
+@ We compute the values of |easy_line| and the other local variables relating
+to line length when the |line_break| procedure is initializing itself.
+
+@<Get ready to start...@>=
+if (par_shape_ptr==null)
+  if (hang_indent==0)
+    {@+last_special_line=0;second_width=x;
+    second_indent=0;
+    }
+  else@<Set line length parameters in preparation for hanging indentation@>@;
+else QUIT("parshape not yet implemented");
+if (looseness==0) easy_line=last_special_line;
+else easy_line=max_halfword
+
+@ @<Set line length parameters in preparation for hanging indentation@>=
+{@+last_special_line=abs(hang_after);
+if (hang_after < 0)
+  {@+first_width=x-abs(hang_indent);
+  if (hang_indent >= 0) first_indent=hang_indent;
+  else first_indent=0;
+  second_width=x;second_indent=0;
+  }
+else{@+first_width=x;first_indent=0;
+  second_width=x-abs(hang_indent);
+  if (hang_indent >= 0) second_indent=hang_indent;
+  else second_indent=0;
+  }
+}
+
+@ When we come to the following code, we have just encountered the first
+active node~|r| whose |line_number| field contains |l|. Thus we want to
+compute the length of the $l\mskip1mu$th line of the current paragraph. Furthermore,
+we want to set |old_l| to the last number in the class of line numbers
+equivalent to~|l|.
+
+@<Compute the new line width@>=
+if (l > easy_line)
+  {@+line_width=second_width;old_l=max_halfword-1;
+  }
+else{@+old_l=l;
+  if (l > last_special_line) line_width=second_width;
+  else if (par_shape_ptr==null) line_width=first_width;
+  else line_width=mem[par_shape_ptr+2*l@,].sc;
+  }
+
+@ The remaining part of |try_break| deals with the calculation of
+demerits for a break from |r| to |cur_p|.
+
+The first thing to do is calculate the badness, |b|. This value will always
+be between zero and |inf_bad+1|; the latter value occurs only in the
+case of lines from |r| to |cur_p| that cannot shrink enough to fit the necessary
+width. In such cases, node |r| will be deactivated.
+We also deactivate node~|r| when a break at~|cur_p| is forced, since future
+breaks must go through a forced break.
+
+@<Consider the demerits for a line from |r| to |cur_p|...@>=
+{@+artificial_demerits=false;@/
+@^inner loop@>
+shortfall=line_width-cur_active_width[1]; /*we're this much too short*/
+if (shortfall > 0)
+  @<Set the value of |b| to the badness for stretching the line, and compute
+the corresponding |fit_class|@>@;
+else@<Set the value of |b| to the badness for shrinking the line, and compute
+the corresponding |fit_class|@>;
+if ((b > inf_bad)||(pi==eject_penalty))
+  @<Prepare to deactivate node~|r|, and |goto deactivate| unless there is
+a reason to consider lines of text from |r| to |cur_p|@>@;
+else{@+prev_r=r;
+  if (b > threshold) goto resume;
+  node_r_stays_active=true;
+  }
+@<Record a new feasible break@>;
+if (node_r_stays_active) goto resume; /*|prev_r| has been set to |r|*/
+deactivate: @<Deactivate node |r|@>;
+}
+
+@ When a line must stretch, the available stretchability can be found in the
+subarray |cur_active_width[2 dotdot 5]|, in units of points, fil, fill, and filll.
+
+The present section is part of \TeX's inner loop, and it is most often performed
+when the badness is infinite; therefore it is worth while to make a quick
+test for large width excess and small stretchability, before calling the
+|badness| subroutine.
+@^inner loop@>
+
+@<Set the value of |b| to the badness for stretching...@>=
+if ((cur_active_width[3]!=0)||(cur_active_width[4]!=0)||@|
+  (cur_active_width[5]!=0))
+  {@+b=0;fit_class=decent_fit; /*infinite stretch*/
+  }
+else{@+if (shortfall > 7230584) if (cur_active_width[2] < 1663497)
+    {@+b=inf_bad;fit_class=very_loose_fit;goto done1;
+    }
+  b=badness(shortfall, cur_active_width[2]);
+  if (b > 12)
+    if (b > 99) fit_class=very_loose_fit;
+    else fit_class=loose_fit;
+  else fit_class=decent_fit;
+  done1: ;
+  }
+
+@ Shrinkability is never infinite in a paragraph;
+we can shrink the line from |r| to |cur_p| by at most |cur_active_width[6]|.
+
+@<Set the value of |b| to the badness for shrinking...@>=
+{@+if (-shortfall > cur_active_width[6]) b=inf_bad+1;
+else b=badness(-shortfall, cur_active_width[6]);
+if (b > 12) fit_class=tight_fit;@+else fit_class=decent_fit;
+}
+
+@ During the final pass, we dare not lose all active nodes, lest we lose
+touch with the line breaks already found. The code shown here makes sure
+that such a catastrophe does not happen, by permitting overfull boxes as
+a last resort. This particular part of \TeX\ was a source of several subtle
+bugs before the correct program logic was finally discovered; readers
+who seek to ``improve'' \TeX\ should therefore think thrice before daring
+to make any changes here.
+@^overfull boxes@>
+
+@<Prepare to deactivate node~|r|, and |goto deactivate| unless...@>=
+{@+if (final_pass&&(minimum_demerits==awful_bad)&&@|
+   (link(r)==last_active)&&
+   (prev_r==active))
+  artificial_demerits=true; /*set demerits zero, this break is forced*/
+else if (b > threshold) goto deactivate;
+node_r_stays_active=false;
+}
+
+@ When we get to this part of the code, the line from |r| to |cur_p| is
+feasible, its badness is~|b|, and its fitness classification is |fit_class|.
+We don't want to make an active node for this break yet, but we will
+compute the total demerits and record them in the |minimal_demerits| array,
+if such a break is the current champion among all ways to get to |cur_p|
+in a given line-number class and fitness class.
+
+@<Record a new feasible break@>=
+if (artificial_demerits) d=0;
+else@<Compute the demerits, |d|, from |r| to |cur_p|@>;
+#ifdef @!STAT
+if (tracing_paragraphs > 0)
+  @<Print a symbolic description of this feasible break@>;
+#endif
+@;@/
+d=d+total_demerits(r); /*this is the minimum total demerits
+  from the beginning to |cur_p| via |r|*/
+if (d <= minimal_demerits[fit_class])
+  {@+minimal_demerits[fit_class]=d;
+  best_place[fit_class]=break_node(r);best_pl_line[fit_class]=l;
+  if (d < minimum_demerits) minimum_demerits=d;
+  }
+
+@ @<Print a symbolic description of this feasible break@>=
+{@+if (printed_node!=cur_p)
+  @<Print the list between |printed_node| and |cur_p|, then set |printed_node:=cur_p|@>;
+print_nl("@@");
+@.\AT@>
+if (cur_p==null) print_esc("par");
+else if (type(cur_p)!=glue_node)
+  {@+if (type(cur_p)==penalty_node) print_esc("penalty");
+  else if (type(cur_p)==disc_node) print_esc("discretionary");
+  else if (type(cur_p)==kern_node) print_esc("kern");
+  else print_esc("math");
+  }
+print(" via @@@@");
+if (break_node(r)==null) print_char('0');
+else print_int(serial(break_node(r)));
+print(" b=");
+if (b > inf_bad) print_char('*');@+else print_int(b);
+@.*\relax@>
+print(" p=");print_int(pi);print(" d=");
+if (artificial_demerits) print_char('*');@+else print_int(d);
+}
+
+@ @<Print the list between |printed_node| and |cur_p|...@>=
+{@+print_nl("");
+if (cur_p==null) short_display(link(printed_node));
+else{@+save_link=link(cur_p);
+  link(cur_p)=null;print_nl("");short_display(link(printed_node));
+  link(cur_p)=save_link;
+  }
+printed_node=cur_p;
+}
+
+@ When the data for a discretionary break is being displayed, we will have
+printed the |pre_break| and |post_break| lists; we want to skip over the
+third list, so that the discretionary data will not appear twice.  The
+following code is performed at the very end of |try_break|.
+
+@<Update the value of |printed_node|...@>=
+if (cur_p==printed_node) if (cur_p!=null) if (type(cur_p)==disc_node)
+  {@+t=replace_count(cur_p);
+  while (t > 0)
+    {@+decr(t);printed_node=link(printed_node);
+    }
+  }
+
+@ @<Compute the demerits, |d|, from |r| to |cur_p|@>=
+{@+d=line_penalty+b;
+if (abs(d) >= 10000) d=100000000;@+else d=d*d;
+if (pi!=0)
+{ if (pi > 0) d=d+pi*pi;
+  else if (pi > eject_penalty) d=d-pi*pi; }
+if ((break_type==hyphenated)&&(type(r)==hyphenated))
+{ if (cur_p!=null) d=d+double_hyphen_demerits;
+  else d=d+final_hyphen_demerits; }
+if (abs(fit_class-fitness(r)) > 1) d=d+adj_demerits;
+}
+
+@ When an active node disappears, we must delete an adjacent delta node if the
+active node was at the beginning or the end of the active list, or if it
+was surrounded by delta nodes. We also must preserve the property that
+|cur_active_width| represents the length of material from |link(prev_r)|
+to~|cur_p|.
+
+@d combine_two_deltas(A) @|mem[prev_r+A].sc=mem[prev_r+A].sc+mem[r+A].sc
+@d downdate_width(A) @|cur_active_width[A]=cur_active_width[A]-
+  mem[prev_r+A].sc
+
+@<Deactivate node |r|@>=
+link(prev_r)=link(r);free_node(r, active_node_size);
+if (prev_r==active) @<Update the active widths, since the first active node
+has been deleted@>@;
+else if (type(prev_r)==delta_node)
+  {@+r=link(prev_r);
+  if (r==last_active)
+    {@+do_all_six(downdate_width);
+    link(prev_prev_r)=last_active;
+    free_node(prev_r, delta_node_size);prev_r=prev_prev_r;
+    }
+  else if (type(r)==delta_node)
+    {@+do_all_six(update_width);
+    do_all_six(combine_two_deltas);
+    link(prev_r)=link(r);free_node(r, delta_node_size);
+    }
+  }
+
+@ The following code uses the fact that |type(last_active)!=delta_node|. If the
+active list has just become empty, we do not need to update the
+|active_width| array, since it will be initialized when an active
+node is next inserted.
+
+@d update_active(A) active_width[A]=active_width[A]+mem[r+A].sc
+
+@<Update the active widths,...@>=
+{@+r=link(active);
+if (type(r)==delta_node)
+  {@+do_all_six(update_active);
+  do_all_six(copy_to_cur_active);
+  link(active)=link(r);free_node(r, delta_node_size);
+  }
+}
+
+@* Breaking paragraphs into lines, continued.
+So far we have gotten a little way into the |line_break| routine, having
+covered its important |try_break| subroutine. Now let's consider the
+rest of the process.
+
+The main loop of |line_break| traverses the given hlist,
+starting at |link(temp_head)|, and calls |try_break| at each legal
+breakpoint. A variable called |auto_breaking| is set to true except
+within math formulas, since glue nodes are not legal breakpoints when
+they appear in formulas.
+
+The current node of interest in the hlist is pointed to by |cur_p|. Another
+variable, |prev_p|, is usually one step behind |cur_p|, but the real
+meaning of |prev_p| is this: If |type(cur_p)==glue_node| then |cur_p| is a legal
+breakpoint if and only if |auto_breaking| is true and |prev_p| does not
+point to a glue node, penalty node, explicit kern node, or math node.
+
+The following declarations provide for a few other local variables that are
+used in special calculations.
+
+@<Local variables for line breaking@>=
+bool @!auto_breaking; /*is node |cur_p| outside a formula?*/
+pointer @!prev_p; /*helps to determine when glue nodes are breakpoints*/
+pointer @!q, @!r, @!s; /*miscellaneous nodes of temporary interest*/
+internal_font_number @!f; /*used when calculating character widths*/
+
+@ The `\ignorespaces|loop|\unskip' in the following code is performed at most
+thrice per call of |line_break|, since it is actually a pass over the
+entire paragraph.
+
+@<Find optimal breakpoints@>=
+threshold=pretolerance;
+if (threshold >= 0)
+  {
+#ifdef @!STAT
+if (tracing_paragraphs > 0)
+    {@+print_nl("@@firstpass");@+} @;
+#endif
+@;@/
+  second_pass=false;final_pass=false;
+  }
+else{@+threshold=tolerance;second_pass=true;
+  final_pass=(emergency_stretch <= 0);
+#ifdef @!STAT
+#endif
+@;
+  }
+loop@+{@+if (threshold > inf_bad) threshold=inf_bad;
+  @<Create an active breakpoint representing the beginning of the paragraph@>;
+  cur_p=link(temp_head);auto_breaking=true;@/
+  prev_p=cur_p; /*glue at beginning is not a legal breakpoint*/
+  while ((cur_p!=null)&&(link(active)!=last_active))
+    @<Call |try_break| if |cur_p| is a legal breakpoint; on the second pass,
+also try to hyphenate the next word, if |cur_p| is a glue node; then advance
+|cur_p| to the next node of the paragraph that could possibly be a legal breakpoint@>;
+  if (cur_p==null)
+    @<Try the final line break at the end of the paragraph, and |goto done|
+if the desired breakpoints have been found@>;
+  @<Clean up the memory by removing the break nodes@>;
+  if (!second_pass)
+    {
+#ifdef @!STAT
+if (tracing_paragraphs > 0) print_nl("@@secondpass");@;
+#endif
+    threshold=tolerance;second_pass=true;final_pass=(emergency_stretch <= 0);
+    }  /*if at first you don't succeed, \dots*/
+  else{
+#ifdef @!STAT
+if (tracing_paragraphs > 0)
+      print_nl("@@emergencypass");@;
+#endif
+    background[2]=background[2]+emergency_stretch;final_pass=true;
+    }
+  }
+done:
+#ifdef @!STAT
+#endif
+
+@ The active node that represents the starting point does not need a
+corresponding passive node.
+
+@d store_background(A) active_width[A]=background[A]
+
+@<Create an active breakpoint representing the beginning of the paragraph@>=
+q=get_node(active_node_size);
+type(q)=unhyphenated;fitness(q)=decent_fit;
+link(q)=last_active;break_node(q)=null;
+line_number(q)=prev_graf+1;total_demerits(q)=0;link(active)=q;
+do_all_six(store_background);@/
+passive=null;printed_node=temp_head;pass_number=0;
+
+@ @<Clean...@>=
+q=link(active);
+while (q!=last_active)
+  {@+cur_p=link(q);
+  if (type(q)==delta_node) free_node(q, delta_node_size);
+  else free_node(q, active_node_size);
+  q=cur_p;
+  }
+q=passive;
+while (q!=null)
+  {@+cur_p=link(q);
+  free_node(q, passive_node_size);
+  q=cur_p;
+  }
+
+@ Here is the main switch in the |line_break| routine, where legal breaks
+are determined. As we move through the hlist, we need to keep the |active_width|
+array up to date, so that the badness of individual lines is readily calculated
+by |try_break|. It is convenient to use the short name |act_width| for
+the component of active width that represents real width as opposed to glue.
+
+@d act_width active_width[1] /*length from first active node to current node*/
+@d kern_break {@+if (!is_char_node(link(cur_p))&&auto_breaking)
+    if (type(link(cur_p))==glue_node) try_break(0, unhyphenated);
+  act_width=act_width+width(cur_p);
+  }
+
+@<Call |try_break| if |cur_p| is a legal breakpoint...@>=
+{@+if (is_char_node(cur_p))
+  @<Advance \(c)|cur_p| to the node following the present string of characters@>;
+switch (type(cur_p)) {
+case hlist_node: case vlist_node: case rule_node: act_width=act_width+width(cur_p);@+break;
+case whatsit_node: @<Advance \(p)past a whatsit node in the \(l)|line_break|
+loop@>@;@+break;
+case glue_node: {@+@<If node |cur_p| is a legal breakpoint, call |try_break|;
+then update the active widths by including the glue in |glue_ptr(cur_p)|@>;
+  } @+break;
+case kern_node: if (subtype(cur_p)==explicit) kern_break@;
+  else act_width=act_width+width(cur_p);@+break;
+case ligature_node: {@+f=font(lig_char(cur_p));
+  act_width=act_width+char_width(f, character(lig_char(cur_p)));
+  } @+break;
+case disc_node: @<Try to break after a discretionary fragment, then |goto
+done5|@>@;
+case math_node: {@+auto_breaking=(subtype(cur_p)==after);kern_break;
+  } @+break;
+case penalty_node: try_break(penalty(cur_p), unhyphenated);@+break;
+case mark_node: case ins_node: case adjust_node: do_nothing;@+break;
+default:confusion("paragraph");
+@:this can't happen paragraph}{\quad paragraph@>
+} @/
+prev_p=cur_p;cur_p=link(cur_p);
+done5: ;}
+
+@ The code that passes over the characters of words in a paragraph is
+part of \TeX's inner loop, so it has been streamlined for speed. We use
+the fact that `\.{\\parfillskip}' glue appears at the end of each paragraph;
+it is therefore unnecessary to check if |link(cur_p)==null| when |cur_p| is a
+character node.
+@^inner loop@>
+
+@<Advance \(c)|cur_p| to the node following the present string...@>=
+{@+prev_p=cur_p;
+@/do@+{f=font(cur_p);
+act_width=act_width+char_width(f, character(cur_p));
+cur_p=link(cur_p);
+}@+ while (!(!is_char_node(cur_p)));
+}
+
+@ When node |cur_p| is a glue node, we look at |prev_p| to see whether or not
+a breakpoint is legal at |cur_p|, as explained above.
+
+@<If node |cur_p| is a legal breakpoint, call...@>=
+if (auto_breaking)
+  {@+if (is_char_node(prev_p)) try_break(0, unhyphenated);
+  else if (precedes_break(prev_p)) try_break(0, unhyphenated);
+  else if ((type(prev_p)==kern_node)&&(subtype(prev_p)!=explicit))
+    try_break(0, unhyphenated);
+  }
+check_shrinkage(glue_ptr(cur_p));q=glue_ptr(cur_p);
+act_width=act_width+width(q);@|
+active_width[2+stretch_order(q)]=@|
+  active_width[2+stretch_order(q)]+stretch(q);@/
+active_width[6]=active_width[6]+shrink(q)
+
+@ The following code knows that discretionary texts contain
+only character nodes, kern nodes, box nodes, rule nodes, and ligature nodes.
+
+@<Try to break after a discretionary fragment...@>=
+{@+if (!is_auto_disc(cur_p) || second_pass || final_pass)
+  {@+s=pre_break(cur_p);disc_width=0;
+if (s==null) try_break(ex_hyphen_penalty, hyphenated);
+else{@+@/do@+{@<Add the width of node |s| to |disc_width|@>;
+    s=link(s);
+  }@+ while (!(s==null));
+  act_width=act_width+disc_width;
+  try_break(hyphen_penalty, hyphenated);
+  act_width=act_width-disc_width;
+  }
+}
+r=replace_count(cur_p);s=link(cur_p);
+while (r > 0)
+  {@+@<Add the width of node |s| to |act_width|@>;
+  decr(r);s=link(s);
+  }
+prev_p=cur_p;cur_p=s;goto done5;
+}
+
+@ @<Add the width of node |s| to |disc_width|@>=
+if (is_char_node(s))
+  {@+f=font(s);
+  disc_width=disc_width+char_width(f, character(s));
+  }
+else switch (type(s)) {
+  case ligature_node: {@+f=font(lig_char(s));
+    disc_width=disc_width+
+      char_width(f, character(lig_char(s)));
+    } @+break;
+  case hlist_node: case vlist_node: case rule_node:
+  case kern_node:
+    disc_width=disc_width+width(s);@+break;
+  default:confusion("disc3");
+@:this can't happen disc3}{\quad disc3@>
+  }
+
+@ @<Add the width of node |s| to |act_width|@>=
+if (is_char_node(s))
+  {@+f=font(s);
+  act_width=act_width+char_width(f, character(s));
+  }
+else switch (type(s)) {
+  case ligature_node: {@+f=font(lig_char(s));
+    act_width=act_width+
+      char_width(f, character(lig_char(s)));
+    } @+break;
+  case hlist_node: case vlist_node: case rule_node:
+  case kern_node:
+    act_width=act_width+width(s);@+break;
+  default:confusion("disc4");
+@:this can't happen disc4}{\quad disc4@>
+  }
+
+@ The forced line break at the paragraph's end will reduce the list of
+breakpoints so that all active nodes represent breaks at |cur_p==null|.
+On the first pass, we insist on finding an active node that has the
+correct ``looseness.'' On the final pass, there will be at least one active
+node, and we will match the desired looseness as well as we can.
+
+The global variable |best_bet| will be set to the active node for the best
+way to break the paragraph, and a few other variables are used to
+help determine what is best.
+
+@<Selected global variables@>=
+static pointer @!best_bet; /*use this passive node and its predecessors*/
+static int @!fewest_demerits; /*the demerits associated with |best_bet|*/
+static halfword @!best_line; /*line number following the last line of the new paragraph*/
+static int @!actual_looseness; /*the difference between |line_number(best_bet)|
+  and the optimum |best_line|*/
+static int @!line_diff; /*the difference between the current line number and
+  the optimum |best_line|*/
+
+@ @<Try the final line break at the end of the paragraph...@>=
+{@+try_break(eject_penalty, hyphenated);
+if (link(active)!=last_active)
+  {@+@<Find an active node with fewest demerits@>;
+  if (looseness==0) goto done;
+  @<Find the best active node for the desired looseness@>;
+  if ((actual_looseness==looseness)||final_pass) goto done;
+  }
+}
+
+@ @<Find an active node...@>=
+r=link(active);fewest_demerits=awful_bad;
+@/do@+{if (type(r)!=delta_node) if (total_demerits(r) < fewest_demerits)
+  {@+fewest_demerits=total_demerits(r);best_bet=r;
+  }
+r=link(r);
+}@+ while (!(r==last_active));
+best_line=line_number(best_bet)
+
+@ The adjustment for a desired looseness is a slightly more complicated
+version of the loop just considered. Note that if a paragraph is broken
+into segments by displayed equations, each segment will be subject to the
+looseness calculation, independently of the other segments.
+
+@<Find the best active node...@>=
+{@+r=link(active);actual_looseness=0;
+@/do@+{if (type(r)!=delta_node)
+  {@+line_diff=line_number(r)-best_line;
+  if (((line_diff < actual_looseness)&&(looseness <= line_diff))||@|
+  ((line_diff > actual_looseness)&&(looseness >= line_diff)))
+    {@+best_bet=r;actual_looseness=line_diff;
+    fewest_demerits=total_demerits(r);
+    }
+  else if ((line_diff==actual_looseness)&&@|
+    (total_demerits(r) < fewest_demerits))
+    {@+best_bet=r;fewest_demerits=total_demerits(r);
+    }
+  }
+r=link(r);
+}@+ while (!(r==last_active));
+best_line=line_number(best_bet);
+}
+
+@ Once the best sequence of breakpoints has been found (hurray), we call on the
+procedure |post_line_break| to finish the remainder of the work.
+(By introducing this subprocedure, we are able to keep |line_break|
+from getting extremely long.)
+
+@<Break the paragraph at the chosen...@>=
+post_line_break(final_widow_penalty)
+
+@ The total number of lines that will be set by |post_line_break|
+is |best_line-prev_graf-1|. The last breakpoint is specified by
+|break_node(best_bet)|, and this passive node points to the other breakpoints
+via the |prev_break| links. The finishing-up phase starts by linking the
+relevant passive nodes in forward order, changing |prev_break| to
+|next_break|. (The |next_break| fields actually reside in the same memory
+space as the |prev_break| fields did, but we give them a new name because
+of their new significance.) Then the lines are justified, one by one.
+
+@d next_break prev_break /*new name for |prev_break| after links are reversed*/
+
+@<Declare subprocedures for |line_break|@>=
+static void post_line_break(int @!final_widow_penalty)
+{@+
+pointer q, @!r, @!s; /*temporary registers for list manipulation*/
+bool @!disc_break; /*was the current break at a discretionary node?*/
+bool @!post_disc_break; /*and did it have a nonempty post-break part?*/
+bool @!first_line=true; /*Is this the first line of the paragraph?*/
+uint32_t line_offset, next_offset; /*The first and next offset of the line. */
+scaled @!cur_width; /*width of line number |cur_line|*/
+scaled @!cur_indent; /*left margin of line number |cur_line|*/
+quarterword @!t; /*used for replacement counts in discretionary nodes*/
+int @!pen; /*use when calculating penalties between lines*/
+halfword @!cur_line; /*the current line number being justified*/
+@<Reverse the links of the relevant passive nodes, setting |cur_p| to the
+first breakpoint@>;
+cur_line=prev_graf+1;
+next_offset=hposition(link(temp_head));
+if (next_offset>node_pos)
+  next_offset=next_offset-node_pos;
+else
+  next_offset=0;
+@/do@+{
+line_offset=next_offset;
+{ pointer q=cur_break(cur_p);
+  if (q==null)
+    next_offset=(hpos-hstart); /*necessary if the paragraph has a display at |hpos|*/
+  else
+    next_offset= hposition(q);
+  if (next_offset>node_pos)
+    next_offset=next_offset-node_pos;
+  else
+    next_offset=0;
+}
+@<Justify the line ending at breakpoint |cur_p|, and append it to the current
+vertical list, together with associated penalties and other insertions@>;
+incr(cur_line);cur_p=next_break(cur_p);
+if (cur_p!=null) if (!post_disc_break)
+  @<Prune unwanted nodes at the beginning of the next line@>;
+if (cur_p!=null)
+{  if (just_label>=0)
+  { q = get_node(link_node_size);
+    type(q)=whatsit_node; subtype(q)=start_link_node;
+    label_ref(as_label(q))=just_label;
+    if (just_color>=0) color_ref(as_color(q))=just_color;
+    else  color_ref(as_color(q))=0xFF; /* this should not happen*/
+    link(q)=link(temp_head);
+    link(temp_head)=q;
+  }
+  else if (just_color>=0)
+  { q = get_node(color_node_size);
+    type(q)=whatsit_node; subtype(q)=color_node;
+    color_ref(q)=just_color;
+    link(q)=link(temp_head);
+    link(temp_head)=q;
+  }
+
+}
+}@+ while (!(cur_p==null));
+if ((cur_line!=best_line)||(link(temp_head)!=null))
+  confusion("line breaking");
+@:this can't happen line breaking}{\quad line breaking@>
+prev_graf=best_line-1;
+}
+
+@ The job of reversing links in a list is conveniently regarded as the job
+of taking items off one stack and putting them on another. In this case we
+take them off a stack pointed to by |q| and having |prev_break| fields;
+we put them on a stack pointed to by |cur_p| and having |next_break| fields.
+Node |r| is the passive node being moved from stack to stack.
+
+@<Reverse the links of the relevant passive nodes...@>=
+q=break_node(best_bet);cur_p=null;
+@/do@+{r=q;q=prev_break(q);next_break(r)=cur_p;cur_p=r;
+}@+ while (!(q==null))
+
+@ Glue and penalty and kern and math nodes are deleted at the beginning of
+a line, except in the anomalous case that the node to be deleted is actually
+one of the chosen breakpoints. Otherwise
+the pruning done here is designed to match
+the lookahead computation in |try_break|, where the |break_width| values
+are computed for non-discretionary breakpoints.
+
+@<Prune unwanted nodes at the beginning of the next line@>=
+{@+r=temp_head;
+loop@+{@+q=link(r);
+  if (q==cur_break(cur_p)) goto done1;
+     /*|cur_break(cur_p)| is the next breakpoint*/
+   /*now |q| cannot be |null|*/
+  if (is_char_node(q)) goto done1;
+  if (non_discardable(q)) goto done1;
+  if (type(q)==kern_node) if (subtype(q)!=explicit) goto done1;
+  r=q; /*now |type(q)==glue_node|, |kern_node|, |math_node|, or |penalty_node|*/
+  }
+done1: if (r!=temp_head)
+  {@+link(r)=null;flush_node_list(link(temp_head));
+  link(temp_head)=q;
+  }
+}
+
+@ The current line to be justified appears in a horizontal list starting
+at |link(temp_head)| and ending at |cur_break(cur_p)|. If |cur_break(cur_p)| is
+a glue node, we reset the glue to equal the |right_skip| glue; otherwise
+we append the |right_skip| glue at the right. If |cur_break(cur_p)| is a
+discretionary node, we modify the list so that the discretionary break
+is compulsory, and we set |disc_break| to |true|. We also append
+the |left_skip| glue at the left of the line, unless it is zero.
+
+@<Justify the line ending at breakpoint |cur_p|, and append it...@>=
+@<Modify the end of the line to reflect the nature of the break and to include
+\.{\\rightskip}; also set the proper value of |disc_break|@>;
+@<Put the \(l)\.{\\leftskip} glue at the left and detach this line@>;
+@<Call the packaging subroutine, setting |just_box| to the justified box@>;
+@<Append the new box to the current vertical list, followed by the list of
+special nodes taken out of the box by the packager@>;
+@<Append a penalty node, if a nonzero penalty is appropriate@>@;
+
+@ At the end of the following code, |q| will point to the final node on the
+list about to be justified.
+
+@<Modify the end of the line...@>=
+q=cur_break(cur_p);disc_break=false;post_disc_break=false;
+if (q!=null)  /*|q| cannot be a |char_node|*/
+  if (type(q)==glue_node)
+    {@+delete_glue_ref(glue_ptr(q));
+    glue_ptr(q)=right_skip;
+    subtype(q)=right_skip_code+1;add_glue_ref(right_skip);
+    goto done;
+    }
+  else{@+if (type(q)==disc_node)
+      @<Change discretionary to compulsory and set |disc_break:=true|@>@;
+    else if ((type(q)==math_node)||(type(q)==kern_node)) width(q)=0;
+    }
+else{@+q=temp_head;
+  while (link(q)!=null) q=link(q);
+  }
+@<Put the \(r)\.{\\rightskip} glue after node |q|@>;
+done:
+
+@ @<Change discretionary to compulsory...@>=
+{@+pointer pre_q = pre_break(q);
+pointer post_q = post_break(q);
+t=replace_count(q);
+type(q)=whatsit_node;
+subtype(q)=ignore_node;
+ignore_info(q)=1;
+@<Keep the |t| nodes following |q|, and make |r| point to the following node@>;
+s=get_node(ignore_node_size);
+type(s)=whatsit_node;
+subtype(s)=ignore_node;
+ignore_info(s)=0;
+ignore_list(s)=null;
+link(s)=r; r=s;
+if (post_q!=null) @<Transplant the post-break list@>;
+if (pre_q!=null) @<Transplant the pre-break list@>;
+link(q)=r;disc_break=true;
+}
+
+@ @<Keep the |t| nodes following |q|...@>=
+if (t==0) {ignore_list(q)=null; r=link(q);}
+else{@+r=q;
+  while (t > 1)
+    {@+r=link(r);decr(t);
+    }
+  s=link(r);
+  r=link(s);link(s)=null;
+  ignore_list(q)=link(q);
+  }
+
+@ We move the post-break list from inside node |q| to the main list by
+re\-attaching it just before the present node |r|, then resetting |r|.
+
+@<Transplant the post-break list@>=
+{@+s=post_q;
+while (link(s)!=null) s=link(s);
+link(s)=r;r=post_q;post_disc_break=true;
+}
+
+@ We move the pre-break list from inside node |q| to the main list by
+re\-attaching it just after the present node |q|, then resetting |q|.
+
+@<Transplant the pre-break list@>=
+{@+s=pre_q;link(q)=s;
+while (link(s)!=null) s=link(s);
+q=s;
+}
+
+@ @<Put the \(r)\.{\\rightskip} glue after node |q|@>=
+r=new_glue(right_skip);link(r)=link(q);link(q)=r;q=r
+
+@ The following code begins with |q| at the end of the list to be
+justified. It ends with |q| at the beginning of that list, and with
+|link(temp_head)| pointing to the remainder of the paragraph, if any.
+
+@<Put the \(l)\.{\\leftskip} glue at the left...@>=
+r=link(q);link(q)=null;q=link(temp_head);link(temp_head)=r;
+if (left_skip!=zero_glue)
+  {@+r=new_glue(left_skip);
+  link(r)=q;q=r;
+  }
+
+@ @<Append the new box to the current vertical list...@>=
+if (first_line)
+{ pointer p=happend_to_vlist(just_box);
+  if (p!=null)
+    store_map(p,node_pos,line_offset);
+  store_map(just_box,node_pos,line_offset);
+  first_line=false;
+}
+else
+{  append_to_vlist(just_box,line_offset);
+ store_map(just_box,node_pos,line_offset);
+}
+if (adjust_head!=adjust_tail)
+  {@+link(tail)=link(adjust_head);tail=adjust_tail;
+   }
+adjust_tail=null
+
+@ Now |q| points to the hlist that represents the current line of the
+paragraph. We need to compute the appropriate line width, pack the
+line into a box of this size, and shift the box by the appropriate
+amount of indentation.
+
+@<Call the packaging subroutine...@>=
+if (cur_line > last_special_line)
+  {@+cur_width=second_width;cur_indent=second_indent;
+  }
+else if (par_shape_ptr==null)
+  {@+cur_width=first_width;cur_indent=first_indent;
+  }
+else{@+cur_width=mem[par_shape_ptr+2*cur_line].sc;
+  cur_indent=mem[par_shape_ptr+2*cur_line-1].sc;
+  }
+adjust_tail=adjust_head;just_box=hpack(q, cur_width, exactly);
+shift_amount(just_box)=cur_indent
+
+@ Penalties between the lines of a paragraph come from club and widow lines,
+from the |inter_line_penalty| parameter, and from lines that end at
+discretionary breaks.  Breaking between lines of a two-line paragraph gets
+both club-line and widow-line penalties. The local variable |pen| will
+be set to the sum of all relevant penalties for the current line, except
+that the final line is never penalized.
+
+@<Append a penalty node, if a nonzero penalty is appropriate@>=
+if (cur_line+1!=best_line)
+  {@+pen=inter_line_penalty;
+  if (cur_line==prev_graf+1) pen=pen+club_penalty;
+  if (cur_line+2==best_line) pen=pen+final_widow_penalty;
+  if (disc_break) pen=pen+broken_penalty;
+  if (pen!=0)
+    {@+r=new_penalty(pen); store_map(r, node_pos, next_offset);
+    link(tail)=r;tail=r;
+    }
+  }
+
+
+@* Breaking vertical lists into pages.
+The |vsplit| procedure, which implements \TeX's \.{\\vsplit} operation,
+is considerably simpler than |line_break| because it doesn't have to
+worry about hyphenation, and because its mission is to discover a single
+break instead of an optimum sequence of breakpoints.  But before we get
+into the details of |vsplit|, we need to consider a few more basic things.
+
+@ A subroutine called |prune_page_top| takes a pointer to a vlist and
+returns a pointer to a modified vlist in which all glue, kern, and penalty nodes
+have been deleted before the first box or rule node. However, the first
+box or rule is actually preceded by a newly created glue node designed so that
+the topmost baseline will be at distance |split_top_skip| from the top,
+whenever this is possible without backspacing.
+
+In this routine and those that follow, we make use of the fact that a
+vertical list contains no character nodes, hence the |type| field exists
+for each node in the list.
+@^data structure assumptions@>
+
+\noindent
+@<\TeX\ functions@>=
+
+#define ensure_vbox(N) /* no longer needed */@#
+
+static pointer prune_page_top(pointer @!p) /*adjust top after page break*/
+{@+pointer prev_p; /*lags one step behind |p|*/
+pointer @!q; /*temporary variable for list manipulation*/
+prev_p=temp_head;link(temp_head)=p;
+while (p!=null)
+  switch (type(p)) {
+  case hlist_node: case vlist_node: case rule_node: @<Insert glue for |split_top_skip|
+and set~|p:=null|@>@;@+break;
+  case whatsit_node: case mark_node: case ins_node: {@+prev_p=p;p=link(prev_p);
+    } @+break;
+  case glue_node: case kern_node: case penalty_node: {@+q=p;p=link(q);link(q)=null;
+    link(prev_p)=p;flush_node_list(q);
+    } @+break;
+  default:confusion("pruning");
+@:this can't happen pruning}{\quad pruning@>
+  }
+return link(temp_head);
+}
+
+@ @<Insert glue for |split_top_skip|...@>=
+{@+temp_ptr=new_spec(pointer_def[glue_kind][split_top_skip_no]);
+q=new_glue(temp_ptr);glue_ref_count(temp_ptr)=null;link(prev_p)=q;link(q)=p;
+   /*now |temp_ptr==glue_ptr(q)|*/
+if (width(temp_ptr) > height(p)) width(temp_ptr)=width(temp_ptr)-height(p);
+else width(temp_ptr)=0;
+p=null;
+}
+
+@ The next subroutine finds the best place to break a given vertical list
+so as to obtain a box of height~|h|, with maximum depth~|d|.
+A pointer to the beginning of the vertical list is given,
+and a pointer to the optimum breakpoint is returned. The list is effectively
+followed by a forced break, i.e., a penalty node with the |eject_penalty|;
+if the best break occurs at this artificial node, the value |null| is returned.
+
+An array of six |scaled| distances is used to keep track of the height
+from the beginning of the list to the current place, just as in |line_break|.
+In fact, we use one of the same arrays, only changing its name to reflect
+its new significance.
+
+@d active_height active_width /*new name for the six distance variables*/
+@d cur_height active_height[1] /*the natural height*/
+@d set_height_zero(A) active_height[A]=0 /*initialize the height to zero*/
+@#
+@<\TeX\ functions@>=
+static pointer vert_break(pointer @!p, scaled @!h, scaled @!d)
+   /*finds optimum page break*/
+{@+
+pointer prev_p; /*if |p| is a glue node, |type(prev_p)| determines
+  whether |p| is a legal breakpoint*/
+pointer @!q, @!r; /*glue specifications*/
+int @!pi; /*penalty value*/
+int @!b; /*badness at a trial breakpoint*/
+int @!least_cost; /*the smallest badness plus penalties found so far*/
+pointer @!best_place=p; /*the most recent break that leads to |least_cost|*/
+scaled @!prev_dp; /*depth of previous box in the list*/
+small_number @!t; /*|type| of the node following a kern*/
+prev_p=p; /*an initial glue node is not a legal breakpoint*/
+least_cost=awful_bad;do_all_six(set_height_zero);prev_dp=0;
+loop@+{@+@<If node |p| is a legal breakpoint, check if this break is the best
+known, and |goto done| if |p| is null or if the page-so-far is already too
+full to accept more stuff@>;
+  prev_p=p;p=link(prev_p);
+  }
+done: return best_place;
+}
+
+@ A global variable |best_height_plus_depth| will be set to the natural size
+of the box that corresponds to the optimum breakpoint found by |vert_break|.
+(This value is used by the insertion-splitting algorithm of the page builder.)
+
+@<Selected global variables@>=
+static scaled @!best_height_plus_depth; /*height of the best box, without stretching or
+  shrinking*/
+
+@ A subtle point to be noted here is that the maximum depth~|d| might be
+negative, so |cur_height| and |prev_dp| might need to be corrected even
+after a glue or kern node.
+
+@<If node |p| is a legal breakpoint, check...@>=
+if (p==null) pi=eject_penalty;
+else@<Use node |p| to update the current height and depth measurements; if
+this node is not a legal breakpoint, |goto not_found| or |update_heights|,
+otherwise set |pi| to the associated penalty at the break@>;
+@<Check if node |p| is a new champion breakpoint; then \(go)|goto done| if
+|p| is a forced break or if the page-so-far is already too full@>;
+if ((type(p) < glue_node)||(type(p) > kern_node)) goto not_found;
+update_heights: @<Update the current height and depth measurements with respect
+to a glue or kern node~|p|@>;
+not_found: if (prev_dp > d)
+    {@+cur_height=cur_height+prev_dp-d;
+    prev_dp=d;
+    }
+
+@ @<Use node |p| to update the current height and depth measurements...@>=
+switch (type(p)) {
+case hlist_node: case vlist_node: case rule_node: {@+@t@>@;@/
+  cur_height=cur_height+prev_dp+height(p);prev_dp=depth(p);
+  goto not_found;
+  }
+case whatsit_node: @<Process whatsit |p| in |vert_break| loop, |goto not_found|@>;
+case glue_node: if (precedes_break(prev_p)) pi=0;
+  else goto update_heights;@+break;
+case kern_node: {@+if (link(p)==null) t=penalty_node;
+  else t=type(link(p));
+  if (t==glue_node) pi=0;@+else goto update_heights;
+  } @+break;
+case penalty_node: pi=penalty(p);@+break;
+case mark_node: case ins_node: goto not_found;
+default:confusion("vertbreak");
+@:this can't happen vertbreak}{\quad vertbreak@>
+}
+
+@ @d deplorable 100000 /*more than |inf_bad|, but less than |awful_bad|*/
+
+@<Check if node |p| is a new champion breakpoint; then \(go)...@>=
+if (pi < inf_penalty)
+  {@+@<Compute the badness, |b|, using |awful_bad| if the box is too full@>;
+  if (b < awful_bad)
+  { if (pi <= eject_penalty) b=pi;
+    else if (b < inf_bad) b=b+pi;
+      else b=deplorable;
+  }
+  if (b <= least_cost)
+    {@+best_place=p;least_cost=b;
+    best_height_plus_depth=cur_height+prev_dp;
+    }
+  if ((b==awful_bad)||(pi <= eject_penalty)) goto done;
+  }
+
+@ @<Compute the badness, |b|, using |awful_bad| if the box is too full@>=
+if (cur_height < h)
+  if ((active_height[3]!=0)||(active_height[4]!=0)||
+    (active_height[5]!=0)) b=0;
+  else b=badness(h-cur_height, active_height[2]);
+else if (cur_height-h > active_height[6]) b=awful_bad;
+else b=badness(cur_height-h, active_height[6])
+
+@ Vertical lists that are subject to the |vert_break| procedure should not
+contain infinite shrinkability, since that would permit any amount of
+information to ``fit'' on one page.
+
+@<Update the current height and depth measurements with...@>=
+if (type(p)==kern_node) q=p;
+else{@+q=glue_ptr(p);
+  active_height[2+stretch_order(q)]=@|
+    active_height[2+stretch_order(q)]+stretch(q);@/
+  active_height[6]=active_height[6]+shrink(q);
+  if ((shrink_order(q)!=normal)&&(shrink(q)!=0))
+    {@+@t@>@;@/
+    DBG(DBGTEX,"Infinite glue shrinkage found in box being split");
+    r=new_spec(q);shrink_order(r)=normal;delete_glue_ref(q);
+    glue_ptr(p)=r;q=r;
+    }
+  }
+cur_height=cur_height+prev_dp+width(q);prev_dp=0
+
+
+@* The page builder.
+When \TeX\ appends new material to its main vlist in vertical mode, it uses
+a method something like |vsplit| to decide where a page ends, except that
+the calculations are done ``on line'' as new items come in.
+The main complication in this process is that insertions must be put
+into their boxes and removed from the vlist, in a more-or-less optimum manner.
+
+We shall use the term ``current page'' for that part of the main vlist that
+is being considered as a candidate for being broken off and sent to the
+user's output routine. The current page starts at |link(page_head)|, and
+it ends at |page_tail|.  We have |page_head==page_tail| if this list is empty.
+@^current page@>
+
+Utter chaos would reign if the user kept changing page specifications
+while a page is being constructed, so the page builder keeps the pertinent
+specifications frozen as soon as the page receives its first box or
+insertion.  The global variable |page_contents| is |empty| when the
+current page contains only mark nodes and content-less whatsit nodes; it
+is |inserts_only| if the page contains only insertion nodes in addition to
+marks and whatsits.  Glue nodes, kern nodes, and penalty nodes are
+discarded until a box or rule node appears, at which time |page_contents|
+changes to |box_there|.  As soon as |page_contents| becomes non-|empty|,
+the current |vsize| and |max_depth| are squirreled away into |page_goal|
+and |page_max_depth|; the latter values will be used until the page has
+been forwarded to the user's output routine. The \.{\\topskip} adjustment
+is made when |page_contents| changes to |box_there|.
+
+Although |page_goal| starts out equal to |vsize|, it is decreased by the
+scaled natural height-plus-depth of the insertions considered so far, and by
+the \.{\\skip} corrections for those insertions. Therefore it represents
+the size into which the non-inserted material should fit, assuming that
+all insertions in the current page have been made.
+
+The global variables |best_page_break| and |least_page_cost| correspond
+respectively to the local variables |best_place| and |least_cost| in the
+|vert_break| routine that we have already studied; i.e., they record the
+location and value of the best place currently known for breaking the
+current page. The value of |page_goal| at the time of the best break is
+stored in |best_size|.
+
+@d inserts_only 1
+   /*|page_contents| when an insert node has been contributed, but no boxes*/
+@d box_there 2 /*|page_contents| when a box or rule has been contributed*/
+
+@<Selected global variables@>=
+static pointer @!page_tail; /*the final node on the current page*/
+static int @!page_contents; /*what is on the current page so far?*/
+static scaled @!page_max_depth; /*maximum box depth on page being built*/
+static pointer @!best_page_break; /*break here to get the best page known so far*/
+static int @!least_page_cost; /*the score for this currently best page*/
+static scaled @!best_size; /*its |page_goal|*/
+
+@ The page builder has another data structure to keep track of insertions.
+This is a list of four-word nodes, starting and ending at |page_ins_head|.
+That is, the first element of the list is node |r@t$\_1$@>==link(page_ins_head)|;
+node $r_j$ is followed by |r@t$\_{j+1}$@>==link(r@t$\_j$@>)|; and if there are
+|n| items we have |r@t$\_{n+1}$@>==page_ins_head|. The |subtype| field of
+each node in this list refers to an insertion number; for example, `\.{\\insert
+250}' would correspond to a node whose |subtype| is |qi(250)|
+(the same as the |subtype| field of the relevant |ins_node|). These |subtype|
+fields are in increasing order, and |subtype(page_ins_head)==
+qi(255)|, so |page_ins_head| serves as a convenient sentinel
+at the end of the list. A record is present for each insertion number that
+appears in the current page.
+
+The |type| field in these nodes distinguishes two possibilities that
+might occur as we look ahead before deciding on the optimum page break.
+If |type(r)==inserting|, then |height(r)| contains the total of the
+height-plus-depth dimensions of the box and all its inserts seen so far.
+If |type(r)==split_up|, then no more insertions will be made into this box,
+because at least one previous insertion was too big to fit on the current
+page; |broken_ptr(r)| points to the node where that insertion will be
+split, if \TeX\ decides to split it, |broken_ins(r)| points to the
+insertion node that was tentatively split, and |height(r)| includes also the
+natural height plus depth of the part that would be split off.
+
+In both cases, |last_ins_ptr(r)| points to the last |ins_node|
+encountered for box |qo(subtype(r))| that would be at least partially
+inserted on the next page; and |best_ins_ptr(r)| points to the last
+such |ins_node| that should actually be inserted, to get the page with
+minimum badness among all page breaks considered so far. We have
+|best_ins_ptr(r)==null| if and only if no insertion for this box should
+be made to produce this optimum page.
+
+The data structure definitions here use the fact that the |@!height| field
+appears in the fourth word of a box node.
+@^data structure assumptions@>
+
+@d page_ins_node_size 4 /*number of words for a page insertion node*/
+@d inserting 0 /*an insertion class that has not yet overflowed*/
+@d split_up 1 /*an overflowed insertion class*/
+@d broken_ptr(A) link(A+1)
+   /*an insertion for this class will break here if anywhere*/
+@d broken_ins(A) info(A+1) /*this insertion might break at |broken_ptr|*/
+@d last_ins_ptr(A) link(A+2) /*the most recent insertion for this |subtype|*/
+@d best_ins_ptr(A) info(A+2) /*the optimum most recent insertion*/
+
+@<Initialize the special list heads...@>=
+subtype(page_ins_head)=qi(255);
+type(page_ins_head)=split_up;link(page_ins_head)=page_ins_head;
+
+@ An array |page_so_far| records the heights and depths of everything
+on the current page. This array contains six |scaled| numbers, like the
+similar arrays already considered in |line_break| and |vert_break|; and it
+also contains |page_goal| and |page_depth|, since these values are
+all accessible to the user via |set_page_dimen| commands. The
+value of |page_so_far[1]| is also called |page_total|.  The stretch
+and shrink components of the \.{\\skip} corrections for each insertion are
+included in |page_so_far|, but the natural space components of these
+corrections are not, since they have been subtracted from |page_goal|.
+
+The variable |page_depth| records the depth of the current page; it has been
+adjusted so that it is at most |page_max_depth|. The variable
+|last_glue| points to the glue specification of the most recent node
+contributed from the contribution list, if this was a glue node; otherwise
+|last_glue==max_halfword|. (If the contribution list is nonempty,
+however, the value of |last_glue| is not necessarily accurate.)
+The variables |last_penalty| and |last_kern| are similar.  And
+finally, |insert_penalties| holds the sum of the penalties associated with
+all split and floating insertions.
+
+@d page_goal page_so_far[0] /*desired height of information on page being built*/
+@d page_total page_so_far[1] /*height of the current page*/
+@d page_shrink page_so_far[6] /*shrinkability of the current page*/
+@d page_depth page_so_far[7] /*depth of the current page*/
+
+@<Selected global variables@>=
+static scaled @!page_so_far[8]; /*height and glue of the current page*/
+static int @!insert_penalties; /*sum of the penalties for insertions
+  that were held over*/
+
+@ @d print_plus(A, B) if (page_so_far[A]!=0)
+  {@+print(" plus ");print_scaled(page_so_far[A]);print(B);@+}
+
+@<Basic printing procedures@>=
+static void print_totals(void)
+{@+print_scaled(page_total);
+print_plus(2,"");
+print_plus(3,"fil");
+print_plus(4,"fill");
+print_plus(5,"filll");
+if (page_shrink!=0)
+  {@+print(" minus ");print_scaled(page_shrink);
+  }
+}
+
+@ Here is a procedure that is called when the |page_contents| is changing
+from |empty| to |inserts_only| or |box_there|.
+
+@d set_page_so_far_zero(A) page_so_far[A]=0
+
+@<\TeX\ functions@>=
+static void freeze_page_specs(small_number @!s)
+{@+page_contents=s;
+page_goal=hvsize;page_max_depth=max_depth;
+page_depth=0;do_all_six(set_page_so_far_zero);
+least_page_cost=awful_bad;
+#ifdef @!STAT
+if (tracing_pages > 0)
+  {@+begin_diagnostic();
+  print_nl("%% goal height=");print_scaled(page_goal);
+@.goal height@>
+  print(", max depth=");print_scaled(page_max_depth);
+  end_diagnostic(false);
+  } @;
+#endif
+@;@/
+}
+
+@ Pages are built by appending nodes to the current list in \TeX's
+vertical mode, which is at the outermost level of the semantic nest. This
+vlist is split into two parts; the ``current page'' that we have been
+talking so much about already, and the ``contribution list'' that receives
+new nodes as they are created.  The current page contains everything that
+the page builder has accounted for in its data structures, as described
+above, while the contribution list contains other things that have been
+generated by other parts of \TeX\ but have not yet been
+seen by the page builder.
+The contribution list starts at |link(contrib_head)|, and it ends at the
+current node in \TeX's vertical mode.
+
+When \TeX\ has appended new material in vertical mode, it calls the procedure
+|build_page|, which tries to catch up by moving nodes from the contribution
+list to the current page. This procedure will succeed in its goal of
+emptying the contribution list, unless a page break is discovered, i.e.,
+unless the current page has grown to the point where the optimum next
+page break has been determined. In the latter case, the nodes after the
+optimum break will go back onto the contribution list, and control will
+effectively pass to the user's output routine.
+
+We make |type(page_head)==glue_node|, so that an initial glue node on
+the current page will not be considered a valid breakpoint.
+
+@<Initialize the special list...@>=
+type(page_head)=glue_node;subtype(page_head)=normal;
+
+@ \TeX\ is not always in vertical mode at the time |build_page|
+is called; the current mode reflects what \TeX\ should return to, after
+the contribution list has been emptied. A call on |build_page| should
+be immediately followed by `|goto big_switch|', which is \TeX's central
+control point.
+
+@<\TeX\ functions@>=
+static bool hbuild_page(void) /*append contributions to the current page*/
+{@+
+pointer p; /*the node being appended*/
+pointer @!q, @!r; /*nodes being examined*/
+int @!b, @!c; /*badness and cost of current page*/
+int @!pi; /*penalty to be added to the badness*/
+if (link(contrib_head)==null) return false;
+@/do@+{resume: p=link(contrib_head);@/
+@<Move node |p| to the current page; if it is time for a page break, put the
+nodes following the break back onto the contribution list, and |return| to
+the user's output routine if there is one@>;
+}@+ while (!(link(contrib_head)==null));
+@<Make the contribution list empty by setting its tail to |contrib_head|@>;
+return false;
+}
+
+@ @d contrib_tail nest[0].tail_field /*tail of the contribution list*/
+
+@<Make the contribution list empty...@>=
+if (nest_ptr==0) tail=contrib_head; /*vertical mode*/
+else contrib_tail=contrib_head /*other modes*/
+
+@ The code here is an example of a many-way switch into routines that
+merge together in different places. Some people call this unstructured
+programming, but the author doesn't see much wrong with it, as long as
+@^Knuth, Donald Ervin@>
+the various labels have a well-understood meaning.
+
+@<Move node |p| to the current page;...@>=
+@<If the current page is empty and node |p| is to be deleted, |goto done1|;
+otherwise use node |p| to update the state of the current page; if this node
+is an insertion, |goto contribute|; otherwise if this node is not a legal
+breakpoint, |goto contribute| or |update_heights|; otherwise set |pi| to the
+penalty associated with this breakpoint@>;
+@<Check if node |p| is a new champion breakpoint; then \(if)if it is time
+for a page break, prepare for output, and either fire up the user's output
+routine and |return| or ship out the page and |goto done|@>;
+if ((type(p) < glue_node)||(type(p) > kern_node)) goto contribute;
+update_heights: @<Update the current page measurements with respect to the
+glue or kern specified by node~|p|@>;
+contribute: @<Make sure that |page_max_depth| is not exceeded@>;
+@<Link node |p| into the current page and |goto done|@>;
+done1: @<Recycle node |p|@>;
+done:
+
+@ @<Link node |p| into the current page and |goto done|@>=
+link(page_tail)=p;page_tail=p;
+link(contrib_head)=link(p);link(p)=null;goto done
+
+@ @<Recycle node |p|@>=
+link(contrib_head)=link(p);link(p)=null;flush_node_list(p)
+
+@ The title of this section is already so long, it seems best to avoid
+making it more accurate but still longer, by mentioning the fact that a
+kern node at the end of the contribution list will not be contributed until
+we know its successor.
+
+@<If the current page is empty...@>=
+switch (type(p)) {
+case hlist_node: case vlist_node: case rule_node: if (page_contents < box_there)
+    @<Initialize the current page, insert the \.{\\topskip} glue ahead of
+|p|, and |goto continue|@>@;
+  else@<Prepare to move a box or rule node to the current page, then |goto
+contribute|@>@;@+break;
+case whatsit_node: @<Prepare to move whatsit |p| to the current page, then
+|goto contribute|@>;
+case glue_node: if (page_contents < box_there) goto done1;
+  else if (precedes_break(page_tail) &&
+           !(type(page_tail)==whatsit_node && subtype(page_tail)==color_node))
+	 pi=0;
+  else goto update_heights;@+break;
+case kern_node: if (page_contents < box_there) goto done1;
+  else if (link(p)==null) return false;
+  else if (type(link(p))==glue_node) pi=0;
+  else goto update_heights;@+break;
+case penalty_node: if (page_contents < box_there) goto done1;@+else pi=penalty(p);@+break;
+case mark_node: goto contribute;
+case ins_node: happend_insertion(p); goto contribute;
+default:confusion("page");
+@:this can't happen page}{\quad page@>
+}
+
+@ @<Initialize the current page, insert the \.{\\topskip} glue...@>=
+{@+if (page_contents==empty) freeze_page_specs(box_there);
+else page_contents=box_there;
+temp_ptr=new_spec(pointer_def[glue_kind][top_skip_no]);
+q=new_glue(temp_ptr);glue_ref_count(temp_ptr)=null;
+{ uint64_t h=hlocation(p); store_map(q,LOC_POS0(h),LOC_OFF(h)); }
+if (width(temp_ptr) > height(p)) width(temp_ptr)=width(temp_ptr)-height(p);
+else width(temp_ptr)=0;
+link(q)=p;link(contrib_head)=q;goto resume;
+}
+
+@ @<Prepare to move a box or rule node to the current page...@>=
+{@+page_total=page_total+page_depth+height(p);
+page_depth=depth(p);
+goto contribute;
+}
+
+@ @<Make sure that |page_max_depth| is not exceeded@>=
+if (page_depth > page_max_depth)
+  {@+page_total=@|
+    page_total+page_depth-page_max_depth;@/
+  page_depth=page_max_depth;
+  }
+
+@ @<Update the current page measurements with respect to the glue...@>=
+if (type(p)==kern_node) q=p;
+else{@+q=glue_ptr(p);
+  page_so_far[2+stretch_order(q)]=@|
+    page_so_far[2+stretch_order(q)]+stretch(q);@/
+  page_shrink=page_shrink+shrink(q);
+  if ((shrink_order(q)!=normal)&&(shrink(q)!=0))
+    {@+@t@>@;@/
+     DBG(DBGTEX,"Infinite glue shrinkage found on current page");
+    r=new_spec(q);shrink_order(r)=normal;fast_delete_glue_ref(q);
+    glue_ptr(p)=r;q=r;
+    }
+  }
+page_total=page_total+page_depth+width(q);page_depth=0
+
+@ @<Check if node |p| is a new champion breakpoint; then \(if)...@>=
+if (pi < inf_penalty)
+  {@+@<Compute the badness, |b|, of the current page, using |awful_bad| if
+the box is too full@>;
+  if (b < awful_bad)
+    if (pi <= eject_penalty) c=pi;
+    else if (b < inf_bad) c=b+pi+insert_penalties;
+      else c=deplorable;
+  else c=b;
+  if (insert_penalties >= 10000) c=awful_bad;
+#ifdef @!STAT
+  if (tracing_pages > 0) @<Display the page break cost@>;
+#endif
+@;@/
+  if (c <= least_page_cost)
+    {@+best_page_break=p;best_size=page_goal;
+    least_page_cost=c;
+    r=link(page_ins_head);
+    while (r!=page_ins_head)
+      {@+best_ins_ptr(r)=last_ins_ptr(r);
+      r=link(r);
+      }
+    }
+  if ((c==awful_bad)||(pi <= eject_penalty))
+{ hloc_set_next(best_page_break);
+  if (p==best_page_break) best_page_break=null;
+  hpack_page();
+  hfill_page_template();
+  return true;
+}
+  }
+
+@ @<Display the page break cost@>=
+{@+begin_diagnostic();print_nl("%");
+print(" t=");print_totals();@/
+print(" g=");print_scaled(page_goal);@/
+print(" b=");
+if (b==awful_bad) print_char('*');@+else print_int(b);
+@.*\relax@>
+print(" p=");print_int(pi);
+print(" c=");
+if (c==awful_bad) print_char('*');@+else print_int(c);
+if (c <= least_page_cost) print_char('#');
+end_diagnostic(false);
+}
+
+@ @<Compute the badness, |b|, of the current page...@>=
+if (page_total < page_goal)
+  if ((page_so_far[3]!=0)||(page_so_far[4]!=0)||@|
+    (page_so_far[5]!=0)) b=0;
+  else b=badness(page_goal-page_total, page_so_far[2]);
+else if (page_total-page_goal > page_shrink) b=awful_bad;
+else b=badness(page_total-page_goal, page_shrink)
+
+@ @<\TeX\ functions@>=
+static void happend_insertion(pointer p)@/
+{ uint8_t @!n; /*insertion box number*/
+  scaled @!delta, @!h, @!w; /*sizes used for insertion calculations*/
+  pointer q,r;
+  if (page_contents==empty) freeze_page_specs(inserts_only);
+n=subtype(p);r=page_ins_head;
+while (n >= subtype(link(r))) r=link(r);
+n=qo(n);
+if (subtype(r)!=qi(n))
+  @<Create a page insertion node with |subtype(r)=qi(n)|, and include the
+glue correction for box |n| in the current page state@>;
+if (type(r)==split_up) insert_penalties=insert_penalties+float_cost(p);
+else{@+last_ins_ptr(r)=p;
+  delta=page_goal-page_total-page_depth+page_shrink;
+     /*this much room is left if we shrink the maximum*/
+  if (count(n)==1000) h=height(p);
+  else h=x_over_n(height(p), 1000)*count(n); /*this much room is needed*/
+  if (((h <= 0)||(h <= delta))&&(height(p)+height(r) <= dimen(n)))
+    {@+page_goal=page_goal-h;height(r)=height(r)+height(p);
+    }
+  else@<Find the best way to split the insertion, and change |type(r)| to
+|split_up|@>;
+  }
+}
+
+@ We take note of the value of \.{\\skip} |n| and the height plus depth
+of \.{\\box}~|n| only when the first \.{\\insert}~|n| node is
+encountered for a new page. A user who changes the contents of \.{\\box}~|n|
+after that first \.{\\insert}~|n| had better be either extremely careful
+or extremely lucky, or both.
+
+@<Create a page insertion node...@>=
+{@+q=get_node(page_ins_node_size);link(q)=link(r);link(r)=q;r=q;
+subtype(r)=qi(n);type(r)=inserting;ensure_vbox(n);
+if (box(n)==null) height(r)=0;
+else height(r)=height(box(n))+depth(box(n));
+best_ins_ptr(r)=null;@/
+q=skip(n);
+if (count(n)==1000) h=height(r);
+else h=x_over_n(height(r), 1000)*count(n);
+page_goal=page_goal-h-width(q);@/
+page_so_far[2+stretch_order(q)]=@|page_so_far[2+stretch_order(q)]+stretch(q);@/
+page_shrink=page_shrink+shrink(q);
+if ((shrink_order(q)!=normal)&&(shrink(q)!=0))
+  DBG(DBGTEX,"Infinite glue shrinkage inserted from stream %d",n);
+}
+
+@ Here is the code that will split a long footnote between pages, in an
+emergency. The current situation deserves to be recapitulated: Node |p|
+is an insertion into box |n|; the insertion will not fit, in its entirety,
+either because it would make the total contents of box |n| greater than
+\.{\\dimen} |n|, or because it would make the incremental amount of growth
+|h| greater than the available space |delta|, or both. (This amount |h| has
+been weighted by the insertion scaling factor, i.e., by \.{\\count} |n|
+over 1000.) Now we will choose the best way to break the vlist of the
+insertion, using the same criteria as in the \.{\\vsplit} operation.
+
+@<Find the best way to split the insertion...@>=
+{@+if (count(n) <= 0) w=max_dimen;
+else{@+w=page_goal-page_total-page_depth;
+  if (count(n)!=1000) w=x_over_n(w, count(n))*1000;
+  }
+if (w > dimen(n)-height(r)) w=dimen(n)-height(r);
+q=vert_break(ins_ptr(p), w, depth(p));
+height(r)=height(r)+best_height_plus_depth;
+#ifdef @!STAT
+if (tracing_pages > 0) @<Display the insertion split cost@>;
+#endif
+@;@/
+if (count(n)!=1000)
+  best_height_plus_depth=x_over_n(best_height_plus_depth, 1000)*count(n);
+page_goal=page_goal-best_height_plus_depth;
+type(r)=split_up;broken_ptr(r)=q;broken_ins(r)=p;
+if (q==null) insert_penalties=insert_penalties+eject_penalty;
+else if (type(q)==penalty_node) insert_penalties=insert_penalties+penalty(q);
+}
+
+@ @<Display the insertion split cost@>=
+{@+begin_diagnostic();print_nl("% split");print_int(n);
+@.split@>
+print(" to ");print_scaled(w);
+print_char(',');print_scaled(best_height_plus_depth);@/
+print(" p=");
+if (q==null) print_int(eject_penalty);
+else if (type(q)==penalty_node) print_int(penalty(q));
+else print_char('0');
+end_diagnostic(false);
+}
+
+@ @<\TeX\ functions@>=
+static void hpack_page(void)
+{
+pointer p, @!q, @!r, @!s; /*nodes being examined and/or changed*/
+pointer @!prev_p; /*predecessor of |p|*/
+uint8_t @!n; /*insertion box number*/
+bool @!wait; /*should the present insertion be held over?*/
+pointer @!save_split_top_skip; /*saved value of |split_top_skip|*/
+#if 0
+     print_str("\npage_head:\n");
+     show_box(link(page_head));
+     print_str("\nstream 0:\n");
+     show_box(streams[0].p);
+     print_str("\nstream 1:\n");
+     show_box(streams[1].p);
+#endif
+if (box(0)!=null)
+{ flush_node_list(box(0)); box(0)=null; }
+insert_penalties=0; /*this will count the number of insertions held over*/
+save_split_top_skip=split_top_skip;
+@<Prepare all the boxes involved in insertions to act as queues@>;
+q=hold_head;link(q)=null;prev_p=page_head;p=link(prev_p);
+while (p!=best_page_break)
+  {@+if (type(p)==ins_node)
+    {@<Either insert the material specified by node |p| into the appropriate box,
+or hold it for the next page; also delete node |p| from the current page@>;
+  }
+  prev_p=p;p=link(prev_p);
+  }
+split_top_skip=save_split_top_skip;
+@<Break the current page at node |p|, put it in box~255, and put the remaining nodes
+on the contribution list@>;
+@<Delete \(t)the page-insertion nodes@>;
+}
+
+@ When the following code is executed, the current page runs from node
+|link(page_head)| to node |prev_p|, and the nodes from |p| to |page_tail|
+are to be placed back at the front of the contribution list. Furthermore
+the heldover insertions appear in a list from |link(hold_head)| to |q|; we
+will put them into the current page list for safekeeping while the user's
+output routine is active.  We might have |q==hold_head|; and |p==null| if
+and only if |prev_p==page_tail|. Error messages are suppressed within
+|vpackage|, since the box might appear to be overfull or underfull simply
+because the stretch and shrink from the \.{\\skip} registers for inserts
+are not actually present in the box.
+
+@<Break the current page at node |p|, put it...@>=
+if (p!=null)
+  {@+if (link(contrib_head)==null)
+    { if (nest_ptr==0) tail=page_tail;
+      else contrib_tail=page_tail; }
+  link(page_tail)=link(contrib_head);
+  link(contrib_head)=p;
+  link(prev_p)=null;
+  }
+streams[0].p=link(page_head); link(page_head)=null; page_tail=page_head;
+streams[0].t=prev_p;
+if (q!=hold_head)
+  {@+link(q)=link(contrib_head);
+     link(contrib_head)=link(hold_head);
+  }
+
+@ If many insertions are supposed to go into the same box, we want to know
+the position of the last node in that box, so that we don't need to waste time
+when linking further information into it. The |last_ins_ptr| fields of the
+page insertion nodes are therefore used for this purpose during the
+packaging phase.
+
+@<Prepare all the boxes involved in insertions to act as queues@>=
+{@+r=link(page_ins_head);
+while (r!=page_ins_head)
+  {@+if (best_ins_ptr(r)!=null)
+    {@+n=qo(subtype(r));ensure_vbox(n);
+    if (box(n)==null) box(n)=new_null_box();
+    p=box(n)+list_offset;
+    while (link(p)!=null) p=link(p);
+    last_ins_ptr(r)=p;
+    }
+  r=link(r);
+  }
+}
+
+@ @<Delete \(t)the page-insertion nodes@>=
+r=link(page_ins_head);
+while (r!=page_ins_head)
+  {@+q=link(r);free_node(r, page_ins_node_size);r=q;
+  }
+link(page_ins_head)=page_ins_head
+
+@ We will set |best_ins_ptr=null| and package the box corresponding to
+insertion node~|r|, just after making the final insertion into that box.
+If this final insertion is `|split_up|', the remainder after splitting
+and pruning (if any) will be carried over to the next page.
+
+@<Either insert the material specified by node |p| into...@>=
+{@+r=link(page_ins_head);
+while (subtype(r)!=subtype(p)) r=link(r);
+if (best_ins_ptr(r)==null) wait=true;
+else{@+wait=false;s=last_ins_ptr(r);link(s)=ins_ptr(p);
+  if (best_ins_ptr(r)==p)
+    @<Wrap up the box specified by node |r|, splitting node |p| if called
+for; set |wait:=true| if node |p| holds a remainder after splitting@>@;
+  else{@+while (link(s)!=null) s=link(s);
+    last_ins_ptr(r)=s;
+    }
+  }
+@<Either append the insertion node |p| after node |q|, and remove it from
+the current page, or delete |node(p)|@>;
+}
+
+@ @<Wrap up the box specified by node |r|, splitting node |p| if...@>=
+{@+if (type(r)==split_up)
+  if ((broken_ins(r)==p)&&(broken_ptr(r)!=null))
+    {@+while (link(s)!=broken_ptr(r)) s=link(s);
+    link(s)=null;
+    split_top_skip=split_top_ptr(p);
+    ins_ptr(p)=prune_page_top(broken_ptr(r));
+    if (ins_ptr(p)!=null)
+      {@+temp_ptr=vpack(ins_ptr(p), natural);
+      height(p)=height(temp_ptr)+depth(temp_ptr);
+      free_node(temp_ptr, box_node_size);wait=true;
+      }
+    }
+while (link(s)!=null) s=link(s);
+best_ins_ptr(r)=null;
+n=qo(subtype(r));
+temp_ptr=list_ptr(box(n));
+free_node(box(n), box_node_size);
+streams[n].p=temp_ptr;
+streams[n].t=s;
+}
+
+@ @<Either append the insertion node |p|...@>=
+link(prev_p)=link(p);link(p)=null;
+if (wait)
+  {@+link(q)=p;q=p;incr(insert_penalties);
+  }
+else{@+delete_glue_ref(split_top_ptr(p));
+  free_node(p, ins_node_size);
+  }
+p=prev_p
+
+@* The chief executive.
+We come now to the |main_control| routine, which contains the master
+switch that causes all the various pieces of \TeX\ to do their things,
+in the right order.
+
+In a sense, this is the grand climax of the program: It applies all the
+tools that we have worked so hard to construct. In another sense, this is
+the messiest part of the program: It necessarily refers to other pieces
+of code all over the place, so that a person can't fully understand what is
+going on without paging back and forth to be reminded of conventions that
+are defined elsewhere. We are now at the hub of the web, the central nervous
+system that touches most of the other parts and ties them together.
+@^brain@>
+
+The structure of |main_control| itself is quite simple. There's a label
+called |big_switch|, at which point the next token of input is fetched
+using |get_x_token|. Then the program branches at high speed into one of
+about 100 possible directions, based on the value of the current
+mode and the newly fetched command code; the sum |abs(mode)+cur_cmd|
+indicates what to do next. For example, the case `|vmode+letter|' arises
+when a letter occurs in vertical mode (or internal vertical mode); this
+case leads to instructions that initialize a new paragraph and enter
+horizontal mode.
+
+The big |case| statement that contains this multiway switch has been labeled
+|reswitch|, so that the program can |goto reswitch| when the next token
+has already been fetched. Most of the cases are quite short; they call
+an ``action procedure'' that does the work for that case, and then they
+either |goto reswitch| or they ``fall through'' to the end of the |case|
+statement, which returns control back to |big_switch|. Thus, |main_control|
+is not an extremely large procedure, in spite of the multiplicity of things
+it must do; it is small enough to be handled by \PASCAL\ compilers that put
+severe restrictions on procedure size.
+@!@^action procedure@>
+
+One case is singled out for special treatment, because it accounts for most
+of \TeX's activities in typical applications. The process of reading simple
+text and converting it into |char_node| records, while looking for ligatures
+and kerns, is part of \TeX's ``inner loop''; the whole program runs
+efficiently when its inner loop is fast, so this part has been written
+with particular care.
+
+@ The boolean variables of the main loop are normally false, and always reset
+to false before the loop is left. That saves us the extra work of initializing
+each time.
+
+
+@* Building boxes and lists.
+The most important parts of |main_control| are concerned with \TeX's
+chief mission of box-making. We need to control the activities that put
+entries on vlists and hlists, as well as the activities that convert
+those lists into boxes. All of the necessary machinery has already been
+developed; it remains for us to ``push the buttons'' at the right times.
+
+
+@ Many of the actions related to box-making are triggered by the appearance
+of braces in the input. For example, when the user says `\.{\\hbox}
+\.{to} \.{100pt\{$\langle\,\hbox{\rm hlist}\,\rangle$\}}' in vertical mode,
+the information about the box size (100pt, |exactly|) is put onto |save_stack|
+with a level boundary word just above it, and |cur_group=adjusted_hbox_group|;
+\TeX\ enters restricted horizontal mode to process the hlist. The right
+brace eventually causes |save_stack| to be restored to its former state,
+at which time the information about the box size (100pt, |exactly|) is
+available once again; a box is packaged and we leave restricted horizontal
+mode, appending the new box to the current list of the enclosing mode
+(in this case to the current list of vertical mode), followed by any
+vertical adjustments that were removed from the box by |hpack|.
+
+The next few sections of the program are therefore concerned with the
+treatment of left and right curly braces.
+
+
+@* Building math lists.
+
+
+@ When we enter display math mode, we need to call |line_break| to
+process the partial paragraph that has just been interrupted by the
+display. Then we can set the proper values of |display_width| and
+|display_indent| and |pre_display_size|.
+
+@<\TeX\ functions@>=
+static void hdisplay(pointer p, pointer a, bool l)
+{@+
+scaled x; /* the |hsize| in the enclosing paragraph */
+uint32_t offset=node_pos-node_pos1; /* offset of the display node in the current parragraph */
+{scaled w; /*new or partial |pre_display_size|*/
+scaled @!l; /*new |display_width|*/
+scaled @!s; /*new |display_indent|*/
+pointer @!p; /*current node when calculating |pre_display_size|*/
+pointer @!q; /*glue specification when calculating |pre_display_size|*/
+internal_font_number @!f; /*font in current |char_node|*/
+int @!n; /*scope of paragraph shape specification*/
+scaled @!v; /*|w| plus possible glue amount*/
+scaled @!d; /*increment to |v|*/
+
+if (head==tail)  /*`\.{\\noindent\$\$}' or `\.{\$\${ }\$\$}'*/
+  {@+pop_nest();w=-max_dimen; x=cur_list.hs_field; offset=0;
+  }
+else{@+ pointer par_ptr;
+     hprune_unwanted_nodes();
+     par_ptr=link(head);
+     pop_nest();
+     store_map(par_ptr,node_pos,0);
+     line_break(display_widow_penalty,par_ptr);@/
+     x=cur_list.hs_field;
+  @<Calculate the natural width, |w|, by which the characters of the final
+line extend to the right of the reference point, plus two ems; or set |w:=max_dimen|
+if the non-blank information on that line is affected by stretching or shrinking@>;
+  }
+ /*now we are in vertical mode, working on the list that will contain the display*/
+@<Calculate the length, |l|, and the shift amount, |s|, of the display lines@>;
+pre_display_size=w;@+display_width=l; display_indent=s;
+}
+
+@ @<Calculate the natural width, |w|, by which...@>=
+v=shift_amount(just_box)+2*dimen_def[quad_no];w=-max_dimen;
+p=list_ptr(just_box);
+while (p!=null)
+  {@+@<Let |d| be the natural width of node |p|; if the node is ``visible,''
+|goto found|; if the node is glue that stretches or shrinks, set |v:=max_dimen|@>;
+  if (v < max_dimen) v=v+d;
+  goto not_found;
+  found: if (v < max_dimen)
+    {@+v=v+d;w=v;
+    }
+  else{@+w=max_dimen;goto done;
+    }
+  not_found: p=link(p);
+  }
+done:
+
+@ @<Let |d| be the natural width of node |p|...@>=
+reswitch: if (is_char_node(p))
+  {@+f=font(p);d=char_width(f, character(p));
+  goto found;
+  }
+switch (type(p)) {
+case hlist_node: case vlist_node: case rule_node: {@+d=width(p);goto found;
+  }
+case ligature_node: @<Make node |p| look like a |char_node|...@>@;
+case kern_node: case math_node: d=width(p);@+break;
+case glue_node: @<Let |d| be the natural width of this glue; if stretching
+or shrinking, set |v:=max_dimen|; |goto found| in the case of leaders@>@;@+break;
+case whatsit_node: @<Let |d| be the width of the whatsit |p|@>;@+break;
+default:d=0;
+}
+
+@ We need to be careful that |w|, |v|, and |d| do not depend on any |glue_set|
+values, since such values are subject to system-dependent rounding.
+System-dependent numbers are not allowed to infiltrate parameters like
+|pre_display_size|, since \TeX82 is supposed to make the same decisions on all
+machines.
+
+@<Let |d| be the natural width of this glue...@>=
+{@+q=glue_ptr(p);d=width(q);
+if (glue_sign(just_box)==stretching)
+  {@+if ((glue_order(just_box)==stretch_order(q))&&@|
+     (stretch(q)!=0))
+    v=max_dimen;
+  }
+else if (glue_sign(just_box)==shrinking)
+  {@+if ((glue_order(just_box)==shrink_order(q))&&@|
+     (shrink(q)!=0))
+    v=max_dimen;
+  }
+if (subtype(p) >= a_leaders) goto found;
+}
+
+@ A displayed equation is considered to be three lines long, so we
+calculate the length and offset of line number |prev_graf+2|.
+
+@<Calculate the length, |l|,...@>=
+if (par_shape_ptr==null)
+  if ((hang_indent!=0)&&@|
+   (((hang_after >= 0)&&(prev_graf+2 > hang_after))||@|
+    (prev_graf+1 < -hang_after)))
+    {@+l=x-abs(hang_indent);
+    if (hang_indent > 0) s=hang_indent;@+else s=0;
+    }
+  else{@+l=x;s=0;
+    }
+else{@+n=info(par_shape_ptr);
+  if (prev_graf+2 >= n) p=par_shape_ptr+2*n;
+  else p=par_shape_ptr+2*(prev_graf+2);
+  s=mem[p-1].sc;l=mem[p].sc;
+  }
+
+@ Primitive math operators like \.{\\mathop} and \.{\\underline} are given
+the command code |math_comp|, supplemented by the noad type that they
+generate.
+
+
+
+
+
+@ We have saved the worst for last: The fussiest part of math mode processing
+occurs when a displayed formula is being centered and placed with an optional
+equation number.
+
+@<Local variables for finishing...@>=
+pointer @!b; /*box containing the equation*/
+scaled @!w; /*width of the equation*/
+scaled @!z; /*width of the line*/
+scaled @!e; /*width of equation number*/
+scaled @!q; /*width of equation number plus space to separate from equation*/
+scaled @!d; /*displacement of equation in the line*/
+scaled @!s; /*move the line right this much*/
+small_number @!g1, @!g2; /*glue parameter codes for before and after*/
+pointer @!r; /*kern node used to position the display*/
+pointer @!t; /*tail of adjustment list*/
+
+@ At this time |p| points to the mlist for the formula; |a| is either
+|null| or it points to a box containing the equation number; and we are in
+vertical mode (or internal vertical mode).
+
+@<\TeX\ functions@>=
+{@<Local variables for finishing a displayed formula@>@;
+adjust_tail=adjust_head;b=hpack(p, natural);p=list_ptr(b);
+t=adjust_tail;adjust_tail=null;@/
+w=width(b);z=display_width;s=display_indent;
+if (a==null)
+  {@+e=0;q=0;
+  }
+else{@+e=width(a);q=e+math_quad;
+  }
+if (w+q > z)
+  @<Squeeze the equation as much as possible; if there is an equation number
+that should go on a separate line by itself, set~|e:=0|@>;
+@<Determine the displacement, |d|, of the left edge of the equation, with
+respect to the line size |z|, assuming that |l=false|@>;
+@<Append the glue or equation number preceding the display@>;
+@<Append the display and perhaps also the equation number@>;
+@<Append the glue or equation number following the display@>;
+prev_graf=prev_graf+3;
+cur_list.bs_pos=hpos+node_pos;
+push_nest();mode=hmode;
+} /* end of \<Finish displayed math> */
+} /* end of |hdisplay| */
+
+@ The user can force the equation number to go on a separate line
+by causing its width to be zero.
+
+@<Squeeze the equation as much as possible...@>=
+{@+if ((e!=0)&&((w-total_shrink[normal]+q <= z)||@|
+   (total_shrink[fil]!=0)||(total_shrink[fill]!=0)||
+   (total_shrink[filll]!=0)))
+  {@+free_node(b, box_node_size);
+  b=hpack(p, z-q, exactly);
+  }
+else{@+e=0;
+  if (w > z)
+    {@+free_node(b, box_node_size);
+    b=hpack(p, z, exactly);
+    }
+  }
+w=width(b);
+}
+
+@ We try first to center the display without regard to the existence of
+the equation number. If that would make it too close (where ``too close''
+means that the space between display and equation number is less than the
+width of the equation number), we either center it in the remaining space
+or move it as far from the equation number as possible. The latter alternative
+is taken only if the display begins with glue, since we assume that the
+user put glue there to control the spacing precisely.
+
+@<Determine the displacement, |d|, of the left edge of the equation...@>=
+d=half(z-w);
+if ((e > 0)&&(d < 2*e))  /*too close*/
+  {@+d=half(z-w-e);
+  if (p!=null) if (!is_char_node(p)) if (type(p)==glue_node) d=0;
+  }
+
+@ If the equation number is set on a line by itself, either before or
+after the formula, we append an infinite penalty so that no page break will
+separate the display from its number; and we use the same size and
+displacement for all three potential lines of the display, even though
+`\.{\\parshape}' may specify them differently.
+
+@<Append the glue or equation number preceding the display@>=
+tail_append(new_penalty(pre_display_penalty));@/
+store_map(tail, node_pos, offset);
+if ((d+s <= pre_display_size)||l)  /*not enough clearance*/
+  {@+g1=above_display_skip_no;g2=below_display_skip_no;
+  }
+else{@+g1=above_display_short_skip_no;
+  g2=below_display_short_skip_no;
+  }
+if (l&&(e==0))  /*it follows that |type(a)==hlist_node|*/
+  {@+shift_amount(a)=s;append_to_vlist(a,offset);
+  tail_append(new_penalty(inf_penalty)); store_map(tail, node_pos, offset);
+  }
+else {tail_append(new_glue(pointer_def[glue_kind][g1])); store_map(tail, node_pos, offset); }
+
+@ @<Append the display and perhaps also the equation number@>=
+if (e!=0)
+  {@+r=new_kern(z-w-e-d);
+  if (l)
+    {@+link(a)=r;link(r)=b;b=a;d=0;
+    }
+  else{@+link(b)=r;link(r)=a;
+    }
+  b=hpack(b, natural);
+  }
+shift_amount(b)=s+d;append_to_vlist(b,offset)
+
+@ @<Append the glue or equation number following the display@>=
+if ((a!=null)&&(e==0)&&!l)
+  {@+tail_append(new_penalty(inf_penalty));
+  shift_amount(a)=s+z-width(a);
+  append_to_vlist(a,offset);
+  g2=0;
+  }
+if (t!=adjust_head)  /*migrating material comes after equation number*/
+  {@+link(tail)=link(adjust_head);tail=t;
+  }
+tail_append(new_penalty(post_display_penalty));
+offset=(hpos-hstart)+1-node_pos; /*offset after the display*/
+store_map(tail, node_pos,offset);
+if (g2 > 0) { tail_append(new_glue(pointer_def[glue_kind][g2]));store_map(tail, node_pos, offset);}
+
+
+@* Mode-independent processing.
+
+@* Dumping and undumping the tables.
+
+@* The main program.
+
+@* Debugging.
+
+@* Extensions.
+The program above includes a bunch of ``hooks'' that allow further
+capabilities to be added without upsetting \TeX's basic structure.
+Most of these hooks are concerned with ``whatsit'' nodes, which are
+intended to be used for special purposes; whenever a new extension to
+\TeX\ involves a new kind of whatsit node, a corresponding change needs
+to be made to the routines below that deal with such nodes,
+but it will usually be unnecessary to make many changes to the
+other parts of this program.
+
+In order to demonstrate how extensions can be made, we shall treat
+`\.{\\write}', `\.{\\openout}', `\.{\\closeout}', `\.{\\immediate}',
+`\.{\\special}', and `\.{\\setlanguage}' as if they were extensions.
+These commands are actually primitives of \TeX, and they should
+appear in all implementations of the system; but let's try to imagine
+that they aren't. Then the program below illustrates how a person
+could add them.
+
+Sometimes, of course, an extension will require changes to \TeX\ itself;
+no system of hooks could be complete enough for all conceivable extensions.
+The features associated with `\.{\\write}' are almost all confined to the
+following paragraphs, but there are small parts of the |print_ln| and
+|print_char| procedures that were introduced specifically to \.{\\write}
+characters. Furthermore one of the token lists recognized by the scanner
+is a |write_text|; and there are a few other miscellaneous places where we
+have already provided for some aspect of \.{\\write}.  The goal of a \TeX\
+extender should be to minimize alterations to the standard parts of the
+program, and to avoid them completely if possible. He or she should also
+be quite sure that there's no easy way to accomplish the desired goals
+with the standard features that \TeX\ already has. ``Think thrice before
+extending,'' because that may save a lot of work, and it will also keep
+incompatible extensions of \TeX\ from proliferating.
+@^system dependencies@>
+@^extensions to \TeX@>
+
+@ First let's consider the format of whatsit nodes that are used to represent
+the data associated with \.{\\write} and its relatives. Recall that a whatsit
+has |type==whatsit_node|, and the |subtype| is supposed to distinguish
+different kinds of whatsits. Each node occupies two or more words; the
+exact number is immaterial, as long as it is readily determined from the
+|subtype| or other data.
+
+We shall introduce five |subtype| values here, corresponding to the
+control sequences \.{\\openout}, \.{\\write}, \.{\\closeout}, \.{\\special}, and
+\.{\\setlanguage}. The second word of I/O whatsits has a |write_stream| field
+that identifies the write-stream number (0 to 15, or 16 for out-of-range and
+positive, or 17 for out-of-range and negative).
+In the case of \.{\\write} and \.{\\special}, there is also a field that
+points to the reference count of a token list that should be sent. In the
+case of \.{\\openout}, we need three words and three auxiliary subfields
+to hold the string numbers for name, area, and extension.
+
+@d write_node_size 2 /*number of words in a write/whatsit node*/
+@d open_node_size 3 /*number of words in an open/whatsit node*/
+@d open_node 0 /*|subtype| in whatsits that represent files to \.{\\openout}*/
+@d write_node 1 /*|subtype| in whatsits that represent things to \.{\\write}*/
+@d close_node 2 /*|subtype| in whatsits that represent streams to \.{\\closeout}*/
+@d special_node 3 /*|subtype| in whatsits that represent \.{\\special} things*/
+@d language_node 4 /*|subtype| in whatsits that change the current language*/
+@d what_lang(A) link(A+1) /*language number, in the range |0 dotdot 255|*/
+@d what_lhm(A) type(A+1) /*minimum left fragment, in the range |1 dotdot 63|*/
+@d what_rhm(A) subtype(A+1) /*minimum right fragment, in the range |1 dotdot 63|*/
+@d write_tokens(A) link(A+1) /*reference count of token list to write*/
+
+@d hitex_ext        language_node+1
+@d param_node         hitex_ext /*|subtype| that records the change of a parameter*/
+@d param_node_size 3 /* number of memory words in a |param_node| */
+@d param_type(A) type(A+1) /* type of parameter */
+@d glue_type  2 /* type of an |glue_par| node */
+@d param_no(A) subtype(A+1) /* the parameter number */
+@d param_value(A)  mem[A+2] /* the parameter value */@#
+
+@d par_node        hitex_ext+1 /*|subtype|  that records a paragraph*/
+@d par_node_size 5 /* number of memory words in a |par_node| */
+@d par_penalty(A)  mem[A+1].i /* the final penalty */
+@d par_extent(A)   link(A+3) /* the extent */@#
+@d par_params(A)   info(A+4) /* list of parameter nodes */
+@d par_list(A)     link(A+4) /* list of content nodes */
+
+@d disp_node           hitex_ext+2 /*|subtype| that records a math display*/
+@d disp_node_size    3 /* number of memory words in a |disp_node| */
+@d display_left(A)    type(A+1) /* 1=left 0=right */
+@d display_no_bs(A)    subtype(A+1) /* |prev_depth==ignore_depth| */
+@d display_params(A)   link(A+1) /* list of parameter nodes */
+@d display_formula(A)  link(A+2) /* formula list */
+@d display_eqno(A)     info(A+2) /* box with equation number */@#
+
+@d baseline_node    hitex_ext+3  /*|subtype| that records a |baseline_skip| */
+@d baseline_node_size small_node_size /* This is 2; we will convert baseline nodes to glue nodes */
+
+@d image_node    hitex_ext+4  /*|subtype| that records an image */
+@d image_node_size 6 /* number of memory words in an |image_node| */
+@d image_width(A)  mem[A+1].sc  /*width of image */
+@d image_height(A) mem[A+2].sc  /*height of image */
+@d image_no(A)     link(A+3)  /* the section number */
+@d image_alt(A)    link(A+5)  /* alternative image description text */@#
+
+@d hpack_node         hitex_ext+5 /* a hlist that needs to go to hpack */
+@d vpack_node         hitex_ext+6 /* a vlist that needs to go to vpackage */
+@d pack_node_size       box_node_size /* a box node up to |list_ptr|*/
+@d pack_m(A)  type(A+list_offset) /* either additional or exactly */
+@d pack_limit(A)        mem[(A)+1+list_offset].sc /* depth limit in |vpack| */
+@d pack_extent(A) link(A+2+list_offset) /* extent */@#
+
+@d hset_node         hitex_ext+7  /* represents a hlist that needs |glue_set| */
+@d vset_node         hitex_ext+8  /* represents a vlist that needs |glue_set| */
+@d set_node_size     box_node_size /* up to |list_ptr| like a box node */
+@d set_stretch_order glue_sign
+@d set_shrink_order  glue_order
+@d set_stretch(A)    mem[(A)+1+list_offset].sc /* replaces |glue_set| */
+@d set_extent(A)     pack_extent(A) /* extent */
+@d set_shrink(A)     mem[(A)+3+list_offset].sc @#
+
+@d align_node          hitex_ext+9 /* represents an alignment */
+@d align_node_size     4
+@d align_extent(A)     link(A+2) /* the extent of the alignment */
+@d align_m(A)          type(A+2) /* either additional or exactly */
+@d align_preamble(A)   info(A+3) /* the preamble */
+@d align_list(A)       link(A+3) /* the unset rows/columns */
+
+@d setpage_node       hitex_ext+10 /* represents a page template */
+@d setpage_node_size  6
+@d setpage_topskip(A) link(A+2)
+@d setpage_height(A)  info(A+4) /* extended dimension number */
+@d setpage_width(A)   link(A+4) /* extended dimension number */
+@d setpage_list(A)    info(A+5) /* the template itself */
+@d setpage_streams(A) link(A+5)   /* list of stream definitions */
+
+@d setstream_node         hitex_ext+11 /* represents a stream definition */
+@d setstream_node_size    6
+@d setstream_max(A)       info(A+3) /* extended dimension number */
+@d setstream_width(A)     link(A+3) /* extended dimension number */
+@d setstream_topskip(A)   info(A+4)
+@d setstream_height(A)    link(A+4)
+@d setstream_before(A)    info(A+5)
+@d setstream_after(A)     link(A+5)
+
+@d stream_node     hitex_ext+12 /* represents a stream insertion point */
+@d stream_node_size 2
+@d stream_number(A)   type(A+1)
+@d stream_insertion(A) subtype(A+1)
+
+
+@d xdimen_node hitex_ext+15
+@d xdimen_node_size    4
+@d xdimen_ref_count(A) link(A)
+@d xdimen_width(A)     mem[A+1].sc
+@d xdimen_hfactor(A)   mem[A+2].sc
+@d xdimen_vfactor(A)   mem[A+3].sc
+
+@d ignore_node hitex_ext+16 /* ignored used to attach extra information */
+@d ignore_node_size small_node_size /* same as |disc_node| */
+@d ignore_info(A)    type(A+1)
+@d ignore_list(A)    link(A+1)
+
+@d color_node hitex_ext+17 /* represent a color node */
+@d end_color_node hitex_ext+18 /* represent an end color node */
+@d no_color_node  hitex_ext+22 /* a deleted end color node */
+@d color_node_size small_node_size
+@d color_ref(A)  type(A+1) /* reference to the color set */
+
+@d label_node hitex_ext+23 /* represents a link to a another location */
+@d label_node_size 2
+@d label_ref(A) link(A+1) /* hint: a reference to a label */
+
+@d start_link_node hitex_ext+24 /* represents a link to another location */
+@d end_link_node hitex_ext+25 /* represents a link to another location */
+@d link_node_size 3
+@d as_color(A) (A)     /* second word like a |color_node| */
+@d as_label(A) ((A)+1) /* third word like a |label_node| */
+
+@d outline_node hitex_ext+26 /* represents an outline item */
+@d outline_node_size 3 /* second word like a |label_node| */
+@d outline_ptr(A)   link(A+2) /* text to be displayed */
+@d outline_depth(A) info(A+2) /* depth of sub items */
+
+
+@ Each new type of node that appears in our data structure must be capable
+of being displayed, copied, destroyed, and so on. The routines that we
+need for write-oriented whatsits are somewhat like those for mark nodes;
+other extensions might, of course, involve more subtlety here.
+
+@<Display the whatsit...@>=
+switch (subtype(p)) {
+case special_node: {@+print_esc("special");
+  print_mark(write_tokens(p));
+  } @+break;
+case language_node: {@+print_esc("setlanguage");
+  print_int(what_lang(p));print(" (hyphenmin ");
+  print_int(what_lhm(p));print_char(',');
+  print_int(what_rhm(p));print_char(')');
+  } @+break;
+case param_node: print_esc("parameter ");
+  print_int(param_type(p));print_char(',');print_int(param_no(p));
+  print_char(':');print_int(param_value(p).i);
+  break;
+case par_node: print_esc("paragraph(");
+  print_xdimen(par_extent(p));
+  print(", ");
+  print_int(par_penalty(p));
+  print_char(')');
+  node_list_display(par_params(p));
+  node_list_display(par_list(p));
+  break;
+case disp_node: print_esc("display ");
+  node_list_display(display_eqno(p));
+  if (display_left(p)) print("left "); else  print("right ");
+  node_list_display(display_formula(p));
+  node_list_display(display_params(p));
+  break;
+case hset_node: case vset_node:
+  print_char('\\');
+  print_char(subtype(p)==hset_node?'h':'v');
+  print("set(");
+  print_scaled(height(p)); print_char('+');
+  print_scaled(depth(p)); print(")x"); print_scaled(width(p));
+  if (shift_amount(p)!=0)
+    {@+print(", shifted ");print_scaled(shift_amount(p));
+    }
+  if (set_stretch(p)!=0)
+  {@+print(", stretch ");print_glue(set_stretch(p),set_stretch_order(p),"pt");
+    }
+  if (set_shrink(p)!=0)
+  {@+print(", shrink ");print_glue(set_shrink(p),set_shrink_order(p),"pt");
+    }
+  print(", extent "); print_xdimen(set_extent(p));
+  node_list_display(list_ptr(p)); /*recursive call*/
+  break;
+case hpack_node: case vpack_node:
+  print_char('\\');
+  print_char(subtype(p)==hpack_node?'h':'v');
+  print("pack(");
+  print(pack_m(p)==exactly?"exactly ":"additional ");
+  print_xdimen(pack_extent(p));
+  if (subtype(p)==vpack_node && pack_limit(p)!=max_dimen) { print(", limit "); print_scaled(pack_limit(p)); }
+  print_char(')');
+  node_list_display(list_ptr(p));
+  break;
+case image_node:
+  print_esc("HINTimage(");
+  print("width ");print_scaled(image_height(p));
+  print(" height "); print_scaled(image_width(p));
+  print("), section ");print_int(image_no(p));
+  if (dir[image_no(p)].file_name!=NULL) {print(", "); print(dir[image_no(p)].file_name);}
+  break;
+case color_node:
+  print_esc("HINTcolor ");print_int(color_ref(p));
+  break;
+case no_color_node:
+  print_esc("HINTendcolor ignored");
+  break;
+case end_color_node:
+  print_esc("HINTendcolor ");
+  break;
+case align_node:
+  print_esc("align(");
+  print(align_m(p)==exactly?"exactly ":"additional ");
+  print_xdimen(align_extent(p));print_char(')');
+  node_list_display(align_preamble(p));
+  print_char(':');
+  node_list_display(align_list(p));
+  break;
+case ignore_node:
+  print_esc("ignore ");print_int(ignore_info(p));print_char(':');
+  node_list_display(ignore_list(p));
+  break;
+case start_link_node:
+  print_esc("HINTstartlink ");
+  print_label(as_label(p));
+  if (color_ref(as_color(p))!=1) { print("color "); print_int(color_ref(as_color(p))); }
+  break;
+case end_link_node:
+  print_esc("HINTendlink ");
+  if (color_ref(as_color(p))!=0xFF) { print("color "); print_int(color_ref(as_color(p))); }
+  break;
+case label_node:
+  print_esc("HINTdest ");
+  print_label(p);
+  break;
+case outline_node:
+  print_esc("HINToutline");
+  print_label(p);
+  print(" depth "); print_int(outline_depth(p));
+  if (outline_ptr(p)==null) print("{}"); else
+  { print_ln();print_current_string();node_list_display(outline_ptr(p));}
+  break;
+case stream_node:
+  print_esc("HINTstream");print_int(stream_insertion(p));
+  print_char('(');print_int(stream_number(p));print_char(')');
+  break;
+default: print("whatsit?");
+}
+
+@ @<Make a partial copy of the whatsit...@>=
+switch (subtype(p)) {
+case open_node: {@+r=get_node(open_node_size);words=open_node_size;
+  } @+break;
+case write_node: case special_node: {@+r=get_node(write_node_size);
+  add_token_ref(write_tokens(p));words=write_node_size;
+  } @+break;
+case close_node: case language_node: {@+r=get_node(small_node_size);
+  words=small_node_size;
+  } @+break;
+case param_node:
+{@+r=get_node(param_node_size);
+  if (param_type(p)==glue_type) add_glue_ref(param_value(p).i);
+  words=param_node_size;
+  } @+break;
+case par_node:
+{@+r=get_node(par_node_size);
+  add_xdimen_ref(par_extent(p));
+  par_params(r)=copy_node_list(par_params(p));
+  par_list(r)=copy_node_list(par_list(p));
+  words=par_node_size-1;
+  } @+break;
+case disp_node:
+{@+r=get_node(disp_node_size);
+  display_left(r)=display_left(p);
+  display_no_bs(r)=display_no_bs(p);
+  display_eqno(r)=copy_node_list(display_eqno(p));
+  display_formula(r)=copy_node_list(display_formula(p));
+  display_params(r)=copy_node_list(display_params(p));
+  words=disp_node_size-2;
+  } @+break;
+case baseline_node:
+{@+r=get_node(baseline_node_size);
+  words=baseline_node_size;
+  } @+break;
+case hpack_node: case vpack_node:
+{@+r=get_node(pack_node_size);
+  mem[r+7]=mem[p+7];mem[r+6]=mem[p+6];mem[r+5]=mem[p+5]; /*copy the last three words*/
+  list_ptr(r)=copy_node_list(list_ptr(p));/*this affects |mem[r+5]|*/
+  add_xdimen_ref(pack_extent(p));/*this affects |mem[r+7]|*/
+  words=5;
+  } @+break;
+case hset_node: case vset_node:
+{@+r=get_node(set_node_size);
+  mem[r+8]=mem[p+8];mem[r+7]=mem[p+7];mem[r+6]=mem[p+6];mem[r+5]=mem[p+5]; /*copy the last four words*/
+  list_ptr(r)=copy_node_list(list_ptr(p)); /*this affects |mem[r+5]|*/
+  add_xdimen_ref(set_extent(p));/*this affects |mem[r+7]|*/
+  words=5;
+  } @+break;
+case image_node:
+    r=get_node(image_node_size);
+    image_alt(r)=copy_node_list(image_alt(p));
+    words=image_node_size-1;
+    break;
+case color_node:
+case no_color_node:
+case end_color_node:
+    r=get_node(color_node_size);
+    words=color_node_size;
+    break;
+case align_node:
+  {@+r=get_node(align_node_size);
+     align_preamble(r)=copy_node_list(align_preamble(p));
+     align_list(r)=copy_node_list(align_list(p));
+     add_xdimen_ref(align_extent(p));
+     words=align_node_size-1;
+  } @+break;
+case setpage_node:
+  {@+r=get_node(setpage_node_size);
+     add_glue_ref(setpage_topskip(p));
+     add_xdimen_ref(setpage_height(p));
+     add_xdimen_ref(setpage_width(p));
+     setpage_list(r)=copy_node_list(setpage_list(p));
+     setpage_streams(r)=copy_node_list(setpage_streams(p));
+     words=setpage_node_size-1;
+  } @+break;
+case setstream_node:
+  {@+r=get_node(setstream_node_size);
+     add_xdimen_ref(setstream_max(p));
+     add_xdimen_ref(setstream_width(p));
+     add_glue_ref(setstream_topskip(p));
+     add_glue_ref(setstream_height(p));
+    setstream_before(r)=copy_node_list(setstream_before(p));
+    setstream_after(r)=copy_node_list(setstream_after(p));
+    words=setstream_node_size-1;
+  } @+break;
+case ignore_node:
+    r=get_node(ignore_node_size);
+    ignore_info(r)=ignore_info(p);
+    ignore_list(r)=copy_node_list(ignore_list(p));
+    words=ignore_node_size-1;
+  break;
+case start_link_node:
+    r=get_node(link_node_size);
+    words=link_node_size;
+    break;
+case end_link_node:
+    r=get_node(link_node_size);
+    words=link_node_size;
+    break;
+case label_node:
+    r=get_node(label_node_size);
+    words=label_node_size;
+    break;
+case outline_node:
+    r=get_node(outline_node_size);
+    outline_ptr(r)=copy_node_list(outline_ptr(p));
+    outline_depth(r)=outline_depth(p);
+    words=outline_node_size-1;
+    break;
+case stream_node:
+    r=get_node(stream_node_size);
+    words=stream_node_size;
+  break;
+case xdimen_node:
+    r=get_node(xdimen_node_size);
+    words=xdimen_node_size;
+  break;
+default:confusion("ext2");
+@:this can't happen ext2}{\quad ext2@>
+}
+
+@ @<Wipe out the whatsit...@>=
+{@+switch (subtype(p)) {
+case close_node: case language_node: free_node(p, small_node_size);@+break;
+case param_node:
+  if (param_type(p)==glue_type) fast_delete_glue_ref(param_value(p).i);
+  free_node(p, param_node_size);@+break;
+case par_node:
+  delete_xdimen_ref(par_extent(p));
+  flush_node_list(par_params(p));
+  flush_node_list(par_list(p));
+  free_node(p, par_node_size);@+break;
+case disp_node:
+  flush_node_list(display_eqno(p));
+  flush_node_list(display_formula(p));
+  flush_node_list(display_params(p));
+  free_node(p, disp_node_size);@+break;
+case  baseline_node:
+  free_node(p, baseline_node_size);@+break;
+case  hpack_node: case  vpack_node:
+  delete_xdimen_ref(pack_extent(p));
+  flush_node_list(list_ptr(p));
+  free_node(p, pack_node_size);@+break;
+case  hset_node: case  vset_node:
+  delete_xdimen_ref(set_extent(p));
+  flush_node_list(list_ptr(p));
+  free_node(p, set_node_size);@+break;
+case image_node:
+  flush_node_list(image_alt(p));
+  free_node(p,image_node_size);@+break;
+case color_node:
+case no_color_node:
+case end_color_node:
+  free_node(p,color_node_size);@+break;
+case align_node:
+  delete_xdimen_ref(align_extent(p));
+  flush_node_list(align_preamble(p));
+  flush_node_list(align_list(p));
+  free_node(p, align_node_size);@+break;
+case setpage_node:
+  delete_glue_ref(setpage_topskip(p));
+  delete_xdimen_ref(setpage_height(p));
+  delete_xdimen_ref(setpage_width(p));
+  flush_node_list(setpage_list(p));
+  flush_node_list(setpage_streams(p));
+  free_node(p, setpage_node_size);@+break;
+case setstream_node:
+  delete_xdimen_ref(setstream_max(p));
+  delete_xdimen_ref(setstream_width(p));
+  delete_glue_ref(setstream_topskip(p));
+  delete_glue_ref(setstream_height(p));
+  flush_node_list(setstream_before(p));
+  flush_node_list(setstream_after(p));
+  free_node(p,setstream_node_size); @+break;
+case ignore_node:
+  flush_node_list(ignore_list(p));
+  free_node(p,ignore_node_size); @+break;
+case start_link_node:
+  free_node(p,link_node_size);@+break;
+case end_link_node:
+  free_node(p,link_node_size);@+break;
+case label_node:
+  free_node(p,label_node_size);@+break;
+case outline_node:
+  flush_node_list(outline_ptr(p));
+  free_node(p,outline_node_size);@+break;
+case stream_node:
+  free_node(p,stream_node_size); @+break;
+case xdimen_node:
+  free_node(p,xdimen_node_size);
+default:confusion("ext3");
+@:this can't happen ext3}{\quad ext3@>
+} @/
+goto done;
+}
+
+@ @<Incorporate a whatsit node into a vbox@>=
+if (subtype(p)==image_node)
+{ if (image_width(p)> w) w= image_width(p);
+  x= x+d+image_height(p);d=0;
+}
+
+@ @<Incorporate a whatsit node into an hbox@>=
+if (subtype(p)==image_node)
+{@+if (image_height(p)> h) h= image_height(p);
+  x= x+image_width(p);
+}
+else if (subtype(p)==color_node)
+  just_color=color_ref(p);
+else if (subtype(p)==end_color_node)
+  just_color=-1;
+else if (subtype(p)==start_link_node)
+{ just_label=label_ref(as_label(p)); just_color=color_ref(as_color(p));
+  if (just_color==0xFF) just_color=-1;
+}
+else if (subtype(p)==end_link_node)
+{ just_label=-1; just_color=color_ref(as_color(p));
+  if (just_color==0xFF) just_color=-1;
+}
+
+@ @<Let |d| be the width of the whatsit |p|@>=
+d=((subtype(p)==image_node)?image_width(p):0)
+
+@ @d adv_past(A) {}
+
+@<Advance \(p)past a whatsit node in the \(l)|line_break| loop@>=@+
+if (subtype(cur_p)==image_node)act_width=act_width+image_width(cur_p);
+adv_past(cur_p)
+
+@ @<Prepare to move whatsit |p| to the current page, then |goto contribute|@>=
+if (subtype(p)==image_node)
+{@+page_total=page_total+page_depth+image_height(p);
+page_depth=0;
+}
+goto contribute
+
+@ @<Process whatsit |p| in |vert_break| loop, |goto not_found|@>=
+goto not_found
+
+
+@
+
+\endgroup
 
 \section{Building Pages Bottom Up}
 \TeX's page builder (see section~\secref{texbuildpage}) moves nodes from the contribution list 
@@ -3972,10 +11434,10 @@ case penalty_node: if (page_contents == empty) goto done1;@+else pi=penalty(p);@
 case ins_node: happend_insertion(p); goto contribute;
 default: DBG(DBGTEX,"Unexpected node type %d in build_page_up ignored\n",type(p));
 } 
-  @<Check if node |p| is a new champion breakpoint@>@;
+  @<Check if node |p| is a new champion breakpoint for the top of page@>@;
 contribute:
 @<Prepend node |p| to the current page and |goto done|@>@;
-done1: @<Recycle node |p|@>@;
+done1: @<Recycle node |p|@>;
 done: 
 @
 
@@ -3987,9 +11449,6 @@ link(page_head)=p;
 goto done;
 @
 
-@<Recycle node |p|@>=
-link(contrib_head)=link(p);link(p)=null;flush_node_list(p);
-@
 \subsection{Glues and Kerns}
 
 Page breaks are possible at a glue node, if the node just above the glue node is a
@@ -4047,16 +11506,7 @@ else c=b;
 if (insert_penalties >= 10000) c=awful_bad;
 @
 
-@<Compute the badness, |b|, of the current page...@>=
-if (page_total < page_goal) 
-{  if ((page_so_far[3]!=0)||(page_so_far[4]!=0)||(page_so_far[5]!=0)) b=0;
-  else b=badness(page_goal-page_total, page_so_far[2]);
-}
-else if (page_total-page_goal > page_shrink) b=awful_bad;
-else b=badness(page_total-page_goal, page_shrink)
-@
-
-@<Check if node |p| is a new champion breakpoint@>=
+@<Check if node |p| is a new champion breakpoint for the top of page@>=
 if (pi < inf_penalty) 
 {@+@<Compute the cost |c| of a possible break at |p|@>@;
   if (c <= least_page_cost) 
@@ -4194,7 +11644,7 @@ content section, or zero if no such position is known.
 To delete an entry, simply call |store_map(p,0,0)|.
 
 @<\HINT\ functions@>=
-void store_map(pointer p, uint32_t pos0, uint32_t offset)
+static void store_map(pointer p, uint32_t pos0, uint32_t offset)
 {@+ map[p]=pos0;
   map[p+1]=offset;@+
 }
@@ -4207,7 +11657,7 @@ uint32_t hposition(pointer p)
 The function that takes information form the cache and converts it to a |uint64_t| location, as mentioned above, commes next. It returns |HINT_NO_LOC| if no information is in the cache.
 This value is used to indicate that a variable contains no valid location.
 
-@<\HINT\ |extern|@>=
+@<\HINT\ |static|@>=
 #define HINT_NO_LOC 0xFFFFFFFFFFFFFFFF
 #define PAGE_LOC(POS0,OFF) (((uint64_t)((POS0)+(OFF))<<32) + (uint64_t)(OFF))
 #define LOC_POS(P) ((P)>>32) /* the node position */
@@ -4242,13 +11692,13 @@ of locations sorted by their position in a circular buffer.
 @<\HINT\ variables@>=
 #define MAX_PAGE_POS (1<<3) /* must be a power of 2 */
 
-uint64_t page_loc[MAX_PAGE_POS];
-int cur_loc;
+static uint64_t page_loc[MAX_PAGE_POS];
+static int cur_loc;
 static int lo_loc, hi_loc;
 @
-@<\HINT\ |extern|@>=
-extern uint64_t page_loc[];
-extern int cur_loc;
+@<\HINT\ |static|@>=
+static uint64_t page_loc[];
+static int cur_loc;
 @
 
 The location of the current page is found at |page_loc[cur_loc]| which
@@ -4267,11 +11717,13 @@ if there is a next page in the cache. |hloc_prev| does the same for the preceedi
 #define @[NEXT_PAGE(X)@] (X=(X+1)&(MAX_PAGE_POS-1))
 #define @[PREV_PAGE(X)@] (X=(X-1)&(MAX_PAGE_POS-1))
 @#
-void hloc_clear(void)
+static void hloc_clear(void)
 { @+lo_loc=hi_loc=cur_loc;PREV_PAGE(lo_loc);NEXT_PAGE(hi_loc);@+
 }
+@
 
-bool hloc_next(void)
+@<render functions@>=
+static bool hloc_next(void)
 { @+int i=cur_loc;
   if (hstart+LOC_POS(page_loc[cur_loc])>=hend) 
     return false;
@@ -4282,7 +11734,7 @@ bool hloc_next(void)
   return true;
 }
 
-bool hloc_prev(void) 
+static bool hloc_prev(void) 
 { @+int i=cur_loc;
   if (page_loc[cur_loc]==0) 
     return false;
@@ -4292,21 +11744,18 @@ bool hloc_prev(void)
   cur_loc=i;
   return true;
 }
-
-
 @
-@<\HINT\ |extern|@>=
-extern void hloc_clear(void); /* keep only |cur_loc| in the cache */
-extern bool hloc_next(void);  /* advance to the next page if possible */
-extern bool hloc_prev(void);  /* advance to the previous page if possible */
-extern uint64_t hlocation(pointer p); /* map |p| to its file location */
+
+@<\HINT\ |static|@>=
+static void hloc_clear(void); /* keep only |cur_loc| in the cache */
+static uint64_t hlocation(pointer p); /* map |p| to its file location */
 @
 
 After these preparations, we can turn our attention to the functions that manage
 the page cache itself. We start with the initialization function:
 
 @<\HINT\ functions@>=
-void hloc_init(void)
+static void hloc_init(void)
 {@+cur_loc=0;
   hloc_clear();
   page_loc[cur_loc]=0;
@@ -4325,9 +11774,9 @@ A more drastic action needs to be taken if the value of |h| is not in the page l
 If the location of the current page is new, we do not know anything about the position
 of following or preceeding pages and we have to clear the cache. 
 
-@<\HINT\ auxiliar functions@>=
+@<render functions@>=
 
-void hloc_set(uint64_t h)
+static void hloc_set(uint64_t h)
 {@+ int i;
   if (page_loc[cur_loc]==h) return;
   for (i=lo_loc,NEXT_PAGE(i); i!=hi_loc; NEXT_PAGE(i))
@@ -4353,7 +11802,7 @@ void hloc_set(uint64_t h)
  
  @<\HINT\ auxiliar functions@>=
 
-void hloc_set_next(pointer p)
+static void hloc_set_next(pointer p)
 { @+int i=cur_loc;
   uint64_t h=hlocation(p); 
   if (h==page_loc[cur_loc]) return;
@@ -4389,7 +11838,7 @@ mode, we will set the current page to the new location and keep only the positio
 old current page as position of the next page in the cache.
 
 @<\HINT\ auxiliar functions@>=
-void hloc_set_prev(pointer p)
+static void hloc_set_prev(pointer p)
 { @+int i=cur_loc;
   uint64_t h=hlocation(p); 
   PREV_PAGE(i);
@@ -4413,12 +11862,11 @@ void hloc_set_prev(pointer p)
 
 The following functions are called from the \TeX\ code:
 
-@<\HINT\ |extern|@>=
-extern void hloc_init(void);
-extern void store_map(pointer p, uint32_t pos, uint32_t offset); /*store the location of |p|*/
-extern uint32_t hposition(pointer p); /* return the position of |p| or 0*/
-extern void hloc_set(uint64_t h);
-extern void hloc_set_next(pointer p);/* record the location of |p| as the start of the next page */
+@<\HINT\ |static|@>=
+static void hloc_init(void);
+static void store_map(pointer p, uint32_t pos, uint32_t offset); /*store the location of |p|*/
+static uint32_t hposition(pointer p); /* return the position of |p| or 0*/
+static void hloc_set_next(pointer p);/* record the location of |p| as the start of the next page */
 @
 
 \section{The Top-Level Interface}
@@ -4449,6 +11897,7 @@ int hint_begin(void)
 { if (!hint_map()) return 0;
   hpos=hstart=hin_addr;
   hend=hstart+hin_size;
+  ft_init();
   hint_clear_fonts(true);
   hflush_contribution_list(); hpage_init();
   flush_node_list(link(page_head));
@@ -4480,15 +11929,9 @@ void hint_end(void)
   free_definitions();
   list_leaks();
   hclear_dir();
+  hint_clear_fonts(true);
+  ft_destroy();
 }
-@
-
-
-@<\HINT\ |extern|@>=
-extern int hint_begin(void);
-extern void hint_end(void);
-extern bool hint_map(void);
-extern void hint_unmap(void);
 @
 
 
@@ -4514,12 +11957,12 @@ and a scale factor 1. In both cases, the renderer will produce a 300 by 400 pixe
 which would either fill the larger aerea at 100dpi or the smaler one at 200dpi.
 
 @<render variables@>=
-double xdpi=600.0, ydpi=600.0;
+static double xdpi=600.0, ydpi=600.0;
 @
 
-@<render functions@>=
+@<\HINT\ functions@>=
 void hint_resize(int px_h, int px_v, double x_dpi, double y_dpi)
-{ 
+{ double pt_h, pt_v;
 #if 0
   /* this optimization causes the android viewer to display a blank page
      after opening a new file. To be investigated!
@@ -4532,7 +11975,11 @@ void hint_resize(int px_h, int px_v, double x_dpi, double y_dpi)
   old_px_h=px_h; old_px_v=px_v; old_xdpi=x_dpi; old_ydpi=y_dpi;
 #endif
   xdpi=x_dpi; ydpi=y_dpi;
-  nativeSetSize(px_h, px_v, xdpi, ydpi);
+  pt_h = px_h * 72.27 / x_dpi;
+  pt_v = px_v * 72.27 / y_dpi; 
+  page_h = round(pt_h * (1 << 16));
+  page_v = round(pt_v * (1 << 16));
+  nativeSetSize(px_h, px_v, pt_h, pt_v);
   hloc_clear();
   hflush_contribution_list(); hpage_init();
   forward_mode=false;
@@ -4540,10 +11987,26 @@ void hint_resize(int px_h, int px_v, double x_dpi, double y_dpi)
 }
 @
 
-
 The function tells the native renderer about the change, clears all locations
 from the location cache, removes nodes from the contribution list,
 and resets the rendering direction.
+
+Once a \HINT\ file is loaded, the GUI might be interested to know the ``design size''
+of the document. The following two functions will return the \.{\\hsize} and \.{\\vsize}
+as given to Hi\TeX.
+
+@<\HINT\ functions@>=
+scaled hint_hsize(void)
+{ if (dimen_def!=NULL) return dimen_def[hsize_dimen_no];
+  else return 0;
+}
+
+scaled hint_vsize(void)
+{ if (dimen_def!=NULL) return dimen_def[vsize_dimen_no];
+  else return 0;
+}
+@
+
 
 
 \subsection{Building Pages Forward and Backward}
@@ -4609,7 +12072,7 @@ belongs to the bottom of the preceeding page and |hpos| will
 indicate where parsing should contine when producing the previous page.
  After the call, we will have at least two enties in the location cache:
 the top of the current page and the top of the next page.
-@<\HINT\ |extern|@>=
+@<\HINT\ |static|@>=
 extern bool hint_forward(void);
 extern bool hint_backward(void);
 @
@@ -4638,11 +12101,9 @@ bool flush_pages(uint32_t pos)
 We needed:
 
 @<\HINT\ variables@>=
-scaled hvsize, hhsize;
+static scaled hvsize, hhsize;
 @
-@<\HINT\ |extern|@>=
-extern scaled hvsize, hhsize;
-@
+
 The variables |hvsize| and |hhsize| give the vertical and horizontal
 size of the main body of text. They are determined by subtracting the
 margins from |page_v| and |page_h| as determined by the GUI.
@@ -4666,7 +12127,7 @@ the main body of text as well as the offset of its top/left
 position. The dimensions are given in scaled points.
 
 @<\HINT\ variables@>=
-int page_v, page_h, offset_v, offset_h;
+static int page_v, page_h, offset_v, offset_h;
 @
 
 If no page template is defined, a default algorithm is used.
@@ -4754,9 +12215,6 @@ uint64_t hint_page_top(uint64_t h)
   if (LOC_OFF(h))
     hget_par_node(LOC_OFF(h));
   hint_forward();
-#if 0
-  show_box(streams[0].p);
-#endif
   forward_mode=true;
   backward_mode=false;
   return h;
@@ -4878,7 +12336,8 @@ Now let's consider moving to the next page.
 If we produced the current page using |hint_forward|, we can simply call
 |hint_forward| again. For this reason, we use the variables  |forward_mode| and |backward_mode|
 to keep track of the direction used to render the current page.
-@<render variables@>=
+
+@<\HINT\ variables@>=
 static bool forward_mode=false, backward_mode=false;
 @
 If simply moving forward does not work---we might not know the position of the next page,
@@ -5198,7 +12657,7 @@ a simple data type is used for outlines.
 It contains the information relevant to the 
 user interface.
 
-@<\HINT\ |extern|@>=
+@<\HINT\ |static|@>=
 typedef struct { 
 uint64_t pos;  
 uint8_t depth; 
@@ -5206,7 +12665,7 @@ uint8_t where;
 int p; /* pointer to the list of title nodes */
 char *title; /* title as sequence of utf8 character codes */
 } hint_Outline;
-extern hint_Outline *hint_outlines;
+hint_Outline *hint_outlines;
 @
 
 The |pos| field contains a ``position'' in the hint file 
@@ -5216,7 +12675,7 @@ navigate to the desired position in the \HINT\ file.
 The |where| field indicates where the
 label should be placed on the page.
 The values are:
-@<\HINT\ |extern|@>=
+@<\HINT\ |static|@>=
 #define LABEL_UNDEF 0
 #define LABEL_TOP 1
 #define LABEL_BOT 2
@@ -5275,7 +12734,7 @@ returns a pointer to an array of type |hint_Outline[]|, that can be indexed
 from 0 to |max_outline|.
 
 Here is a summary of the above functions:
-@<\HINT\ |extern|@>=
+@<\HINT\ |static|@>=
 extern int hint_get_outline_max(void);
 extern hint_Outline *hint_get_outlines(void);
 extern uint64_t hint_outline_page(int i);
@@ -5328,7 +12787,7 @@ During traversal, the function is stored in the variable |trv_stream|.
 static bool trv_ignore=false;
 static bool trv_skip_space=false;
 static void (*trv_stream)(uint32_t c);
-void trv_init(void (*f)(uint32_t c))
+static void trv_init(void (*f)(uint32_t c))
 {trv_ignore=false;trv_skip_space=false; trv_stream=f;}
 
 static void trv_char(uint32_t c)
@@ -5340,7 +12799,7 @@ static void trv_char(uint32_t c)
   }
 }
 
-void trv_hlist(pointer p)
+static void trv_hlist(pointer p)
 { while(p!=null)
   { if(is_char_node(p))
     { if (!trv_ignore) trv_char(character(p));
@@ -5376,7 +12835,7 @@ void trv_hlist(pointer p)
   }
 }
 
-void trv_vlist(pointer p)
+static void trv_vlist(pointer p)
 { while(p!=null)
   { switch (type(p))
     { case hlist_node: if(list_ptr(p)!=null) trv_hlist(list_ptr(p));  
@@ -5390,10 +12849,10 @@ void trv_vlist(pointer p)
 }
 @
 
-@<\HINT\ |extern|@>=
-extern void trv_init(void (*f)(uint32_t c));
-extern void trv_vlist(pointer p);
-extern void trv_hlist(pointer p);
+@<\HINT\ |static|@>=
+static void trv_init(void (*f)(uint32_t c));
+static void trv_vlist(pointer p);
+static void trv_hlist(pointer p);
 @
 
 Using these functions we can now implement the function
@@ -5421,7 +12880,7 @@ static void trv_string_collect(uint32_t c)
   }
 }
 
-char *hlist_to_string(pointer p)
+static char *hlist_to_string(pointer p)
 { trv_string_size=0;
   trv_init(trv_string_collect);
   trv_hlist(p);
@@ -5678,7 +13137,7 @@ static uint64_t m_page; /* the position of the page currently marked */
 @
 
 @<render functions@>=
-void hmark_page(void)
+static void hmark_page(void)
 { if (streams==NULL || streams[0].p==null) return;
   m_ptr=0; 
   if (m_page!=page_loc[cur_loc])
@@ -5699,10 +13158,13 @@ void hmark_page(void)
 }
 @
 
+@<\HINT\ declarations@>=
+static void hmark_page(void);
+@
 
 We need a dummy version for our test programs.
 @<test functions@>=
-void hmark_page(void)
+static void hmark_page(void)
 {return; }
 @
 
@@ -5730,35 +13192,53 @@ m_ptr=0; m_d=m_get(); c_ignore=false; cur_style=next_style=0;
 
 Whenever the renderer encounters a character, it will need to
 update |cur_style|.
+The new value of |cur_style| is assigned to |next_style| and
+the latter value is used when calling |render_char|. This is needed
+because the call to render char is shared with a |goto render_c;|
+when handling a ligature. The handling of the ligature might
+then change the value of |next_char|. Whether this detour is realy
+necessary remains unclear. It seems simpler to change the value of
+|cur_style| directly when handling a ligature. But note that also
+ignore nodes change the value of |next_style| and if the ignore node
+preceeds a ligature node this change might be important. 
 
-@<update |cur_style|@>=
-{ while (m_d==0)
-  { cur_style=cur_style>0?0:1;
-    if (cur_style>0)
-    { if (m_ptr==m_focus) cur_style=2;
+
+@<compute the |next_style|@>=
+  next_style=cur_style;
+  while (m_d==0)
+  { next_style=next_style>0?0:1;
+    if (next_style>0)
+    { if (m_ptr==m_focus) next_style=2;
       m_d=m_chars;
     }
     else
       m_d=m_get();
   }
   m_d--;
-}
 @
 
 When rendering a ligature, we consider for the purpose of marking
 the characters which generated the ligature.
 If any of these characters is marked, the whole ligature is marked.
 @<account for the characters that generated the ligature@>=
-
 if (!c_ignore)
 { pointer q;
-  next_style=0;
+  int s, max_s;
+  s=cur_style;
+  max_s=0;
   q=lig_ptr(p);
   while (q!=null)
-  { @<update |cur_style|@>@;
-    if (cur_style>next_style) next_style=cur_style;
+  { if (is_char_node(q) && character(q)!=' ')
+    { @<compute the |next_style|@>@;
+      cur_style=next_style;
+      if (next_style>max_s) max_s=next_style;
+    }
     q=link(q);
   }
+  if (s!=max_s)
+    hSetColor(max_s);
+  else
+    cur_style=s;
 }
 @
 
@@ -5790,11 +13270,17 @@ but without rendering them. We assume that the |ignore_list|
 consists (recursively!) entirely of character, kern, box, rule, and ligature nodes.
 
 @<render functions@>=
-void c_ignore_list(pointer p)
-{ while(p!=null)
-  { if(is_char_node(p))
-    { @<update |cur_style|@>@;
-      if (cur_style>next_style) next_style=cur_style;
+static void hSetColor(int c);
+
+static void c_ignore_list(pointer p)
+{ int s, max_s;
+  s=cur_style;
+  max_s=0;
+  while(p!=null)
+  { if (is_char_node(p) && character(p)!=' ')
+    { @<compute the |next_style|@>@;
+      cur_style=next_style;
+      if (next_style>max_s) max_s=next_style;
     }
     else
     { switch(type(p)) 
@@ -5803,8 +13289,9 @@ void c_ignore_list(pointer p)
         case ligature_node:
         { pointer q=lig_ptr(p);
           while (q!=null)
-          { @<update |cur_style|@>@;
-            if (cur_style>next_style) next_style=cur_style;         
+          { @<compute the |next_style|@>@;
+            cur_style=next_style;
+            if (next_style>max_s) max_s=next_style;
             q=link(q);
           }
         }
@@ -5813,6 +13300,10 @@ void c_ignore_list(pointer p)
     }
     p=link(p);
   }
+  if (s!=max_s)
+    hSetColor(max_s);
+  else
+    cur_style=s;
 }
 @
 
@@ -5881,11 +13372,24 @@ static int cur_link=-1;
 @<handle a start link node@>=
 local_link=label_ref(as_label(p));
 add_new_link(local_link,this_box,cur_h,cur_v);
+{ uint32_t c = color_ref(as_color(p));
+  if (c==0xFF) 
+    hSetColor(list_color);
+  else
+    hSetColor(c);
+}
+
 @
 
 @<handle an end link node@>=
 end_new_link(local_link,this_box,cur_h,cur_v);
 local_link=-1;
+{ uint32_t c = color_ref(as_color(p));
+  if (c==0xFF)
+    hSetColor(list_color);
+  else
+    hSetColor(c);
+}
 @
 
 If at the end of a horizontal list |local_link| is |true| an additional
@@ -5917,19 +13421,19 @@ If |max_links| is negative, no links are available.
 
 
 
-@<\HINT\ |extern|@>=
+@<\HINT\ |static|@>=
 typedef struct { 
 uint64_t pos;  
 uint8_t where; 
 scaled top, bottom, left, right;
 } hint_Link;
 extern hint_Link *hint_links;
-extern int max_link;
+static int max_link;
 @
 
 @<\HINT\ variables@>=
 hint_Link *hint_links=NULL;
-int max_link=-1;
+static int max_link=-1;
 @
 
 The |hint_links| array is filled with the necessary information
@@ -5937,7 +13441,7 @@ when the page is rendered.
 
 @<render functions@>=
 static int links_allocated=0;
-void add_new_link(int n, pointer p, scaled h, scaled v)
+static void add_new_link(int n, pointer p, scaled h, scaled v)
 { hint_Link *t;
    uint64_t pos;
    uint8_t where;
@@ -5974,7 +13478,7 @@ void add_new_link(int n, pointer p, scaled h, scaled v)
   }
 }
 
-void end_new_link(int n, pointer p, scaled h, scaled v)
+static void end_new_link(int n, pointer p, scaled h, scaled v)
 { hint_Link *t;
   if (max_link<0) return;
   t=hint_links+max_link;
@@ -6089,8 +13593,8 @@ As a shortcut, it can call this function:
 @
 
 Here is a summary of the above functions:
-@<\HINT\ |extern|@>=
-extern int hint_find_link(scaled x, scaled y,scaled precission);
+@<\HINT\ |static|@>=
+extern int hint_find_link(scaled x, scaled y, scaled precission);
 extern uint64_t hint_link_page(int i);
 @
 
@@ -6099,18 +13603,30 @@ extern uint64_t hint_link_page(int i);
 How to render a \HINT\ file on any specific device depends largely on the
 operating system and its API encapsulating the device. Never the less, there
 are some functions that can be shared accross many different operating systems
-or at least can serve as a starting point for implementing operating system specific
-versions.
+or at least can serve as a starting point for implementing operating system 
+specific versions.
 
 Most systems, for example, will need some code to initialize and to finalize
 the rendering infrastructure. The system depenent functions will be implemented
 in as |nativeInit| and |nativeClear|. To have a consistent interface accross
 different graphical user interfaces. These are reexported as |hint_render_on|
-and |hint_render_off|.
+and |hint_render_off|. |hint_render_on| must be called before any other
+function that attempts to use the native rendering infrastructure.
 
 @<render functions@>=
+#define CUR_FG FG(CURCOLOR(cur_mode,cur_style,color_def[cur_color]))
+#define CUR_BG BG(CURCOLOR(cur_mode,cur_style,color_def[cur_color]))
+
+static void hSetColor(int c)
+{ cur_color=c;
+  cur_fg=CUR_FG;
+  nativeSetForeground(cur_fg);
+}
+
 void hint_render_on(void)
 { nativeInit();
+  hSetColor(0);
+  hint_clear_fonts(true);
 }
 
 void hint_render_off(void)
@@ -6118,27 +13634,29 @@ void hint_render_off(void)
 }
 @
 
-Similar functions that are just forwarded are |nativeSetDark|
-and |nativeSetGamma|
+A function that is just forwarded is |nativeSetGamma|.
 
 @<render functions@>=
+
 void hint_dark(int dark)
-{ nativeSetColor(color_def!=NULL?color_def:color_defaults);
-  nativeSetDark(dark);
+{ cur_mode=dark?1:0;
+  hSetColor(cur_color);
 }
+
 void hint_gamma(double gamma)
 { nativeSetGamma(gamma);
 }
 @
 
 Prototypes of the three functions just defined are contained in
-the {\tt hrender.h} file where as the prototypes of the 
+the {\tt hint.h} file where as the prototypes of the 
 ``native'' functions are part of {\tt rendernative.h}. The latter
 file contains requirements: functions that need to be implemented
-but are not defined here. Most implementations will avoid the
-inclusion of  {\tt rendernative.h} because it will need other include files,
-notably  {\tt hfonts.h} which defines the interface to the font cache.
-In contrast, {\tt hrender.h} has almost no dependencies and avoids
+but are not defined here.
+%Most implementations will avoid the
+%inclusion of  {\tt rendernative.h} because it will need other include files,
+%notably  {\tt hfonts.h} which defines the interface to the font cache.
+{\tt hint.h} has almost no dependencies and avoids
 cluttering the global name space by using the |hint_|\dots prefix.
 
 
@@ -6152,7 +13670,7 @@ TrueType\cite{TTT:TT} fonts, and OpenType fonts\cite{MS:OTF}\cite{ISO:OTF}.
 To render the latter, we use the FreeType Library\cite{freetype}
 by David Turner, Werner Lemberg, and others.
 
-@<font types@>=
+@<\HINT\ types@>=
 typedef	enum {@+ no_format, pk_format, ft_format@+ } FontFormat;
 @
 
@@ -6164,7 +13682,7 @@ the individual glyphs belonging to the font. Further, it includes an
 for the different font formats.
 
 
-@<font types@>=
+@<\HINT\ types@>=
 @<definitions of |PKfont| and |FTfont| types@>@;
 
 typedef struct font_s {
@@ -6174,22 +13692,21 @@ typedef struct font_s {
   double s; /* the size in pt */
   double hpxs,vpxs; /* the horizontal and vertical size of one pixel in pt */
   @<the glyph cache@>@;
+  bool resize;
   FontFormat ff; /* the font format */
-  union {@+ PKfont pk; @+FTfont tt;@+  }; /* the font format specific parts */
 } Font;
 @
 The |fonts| table contains an entry for every possible font number.
 
-@<font variables@>=
+@<\HINT\ variables@>=
 static Font *fonts[0x100]={NULL}; 
 @
 
 Given a font number |f| the following function returns a pointer to the 
 corresponding font structure, extracting the necessary information from the \HINT\ file if necessary.
-@<font functions@>=
-static struct font_s *hget_font(uint8_t f)
+@<render functions@>=
+static struct font_s *hload_font(uint8_t f)
 { Font *fp;
-  if (fonts[f]!=NULL) return fonts[f];
   DBG(DBGFONT,"Decoding new font %d\n",f);
   if (f>max_ref[font_kind])
     QUIT("Undefined font %d\n",f);
@@ -6204,10 +13721,11 @@ static struct font_s *hget_font(uint8_t f)
     fp->font_data=hstart;
     fp->data_size=hend-hstart;@/
     hpos=spos; hstart=sstart;hend=send;
+    fp->resize=true;
   }
-  fp->s=font_at_size(f)/(double)(1<<16);
-  @<determine the font format and unpack the font@>@;
   fonts[f]=fp;
+  fp->s=font_def[f].s/(double)(1<<16);
+  @<determine the font format and unpack the font@>@;
   return fonts[f];
 }
 @
@@ -6215,7 +13733,7 @@ static struct font_s *hget_font(uint8_t f)
 To initialize the |fonts| table and remove all fonts form memory, the
 function |hint_clear_fonts|  is used with the |rm| parameter set to
 |true|. If |rm| is set to |false| the action is less drastic: only the
-function |nativeFreeGlyph| is called for all glyphs in the glyph cache,
+function |nativeFreeTexture| is called for all glyphs in the glyph cache,
 the |fonts| table and the glyph cache are retained.
 
 
@@ -6228,18 +13746,22 @@ void hint_clear_fonts(bool rm)
   for (f=0;f<=max_ref[font_kind];f++)
     if (fonts[f]!=NULL)
     { hfree_glyph_cache(fonts[f],rm);
-      if (rm)@+ { @+ free(fonts[f]); fonts[f]=NULL;@+ }
+      if (rm)@+ { @+ fonts[f]->resize=true;@+ }
     }
 }
 @
 
 We need a dummy version for our test programs.
 @<test functions@>=
-void hint_clear_fonts(bool rm)
-{return; }
+/* replaces the values from hrender.c */
+double xdpi=600.0,ydpi=600.0;
+unsigned int nativeFreeTexture(unsigned int t)  {return 0;}
+unsigned int nativeTexture(unsigned char *bits, int w, int h) {return 0;}
+void nativeGlyph(double x,double y,double w,double h,
+   unsigned int t)  {return;}
+static void hfree_glyph_cache(Font *f, bool rm) {}
+void nativeSetSize(int px_h, int px_v, double pt_x, double pt_v) {}
 @
-
-
 
 
 
@@ -6255,20 +13777,19 @@ The order and depth of the trees reflects UTF-8 encoding.
    of 2, 3, and 4 levels respectively.
 
 @<the glyph cache@>=
-  struct gcache_s **g0; /* $0 \le |g| < 2^7$ */
-  struct gcache_s ***g1;  /* $2^7 \le |g| < 2^{12}$ */
-  struct gcache_s ****g2; /* $2^{12} \le |g| < 2^{18}$ */
-  struct gcache_s *****g3; /* $2^{18} \le |g| < 2^{24}$ */@/
+  Gcache **g0; /* $0 \le |g| < 2^7$ */
+  Gcache ***g1;  /* $2^7 \le |g| < 2^{12}$ */
+  Gcache ****g2; /* $2^{12} \le |g| < 2^{18}$ */
+  Gcache *****g3; /* $2^{18} \le |g| < 2^{24}$ */@/
 @t~@>
 @
 
 
-The glyphs are described using a |gcache_s| structure. 
-We use |Gcache| as a shorthand for |struct gcache_s|.
- 
-To look up the cached glyph data for font |f| and charactercode |cc|, we use the function |g_lookup|.
+The glyphs are described using a |Gcache| structure. 
+To look up the cached glyph data for font |f| and charactercode |cc|,
+we use the function |g_lookup|.
 
-@<auxiliar font functions@>=
+@<render functions@>=
 #define G0_BITS 7
 #define G0_SIZE (1<<G0_BITS)
 #define G0_MASK (G0_SIZE-1)
@@ -6311,11 +13832,11 @@ Given a font and a charactercode it returns a pointer to the glyph,
 allocating a glyph if none is yet allocated, and returning a pointer to ``the undefined glyph''
 if no more memory is available.
 
-@<font variables@>=
+@<\HINT\ variables@>=
 static Gcache g_undefined ={0};
 @
 
-@<auxiliar font functions@>=
+@<render functions@>=
 static Gcache *hnew_g(Gcache **g)
 { if (*g==NULL)
     *g=calloc(1, sizeof(Gcache));
@@ -6372,27 +13893,27 @@ static Gcache *hnew_glyph(Font *f, unsigned int cc)
 
 The next set of functions is used to clear the glyph cache.
 If the boolean parameter |rm| is |true|, the complete cache will 
-be deallocated. Otherwise only the function |nativeFreeGlyph| will be called.
+be deallocated. Otherwise only the function |nativeFreeTexture| will be called.
 Together with the exported function |hint_clear_fonts| this offers
 the native rendering engine a method to relase allocated resources
 without the need to know the deatails of the glyph cache.
 The construction of the functions |hfree_g0| to |hfree_g3| mirrors
 the construction of |hnew_g0| to  |hnew_g3|
 
-@<font functions@>=
-static void hfree_g0(struct gcache_s **g, bool rm)
+@<render functions@>=
+static void hfree_g0(Gcache **g, bool rm)
 { int i;
   if (g==NULL) return;
   for (i=0;i<G0_SIZE;i++)
     if (g[i]!=NULL)
-    { nativeFreeGlyph(g[i]);
+    { g[i]->OGLtexture=nativeFreeTexture(g[i]->OGLtexture);
       if (rm) {
       if (g[i]->bits!=NULL) free(g[i]->bits);
       free(g[i]); g[i]=NULL;@+ }
     }
 }
 
-static void hfree_g1(struct gcache_s ***g, bool rm)
+static void hfree_g1(Gcache ***g, bool rm)
 { int i;
   if (g==NULL) return;
   for (i=0;i<G123_SIZE;i++)
@@ -6402,7 +13923,7 @@ static void hfree_g1(struct gcache_s ***g, bool rm)
 	}
 }
 
-static void hfree_g2(struct gcache_s ****g, bool rm)
+static void hfree_g2(Gcache ****g, bool rm)
 { int i;
   if (g==NULL) return;
   for (i=0;i<G123_SIZE;i++)
@@ -6413,7 +13934,7 @@ static void hfree_g2(struct gcache_s ****g, bool rm)
 }
 
 
-static void hfree_g3(struct gcache_s *****g, bool rm)
+static void hfree_g3(Gcache *****g, bool rm)
 { int i;
   if (g==NULL) return;
   for (i=0;i<G123_SIZE;i++)
@@ -6466,59 +13987,60 @@ the font format number |ff|. The information in this last part helps
 with on-demand decoding of glyphs.
 
 
-@<font types@>=
+
+@<definitions of |PKfont| and |FTfont| types@>=
 @<definitions of format specific types@>@;
 
-struct gcache_s {
+typedef struct {
   int w,h; 
   int hoff,voff; 
   unsigned char *bits; 
-  unsigned int GLtexture;
+  unsigned int OGLtexture;
   FontFormat ff; 
   union {@+
 	  PKglyph pk;@+
 	  FTglyph tt;@+
   };
-};
-typedef struct gcache_s Gcache;
+} Gcache;
 @
  
 
-The above structure has a |GLtexture| member if rendering is done on
-the Android operating system using Open~EGL 2.0. To speed up the
+The above structure has an |OGLtexture| member. To speed up the
 rendering of glyphs, the glyph bitmap is loaded into the graphics
 cards as a texture and from then on identified by a single integer,
-the |GLtexture|.
+the |OGLtexture|.
 
 Occasionaly, however, the front-end will change the OpenGL context and
 the texture identifiers will loose their meaning. In this situation,
 it is not necessary to wipe out the entire glyph cache with all the
 extracted bitmaps but only the invalidation of the texture identifiers
 is needed.  This effect can be achived by calling
-|hint_clear_fonts(false)|. It will call |nativeFreeGlyph| for all
-glyphs and this function can set the |GLtexture| value to zero.
+|hint_clear_fonts(false)|. It will call |nativeFreeTexture| for all
+glyphs and set the |OGLtexture| value to zero.
 
 
-The top level function to access a glyph is |hget_glyph|. Given a font pointer |fp| 
+The top level function to access a glyph is |hload_glyph|. Given a font pointer |fp| 
 and a character code |cc| it looks up the glyph in the glyph cache.
 For PK fonts, all cache entries are made when initializing the font.
 For FreeType fonts, a cache entry is made when the glyph is accessed the first time.
 For both types of fonts, the unpacking is done just before the first use.
 
-@<font functions@>=
-Gcache *hget_glyph(Font *f, unsigned int cc)
+@<render functions@>=
+static void ft_unpack_glyph(uint8_t f, Font *fp, Gcache *g, uint32_t cc);
+
+static Gcache *hload_glyph(uint8_t f, Font *fp, unsigned int cc)
 {
   Gcache *g=NULL;
-  g=g_lookup(f,cc);
+  g=g_lookup(fp,cc);
   if (g==NULL)
-  { if (f->ff==ft_format)
-      g=hnew_glyph(f,cc);
+  { if (fp->ff==ft_format)
+      g=hnew_glyph(fp,cc);
     else  
       return NULL;
   }
   if (g->ff==no_format)           
-  { if (f->ff==pk_format) pkunpack_glyph(g);
-    else if (f->ff==ft_format) ft_unpack_glyph(f,g,cc);
+  { if (fp->ff==pk_format) pkunpack_glyph(g);
+    else if (fp->ff==ft_format) ft_unpack_glyph(f,fp,g,cc);
     else QUIT("Font format not supported");
   }
   return g;
@@ -6535,31 +14057,67 @@ that is more convenient for non \TeX{nical} sytems, namely regular
 points stored as |double| values. The latter is used by the native
 rendering functions.
 The conversion is done by the macro |SP2PT|.
+Rounding the glyph coordinates to the closes pixel boundary
+makes sense only if using the native dpi, if using a multiple its of not much use.
+Further, we round to pixels only if pixel size in pt is above a threshold.
+We might need to export these with a setter.
+Note: The function |nativeGlyphs| requires the top/left position of the
+texture. It is computed from the reference point $(x,y)$ the displacement
+of the bitmap $(dx,dy)$ and the height $h$. 
+Further the units are points.
 
-@<render definitions@>=
+@<render functions@>=
+static bool round_to_pixel=0;
+static double dpi_threshold= 100;
+
 #define SP2PT(X) ((X)/(double)(1<<16))
-@
-@<font functions@>=
-void render_char(int x, int y, uint8_t f, uint32_t cc, int style)
 
-{ double w, h, dx, dy;
-  Font *fp=hget_font(f);
-  Gcache *g=hget_glyph(fp,cc);
+void hint_round_position(bool r, double t)
+{ round_to_pixel=r;
+  dpi_threshold=t;
+}
+
+static void render_char(int x, int y, uint8_t f, uint32_t cc)
+
+{ double w, h, dx, dy, top, left;
+  Font *fp;
+  Gcache *g;
+  fp = fonts[f];
+  if (fp==NULL|| fp->resize) fp=hload_font(f);
+  if (fp==NULL) return;
+  g=hload_glyph(f,fp,cc);
   if (g==NULL) return;
 
   dx=(double)g->hoff*fp->hpxs;
   dy=(double)g->voff*fp->vpxs;@/
   w =(double)g->w*fp->hpxs;
   h =(double)g->h*fp->vpxs;
-  nativeGlyph(SP2PT(x),dx,SP2PT(y),dy,w,h,g,style);
+  if (g->OGLtexture==0)
+    g->OGLtexture=nativeTexture(g->bits,g->w,g->h);
+
+  left=SP2PT(x)-dx;
+  top=SP2PT(y)+h-dy;
+
+  if (round_to_pixel)
+  { double pxs;
+    if (xdpi<dpi_threshold)
+    { pxs = 72.27/xdpi; /* pixel size in point */
+      left=left/pxs;
+      left=floor(left+0.5);
+      left=left*pxs;
+    }
+    if (ydpi<dpi_threshold)
+    { pxs = 72.27/ydpi; /* pixel size in point */
+      top=top/pxs;
+      top=floor(top+0.5);
+      top=top*pxs;
+    }
+  }
+  nativeGlyph(left,top,w,h,g->OGLtexture);
 }
 
 @
 \goodbreak
-The above function is used in the rendering. So we export it.
-@<|extern| font functions@>=
-extern void render_char(int x, int y, uint8_t f, uint32_t cc, int s);
-@
 
 \subsection{Rules}
 Rendering rules, that is black rectangles, is simpler.
@@ -6577,7 +14135,7 @@ renderer with finding the image data in segment |n| of the \HINT\
 file. Instead we pass a pointer to the first byte and a pointer past
 the last byte. We also pass the position and size as we did for rules.
 @<render functions@>=
-void render_image(int x, int y, int w, int h, uint32_t n)
+static void render_image(int x, int y, int w, int h, uint32_t n)
 { 
   uint8_t *spos, *sstart, *send;
   spos=hpos; sstart=hstart;send=hend;
@@ -6588,44 +14146,52 @@ void render_image(int x, int y, int w, int h, uint32_t n)
 @
 
 \subsection{Colors}
-When a color node occurs on a page, we pass the pointer
-to the color set definition to the renderer using the
-|nativeSetColor| function. Further the background might
-change, which requires a computation of the area of the change and
-a call to |nativeBackground|.
+When a color node occurs on a page, we pass the new color number
+to the |hSetColor| function. The |hSetColor| function, will cache
+the frequently used color variables, like the current foreground color |cur_fg|,
+so it is necessary to call it whenever either |cur_mode| or |cur_style|
+are changing as well.
+Because the background is changing infrequently, the current
+background color is not cached and calls to  |nativeBackground|
+must be made whenever necessary.
 
 @<native rendering definitions@>=
-extern void nativeSetColor(ColorSet *cs);
-extern void nativeBackground(double x, double y, double h, double w);
+extern void nativeBackground(double x, double y, double h, double w, uint32_t bg);
 @
+
+Here are the variables:
 
 @<render variables@>=
-int cur_color=0, cur_mode=0, cur_style=0, next_style=0;
+static int cur_style=0, cur_mode=0, cur_color=0, next_style=0;
+static uint32_t cur_fg;
 @
 
+For the following code it might be simpler to get the current
+background color from the native renderer instead of getting the
+mode and computing it.
+
 @<handle a horizontal change in the background color@>=
-if (cur_color!=list_color &&
-    (BG(CURCOLOR(cur_mode,cur_style,color_def[cur_color]))&0xFF)>0)
+if (cur_color!=list_color && (CUR_BG&0xFF)>0)
 { scaled x,y,w,h;
   x=cur_h;
   y=cur_v+depth(this_box);
   w=hcolor_distance(link(p),g_sign,g_order,glue_set(this_box));
   h=height(this_box)+depth(this_box);
   if (w>0 && h>0)
-    nativeBackground(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h));
+    nativeBackground(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),CUR_BG);
 }
+
 @
 
 @<handle a vertical change in the background color@>=
-if (cur_color!=list_color &&
-    (BG(CURCOLOR(cur_mode,cur_style,color_def[cur_color]))&0xFF)>0)
+if (cur_color!=list_color && (CUR_BG&0xFF)>0)
 { scaled x,y,w,h;
   x=left_edge;
   h=vcolor_distance(link(p),g_sign,g_order,glue_set(this_box));
   y=cur_v+h;
   w=width(this_box);
   if (w>0 && h>0)
-    nativeBackground(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h));
+    nativeBackground(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),CUR_BG);
 }
 @
 
@@ -6637,8 +14203,8 @@ document, but its reponsibilities are listed in section~\secref{native}.
 
 @<render functions@>=
 uint64_t hint_blank(void)
-{ nativeSetColor(color_def!=NULL?color_def:color_defaults);
-  nativeBlank();
+{ hSetColor(0);
+  nativeBlank(CUR_BG);
   return 0;
 }
 @
@@ -6652,7 +14218,8 @@ and |cur_v| contain the current horizontal and vertical position;
 |rule_ht|, |rule_dp|, and |rule_wd| contain the height, depth, and
 width of a rule that should be output next.
 |cur_color| contains the current color set;
-|cur_mode| and |cur_style| the current color mode and style.
+|cur_mode| contains the current color mode;
+and |cur_style| the current color style.
 
 @<render variables@>=
 static scaled cur_h, cur_v;
@@ -6710,8 +14277,9 @@ if(link(p)==0xffff)
     { f= font(p);
       c= character(p);
       if (!c_ignore && c!=' ')
-      { @<update |cur_style|@>@;
-        next_style=cur_style;
+      { @<compute the |next_style|@>@;
+        if (next_style!=cur_style)
+          hSetColor(next_style);
       }
 render_c:        
 #ifdef DEBUG
@@ -6719,8 +14287,8 @@ render_c:
            QUIT("Undefined Font %d mem[0x%x]=0x%x\n",
                 f,p,mem[p].i);
 #endif
-      render_char(cur_h, cur_v, f,c,next_style);
-      cur_h= cur_h+char_width(f, char_info(f, c));
+      render_char(cur_h, cur_v, f,c);
+      cur_h= cur_h+char_width(f,  c);
 #ifdef DEBUG
       if(link(p)==0xffff)
         QUIT("Undefined link in charlist mem[0x%x]=0x%x\n",p,mem[p].i);
@@ -6747,7 +14315,7 @@ render_c:
          else 
            hlist_render(p);
          if (cur_color!=cur_c)
-         { cur_color=cur_c; nativeSetColor(color_def+cur_color); }
+           hSetColor(cur_c);
          cur_h= edge+width(p);cur_v= base_line;
        }
        break;
@@ -6758,26 +14326,18 @@ render_c:
        switch (subtype(p))
        { case ignore_node: @<handle an ignore node@>@;break;
  	 case color_node:
- 	   cur_color=color_ref(p);
-           nativeSetColor(color_def+cur_color);
+           hSetColor(color_ref(p));
            @<handle a horizontal change in the background color@>@;
 	   break;
  	 case end_color_node:
-	   cur_color=list_color;
-           nativeSetColor(color_def+cur_color);
+           hSetColor(list_color);
 	   break;
          case start_link_node:
 	   @<handle a start link node@>@;
-           cur_color = color_ref(as_color(p));
-	   if (cur_color==0xFF) cur_color=list_color;
-           nativeSetColor(color_def+cur_color);
-	   @<handle a horizontal change in the background color@>@;
+ 	   @<handle a horizontal change in the background color@>@;
 	   break;
          case end_link_node:
 	   @<handle an end link node@>@;
-           cur_color = color_ref(as_color(p));
-	   if (cur_color==0xFF) cur_color=list_color;
-           nativeSetColor(color_def+cur_color);
 	   @<handle a horizontal change in the background color@>@;
 	   break;
          case image_node:
@@ -6843,7 +14403,7 @@ render_c:
 	    else 
 	      hlist_render(leader_box);
             if (cur_color!=cur_c)
-            { cur_color=cur_c; nativeSetColor(color_def+cur_color); }
+              hSetColor(cur_c);
             c_ignore=false;
 	    cur_v= base_line;
 	    cur_h= h_save+leader_wd+lx;
@@ -6936,7 +14496,7 @@ while(p!=null)
 	  else
             hlist_render(p);
           if (cur_color!=cur_c)
-          { cur_color=cur_c; nativeSetColor(color_def+cur_color); }
+            hSetColor(cur_c); 
           cur_v= save_v+depth(p);cur_h= left_edge;
         }
         break;
@@ -6946,26 +14506,18 @@ while(p!=null)
       case whatsit_node:
         switch (subtype(p))
         { case color_node:
- 	    cur_color=color_ref(p);
-	    nativeSetColor(color_def+cur_color);
+	    hSetColor(color_ref(p));
             @<handle a vertical change in the background color@>@;
 	    break;
  	  case end_color_node:
-	    cur_color=list_color;
-            nativeSetColor(color_def+cur_color);
+            hSetColor(list_color);
 	    break;
 	  case start_link_node:
 	    @<handle a start link node@>@;
-	    cur_color = color_ref(as_color(p));
-	    if (cur_color==0xFF) cur_color=list_color;
-	    nativeSetColor(color_def+cur_color);
             @<handle a vertical change in the background color@>
 	    break;
           case end_link_node:
 	    @<handle an end link node@>@;
-	    cur_color = color_ref(as_color(p));
-	    if (cur_color==0xFF) cur_color=list_color;
-	    nativeSetColor(color_def+cur_color);
             @<handle a vertical change in the background color@>
 	    break;
          case image_node:
@@ -7030,7 +14582,7 @@ while(p!=null)
 		      else 
 		        hlist_render(leader_box);
 		      if (cur_color!=cur_c)
-         	      { cur_color=cur_c; nativeSetColor(color_def+cur_color); }
+         	        hSetColor(cur_c);
                       c_ignore=false;
 		      cur_h= left_edge;
 		      cur_v= save_v-height(leader_box)+leader_ht+lx;
@@ -7060,13 +14612,6 @@ move_past:
     cur_v= cur_v+rule_ht;
   } /* end |if| */
   next_p:
-#if 0
-      if (link(p)==1 || link(p)==0xffff) {
-        show_box(streams[0].p);
-        QUIT("vertical node mem[0x%x] =0x%x ->linking to node 0x%x\n",
-          p, mem[p].i, link(p));
-    }
-#endif    
     p= link(p);
   } /* end |while| */
 } /* end |vlist_render| */
@@ -7089,8 +14634,8 @@ while(p!=null)
   { do
     { f= font(p);
       c= character(p);
-render_c:        
-      dist= dist+char_width(f, char_info(f, c));
+character_distance:        
+      dist= dist+char_width(f, c);
       p= link(p);
     } while(is_char_node(p));
   }
@@ -7106,7 +14651,7 @@ render_c:
       case ligature_node:
         f= font(lig_char(p));
         c= character(lig_char(p));
-        goto render_c;
+        goto character_distance;
       case whatsit_node:
         switch (subtype(p))
         { case start_link_node: 
@@ -7221,9 +14766,9 @@ the page: the |hint_render| function.
 @<render functions@>=
 
 void hint_render(void)
-{  cur_color=0;
-   nativeSetColor(color_def!=NULL?color_def:color_defaults);
-   nativeBlank();
+{  cur_style=0;
+   hSetColor(0);
+   nativeBlank(CUR_BG);
    if (streams==NULL || streams[0].p==null) return;
    cur_h= 0;
    cur_v= height(streams[0].p);
@@ -7290,34 +14835,33 @@ extern int nativePrint(unsigned char *bits);
 @
 
 
-To set the size of the drawing aerea in pixel and the resolution in dots (pixel) per inch call |nativeSetSize|
+To set the size of the drawing aerea in pixel and in point call |nativeSetSize|
 @<native rendering definitions@>=
-extern void nativeSetSize(int px_h, int px_v, double xdpi, double ydpi);
+extern void nativeSetSize(int px_h, int px_v, double pt_x, double pt_v);
 @ 
 
 The native renderer may implement an optional procedure to switch between dark and light mode.
 The other procedure may change the $\gamma$-value.
 @<native rendering definitions@>=
-extern void nativeSetDark(int dark);
+extern void nativeSetForeground(uint32_t fg);
 extern void nativeSetGamma(double gamma);
 @
 
-To  render an empty page make sure that |nativeSetColor| ist called to
+To  render an empty page make sure that |hSetColor| ist called to
 establish a valid color schema and then call |nativeBlank|.
 @<native rendering definitions@>=
-extern void nativeBlank(void); 
+extern void nativeBlank(uint32_t bg); 
 @
 
 In the following, if not otherwise stated, all dimensions are given as double values in point.
 We have $72.27\,\hbox{pt} = 1\,\hbox{inch}$ and $1\,\hbox{inch} = 2.54\, \hbox{cm}$.
 
 
-To render the glyph |g| with reference point at $(|dx|,|dy|)$
-at position $(|x|,|y|)$ with width |w| and height |h| and style |s| call:
+To render the texture |t| with the top left point at $(|x|,|y|)$ and
+with width |w| and height |h| call:
 @<native rendering definitions@>=
-typedef struct gcache_s *gcache_s_ptr;
-
-extern void nativeGlyph(double x, double dx, double y, double dy, double w, double h, struct gcache_s *g, int style);
+extern void nativeGlyph(double x, double y, double w, double h,
+  unsigned int t);
 @
 For an explanation of the style parameter see section~\secref{search}.
 
@@ -7335,21 +14879,20 @@ with the image data in memory from |istart| to (but not including) |iend| call:
 void nativeImage(double x, double y, double w, double h, unsigned char *istart, unsigned char *iend);
 @
 
-For PK fonts and FreeType fonts we need two functions to translate the
+For PK fonts and FreeType fonts we need a function to translate the
 glyph bitmap in |g->bits| into a device dependent representation.
-@<native rendering definitions@>= 
-extern void nativeSetPK(struct gcache_s *g);
-extern void nativeSetFreeType(struct gcache_s *g);
+@<native rendering definitions@>=
+extern unsigned int nativeTexture(unsigned char *bits, int w, int h);
 @
 
 To free any native resources associated with a cached glyph |g| call:
 
 @<native rendering definitions@>=
-void nativeFreeGlyph(struct gcache_s *g);
+unsigned int nativeFreeTexture(unsigned int t);
 @
 This function is also called for all glyphs by the function |hint_clear_fonts|.
 If the |rm| parameter to that function is |false|, the glyph cache is not deallocated
-only |nativeFreeGlyph| is executed for all glyphs.
+only |nativeFreeTexture| is executed for all glyphs.
 
 
 \section{Font Files}
@@ -7357,7 +14900,8 @@ only |nativeFreeGlyph| is executed for all glyphs.
 \subsection{PK Fonts}
 
 PK Files
-contain a compressed representation of bitmap fonts  produced by \MF\ and {\tt gftopk}. The definitions and algorithms that follow here can be found,
+contain a compressed representation of bitmap fonts  produced by \MF\ and {\tt gftopk}.
+The definitions and algorithms that follow here can be found,
 along with a more detailed description, in \cite{TR:pkfile}. 
 
 The first thing we need to know when a section of a \HINT\ file contains a font is
@@ -7400,18 +14944,6 @@ values |0xF7| and |0x59|.
 %half the actual width and height, but would double the render factor. The image it receives
 %cann then be displayed stretching it only be half the render factor thus obtaining an image
 %that is scaled down by exactly the render factor filling the complete client window.
-
-
-The information in the PK file that is specific to a PK font is stored as a |PKfont| type:
-@<definitions of |PKfont| and |FTfont| types@>=
-
-typedef struct
-{ unsigned char *pk_comment; /* the program that made the pk font */
-  unsigned int cs; /* checksum */
-  double ds; /* the design size in pt */
-  unsigned char id; /* the id currently allways 89 */
-} PKfont;
-@
 
 For every glyph, there is a |flag| byte in the PK file that tells how the corresponding glyph is
 encoded and a pointer to the encoding itself.
@@ -7623,7 +15155,7 @@ static void pkunpack_glyph(Gcache *g)
   }
   if ((g->pk.flag>>4)==14) pk_bitmap(g,pk_data+i);
   else pk_runlength(g,pk_data+i);
-  nativeSetPK(g);
+  g->OGLtexture=nativeTexture(g->bits,g->w,g->h);
 }
 @
 
@@ -7646,7 +15178,7 @@ static Gcache *hnew_glyph(Font *pk, unsigned int cc);
 #define PK_ID    89
 
 
-int unpack_pk_file(Font *pk)
+static int unpack_pk_file(Font *pk)
 /* scan |pk->pk_data| and extract information. Do not unpack glyphs, these are unpacked on demand. */
 {   int i,j;
     unsigned int k;
@@ -7664,23 +15196,21 @@ int unpack_pk_file(Font *pk)
 	  case PK_NO_OP: break;
 	  case PK_PRE:
 	  { int csize;
-	    pk->pk.id=PK_READ_1_BYTE();
-		if (pk->pk.id!=PK_ID) return 0;
-		csize=PK_READ_1_BYTE();
-		pk->pk.pk_comment=pk->font_data+i;
-                i=i+csize;
-        pk->pk.ds=PK_READ_4_BYTE()/(double)(1<<20);
-		pk->pk.cs=PK_READ_4_BYTE();
-		pk->hpxs=(double)(1<<16)/PK_READ_4_BYTE();
-		pk->vpxs=(double)(1<<16)/PK_READ_4_BYTE();
-		if (pk->pk.ds!=pk->s) 
-		{ double m=pk->s/pk->pk.ds;
-		  pk->hpxs*=m;
-		  pk->vpxs*=m;
-		}
-#if 0    /* data is read only */
-		pk->comment[csize]=0;  /* After reading the data insert zero byte to terminate comment */
-#endif
+            double ds; /* the design size in pt */
+            unsigned char id; /* the id currently allways 89 */
+	    id=PK_READ_1_BYTE();
+            if (id!=PK_ID) return 0;
+	    csize=PK_READ_1_BYTE();
+            i=i+csize; /* skip comment */
+            ds=PK_READ_4_BYTE()/(double)(1<<20); /*design size in pt*/
+	    i=i+4; /* skip checksum */
+	    pk->hpxs=(double)(1<<16)/PK_READ_4_BYTE(); /*scaled px/pt to pt/px*/
+	    pk->vpxs=(double)(1<<16)/PK_READ_4_BYTE();
+	    if (ds!=pk->s) 
+	    { double m=pk->s/ds;
+	      pk->hpxs*=m;
+	      pk->vpxs*=m;
+	    }
 	  }
         break;
 	  case PK_POST: break;
@@ -7718,30 +15248,160 @@ int unpack_pk_file(Font *pk)
 
 \subsection{PostScript Type 1, TrueType, and OpenType Fonts}
 
-To unpack these fonts, we use the FreeType library\cite{freetype}.
-To use this library, we need a library variable and initialize it.
+To access font metrics that are otherwise contained in a \.{.TFM} file,
+there is a collection of functions that is shared with Hi\TeX.
+Make shure that any changes here are also made in  Hi\TeX.
+
+It defines some global varaibles:
+
+@<\HINT\ variables@>=
+static FT_Library ft_library=0;
+static FT_Face font_face[0x100]={NULL};
+static FT_Error ft_err;
 
 
-@<font variables@>=
-static FT_Library  ft_library=NULL;
-@
+@ To initialize and destroy the Free Type library
+and the array of font faces, these functions are needed:
 
-@<Initialize the FreeType library@>=
-if (ft_library==NULL) 
-{ int e=FT_Init_FreeType( &ft_library );
-  if (e) QUIT("Unable to initialize the FreeType library");
+@<FreeType font functions@>=
+static void ft_init(void)
+{ int i;
+  if (ft_library) return;
+  ft_err =  FT_Init_FreeType(&ft_library);
+  if (ft_err)
+    QUIT("Unable to initialize the FreeType Library.");
+  for (i=0; i<0x100;i++)
+    font_face[i]=NULL;
+}
+
+static void ft_destroy(void)
+{ int i;
+  if (ft_library==NULL) return;
+  for (i=0;i<0x100;i++)
+    if (font_face[i]!=NULL)
+    {  ft_err= FT_Done_Face(font_face[i]); font_face[i]=NULL; }
+  ft_err =  FT_Done_FreeType(ft_library);
+  if (ft_err)
+    MESSAGE("Error releasing the FreeType Library.");
+  ft_library=NULL;
+  /* this should probably go somewhere else */
+  for (i=0;i<0x100;i++)
+  { free(fonts[i]); fonts[i]=NULL;} 
 }
 @
 
-Next we need a |FT_Face| variable, which we place in the |FTfont| type.
-@<definitions of |PKfont| and |FTfont| types@>=
-typedef struct
-{ FT_Face face;
-} FTfont;
+Once the library is initialized, it is possible to
+create a font face from it either from a file
+using |FT_New_Face| or from memory using |FT_New_Memory_Face|.
+Both functions need an index to select a font face
+in case the file or memory image contains multiple
+faces. The functions that follow often have such a font face
+as parameter.
+
+The first example is a function to get the ``width'' of
+a character. What \TeX\ calls the ``width'' of the character
+is called the ``advance'' in freetype: it is the distance
+from one character to the next character including the
+space between the characters; while the ``width'' of the
+character is the distance between the left and right egdge
+of the characters glyph. The latter is not needed by \TeX.
+We give two version, one will accept a character code, the
+other assumes that the glyph id is already available.
+
+@<\HINT\ auxiliar functions@>=
+#if 0
+static FT_UInt ft_glyph(FT_Face ft_face, int c)
+{ FT_UInt ft_gid;
+  ft_gid = FT_Get_Char_Index(ft_face, c);
+  return ft_gid;
+}
+#endif
+
+#ifdef DEBUG
+static bool ft_exists(FT_Face ft_face, int c)
+{ return FT_Get_Char_Index(ft_face, c)!=0;
+}
+#endif
+
+static scaled ft_glyph_width(FT_Face ft_face, FT_UInt ft_gid, scaled s)
+{ FT_Fixed a;
+  scaled w;
+  ft_err=FT_Get_Advance(ft_face, ft_gid, FT_LOAD_NO_SCALE, &a);
+  if (ft_err!=0) return 0;
+  w= (scaled)((double)s*(double)a/(double)ft_face->units_per_EM +0.5);
+  return w;
+}
+
+static scaled ft_width(FT_Face ft_face, int c, scaled s)
+{ FT_UInt ft_gid;
+  ft_gid = FT_Get_Char_Index(ft_face, c);
+  if (ft_gid==0) return 0;
+  return ft_glyph_width(ft_face, ft_gid, s);
+}
 @
 
+Finding the height and depth of a character is
+slightly more complex. It requires loading the glyph
+and retrieving its bounding box.
+Since most of the time we need the height and the depth
+together, we provide one function for both.
+We use |FT_Glyph_Get_CBox| to get the control box which is supposed to be fast.
+Because the glyph has been loaded with |FT_LOAD_NO_SCALE| we call
+|FT_Glyph_Get_CBox| with mode |FT_GLYPH_BBOX_UNSCALED| and
+get unscaled font units in 26.6 pixel format. 
+
+@<\HINT\ auxiliar functions@>=
+static FT_Error ft_glyph_bbox(FT_Face ft_face, FT_UInt ft_gid, FT_BBox *ft_bbox)
+{ FT_Glyph ft_glyph;
+  ft_err = FT_Load_Glyph(ft_face, ft_gid, FT_LOAD_NO_SCALE);
+  if (ft_err!=0) return ft_err;
+  ft_err = FT_Get_Glyph(ft_face->glyph, &ft_glyph);
+  if (ft_err!=0) return ft_err;
+  FT_Glyph_Get_CBox(ft_glyph, FT_GLYPH_BBOX_UNSCALED, ft_bbox);
+  return 0;
+}
+
+static void ft_glyph_height_depth(FT_Face ft_face, FT_UInt ft_gid,
+  scaled *h, scaled *d, scaled s)
+{ FT_BBox ft_bbox;
+  *h=*d=0;
+  ft_err= ft_glyph_bbox(ft_face, ft_gid, &ft_bbox);
+  if (ft_err!=0)
+    return;
+  if (ft_bbox.yMax>0)
+   *h=(scaled)((double)s*(double)(ft_bbox.yMax)/(double)ft_face->units_per_EM +0.5);
+  if (ft_bbox.yMin<0)
+   *d= (scaled)((double)s*(double)(-ft_bbox.yMin)/(double)ft_face->units_per_EM +0.5);
+}
+
+@
+
+
+
+
+The first character of a font can be obtained using
+|FT_Get_First_Char|. For now, I do not know a way to determine
+the last one.
+
+@<Unused freetype file metric functions unused@>=
+static int ft_last(FT_Face ft_face)
+{ return 0x10FFFF; }
+
+static int ft_first(FT_Face ft_face)
+{ FT_UInt ft_gid;
+  FT_ULong c;
+  c = FT_Get_First_Char(ft_face,&ft_gid);
+  if (ft_gid==0) /* charmap empty*/
+    return ft_last(ft_face)+1;
+  else
+    return c;
+}
+@
+
+To unpack these fonts, we use the FreeType library\cite{freetype}.
+
 The data type for FreeType glyphs is still empty.
-@<definitions of |PKfont| and |FTfont| types@>=
+@<definitions of format specific types@>=
 typedef struct
 { int dummy;
 } FTglyph;
@@ -7752,24 +15412,31 @@ To determine the rendering size, we use the function |font_at_size| to
 obtain the size of the font in scaled point and convert it; the variable |f->s| then
 contains the size in point as a floating point value.
 The resolution used to render the font's glyphs is based on the current setting
-of |xdpi| and |ydpi|. If at the later time the resolution changes, for example
+of |xdpi| and |ydpi|. If at a later time the resolution changes, for example
 because of a scaling operation, it might be necessary to rerender the fonts.
 This can be achived by calling |hint_clear_fonts(true)|.
 
+The function |load_font_face(f)| is called only if |font_face[f]==NULL|
+and should be called whenever |font_face[f]| is needed but not yet defined.
+
+
 @<FreeType font functions@>=
 
-int unpack_ft_file(Font *f)
-{ int e;
-  @<Initialize the FreeType library@>@;
-  f->hpxs=72.27/xdpi;
-  f->vpxs=72.27/ydpi;
-  e = FT_New_Memory_Face( ft_library,
-                          f->font_data, f->data_size,0,&(f->tt.face));                              
-  if (e) return 0;
+static FT_Face hload_font_face(uint8_t f)
+{ int ft_err;
+  Font *fp=fonts[f];
+  FT_Face ft_face;
+  ft_err = FT_New_Memory_Face(ft_library,
+                          fp->font_data, fp->data_size,0,&ft_face);                     
+  if (ft_err)
+  { LOG("Unable to create font %d\n",f);
+    return NULL;
+  }
+  font_face[f]=ft_face;
   @<Select the correct encoding@>@;
-  @<Set the required size and transformation@>@;
-  f->ff=ft_format;
-  return 1;
+  @<Set the required size@>@;
+  FT_Set_Transform(ft_face,NULL,NULL);
+  return ft_face;
 }
 @
 
@@ -7782,22 +15449,30 @@ errors, because it is better to use the font with the wrong
 character map than to quit the program.
 
 @<Select the correct encoding@>=
- e =FT_Select_Charmap(f->tt.face,FT_ENCODING_ADOBE_CUSTOM); 
- if (e) LOG("Unable to select custom encoding for font %d\n",f->n);    
+ if (width_base[f]==0)
+   ft_err =FT_Select_Charmap(ft_face,FT_ENCODING_UNICODE);
+ else  
+ { ft_err = FT_Select_Charmap(ft_face,FT_ENCODING_ADOBE_CUSTOM); 
+   if (ft_err)  ft_err =FT_Select_Charmap(ft_face,FT_ENCODING_UNICODE);
+ }
+ if (ft_err)  LOG("Unable to select encoding for font %d\n",fp->n);
 @
 
-We use the FreeType library to render outline fonts. These fonts can be rendered at any
-size and we need to set the correct size. Note that FreeType needs the size in ``big points''
+We use the FreeType library to render outline fonts.
+These fonts can be rendered at any
+size and we need to set the correct size.
+Note that FreeType needs the size in ``big points''
 not \TeX\ points.
-@<Set the required size and transformation@>=
-   e = FT_Set_Char_Size(
-            f->tt.face,    /* handle to face object           */
+
+@<Set the required size@>=
+   ft_err = FT_Set_Char_Size(
+            ft_face,    /* handle to face object           */
             0,       /* |char_width| in $1/64$th of points  */
-            (FT_F26Dot6)(0.5+(f->s*64.0*72.0/72.27)),  /* |char_height| in $1/64$th of points */
-            72.27/f->hpxs,     /* horizontal device resolution    */
-            72.27/f->vpxs);   /* vertical device resolution      */
-  if (e) QUIT("Unable to set FreeType glyph size"); 
-  FT_Set_Transform(f->tt.face,0,0);
+            (FT_F26Dot6)(0.5+(fp->s*64.0*72.0/72.27)),  /* |char_height| in $1/64$th of points */
+            72.27/fp->hpxs,     /* horizontal device resolution    */
+            72.27/fp->vpxs);   /* vertical device resolution      */
+  if (ft_err) QUIT("Unable to set FreeType glyph size"); 
+ fp->resize=false;
 @
 
 After translating the character code |cc| into the glyph index |i| using
@@ -7812,42 +15487,71 @@ in FreeType fonts are positioned slighly higher. Unfortunately the vertical
 displacement is magnified for scaled fonts, so subtracting 1 is not enough
 in this cases.
 
-@<FreeType font functions@>=
-static void ft_unpack_glyph(Font *f, Gcache *g, uint32_t cc)
+@<render functions@>=
+static void ft_unpack_glyph(uint8_t f, Font *fp, Gcache *g, uint32_t cc)
 { int e,i;
-
-  i = FT_Get_Char_Index( f->tt.face, cc);
+  FT_Face ft_face=font_face[f];
+  if (ft_face==NULL)
+    ft_face=hload_font_face(f);
+  if (ft_face==NULL)
+   QUIT("Unable to create FreeType face for font %d (%s)",f, font_def[f].n);
+  if (fp->resize)
+  { fp->hpxs=72.27/xdpi;
+    fp->vpxs=72.27/ydpi;
+    @<Set the required size@>@;
+  }
+  i = FT_Get_Char_Index( ft_face, cc);
   e = FT_Load_Glyph(
-            f->tt.face,          /* handle to face object */
+            ft_face,          /* handle to face object */
             i,   /* glyph index           */
             FT_LOAD_RENDER | FT_LOAD_TARGET_NORMAL );  /* load flags, see below */
-  if (e) QUIT("Unable to render FreeType glyph %c (%u)",(char)cc,cc);
+  if (e) MESSAGE("0x%xUnable to render FreeType glyph '%c' (%u)",e,(char)cc,cc);
 
-  g->w=f->tt.face->glyph->bitmap.width;
-  g->h=f->tt.face->glyph->bitmap.rows;
-  g->hoff=-f->tt.face->glyph->bitmap_left;
-  g->voff=f->tt.face->glyph->bitmap_top-1;
+  g->w=ft_face->glyph->bitmap.width;
+  g->h=ft_face->glyph->bitmap.rows;
+  g->hoff=-ft_face->glyph->bitmap_left;
+  g->voff=ft_face->glyph->bitmap_top-1;
   g->bits=calloc(g->w*g->h, 1);
   if (g->bits==NULL) QUIT("Out of memory for FreeType glyph %c (%u)",(char)cc,cc);
-  memcpy(g->bits,f->tt.face->glyph->bitmap.buffer,g->w*g->h);
+  memcpy(g->bits,ft_face->glyph->bitmap.buffer,g->w*g->h);
 
   g->ff=ft_format;
-  nativeSetFreeType(g);
+  g->OGLtexture=nativeTexture(g->bits,g->w, g->h);
 }
 
 @
 
-The function |unpack_ft_file| returns |false| if the font is not a FreeType font.
+If the font data does not specify a PK font file, we silently assume
+that it is a font file that can be handled by free type.
+Here we postpone the opening of the file which is done when the
+font face is first needed, either to get font metrics or font glyphs.
+Opening any specific page, we do not expect to find all the fonts
+available in the \HINT\ file on it. So there is no point in loading
+all of them in advance.
 
 @<determine the font format and unpack the font@>=
-  else if (unpack_ft_file(fp)) 
-      fp->ff=ft_format;
   else
-      { QUIT("Font format not supported for font %d\n",fp->n);
-        free(fp); fp=NULL; 
-      }
+  { fp->ff=ft_format;
+    fp->hpxs=72.27/xdpi;
+    fp->vpxs=72.27/ydpi;
+  }
 @
 
+We close with the functions to compute font metrics.
+
+@<FreeType font functions@>=
+scaled x_char_width(uint8_t f, int c)
+{ FT_Face ft_face=font_face[f];
+  if (ft_face==NULL)
+    ft_face=hload_font_face(f);
+  if (ft_face==NULL)
+    return 0;
+  return ft_width(ft_face, c, font_size[f]);
+}
+@
+
+
+\appendix
 
 
 \section{Error Handling}\label{error_section}
@@ -7856,24 +15560,24 @@ There is no good program without good error handling
 The file {\tt error.h} is responsible for defining these macros:
 \itemize
 \item |LOG| to write out messages on a log file or a log window.
-The primary use of this macro is for debugging purposes.
+  The primary use of this macro is for debugging purposes.
 \item |MESSAGE| to give information to the user during regular use.
-It might for example pop up a window and ask the user to confirm the message.
+  It might for example pop up a window and ask the user to confirm the message.
 \item |ERROR| this is used in the |QUIT| macro to notify the user. It is only a local macro. 
 \item |QUIT| to inform the user about a problen that can not be fixed.
-Unlike the programs Hi\TeX\ or the \.{stretch} and \.{shrink}
-programs, the code defined here is normaly only the backend of a much
-larger program with a graphical user interface.  These programs should
-not terminate unexpectedly with an error message but recover gracefully.
-The |QUIT| macro will therefore write the error message into a character array
-and invoke a |longjmp| to take an error exit.
+  Unlike the programs Hi\TeX\ or the \.{stretch} and \.{shrink}
+  programs, the code defined here is normaly only the backend of a much
+  larger program with a graphical user interface.  These programs should
+  not terminate unexpectedly with an error message but recover gracefully.
+  The |QUIT| macro will therefore write the error message into a character array
+  and invoke a |longjmp| to take an error exit.
 \item |HINT_TRY| might be used in the front-end to define a point of recovery;
-an |else| clause can then be used to catch and process errors.
+  an |else| clause can then be used to catch and process errors.
 \enditemize
 
 The implementation of these macros is highly implementation dependent.
-So the following provides some useful defaults and special solutions
-for the Windows and the Android system.
+So the following provides some  special solutions
+for Windows, Apple, and Android followed by useful defaults.
 
 \index{LOG+\.{LOG}}
 \index{MESSAGE+\.{MESSAGE}}\index{QUIT+\.{QUIT}}
@@ -7938,7 +15642,6 @@ extern int hint_error(const char*title,const char*msg);
                      ERROR_MESSAGE,hint_end(),longjmp(hint_error_exit,1))
 #endif
 
-
 #ifndef HINT_TRY
 #define HINT_TRY if ((hint_error_string[0]=0,setjmp(hint_error_exit)==0))
 #endif
@@ -7946,58 +15649,82 @@ extern int hint_error(const char*title,const char*msg);
 #endif
 @
 
+The following variables are required for the error handling.
+The |hint_error_exit| variable should be initialized before using the functions
+defined below in \.{hint.h}.
 
-The following variables are required for the error handling: 
 @<\HINT\ variables@>=
 jmp_buf hint_error_exit;
 char hint_error_string[MAX_HINT_ERROR];
 @
 
+
 \section{Testing \HINT}\label{testing}
 \subsection{Comparing \HINT\ Output to \TeX\ Output}
 One objective of \HINT\ is to make the following diagram commutative:
-$$\includefig{diagram}$$
-In order to test this property of \TeX, Hi\TeX, and \HINT, we write a command line
-version of \HINT, called {\tt hintcl}, 
-and run it together with \TeX\ and Hi\TeX\ against a collection
-of test files. Since testing the equality of DVI files is not very convenient,
-we use |show_box| to print a page description of every page and compare them
-against the page descriptions produced by \TeX\  when {\tt tracingoutput} is enabled.
-We expect to see no differences.
+$$\includefig{diagram}$$ 
+In order to test this property of \TeX, Hi\TeX, and \HINT, we write a
+command line version of \HINT, called \.{hinttype}, and run it
+together with \TeX\ and Hi\TeX\ against a collection of test
+files. We use |show_box| to print a page description of every page and
+compare them against the page descriptions produced by \TeX\ when 
+{\tt tracingoutput} is enabled.  We expect to see no significant
+differences.
 
-The testfile also illustrates nicely how to use the different functions of
-the \TeX\ library and the \HINT\ library. Here is the main program:
+With the ``\.{-b}'' command line option, the test program will
+generate all pages in reverse order starting at the end of the file
+until reaching the beginning.
 
-@(main.c@>=
+The testfile also illustrates nicely how to use the different
+functions of the \TeX\ library and the \HINT\ library. Here is the
+main program:
+
+@(hinttype.c@>=
 #include "basetypes.h"
+#include <math.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
 #include "error.h"
 #include "format.h"
 #include "get.h"
-#include "htex.h"
 #include "hint.h"
-extern int page_h, page_v;
+#include "rendernative.h"
 
 
-
-@<test variables@>@;
-
-@<test functions@>@;
+@<functions required by the \HINT\ backend@>@;
 
 int main(int argc, char *argv[])
 { char *stem_name=NULL, *prog_name=argv[0];
   int stem_length=0;
   bool option_log=false;
+  int page_count=0;
+  bool option_backward=false;
+  int px_h, px_v;
   HINT_TRY {
     @<process the command line@>@;
     @<open the log file@>@;
     if(!hint_begin()) goto explain_usage;
-    page_h=hhsize;
-    page_v=hvsize;
-    while (hint_forward())
-      @<show the page@>@;
+    @<set the window size to match \.{\\hsize} and \.{\\vsize}@>@;
+    if (option_backward)
+    { hpos=hend;
+      while (hint_backward()) 
+      { page_count--;
+        fprintf(hlog,"\nCompleted box being shipped out [%d]",page_count);
+        hint_show_page();
+        fprintf(hlog,"\n");
+      }
+    }
+    else
+    { while (hint_forward())
+      { page_count++;
+        fprintf(hlog,"\nCompleted box being shipped out [%d]",page_count);
+        hint_show_page();
+        fprintf(hlog,"\n");
+      }
+    }
     hint_end();
     @<close the log file@>@;
     return 0;
@@ -8011,6 +15738,29 @@ explain_usage:
 @
 \goodbreak
 
+To make the output of Hi\TeX\ plus \.{hinttype} match the output of
+\TeX, it is necessary to make sure \.{hinttype} is using the same
+``page size'' as \TeX.
+This is acieved by combining two steps:
+First, the test files use a page template setting the margins to zero,
+so that \.{\\hsize} and \.{\\vsize} are the same as the page dimensions.
+The second step is calling |hint_resize| to make the window size equal 
+to \.{\\hsize} and \.{\\vsize}. 
+We can obtain  \.{\\hsize} and \.{\\vsize} in scaled points 
+from the \HINT\ file using the functions |hint_hsize| and  |hint_hsize|.
+|hint_resize| needs the window size in pixels at an arbitrary choice
+of the resolution in dots per inch. Because one inch equals 72.27 of
+\TeX's points, a resolution of 72.27 dpi is a good choice.
+It means that one pixel measures exactly one point.
+
+@<set the window size to match \.{\\hsize} and \.{\\vsize}@>=
+    px_h=floor(0.5+(hint_hsize()/(double)ONE));
+    px_v=floor(0.5+(hint_vsize()/(double)ONE));
+    if (px_h!=0 && px_v!=0)
+      hint_resize(px_h, px_v, 72.27, 72.27);
+@
+
+
 Processing of the command line is straight forward:
 
 @<process the command line@>=
@@ -8022,6 +15772,7 @@ Processing of the command line is straight forward:
     { char option=(*argv)[1];
       switch(option)
       { case 'l': option_log=true; @+break;
+        case 'b': option_backward=true; @+break;
         case 'd': @/
           argv++; if (*argv==NULL) goto explain_usage;
           debugflags=strtol(*argv,NULL,16);
@@ -8055,6 +15806,7 @@ parameters and options\index{option}\index{debugging}.
   "Usage: %s [options] filename.hnt\n",prog_name);@/
   fprintf(stderr,
   "Options:\n"@/
+  "\t -b     \t generate pages in backward order\n"@/
   "\t -l     \t redirect stdout to a log file\n");@/
 #ifdef DEBUG
 fprintf(stderr,"\t -d XXX \t hexadecimal value. OR together these values:\n");@/
@@ -8109,7 +15861,7 @@ To map and unmap the input file, the function |hint_map| and
 Depending on the operating system, different implementations
 may be supplied.
 
-@<test functions@>=
+@<functions required by the \HINT\ backend@>=
 
 bool hint_map(void)
 { return hget_map();
@@ -8118,64 +15870,14 @@ bool hint_map(void)
 void hint_unmap(void)
 { hget_unmap(); 
 }
-
 @
 
-
-@<test variables@>=
-int page_count=0;
-@
-
-
-@<show the page@>=
-{ page_count++;
-  fprintf(hlog,"\nCompleted box being shipped out [%d]",page_count);
-  show_box(streams[0].p);
-  fprintf(hlog,"\n");
+@<test functions@>=
+void hint_show_page(void)
+{ show_box(streams[0].p);
 }
-
-
 @
-\subsection{Testing the Backwards Reading}
-The following code  is similar to the code for the {\tt skip} program described in \cite{MR:format}. It test reading the \HINT\ file from end to start.
 
-@(back.c@>=
-#include "basetypes.h"
-#include <string.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include "error.h"
-#include "format.h"
-#include "get.h"
-#include "htex.h"
-#include "hint.h"
-
-@<test variables@>@;
-
-@<test functions@>@;
-
-int main(int argc, char *argv[])
-{ char *stem_name=NULL, *prog_name=argv[0];
-  int stem_length=0;
-  bool option_log=false;
-  HINT_TRY {
-    @<process the command line@>@;
-    @<open the log file@>@;
-    if(!hint_begin()) goto explain_usage;
-    hpos=hend;
-    while (hint_backward()) continue;
-    hint_end();
-    @<close the log file@>@;
-    return 0;
-explain_usage:
-    @<explain usage@>@;
-    return 1;
-  }
-  else
-    return 1;
-}
-
-@
 
 \section{Finding memory leaks}
 To find memory leaks, we make a table big enough for all 16 bit values (pointers)
@@ -8183,7 +15885,9 @@ and record a pointer with the allocated size when allocated and remove it when d
 We can then list the currently allocated records.
 
 @<\HINT\ auxiliar functions@>=
+#ifdef DEBUG
 static pointer leaks[1<<16] = {0};
+#endif
 
 static void leak_clear(void)
 { 
@@ -8194,7 +15898,7 @@ static void leak_clear(void)
 #endif
 }
 
-void leak_in(pointer p, int s)
+static void leak_in(pointer p, int s)
 {
 #ifdef DEBUG 
 if (0!=leaks[p])
@@ -8203,7 +15907,7 @@ leaks[p]=s;
 #endif
 }
 
-void leak_out(pointer p, int s)
+static void leak_out(pointer p, int s)
 {  
 #ifdef DEBUG
    if (s!=leaks[p])
@@ -8223,77 +15927,95 @@ static void list_leaks(void)
 }
 @ 
 
-@<\HINT\ |extern|@>=
-extern void leak_in(pointer p, int s);
-extern void leak_out(pointer p, int s);
+@<\HINT\ |static|@>=
+static void leak_in(pointer p, int s);
+static void leak_out(pointer p, int s);
 @
 
-\appendix
+
 
 \section{The Source Files}
-
-\subsection{{\tt hint.h}}
-
-The {\tt hint.h} file lists functions and variables exported from {\tt hint.c}.
-Care was taken not to use \TeX's types but the |pointer| and |scaled| type
-are still necessary. In case {\tt htex.h} is not included prior (nor after!)
-{\tt hint.h}, both types are defined separately. The compiler will produce
-error mesages it the definitions in {\tt hint.h} and {\tt htex.h} don't agree.
-
-@(hint.h@>=
-#ifndef _HINT_H_
-#define _HINT_H_
-
-typedef uint16_t pointer;
-typedef int scaled;
-
-@<\HINT\ |extern|@>@;
-
-#endif
-@
 
 \subsection{{\tt hint.c}}
 @(hint.c@>=
 #include "basetypes.h"
 #include <string.h>
 #include <math.h>
-#include <zlib.h>@#
+#include <zlib.h>
+@#
+#include <ft2build.h>
+#include <freetype/tttags.h>
+#include <freetype/tttables.h>
+#include <freetype/ftglyph.h>
+#include <freetype/ftadvanc.h>
+#include FT_FREETYPE_H
+@#
 #include "error.h"
 #include "format.h"
 #include "hint.h"
-#include "hrender.h"
 #include "rendernative.h"
 #include "get.h"
-#include "htex.h"
+
+
+@h
+enum {@+@<Constants in the outer block@>@+};
+@<Types in the outer block@>@;
+
+@<\HINT\ |static|@>@;
+
+static void hpack_page(void);
+static void happend_insertion(pointer p);
 
 @<GET macros@>@;
 @<TEG macros@>@;
 
 @<\HINT\ types@>@;
-
+@<\HINT\ private types@>@;
 @<\HINT\ variables@>@;
+
+@<\TeX\ functions@>@;
+
 @<\HINT\ declarations@>@;
-@<\HINT\ font access functions@>@;
 @<\HINT\ auxiliar functions@>@;
+
 @<get functions@>@;
 @<teg functions@>@;
+
+@<FreeType font functions@>@;
+
+
+@<font functions@>@;
+
+#ifdef HINTTYPE
+/* code required to support the command line interface */
+@<test functions@>@;
+#else
+/* code required to support a GUI */
+@<render variables@>@;
+@<PK font functions@>@;
+@<render functions@>@;
+#endif
 
 
 @<\HINT\ functions@>@;
 
 @
 
-\subsection{{\tt hrender.h}}
-@(hrender.h@>=
+\subsection{{\tt hint.h}}
+@(hint.h@>=
 #ifndef _HRENDER_H
 #define _HRENDER_H
-@<render definitions@>@;
 
-extern int cur_mode, cur_style;
-extern int page_h, page_v;
-extern double xdpi, ydpi;
+typedef int scaled;
+
+/*Variables and functions provided by the \HINT\ backend*/
+
+extern int hint_begin(void);
+extern void hint_end(void);
 extern uint64_t hint_blank(void);
 extern void     hint_render(void);
+extern bool hint_forward(void);
+extern bool hint_backward(void);
 extern uint64_t hint_page_get(void);
 extern uint64_t hint_page_top(uint64_t h);
 extern uint64_t hint_page_middle(uint64_t h);
@@ -8303,8 +16025,9 @@ extern uint64_t hint_page_next(void);
 extern uint64_t hint_page_prev(void);
 extern uint64_t hint_page_home(void);
 extern void hint_resize(int px_h, int px_v, double xdpi, double ydpi);
+extern scaled hint_hsize(void);
+extern scaled hint_vsize(void);
 extern void hint_clear_fonts(bool rm);
-extern void hmark_page(void);
 extern void hint_set_mark(char *m, int s);
 extern bool hint_prev_mark(void);
 extern bool hint_next_mark(void);
@@ -8317,65 +16040,37 @@ extern void hint_gamma(double gamma);
 extern int hint_print_on(int w, int h,  int bpr, int bpp, unsigned char *bits);
 extern int hint_print_off(void);
 extern int hint_print(unsigned char *bits);
+extern int hint_find_link(scaled x, scaled y, scaled precission);
+extern uint64_t hint_link_page(int i);
+extern void hint_show_page(void);
+extern void hint_round_position(bool r, double t);
+
+/*Variables and functions expected by the \HINT\ backend*/
+
+extern bool hint_map(void);
+extern void hint_unmap(void);
+
+
+
+
+
+
+
+
+
 #endif 
 @
 
-\subsection{{\tt hrender.c}}
-@(hrender.c@>=
-#include "basetypes.h"
-#include "error.h"
-#include "format.h"
-#include <string.h>
-#include <math.h>
-#include "get.h"
-#include "hint.h"
-#include "hrender.h"
-#include "rendernative.h"
-#include "htex.h"
-
-@<|extern| font functions@>
-
-@<render variables@>@;
-@<render functions@>@;
-@
-
-
-\subsection{{\tt hfonts.h}}
-@(hfonts.h@>=
-#ifndef _HFONTS_H
-#define _HFONTS_H
-
-@<font types@>@;
-
-
+@ @<\HINT\ |static|@>=
+#ifdef DEBUG
+static bool ft_exists(FT_Face ft_face, int c);
 #endif
-@
-
-\subsection{{\tt hfonts.c}}
-@(hfonts.c@>=
-#include "basetypes.h"
-#include "error.h"
-#include "format.h"
-
-#include "get.h"
-#include <ft2build.h>
-#include FT_FREETYPE_H
-#include "hfonts.h"
-#include "hint.h"
-#include "hrender.h"
-#include "rendernative.h"
-
-@<font variables@>@;
-@<\HINT\ font access functions@>@;
-@<|extern| font functions@>@;
-@<auxiliar font functions@>@;
-
-@<FreeType font functions@>@;
-
-@<PK font functions@>@;
-
-@<font functions@>@;
-
+static FT_Face font_face[];
+static scaled x_char_width(uint8_t f, int c);
+static FT_Face hload_font_face(uint8_t f);
+static scaled ft_glyph_width(FT_Face ft_face, FT_UInt ft_gid, scaled s);
+static void ft_glyph_height_depth(FT_Face ft_face, FT_UInt ft_gid,
+  scaled *h, scaled *d, scaled s);
 @
 
 \subsection{{\tt rendernative.h}}

@@ -39,15 +39,14 @@
 #include <GLFW/glfw3.h>
 
 #define VERSION 2
+#define MINOR_VERSION 2
 #define REVISION 1
-#define PATCHLEVEL 0
 
 #include "error.h"
 #include "basetypes.h"
 #include "format.h"
 #include "get.h"
 #include "hint.h"
-#include "hrender.h"
 #include "rendernative.h"
 
 /* Error Handling */
@@ -75,8 +74,8 @@ GLFWwindow* window;
 #define SCALE_MIN 0.2
 #define SCALE_NORMAL 1.0
 #define SCALE_MAX 5.0
-double scale=SCALE_NORMAL;
-uint64_t pos; /* position of current page */
+static double scale=SCALE_NORMAL;
+static uint64_t pos; /* position of current page */
 
 
 /* Getting the dpi for a window is not as simple as one might think,
@@ -163,7 +162,7 @@ static void init_monitors(void)
 }
 
 static int m_width, m_height;
-int width_mm, height_mm;
+static int width_mm, height_mm;
 
 static int find_monitor(int x, int y)
 /* return monitor for screen coordinates (x, y) */
@@ -184,10 +183,10 @@ static int find_monitor(int x, int y)
   return 0;
 }
 
-int px_h=1024, px_v=768; // size in pixel
-double x_dpi, y_dpi;
+static int px_h=1024, px_v=768; // size in pixel
+static double x_dpi, y_dpi;
 
-void set_dpi(GLFWwindow* window, int px, int py)
+static void set_dpi(GLFWwindow* window, int px, int py)
 { int wx, wy, ww, wh;
   glfwGetWindowPos(window, &wx, &wy);
   glfwGetWindowSize(window, &ww, &wh);
@@ -198,7 +197,7 @@ void set_dpi(GLFWwindow* window, int px, int py)
   //LOG("dpi: %f x %f\n",x_dpi,y_dpi);
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int w, int h)
+static void framebuffer_size_callback(GLFWwindow* window, int w, int h)
 { px_h=w; px_v=h;
   glViewport(0, 0, w, h);
   set_dpi(window,w,h);
@@ -207,7 +206,7 @@ void framebuffer_size_callback(GLFWwindow* window, int w, int h)
   hint_page();
 }
 
-void init_dpi(GLFWwindow* window)
+static void init_dpi(GLFWwindow* window)
 { int px,py;
   glfwGetFramebufferSize(window, &px, &py);
   set_dpi(window,px,py);
@@ -221,8 +220,8 @@ bool hint_map(void)
 { return hget_map();
 }
 
-int open_file(int home)
-{ hint_clear_fonts(true);
+static int open_file(int home)
+{ hint_end();
   if (!hint_begin()) return 0;
   if (home)
     hint_page_home();
@@ -327,14 +326,14 @@ static int set_input_file(char *fn)
     return file_chooser();
 }
 
-int dark = 0, loading=0, autoreload=0, home=0;
+static int dark = 0, loading=0, autoreload=0, home=0;
 
-int usage(void)
+static int usage(void)
 {    return hint_error("Usage:", "hintview [options] file\n"
 		  "Call 'hintview --help' for details.\n");
 }
 
-int help(void)
+static int help(void)
 { fprintf(stdout,"%s",
    "Usage: hintview [options] file\n"
    "Options:\n"
@@ -353,15 +352,17 @@ int help(void)
   return 0;
 }
 
-int command_line(int argc, char *argv[])
+static int command_line(int argc, char *argv[])
 { int i;
   for (i=1; argv[i]!=NULL && argv[i][0]=='-'; i++)
     { switch (argv[i][1])
       { case '-':
 	    if (strcmp(argv[i]+2,"help")==0) return help();
 	    else if (strcmp(argv[i]+2,"version")==0)
-	      { fprintf(stdout,"hintview version %d.%d.%d\nHINT file format version %d.%d\n", 
-			VERSION, REVISION, PATCHLEVEL, HINT_VERSION, HINT_MINOR_VERSION);
+	      { fprintf(stdout,"hintview version %d.%d.%d\n"
+			"HINT file format version %d.%d\n", 
+			VERSION, MINOR_VERSION, REVISION,
+			HINT_VERSION, HINT_MINOR_VERSION);
 	        return 0;
 	      }
 	    else
@@ -383,10 +384,10 @@ int command_line(int argc, char *argv[])
   return 1;	
 }
 
-GLFWcursor *drag_cursor, *hand_cursor, *arrow_cursor;
-int mouse_down=0, drag=0, on_link=0;
+static GLFWcursor *drag_cursor, *hand_cursor, *arrow_cursor;
+static int mouse_down=0, drag=0, on_link=0;
 
-void clear_cursor(void)
+static void clear_cursor(void)
 { if (on_link||drag) 
   { glfwSetCursor(window, arrow_cursor); on_link=drag=0;}
 }
@@ -396,27 +397,67 @@ void clear_cursor(void)
 #define KEY(K) KEY_MOD(K,0)
 #define CTRL(K) KEY_MOD(K,GLFW_MOD_CONTROL)
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{ if (action!=GLFW_PRESS) return;
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{ static double gamma=1.8;
+  if (action!=GLFW_PRESS) return;
   switch (KEY_MOD(key,mods)) {
-  case CTRL(GLFW_KEY_Q):
-    glfwSetWindowShouldClose(window,1);
+  case CTRL(GLFW_KEY_A): /* auto reload */
+    autoreload=!autoreload;
+    if (!autoreload)
+      break; /* else fall through to reload */
+  case CTRL(GLFW_KEY_F): /* file */
+    if (set_input_file(NULL))
+      open_file(home);
     break;
   case CTRL(GLFW_KEY_N):
     dark=!dark;
     hint_dark(dark);
     break;
-  case KEY(GLFW_KEY_HOME):
-  case CTRL(GLFW_KEY_H):
-    hint_page_home();
+  case CTRL(GLFW_KEY_O): /* outlines */
+    break;
+  case CTRL(GLFW_KEY_P): /* round position to pixel */
+    { static bool rpx=true;
+      static double th=1000; /*allmost no threshold*/
+      rpx=!rpx;
+      hint_round_position(rpx,th);
+    }
+    break;
+  case CTRL(GLFW_KEY_KP_ADD): /* round position to pixel */
+    { gamma=gamma+0.1;
+      if (gamma>4.0) gamma=4.0;
+      hint_gamma(gamma);
+    }
+    break;
+  case CTRL(GLFW_KEY_KP_SUBTRACT): /* round position to pixel */
+    { gamma=gamma-0.1;
+      if (gamma<0.1) gamma=0.1;
+      hint_gamma(gamma);
+    }
+    break;
+  case CTRL(GLFW_KEY_Q):
+    glfwSetWindowShouldClose(window,1);
+    break;
+  case CTRL(GLFW_KEY_R): /* reload */
+    if (!loading)
+    { loading=1;
+      HINT_TRY reload_file();
+      loading=0;
+    }
     clear_cursor();
     break;
-  case CTRL(GLFW_KEY_Z): 
+  case CTRL(GLFW_KEY_S): /* search */
+    break;
   case CTRL(GLFW_KEY_Y): /* US keyboard */
+  case CTRL(GLFW_KEY_Z): 
     scale=SCALE_NORMAL;
     hint_resize(px_h,px_v,scale*x_dpi,scale*y_dpi);
     hint_page();
     hint_clear_fonts(true);
+    clear_cursor();
+    break;
+  case KEY(GLFW_KEY_HOME):
+  case CTRL(GLFW_KEY_H):
+    hint_page_home();
     clear_cursor();
     break;
   case KEY(GLFW_KEY_PAGE_DOWN):
@@ -429,25 +470,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     hint_page();
     clear_cursor();
     break;
-  case CTRL(GLFW_KEY_A): /* auto reload */
-    autoreload=!autoreload;
-    if (!autoreload)
-      break; /* else fall through to reload */
-  case CTRL(GLFW_KEY_R): /* reload */
-    if (!loading)
-    { loading=1;
-      HINT_TRY reload_file();
-      loading=0;
-    }
-    clear_cursor();
-    break;
-  case CTRL(GLFW_KEY_S): /* search */
-    break;
-  case CTRL(GLFW_KEY_F): /* file */
-    if (set_input_file(NULL))
-      open_file(home);
-    break;
-   case CTRL(GLFW_KEY_O): /* outlines */
   default:
     // LOG("key %d, scan %d, action %d, mosd %d\n",key, scancode, action, mods);
     break;
@@ -458,7 +480,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 #define PX2SP(X,DPI) floor((X)*ONE*72.27/((DPI)*scale))
 
-void mouse_click(void)
+static void mouse_click(void)
 { double x,y;
   int link;
   glfwGetCursorPos(window, &x, &y);
@@ -472,7 +494,7 @@ void mouse_click(void)
   }
 }
 
-double x_start, y_start, xy_start, scale_start, time_start;
+static double x_start, y_start, xy_start, scale_start, time_start;
 #define DELTA_T 0.4
 #define DELTA_XY 16.0
 
@@ -510,7 +532,7 @@ static void cursor_position_callback(GLFWwindow* window, double x, double y)
 }
 
 
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 { if (button == GLFW_MOUSE_BUTTON_LEFT)
   { if (action == GLFW_PRESS)
     { glfwGetCursorPos(window, &x_start, &y_start);
@@ -531,7 +553,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
   }      
 }
 
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
   if (yoffset > 0.0)
   {
@@ -546,13 +568,13 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
   }
 }
 
-void cursor_enter_callback(GLFWwindow* window, int entered)
+static void cursor_enter_callback(GLFWwindow* window, int entered)
 { if (entered && autoreload && new_file_time())
     reload_file();
   //LOG("entered=%d auto=%d\n",entered, autoreload);
 }
 
-int create_window(void)
+static int create_window(void)
 { if( !glfwInit() )
   {
     hint_error("GLFW", "Failed to initialize GLFW\n" );
@@ -607,8 +629,7 @@ int main(int argc, char *argv[])
     return 1;
    if (!create_window())
     return 1;
-  nativeSetColor(color_defaults);
-  nativeSetDark(dark);
+  hint_dark(dark);
   hint_resize(px_h,px_v,scale*x_dpi,scale*y_dpi);
   if (!open_file(home))
     return 1;

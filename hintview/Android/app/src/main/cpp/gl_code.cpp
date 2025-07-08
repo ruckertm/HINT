@@ -104,6 +104,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_init(JNIEnv *env, jclass obj) {
     LOGI("Native init\n");
     debugflags=0x1;
     nativeInit();
+    hint_clear_fonts(true);
  }
 
 

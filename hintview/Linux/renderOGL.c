@@ -32,9 +32,6 @@
 #include "error.h"
 #include <ft2build.h>
 #include <freetype/freetype.h>
-#include "hint.h"
-#include "hfonts.h"
-#include "hrender.h"
 #include "rendernative.h"
 #define STBI_ONLY_JPEG
 #define STBI_ONLY_PNG
@@ -66,6 +63,7 @@ static void printGLString(const char *name, GLenum s) {
 #define MAX_INFOLOG 512
 static GLuint ProgramID, MatrixID, RuleID, GammaID, FGcolorID, IsImageID, ImageID=0;
 static unsigned char *last_b=NULL;
+static uint32_t cur_fg=0; /*the current foreground color*/
 
 #define xyID 0
 #define uvID 1
@@ -249,9 +247,7 @@ static void mkRuleTexture() /* the texture used for rules */
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
-static ColorSet *cur_colorset=NULL;
-
-extern void nativeInit(void)
+void nativeInit(void)
 { GLuint VertexArrayID;
   static int glewInitialized=0;
   /* Initialize GLEW */
@@ -294,8 +290,8 @@ extern void nativeInit(void)
   glUniform1f(GammaID, 1.0f/2.2f);
   glUniform1i(IsImageID, 0);
   glUniform4f(FGcolorID, 0.0, 0.0, 0.0, 1.0); // black as default foreground
+  cur_fg=0x000000FF; /* possibly better: use nativeSetForeground */
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // white as default background
-  cur_colorset=color_defaults;
    /* 1rst attribute buffer : XYs */
   glEnableVertexAttribArray(xyID);
   glBindBuffer(GL_ARRAY_BUFFER, xybuffer);
@@ -320,7 +316,6 @@ extern void nativeInit(void)
   glEnable(GL_FRAMEBUFFER_SRGB);
   checkGlError("GL_FRAMEBUFFER_SRGB");
 
-  hint_clear_fonts(true);
   mkRuleTexture();
   ImageID=0;
   last_b=NULL;
@@ -345,9 +340,8 @@ void nativeSetGamma(double gamma)
 }
 
 
-static uint32_t cur_fg=0;
 
-static void nativeSetForeground(uint32_t fg)
+void nativeSetForeground(uint32_t fg)
 /* set foreground rgba colors */
 { if (fg!=cur_fg)
   { uint8_t r,g,b,a;
@@ -360,33 +354,16 @@ static void nativeSetForeground(uint32_t fg)
   }
 }
 
-void nativeBackground(double x, double y, double w, double h)
-{ uint32_t bg, fg;
-  fg=cur_colorset[0][cur_mode*6+cur_style*2];
-  bg=cur_colorset[0][cur_mode*6+cur_style*2+1];
+
+void nativeBackground(double x, double y, double w, double h, uint32_t bg)
+{ uint32_t fg=cur_fg;
   nativeSetForeground(bg);
   nativeRule(x,y,w,h);
   nativeSetForeground(fg);
 }
 
-void nativeSetDark(int on)
-{ uint32_t fg;
-  cur_mode=on?1:0;
-  fg=cur_colorset[0][cur_mode*6+cur_style*2];
-  nativeSetForeground(fg);
-}
-
-void nativeSetColor(ColorSet *cs)
-{ cur_colorset=cs;
-  nativeSetDark(cur_mode);
-}
-
-void nativeBlank(void)
-{ uint32_t bg;
-  uint8_t r,g,b,a;
-  if (cur_colorset==NULL)
-    QUIT("Calling nativeBlank without calling nativeSetColor");
-  bg=cur_colorset[0][cur_mode*6+1];
+void nativeBlank(uint32_t bg)
+{ uint8_t r,g,b,a;
   a=bg&0xFF;bg=bg>>8;
   b=bg&0xFF;bg=bg>>8;
   g=bg&0xFF;bg=bg>>8;
@@ -395,15 +372,18 @@ void nativeBlank(void)
   glClear(GL_COLOR_BUFFER_BIT);
 }
 
-
+#if 0
 static float pt_h=600.0, pt_v=800.0;
+#endif
 
-void nativeSetSize(int px_h, int px_v, double x_dpi, double y_dpi)
-{  //LOG("xdpi=%f, ydpi=%f\n",x_dpi,y_dpi);
+void nativeSetSize(int px_h, int px_v, double pt_h, double pt_v)
+{
+#if 0  
    pt_h = px_h * 72.27 / x_dpi;
    pt_v = px_v * 72.27 / y_dpi; 
    page_h = round(pt_h * (1 << 16));
    page_v = round(pt_v * (1 << 16));
+#endif
    MVP[0][0]=2.0/pt_h; // x: scale to -1 to +1
    MVP[1][1]=-2.0/pt_v; // y: scale to 1 to -1
    //MVP[2][2]=0.0f; // z: don't care
@@ -415,7 +395,7 @@ void nativeSetSize(int px_h, int px_v, double x_dpi, double y_dpi)
    glViewport(0, 0, px_h, px_v);
 }
 
-extern void nativeRule(double x, double y, double w, double h)
+void nativeRule(double x, double y, double w, double h)
 /* Using GL to render a rule (a black rectangle)
    Coordinates in points, origin bottom left, x and w right, y and h up
    x,y position
@@ -505,26 +485,27 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
 }
 
 static const int to_nearest=1;
-static void GLtexture(Gcache *g) {
-    unsigned texID;
+
+unsigned int nativeTexture(unsigned char *bits, int w, int h) {
+    unsigned int textureID;
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     checkGlError("glPixelStorei");
-    glGenTextures(1, &texID);
+    glGenTextures(1, &textureID);
     checkGlError("glGenTextures");
-    glBindTexture(GL_TEXTURE_2D, texID);
-    checkGlError("glBindTexture texID");
-    /* the first element in g->bits corresponds to the lower left pixel,
-     * the last element in g->bits to the upper right pixel. */
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    checkGlError("glBindTexture textureID");
+    /* the first element in bits corresponds to the lower left pixel,
+     * the last element in bits to the upper right pixel. */
     glTexImage2D(
             GL_TEXTURE_2D,
             0,
             GL_R8,
-            g->w,
-            g->h,
+            w,
+            h,
             0,
             GL_RED,
             GL_UNSIGNED_BYTE,
-            g->bits
+            bits
     );
     checkGlError("glTeXImage2D Glyph");
 
@@ -538,41 +519,27 @@ static void GLtexture(Gcache *g) {
     { glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
-
-    g->GLtexture = texID;
-    //MESSAGE("Generated GL texture %d",g->GLtexture);
+    //MESSAGE("Generated GL texture %d",textureID);
+    return textureID;
 }
 
-void nativeSetPK(struct gcache_s*g)
-{GLtexture(g); /* can I free g->bits ? */}
+unsigned int nativeFreeTexture(unsigned int t)
+{ if (t != 0) {
+    glDeleteTextures(1, &t); // probably not needed
+  }
+  return 0;
+}
 
-void nativeSetFreeType(struct gcache_s*g)
-{GLtexture(g);}
 
+#if 0
 int round_to_pixel=1; /* makes sense only if using the native dpi, if using a multiple its of not much use*/
 double pixel_size_threshold= 72.27/200; /*round to pixel only if pixel size in pt is above threshold*/
-void nativeGlyph(double x, double dx, double y, double dy, double w, double h, struct gcache_s *g, int s)
-/* given glyph g, display g at position x,y in size w,h. x, y, w, h are given in point */
-{  
-  if (g->GLtexture == 0)
-    GLtexture(g);
-  x=x-dx;
-  y=y+h-dy;
-  if (round_to_pixel)
-  { double pxs;
-    pxs = 72.27/xdpi; /* pixel size in point */
-    if (pxs>=pixel_size_threshold)
-    { x=x/pxs;
-      x=floor(x+0.5);
-      x=x*pxs;
-    }
-    pxs = 72.27/ydpi; /* pixel size in point */
-    if (pxs>=pixel_size_threshold)
-    { y=y/pxs;
-      y=floor(y+0.5);
-      y=y*pxs;
-    }
-  }
+#endif
+
+void nativeGlyph(double x, double y, double w, double h, unsigned int t)
+/* display texture t at position x,y in size w, h.
+   x, y, w, h are given in point */
+{
   xy[0][0]=x;	  xy[0][1]=y;
   xy[1][0]=x;	  xy[1][1]=y-h;
   xy[2][0]=x+w;     xy[2][1]=y-h;
@@ -581,22 +548,12 @@ void nativeGlyph(double x, double dx, double y, double dy, double w, double h, s
   xy[4][0]=x;       xy[4][1]=y;
   xy[5][0]=x+w;     xy[5][1]=y-h;
 
-  glBindTexture(GL_TEXTURE_2D, g->GLtexture);
-  checkGlError("glBindTexture g->GLtexture");
-
-  nativeSetForeground(cur_colorset[0][cur_mode*6+s*2]);
-
+  glBindTexture(GL_TEXTURE_2D, t);
+  checkGlError("glBindTexture t");
   glBindBuffer(GL_ARRAY_BUFFER, xybuffer);
   glBufferData(GL_ARRAY_BUFFER, sizeof(xy), xy, GL_STREAM_DRAW);
   glDrawArrays(GL_TRIANGLES, 0, 2*3);
   //checkGlError("glDrawArrays");
-}
-
-void nativeFreeGlyph(struct gcache_s*g)
-{    if (g->GLtexture != 0) {
-        glDeleteTextures(1, &(g->GLtexture)); // probably not needed
-        g->GLtexture = 0;
-    }
 }
 
 

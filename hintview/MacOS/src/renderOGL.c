@@ -319,7 +319,6 @@ extern void nativeInit(void)
             MESSAGE("framebuffer status error 0x%x",error);
     }
             
-  hint_clear_fonts(false);
   mkRuleTexture();
   ImageID=0;
   last_b=NULL;

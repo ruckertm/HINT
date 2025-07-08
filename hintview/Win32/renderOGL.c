@@ -313,7 +313,6 @@ void nativeInit(void)
   glEnable(GL_FRAMEBUFFER_SRGB);
   checkGlError("GL_FRAMEBUFFER_SRGB");
 
-  hint_clear_fonts(true);
   mkRuleTexture();
   ImageID=0;
   last_b=NULL;

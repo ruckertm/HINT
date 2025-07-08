@@ -3245,7 +3245,7 @@ txt: TXT_CC { hput_txt_cc($1); }
 @
 
 The following function keeps track of the position in the current line.
-It the line gets too long it will break the text at the next space
+If the line gets too long it will break the text at the next space
 character. If no suitable space character comes along,
 the line will be broken after any regular character.
 
@@ -8848,7 +8848,7 @@ def_node:
 @<get functions@>=
 void hget_definition(int n, Tag a, uint32_t node_pos)
 {@+ switch(KIND(a))
-    { case font_kind: hget_font_def(n);@+ break;
+    { case font_kind: hget_font_def(INFO(a),n);@+ break;
       case param_kind:
         {@+ List l; l.t=a; @+HGET_LIST(INFO(a),l); @+hwrite_parameters(&l); @+ break;@+} 
       case page_kind: hget_page(); @+break;
@@ -9022,23 +9022,18 @@ fonts that can be used in a \HINT\ file to at most 256.
 
 A long format font definition starts with the keyword ``\.{font}'' and
 is followed by the font number, as usual prefixed by an asterisk. Then
-comes the font specification with the font size, the font
-name, the section number of the \TeX\ font metric file, and the
+comes the font specification with the font name, the font size,
+the section number of the \TeX\ font metric file, and the
 section number of the file containing the glyphs for the font.
 The \HINT\ format supports \.{.pk} files, the traditional font format
 for \TeX, and the more modern PostScript Type 1 fonts,
 TrueType fonts, and OpenType fonts.
 
-The format of font definitions will probably change in future
-versions of the \HINT\ file format. 
-For example,  \.{.pk} files might be replaced entirely by PostScript Type 1 fonts.
-Also \HINT\ needs the \TeX\ font metric files only to obtain the sizes
-of characters when running \TeX's line breaking algorithm.
-But for many TrueType fonts there are no \TeX\ font metric files,
-while the necessary information about character sizes should be easy
-to obtain.
-Another information, that is currently missing from font definitions,
-is the fonts character encoding.
+Starting with version 2.2, there is new support for TrueType and OpenType
+fonts while \.{.pk} fonts are considered deprecated.
+The previously mandatory \.{.tfm} file is no longer required for
+TrueType and OpenType fonts. Instead, the hint viewer is required to
+extract the necessary font metrics directly from the font files.
 
 In a \HINT\ file, text is represented as a sequence of numbers called
 character codes. \HINT\ files use the UTF-8 character encoding
@@ -9059,13 +9054,28 @@ need to ``understand'' the content of the \HINT\ file. For example
 programs that want to translate a \HINT\ document to a different language,
 or for text-to-speech conversion.
 
+For FreeType and OpenType fonts, the \HINT\ viewer is required to support
+only two character encodings: |FT_ENCODING_ADOBE_CUSTOM|, used for the
+traditional \TeX\ encoding schema of fonts;
+and |FT_ENCODING_UNICODE| used for TrueType and OpenType fonts that do not have
+a \.{.tfm} file along with them. To be precise: a font that has no  \.{.tfm}
+file along with it must be encoded in Unicode. That is a glyph node
+will specify the unicode value of the desired character, which is then
+translated to the glyph number using |FT_ENCODING_UNICODE|.
+For ligature nodes, the node will speciy the glyph number directly without
+a need to translate it further, but the replacement list of the ligature
+will contain the unicode values of the replacement characters.
+
+In the short format we use the info value |b000| for a font with  \.{.tfm} file
+and the info value |b001| for a font without  \.{.tfm} file.
+
 The Internet Engineering Task Force IETF has established a character set
 registry\cite{ietf:charset-mib} that defines an enumeration of all
 registered coded character sets\cite{iana:charset-mib}.  The coded
 character set numbers are in the range 1--2999.
 This encoding number, as given in~\cite{iana:charset},
 might be one possibility for specifying the font encoding as
-part of a font definition.
+part of a font definition. But none such addition is planed at the moment.
 
 Currently, it is only required that a font specifies
 an interword glue and a default discretionary break. After that comes
@@ -9122,6 +9132,10 @@ font: font_head font_param_list;
 
 font_head: string dimension UNSIGNED UNSIGNED @/
   	 	 {uint8_t f=$<u>@&0;  SET_DBIT(f,font_kind); @+hfont_name[f]=strdup($1); $$=hput_font_head(f,hfont_name[f],$2,$3,$4);};
+font_head: string dimension UNSIGNED @/
+  	 	 {uint8_t f=$<u>@&0;  SET_DBIT(f,font_kind); @+hfont_name[f]=strdup($1); $$=hput_font_head(f,hfont_name[f],$2,-1,$3);};
+
+
 
 font_param_list: glue_node disc_node @+ | font_param_list font_param ;
 
@@ -9166,14 +9180,15 @@ static void hget_font_params(void)
 }
 
 
-void hget_font_def(uint8_t f)
+void hget_font_def(Info i, uint8_t f)
 { char *n; @+Dimen s=0;@+uint16_t m,y; 
   HGET_STRING(n);@+ hwrite_string(n);@+  hfont_name[f]=strdup(n);
   HGET32(s); @+ hwrite_dimension(s);
   DBG(DBGDEF,"Font %s size 0x%x\n", n, s); 
-  HGET16(m); @+RNG("Font metrics",m,3,max_section_no);
+  if (i==b000) { HGET16(m); @+RNG("Font metrics",m,3,max_section_no); }
   HGET16(y); @+RNG("Font glyphs",y,3,max_section_no);
-  hwritef(" %d %d",m,y);
+  if (i==b000) hwritef(" %d",m);
+  hwritef(" %d",y);
   hget_font_params();
   DBG(DBGDEF,"End font definition\n");
 }
@@ -9181,12 +9196,14 @@ void hget_font_def(uint8_t f)
 
 \putcode
 @<put functions@>=
-Tag hput_font_head(uint8_t f,  char *n, Dimen s, @| uint16_t m, uint16_t y)
-{ Info i=b000;
+Tag hput_font_head(uint8_t f,  char *n, Dimen s, @| int m, uint16_t y)
+{ Info i;
+  
   DBG(DBGDEF,"Defining font %d (%s) size 0x%x\n", f, n, s); 
   hput_string(n);
   HPUT32(s);@+ 
-  HPUT16(m); @+HPUT16(y); 
+  if (m>=0) {i=b000; HPUT16(m);} else i=b001;
+  HPUT16(y); 
   return TAG(font_kind,i);
 }
 @
@@ -11099,14 +11116,6 @@ case TAG(color_kind,b000): @+ (void)HTEG8; @+break;
 
 \noindent
 @<shared skip functions@>=
-void hteg_size_boundary(Info info)
-{ uint32_t n;
-  info=info&0x3;
-  if (info==0) return;
-  n=HTEG8;
-  if (n!=0x100-info) QUIT(@["List size boundary byte 0x%x does not match info value %d at " SIZE_F@],
-                            n, info,hpos-hstart);
-}
 
 uint32_t hteg_list_size(Info info)
 { uint32_t n=0;
@@ -11118,8 +11127,19 @@ uint32_t hteg_list_size(Info info)
   else QUIT("List info %d must be 0, 1, 2, or 3",info);
   return n;
 } 
+@
 
-void hteg_list(List *l)
+@<skip functions@>=
+static void hteg_size_boundary(Info info)
+{ uint32_t n;
+  info=info&0x3;
+  if (info==0) return;
+  n=HTEG8;
+  if (n!=0x100-info) QUIT(@["List size boundary byte 0x%x does not match info value %d at " SIZE_F@],
+                            n, info,hpos-hstart);
+}
+
+static void hteg_list(List *l)
 { @<skip the end byte |z|@>@,
   @+if (KIND(z)!=list_kind && KIND(z)!=param_kind) @/
     QUIT("List expected at 0x%x", (uint32_t)(hpos-hstart)); 
@@ -11139,7 +11159,7 @@ void hteg_list(List *l)
   @<skip and check the start byte |a|@>@;
 }
 
-void hteg_param_list(List *l)
+static void hteg_param_list(List *l)
 { @+if (KIND(*(hpos-1))!=param_kind) return;
   hteg_list(l);
 }
@@ -11294,7 +11314,7 @@ typedef double float64_t;
 #error  @=float64 type must have size 8@>
 #endif
 #define HINT_VERSION 2
-#define HINT_MINOR_VERSION 1
+#define HINT_MINOR_VERSION 2
 #define AS_STR(X) #X
 #define VERSION_AS_STR(X,Y) AS_STR(X) "." AS_STR(Y)
 #define HINT_VERSION_STRING VERSION_AS_STR(HINT_VERSION, HINT_MINOR_VERSION)
@@ -11558,7 +11578,7 @@ extern void hput_string(char *str);
 extern void hput_range(uint8_t pg, bool on);
 extern void hput_max_definitions(void);
 extern Tag hput_dimen(Dimen d);
-extern Tag hput_font_head(uint8_t f,  char *n, Dimen s,@| uint16_t m, uint16_t y);
+extern Tag hput_font_head(uint8_t f,  char *n, Dimen s,@| int m, uint16_t y);
 extern void hput_range_defs(void);
 extern void hput_xdimen_node(Xdimen *x);
 extern void hput_directory(void);
@@ -11831,7 +11851,7 @@ contained in {\tt get.h}. The remaining declarations are these:
 @<get function declarations@>=
 extern void hget_xdimen_node(Xdimen *x);
 extern void hget_def_node(void);
-extern void hget_font_def(uint8_t f);
+extern void hget_font_def(Info i, uint8_t f);
 extern void hget_content_section(void);
 extern Tag hget_content_node(void);
 extern void hget_glue_node(void);
