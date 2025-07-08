@@ -19,6 +19,21 @@
 			</array>
 		</dict>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLIconFile</key>
+			<string>HINT</string>
+			<key>CFBundleURLName</key>
+			<string>edu.hm.cs.hintview.hnt</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>hnt</string>
+			</array>
+		</dict>
+	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>UIApplicationSceneManifest</key>

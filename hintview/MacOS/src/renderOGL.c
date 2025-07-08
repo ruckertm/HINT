@@ -451,27 +451,17 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
         ImageID = 0;
     }
     last_b=b;
+    //LOG("nativeImage %d chanels\n",nrChannels);
+
     data = stbi_load_from_memory(b, (int) (e - b), &width, &height, &nrChannels, 4);
     if (data == NULL)
     { LOG("Unable to display image\n");
       data=grey; width=height=1; nrChannels=4;
     }
-    //LOG("nativeImage %d chanels\n",nrChannels);
-#if 0
-    format = GL_RGBA;
-    if (nrChannels == 4)
-        format = GL_RGBA;
-    else if (nrChannels == 3)
-        format = GL_RGB;
-    else if (nrChannels == 2)
-        format = GL_RG;
-    else if (nrChannels == 1)
-        format = GL_ALPHA;
-#else
-    /* this works with setting the number of channels to 4 above */
+ /* this works with setting the number of channels to 4 above */
     internal_format=GL_SRGB_ALPHA;
     format=GL_RGBA;
-#endif
+
     glGenTextures(1, &ImageID);
     glBindTexture(GL_TEXTURE_2D, ImageID);
     checkGlError("glBindTexture ImageID");

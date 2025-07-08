@@ -2,12 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleDisplayName</key>
-	<string></string>
+	<string>HintView</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
@@ -34,9 +32,9 @@
 	<key>CFBundleHelpBookName</key>
 	<string>HintView Help</string>
 	<key>CFBundleIconFile</key>
-	<string>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;
-&lt;plist version=&quot;1.0&quot;&gt;
+	<string>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"&gt;
+&lt;plist version="1.0"&gt;
 &lt;string&gt;&lt;/string&gt;
 &lt;/plist&gt;
 </string>
@@ -70,10 +68,15 @@
 				<string>hnt</string>
 			</array>
 		</dict>
-		<dict/>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.utilities</string>
 	<key>LSMultipleInstancesProhibited</key>
@@ -92,6 +95,7 @@
 			<key>UTTypeConformsTo</key>
 			<array>
 				<string>public.data</string>
+				<string>public.content</string>
 			</array>
 			<key>UTTypeDescription</key>
 			<string>HINT file</string>
@@ -106,6 +110,8 @@
 			</dict>
 			<key>UTTypeIdentifier</key>
 			<string>edu.hm.cs.hintview.hnt</string>
+			<key>UTTypeReferenceURL</key>
+			<string>https://hint.userweb.mwn.de/hint/hintview.html</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -121,6 +127,7 @@
 			<key>UTTypeConformsTo</key>
 			<array>
 				<string>public.data</string>
+				<string>public.content</string>
 			</array>
 			<key>UTTypeDescription</key>
 			<string>HINT</string>
@@ -140,6 +147,10 @@
 				<key>public.filename-extension</key>
 				<array>
 					<string>hnt</string>
+				</array>
+				<key>public.mime-type</key>
+				<array>
+					<string>application/hintview</string>
 				</array>
 			</dict>
 		</dict>

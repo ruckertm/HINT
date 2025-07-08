@@ -153,7 +153,7 @@
 		552970C4290AA93B003E61E0 /* main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
 		555C72BB2CECB74A00F62BE6 /* stb_image.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = stb_image.c; sourceTree = "<group>"; };
 		555CAAA92924EBF300C9C6AE /* HINT.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = HINT.icns; sourceTree = "<group>"; };
-		557A9BB328F445B7004772FE /* iOSHintView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOSHintView.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		557A9BB328F445B7004772FE /* HintView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HintView.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		557A9BB628F445B7004772FE /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		557A9BB728F445B7004772FE /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		557A9BB928F445B7004772FE /* SceneDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SceneDelegate.h; sourceTree = "<group>"; };
@@ -290,7 +290,7 @@
 		557A9BB428F445B7004772FE /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				557A9BB328F445B7004772FE /* iOSHintView.app */,
+				557A9BB328F445B7004772FE /* HintView.app */,
 				550C78D1290FFF5D00FDBDA4 /* libfreetype.a */,
 			);
 			name = Products;
@@ -367,9 +367,9 @@
 			productReference = 550C78D1290FFF5D00FDBDA4 /* libfreetype.a */;
 			productType = "com.apple.product-type.library.static";
 		};
-		557A9BB228F445B7004772FE /* iOSHintView */ = {
+		557A9BB228F445B7004772FE /* HintView */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 557A9BCC28F445B9004772FE /* Build configuration list for PBXNativeTarget "iOSHintView" */;
+			buildConfigurationList = 557A9BCC28F445B9004772FE /* Build configuration list for PBXNativeTarget "HintView" */;
 			buildPhases = (
 				557A9BAF28F445B7004772FE /* Sources */,
 				557A9BB028F445B7004772FE /* Frameworks */,
@@ -380,9 +380,9 @@
 			dependencies = (
 				550C79362910086900FDBDA4 /* PBXTargetDependency */,
 			);
-			name = iOSHintView;
+			name = HintView;
 			productName = iOSHintView;
-			productReference = 557A9BB328F445B7004772FE /* iOSHintView.app */;
+			productReference = 557A9BB328F445B7004772FE /* HintView.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -402,7 +402,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 557A9BAE28F445B7004772FE /* Build configuration list for PBXProject "iOSHintView" */;
+			buildConfigurationList = 557A9BAE28F445B7004772FE /* Build configuration list for PBXProject "HintView" */;
 			compatibilityVersion = "Xcode 13.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -415,7 +415,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				557A9BB228F445B7004772FE /* iOSHintView */,
+				557A9BB228F445B7004772FE /* HintView */,
 				550C78D0290FFF5D00FDBDA4 /* freetype */,
 			);
 		};
@@ -697,9 +697,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = V3Q8F4UF64;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -713,7 +714,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = HintView;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
-				INFOPLIST_KEY_NSDownloadsFolderUsageDescription = "";
+				INFOPLIST_KEY_NSDownloadsFolderUsageDescription = "Open HINT file for viewing";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -723,7 +724,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.1.0;
+				MARKETING_VERSION = 2.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = edu.hm.cs.hintview;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -738,9 +739,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = V3Q8F4UF64;
 				GCC_PREPROCESSOR_DEFINITIONS = "GLES_SILENCE_DEPRECATION=1";
@@ -750,7 +752,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = HintView;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
-				INFOPLIST_KEY_NSDownloadsFolderUsageDescription = "";
+				INFOPLIST_KEY_NSDownloadsFolderUsageDescription = "Open HINT file for viewing";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -760,7 +762,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.1.0;
+				MARKETING_VERSION = 2.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = edu.hm.cs.hintview;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -782,7 +784,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		557A9BAE28F445B7004772FE /* Build configuration list for PBXProject "iOSHintView" */ = {
+		557A9BAE28F445B7004772FE /* Build configuration list for PBXProject "HintView" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				557A9BCA28F445B9004772FE /* Debug */,
@@ -791,7 +793,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		557A9BCC28F445B9004772FE /* Build configuration list for PBXNativeTarget "iOSHintView" */ = {
+		557A9BCC28F445B9004772FE /* Build configuration list for PBXNativeTarget "HintView" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				557A9BCD28F445B9004772FE /* Debug */,
