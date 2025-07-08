@@ -32,7 +32,7 @@
 #include "basetypes.h"
 #include "winmain.h"
 #include "error.h"
-#include "hrender.h"
+#include "hint.h"
 #include "glcontext.h"
 #include "print.h"
 

@@ -31,7 +31,6 @@
 #include "resource.h"
 #include "error.h"
 #include "winmain.h"
-#include "hrender.h"
 #include "hint.h"
 
 // AddItemToTree - adds items to a tree-view control. 

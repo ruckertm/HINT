@@ -86,7 +86,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\backend;..\external\zlib-1.2.11;..\external\glew-1.13.0\include;..\external\freetype-2.3.5\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\backend;..\external\zlib-1.2.11;..\external\glew-1.13.0\include;..\external\freetype-2.12.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG;_WINDOWS;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -114,7 +114,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\backend;..\external\zlib-1.2.11;..\external\glew-1.13.0\include;..\external\freetype-2.3.5\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\backend;..\external\zlib-1.2.11;..\external\glew-1.13.0\include;..\external\freetype-2.12.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;DEBUG;_WINDOWS;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -141,7 +141,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\backend;..\external\zlib-1.2.11;..\external\glew-1.13.0\include;..\external\zlib-1.2.11;..\external\freetype-2.3.5\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\backend;..\external\zlib-1.2.11;..\external\glew-1.13.0\include;..\external\freetype-2.12.1\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling />
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -170,7 +170,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\backend;..\external\zlib-1.2.11;..\external\glew-1.13.0\include;..\external\freetype-2.3.5\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\backend;..\external\zlib-1.2.11;..\external\glew-1.13.0\include;..\external\freetype-2.12.1\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>
       </ExceptionHandling>
@@ -199,10 +199,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\backend\get.c" />
-    <ClCompile Include="..\backend\hfonts.c" />
     <ClCompile Include="..\backend\hint.c" />
-    <ClCompile Include="..\backend\hrender.c" />
-    <ClCompile Include="..\backend\htex.c" />
     <ClCompile Include="..\backend\tables.c" />
     <ClCompile Include="..\external\glew-1.13.0\src\glew.c" />
     <ClCompile Include="button.c" />
@@ -220,10 +217,7 @@
     <ClInclude Include="..\backend\basetypes.h" />
     <ClInclude Include="..\backend\error.h" />
     <ClInclude Include="..\backend\format.h" />
-    <ClInclude Include="..\backend\hfonts.h" />
     <ClInclude Include="..\backend\hint.h" />
-    <ClInclude Include="..\backend\hrender.h" />
-    <ClInclude Include="..\backend\htex.h" />
     <ClInclude Include="..\backend\rendernative.h" />
     <ClInclude Include="button.h" />
     <ClInclude Include="glcontext.h" />
@@ -255,11 +249,8 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\backend\btex.w" />
     <None Include="..\backend\format.w" />
     <None Include="..\backend\hint.w" />
-    <None Include="..\backend\htex.ch" />
-    <None Include="..\backend\htex.w" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

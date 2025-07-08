@@ -11697,7 +11697,6 @@ static int cur_loc;
 static int lo_loc, hi_loc;
 @
 @<\HINT\ |static|@>=
-static uint64_t page_loc[];
 static int cur_loc;
 @
 
@@ -12657,15 +12656,12 @@ a simple data type is used for outlines.
 It contains the information relevant to the 
 user interface.
 
+
+The |hint_Outline| type is defined in the header file
+but the definition should be here.
+
 @<\HINT\ |static|@>=
-typedef struct { 
-uint64_t pos;  
-uint8_t depth; 
-uint8_t where; 
-int p; /* pointer to the list of title nodes */
-char *title; /* title as sequence of utf8 character codes */
-} hint_Outline;
-hint_Outline *hint_outlines;
+static hint_Outline *hint_outlines;
 @
 
 The |pos| field contains a ``position'' in the hint file 
@@ -12734,7 +12730,7 @@ returns a pointer to an array of type |hint_Outline[]|, that can be indexed
 from 0 to |max_outline|.
 
 Here is a summary of the above functions:
-@<\HINT\ |static|@>=
+@<\HINT\ |extern|@>=
 extern int hint_get_outline_max(void);
 extern hint_Outline *hint_get_outlines(void);
 extern uint64_t hint_outline_page(int i);
@@ -15961,6 +15957,7 @@ static void leak_out(pointer p, int s);
 enum {@+@<Constants in the outer block@>@+};
 @<Types in the outer block@>@;
 
+
 @<\HINT\ |static|@>@;
 
 static void hpack_page(void);
@@ -16003,8 +16000,8 @@ static void happend_insertion(pointer p);
 
 \subsection{{\tt hint.h}}
 @(hint.h@>=
-#ifndef _HRENDER_H
-#define _HRENDER_H
+#ifndef _HINT_H
+#define _HINT_H
 
 typedef int scaled;
 
@@ -16045,6 +16042,18 @@ extern uint64_t hint_link_page(int i);
 extern void hint_show_page(void);
 extern void hint_round_position(bool r, double t);
 
+typedef struct { 
+uint64_t pos;  
+uint8_t depth; 
+uint8_t where; 
+int p; /* pointer to the list of title nodes */
+char *title; /* title as sequence of utf8 character codes */
+} hint_Outline;
+
+extern int hint_get_outline_max(void);
+extern hint_Outline *hint_get_outlines(void);
+extern uint64_t hint_outline_page(int i);
+
 /*Variables and functions expected by the \HINT\ backend*/
 
 extern bool hint_map(void);
@@ -16065,7 +16074,7 @@ extern void hint_unmap(void);
 #ifdef DEBUG
 static bool ft_exists(FT_Face ft_face, int c);
 #endif
-static FT_Face font_face[];
+
 static scaled x_char_width(uint8_t f, int c);
 static FT_Face hload_font_face(uint8_t f);
 static scaled ft_glyph_width(FT_Face ft_face, FT_UInt ft_gid, scaled s);

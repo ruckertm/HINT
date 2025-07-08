@@ -372,18 +372,8 @@ void nativeBlank(uint32_t bg)
   glClear(GL_COLOR_BUFFER_BIT);
 }
 
-#if 0
-static float pt_h=600.0, pt_v=800.0;
-#endif
-
 void nativeSetSize(int px_h, int px_v, double pt_h, double pt_v)
 {
-#if 0  
-   pt_h = px_h * 72.27 / x_dpi;
-   pt_v = px_v * 72.27 / y_dpi; 
-   page_h = round(pt_h * (1 << 16));
-   page_v = round(pt_v * (1 << 16));
-#endif
    MVP[0][0]=2.0/pt_h; // x: scale to -1 to +1
    MVP[1][1]=-2.0/pt_v; // y: scale to 1 to -1
    //MVP[2][2]=0.0f; // z: don't care
@@ -530,11 +520,6 @@ unsigned int nativeFreeTexture(unsigned int t)
   return 0;
 }
 
-
-#if 0
-int round_to_pixel=1; /* makes sense only if using the native dpi, if using a multiple its of not much use*/
-double pixel_size_threshold= 72.27/200; /*round to pixel only if pixel size in pt is above threshold*/
-#endif
 
 void nativeGlyph(double x, double y, double w, double h, unsigned int t)
 /* display texture t at position x,y in size w, h.
