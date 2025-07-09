@@ -35,7 +35,6 @@ extern "C" {
 #include "format.h"
 #include "get.h"
 #include "hint.h"
-#include "hrender.h"
 #include "rendernative.h"
 #define round(X) ((int) ((X) >=0.0?floor((X) +0.5) :ceil((X) -0.5) ) )
 // Functions from rendergl.c
@@ -262,7 +261,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_setPos(JNIEnv *env, jclass obj, jlong pos) {
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_setMode(JNIEnv *env, jclass obj, jboolean mode) {
-    nativeSetDark(mode);
+    hint_dark(mode);
 }
 
 extern "C" JNIEXPORT void JNICALL

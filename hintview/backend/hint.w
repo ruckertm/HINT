@@ -1183,7 +1183,7 @@ and initialize the variable |hint_outlines| together with the
 variable |labels|.
 
 @<\HINT\ variables@>=
-hint_Outline *hint_outlines=NULL;
+static hint_Outline *hint_outlines=NULL;
 static int outline_no=-1;
 @
 

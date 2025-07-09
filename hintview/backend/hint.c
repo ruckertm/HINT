@@ -1509,7 +1509,7 @@ static PageDef*cur_page;
 /*:57*//*65:*/
 #line 1185 "hint.w"
 
-hint_Outline*hint_outlines= NULL;
+static hint_Outline*hint_outlines= NULL;
 static int outline_no= -1;
 /*:65*//*73:*/
 #line 1277 "hint.w"

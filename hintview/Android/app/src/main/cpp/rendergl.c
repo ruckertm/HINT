@@ -328,12 +328,13 @@ void nativeRule(double x, double y, double w, double h)
    w,h width and height
   */
 { //LOGI("Rendering rule at (%f,%f) sized %fx%f",x/SPf,y/SPf,w/SPf,h/SPf);
-    GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
+
+   GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
                        (GLfloat) x, (GLfloat) (y - h), 0.0f, 0.0f,
                        (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
+                       (GLfloat) (x +w), (GLfloat) y, 1.0f, 1.0f,
                        (GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
-                       (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
-                       (GLfloat) (x + w), (GLfloat) y, 1.0f, 1.0f
+                       (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f
     };
     glBindTexture(GL_TEXTURE_2D, RuleID);
     checkGlError("glBindTexture RuleID");
@@ -394,14 +395,13 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
      checkGlError("glBindTexture old ImageID");
   }
 
-  GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
-                           (GLfloat) x, (GLfloat) (y - h), 0.0f, 0.0f,
-                           (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
-                           (GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
-                           (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
-                           (GLfloat) (x + w), (GLfloat) y, 1.0f, 1.0f
-        };
-
+    GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
+                       (GLfloat) x, (GLfloat) (y - h), 0.0f, 0.0f,
+                       (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
+                       (GLfloat) (x +w), (GLfloat) y, 1.0f, 1.0f,
+                       (GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
+                       (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f
+    };
   glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
   checkGlError("glVertexAttribPointer");
 
@@ -461,12 +461,12 @@ void nativeGlyph(double x, double y, double w, double h, unsigned int t)
 /* display texture t at position x,y in size w, h.
    x, y, w, h are given in point */
 {  
-  GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 0.0f,
-                     (GLfloat) x, (GLfloat) (y + h), 0.0f, 1.0f,
-                     (GLfloat) (x + w), (GLfloat) (y + h), 1.0f, 1.0f,
-                     (GLfloat) x, (GLfloat) y, 0.0f, 0.0f,
-                     (GLfloat) (x + w), (GLfloat) (y + h), 1.0f, 1.0f,
-                     (GLfloat) (x + w), (GLfloat) y, 1.0f, 0.0f
+  GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
+                     (GLfloat) x, (GLfloat) (y - h), 0.0f, 0.0f,
+                     (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
+                     (GLfloat) (x +w), (GLfloat) y, 1.0f, 1.0f,
+                     (GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
+                     (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f
   };
   glBindTexture(GL_TEXTURE_2D, t);
   checkGlError("glBindTexture t");

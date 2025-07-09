@@ -15,7 +15,7 @@ find_library( # Defines the name of the path variable that stores the
 
 
 set(TOP_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../../../../..")
-set(FREETYPE_SOURCE_DIR "${TOP_SOURCE_DIR}/external/freetype-2.3.5")
+set(FREETYPE_SOURCE_DIR "${TOP_SOURCE_DIR}/external/freetype-2.12.1")
 # include files
 include_directories("${TOP_SOURCE_DIR}/backend")
 include_directories("${FREETYPE_SOURCE_DIR}/include")
@@ -47,7 +47,8 @@ set(FT_SRCS
         ${FREETYPE_SOURCE_DIR}/src/raster/raster.c
         ${FREETYPE_SOURCE_DIR}/src/smooth/smooth.c
         ${FREETYPE_SOURCE_DIR}/src/psaux/psaux.c
-        ${FREETYPE_SOURCE_DIR}/src/psnames/psmodule.c)
+        ${FREETYPE_SOURCE_DIR}/src/psnames/psmodule.c
+        )
 
 add_library(freetype STATIC ${FT_SRCS})
 target_compile_options(freetype  PRIVATE -Wno-shift-negative-value -Wno-empty-body)
@@ -56,11 +57,8 @@ target_compile_options(freetype  PRIVATE -Wno-shift-negative-value -Wno-empty-bo
 add_library(hintview SHARED
         gl_code.cpp
         rendergl.c
-        hfonts.c
         tables.c
-        htex.c
         get.c
-        hrender.c
         hint.c
         )
 target_compile_options(hintview PRIVATE -Wno-dangling-else)
