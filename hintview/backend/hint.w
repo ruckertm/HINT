@@ -13232,7 +13232,9 @@ if (!c_ignore)
     q=link(q);
   }
   if (s!=max_s)
-    hSetColor(max_s);
+  { cur_style=max_s;
+    hSetColor(cur_color);
+  }
   else
     cur_style=s;
 }
@@ -13297,7 +13299,9 @@ static void c_ignore_list(pointer p)
     p=link(p);
   }
   if (s!=max_s)
-    hSetColor(max_s);
+  { cur_style=max_s;
+    hSetColor(cur_color);
+  }
   else
     cur_style=s;
 }
@@ -14145,8 +14149,8 @@ static void render_image(int x, int y, int w, int h, uint32_t n)
 When a color node occurs on a page, we pass the new color number
 to the |hSetColor| function. The |hSetColor| function, will cache
 the frequently used color variables, like the current foreground color |cur_fg|,
-so it is necessary to call it whenever either |cur_mode| or |cur_style|
-are changing as well.
+so it is necessary to call it after either |cur_mode| or |cur_style|
+is changing as well.
 Because the background is changing infrequently, the current
 background color is not cached and calls to  |nativeBackground|
 must be made whenever necessary.
@@ -14275,7 +14279,9 @@ if(link(p)==0xffff)
       if (!c_ignore && c!=' ')
       { @<compute the |next_style|@>@;
         if (next_style!=cur_style)
-          hSetColor(next_style);
+	{ cur_style =next_style;
+          hSetColor(cur_color);
+	}
       }
 render_c:        
 #ifdef DEBUG

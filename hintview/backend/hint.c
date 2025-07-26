@@ -1,5 +1,5 @@
 /*758:*/
-#line 15936 "hint.w"
+#line 15942 "hint.w"
 
 #include "basetypes.h"
 #include <string.h> 
@@ -595,7 +595,7 @@ act_width= act_width+width(cur_p) ; \
 #define adv_past(A) {} \
 
 
-#line 15956 "hint.w"
+#line 15962 "hint.w"
 
 enum{/*232:*/
 #line 4181 "hint.w"
@@ -639,7 +639,7 @@ file_name_size= 1024,
 empty_string= 256
 
 /*:232*/
-#line 15957 "hint.w"
+#line 15963 "hint.w"
 };
 /*237:*/
 #line 4295 "hint.w"
@@ -746,7 +746,7 @@ typedef uint8_t internal_font_number;
 typedef uint16_t font_index;
 
 /*:379*/
-#line 15958 "hint.w"
+#line 15964 "hint.w"
 
 
 
@@ -867,7 +867,7 @@ static void trv_init(void(*f)(uint32_t c));
 static void trv_vlist(pointer p);
 static void trv_hlist(pointer p);
 /*:652*//*680:*/
-#line 13420 "hint.w"
+#line 13424 "hint.w"
 
 typedef struct{
 uint64_t pos;
@@ -877,22 +877,22 @@ scaled top,bottom,left,right;
 extern hint_Link*hint_links;
 static int max_link;
 /*:680*//*685:*/
-#line 13592 "hint.w"
+#line 13596 "hint.w"
 
 extern int hint_find_link(scaled x,scaled y,scaled precission);
 extern uint64_t hint_link_page(int i);
 /*:685*//*757:*/
-#line 15926 "hint.w"
+#line 15932 "hint.w"
 
 static void leak_in(pointer p,int s);
 static void leak_out(pointer p,int s);
 /*:757*//*761:*/
-#line 16073 "hint.w"
+#line 16079 "hint.w"
 
 #ifdef DEBUG
 static bool ft_exists(FT_Face ft_face,int c);
 #endif
-#line 16077 "hint.w"
+#line 16083 "hint.w"
 
 static scaled x_char_width(uint8_t f,int c);
 static FT_Face hload_font_face(uint8_t f);
@@ -900,7 +900,7 @@ static scaled ft_glyph_width(FT_Face ft_face,FT_UInt ft_gid,scaled s);
 static void ft_glyph_height_depth(FT_Face ft_face,FT_UInt ft_gid,
 scaled*h,scaled*d,scaled s);
 /*:761*/
-#line 15961 "hint.w"
+#line 15967 "hint.w"
 
 
 static void hpack_page(void);
@@ -1131,7 +1131,7 @@ tail_append(p);}
     RNG("label color",color_ref(as_color(p)),0,max_ref[color_kind]);\
   tail_append(p);}
 /*:213*/
-#line 15966 "hint.w"
+#line 15972 "hint.w"
 
 /*94:*/
 #line 1639 "hint.w"
@@ -1334,7 +1334,7 @@ tail_append(p);}
     RNG("label color",color_ref(as_color(p)),0,max_ref[color_kind]);\
   tail_append(p);}
 /*:214*/
-#line 15967 "hint.w"
+#line 15973 "hint.w"
 
 
 /*21:*/
@@ -1353,24 +1353,24 @@ typedef struct ParamDef{
 struct ParamDef*next;
 Param p;}ParamDef;
 /*:37*//*688:*/
-#line 13669 "hint.w"
+#line 13673 "hint.w"
 
 typedef enum{no_format,pk_format,ft_format}FontFormat;
 /*:688*//*689:*/
-#line 13681 "hint.w"
+#line 13685 "hint.w"
 
 /*699:*/
-#line 13987 "hint.w"
+#line 13991 "hint.w"
 
 /*725:*/
-#line 14947 "hint.w"
+#line 14953 "hint.w"
 
 typedef struct
 {unsigned char flag;
 unsigned char*encoding;
 }PKglyph;
 /*:725*//*727:*/
-#line 14974 "hint.w"
+#line 14980 "hint.w"
 
 typedef struct{
 int j;
@@ -1379,13 +1379,13 @@ int f;
 unsigned char*pk_data;
 }PKparse;
 /*:727*//*739:*/
-#line 15400 "hint.w"
+#line 15406 "hint.w"
 
 typedef struct
 {int dummy;
 }FTglyph;
 /*:739*/
-#line 13988 "hint.w"
+#line 13992 "hint.w"
 
 
 typedef struct{
@@ -1400,7 +1400,7 @@ FTglyph tt;
 };
 }Gcache;
 /*:699*/
-#line 13682 "hint.w"
+#line 13686 "hint.w"
 
 
 typedef struct font_s{
@@ -1410,7 +1410,7 @@ int data_size;
 double s;
 double hpxs,vpxs;
 /*694:*/
-#line 13775 "hint.w"
+#line 13779 "hint.w"
 
 Gcache**g0;
 Gcache***g1;
@@ -1418,13 +1418,13 @@ Gcache****g2;
 Gcache*****g3;
 
 /*:694*/
-#line 13690 "hint.w"
+#line 13694 "hint.w"
 
 bool resize;
 FontFormat ff;
 }Font;
 /*:689*/
-#line 15969 "hint.w"
+#line 15975 "hint.w"
 
 /*28:*/
 #line 614 "hint.w"
@@ -1438,7 +1438,7 @@ pointer h;
 pointer p[MAX_FONT_PARAMS+1];
 }FontDef;
 /*:28*/
-#line 15970 "hint.w"
+#line 15976 "hint.w"
 
 /*2:*/
 #line 323 "hint.w"
@@ -1550,20 +1550,20 @@ static int page_v,page_h,offset_v,offset_h;
 
 static bool forward_mode= false,backward_mode= false;
 /*:633*//*681:*/
-#line 13430 "hint.w"
+#line 13434 "hint.w"
 
 hint_Link*hint_links= NULL;
 static int max_link= -1;
 /*:681*//*690:*/
-#line 13697 "hint.w"
+#line 13701 "hint.w"
 
 static Font*fonts[0x100]= {NULL};
 /*:690*//*696:*/
-#line 13831 "hint.w"
+#line 13835 "hint.w"
 
 static Gcache g_undefined= {0};
 /*:696*//*734:*/
-#line 15253 "hint.w"
+#line 15259 "hint.w"
 
 static FT_Library ft_library= 0;
 static FT_Face font_face[0x100]= {NULL};
@@ -1571,12 +1571,12 @@ static FT_Error ft_err;
 
 
 /*:734*//*747:*/
-#line 15652 "hint.w"
+#line 15658 "hint.w"
 
 jmp_buf hint_error_exit;
 char hint_error_string[MAX_HINT_ERROR];
 /*:747*/
-#line 15971 "hint.w"
+#line 15977 "hint.w"
 
 
 /*227:*/
@@ -5721,7 +5721,7 @@ push_nest();mode= hmode;
 }
 
 /*:564*/
-#line 15973 "hint.w"
+#line 15979 "hint.w"
 
 
 /*3:*/
@@ -5773,7 +5773,7 @@ static scaled hget_xdimen_node(void);
 
 static void hmark_page(void);
 /*:666*/
-#line 15975 "hint.w"
+#line 15981 "hint.w"
 
 /*9:*/
 #line 389 "hint.w"
@@ -7264,7 +7264,7 @@ trv_string[trv_string_size]= 0;
 return trv_string;
 }
 /*:653*//*736:*/
-#line 15307 "hint.w"
+#line 15313 "hint.w"
 
 #if 0
 static FT_UInt ft_glyph(FT_Face ft_face,int c)
@@ -7273,14 +7273,14 @@ ft_gid= FT_Get_Char_Index(ft_face,c);
 return ft_gid;
 }
 #endif
-#line 15315 "hint.w"
+#line 15321 "hint.w"
 
 #ifdef DEBUG
 static bool ft_exists(FT_Face ft_face,int c)
 {return FT_Get_Char_Index(ft_face,c)!=0;
 }
 #endif
-#line 15321 "hint.w"
+#line 15327 "hint.w"
 
 static scaled ft_glyph_width(FT_Face ft_face,FT_UInt ft_gid,scaled s)
 {FT_Fixed a;
@@ -7298,7 +7298,7 @@ if(ft_gid==0)return 0;
 return ft_glyph_width(ft_face,ft_gid,s);
 }
 /*:736*//*737:*/
-#line 15349 "hint.w"
+#line 15355 "hint.w"
 
 static FT_Error ft_glyph_bbox(FT_Face ft_face,FT_UInt ft_gid,FT_BBox*ft_bbox)
 {FT_Glyph ft_glyph;
@@ -7324,12 +7324,12 @@ if(ft_bbox.yMin<0)
 }
 
 /*:737*//*756:*/
-#line 15883 "hint.w"
+#line 15889 "hint.w"
 
 #ifdef DEBUG
 static pointer leaks[1<<16]= {0};
 #endif
-#line 15887 "hint.w"
+#line 15893 "hint.w"
 
 static void leak_clear(void)
 {
@@ -7338,7 +7338,7 @@ int i;
 for(i= 0;i<0x10000;i++)
 leaks[i]= 0;
 #endif
-#line 15895 "hint.w"
+#line 15901 "hint.w"
 }
 
 static void leak_in(pointer p,int s)
@@ -7348,7 +7348,7 @@ if(0!=leaks[p])
 fprintf(stderr,"ERROR leak in: p=%d, s in=%d, leaks[p]= %d != 0\n",p,s,leaks[p]);
 leaks[p]= s;
 #endif
-#line 15904 "hint.w"
+#line 15910 "hint.w"
 }
 
 static void leak_out(pointer p,int s)
@@ -7358,7 +7358,7 @@ if(s!=leaks[p])
 fprintf(stderr,"ERROR: leak out: p=%d, s out=%d != %d = s in\n",p,s,leaks[p]);
 leaks[p]= 0;
 #endif
-#line 15913 "hint.w"
+#line 15919 "hint.w"
 }
 
 static void list_leaks(void)
@@ -7369,10 +7369,10 @@ for(i= 0;i<0x10000;i++)
 if(leaks[i]!=0)
 fprintf(stderr,"ERROR:leak final: p=%d, s=%d\n",i,leaks[i]);
 #endif
-#line 15923 "hint.w"
+#line 15929 "hint.w"
 }
 /*:756*/
-#line 15976 "hint.w"
+#line 15982 "hint.w"
 
 
 /*1:*/
@@ -8015,7 +8015,7 @@ if(a!=z)tag_mismatch(a,z,node_pos,(uint32_t)(hpos-hstart-1));
 return par_ptr;
 }
 /*:176*/
-#line 15978 "hint.w"
+#line 15984 "hint.w"
 
 /*90:*/
 #line 1581 "hint.w"
@@ -8320,11 +8320,11 @@ return p;
 #endif
 #line 2809 "hint.w"
 /*:164*/
-#line 15979 "hint.w"
+#line 15985 "hint.w"
 
 
 /*735:*/
-#line 15262 "hint.w"
+#line 15268 "hint.w"
 
 static void ft_init(void)
 {int i;
@@ -8351,7 +8351,7 @@ for(i= 0;i<0x100;i++)
 {free(fonts[i]);fonts[i]= NULL;}
 }
 /*:735*//*740:*/
-#line 15419 "hint.w"
+#line 15425 "hint.w"
 
 
 static FT_Face hload_font_face(uint8_t f)
@@ -8366,7 +8366,7 @@ return NULL;
 }
 font_face[f]= ft_face;
 /*741:*/
-#line 15447 "hint.w"
+#line 15453 "hint.w"
 
 if(width_base[f]==0)
 ft_err= FT_Select_Charmap(ft_face,FT_ENCODING_UNICODE);
@@ -8376,10 +8376,10 @@ if(ft_err)ft_err= FT_Select_Charmap(ft_face,FT_ENCODING_UNICODE);
 }
 if(ft_err)LOG("Unable to select encoding for font %d\n",fp->n);
 /*:741*/
-#line 15432 "hint.w"
+#line 15438 "hint.w"
 
 /*742:*/
-#line 15463 "hint.w"
+#line 15469 "hint.w"
 
 ft_err= FT_Set_Char_Size(
 ft_face,
@@ -8390,13 +8390,13 @@ ft_face,
 if(ft_err)QUIT("Unable to set FreeType glyph size");
 fp->resize= false;
 /*:742*/
-#line 15433 "hint.w"
+#line 15439 "hint.w"
 
 FT_Set_Transform(ft_face,NULL,NULL);
 return ft_face;
 }
 /*:740*//*745:*/
-#line 15538 "hint.w"
+#line 15544 "hint.w"
 
 scaled x_char_width(uint8_t f,int c)
 {FT_Face ft_face= font_face[f];
@@ -8407,12 +8407,12 @@ return 0;
 return ft_width(ft_face,c,font_size[f]);
 }
 /*:745*/
-#line 15981 "hint.w"
+#line 15987 "hint.w"
 
 
 
 /*692:*/
-#line 13736 "hint.w"
+#line 13740 "hint.w"
 
 static void hfree_glyph_cache(Font*f,bool rm);
 
@@ -8426,7 +8426,7 @@ if(rm){fonts[f]->resize= true;}
 }
 }
 /*:692*/
-#line 15984 "hint.w"
+#line 15990 "hint.w"
 
 
 #ifdef HINTTYPE
@@ -8437,7 +8437,7 @@ if(rm){fonts[f]->resize= true;}
 static void hmark_page(void)
 {return;}
 /*:667*//*693:*/
-#line 13751 "hint.w"
+#line 13755 "hint.w"
 
 
 double xdpi= 600.0,ydpi= 600.0;
@@ -8448,16 +8448,16 @@ unsigned int t){return;}
 static void hfree_glyph_cache(Font*f,bool rm){}
 void nativeSetSize(int px_h,int px_v,double pt_x,double pt_v){}
 /*:693*//*755:*/
-#line 15871 "hint.w"
+#line 15877 "hint.w"
 
 void hint_show_page(void)
 {show_box(streams[0].p);
 }
 /*:755*/
-#line 15988 "hint.w"
+#line 15994 "hint.w"
 
 #else
-#line 15990 "hint.w"
+#line 15996 "hint.w"
 
 /*615:*/
 #line 11958 "hint.w"
@@ -8493,35 +8493,35 @@ static uint64_t m_page;
 
 static bool c_ignore;
 /*:668*//*675:*/
-#line 13364 "hint.w"
+#line 13368 "hint.w"
 
 static int cur_link= -1;
 /*:675*//*705:*/
-#line 14160 "hint.w"
+#line 14164 "hint.w"
 
 static int cur_style= 0,cur_mode= 0,cur_color= 0,next_style= 0;
 static uint32_t cur_fg;
 /*:705*//*709:*/
-#line 14220 "hint.w"
+#line 14224 "hint.w"
 
 static scaled cur_h,cur_v;
 static scaled rule_ht,rule_dp,rule_wd;
 /*:709*/
-#line 15991 "hint.w"
+#line 15997 "hint.w"
 
 /*726:*/
-#line 14958 "hint.w"
+#line 14964 "hint.w"
 
 #define PK_READ_1_BYTE() (pk_data[i++])
 #define PK_READ_2_BYTE() (k= PK_READ_1_BYTE(),k= k<<8,k= k+pk_data[i++],k)
 #define PK_READ_3_BYTE() (k= PK_READ_2_BYTE(),k= k<<8,k= k+pk_data[i++],k)
 #define PK_READ_4_BYTE() (k= PK_READ_3_BYTE(),k= k<<8,k= k+pk_data[i++],k)
 /*:726*//*728:*/
-#line 14985 "hint.w"
+#line 14991 "hint.w"
 
 #define read_nybble(P) ((P).j&1?((P).pk_data[(P).j++>>1]&0xF):(((P).pk_data[(P).j++>>1]>>4)&0xF))
 /*:728*//*729:*/
-#line 15011 "hint.w"
+#line 15017 "hint.w"
 
 static int packed_number(PKparse*p)
 {int i,k;
@@ -8540,7 +8540,7 @@ return packed_number(p);
 }
 }
 /*:729*//*730:*/
-#line 15040 "hint.w"
+#line 15046 "hint.w"
 
 static void pk_runlength(Gcache*g,unsigned char*pk_data){
 PKparse p;
@@ -8582,7 +8582,7 @@ y++;
 }
 }
 /*:730*//*731:*/
-#line 15092 "hint.w"
+#line 15098 "hint.w"
 
 static void pk_bitmap(Gcache*g,unsigned char*pk_data){
 unsigned char*bits;
@@ -8603,7 +8603,7 @@ if(mask==0){pk_data++;mask= 0x80;}
 }
 }
 /*:731*//*732:*/
-#line 15115 "hint.w"
+#line 15121 "hint.w"
 
 
 static void pkunpack_glyph(Gcache*g)
@@ -8615,7 +8615,7 @@ if(g->bits!=NULL)return;
 #if 0
 DBG(DBGRENDER,"Unpacking glyph %c (0x%x)",g->cc,g->cc);
 #endif
-#line 15126 "hint.w"
+#line 15132 "hint.w"
  pk_data= g->pk.encoding;
 i= 0;
 if((g->pk.flag&7)<4)
@@ -8647,7 +8647,7 @@ else pk_runlength(g,pk_data+i);
 g->OGLtexture= nativeTexture(g->bits,g->w,g->h);
 }
 /*:732*//*733:*/
-#line 15160 "hint.w"
+#line 15166 "hint.w"
 
 
 static Gcache*hnew_glyph(Font*pk,unsigned int cc);
@@ -8731,7 +8731,7 @@ return 1;
 }
 
 /*:733*/
-#line 15992 "hint.w"
+#line 15998 "hint.w"
 
 /*35:*/
 #line 719 "hint.w"
@@ -9443,7 +9443,7 @@ m_put(HINT_NO_POS);
 if(m_focus>=m_max)m_focus= 0;
 }
 /*:665*//*673:*/
-#line 13268 "hint.w"
+#line 13270 "hint.w"
 
 static void hSetColor(int c);
 
@@ -9468,7 +9468,7 @@ m_d= m_get();
 }
 m_d--;
 /*:670*/
-#line 13277 "hint.w"
+#line 13279 "hint.w"
 
 cur_style= next_style;
 if(next_style> max_s)max_s= next_style;
@@ -9495,7 +9495,7 @@ m_d= m_get();
 }
 m_d--;
 /*:670*/
-#line 13288 "hint.w"
+#line 13290 "hint.w"
 
 cur_style= next_style;
 if(next_style> max_s)max_s= next_style;
@@ -9508,12 +9508,14 @@ break;
 p= link(p);
 }
 if(s!=max_s)
-hSetColor(max_s);
+{cur_style= max_s;
+hSetColor(cur_color);
+}
 else
 cur_style= s;
 }
 /*:673*//*674:*/
-#line 13326 "hint.w"
+#line 13330 "hint.w"
 
 bool hint_prev_mark(void)
 {m_focus= m_prev(m_focus);
@@ -9534,7 +9536,7 @@ m_focus= m_next(0);
 return(m_focus!=0);
 }
 /*:674*//*682:*/
-#line 13438 "hint.w"
+#line 13442 "hint.w"
 
 static int links_allocated= 0;
 static void add_new_link(int n,pointer p,scaled h,scaled v)
@@ -9573,7 +9575,7 @@ pos= ((uint64_t)labels[n].pos<<32)+(labels[n].pos-labels[n].pos0);
 #line 1258 "hint.w"
 }
 /*:71*/
-#line 13459 "hint.w"
+#line 13463 "hint.w"
 
 t->where= where;
 t->pos= pos;
@@ -9603,7 +9605,7 @@ else
 t->bottom= v;
 }
 /*:682*//*683:*/
-#line 13511 "hint.w"
+#line 13515 "hint.w"
 
 static scaled hlink_distance(scaled x,scaled y,hint_Link*t)
 {scaled d,dx= 0,dy= 0;
@@ -9664,7 +9666,7 @@ return last_hit_link;
 }
 }
 /*:683*//*684:*/
-#line 13576 "hint.w"
+#line 13580 "hint.w"
 
 uint64_t hint_link_page(int i)
 {uint64_t h;
@@ -9679,7 +9681,7 @@ else if(w==LABEL_MID)return hint_page_middle(h);
 else return hint_page_get();
 }
 /*:684*//*686:*/
-#line 13612 "hint.w"
+#line 13616 "hint.w"
 
 #define CUR_FG FG(CURCOLOR(cur_mode,cur_style,color_def[cur_color]))
 #define CUR_BG BG(CURCOLOR(cur_mode,cur_style,color_def[cur_color]))
@@ -9700,7 +9702,7 @@ void hint_render_off(void)
 {nativeClear();
 }
 /*:686*//*687:*/
-#line 13635 "hint.w"
+#line 13639 "hint.w"
 
 
 void hint_dark(int dark)
@@ -9712,7 +9714,7 @@ void hint_gamma(double gamma)
 {nativeSetGamma(gamma);
 }
 /*:687*//*691:*/
-#line 13703 "hint.w"
+#line 13707 "hint.w"
 
 static struct font_s*hload_font(uint8_t f)
 {Font*fp;
@@ -9735,14 +9737,14 @@ fp->resize= true;
 fonts[f]= fp;
 fp->s= font_def[f].s/(double)(1<<16);
 /*724:*/
-#line 14907 "hint.w"
+#line 14913 "hint.w"
 
 if(fp->font_data[0]==0xF7&&fp->font_data[1]==0x59)
 {fp->ff= pk_format;
 if(!unpack_pk_file(fp)){free(fp);fp= NULL;}
 }
 /*:724*//*744:*/
-#line 15528 "hint.w"
+#line 15534 "hint.w"
 
 else
 {fp->ff= ft_format;
@@ -9750,12 +9752,12 @@ fp->hpxs= 72.27/xdpi;
 fp->vpxs= 72.27/ydpi;
 }
 /*:744*/
-#line 13724 "hint.w"
+#line 13728 "hint.w"
 
 return fonts[f];
 }
 /*:691*//*695:*/
-#line 13788 "hint.w"
+#line 13792 "hint.w"
 
 #define G0_BITS 7
 #define G0_SIZE (1<<G0_BITS)
@@ -9790,7 +9792,7 @@ return f->g0[cc];
 return NULL;
 }
 /*:695*//*697:*/
-#line 13835 "hint.w"
+#line 13839 "hint.w"
 
 static Gcache*hnew_g(Gcache**g)
 {if(*g==NULL)
@@ -9845,7 +9847,7 @@ else if(cc<G123_SIZE*G123_SIZE*G123_SIZE*G0_SIZE)return hnew_g3(&(f->g3),cc);
 else return&g_undefined;
 }
 /*:697*//*698:*/
-#line 13899 "hint.w"
+#line 13903 "hint.w"
 
 static void hfree_g0(Gcache**g,bool rm)
 {int i;
@@ -9910,7 +9912,7 @@ if(rm){free(f->g3);f->g3= NULL;}
 }
 }
 /*:698*//*700:*/
-#line 14024 "hint.w"
+#line 14028 "hint.w"
 
 static void ft_unpack_glyph(uint8_t f,Font*fp,Gcache*g,uint32_t cc);
 
@@ -9932,7 +9934,7 @@ else QUIT("Font format not supported");
 return g;
 }
 /*:700*//*701:*/
-#line 14065 "hint.w"
+#line 14069 "hint.w"
 
 static bool round_to_pixel= 0;
 static double dpi_threshold= 100;
@@ -9984,14 +9986,14 @@ nativeGlyph(left,top,w,h,g->OGLtexture);
 }
 
 /*:701*//*702:*/
-#line 14121 "hint.w"
+#line 14125 "hint.w"
 
 static void render_rule(int x,int y,int w,int h)
 {if(w> 0&&h> 0)
 nativeRule(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h));
 }
 /*:702*//*703:*/
-#line 14133 "hint.w"
+#line 14137 "hint.w"
 
 static void render_image(int x,int y,int w,int h,uint32_t n)
 {
@@ -10002,7 +10004,7 @@ nativeImage(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),hstart,hend);
 hpos= spos;hstart= sstart;hend= send;
 }
 /*:703*//*708:*/
-#line 14200 "hint.w"
+#line 14204 "hint.w"
 
 uint64_t hint_blank(void)
 {hSetColor(0);
@@ -10010,7 +10012,7 @@ nativeBlank(CUR_BG);
 return 0;
 }
 /*:708*//*710:*/
-#line 14225 "hint.w"
+#line 14229 "hint.w"
 
 static void vlist_render(pointer this_box);
 static scaled hcolor_distance(pointer p,
@@ -10046,11 +10048,11 @@ if(p==0xffff)
 QUIT("Undefined list pointer in hbox 0x%x-> mem[0x%x] -> 0x%x\n",
 this_box,mem[this_box].i,p);
 #endif
-#line 14260 "hint.w"
+#line 14264 "hint.w"
  base_line= cur_v;
 left_edge= cur_h;
 /*679:*/
-#line 13404 "hint.w"
+#line 13408 "hint.w"
 
 if(cur_link>=0)
 {add_new_link(cur_link,this_box,cur_h,cur_v);
@@ -10058,7 +10060,7 @@ local_link= cur_link;
 cur_link= -1;
 }
 /*:679*/
-#line 14262 "hint.w"
+#line 14266 "hint.w"
 
 while(p!=null)
 {
@@ -10068,7 +10070,7 @@ QUIT("Undefined pointer in hlist 0x%x\n",p);
 if(link(p)==0xffff)
 QUIT("Undefined link in hlist mem[0x%x]=0x%x\n",p,mem[p].i);
 #endif
-#line 14271 "hint.w"
+#line 14275 "hint.w"
  if(is_char_node(p))
 {do
 {f= font(p);
@@ -10089,10 +10091,12 @@ m_d= m_get();
 }
 m_d--;
 /*:670*/
-#line 14276 "hint.w"
+#line 14280 "hint.w"
 
 if(next_style!=cur_style)
-hSetColor(next_style);
+{cur_style= next_style;
+hSetColor(cur_color);
+}
 }
 render_c:
 #ifdef DEBUG
@@ -10100,14 +10104,14 @@ if(f> max_ref[font_kind])
 QUIT("Undefined Font %d mem[0x%x]=0x%x\n",
 f,p,mem[p].i);
 #endif
-#line 14286 "hint.w"
+#line 14292 "hint.w"
  render_char(cur_h,cur_v,f,c);
 cur_h= cur_h+char_width(f,c);
 #ifdef DEBUG
 if(link(p)==0xffff)
 QUIT("Undefined link in charlist mem[0x%x]=0x%x\n",p,mem[p].i);
 #endif
-#line 14292 "hint.w"
+#line 14298 "hint.w"
  p= link(p);
 }while(is_char_node(p));
 }
@@ -10120,7 +10124,7 @@ if(list_ptr(p)==0xffff)
 QUIT("Undefined list pointer in hlist mem[0x%x] = 0x%x -> 0x%x\n",
 p,mem[p].i,list_ptr(p));
 #endif
-#line 14304 "hint.w"
+#line 14310 "hint.w"
  if(list_ptr(p)==null)cur_h= cur_h+width(p);
 else
 {int cur_c= cur_color;
@@ -10141,7 +10145,7 @@ goto fin_rule;
 case whatsit_node:
 switch(subtype(p))
 {case ignore_node:/*672:*/
-#line 13247 "hint.w"
+#line 13249 "hint.w"
 
 if(ignore_info(p)==1)
 {next_style= 0;
@@ -10151,12 +10155,12 @@ c_ignore= true;
 else
 c_ignore= false;
 /*:672*/
-#line 14323 "hint.w"
+#line 14329 "hint.w"
 break;
 case color_node:
 hSetColor(color_ref(p));
 /*706:*/
-#line 14169 "hint.w"
+#line 14173 "hint.w"
 
 if(cur_color!=list_color&&(CUR_BG&0xFF)> 0)
 {scaled x,y,w,h;
@@ -10169,7 +10173,7 @@ nativeBackground(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),CUR_BG);
 }
 
 /*:706*/
-#line 14326 "hint.w"
+#line 14332 "hint.w"
 
 break;
 case end_color_node:
@@ -10177,7 +10181,7 @@ hSetColor(list_color);
 break;
 case start_link_node:
 /*676:*/
-#line 13368 "hint.w"
+#line 13372 "hint.w"
 
 local_link= label_ref(as_label(p));
 add_new_link(local_link,this_box,cur_h,cur_v);
@@ -10189,10 +10193,10 @@ hSetColor(c);
 }
 
 /*:676*/
-#line 14332 "hint.w"
+#line 14338 "hint.w"
 
 /*706:*/
-#line 14169 "hint.w"
+#line 14173 "hint.w"
 
 if(cur_color!=list_color&&(CUR_BG&0xFF)> 0)
 {scaled x,y,w,h;
@@ -10205,12 +10209,12 @@ nativeBackground(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),CUR_BG);
 }
 
 /*:706*/
-#line 14333 "hint.w"
+#line 14339 "hint.w"
 
 break;
 case end_link_node:
 /*677:*/
-#line 13380 "hint.w"
+#line 13384 "hint.w"
 
 end_new_link(local_link,this_box,cur_h,cur_v);
 local_link= -1;
@@ -10221,10 +10225,10 @@ else
 hSetColor(c);
 }
 /*:677*/
-#line 14336 "hint.w"
+#line 14342 "hint.w"
 
 /*706:*/
-#line 14169 "hint.w"
+#line 14173 "hint.w"
 
 if(cur_color!=list_color&&(CUR_BG&0xFF)> 0)
 {scaled x,y,w,h;
@@ -10237,7 +10241,7 @@ nativeBackground(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),CUR_BG);
 }
 
 /*:706*/
-#line 14337 "hint.w"
+#line 14343 "hint.w"
 
 break;
 case image_node:
@@ -10354,12 +10358,14 @@ if(next_style> max_s)max_s= next_style;
 q= link(q);
 }
 if(s!=max_s)
-hSetColor(max_s);
+{cur_style= max_s;
+hSetColor(cur_color);
+}
 else
 cur_style= s;
 }
 /*:671*/
-#line 14419 "hint.w"
+#line 14425 "hint.w"
 
 goto render_c;
 default:;
@@ -10382,19 +10388,19 @@ next_p:
 if(link(p)==0xffff)
 QUIT("Undefined link in hlist mem[0x%x]=0x%x\n",p,mem[p].i);
 #endif
-#line 14441 "hint.w"
+#line 14447 "hint.w"
  p= link(p);
 }
 }
 /*678:*/
-#line 13394 "hint.w"
+#line 13398 "hint.w"
 
 if(local_link>=0)
 {end_new_link(local_link,this_box,cur_h,cur_v);
 cur_link= local_link;
 }
 /*:678*/
-#line 14444 "hint.w"
+#line 14450 "hint.w"
 
 }
 
@@ -10423,7 +10429,7 @@ if(p==0xffff)
 QUIT("Undefined list pointer in vbox 0x%x-> mem[0x%x] -> 0x%x\n",
 this_box,mem[this_box].i,p);
 #endif
-#line 14472 "hint.w"
+#line 14478 "hint.w"
  left_edge= cur_h;cur_v= cur_v-height(this_box);
 top_edge= cur_v;
 while(p!=null)
@@ -10437,7 +10443,7 @@ if(list_ptr(p)==0xffff)
 QUIT("Undefined list pointer in vlist mem[0x%x] = 0x%x -> 0x%x\n",
 p,mem[p].i,list_ptr(p));
 #endif
-#line 14485 "hint.w"
+#line 14491 "hint.w"
  if(list_ptr(p)==null)cur_v= cur_v+height(p)+depth(p);
 else
 {int cur_c= cur_color;
@@ -10460,7 +10466,7 @@ switch(subtype(p))
 {case color_node:
 hSetColor(color_ref(p));
 /*707:*/
-#line 14182 "hint.w"
+#line 14186 "hint.w"
 
 if(cur_color!=list_color&&(CUR_BG&0xFF)> 0)
 {scaled x,y,w,h;
@@ -10472,7 +10478,7 @@ if(w> 0&&h> 0)
 nativeBackground(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),CUR_BG);
 }
 /*:707*/
-#line 14506 "hint.w"
+#line 14512 "hint.w"
 
 break;
 case end_color_node:
@@ -10480,7 +10486,7 @@ hSetColor(list_color);
 break;
 case start_link_node:
 /*676:*/
-#line 13368 "hint.w"
+#line 13372 "hint.w"
 
 local_link= label_ref(as_label(p));
 add_new_link(local_link,this_box,cur_h,cur_v);
@@ -10492,10 +10498,10 @@ hSetColor(c);
 }
 
 /*:676*/
-#line 14512 "hint.w"
+#line 14518 "hint.w"
 
 /*707:*/
-#line 14182 "hint.w"
+#line 14186 "hint.w"
 
 if(cur_color!=list_color&&(CUR_BG&0xFF)> 0)
 {scaled x,y,w,h;
@@ -10507,12 +10513,12 @@ if(w> 0&&h> 0)
 nativeBackground(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),CUR_BG);
 }
 /*:707*/
-#line 14513 "hint.w"
+#line 14519 "hint.w"
 
 break;
 case end_link_node:
 /*677:*/
-#line 13380 "hint.w"
+#line 13384 "hint.w"
 
 end_new_link(local_link,this_box,cur_h,cur_v);
 local_link= -1;
@@ -10523,10 +10529,10 @@ else
 hSetColor(c);
 }
 /*:677*/
-#line 14516 "hint.w"
+#line 14522 "hint.w"
 
 /*707:*/
-#line 14182 "hint.w"
+#line 14186 "hint.w"
 
 if(cur_color!=list_color&&(CUR_BG&0xFF)> 0)
 {scaled x,y,w,h;
@@ -10538,7 +10544,7 @@ if(w> 0&&h> 0)
 nativeBackground(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),CUR_BG);
 }
 /*:707*/
-#line 14517 "hint.w"
+#line 14523 "hint.w"
 
 break;
 case image_node:
@@ -10638,7 +10644,7 @@ p= link(p);
 }
 
 /*:710*//*711:*/
-#line 14620 "hint.w"
+#line 14626 "hint.w"
 
 static scaled hcolor_distance(pointer p,uint8_t g_sign,glue_ord g_order,glue_ratio g_set)
 {scaled dist= 0;
@@ -10714,7 +10720,7 @@ return dist;
 }
 
 /*:711*//*712:*/
-#line 14696 "hint.w"
+#line 14702 "hint.w"
 
 static scaled vcolor_distance(pointer p,uint8_t g_sign,glue_ord g_order,glue_ratio g_set)
 {scaled dist= 0;
@@ -10778,7 +10784,7 @@ return dist;
 }
 
 /*:712*//*713:*/
-#line 14762 "hint.w"
+#line 14768 "hint.w"
 
 
 void hint_render(void)
@@ -10794,7 +10800,7 @@ cur_link= -1;max_link= -1;last_hit_link= -1;
 
 m_ptr= 0;m_d= m_get();c_ignore= false;cur_style= next_style= 0;
 /*:669*/
-#line 14772 "hint.w"
+#line 14778 "hint.w"
 
 if(type(streams[0].p)==vlist_node)
 vlist_render(streams[0].p);
@@ -10802,7 +10808,7 @@ else
 hlist_render(streams[0].p);
 }
 /*:713*//*714:*/
-#line 14800 "hint.w"
+#line 14806 "hint.w"
 
 int hint_print_on(int w,int h,int bpr,int bpp,unsigned char*bits)
 {return nativePrintStart(w,h,bpr,bpp,bits);
@@ -10816,7 +10822,7 @@ int hint_print(unsigned char*bits)
 {return nativePrint(bits);
 }
 /*:714*//*743:*/
-#line 15486 "hint.w"
+#line 15492 "hint.w"
 
 static void ft_unpack_glyph(uint8_t f,Font*fp,Gcache*g,uint32_t cc)
 {int e,i;
@@ -10829,7 +10835,7 @@ if(fp->resize)
 {fp->hpxs= 72.27/xdpi;
 fp->vpxs= 72.27/ydpi;
 /*742:*/
-#line 15463 "hint.w"
+#line 15469 "hint.w"
 
 ft_err= FT_Set_Char_Size(
 ft_face,
@@ -10840,7 +10846,7 @@ ft_face,
 if(ft_err)QUIT("Unable to set FreeType glyph size");
 fp->resize= false;
 /*:742*/
-#line 15497 "hint.w"
+#line 15503 "hint.w"
 
 }
 i= FT_Get_Char_Index(ft_face,cc);
@@ -10863,10 +10869,10 @@ g->OGLtexture= nativeTexture(g->bits,g->w,g->h);
 }
 
 /*:743*/
-#line 15993 "hint.w"
+#line 15999 "hint.w"
 
 #endif
-#line 15995 "hint.w"
+#line 16001 "hint.w"
 
 
 /*62:*/
@@ -11702,7 +11708,7 @@ p= link(p);
 }
 }
 /*:651*/
-#line 15997 "hint.w"
+#line 16003 "hint.w"
 
 
 /*:758*/

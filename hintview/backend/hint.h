@@ -1,5 +1,5 @@
 /*759:*/
-#line 16002 "hint.w"
+#line 16008 "hint.w"
 
 #ifndef _HINT_H
 #define _HINT_H
@@ -69,5 +69,5 @@ extern void hint_unmap(void);
 
 
 #endif
-#line 16071 "hint.w"
+#line 16077 "hint.w"
 /*:759*/
