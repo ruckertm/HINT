@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.WindowInsets;
 
 import android.app.Dialog;
+import android.view.WindowInsetsController;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.view.View.OnClickListener;
@@ -35,6 +36,7 @@ import android.text.method.LinkMovementMethod;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.FitWindowsViewGroup;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
@@ -42,6 +44,7 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import androidx.core.view.WindowInsetsCompat;
 
 public class HINTVIEWActivity extends AppCompatActivity {
     private static final String TAG = "HINTVIEWActivity";
@@ -108,10 +111,12 @@ public class HINTVIEWActivity extends AppCompatActivity {
                             toolbar.getPaddingEnd(),
                             toolbar.getPaddingBottom());
                 }
-                toolbar.setPadding(padding.left + insets.getSystemWindowInsetLeft(),
-                        padding.top + insets.getSystemWindowInsetTop(),
-                        padding.right + insets.getSystemWindowInsetRight(),
-                        padding.bottom);
+                toolbar.setPadding(
+                        padding.left + insets.getInsets(WindowInsets.Type.systemBars()).left,
+                        padding.top + insets.getInsets(WindowInsets.Type.systemBars()).top,
+                        padding.right + insets.getInsets(WindowInsets.Type.systemBars()).right,
+                        padding.bottom
+                );
 
                 return insets;
             }
@@ -127,6 +132,13 @@ public class HINTVIEWActivity extends AppCompatActivity {
         //Log.w(TAG, "toolbar translation " + toolbar.getTranslationY());
         toolbar.requestTransparentRegion(toolbar);
         // hide Nav- & Status-bar
+        WindowInsetsController windowInsetsController;
+        windowInsetsController= view.getWindowInsetsController();
+        if (!toolbarVisible)
+           windowInsetsController.hide(WindowInsets.Type.systemBars());
+        else
+            windowInsetsController.show(WindowInsets.Type.systemBars());
+  /*
         view.setSystemUiVisibility(toolbarVisible ?
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                         | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -138,6 +150,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
                         | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
                         | View.SYSTEM_UI_FLAG_IMMERSIVE
                         | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+    */
     }
 
     void setToolbar(boolean darkMode) {

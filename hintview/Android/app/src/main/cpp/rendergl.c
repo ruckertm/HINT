@@ -37,9 +37,6 @@
 #include "error.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include "hint.h"
-#include "hfonts.h"
-#include "hrender.h"
 #include "rendernative.h"
 #define STBI_ONLY_JPEG
 #define STBI_ONLY_PNG
@@ -56,14 +53,14 @@
 static void checkGlError(const char *op)
 { GLint error;
   while( (error= glGetError())!= GL_NO_ERROR)
-	  LOGE("OGL Error after %s: 0x%x\n", op, error);
+	  MESSAGE("OGL Error after %s: 0x%x\n", op, error);
 }
 
 static void printGLString(const char *name, GLenum s) {
   const GLubyte *v;
   v = glGetString(s);
   checkGlError(name);
-  LOGI("GL %s= %s\n", name, v);
+  LOG("GL %s = %s\n", name, v);
 }
 
 #else
@@ -79,7 +76,7 @@ static void printGLString(const char *name, GLenum s) {
 static GLuint gvPositionHandle;
 static GLuint ProgramID, MatrixID, RuleID, GammaID, FGcolorID, IsImageID, ImageID=0;
 static unsigned char *last_b=NULL;
-static uint32_t cur_fg=0;
+static uint32_t cur_fg=0; /*the current foreground color*/
 
 static const char *VertexShader =
         "#version 100\n"
@@ -107,33 +104,49 @@ static const char *FragmentShader =
              "gl_FragColor.b = FGcolor.b;\n"
           "}\n"
           "else gl_FragColor = texColor;\n"
-        "}\n";
+        "}\n"
+;
+/* The Fragment shader should do Gamma correct (GC) blending.
+   The theory says transform FGcolor and BGcolor to linear space
+   FGlin = pow(FGcolor,2.2); BGlin=pow(BGcolor,2.2);
+   BlendLin = FGlin*alpha + BGlin*(1-alpha);
+   Blend = pow(BlendLin,1/2.2);
+   
+   But, the alpha values delivered by the freetype font rasterizer
+   are actually brightness values! And our foreground and background
+   values are pretty much either black (0.0) or white (1.0) or plain 
+   Blue (0.0,0.0,1.0) or things like that. So pow(FGcolor,2.2) will do
+   nothing or little to them. But we should transform the alpha to 
+   linear space before blending. So we have
+   AlphaLin = pow(alpha,2.2)
+   BlendLin = FGcolor*alphaLin + BGcolor*(1-AlphaLin);
+   Blend = pow(BlendLin, 1/2.2);
+   The last line will be done automatically by the hardware if we specify
+   an GL_FRAMBUFFER_SRGB. The second last line is the normal blending
+   if we change the alpha value to linear.
+   Using this will require that images are also converted to linear textures
+   in sRGB space.
+*/
 
-static GLuint loadShader(GLenum shaderType, const char *pSource) {
-    GLuint shaderID;
-    GLint result = 0;
-    shaderID = glCreateShader(shaderType);
-    if (shaderID) {
-        glShaderSource(shaderID, 1, &pSource, NULL);
-        glCompileShader(shaderID);
-        glGetShaderiv(shaderID, GL_COMPILE_STATUS, &result);
-        if (!result) {
-            GLint infoLen = 0;
-            glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &infoLen);
-            if (infoLen) {
-                char *buf = (char *) malloc(infoLen);
-                if (buf) {
-                    glGetShaderInfoLog(shaderID, infoLen, NULL, buf);
-                    LOGE("Could not compile shader %d:\n%s\n",
-                         shaderType, buf);
-                    free(buf);
-                }
-                glDeleteShader(shaderID);
-                shaderID = 0;
-            }
-        }
+static GLuint loadShader(GLenum type, char const *source)
+{ GLuint shaderID;
+  GLint result =GL_FALSE;
+
+  /* Compile and check vertex shader */
+  shaderID = glCreateShader(type);
+  if (shaderID) {
+    glShaderSource(shaderID, 1, &source, NULL);
+    glCompileShader(shaderID);
+    glGetShaderiv(shaderID, GL_COMPILE_STATUS, &result);
+    if (!result)
+    { char InfoLog[MAX_INFOLOG];
+      glGetShaderInfoLog(shaderID, MAX_INFOLOG, NULL, InfoLog);
+      glDeleteShader(shaderID);
+      shaderID = 0;
+      LOGE("Error compiling shader (%d): %s\n", type, InfoLog);
     }
-    return shaderID;
+  }
+  return shaderID;
 }
 
 static void createProgram(void)
@@ -153,18 +166,11 @@ static void createProgram(void)
     glLinkProgram(ProgramID);
     glGetProgramiv(ProgramID, GL_LINK_STATUS, &result);
     if (!result)
-    {     GLint bufLength = 0;
-          glGetProgramiv(ProgramID, GL_INFO_LOG_LENGTH, &bufLength);
-          if (bufLength) {
-              char *buf = (char *) malloc(bufLength);
-              if (buf) {
-                  glGetProgramInfoLog(ProgramID, bufLength, NULL, buf);
-                  LOGE("Could not link program:\n%s\n", buf);
-                  free(buf);
-              }
-          }
+    { char InfoLog[MAX_INFOLOG];
+      glGetProgramInfoLog(ProgramID, MAX_INFOLOG, NULL, InfoLog);
       glDeleteProgram(ProgramID);
       ProgramID = 0;
+      QUIT("Error linking shader program: %s\n", InfoLog);
     }
     glDetachShader(ProgramID, vertexID);
     glDetachShader(ProgramID, fragmentID);
@@ -198,8 +204,6 @@ static void mkRuleTexture() { /* the texture used for rules */
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
-static ColorSet *cur_colorset=NULL;
-
 extern void nativeInit(void)
 { LOGI("nativeInit GL Graphics\n");
 
@@ -229,17 +233,15 @@ extern void nativeInit(void)
   glUniform1f(GammaID, 1.0f/2.2f);
   glUniform1i(IsImageID, 0);
   glUniform4f(FGcolorID, 0.0, 0.0, 0.0, 1.0); // black as default foreground
-  cur_fg=0xFF;
+  cur_fg=0x000000FF; /* possibly better: use nativeSetForeground */
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // white as default background
-  cur_colorset=color_defaults;
 
   /* Make the alpha channel work */
   glEnable(GL_BLEND);
   checkGlError("glEnable BLEND");
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   checkGlError("glBlendFunc");
-#if 0
-    // not in EGL
+#if 0 /* not in EGL */
   glEnable(GL_MULTISAMPLE);
   checkGlError("GL_MULTISAMPLE");
   glEnable(GL_FRAMEBUFFER_SRGB);
@@ -248,7 +250,7 @@ extern void nativeInit(void)
   mkRuleTexture();
   ImageID=0;
   last_b=NULL;
-  //LOGI("nativeInit done\n");
+  //LOG("nativeInit done\n");
 }
 
 
@@ -273,11 +275,9 @@ void nativeSetGamma(double gamma)
   checkGlError("glsetgamma");
 }
 
-#if 1
 
 
-
-static void nativeSetForeground(uint32_t fg)
+void nativeSetForeground(uint32_t fg)
 /* set foreground rgba colors */
 { if (fg!=cur_fg)
   { uint8_t r,g,b,a;
@@ -290,33 +290,16 @@ static void nativeSetForeground(uint32_t fg)
   }
 }
 
-void nativeBackground(double x, double y, double w, double h)
-{ uint32_t bg, fg;
-  fg=cur_colorset[0][cur_mode*6+cur_style*2];
-  bg=cur_colorset[0][cur_mode*6+cur_style*2+1];
+
+void nativeBackground(double x, double y, double w, double h, uint32_t bg)
+{ uint32_t fg=cur_fg;
   nativeSetForeground(bg);
   nativeRule(x,y,w,h);
   nativeSetForeground(fg);
 }
 
-void nativeSetDark(int on)
-{ uint32_t fg;
-  cur_mode=on?1:0;
-  fg=cur_colorset[0][cur_mode*6+cur_style*2];
-  nativeSetForeground(fg);
-}
-
-void nativeSetColor(ColorSet *cs)
-{ cur_colorset=cs;
-  nativeSetDark(cur_mode);
-}
-
-void nativeBlank(void)
-{ uint32_t bg;
-  uint8_t r,g,b,a;
-  if (cur_colorset==NULL)
-    QUIT("Calling nativeBlank without calling nativeSetColor");
-  bg=cur_colorset[0][cur_mode*6+1];
+void nativeBlank(uint32_t bg)
+{ uint8_t r,g,b,a;
   a=bg&0xFF;bg=bg>>8;
   b=bg&0xFF;bg=bg>>8;
   g=bg&0xFF;bg=bg>>8;
@@ -325,73 +308,33 @@ void nativeBlank(void)
   glClear(GL_COLOR_BUFFER_BIT);
 }
 
-#else
-static GLfloat curfr=0.0f, curfg=0.0f, curfb=0.0f;
-static uint8_t last_style=0;
-static void nativeSetColors(GLfloat fr, GLfloat fg, GLfloat fb, GLfloat br, GLfloat bg, GLfloat bb)
-/* set foreground and background rgb colors */
+void nativeSetSize(int px_h, int px_v, double pt_h, double pt_v)
 {
-  glClearColor(br, bg, bb, 1.0f);
-  curfr=fr; curfg=fg; curfb=fb;
-  glUniform3f(FGcolorID, fr, fg, fb);
-  last_style=0;
+   MVP[0][0]=2.0/pt_h; // x: scale to -1 to +1
+   MVP[1][1]=-2.0/pt_v; // y: scale to 1 to -1
+   //MVP[2][2]=0.0f; // z: don't care
+   MVP[3][0]=-1.0f; // x position: left
+   MVP[3][1]=1.0f; // y position: up
+   //MVP[3][2]=-1.0f; // don't care
+   //MVP[3][3]=1.0f; // w: identity, already there
+   glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+   glViewport(0, 0, px_h, px_v);
 }
 
-
-void nativeSetDark(int on)
-{   if (on) {
-        nativeSetColors(1.0f, 1.0f, 0.99f, 0.0f, 0.0f, 0.01f);
-    } else {
-        nativeSetColors(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
-    }
-}
-
-void nativeBlank(void)
-{ glClear(GL_COLOR_BUFFER_BIT);
-}
-#endif
-
-
-static float pt_h=600.0, pt_v=800.0;
-
-void nativeSetSize(int px_h, int px_v, double x_dpi, double y_dpi)
-/* Given the size of the output area px_h,px_v in pixel and the resolution in dpi,
-   make sure the projection is set up properly.
- */
-{    /* convert pixel to point */
-    pt_h = px_h * 72.27 / x_dpi;
-    pt_v = px_v * 72.27 / y_dpi;
-    /* convert point to scaled point*/
-    page_h = round(pt_h * (1 << 16));
-    page_v = round(pt_v * (1 << 16));
-
-    LOGI("native SetSize to %f pt x %f pt (%d px x %d px)", pt_h, pt_v, px_h, px_v);
-
-    // GL Coordinates are in points
-    MVP[0][0]=2.0/pt_h; // x: scale to -1 to +1
-    MVP[1][1]=-2.0/pt_v; // y: scale to 1 to -1
-    //MVP[2][2]=0.0f; // z: don't care
-    MVP[3][0]=-1.0f; // x position: left
-    MVP[3][1]=1.0f; // y position: up
-    //MVP[3][2]=0.0f; // don't care
-    //MVP[3][3]=1.0f; // w: identity
-    glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-    glViewport(0, 0, px_h, px_v);
- }
-
-extern void nativeRule(double x, double y, double w, double h)
+void nativeRule(double x, double y, double w, double h)
 /* Using GL to render a rule (a black rectangle)
    Coordinates in points, origin bottom left, x and w right, y and h up
    x,y position
    w,h width and height
   */
 { //LOGI("Rendering rule at (%f,%f) sized %fx%f",x/SPf,y/SPf,w/SPf,h/SPf);
-    GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
+
+   GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
                        (GLfloat) x, (GLfloat) (y - h), 0.0f, 0.0f,
                        (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
+                       (GLfloat) (x +w), (GLfloat) y, 1.0f, 1.0f,
                        (GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
-                       (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
-                       (GLfloat) (x + w), (GLfloat) y, 1.0f, 1.0f
+                       (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f
     };
     glBindTexture(GL_TEXTURE_2D, RuleID);
     checkGlError("glBindTexture RuleID");
@@ -421,15 +364,7 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
     { LOG("Unable to display image\n");
       data=grey; width=height=1; nrChannels=4;
     }
-    LOGI("image width=%d, height=%d nrChannels=%d\n", width, height, nrChannels);
-
-
-    glGenTextures(1, &ImageID);
-    // "Bind" the newly created texture : all future texture functions will modify this texture
-    glBindTexture(GL_TEXTURE_2D, ImageID);
-    checkGlError("glBindTexture ImageID");
-
-      // Give the image to OpenGL
+    //LOG("nativeImage %d chanels\n",nrChannels);
     format = GL_RGBA;
     if (nrChannels == 4)
         format = GL_RGBA;
@@ -439,7 +374,10 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
         format = GL_LUMINANCE_ALPHA;
     else if (nrChannels == 1)
         format = GL_LUMINANCE;
-    LOGI("image format=%d\n", format);
+    //LOGI("image format=%d\n", format);
+    glGenTextures(1, &ImageID);
+    glBindTexture(GL_TEXTURE_2D, ImageID);
+    checkGlError("glBindTexture ImageID");
     glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0,
                  format, GL_UNSIGNED_BYTE, data);
     if (glGetError()!= GL_NO_ERROR)
@@ -448,6 +386,7 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
     checkGlError("glTexImage2D(image)");
     if (data!=grey) { stbi_image_free(data); data=NULL; }
     glGenerateMipmap(GL_TEXTURE_2D);
+    checkGlError("glGenerateMipmap(image)");
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   }
@@ -456,15 +395,13 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
      checkGlError("glBindTexture old ImageID");
   }
 
-
-  GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
-                           (GLfloat) x, (GLfloat) (y - h), 0.0f, 0.0f,
-                           (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
-                           (GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
-                           (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
-                           (GLfloat) (x + w), (GLfloat) y, 1.0f, 1.0f
-        };
-
+    GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
+                       (GLfloat) x, (GLfloat) (y - h), 0.0f, 0.0f,
+                       (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
+                       (GLfloat) (x +w), (GLfloat) y, 1.0f, 1.0f,
+                       (GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
+                       (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f
+    };
   glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
   checkGlError("glVertexAttribPointer");
 
@@ -474,26 +411,27 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
 }
 
 static const int to_nearest=1;
-static void GLtexture(Gcache *g) {
-    unsigned texID;
+
+unsigned int nativeTexture(unsigned char *bits, int w, int h) {
+    unsigned int textureID;
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     checkGlError("glPixelStorei");
-    glGenTextures(1, &texID);
+    glGenTextures(1, &textureID);
     checkGlError("glGenTextures");
-    glBindTexture(GL_TEXTURE_2D, texID);
-    checkGlError("glBindTexture texID");
-    /* the first element in g->bits corresponds to the lower left pixel,
-     * the last element in g->bits to the upper right pixel. */
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    checkGlError("glBindTexture textureID");
+    /* the first element in bits corresponds to the lower left pixel,
+     * the last element in bits to the upper right pixel. */
     glTexImage2D(
             GL_TEXTURE_2D,
             0,
             GL_ALPHA,
-            g->w,
-            g->h,
+            w,
+            h,
             0,
             GL_ALPHA,
             GL_UNSIGNED_BYTE,
-            g->bits
+            bits
     );
     checkGlError("glTeXImage2D Glyph");
 
@@ -507,88 +445,36 @@ static void GLtexture(Gcache *g) {
     { glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
-
-    g->GLtexture = texID;
-    //MESSAGE("Generated GL texture %d",g->GLtexture);
+    //MESSAGE("Generated GL texture %d",textureID);
+    return textureID;
 }
 
-void nativeSetPK(struct gcache_s*g)
-{GLtexture(g); /* can I free g->bits ? */}
+unsigned int nativeFreeTexture(unsigned int t)
+{ if (t != 0) {
+    glDeleteTextures(1, &t); // probably not needed
+  }
+  return 0;
+}
 
-void nativeSetFreeType(struct gcache_s*g)
-{GLtexture(g);}
 
-int round_to_pixel=1; /* makes sense only if using the native dpi, if using a multiple its of not much use*/
-double pixel_size_threshold= 72.27/200; /*round to pixel only if pixel size in pt is above threshold*/
-void nativeGlyph(double x, double dx, double y, double dy, double w, double h, struct gcache_s *g, int s)
-/* given glyph g, display g at position x,y in size w,h. x, y, w, h are given in point */
+void nativeGlyph(double x, double y, double w, double h, unsigned int t)
+/* display texture t at position x,y in size w, h.
+   x, y, w, h are given in point */
 {  
-  if (g->GLtexture == 0)
-    GLtexture(g);
-  x=x-dx;
-  y=y-dy; /* Linux y+h-dy */
-  if (round_to_pixel)
-  { double pxs;
-    pxs = 72.27/xdpi; /* pixel size in point */
-    if (pxs>=pixel_size_threshold)
-    { x=x/pxs;
-      x=floor(x+0.5);
-      x=x*pxs;
-    }
-    pxs = 72.27/ydpi; /* pixel size in point */
-    if (pxs>=pixel_size_threshold)
-    { y=y/pxs;
-      y=floor(y+0.5);
-      y=y*pxs;
-    }
-  }
-
-  GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 0.0f,
-                     (GLfloat) x, (GLfloat) (y + h), 0.0f, 1.0f,
-                     (GLfloat) (x + w), (GLfloat) (y + h), 1.0f, 1.0f,
-                     (GLfloat) x, (GLfloat) y, 0.0f, 0.0f,
-                     (GLfloat) (x + w), (GLfloat) (y + h), 1.0f, 1.0f,
-                     (GLfloat) (x + w), (GLfloat) y, 1.0f, 0.0f
+  GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
+                     (GLfloat) x, (GLfloat) (y - h), 0.0f, 0.0f,
+                     (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
+                     (GLfloat) (x +w), (GLfloat) y, 1.0f, 1.0f,
+                     (GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
+                     (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f
   };
-  glBindTexture(GL_TEXTURE_2D, g->GLtexture);
-  checkGlError("glBindTexture g->GLtexture");
-
-#if 1
-  nativeSetForeground(cur_colorset[0][cur_mode*6+s*2]);
-#else
-  if (s!=last_style)
-  { if (s&FOCUS_BIT)
-      glUniform3f(FGcolorID, 0.0f, 1.0f, 0.0f);
-    else if (s&MARK_BIT)
-      glUniform3f(FGcolorID, 1.0f, 0.0f, 0.0f);
-    else if (s&LINK_BIT)
-      glUniform3f(FGcolorID, 0.0f, 0.0f, 1.0f);
-    else
-      glUniform3f(FGcolorID, curfr, curfg,curfb);
-    last_style=s;
-  }
-#endif
-   glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), gQuad);
+  glBindTexture(GL_TEXTURE_2D, t);
+  checkGlError("glBindTexture t");
+  glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), gQuad);
   checkGlError("glVertexAttribPointer");
   glDrawArrays(GL_TRIANGLES, 0, 2*3);
   //checkGlError("glDrawArrays");
 }
-
-void nativeFreeGlyph(struct gcache_s*g)
-{    if (g->GLtexture != 0) {
-        glDeleteTextures(1, &(g->GLtexture)); // probably not needed
-        g->GLtexture = 0;
-    }
-}
-
-#if 0 /* not used by Android */
-void nativeFreeGlyph(struct gcache_s*g)
-{    if (g->GLtexture != 0) {
-        glDeleteTextures(1, &(g->GLtexture)); // probably not needed
-        g->GLtexture = 0;
-    }
-}
-#endif
 
 
 /* no printing support so far, just placeholders */
@@ -597,13 +483,10 @@ int nativePrintStart(int w, int h, int bpr, int bpp, unsigned char *bits)
 { return 0;
 }
 
-int nativePrintEnd(void)
-{ return 0;
-}
-
 int nativePrint(unsigned char *bits)
 { return 0;
 }
 
-
-
+int nativePrintEnd(void)
+{ return 0;
+}

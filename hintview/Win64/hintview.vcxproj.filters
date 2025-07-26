@@ -30,16 +30,7 @@
     <ClCompile Include="..\external\glew-1.13.0\src\glew.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\backend\hfonts.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\backend\hint.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\backend\hrender.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\backend\htex.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="outline.c">
@@ -83,16 +74,7 @@
     <ClInclude Include="glcontext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\backend\hfonts.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\backend\hint.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\backend\hrender.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\backend\htex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="outline.h">
@@ -146,19 +128,10 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\backend\btex.w">
-      <Filter>cweb Files</Filter>
-    </None>
     <None Include="..\backend\format.w">
       <Filter>cweb Files</Filter>
     </None>
     <None Include="..\backend\hint.w">
-      <Filter>cweb Files</Filter>
-    </None>
-    <None Include="..\backend\htex.ch">
-      <Filter>cweb Files</Filter>
-    </None>
-    <None Include="..\backend\htex.w">
       <Filter>cweb Files</Filter>
     </None>
   </ItemGroup>

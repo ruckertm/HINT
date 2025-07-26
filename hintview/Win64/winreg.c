@@ -33,7 +33,7 @@
 #include "winreg.h"
 
 extern int round_to_pixel_h, round_to_pixel_v;
-extern double pixel_size_threshold;
+extern double dpi_threshold;
 
 #define PROJECT_KEY "HINT"
 #define PROGRAM_KEY "HintView"
@@ -60,7 +60,7 @@ regtable regtab= {
 	{"position",&pos,TYPE_UINT64},
 	{"gamma",&gamma,TYPE_DOUBLE},
 	{"scale",&scale,TYPE_DOUBLE},
-	{"pxthr",&pixel_size_threshold,TYPE_DOUBLE},
+	{"pxthr",&dpi_threshold,TYPE_DOUBLE},
 	{KEY_FLAGS,&dark,0},
 	{KEY_FLAGS,&autoreload,1},
 	//{KEY_FLAGS,&round_to_pixel,2},

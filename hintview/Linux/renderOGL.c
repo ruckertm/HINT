@@ -61,6 +61,7 @@ static void printGLString(const char *name, GLenum s) {
 #endif
 
 #define MAX_INFOLOG 512
+static GLuint gvPositionHandle;
 static GLuint ProgramID, MatrixID, RuleID, GammaID, FGcolorID, IsImageID, ImageID=0;
 static unsigned char *last_b=NULL;
 static uint32_t cur_fg=0; /*the current foreground color*/
@@ -139,13 +140,17 @@ static GLuint loadShader(GLenum type, char const *source)
 
   /* Compile and check vertex shader */
   shaderID = glCreateShader(type);
-  glShaderSource(shaderID, 1, &source , NULL);
-  glCompileShader(shaderID);
-  glGetShaderiv(shaderID, GL_COMPILE_STATUS, &result);
-  if (!result)
-  { char InfoLog[MAX_INFOLOG];
-    glGetShaderInfoLog(shaderID, MAX_INFOLOG, NULL, InfoLog);
-    QUIT("Error compiling shader (%d): %s\n", type, InfoLog);
+  if (shaderID) {
+    glShaderSource(shaderID, 1, &source, NULL);
+    glCompileShader(shaderID);
+    glGetShaderiv(shaderID, GL_COMPILE_STATUS, &result);
+    if (!result)
+    { char InfoLog[MAX_INFOLOG];
+      glGetShaderInfoLog(shaderID, MAX_INFOLOG, NULL, InfoLog);
+      glDeleteShader(shaderID);
+      shaderID = 0;
+      QUIT("Error compiling shader (%d): %s\n", type, InfoLog);
+    }
   }
   return shaderID;
 }

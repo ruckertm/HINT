@@ -36,7 +36,6 @@
 #include "error.h"
 #include "glcontext.h"
 #include "format.h"
-#include "hrender.h"
 #include "winreg.h"
 #include "saveimage.h"
 #include "winmain.h"

@@ -32,13 +32,12 @@
 #include <math.h>
 #include "resource.h"
 #include "format.h"
-#include "hrender.h"
 #include "winmain.h"
 #include "hint.h"
 
 
-extern int round_to_pixel_h, round_to_pixel_v, to_nearest;
-extern double pixel_size_threshold;
+int round_to_pixel_h, round_to_pixel_v, to_nearest;
+double dpi_threshold;
 double gamma=2.2;
 
 #pragma warning( disable : 4996 4100)
@@ -105,6 +104,9 @@ void adjust_client_size(HWND hDlg)
 INT_PTR CALLBACK 
 SettingsDialogProc( HWND hDlg, UINT msg, WPARAM wparam, LPARAM lparam )
 { static int size_change=0;
+  scaled page_h = client_width * 72.27 * 0x1000 / (scale * dpi_x);
+  scaled page_v = client_height * 72.27 * 0x1000 / (scale * dpi_y);
+  
   switch ( msg )
   { case WM_INITDIALOG:
 	  SetDlgItemInt(hDlg,IDC_PX,client_width,FALSE);
@@ -118,15 +120,20 @@ SettingsDialogProc( HWND hDlg, UINT msg, WPARAM wparam, LPARAM lparam )
 	  }
 	  set_unit(hDlg,unit);
 	  SendMessage(GetDlgItem(hDlg,IDC_UNITS),CB_SETCURSEL,unit,0);
-	  SetDlgItemDouble(hDlg,IDC_HSIZE,sp2unit[unit]*page_h);
-      SetDlgItemDouble(hDlg,IDC_VSIZE,sp2unit[unit]*page_v);
+	  SetDlgItemDouble(hDlg, IDC_HSIZE, sp2unit[unit] * page_h);
+	  SetDlgItemDouble(hDlg, IDC_VSIZE, sp2unit[unit] * page_v);
+	  
+#if 0
+	  /* these internals are no longer available from hint.c */
+
 	  if (dimen_def!=NULL)
      	SetDlgItemDouble(hDlg,IDC_ESSIZE,sp2unit[unit]*emergency_stretch);
 	  if (integer_def!=NULL)
 	  { SetDlgItemInt(hDlg,IDC_TOLERANCE,tolerance,FALSE);
 	    SetDlgItemInt(hDlg,IDC_PRETOLERANCE,pretolerance,FALSE);
 	  }
-      SetDlgItemDouble(hDlg,IDC_PXSIZE,sp2unit[unit]*pixel_size_threshold*ONE);
+#endif
+	  SetDlgItemDouble(hDlg,IDC_PXSIZE,dpi_threshold);
       SendMessage(GetDlgItem(hDlg,IDC_ROUND_TO_PIXEL_H),BM_SETCHECK,
 		  round_to_pixel_h?BST_CHECKED:BST_UNCHECKED,0);
       SendMessage(GetDlgItem(hDlg,IDC_ROUND_TO_PIXEL_V),BM_SETCHECK,
@@ -249,6 +256,7 @@ SettingsDialogProc( HWND hDlg, UINT msg, WPARAM wparam, LPARAM lparam )
 			SetWindowPos(hMainWnd,HWND_TOPMOST,0,0,r.right-r.left,r.bottom-r.top,SWP_NOMOVE|SWP_NOREDRAW);
 			result=FALSE;
 		}
+#if 0
 		a = round(GetDlgItemDouble(hDlg,IDC_ESSIZE)/sp2unit[unit]);
 		if (dimen_def!=NULL && a!=emergency_stretch) 
 		{ emergency_stretch=a; 
@@ -258,9 +266,10 @@ SettingsDialogProc( HWND hDlg, UINT msg, WPARAM wparam, LPARAM lparam )
 		if (integer_def!=NULL&&a!=tolerance) { tolerance=a; result=TRUE; }
 		a=GetDlgItemInt(hDlg,IDC_PRETOLERANCE,NULL,FALSE);
 		if (integer_def!=NULL && a!=pretolerance ) { pretolerance=a; result=TRUE; }
-	    d=GetDlgItemDouble(hDlg,IDC_PXSIZE)/sp2unit[unit]/ONE;
-		if (d!=pixel_size_threshold) 
-		{  pixel_size_threshold=d; if (round_to_pixel_h||round_to_pixel_v) result=TRUE; }
+#endif
+	    d=GetDlgItemDouble(hDlg,IDC_PXSIZE);
+		if (d!=dpi_threshold) 
+		{  dpi_threshold=d; if (round_to_pixel_h||round_to_pixel_v) result=TRUE; }
 
         EndDialog(hDlg, result);
         return TRUE;
@@ -281,19 +290,20 @@ SettingsDialogProc( HWND hDlg, UINT msg, WPARAM wparam, LPARAM lparam )
       SendMessage(GetDlgItem(hDlg,IDC_ROUND_TO_PIXEL_V),BM_SETCHECK,
 		  round_to_pixel_v?BST_CHECKED:BST_UNCHECKED,0);
 	    if (round_to_pixel_h||round_to_pixel_v) 
-			pixel_size_threshold=GetDlgItemDouble(hDlg,IDC_PXSIZE)/sp2unit[unit]/ONE;
+			dpi_threshold=GetDlgItemDouble(hDlg,IDC_PXSIZE);
+		hint_round_position(round_to_pixel_h || round_to_pixel_v, dpi_threshold);
 	    InvalidateRect(hMainWnd,NULL,FALSE);
 	  }	
 	  else if ( LOWORD(wparam) == IDC_ROUND_TO_PIXEL_H )
 	  { round_to_pixel_h= BST_CHECKED==SendMessage(GetDlgItem(hDlg,IDC_ROUND_TO_PIXEL_H),BM_GETCHECK,0,0);
 	    if (round_to_pixel_h||round_to_pixel_v) 
-			pixel_size_threshold=GetDlgItemDouble(hDlg,IDC_PXSIZE)/sp2unit[unit]/ONE;
+			dpi_threshold=GetDlgItemDouble(hDlg,IDC_PXSIZE);
 	    InvalidateRect(hMainWnd,NULL,FALSE);
 	  }	
 	  else if ( LOWORD(wparam) == IDC_ROUND_TO_PIXEL_V )
 	  { round_to_pixel_v= BST_CHECKED==SendMessage(GetDlgItem(hDlg,IDC_ROUND_TO_PIXEL_V),BM_GETCHECK,0,0);
 	    if (round_to_pixel_h||round_to_pixel_v) 
-			pixel_size_threshold=GetDlgItemDouble(hDlg,IDC_PXSIZE)/sp2unit[unit]/ONE;
+			dpi_threshold=GetDlgItemDouble(hDlg,IDC_PXSIZE);
 	    InvalidateRect(hMainWnd,NULL,FALSE);
 	  }	
 	  else if ( LOWORD(wparam) == IDC_TO_NEAREST )
