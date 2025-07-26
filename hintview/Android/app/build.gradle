@@ -34,7 +34,7 @@ android {
     }
     externalNativeBuild {
         cmake {
-            version '3.6.0'
+            version '3.22.1'
             path 'src/main/cpp/CMakeLists.txt'
         }
     }
@@ -46,6 +46,7 @@ android {
     }
     namespace 'edu.hm.cs.hintview'
     //   ndkVersion '21.4.7075529'
+    ndkVersion '29.0.13599879'
 }
 
 java {

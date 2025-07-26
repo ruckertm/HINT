@@ -135,7 +135,12 @@ public class HINTVIEWActivity extends AppCompatActivity {
         WindowInsetsController windowInsetsController;
         windowInsetsController= view.getWindowInsetsController();
         if (!toolbarVisible)
-           windowInsetsController.hide(WindowInsets.Type.systemBars());
+        {  int t,s;
+            t=WindowInsets.Type.displayCutout();
+            s=WindowInsets.Type.systemBars();
+            t=t|s;
+            windowInsetsController.hide(t);
+        }
         else
             windowInsetsController.show(WindowInsets.Type.systemBars());
   /*
