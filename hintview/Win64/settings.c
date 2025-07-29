@@ -36,16 +36,11 @@
 #include "hint.h"
 
 
-int round_to_pixel_h, round_to_pixel_v, to_nearest;
-double dpi_threshold;
+int round_to_pixel;
+int dpi_threshold;
 double gamma=2.2;
 
 #pragma warning( disable : 4996 4100)
-
-#define emergency_stretch	dimen_def[emergency_stretch_no]
-#define pretolerance integer_def[pretolerance_no]
-#define tolerance integer_def[tolerance_no]
-
 
 enum units {mm=0,in=1,pt=2,pc=3,px=4} unit;
 #define MAXUNIT (px+1)
@@ -62,6 +57,7 @@ static double GetDlgItemDouble(HWND hDlg,UINT DlgItem)
 static double SetDlgItemDouble(HWND hDlg,UINT DlgItem, double x)
 { char c[20];
    _snprintf(c,20,"%0.3f",x);
+   c[19] = 0;
   SetDlgItemText(hDlg,DlgItem,c);
   return atof(c);
 }
@@ -73,15 +69,10 @@ void set_unit( HWND hDlg, int i)
    SetDlgItemDouble(hDlg,IDC_HSIZE,sp2unit[i]*x/sp2unit[unit]);
    x = GetDlgItemDouble(hDlg,IDC_VSIZE);
    SetDlgItemDouble(hDlg,IDC_VSIZE,sp2unit[i]*x/sp2unit[unit]);
-   x = GetDlgItemDouble(hDlg,IDC_ESSIZE);
-   SetDlgItemDouble(hDlg,IDC_ESSIZE,sp2unit[i]*x/sp2unit[unit]);
-   x = GetDlgItemDouble(hDlg,IDC_PXSIZE);
-   SetDlgItemDouble(hDlg,IDC_PXSIZE,sp2unit[i]*x/sp2unit[unit]);
    unit=i;
    SetDlgItemText(hDlg,IDC_HUNIT,unitstr[unit]);
    SetDlgItemText(hDlg,IDC_VUNIT,unitstr[unit]);
-   SetDlgItemText(hDlg,IDC_TUNIT,unitstr[unit]);
-   SetDlgItemText(hDlg,IDC_ESUNIT,unitstr[unit]);
+
 }
 
 void adjust_client_size(HWND hDlg)
@@ -104,8 +95,8 @@ void adjust_client_size(HWND hDlg)
 INT_PTR CALLBACK 
 SettingsDialogProc( HWND hDlg, UINT msg, WPARAM wparam, LPARAM lparam )
 { static int size_change=0;
-  scaled page_h = client_width * 72.27 * 0x1000 / (scale * dpi_x);
-  scaled page_v = client_height * 72.27 * 0x1000 / (scale * dpi_y);
+  scaled page_h = client_width * 72.27 * 0x10000 / (scale * dpi_x);
+  scaled page_v = client_height * 72.27 * 0x10000 / (scale * dpi_y);
   
   switch ( msg )
   { case WM_INITDIALOG:
@@ -113,7 +104,7 @@ SettingsDialogProc( HWND hDlg, UINT msg, WPARAM wparam, LPARAM lparam )
       SetDlgItemInt(hDlg,IDC_PY,client_height,FALSE);
 	  SetDlgItemDouble(hDlg,IDC_XDPI,dpi_x);
 	  SetDlgItemDouble(hDlg,IDC_YDPI,dpi_y);
-	  sp2unit[px]=(dpi_x+dpi_y)/(2*72.27*0x10000);
+	  sp2unit[px]=scale*(dpi_x+dpi_y)/(2*72.27*0x10000);
 	  { int i;
         for (i=0;i<MAXUNIT;i++)
         SendMessage(GetDlgItem(hDlg,IDC_UNITS),CB_ADDSTRING,0,(LPARAM)unitstr[i]);
@@ -133,14 +124,11 @@ SettingsDialogProc( HWND hDlg, UINT msg, WPARAM wparam, LPARAM lparam )
 	    SetDlgItemInt(hDlg,IDC_PRETOLERANCE,pretolerance,FALSE);
 	  }
 #endif
-	  SetDlgItemDouble(hDlg,IDC_PXSIZE,dpi_threshold);
-      SendMessage(GetDlgItem(hDlg,IDC_ROUND_TO_PIXEL_H),BM_SETCHECK,
-		  round_to_pixel_h?BST_CHECKED:BST_UNCHECKED,0);
-      SendMessage(GetDlgItem(hDlg,IDC_ROUND_TO_PIXEL_V),BM_SETCHECK,
-		  round_to_pixel_v?BST_CHECKED:BST_UNCHECKED,0);
-	  SendMessage(GetDlgItem(hDlg,IDC_TO_NEAREST),BM_SETCHECK,
-		  to_nearest?BST_CHECKED:BST_UNCHECKED,0);
-
+	  SetDlgItemInt(hDlg,IDC_PXSIZE,dpi_threshold, FALSE);
+      
+      SendMessage(GetDlgItem(hDlg,IDC_ROUND_TO_PIXEL),BM_SETCHECK,
+		  round_to_pixel?BST_CHECKED:BST_UNCHECKED,0);
+	  
 	  /* Slider for Gamma */
 #define SLIDER_MAX 30 /* slider positions from 0 to MAX_SLIDER */
 #define SLIDER_ONE 18 /* slider position for gamma = 1.0 */
@@ -224,12 +212,23 @@ SettingsDialogProc( HWND hDlg, UINT msg, WPARAM wparam, LPARAM lparam )
 	      else if (gamma>4.0) {gamma=4.0; SetDlgItemDouble(hDlg,IDC_EDIT_GAMMA,gamma);}
 		  PostMessage(hMainWnd, WM_GAMMA, 0, 0);
 	    }
+		else if (LOWORD(wparam) == IDC_PXSIZE)
+	    {
+		  int d = GetDlgItemInt(hDlg, IDC_PXSIZE, NULL, FALSE);
+		  if (d != dpi_threshold)
+		  {
+			  dpi_threshold = d;
+			  hint_round_position(round_to_pixel, dpi_threshold);
+			  InvalidateRect(hMainWnd, NULL, FALSE);
+		  }
+
+	    }
   	    return 0;      
 	  }
 	  if(HIWORD (wparam) == BN_CLICKED)
 	  { if( LOWORD(wparam) == IDOK )
         { BOOL result=FALSE;
-	    int a, v, h, t=0, b=0, l=0, r=0;
+	    int a, v, h, t=0, b=0;
 		double d;
 
         d = GetDlgItemDouble(hDlg,IDC_HSIZE);
@@ -256,63 +255,32 @@ SettingsDialogProc( HWND hDlg, UINT msg, WPARAM wparam, LPARAM lparam )
 			SetWindowPos(hMainWnd,HWND_TOPMOST,0,0,r.right-r.left,r.bottom-r.top,SWP_NOMOVE|SWP_NOREDRAW);
 			result=FALSE;
 		}
-#if 0
-		a = round(GetDlgItemDouble(hDlg,IDC_ESSIZE)/sp2unit[unit]);
-		if (dimen_def!=NULL && a!=emergency_stretch) 
-		{ emergency_stretch=a; 
-		  result=TRUE; 
+	    t=GetDlgItemInt(hDlg,IDC_PXSIZE, NULL, FALSE);
+		if (t!=dpi_threshold) 
+		{  dpi_threshold=t; 
+		   if (round_to_pixel) result=TRUE; 
 		}
-	    a =GetDlgItemInt(hDlg,IDC_TOLERANCE,NULL,FALSE);
-		if (integer_def!=NULL&&a!=tolerance) { tolerance=a; result=TRUE; }
-		a=GetDlgItemInt(hDlg,IDC_PRETOLERANCE,NULL,FALSE);
-		if (integer_def!=NULL && a!=pretolerance ) { pretolerance=a; result=TRUE; }
-#endif
-	    d=GetDlgItemDouble(hDlg,IDC_PXSIZE);
-		if (d!=dpi_threshold) 
-		{  dpi_threshold=d; if (round_to_pixel_h||round_to_pixel_v) result=TRUE; }
-
         EndDialog(hDlg, result);
-        return TRUE;
-      }
-      else if( LOWORD(wparam) == IDCANCEL )
-      {
-        EndDialog(hDlg, FALSE);
         return TRUE;
       }
 	  else if ( LOWORD(wparam) == IDC_ROUND_TO_PIXEL )
 	  { int b=SendMessage(GetDlgItem(hDlg,IDC_ROUND_TO_PIXEL),BM_GETCHECK,0,0);
 	    if (b==BST_UNCHECKED)
-		  round_to_pixel_h=round_to_pixel_v=0;
-		else if (b==BST_CHECKED)
-		  round_to_pixel_h=round_to_pixel_v=1;
-      SendMessage(GetDlgItem(hDlg,IDC_ROUND_TO_PIXEL_H),BM_SETCHECK,
-		  round_to_pixel_h?BST_CHECKED:BST_UNCHECKED,0);
-      SendMessage(GetDlgItem(hDlg,IDC_ROUND_TO_PIXEL_V),BM_SETCHECK,
-		  round_to_pixel_v?BST_CHECKED:BST_UNCHECKED,0);
-	    if (round_to_pixel_h||round_to_pixel_v) 
-			dpi_threshold=GetDlgItemDouble(hDlg,IDC_PXSIZE);
-		hint_round_position(round_to_pixel_h || round_to_pixel_v, dpi_threshold);
+		  round_to_pixel=0;
+		else 
+		  round_to_pixel=1;
+        SendMessage(GetDlgItem(hDlg,IDC_ROUND_TO_PIXEL),BM_SETCHECK,
+		  round_to_pixel?BST_CHECKED:BST_UNCHECKED,0);
+        hint_round_position(round_to_pixel, dpi_threshold);
 	    InvalidateRect(hMainWnd,NULL,FALSE);
-	  }	
-	  else if ( LOWORD(wparam) == IDC_ROUND_TO_PIXEL_H )
-	  { round_to_pixel_h= BST_CHECKED==SendMessage(GetDlgItem(hDlg,IDC_ROUND_TO_PIXEL_H),BM_GETCHECK,0,0);
-	    if (round_to_pixel_h||round_to_pixel_v) 
-			dpi_threshold=GetDlgItemDouble(hDlg,IDC_PXSIZE);
-	    InvalidateRect(hMainWnd,NULL,FALSE);
-	  }	
-	  else if ( LOWORD(wparam) == IDC_ROUND_TO_PIXEL_V )
-	  { round_to_pixel_v= BST_CHECKED==SendMessage(GetDlgItem(hDlg,IDC_ROUND_TO_PIXEL_V),BM_GETCHECK,0,0);
-	    if (round_to_pixel_h||round_to_pixel_v) 
-			dpi_threshold=GetDlgItemDouble(hDlg,IDC_PXSIZE);
-	    InvalidateRect(hMainWnd,NULL,FALSE);
-	  }	
-	  else if ( LOWORD(wparam) == IDC_TO_NEAREST )
-	  { to_nearest= BST_CHECKED==SendMessage(GetDlgItem(hDlg,IDC_TO_NEAREST),BM_GETCHECK,0,0);
-	    hint_clear_fonts(false)	;  
-	    InvalidateRect(hMainWnd,NULL,FALSE);
-	  }	
+	  }
+	  else if (LOWORD(wparam) == IDCANCEL)
+	  {
+		  EndDialog(hDlg, FALSE);
+		  return TRUE;
+	  }
 
-     break;
+	  break;
 	}
   }
   return FALSE;

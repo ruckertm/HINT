@@ -24,11 +24,6 @@
 #define IDC_HUNIT                       1007
 #define IDC_VUNIT                       1008
 #define IDC_PXSIZE                      1009
-#define IDC_TUNIT                       1010
-#define IDC_ESSIZE                      1012
-#define IDC_TOLERANCE                   1013
-#define IDC_PRETOLERANCE                1014
-#define IDC_ESUNIT                      1015
 #define IDC_VERSION                     1016
 #define IDC_TOOLBAR                     1017
 #define IDC_HINT_VERSION                1017
@@ -39,10 +34,8 @@
 #define IDC_OUTLINE                     1022
 #define IDC_ROUND_TO_PIXEL              1023
 #define IDC_YDPI                        1024
-#define IDC_ROUND_TO_PIXEL_V            1025
 #define IDC_EDIT_GAMMA                  1026
 #define IDC_SPIN_GAMMA                  1027
-#define IDC_ROUND_TO_PIXEL_H            1028
 #define IDC_COPYRIGHT                   1028
 #define IDC_ROUND_TO_NEAREST            1029
 #define IDC_TO_NEAREST                  1029

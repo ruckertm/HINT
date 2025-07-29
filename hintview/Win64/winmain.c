@@ -31,6 +31,10 @@
 #include <afxres.h>
 #include <stdio.h>
 #include <math.h>
+#if 0
+#include <ShellScalingApi.h>
+/* remove also the additional libraray score.lib */
+#endif
 #include "resource.h"
 #include "basetypes.h"
 #include "error.h"
@@ -66,21 +70,22 @@ int client_width=0, client_height=0; /* size of client aerea in pixel */
 #define SCALE_MAX 5.0
 double scale=SCALE_NORMAL, dpi_x, dpi_y; /* dpi and scale factor to zoom the rendering */
 
-void init_layout(void)
-/* collect system Information */
+void set_dpi(HDC hdc)
 { 
-  int screen_width, screen_height,hpix, vpix;
-  double dpmmx,dpmmy; /* dots per mm on target device */
-  HDC hdc;
-  hdc=GetDC(NULL);
-  screen_width = GetDeviceCaps(hdc, HORZSIZE);
-  screen_height =  GetDeviceCaps(hdc, VERTSIZE);
-  hpix = GetDeviceCaps(hdc, HORZRES);
-  vpix =  GetDeviceCaps(hdc, VERTRES);
-  dpmmx = (double)hpix/screen_width;
-  dpmmy = (double)vpix/screen_height;
-  dpi_x = dpmmx*25.4;
-  dpi_y = dpmmy*25.4;
+  int h_mm, v_mm,h_px, v_px;
+  double h_dpmm,v_dpmm; 
+  
+  h_mm = GetDeviceCaps(hdc, HORZSIZE); /* size in mm */
+  v_mm =  GetDeviceCaps(hdc, VERTSIZE);
+  h_px = GetDeviceCaps(hdc, HORZRES); /* size in pixel*/
+  v_px =  GetDeviceCaps(hdc, VERTRES);
+  h_dpmm = (double)h_px/h_mm;      /* dots per mm */
+  v_dpmm = (double)v_px/v_mm;
+  if (dpi_x != h_dpmm * 25.4 || dpi_y != v_dpmm * 25.4)
+  { dpi_x = h_dpmm * 25.4;  /* dots per inch */
+	dpi_y = v_dpmm * 25.4;
+	hint_clear_fonts(true);
+  }
 }
 
 /* Rendering Functions */
@@ -276,6 +281,7 @@ static void open_file(void)
   { hint_clear_fonts(true);
     hint_begin();
 	strncpy(title_name,hin_name,MAX_PATH);
+	title_name[MAX_PATH - 1] = 0;
 	SetNavigationTree();
   }
   else
@@ -327,6 +333,7 @@ AboutDialogProc( HWND hDlg, UINT message, WPARAM wparam, LPARAM lparam )
 	  SetDlgItemText(hDlg, IDC_COPYRIGHT, COPYRIGHT);
 	  { char format_version[100];
 	    _snprintf(format_version,99,"HINT Format Version %d.%d",HINT_VERSION, HINT_MINOR_VERSION);
+		format_version[99] = 0;
          SetDlgItemText(hDlg,IDC_HINT_VERSION,format_version);
 	  }
       return TRUE;
@@ -352,8 +359,20 @@ AboutDialogProc( HWND hDlg, UINT message, WPARAM wparam, LPARAM lparam )
   return FALSE;
 }
 
+static HMONITOR hMonitor = NULL;
+static DPI_AWARENESS_CONTEXT dpi_ac = NULL;
+static HRESULT dpi_err = 0;
 
-
+static BOOL set_monitor_dpi(
+	HMONITOR hm,
+	HDC hdc,
+	LPRECT rc,
+	LPARAM unnamedParam4
+)
+{ if (hm == hMonitor)
+    set_dpi(hdc);
+  return TRUE;
+}
 
  /* Resources */
 
@@ -389,7 +408,7 @@ bool onTop=false;
 
 static LRESULT CALLBACK 
 WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{ 
+{
     static PAINTSTRUCT ps;
     static bool draging=false;
 	static POINT drag;
@@ -401,6 +420,7 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_CREATE:
 	  hMainWnd=hWnd;
 	  DragAcceptFiles(hWnd,TRUE);
+	  dpi_ac = SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 	  return 0;
 	case WM_DESTROY:
 	  hint_end(); hint_clear_fonts(true);
@@ -561,18 +581,77 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		if (autoreload && new_file_time())
 		  SendMessage(hMainWnd,WM_COMMAND,ID_KEY_RELOAD,0);
 		return 0;
+#if 0
+	case WM_DPICHANGED:
+		/* the dpi values you get here are 96 for a standarf monitor
+		   and a scaled value if the mobitor is configured with a scale factor.
+		   Neither has anything to do with the true resolution of the monitor. */
+		dpi_x = LOWORD(wParam);
+		dpi_y = HIWORD(wParam);
+		MESSAGE("new dpi x%d", dpi_x);
+		return 0;
+#endif
+#if 1
+	case WM_WINDOWPOSCHANGED:
+	  { LPWINDOWPOS p;
+	  bool needs_resize = false;
+		p= (LPWINDOWPOS)lParam;
+		if (!(p->flags & SWP_NOMOVE) || !(p->flags & SWP_NOSIZE))
+		{ HMONITOR n;
+		  n = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+		  if (n != hMonitor)
+		  { RECT rc;
+			HDC hdc;
+			hMonitor = n;
+			hdc = GetDC(hWnd);
+			GetClientRect(hWnd, &rc);
+			EnumDisplayMonitors(hdc, &rc, set_monitor_dpi, 0);
+			ReleaseDC(hWnd, hdc);
+			needs_resize = true;
+		  }
+		  if (!(p->flags & SWP_NOSIZE)) 
+		  {	RECT r;
+			GetClientRect(hWnd, &r);
+			client_width = r.right - r.left;
+			client_height = r.bottom - r.top;
+			needs_resize = true;
+		   }
+		  if (needs_resize)
+			HINT_TRY resize_page();
+		}
+		return 0;
+	  }
+#else
+		/* the following messages are not sent if  WM_WINDOWPOSCHANGED returns zero.*/
     case WM_SIZE:
 	  client_width=LOWORD(lParam);
 	  client_height=HIWORD(lParam);
   	  HINT_TRY resize_page();
 	  return 0;
+	case WM_MOVE:
+	{
+		
+		HMONITOR n;
+		n = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+		if (n != hMonitor)
+		{	RECT rc;
+			HDC hdc;
+			hMonitor = n;
+			hdc = GetDC(hWnd);
+			GetClientRect(hWnd, &rc);
+			// rc.bottom = (rc.bottom - rc.top) / 2;
+			EnumDisplayMonitors(hdc, &rc, set_monitor_dpi, 0);
+		}
+	}
+	return 0;
+#endif
     case WM_LBUTTONDOWN:
 	{ drag.x = LOWORD(lParam), drag.y=HIWORD(lParam);
       if (!DragDetect(hWnd,drag))
 	  { int link;
 	    HINT_TRY {
-	      link=hint_find_link(round((drag.x<<16)*72.27/(dpi_x*scale)),
-	                            round((drag.y<<16)*72.27/(dpi_y*scale)),2*ONE);
+	      link=hint_find_link(round((drag.x*ONE)*72.27/(dpi_x*scale)),
+	                            round((drag.y*ONE)*72.27/(dpi_y*scale)),2*ONE);
 		  if (link>=0)
 	        hint_link_page(link);
 		}
@@ -618,8 +697,8 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	  }
 	  else
 	  {	int link;
-	    link=hint_find_link(round(((int)mouse.x<<16)*72.27/(dpi_x*scale)),
-	                            round(((int)mouse.y<<16)*72.27/(dpi_y*scale)),2*ONE);
+	    link=hint_find_link(round((mouse.x*ONE)*72.27/(dpi_x*scale)),
+	                            round((mouse.y*ONE)*72.27/(dpi_y*scale)),2*ONE);
         if (link>=0 && !OnLink)
 	    { SetCursor(hHand); OnLink=true; }
 	    else if (link<0 && OnLink)
@@ -658,7 +737,7 @@ static int do_command_line(char *c)
       i=0;
       while (*c!=0 && (!isspace(*c)||quoted) && i<MAX_PATH)
 	    new_name[i++]=*c++;
-	  if (quoted && new_name[i-1]=='"') i--;
+	  if (quoted && i>0 && new_name[i-1]=='"') i--;
       new_name[i]=0;
       if (i>MAX_PATH)
 		return hint_error("Error: File name too long, truncated!", new_name);
@@ -703,9 +782,14 @@ BOOL InitInstance(HINSTANCE hInstance)
 
 
 
-int APIENTRY
-WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst,
-	LPSTR lpCmdLine, int nCmdShow)
+int WINAPI
+WinMain(
+	_In_ HINSTANCE hCurrentInst,
+	_In_opt_ HINSTANCE hPreviousInst,
+	_In_ LPSTR lpCmdLine,
+	_In_ int nCmdShow
+)
+//WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst,LPSTR lpCmdLine, int nCmdShow)
 {   MSG   msg;
 	RECT r;
 	BOOL b;
@@ -718,36 +802,43 @@ WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst,
 #else
 	hlog=stderr;
 #endif 
-	SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
+
 	if (!InitInstance (hCurrentInst)) return FALSE;
+	
+#if 1
+	//	dpi_ac = SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_UNAWARE);
+	dpi_ac = SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+   //  dpi_ac = SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+#else
+	//dpi_err = SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
+	{
+		bool b;
+		b = SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+		if (!b)
+			MESSAGE("Error");
+	}
+	if (dpi_err == S_OK) MESSAGE("OK");
+	else if (dpi_err == E_INVALIDARG) MESSAGE("INVALID");
+	else if (dpi_err == E_ACCESSDENIED) MESSAGE("DENIED");
+	else MESSAGE("UNEXPECTED");
+        /* this used to be before InitInstance */
+	// SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
+#endif
 	InitGLextensions(); 
 
 	ic.dwSize=sizeof(ic);
 	ic.dwICC= ICC_TREEVIEW_CLASSES;
-	if (!InitCommonControlsEx(&ic )) return FALSE;        
-	init_layout();
-    client_width=round(320*dpi_x/72.27); /* 320 pt */
-    client_height=round(400*dpi_y/72.27); /* 400 pt */
-	r.top=r.left=0;
-	r.right=client_width;
-	r.bottom=client_height;
-	AdjustWindowRect(&r,WS_TILEDWINDOW ,FALSE);
+	if (!InitCommonControlsEx(&ic )) return FALSE;
 
-#if 1
     CreateWindow(szClassName, szClassName,
 			WS_OVERLAPPED| WS_TILEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
-			CW_USEDEFAULT,CW_USEDEFAULT, r.right-r.left, r.bottom-r.top,
+			CW_USEDEFAULT,CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, //r.right-r.left, r.bottom-r.top,
 			NULL, NULL, hInst, NULL);
-#else
-	CreateWindowEx(WS_EX_TOPMOST,szClassName, szClassName,
-			WS_TILEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN,
-			CW_USEDEFAULT,CW_USEDEFAULT, r.right-r.left, r.bottom-r.top,
-			NULL, NULL, hInst, NULL);
-#endif
+
 
     if (hMainWnd == NULL) 
 	  return hint_error("Fatal Error","Unable to create window");
-	init_handles();
+	init_handles(); /* this creates the OGL render context */
 
 	read_regtab(); 
 	do_command_line(lpCmdLine);
@@ -760,14 +851,24 @@ WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst,
 	if (autoreload) SendMessage(hMainWnd,WM_COMMAND,ID_KEY_START_AUTORELOAD,0);
 	hAccel = LoadAccelerators(hInst, MAKEINTRESOURCE(IDR_ACCELERATOR));
 
-	HINT_TRY hint_resize(client_width, client_height, dpi_x * scale, dpi_y * scale);
-	HINT_TRY render_file();
-	ShowWindow(hMainWnd, SW_SHOW);
-	//SetFocus(hMainWnd);
-	 //BringWindowToTop(hMainWnd);
-    //SetWindowPos(hMainWnd,HWND_TOP,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_SHOWWINDOW);
+#if 1
+	set_dpi(hDCMain);
+	client_width = round(320 * dpi_x / 72.27); /* 320 pt */
+	client_height = round(400 * dpi_y / 72.27); /* 400 pt */
+	hint_resize(client_width, client_height, dpi_x * scale, dpi_y * scale);
+	r.top = r.left = 0;
+	r.right = client_width;
+	r.bottom = client_height;
+	AdjustWindowRect(&r, WS_TILEDWINDOW, FALSE);
+	SetWindowPos(hMainWnd, HWND_TOP, 0, 0, r.right - r.left, r.bottom - r.top, SWP_NOMOVE | SWP_SHOWWINDOW);
+#endif
+	//SetWindowPos(hMainWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW); /* show the window */
 
-    while ((b= GetMessage(&msg, NULL, 0, 0)) != 0) 
+	HINT_TRY render_file();
+	
+	
+
+	while ((b= GetMessage(&msg, NULL, 0, 0)) != 0) 
     { if (b == -1)
       { hint_error("ERROR","Unexpected end of message loop");
         break;
