@@ -7398,10 +7398,13 @@ bool hcheck_banner(char *magic)
   if (v!=HINT_VERSION)
   { MESSAGE("Wrong HINT version: got %d.%d, expected %d.%d\n",
       v,s,HINT_VERSION,HINT_MINOR_VERSION); return false; }
+#if 0 /* minor versions should be downward compatible */
   if (s<HINT_MINOR_VERSION)
   { MESSAGE("Outdated HINT minor version: got %d.%d, expected %d.%d\n",
       v,s,HINT_VERSION,HINT_MINOR_VERSION); }
-  else if (s>HINT_MINOR_VERSION)
+  else
+#endif
+  if (s>HINT_MINOR_VERSION)
   { MESSAGE("More recent HINT minor version: got %d.%d, expected %d.%d, update your application\n",
       v,s,HINT_VERSION,HINT_MINOR_VERSION); }
   if (*t!=' ' && *t!='\n')
