@@ -278,8 +278,9 @@ static void open_file(void)
   if (hin_name==NULL || hin_name[0]==0) return;
   sl=strlen(hin_name);
   if (sl>4 && strncmp(hin_name+sl-4,".hnt",4)==0)
-  { hint_clear_fonts(true);
-    hint_begin();
+  { hint_end();
+  if (!hint_begin())
+	  return;
 	strncpy(title_name,hin_name,MAX_PATH);
 	title_name[MAX_PATH - 1] = 0;
 	SetNavigationTree();
@@ -299,6 +300,7 @@ static void close_file(void)
 
 static void	render_file(void)
 { open_file();
+  pos = 0;
   show_page();
 }
 

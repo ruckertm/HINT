@@ -139,7 +139,7 @@
     </ClCompile>
     <Link>
       <AdditionalOptions>/NODEFAULTLIB:MSVCRTD.LIB %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>comctl32.lib;freetype.lib;zlib.lib;opengl32.lib;msimg32.lib;Shcore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>comctl32.lib;freetype.lib;zlib.lib;opengl32.lib;msimg32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>LinkVerboseREF</ShowProgress>
       <AdditionalLibraryDirectories>$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
