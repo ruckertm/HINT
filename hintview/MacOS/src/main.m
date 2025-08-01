@@ -58,6 +58,15 @@ int hint_error(const char*title,const char*msg){
     return 0;
 }
 
+int open_help_file(void)
+{   // use URLForResource:withExtension:subdirectory:localization:
+    // or URLsForResourcesWithExtension:subdirectory:
+    // or resourcePath    The full pathname of the bundle’s subdirectory containing resources.
+    // The file calibartion is now in the Assets.xcassets/callibration.dataset/ folder
+    //     possibly there is a better place.
+    return 0;
+}
+
 int main(int argc, char *argv[])
 { int i;
     //for (i=0; i<argc;i++)
