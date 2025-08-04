@@ -140,13 +140,17 @@ static GLuint loadShader(GLenum type, char const *source)
 
   /* Compile and check vertex shader */
   shaderID = glCreateShader(type);
-  glShaderSource(shaderID, 1, &source , NULL);
-  glCompileShader(shaderID);
-  glGetShaderiv(shaderID, GL_COMPILE_STATUS, &result);
-  if (!result)
-  { char InfoLog[MAX_INFOLOG];
-    glGetShaderInfoLog(shaderID, MAX_INFOLOG, NULL, InfoLog);
-    QUIT("Error compiling shader (%d): %s\n", type, InfoLog);
+  if (shaderID) {
+    glShaderSource(shaderID, 1, &source, NULL);
+    glCompileShader(shaderID);
+    glGetShaderiv(shaderID, GL_COMPILE_STATUS, &result);
+    if (!result)
+    { char InfoLog[MAX_INFOLOG];
+      glGetShaderInfoLog(shaderID, MAX_INFOLOG, NULL, InfoLog);
+      glDeleteShader(shaderID);
+      shaderID = 0;
+      QUIT("Error compiling shader (%d): %s\n", type, InfoLog);
+    }
   }
   return shaderID;
 }
@@ -485,8 +489,11 @@ unsigned int nativeTexture(unsigned char *bits, int w, int h) {
     checkGlError("glGenTextures");
     glBindTexture(GL_TEXTURE_2D, textureID);
     checkGlError("glBindTexture textureID");
-    /* the first element in bits corresponds to the lower left pixel,
-     * the last element in bits to the upper right pixel. */
+#if 0
+    bits[0]=0xFF;      /* The first element in bits corresponds to the top left pixel.*/
+    bits[w-1]=0xFF;    /* This is the top right pixel. */
+    bits[w*h-1] =0xFF; /* The last element in bits is the bottom right pixel. */
+#endif    
     glTexImage2D(
             GL_TEXTURE_2D,
             0,

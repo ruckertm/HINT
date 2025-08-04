@@ -61,7 +61,6 @@ static void printGLString(const char *name, GLenum s) {
 #endif
 
 #define MAX_INFOLOG 512
-static GLuint gvPositionHandle;
 static GLuint ProgramID, MatrixID, RuleID, GammaID, FGcolorID, IsImageID, ImageID=0;
 static unsigned char *last_b=NULL;
 static uint32_t cur_fg=0; /*the current foreground color*/
