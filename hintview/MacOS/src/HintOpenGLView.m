@@ -363,6 +363,7 @@ static double x_start, y_start, xy_start, scale_start, time_start;
     NSPoint location = [self convertPointToBacking:[theEvent locationInWindow]];
     x=location.x; y=px_y-location.y;
     drag=1;
+    /* possibly set round_to_pixel to 0 while dragging */
     f=(x_start*x+y_start*y)/xy_start; /* projection of (x,y) on (x_start,y_start) */
     scale=scale_start*f;
     if (scale < SCALE_MIN) scale=SCALE_MIN;

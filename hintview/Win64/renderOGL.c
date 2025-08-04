@@ -551,45 +551,45 @@ void nativeGlyph(double x, double y, double w, double h, unsigned int t)
 
 
 static int print_w, print_h, print_page;
-	GLuint FramebufferID = 0;
-	GLuint PrintTextureID =0;
-	GLuint depthrenderbuffer;
- 	GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+  GLuint FramebufferID = 0;
+  GLuint PrintTextureID =0;
+  GLuint depthrenderbuffer;
+  GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
 
 int nativePrintStart(int w, int h, int bpr, int bpp, unsigned char *bits)
 { print_w=w;
   print_h=h;
   print_page=0;
-  	glGenFramebuffers(1, &FramebufferID);
-	glBindFramebuffer(GL_FRAMEBUFFER, FramebufferID);
+  glGenFramebuffers(1, &FramebufferID);
+  glBindFramebuffer(GL_FRAMEBUFFER, FramebufferID);
     
-	/* texture */
-	glGenTextures(1, &PrintTextureID);
-	glBindTexture(GL_TEXTURE_2D, PrintTextureID);
-	glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, print_w, print_h, 0,GL_RGB, GL_UNSIGNED_BYTE, 0);
-    /* filtering */
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	/* depth buffer  possibly not needed*/
-	glGenRenderbuffers(1, &depthrenderbuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, print_w, print_h);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
-    /* set texture as color attachment */ 
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, PrintTextureID, 0);
-	glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
+  /* texture */
+  glGenTextures(1, &PrintTextureID);
+  glBindTexture(GL_TEXTURE_2D, PrintTextureID);
+  glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, print_w, print_h, 0,GL_RGB, GL_UNSIGNED_BYTE, 0);
+  /* filtering */
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  /* depth buffer  possibly not needed*/
+  glGenRenderbuffers(1, &depthrenderbuffer);
+  glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, print_w, print_h);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
+  /* set texture as color attachment */
+  glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, PrintTextureID, 0);
+  glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
 
-	// Always check that our framebuffer is ok
-	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		return 0;
-    return 1;
+  // Always check that our framebuffer is ok
+  if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    return 0;
+  return 1;
 }
 
 int nativePrint(unsigned char *bits)
-{ 
-#if 0  
+{
+#if 0
   int i;
   /* pseudo printing */
   print_page++;
@@ -597,18 +597,18 @@ int nativePrint(unsigned char *bits)
   for (i=0;i<print_w && i<print_h;i++)
 	bits[(i*print_w+i)*4+(print_page&3)]=bits[(i*print_w+i+1)*4+((print_page+1)&3)]=0;
 #else
-    /* renering into a framebuffer */
+    /* rendering into a framebuffer */
 
 
-	GLint v[4];
-	glGetIntegerv(GL_VIEWPORT,v);
-	memset(bits,0x80,v[2]*v[3]*4);
-	glPixelStorei(GL_PACK_ALIGNMENT,4);	
+    GLint v[4];
+    glGetIntegerv(GL_VIEWPORT,v);
+    memset(bits,0x80,v[2]*v[3]*4);
+    glPixelStorei(GL_PACK_ALIGNMENT,4);
     glReadPixels(0, 0, v[2], v[3], GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)bits);
     checkGlError("glReadPixel");
 
 #endif
-	return 1;
+    return 1;
 }
 
 int nativePrintEnd(void)

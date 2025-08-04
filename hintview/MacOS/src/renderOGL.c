@@ -31,9 +31,6 @@
 #include "error.h"
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include "hint.h"
-#include "hfonts.h"
-#include "hrender.h"
 #include "rendernative.h"
 #define STBI_ONLY_JPEG
 #define STBI_ONLY_PNG
@@ -46,7 +43,6 @@
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/CGLContext.h>
 
-#define DEBUG 1
 
 #ifdef DEBUG
 
@@ -71,6 +67,7 @@ static void printGLString(const char *name, GLenum s) {
 #define MAX_INFOLOG 512
 static GLuint ProgramID, MatrixID, RuleID, GammaID, FGcolorID, IsImageID, ImageID=0;
 static unsigned char *last_b=NULL;
+static uint32_t cur_fg=0; /*the current foreground color*/
 
 #define xyID 0
 #define uvID 1
@@ -107,7 +104,7 @@ static const char FragmentShader[]=
   "uniform int IsImage;\n"
 
   "void main()\n"
-  "{ vec4 texColor = texture( theTexture, UV );\n"
+  "{ vec4 texColor = texture2D( theTexture, UV );\n" /* was just texture(...) */
     "if (IsImage==0) {\n"
       "color.a = pow(texColor.r*FGcolor.a,Gamma);\n"
       "color.r = FGcolor.r;\n"
@@ -146,13 +143,17 @@ static GLuint loadShader(GLenum type, char const *source)
 
   /* Compile and check vertex shader */
   shaderID = glCreateShader(type);
-  glShaderSource(shaderID, 1, &source , NULL);
-  glCompileShader(shaderID);
-  glGetShaderiv(shaderID, GL_COMPILE_STATUS, &result);
-  if (!result)
-  { char InfoLog[MAX_INFOLOG];
-    glGetShaderInfoLog(shaderID, MAX_INFOLOG, NULL, InfoLog);
-    LOG("Error compiling shader (%d): %s\n", type, InfoLog);
+  if (shaderID) {
+    glShaderSource(shaderID, 1, &source, NULL);
+    glCompileShader(shaderID);
+    glGetShaderiv(shaderID, GL_COMPILE_STATUS, &result);
+    if (!result)
+    { char InfoLog[MAX_INFOLOG];
+      glGetShaderInfoLog(shaderID, MAX_INFOLOG, NULL, InfoLog);
+      glDeleteShader(shaderID);
+      shaderID = 0;
+      QUIT("Error compiling shader (%d): %s\n", type, InfoLog);
+    }
   }
   return shaderID;
 }
@@ -254,14 +255,16 @@ static void mkRuleTexture() /* the texture used for rules */
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
-static ColorSet *cur_colorset=NULL;
-
-extern void nativeInit(void)
+void nativeInit(void)
 { GLuint VertexArrayID;
   while(glGetError()!= GL_NO_ERROR)
     continue; /* ignore errors in glewInit */
-  checkGlError("starting nativeInit");
-  /* Create the vertex array object (VAO) */
+
+  printGLString("Version", GL_VERSION);
+  printGLString("Vendor", GL_VENDOR);
+  printGLString("Renderer", GL_RENDERER);
+
+    /* Create the vertex array object (VAO) */
   glGenVertexArrays(1, &VertexArrayID);
   checkGlError("glGenVertexArrays");
   glBindVertexArray(VertexArrayID);
@@ -289,8 +292,8 @@ extern void nativeInit(void)
   glUniform1f(GammaID, 1.0f/2.2f);
   glUniform1i(IsImageID, 0);
   glUniform4f(FGcolorID, 0.0, 0.0, 0.0, 1.0); // black as default foreground
+  cur_fg=0x000000FF; /* possibly better: use nativeSetForeground */
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // white as default background
-  cur_colorset=color_defaults;
    /* 1rst attribute buffer : XYs */
   glEnableVertexAttribArray(xyID);
   glBindBuffer(GL_ARRAY_BUFFER, xybuffer);
@@ -343,9 +346,8 @@ void nativeSetGamma(double gamma)
 }
 
 
-static uint32_t cur_fg=0;
 
-static void nativeSetForeground(uint32_t fg)
+void nativeSetForeground(uint32_t fg)
 /* set foreground rgba colors */
 { if (fg!=cur_fg)
   { uint8_t r,g,b,a;
@@ -358,33 +360,16 @@ static void nativeSetForeground(uint32_t fg)
   }
 }
 
-void nativeBackground(double x, double y, double w, double h)
-{ uint32_t bg, fg;
-  fg=cur_colorset[0][cur_mode*6+cur_style*2];
-  bg=cur_colorset[0][cur_mode*6+cur_style*2+1];
+
+void nativeBackground(double x, double y, double w, double h, uint32_t bg)
+{ uint32_t fg=cur_fg;
   nativeSetForeground(bg);
   nativeRule(x,y,w,h);
   nativeSetForeground(fg);
 }
 
-void nativeSetDark(int on)
-{ uint32_t fg;
-  cur_mode=on?1:0;
-  fg=cur_colorset[0][cur_mode*6+cur_style*2];
-  nativeSetForeground(fg);
-}
-
-void nativeSetColor(ColorSet *cs)
-{ cur_colorset=cs;
-  nativeSetDark(cur_mode);
-}
-
-void nativeBlank(void)
-{ uint32_t bg;
-  uint8_t r,g,b,a;
-  if (cur_colorset==NULL)
-    QUIT("Calling nativeBlank without calling nativeSetColor");
-  bg=cur_colorset[0][cur_mode*6+1];
+void nativeBlank(uint32_t bg)
+{ uint8_t r,g,b,a;
   a=bg&0xFF;bg=bg>>8;
   b=bg&0xFF;bg=bg>>8;
   g=bg&0xFF;bg=bg>>8;
@@ -393,15 +378,8 @@ void nativeBlank(void)
   glClear(GL_COLOR_BUFFER_BIT);
 }
 
-
-static float pt_h=600.0, pt_v=800.0;
-
-void nativeSetSize(int px_h, int px_v, double x_dpi, double y_dpi)
-{  //LOG("xdpi=%f, ydpi=%f\n",x_dpi,y_dpi);
-   pt_h = px_h * 72.27 / x_dpi;
-   pt_v = px_v * 72.27 / y_dpi; 
-   page_h = round(pt_h * (1 << 16));
-   page_v = round(pt_v * (1 << 16));
+void nativeSetSize(int px_h, int px_v, double pt_h, double pt_v)
+{
    MVP[0][0]=2.0/pt_h; // x: scale to -1 to +1
    MVP[1][1]=-2.0/pt_v; // y: scale to 1 to -1
    //MVP[2][2]=0.0f; // z: don't care
@@ -413,7 +391,7 @@ void nativeSetSize(int px_h, int px_v, double x_dpi, double y_dpi)
    glViewport(0, 0, px_h, px_v);
 }
 
-extern void nativeRule(double x, double y, double w, double h)
+void nativeRule(double x, double y, double w, double h)
 /* Using GL to render a rule (a black rectangle)
    Coordinates in points, origin bottom left, x and w right, y and h up
    x,y position
@@ -451,8 +429,6 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
         ImageID = 0;
     }
     last_b=b;
-    //LOG("nativeImage %d chanels\n",nrChannels);
-
     data = stbi_load_from_memory(b, (int) (e - b), &width, &height, &nrChannels, 4);
     if (data == NULL)
     { LOG("Unable to display image\n");
@@ -496,26 +472,30 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
 }
 
 static const int to_nearest=1;
-static void GLtexture(Gcache *g) {
-    unsigned texID;
+
+unsigned int nativeTexture(unsigned char *bits, int w, int h) {
+    unsigned int textureID;
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     checkGlError("glPixelStorei");
-    glGenTextures(1, &texID);
+    glGenTextures(1, &textureID);
     checkGlError("glGenTextures");
-    glBindTexture(GL_TEXTURE_2D, texID);
-    checkGlError("glBindTexture texID");
-    /* the first element in g->bits corresponds to the lower left pixel,
-     * the last element in g->bits to the upper right pixel. */
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    checkGlError("glBindTexture textureID");
+#if 0
+    bits[0]=0xFF;      /* The first element in bits corresponds to the top left pixel.*/
+    bits[w-1]=0xFF;    /* This is the top right pixel. */
+    bits[w*h-1] =0xFF; /* The last element in bits is the bottom right pixel. */
+#endif    
     glTexImage2D(
             GL_TEXTURE_2D,
             0,
             GL_R8,
-            g->w,
-            g->h,
+            w,
+            h,
             0,
             GL_RED,
             GL_UNSIGNED_BYTE,
-            g->bits
+            bits
     );
     checkGlError("glTeXImage2D Glyph");
 
@@ -529,41 +509,22 @@ static void GLtexture(Gcache *g) {
     { glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
-
-    g->GLtexture = texID;
-    //MESSAGE("Generated GL texture %d",g->GLtexture);
+    //MESSAGE("Generated GL texture %d",textureID);
+    return textureID;
 }
 
-void nativeSetPK(struct gcache_s*g)
-{GLtexture(g); /* can I free g->bits ? */}
-
-void nativeSetFreeType(struct gcache_s*g)
-{GLtexture(g);}
-extern int drag;
-int round_to_pixel=1; /* makes sense only if using the native dpi, if using a multiple its of not much use*/
-double pixel_size_threshold= 72.27/200; /*round to pixel only if pixel size in pt is above threshold*/
-void nativeGlyph(double x, double dx, double y, double dy, double w, double h, struct gcache_s *g, int s)
-/* given glyph g, display g at position x,y in size w,h. x, y, w, h are given in point */
-{  
-  if (g->GLtexture == 0)
-    GLtexture(g);
-  x=x-dx;
-  y=y+h-dy;
-  if (round_to_pixel && !drag)
-  { double pxs;
-    pxs = 72.27/xdpi; /* pixel size in point */
-    if (pxs>=pixel_size_threshold)
-    { x=x/pxs;
-      x=floor(x+0.5);
-      x=x*pxs;
-    }
-    pxs = 72.27/ydpi; /* pixel size in point */
-    if (pxs>=pixel_size_threshold)
-    { y=y/pxs;
-      y=floor(y+0.5);
-      y=y*pxs;
-    }
+unsigned int nativeFreeTexture(unsigned int t)
+{ if (t != 0) {
+    glDeleteTextures(1, &t); // probably not needed
   }
+  return 0;
+}
+
+
+void nativeGlyph(double x, double y, double w, double h, unsigned int t)
+/* display texture t at position x,y in size w, h.
+   x, y, w, h are given in point */
+{
   xy[0][0]=x;	  xy[0][1]=y;
   xy[1][0]=x;	  xy[1][1]=y-h;
   xy[2][0]=x+w;     xy[2][1]=y-h;
@@ -572,99 +533,88 @@ void nativeGlyph(double x, double dx, double y, double dy, double w, double h, s
   xy[4][0]=x;       xy[4][1]=y;
   xy[5][0]=x+w;     xy[5][1]=y-h;
 
-  glBindTexture(GL_TEXTURE_2D, g->GLtexture);
-  checkGlError("glBindTexture g->GLtexture");
-
-  nativeSetForeground(cur_colorset[0][cur_mode*6+s*2]);
-
+  glBindTexture(GL_TEXTURE_2D, t);
+  checkGlError("glBindTexture t");
   glBindBuffer(GL_ARRAY_BUFFER, xybuffer);
   glBufferData(GL_ARRAY_BUFFER, sizeof(xy), xy, GL_STREAM_DRAW);
   glDrawArrays(GL_TRIANGLES, 0, 2*3);
   //checkGlError("glDrawArrays");
 }
 
-void nativeFreeGlyph(struct gcache_s*g)
-{    if (g->GLtexture != 0) {
-        glDeleteTextures(1, &(g->GLtexture)); // probably not needed
-        g->GLtexture = 0;
-    }
-}
 
+static int print_w, print_h, print_page, print_bpr, print_bpp;
+  GLuint FramebufferID = 0;
+  GLuint PrintTextureID =0;
+  GLuint depthrenderbuffer;
+  GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
 
-static int print_w, print_h, print_bpr, print_bpp, print_page;
-    GLuint FramebufferID = 0;
-    GLuint PrintTextureID =0;
-    GLuint depthrenderbuffer;
-     GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-
-int nativePrintStart(int w, int h, int bpr, int bpp, unsigned char *bitdata)
+int nativePrintStart(int w, int h, int bpr, int bpp, unsigned char *bits)
 { print_w=w;
   print_h=h;
-    print_bpr=bpr;
-    print_bpp=bpp;
+  print_bpr=bpr;
+  print_bpp=bpp;
   print_page=0;
-      glGenFramebuffers(1, &FramebufferID);
-    glBindFramebuffer(GL_FRAMEBUFFER, FramebufferID);
+  glGenFramebuffers(1, &FramebufferID);
+  glBindFramebuffer(GL_FRAMEBUFFER, FramebufferID);
     
-    /* texture */
-    glGenTextures(1, &PrintTextureID);
-    glBindTexture(GL_TEXTURE_2D, PrintTextureID);
-    glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, print_w, print_h, 0,GL_RGB, GL_UNSIGNED_BYTE, 0);
-    /* filtering */
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  /* texture */
+  glGenTextures(1, &PrintTextureID);
+  glBindTexture(GL_TEXTURE_2D, PrintTextureID);
+  glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, print_w, print_h, 0,GL_RGB, GL_UNSIGNED_BYTE, 0);
+  /* filtering */
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 #if 0
-    /* depth buffer  possibly not needed*/
-    glGenRenderbuffers(1, &depthrenderbuffer);
-    glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, print_w, print_h);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
+  /* depth buffer  possibly not needed*/
+  glGenRenderbuffers(1, &depthrenderbuffer);
+  glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, print_w, print_h);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
 #endif
-    /* set texture as color attachment */
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, PrintTextureID, 0);
-    glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
+  /* set texture as color attachment */
+  glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, PrintTextureID, 0);
+  glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
 
-    // Always check that our framebuffer is ok
-    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        return 0;
-    MVP[0][0]=2.0/pt_h; // x: scale to -1 to +1
-    MVP[1][1]=2.0/pt_v; // y: scale to -1 to +1
-    //MVP[2][2]=0.0f; // z: don't care
-    MVP[3][0]=-1.0f; // x position: left
-    MVP[3][1]=-1.0f; // y position: down
-    //MVP[3][2]=-1.0f; // don't care
-    //MVP[3][3]=1.0f; // w: identity, already there
-    glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
- 
-    return 1;
+  // Always check that our framebuffer is ok
+  if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    return 0;
+  MVP[0][0]=2.0/pt_h; // x: scale to -1 to +1
+  MVP[1][1]=2.0/pt_v; // y: scale to -1 to +1
+  //MVP[2][2]=0.0f; // z: don't care
+  MVP[3][0]=-1.0f; // x position: left
+  MVP[3][1]=-1.0f; // y position: down
+  //MVP[3][2]=-1.0f; // don't care
+  //MVP[3][3]=1.0f; // w: identity, already there
+  glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+  return 1;
 }
 
-int nativePrint(unsigned char *bitdata)
-{    print_page++;
-#if 0 /* pseudo printing */
-    int x,y;
-  
-    memset(bitdata,0xFF&(0x20*print_page),print_bpr*print_h);
-    for (x=0; x<print_h;x=x+1)
-         for (y=0;y<print_bpr;y=y+print_bpp)
-         {  bitdata[x*print_bpr +y]=(y*0xFF/print_bpr)&0xFF; /* red */
-             bitdata[x*print_bpr +y+3]=0xFF; /* alpha */
-         }
-#endif
+int nativePrint(unsigned char *bits)
+{
+#if 0
+  int x,y;
+  /* pseudo printing */
+  print_page++;
+  memset(bits,0xFF&(0x20*print_page),print_bpr*print_h);
+  for (x=0; x<print_h;x=x+1)
+    for (y=0;y<print_bpr;y=y+print_bpp)
+      {  bits[x*print_bpr +y]=(y*0xFF/print_bpr)&0xFF; /* red */
+         bits[x*print_bpr +y+3]=0xFF; /* alpha */
+      }
+#else
+    /* rendering into a framebuffer */
 
-    /* renering into a framebuffer */
 
     GLint v[4];
     glGetIntegerv(GL_VIEWPORT,v);
-    //memset(bitdata,0x80,print_h*print_bpr); // v[2]*v[3]*4
+    //memset(bits,0x80,print_h*print_bpr); // v[2]*v[3]*4
     glPixelStorei(GL_PACK_ALIGNMENT,4);
-   // glPixelStorei(GL_PACK_ROW_LENGTH,print_bpr/print_bpp);
-
-    glReadPixels(0, 0, v[2], v[3], GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)bitdata);
+    glReadPixels(0, 0, v[2], v[3], GL_RGBA, GL_UNSIGNED_BYTE, (GLvoid*)bits);
     checkGlError("glReadPixel");
 
+#endif
     return 1;
 }
 
@@ -674,5 +624,5 @@ int nativePrintEnd(void)
   glDeleteFramebuffers(1, &FramebufferID);
   glDeleteTextures(1, &PrintTextureID);
   glDeleteRenderbuffers(1, &depthrenderbuffer);
-    return 0;
+  return 1;
 }
