@@ -68,8 +68,8 @@ static void printGLString(const char *name, GLenum s) {
 #define  LOGI(...)  (void)0
 #define  LOGE(...)  (void)0
 
-#define printGLString(N,S)	(void)0
-#define checkGlError(OP)	(void)0
+#define printGLString(N,S) (void)0
+#define checkGlError(OP)   (void)0
 #endif
 
 #define MAX_INFOLOG 512
@@ -104,8 +104,8 @@ static const char *FragmentShader =
              "gl_FragColor.b = FGcolor.b;\n"
           "}\n"
           "else gl_FragColor = texColor;\n"
-        "}\n"
-;
+        "}\n";
+
 /* The Fragment shader should do Gamma correct (GC) blending.
    The theory says transform FGcolor and BGcolor to linear space
    FGlin = pow(FGcolor,2.2); BGlin=pow(BGcolor,2.2);
@@ -128,14 +128,14 @@ static const char *FragmentShader =
    in sRGB space.
 */
 
-static GLuint loadShader(GLenum type, char const *source)
+static GLuint loadShader(GLenum shaderType, const char *shaderSource)
 { GLuint shaderID;
-  GLint result =GL_FALSE;
+  GLint result = GL_FALSE;
 
   /* Compile and check vertex shader */
-  shaderID = glCreateShader(type);
+  shaderID = glCreateShader(shaderType);
   if (shaderID) {
-    glShaderSource(shaderID, 1, &source, NULL);
+    glShaderSource(shaderID, 1, &shaderSource, NULL);
     glCompileShader(shaderID);
     glGetShaderiv(shaderID, GL_COMPILE_STATUS, &result);
     if (!result)
@@ -143,7 +143,7 @@ static GLuint loadShader(GLenum type, char const *source)
       glGetShaderInfoLog(shaderID, MAX_INFOLOG, NULL, InfoLog);
       glDeleteShader(shaderID);
       shaderID = 0;
-      LOGE("Error compiling shader (%d): %s\n", type, InfoLog);
+      LOGE("Error compiling shader (%d): %s\n", shaderType, InfoLog);
     }
   }
   return shaderID;
@@ -310,15 +310,15 @@ void nativeBlank(uint32_t bg)
 
 void nativeSetSize(int px_h, int px_v, double pt_h, double pt_v)
 {
-   MVP[0][0]=2.0/pt_h; // x: scale to -1 to +1
-   MVP[1][1]=-2.0/pt_v; // y: scale to 1 to -1
-   //MVP[2][2]=0.0f; // z: don't care
-   MVP[3][0]=-1.0f; // x position: left
-   MVP[3][1]=1.0f; // y position: up
-   //MVP[3][2]=-1.0f; // don't care
-   //MVP[3][3]=1.0f; // w: identity, already there
-   glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-   glViewport(0, 0, px_h, px_v);
+  MVP[0][0]=2.0/pt_h; // x: scale to -1 to +1
+  MVP[1][1]=-2.0/pt_v; // y: scale to 1 to -1
+  //MVP[2][2]=0.0f; // z: don't care
+  MVP[3][0]=-1.0f; // x position: left
+  MVP[3][1]=1.0f; // y position: up
+  //MVP[3][2]=-1.0f; // don't care
+  //MVP[3][3]=1.0f; // w: identity, already there
+  glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+  glViewport(0, 0, px_h, px_v);
 }
 
 void nativeRule(double x, double y, double w, double h)
@@ -329,7 +329,7 @@ void nativeRule(double x, double y, double w, double h)
   */
 { //LOGI("Rendering rule at (%f,%f) sized %fx%f",x/SPf,y/SPf,w/SPf,h/SPf);
 
-   GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
+  GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
                        (GLfloat) x, (GLfloat) (y - h), 0.0f, 0.0f,
                        (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
                        (GLfloat) (x +w), (GLfloat) y, 1.0f, 1.0f,
@@ -353,7 +353,7 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
 
   if (b!=last_b||ImageID==0)
   { unsigned char *data;
-    static unsigned char grey[4]={0,0x80,0x80,0x80};
+    static unsigned char grey[4]={0x80,0x80,0x80,0x80};
     if (ImageID != 0) {
         glDeleteTextures(1, &ImageID);
         ImageID = 0;
@@ -376,8 +376,10 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
         format = GL_LUMINANCE;
     //LOGI("image format=%d\n", format);
     glGenTextures(1, &ImageID);
+
     glBindTexture(GL_TEXTURE_2D, ImageID);
     checkGlError("glBindTexture ImageID");
+
     glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0,
                  format, GL_UNSIGNED_BYTE, data);
     if (glGetError()!= GL_NO_ERROR)
@@ -395,14 +397,14 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
      checkGlError("glBindTexture old ImageID");
   }
 
-    GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
-                       (GLfloat) x, (GLfloat) (y - h), 0.0f, 0.0f,
-                       (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
-                       (GLfloat) (x +w), (GLfloat) y, 1.0f, 1.0f,
-                       (GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
-                       (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f
-    };
-  glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), gQuad);
+  GLfloat gQuad[] = {(GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
+                     (GLfloat) x, (GLfloat) (y - h), 0.0f, 0.0f,
+                     (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f,
+                     (GLfloat) (x +w), (GLfloat) y, 1.0f, 1.0f,
+                     (GLfloat) x, (GLfloat) y, 0.0f, 1.0f,
+                     (GLfloat) (x + w), (GLfloat) (y - h), 1.0f, 0.0f
+                    };
+  glVertexAttribPointer(gvPositionHandle, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), gQuad);
   checkGlError("glVertexAttribPointer");
 
   glUniform1i(IsImageID, 1);

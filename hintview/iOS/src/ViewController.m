@@ -224,6 +224,7 @@ void redisplay(void)
 
 
     nativeInit();
+    hint_clear_fonts(true);
     [self getPreferences];
    
     [_theView addInteraction:[[UIDropInteraction alloc] initWithDelegate:self]];
