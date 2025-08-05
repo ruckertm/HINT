@@ -330,7 +330,8 @@ void redisplay(void)
 }
 
 - (IBAction)theMenuButton:(UIBarButtonItem *)sender {
-    
+    [_theOptions.]
+    hintview_about();
      
 }
 

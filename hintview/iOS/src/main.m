@@ -66,6 +66,28 @@ void hint_log(const char * fmt, ... )
   va_end( ap );
 }
 
+void hintview_about(void)
+{ if (theViewControler!=nil)
+    {  static int presenting=0;
+        UIAlertController* about = [UIAlertController
+                                    alertControllerWithTitle:@"About HintView"
+                                    message:NSLocalizedString(@"HintVersion", @"")
+                                    preferredStyle:UIAlertControllerStyleAlert ];
+        
+        UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault
+                                                              handler:^(UIAlertAction * action) {
+            //NSLog(@"hint_error: Default Action");
+            presenting=0;
+        }];
+        
+        [about addAction:defaultAction];
+        if (presenting==0)
+        {  presenting =1;
+            [theViewControler presentViewController:about animated:NO completion:nil];
+        }
+    }
+}
+
 
 void hint_message(const char*format,...)
 { va_list vargs;

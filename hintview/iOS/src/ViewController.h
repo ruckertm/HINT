@@ -54,6 +54,9 @@
 - (IBAction)theHome:(UIBarButtonItem *)sender;
 - (IBAction)theZoom1:(UIBarButtonItem *)sender;
 - (IBAction)theSearchButton:(id)sender;
+@property (weak, nonatomic) IBOutlet UIMenu *theOptions;
+
+
 
 
 - (void) setSize: (CGSize)size;

@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="UIMenu" message="Requires Xcode 11 or later." minToolsVersion="11.0" requiredIntegratedClassName="UICommandDiff"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -64,6 +65,12 @@
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="upr-fH-DxO"/>
                                     <barButtonItem style="plain" id="wzC-Ur-qxx" userLabel="Menu">
                                         <imageReference key="image" image="ellipsis.circle" catalog="system" symbolScale="large"/>
+                                        <menu key="menu" title="Sub Menu" identifier="submenu" id="gVK-LJ-3aq">
+                                            <children>
+                                                <command title="Item 1" id="bF9-MK-tYR"/>
+                                                <command title="Item 2" id="xas-a0-LqA"/>
+                                            </children>
+                                        </menu>
                                         <connections>
                                             <action selector="theMenuButton:" destination="BYZ-38-t0r" id="oZJ-YF-f4y"/>
                                         </connections>
@@ -110,6 +117,7 @@
                     <toolbarItems/>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
+                        <outlet property="theOptions" destination="gVK-LJ-3aq" id="G1U-iZ-Yxr"/>
                         <outlet property="theSearchBar" destination="BOd-m8-eqM" id="Pgr-DN-bPp"/>
                         <outlet property="theToolbar" destination="lsF-OA-dfU" id="S0C-Ee-8b2"/>
                         <outlet property="theView" destination="8bC-Xf-vdC" id="A3u-Yu-mXU"/>
@@ -151,12 +159,12 @@
         </scene>
     </scenes>
     <resources>
-        <image name="1.magnifyingglass" catalog="system" width="128" height="115"/>
+        <image name="1.magnifyingglass" catalog="system" width="128" height="117"/>
         <image name="doc" catalog="system" width="115" height="128"/>
-        <image name="ellipsis.circle" catalog="system" width="128" height="121"/>
-        <image name="house" catalog="system" width="128" height="106"/>
-        <image name="magnifyingglass" catalog="system" width="128" height="115"/>
-        <image name="sun.max" catalog="system" width="128" height="124"/>
+        <image name="ellipsis.circle" catalog="system" width="128" height="123"/>
+        <image name="house" catalog="system" width="128" height="104"/>
+        <image name="magnifyingglass" catalog="system" width="128" height="117"/>
+        <image name="sun.max" catalog="system" width="128" height="125"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

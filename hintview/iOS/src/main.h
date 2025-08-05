@@ -59,7 +59,7 @@ extern uint64_t pos; /* position of current page */
 extern void hint_log(const char *fmt, ... );
 extern void hint_message(const char*format,...);
 extern int hint_error(const char*title,const char*msg);
-
+extern void hintview_about(void);
 extern UIViewController *theViewControler;
 
 #endif /* main_h */
