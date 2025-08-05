@@ -104,7 +104,7 @@ static const char FragmentShader[]=
   "uniform int IsImage;\n"
 
   "void main()\n"
-  "{ vec4 texColor = texture2D( theTexture, UV );\n" /* was just texture(...) */
+  "{ vec4 texColor = texture( theTexture, UV );\n" /* was just texture(...) */
     "if (IsImage==0) {\n"
       "color.a = pow(texColor.r*FGcolor.a,Gamma);\n"
       "color.r = FGcolor.r;\n"
@@ -580,14 +580,18 @@ int nativePrintStart(int w, int h, int bpr, int bpp, unsigned char *bits)
   // Always check that our framebuffer is ok
   if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     return 0;
-  MVP[0][0]=2.0/pt_h; // x: scale to -1 to +1
-  MVP[1][1]=2.0/pt_v; // y: scale to -1 to +1
+  /* Printing into the Framebuffer needs the vertical distances in the opposite
+    direction. Values are set already by hint_resize.
+   */
+  //MVP[0][0]=-MVP[0][0]; // x: scale to -1 to +1
+  MVP[1][1]= -MVP[1][1]; // y: scale to -1 to +1
   //MVP[2][2]=0.0f; // z: don't care
-  MVP[3][0]=-1.0f; // x position: left
-  MVP[3][1]=-1.0f; // y position: down
+  //MVP[3][0]=-1.0f; // x position: left
+  MVP[3][1]= -MVP[3][1]; // y position: down
   //MVP[3][2]=-1.0f; // don't care
   //MVP[3][3]=1.0f; // w: identity, already there
   glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
   return 1;
 }
 

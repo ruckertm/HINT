@@ -73,9 +73,6 @@
 		55ABAD78283293D700CD1ACA /* renderOGL.c in Sources */ = {isa = PBXBuildFile; fileRef = 55ABAD77283293D700CD1ACA /* renderOGL.c */; };
 		55ABAD7D28329A0400CD1ACA /* get.c in Sources */ = {isa = PBXBuildFile; fileRef = 55ABAD7C28329A0400CD1ACA /* get.c */; };
 		55ABAD8628329A1E00CD1ACA /* hint.c in Sources */ = {isa = PBXBuildFile; fileRef = 55ABAD7F28329A1E00CD1ACA /* hint.c */; };
-		55ABAD8728329A1E00CD1ACA /* hfonts.c in Sources */ = {isa = PBXBuildFile; fileRef = 55ABAD8128329A1E00CD1ACA /* hfonts.c */; };
-		55ABAD8828329A1E00CD1ACA /* htex.c in Sources */ = {isa = PBXBuildFile; fileRef = 55ABAD8328329A1E00CD1ACA /* htex.c */; };
-		55ABAD8928329A1E00CD1ACA /* hrender.c in Sources */ = {isa = PBXBuildFile; fileRef = 55ABAD8528329A1E00CD1ACA /* hrender.c */; };
 		55ABAD8D28329A3700CD1ACA /* tables.c in Sources */ = {isa = PBXBuildFile; fileRef = 55ABAD8C28329A3700CD1ACA /* tables.c */; };
 		55C07F8328369D7A00B0828F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 55C07F8228369D7A00B0828F /* Assets.xcassets */; };
 		55C2D2182869DF1300905EED /* SectionsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 55C2D2172869DF1300905EED /* SectionsController.m */; };
@@ -271,18 +268,12 @@
 		55ABAD7C28329A0400CD1ACA /* get.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = get.c; path = ../backend/get.c; sourceTree = "<group>"; };
 		55ABAD7E28329A0F00CD1ACA /* error.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = error.h; path = ../backend/error.h; sourceTree = "<group>"; };
 		55ABAD7F28329A1E00CD1ACA /* hint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = hint.c; path = ../backend/hint.c; sourceTree = "<group>"; };
-		55ABAD8028329A1E00CD1ACA /* hfonts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hfonts.h; path = ../backend/hfonts.h; sourceTree = "<group>"; };
-		55ABAD8128329A1E00CD1ACA /* hfonts.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = hfonts.c; path = ../backend/hfonts.c; sourceTree = "<group>"; };
 		55ABAD8228329A1E00CD1ACA /* hint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hint.h; path = ../backend/hint.h; sourceTree = "<group>"; };
-		55ABAD8328329A1E00CD1ACA /* htex.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = htex.c; path = ../backend/htex.c; sourceTree = "<group>"; };
-		55ABAD8428329A1E00CD1ACA /* hrender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hrender.h; path = ../backend/hrender.h; sourceTree = "<group>"; };
-		55ABAD8528329A1E00CD1ACA /* hrender.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = hrender.c; path = ../backend/hrender.c; sourceTree = "<group>"; };
 		55ABAD8A28329A2A00CD1ACA /* basetypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = basetypes.h; path = ../backend/basetypes.h; sourceTree = "<group>"; };
 		55ABAD8B28329A3700CD1ACA /* stb_image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stb_image.h; path = ../backend/stb_image.h; sourceTree = "<group>"; };
 		55ABAD8C28329A3700CD1ACA /* tables.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = tables.c; path = ../backend/tables.c; sourceTree = "<group>"; };
 		55ABAD8E28329A6D00CD1ACA /* format.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = format.h; path = ../backend/format.h; sourceTree = "<group>"; };
 		55ABAD8F28329A9300CD1ACA /* get.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = get.h; path = ../backend/get.h; sourceTree = "<group>"; };
-		55ABAD9028329ABA00CD1ACA /* htex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = htex.h; path = ../backend/htex.h; sourceTree = "<group>"; };
 		55ABAD9128329AE900CD1ACA /* main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = main.h; path = src/main.h; sourceTree = "<group>"; };
 		55C07F8228369D7A00B0828F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		55C2D2162869DF1300905EED /* SectionsController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SectionsController.h; sourceTree = "<group>"; };
@@ -400,19 +391,13 @@
 			children = (
 				55ABAD9128329AE900CD1ACA /* main.h */,
 				29B97316FDCFA39411CA2CEA /* main.m */,
-				55ABAD9028329ABA00CD1ACA /* htex.h */,
 				55ABAD8F28329A9300CD1ACA /* get.h */,
 				55ABAD8E28329A6D00CD1ACA /* format.h */,
 				55ABAD8B28329A3700CD1ACA /* stb_image.h */,
 				55ABAD8C28329A3700CD1ACA /* tables.c */,
 				55ABAD8A28329A2A00CD1ACA /* basetypes.h */,
-				55ABAD8128329A1E00CD1ACA /* hfonts.c */,
-				55ABAD8028329A1E00CD1ACA /* hfonts.h */,
 				55ABAD7F28329A1E00CD1ACA /* hint.c */,
 				55ABAD8228329A1E00CD1ACA /* hint.h */,
-				55ABAD8528329A1E00CD1ACA /* hrender.c */,
-				55ABAD8428329A1E00CD1ACA /* hrender.h */,
-				55ABAD8328329A1E00CD1ACA /* htex.c */,
 				55ABAD7E28329A0F00CD1ACA /* error.h */,
 				55ABAD7C28329A0400CD1ACA /* get.c */,
 				55ABAD79283293E500CD1ACA /* rendernative.h */,
@@ -840,14 +825,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				55ABAD7D28329A0400CD1ACA /* get.c in Sources */,
-				55ABAD8928329A1E00CD1ACA /* hrender.c in Sources */,
 				8D11072D0486CEB800E47090 /* main.m in Sources */,
-				55ABAD8728329A1E00CD1ACA /* hfonts.c in Sources */,
 				55C2D22028732DFA00905EED /* PrintView.m in Sources */,
 				55ABAD78283293D700CD1ACA /* renderOGL.c in Sources */,
 				55ABAD8628329A1E00CD1ACA /* hint.c in Sources */,
 				5504FB8628646FF30023DBDE /* PrefView.m in Sources */,
-				55ABAD8828329A1E00CD1ACA /* htex.c in Sources */,
 				55ABAD8D28329A3700CD1ACA /* tables.c in Sources */,
 				556150552869D0E50049FDCB /* Sections.m in Sources */,
 				55C2D2182869DF1300905EED /* SectionsController.m in Sources */,

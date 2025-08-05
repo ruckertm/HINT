@@ -8,8 +8,6 @@
 #import "PrintView.h"
 #import "HintOpenGLView.h"
 #include "hint.h"
-#include "rendernative.h"
-#include "hrender.h"
 #import "main.h"
 @implementation PrintView
 
@@ -77,7 +75,7 @@ void pagination(void)
 - (void)drawRect:(NSRect)rect {
     if (bits!=nil)
     {   hint_render();
-        nativePrint([bits bitmapData]);
+        hint_print([bits bitmapData]);
         [bits drawInRect:rect];
     }
     //NSLog(@"PrintView drawRect:\n");
@@ -129,11 +127,20 @@ void pagination(void)
     [pInfo setBottomMargin:0.0];
     NSRect r = [pInfo imageablePageBounds];
     
-
+#if 0
     nativePrintStart(bpr/bpp,(int)h_px, bpr, bpp, bitdata);
     nativeSetGamma(1.0);
     nativeSetDark(0);
     hint_clear_fonts(true);
+#else
+    
+    hint_dark(0);
+    hint_gamma(1.0);
+    hint_resize((int)w_px,(int)h_px,w_dpi,h_dpi);
+    hint_clear_fonts(true);
+    hint_page_top(0);
+    hint_print_on(bpr/bpp,(int)h_px, bpr, bpp, bitdata);
+#endif
     //NSLog(@"Begin print");
 }
 
@@ -144,9 +151,15 @@ void pagination(void)
 
 - (void) endDocument
 {  [super endDocument];
+#if 0
     nativePrintEnd();
     nativeSetDark(dark);
     nativeSetGamma(hgamma);
+#else
+    hint_print_off();
+    hint_dark(dark);
+    hint_gamma(hgamma);
+#endif
     //NSLog(@"End print");
 }
 @end

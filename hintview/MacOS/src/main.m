@@ -2,19 +2,11 @@
 #import "HintOpenGLView.h"
 #import "SectionsController.h"
 
-#if 0
-#include "rendernative.h" /* rendernative needs gcache_s */
-#else
-extern void nativeInit(void);
-extern void nativeClear(void);
-extern void nativeSetDark(int dark);
-#endif
 #include "error.h"
 #include "basetypes.h"
 #include "format.h"
 #include "get.h"
 #include "hint.h"
-#include "hrender.h"
 #include "main.h"
 
 int dark = 0, loading=0, drag=0, autoreload=0, start_autoreload=0, start_home=1, start_showsearch, showsearch=0, start_newwindow=1;

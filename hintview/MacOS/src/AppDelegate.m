@@ -6,7 +6,6 @@
 #include "format.h"
 #include "get.h"
 #include "hint.h"
-#include "hrender.h"
 #include "main.h"
 
 @implementation AppDelegate

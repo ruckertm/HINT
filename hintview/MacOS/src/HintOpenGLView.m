@@ -9,7 +9,6 @@
 #include <OpenGL/gl3.h>
 #include "hint.h"
 #include "rendernative.h"
-#include "hrender.h"
 #include "main.h"
 
 
@@ -97,7 +96,7 @@ static double x_dpi, y_dpi;     /* resolution in dpi */
 }
 
 - (void) setGamma: (double) g
-{ nativeSetGamma(g);
+{ hint_gamma(g);
   [self setNeedsDisplay: YES];
     NSLog(@"setGamma");
 }
@@ -144,7 +143,7 @@ static double x_dpi, y_dpi;     /* resolution in dpi */
         [_nightModeItem setState:NSControlStateValueOn];
     else
         [_nightModeItem setState: NSControlStateValueOff];
-    nativeSetDark(dark);
+    hint_dark(dark);
     [self setNeedsDisplay: YES];
 }
 
