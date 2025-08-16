@@ -133,7 +133,7 @@ extern "C" void hint_unmap(void) {
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_begin(JNIEnv *env, jclass obj, jint fileDescriptor) {
-    LOGI("hint_end;hint_clear_fonts(true);hint_begin\n");
+    LOGI("hint_end;hint_begin\n");
      fd=fileDescriptor;
      HINT_TRY {
         hint_end();
