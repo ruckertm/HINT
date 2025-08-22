@@ -452,7 +452,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     scale=SCALE_NORMAL;
     hint_resize(px_h,px_v,scale*x_dpi,scale*y_dpi);
     hint_page();
-    hint_clear_fonts(true);
+    hint_clear_fonts(false);
     clear_cursor();
     break;
   case KEY(GLFW_KEY_HOME):
@@ -544,7 +544,7 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
     else if (action == GLFW_RELEASE)
     { mouse_down=0;
       if (drag) /* end dragging */
-      {	hint_clear_fonts(true);
+      {	hint_clear_fonts(false);
         clear_cursor();
       }
       else
