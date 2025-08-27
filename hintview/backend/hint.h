@@ -1,5 +1,5 @@
-/*759:*/
-#line 16008 "hint.w"
+/*756:*/
+#line 16124 "hint.w"
 
 #ifndef _HINT_H
 #define _HINT_H
@@ -38,7 +38,7 @@ extern void hint_gamma(double gamma);
 extern int hint_print_on(int w,int h,int bpr,int bpp,unsigned char*bits);
 extern int hint_print_off(void);
 extern int hint_print(unsigned char*bits);
-extern int hint_find_link(scaled x,scaled y,scaled precission);
+extern int hint_find_link(int x_px,int y_px,int precission_px);
 extern uint64_t hint_link_page(int i);
 extern void hint_show_page(void);
 extern void hint_round_position(bool r,double t);
@@ -69,5 +69,5 @@ extern void hint_unmap(void);
 
 
 #endif
-#line 16077 "hint.w"
-/*:759*/
+#line 16193 "hint.w"
+/*:756*/
