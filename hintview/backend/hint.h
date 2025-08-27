@@ -1,5 +1,5 @@
-/*756:*/
-#line 16124 "hint.w"
+/*753:*/
+#line 16102 "hint.w"
 
 #ifndef _HINT_H
 #define _HINT_H
@@ -43,6 +43,9 @@ extern uint64_t hint_link_page(int i);
 extern void hint_show_page(void);
 extern void hint_round_position(bool r,double t);
 
+/*638:*/
+#line 12728 "hint.w"
+
 typedef struct{
 uint64_t pos;
 uint8_t depth;
@@ -50,6 +53,8 @@ uint8_t where;
 int p;
 char*title;
 }hint_Outline;
+/*:638*/
+#line 16145 "hint.w"
 
 extern int hint_get_outline_max(void);
 extern hint_Outline*hint_get_outlines(void);
@@ -60,14 +65,5 @@ extern uint64_t hint_outline_page(int i);
 extern bool hint_map(void);
 extern void hint_unmap(void);
 
-
-
-
-
-
-
-
-
 #endif
-#line 16193 "hint.w"
-/*:756*/
+/*:753*/

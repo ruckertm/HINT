@@ -638,7 +638,7 @@ ALLOCATE(font_def, max_ref[font_kind]+1, FontDef);
 @<free definitions@>=
 if (font_def!=NULL)
 { hint_clear_fonts(true);
-  ft_unload_faces();
+  ft_destroy();
   free(font_def);
   font_def=NULL;
 }
@@ -700,6 +700,13 @@ static void hget_font_def(uint8_t a, uint8_t i)
 }
 @
 
+We used:
+
+@<\HINT\ declarations@>=
+static pointer hget_glue_spec(void);
+@
+
+
 After reading the definition section, we need to move the information
 from the \TeX\ font metric files included into \TeX's data
 structures. Here we only load the font metric information from \.{.TFM}
@@ -719,25 +726,6 @@ static void hget_font_metrics(void)
     else
       font_size[f]=font_def[f].s;
 }
-@
-
-The above code sets the |font_ptr| variable needed by \TeX.
-
-@<\HINT\ |static|@>=
-static uint8_t font_ptr;
-@
-
-
-
-
-We used:
-
-@<\HINT\ declarations@>=
-static pointer hget_glue_spec(void);
-#if 0
-/* see |hget_font_def| */
-static pointer hget_disc_node(void);
-#endif
 @
 
 \subsection{Parameter Lists}\label{getparamlist}
@@ -907,7 +895,7 @@ static void hrestore_param_list(void)
   QUIT("Parameter save stack flow");
 }
 @
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 static void hrestore_param_list(void);
 @
 
@@ -969,10 +957,6 @@ pointer p, t; /* head and tail */
 static Stream *streams;
 @
 
-@<\HINT\ variables@>=
-static Stream *streams;
-@
- 
 @<allocate definitions@>=
 ALLOCATE(streams, max_ref[stream_kind]+1, Stream);
 @
@@ -1179,7 +1163,7 @@ static void hfill_page_template(void)
 }
 @
 
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 static void hfill_page_template(void);
 @
 
@@ -1274,9 +1258,8 @@ The function |hlist_to_string| is defined in section~\secref{listtraversal}.
 To store colors, we use the same data type that is used for the
 |color_defaults| and give it the name |ColorSet|.
 
-@<\HINT\ |static|@>=
+@<\HINT\ types@>=
 typedef uint32_t ColorSet[12];
-extern ColorSet color_defaults[];
 @
 
 
@@ -1562,7 +1545,7 @@ static pointer hget_definition(uint8_t a)
 }
 @
 
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 static void hget_content(void);
 @
 
@@ -1614,7 +1597,7 @@ static void hteg_content(void)
 }
 @
 
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 static void hteg_content(void);
 @
 
@@ -2319,9 +2302,7 @@ We start with boxes that just need their glue to be set.
   HTEG32(width(p));@+if ((I)&b001) HTEG32(depth(p));@+HTEG32(height(p)); \
   node_pos=hpos-hstart-1;
 @
-@<\HINT\ declarations@>=
-static scaled hget_xdimen_node(void);
-@
+
 
 @<cases to get content@>=
 case TAG(hset_kind,b000): @+{@+pointer p;HGET_SET(b000); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+break;
@@ -2911,7 +2892,7 @@ done: if (r!=head)
   } 
 } 
 @
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 static void hprune_unwanted_nodes(void);
 @
 
@@ -3156,7 +3137,7 @@ static void set_line_break_params(void)
 { hset_param_list(line_break_params);
 }
 @
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 static void set_line_break_params(void);
 @
 
@@ -3198,11 +3179,6 @@ static void hget_par_node(uint32_t offset)
   hget_paragraph(x,offset,q);
   @<read and check the end byte |z|@>@;
 }
-@
-@<\HINT\ |static|@>=
-#if 0
-static void hget_par_node(uint32_t offset);
-#endif
 @
 
 
@@ -3715,7 +3691,7 @@ We modify the corresponding macros accordingly.
 
 The variables containing the parameter definitions are declared |extern|.
 
-@<\HINT\ |static|@>=
+@<\HINT\ variables@>=
 static pointer*pointer_def[32];
 static scaled*dimen_def;
 static int32_t*integer_def;
@@ -3770,8 +3746,7 @@ that are yet undefined. Here is a list of all of them
 which we will put into a header file to force the compiler
 to check for consistent use accross compilation units.
 
-@<\HINT\ |static|@>=
-static Stream *streams;
+@<\HINT\ declarations@>=
 static bool flush_pages(uint32_t pos); 
 static pointer skip(uint8_t n);
 static pointer *box_ptr(uint8_t n);
@@ -3779,7 +3754,7 @@ static int count(uint8_t n);
 static scaled dimen(uint8_t n);
 @
 
-@<\HINT\ functions@>=
+@<\HINT\ auxiliar functions@>=
 pointer skip(uint8_t n)
 { return cur_page->s[n].g; }
 pointer *box_ptr(uint8_t n)
@@ -3827,7 +3802,7 @@ static void hpage_init(void)
 }
 @
 
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 static void hpage_init(void);
 @
 
@@ -3844,7 +3819,7 @@ static void hflush_contribution_list(void)
 }
 @
 
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 static void hflush_contribution_list(void);
 @
 
@@ -4125,7 +4100,7 @@ sections \gglob, \dots,'' also make it possible to look at the set of
 all global variables, if desired.  Similar remarks apply to the other
 portions of the program.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 @<Selected global variables@>@;
 @#
 #ifdef HINTTYPE
@@ -4622,7 +4597,7 @@ apply for |%| as well as for |/|.)
 @ Here is a routine that calculates half of an integer, using an
 unambiguous convention with respect to signed odd numbers.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 
 static int half(int @!x)
 {@+if (odd(x)) return(x+1)/2;
@@ -4706,13 +4681,13 @@ overflow; so the routines set the global variable |arith_error| to |true|
 instead of reporting errors directly to the user. Another global variable,
 |rem|, holds the remainder after a division.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static bool @!arith_error; /*has arithmetic overflow occurred recently?*/
 static scaled @!rem; /*amount subtracted to get an exact division*/
 
 @ We also need to divide scaled dimensions by integers.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static scaled x_over_n(scaled @!x, int @!n)
 {@+bool negative; /*should |rem| be negated?*/
 scaled x_over_n;
@@ -4739,7 +4714,7 @@ by~|d|, in separate operations, since overflow might well occur; and it
 would be too inaccurate to divide by |d| and then multiply by |n|. Hence
 this subroutine simulates 1.5-precision arithmetic.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 #if 0 /* no longer used */
 static scaled xn_over_d(scaled @!x, int @!n, int @!d)
 {@+bool positive; /*was |x >= 0|?*/
@@ -4781,7 +4756,7 @@ computing at most 1095 distinct values, but that is plenty.
 
 @d inf_bad 10000 /*infinitely bad value*/
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static halfword badness(scaled @!t, scaled @!s) /*compute badness, given |t >= 0|*/
 {@+int r; /*approximation to $\alpha t/s$, where $\alpha^3\approx
   100\cdot2^{18}$*/
@@ -5027,7 +5002,7 @@ we try first to increase |mem_end|. If that cannot be done, i.e., if
 |mem_end==mem_max|, we try to decrease |hi_mem_min|. If that cannot be
 done, i.e., if |hi_mem_min==lo_mem_max+1|, we have to quit.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer get_avail(void) /*single-word node allocation*/
 {@+pointer p; /*the new node being got*/
 p=avail; /*get top location in the |avail| stack*/
@@ -5091,7 +5066,7 @@ space exists.
 If |get_node| is called with $s=2^{30}$, it simply merges adjacent free
 areas and returns the value |max_halfword|.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer get_node(int @!s) /*variable-size node allocation*/
 {@+
 pointer p; /*the node currently under inspection*/
@@ -5178,7 +5153,7 @@ the operation |free_node(p, s)| will make its words available, by inserting
 |p| as a new empty node just before where |rover| now points.
 @^inner loop@>
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static void free_node(pointer @!p, halfword @!s) /*variable-size node
   liberation*/
 {@+pointer q; /*|llink(rover)|*/
@@ -5293,7 +5268,7 @@ which all subfields have the values corresponding to `\.{\\hbox\{\}}'.
 (The |subtype| field is set to |min_quarterword|, for historic reasons
 that are no longer relevant.)
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer new_null_box(void) /*creates a new box node*/
 {@+pointer p; /*the new node*/
 p=get_node(box_node_size);type(p)=hlist_node;
@@ -5324,7 +5299,7 @@ an hlist; the |height| and |depth| are never running in a~vlist.
 makes all the dimensions ``running,'' so you have to change the
 ones that are not allowed to run.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer new_rule(void)
 {@+pointer p; /*the new node*/
 p=get_node(rule_node_size);type(p)=rule_node;
@@ -5394,7 +5369,7 @@ a |new_lig_item| function, which returns a two-word node having a given
 |character| field. Such nodes are used for temporary processing as ligatures
 are being created.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer new_ligature(quarterword @!f, quarterword @!c, pointer @!q)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=ligature_node;
@@ -5428,7 +5403,7 @@ not chosen.
 @d pre_break(A) llink(A) /*text that precedes a discretionary break*/
 @d post_break(A) rlink(A) /*text that follows a discretionary break*/
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer new_disc(void) /*creates an empty |disc_node|*/
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=disc_node;
@@ -5463,7 +5438,7 @@ the amount of surrounding space inserted by \.{\\mathsurround}.
 @d before 0 /*|subtype| for math node that introduces a formula*/
 @d after 1 /*|subtype| for math node that winds up a formula*/
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer new_math(scaled @!w, small_number @!s)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=math_node;
@@ -5545,7 +5520,7 @@ typedef int8_t glue_ord; /*infinity to the 0, 1, 2, or 3 power*/
 The reference count in the copy is |null|, because there is assumed
 to be exactly one reference to the new specification.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer new_spec(pointer @!p) /*duplicates a glue specification*/
 {@+pointer q; /*the new spec*/
 q=get_node(glue_spec_size);@/
@@ -5557,7 +5532,7 @@ return q;
 @ Glue nodes that are more or less anonymous are created by |new_glue|,
 whose argument points to a glue specification.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer new_glue(pointer @!q)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=glue_node;subtype(p)=normal;
@@ -5582,7 +5557,7 @@ inserted from \.{\\mkern} specifications in math formulas).
 
 @ The |new_kern| function creates a kern node having a given width.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer new_kern(scaled @!w)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=kern_node;
@@ -5606,7 +5581,7 @@ break will be forced.
 @ Anyone who has been reading the last few sections of the program will
 be able to guess what comes next.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer new_penalty(int @!m)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=penalty_node;
@@ -5675,7 +5650,7 @@ harmless to let |lig_trick| and |garbage| share the same location of |mem|.
 @d hi_mem_stat_usage 14 /*the number of one-word nodes always present*/
 
 
-@ @<\TeX\ functions@>=
+@ @<code from \TeX@>=
 static void mem_init(void)
 { @+ int k;
   @<Initialize |mem|@>@;
@@ -6058,7 +6033,7 @@ specification is being withdrawn.
   else decr(glue_ref_count(A));
   }
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static void delete_glue_ref(pointer @!p) /*|p| points to a glue specification*/
 fast_delete_glue_ref(p)
 static void delete_xdimen_ref(pointer @!p) /*|p| points to a xdimen specification*/
@@ -6072,7 +6047,7 @@ In practice, the nodes deleted are usually charnodes (about 2/3 of the time),
 and they are glue nodes in about half of the remaining cases.
 @^recursion@>
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static void flush_node_list(pointer @!p) /*erase list of nodes starting at |p|*/
 {@+ /*go here when node |p| has been freed*/
 pointer q; /*successor to node |p|*/
@@ -6135,7 +6110,7 @@ example, if the size is altered, or if some link field is moved to another
 relative position---then this code may need to be changed too.
 @^data structure assumptions@>
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer copy_node_list(pointer @!p) /*makes a duplicate of the
   node list that starts at |p| and returns a pointer to the new list*/
 {@+pointer h; /*temporary head of copied list*/
@@ -6373,7 +6348,7 @@ vertical mode, then ``contributed'' to the current page (during which time
 the page-breaking decisions are made). For now, we don't need to know
 any more details about the page-building process.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 
 @<List variables@>@;
 
@@ -6390,7 +6365,7 @@ calling |push_nest|. This routine changes |head| and |tail| so that
 a new (empty) list is begun; it does not change |mode| or |aux|.
 
 @s line mode_line
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static void push_nest(void) /*enter a new semantic level, save the old*/
 {@+if (nest_ptr > max_nest_stack)
   {@+max_nest_stack=nest_ptr;
@@ -6407,7 +6382,7 @@ state is restored by calling |pop_nest|. This routine will never be
 called at the lowest semantic level, nor will it be called unless |head|
 is a node that should be returned to free memory.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static void pop_nest(void) /*leave a semantic level, re-enter the old*/
 {@+free_avail(head);decr(nest_ptr);cur_list=nest[nest_ptr];
 }
@@ -6955,12 +6930,12 @@ typedef uint16_t font_index; /*index into |font_info|*/
 
 @s font_index int
 @s str_number int
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static memory_word @!font_info[font_mem_size+1];
    /*the big collection of font data*/
 static font_index @!fmem_ptr=0; /*first unused word of |font_info|*/
 
-static void hclear_fonts(void)
+static void hclear_font_info(void)
 { fmem_ptr=0;
 }
 static internal_font_number @!font_ptr; /*largest internal font number in use*/
@@ -6988,7 +6963,7 @@ part of this word (the |b0| field), the width of the character is
 |min_quarterword| has already been added to |c| and to |w|, since \TeX\
 stores its quarterwords that way.)
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static int @!char_base0[font_max-font_base+1],
   *const @!char_base = @!char_base0-font_base;
    /*base addresses for |char_info|*/
@@ -7037,7 +7012,7 @@ as fast as possible under the circumstances.
 
 @d char_info(A, B) font_info[char_base[A]+B].qqqq
 @d char_width(A, B) (width_base[A]!=0?
-   font_info[width_base[A]+char_info(A,B).b0].sc:x_char_width(A,B))
+   font_info[width_base[A]+char_info(A,B).b0].sc:ft_char_width(A,B))
 @d char_exists(A) (A.b0 > min_quarterword)
 @d height_depth(A) qo(A.b1)
 @d char_height(A, B) font_info[height_base[A]+(B)/16].sc
@@ -7068,7 +7043,7 @@ information is stored; |null_font| is returned in this case.
 
 @d abort goto bad_tfm /*do this when the \.{TFM} data is wrong*/
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static void read_font_info(int f, char *@!nom, scaled @!s)
 {@+
 int k; /*index into |font_info|*/
@@ -7264,7 +7239,7 @@ make sure that the character exists. The test for existence is here
 only for debugging purposes. This function also ensures that
 font |f| gets loaded if it occurs in a character node.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer new_character(internal_font_number @!f, eight_bits @!c)
 {@+ pointer p; /*newly allocated node*/
     if (font_def[f].ff==no_format) hload_font(f);
@@ -7788,7 +7763,7 @@ static pointer @!adjust_tail=null; /*tail of adjustment list*/
 
 @ Here now is |hpack|, which contains few if any surprises.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer hpack(pointer @!p, scaled @!w, small_number @!m)
 {@+
 pointer r; /*the box node that will be returned*/
@@ -7983,7 +7958,7 @@ point is simply moved down until the limiting depth is attained.
 
 @d vpack(A,B) @[vpackage(A,B, max_dimen)@] /*special case of unconstrained depth*/
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer vpackage(pointer @!p, scaled @!h, small_number @!m, scaled @!l)
 {@+
 pointer r; /*the box node that will be returned*/
@@ -8173,7 +8148,7 @@ itself---we must build it up little by little, somewhat more cautiously
 than we have done with the simpler procedures of \TeX. Here is the
 general outline.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 
 @<Declare subprocedures for |line_break|@>@;
 
@@ -9656,7 +9631,7 @@ for each node in the list.
 @^data structure assumptions@>
 
 \noindent
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 
 #define ensure_vbox(N) /* no longer needed */@#
 
@@ -9704,7 +9679,7 @@ its new significance.
 @d cur_height active_height[1] /*the natural height*/
 @d set_height_zero(A) active_height[A]=0 /*initialize the height to zero*/
 @#
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer vert_break(pointer @!p, scaled @!h, scaled @!d)
    /*finds optimum page break*/
 {@+
@@ -9969,7 +9944,7 @@ from |empty| to |inserts_only| or |box_there|.
 
 @d set_page_so_far_zero(A) page_so_far[A]=0
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static void freeze_page_specs(small_number @!s)
 {@+page_contents=s;
 page_goal=hvsize;page_max_depth=max_depth;
@@ -10020,7 +9995,7 @@ the contribution list has been emptied. A call on |build_page| should
 be immediately followed by `|goto big_switch|', which is \TeX's central
 control point.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static bool hbuild_page(void) /*append contributions to the current page*/
 {@+
 pointer p; /*the node being appended*/
@@ -10196,7 +10171,7 @@ if (page_total < page_goal)
 else if (page_total-page_goal > page_shrink) b=awful_bad;
 else b=badness(page_total-page_goal, page_shrink)
 
-@ @<\TeX\ functions@>=
+@ @<code from \TeX@>=
 static void happend_insertion(pointer p)@/
 { uint8_t @!n; /*insertion box number*/
   scaled @!delta, @!h, @!w; /*sizes used for insertion calculations*/
@@ -10286,7 +10261,7 @@ else print_char('0');
 end_diagnostic(false);
 }
 
-@ @<\TeX\ functions@>=
+@ @<code from \TeX@>=
 static void hpack_page(void)
 {
 pointer p, @!q, @!r, @!s; /*nodes being examined and/or changed*/
@@ -10508,7 +10483,7 @@ process the partial paragraph that has just been interrupted by the
 display. Then we can set the proper values of |display_width| and
 |display_indent| and |pre_display_size|.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static void hdisplay(pointer p, pointer a, bool l)
 {@+
 scaled x; /* the |hsize| in the enclosing paragraph */
@@ -10643,7 +10618,7 @@ pointer @!t; /*tail of adjustment list*/
 |null| or it points to a box containing the equation number; and we are in
 vertical mode (or internal vertical mode).
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 {@<Local variables for finishing a displayed formula@>@;
 adjust_tail=adjust_head;b=hpack(p, natural);p=list_ptr(b);
 t=adjust_tail;adjust_tail=null;@/
@@ -11672,7 +11647,7 @@ uint32_t hposition(pointer p)
 The function that takes information form the cache and converts it to a |uint64_t| location, as mentioned above, commes next. It returns |HINT_NO_LOC| if no information is in the cache.
 This value is used to indicate that a variable contains no valid location.
 
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 #define HINT_NO_LOC 0xFFFFFFFFFFFFFFFF
 #define PAGE_LOC(POS0,OFF) (((uint64_t)((POS0)+(OFF))<<32) + (uint64_t)(OFF))
 #define LOC_POS(P) ((P)>>32) /* the node position */
@@ -11711,9 +11686,7 @@ static uint64_t page_loc[MAX_PAGE_POS];
 static int cur_loc;
 static int lo_loc, hi_loc;
 @
-@<\HINT\ |static|@>=
-static int cur_loc;
-@
+
 
 The location of the current page is found at |page_loc[cur_loc]| which
 is always defined. Pages preceeding the current page may be found
@@ -11760,8 +11733,7 @@ static bool hloc_prev(void)
 }
 @
 
-@<\HINT\ |static|@>=
-static void hloc_clear(void); /* keep only |cur_loc| in the cache */
+@<\HINT\ declarations@>=
 static uint64_t hlocation(pointer p); /* map |p| to its file location */
 @
 
@@ -11876,7 +11848,7 @@ static void hloc_set_prev(pointer p)
 
 The following functions are called from the \TeX\ code:
 
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 static void hloc_init(void);
 static void store_map(pointer p, uint32_t pos, uint32_t offset); /*store the location of |p|*/
 static uint32_t hposition(pointer p); /* return the position of |p| or 0*/
@@ -11912,18 +11884,12 @@ int hint_begin(void)
   hpos=hstart=hin_addr;
   hend=hstart+hin_size;
   ft_init();
-#if 0
-  hint_clear_fonts(true);
-#endif
   hflush_contribution_list(); hpage_init();
   flush_node_list(link(page_head));
-#if 0
-  free_definitions();
-#endif
   mem_init();
   list_init(); 
   hclear_dir();
-  hclear_fonts();@/
+  hclear_font_info();@/
   hget_banner();@/
   if (!hcheck_banner("hint"))
   { hint_unmap(); return 0; }
@@ -11943,8 +11909,6 @@ void hint_end(void)
   hflush_contribution_list(); hpage_init();
   flush_node_list(link(page_head));
   list_leaks();
-  hint_clear_fonts(true);
-  ft_destroy();
   free_definitions();
   hclear_dir();
   hint_unmap(); 
@@ -12180,10 +12144,6 @@ belongs to the bottom of the preceeding page and |hpos| will
 indicate where parsing should contine when producing the previous page.
  After the call, we will have at least two enties in the location cache:
 the top of the current page and the top of the next page.
-@<\HINT\ |static|@>=
-extern bool hint_forward(void);
-extern bool hint_backward(void);
-@
 
 When the page builder has reached the end of the \HINT\ file, it must make sure that
 the material that still is in the contribution list gets flushed out.
@@ -12765,11 +12725,17 @@ a simple data type is used for outlines.
 It contains the information relevant to the 
 user interface.
 
+@<definition of the |hint_Outline| type@>=
+typedef struct { 
+uint64_t pos;  
+uint8_t depth; 
+uint8_t where; 
+int p; /* pointer to the list of title nodes */
+char *title; /* title as sequence of utf8 character codes */
+} hint_Outline;
+@
 
-The |hint_Outline| type is defined in the header file
-but the definition should be here.
-
-@<\HINT\ |static|@>=
+@<\HINT\ variables@>=
 static hint_Outline *hint_outlines;
 @
 
@@ -12780,7 +12746,7 @@ navigate to the desired position in the \HINT\ file.
 The |where| field indicates where the
 label should be placed on the page.
 The values are:
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 #define LABEL_UNDEF 0
 #define LABEL_TOP 1
 #define LABEL_BOT 2
@@ -12888,7 +12854,7 @@ To initialize the traversal, call |trv_init|. Its parameter
 is a function |f| that will receive the stream of characters.
 During traversal, the function is stored in the variable |trv_stream|. 
 
-@<\HINT\ functions@>=
+@<\HINT\ auxiliar functions@>=
 static bool trv_ignore=false;
 static bool trv_skip_space=false;
 static void (*trv_stream)(uint32_t c);
@@ -12903,6 +12869,8 @@ static void trv_char(uint32_t c)
     trv_stream(c);
   }
 }
+
+static void trv_vlist(pointer p);
 
 static void trv_hlist(pointer p)
 { while(p!=null)
@@ -12954,11 +12922,6 @@ static void trv_vlist(pointer p)
 }
 @
 
-@<\HINT\ |static|@>=
-static void trv_init(void (*f)(uint32_t c));
-static void trv_vlist(pointer p);
-static void trv_hlist(pointer p);
-@
 
 Using these functions we can now implement the function
 |hlist_to_string|. Currently this function is used only
@@ -13703,12 +13666,6 @@ As a shortcut, it can call this function:
 }
 @
 
-Here is a summary of the above functions:
-@<\HINT\ |static|@>=
-extern int hint_find_link(int x_px, int y_px, int precission_px);
-extern uint64_t hint_link_page(int i);
-@
-
 
 \section{Rendering \HINT\ Files}
 How to render a \HINT\ file on any specific device depends largely on the
@@ -13737,11 +13694,12 @@ static void hSetColor(int c)
 void hint_render_on(void)
 { nativeInit();
   hSetColor(0);
-  hint_clear_fonts(true);
+ 
 }
 
 void hint_render_off(void)
-{ nativeClear();
+{ hint_clear_fonts(false);
+  nativeClear();
 }
 @
 
@@ -13820,6 +13778,10 @@ static void hload_font(uint8_t f)
     font_def[f].vpxs=y_px_size;
   } 
 }
+@
+
+@ @<\HINT\ declarations@>=
+static void hload_font(uint8_t f);
 @
 
 To initialize the |fonts| table and remove all fonts form memory, the
@@ -14003,7 +13965,8 @@ static void hfree_g0(Gcache **g, bool rm)
   if (g==NULL) return;
   for (i=0;i<G0_SIZE;i++)
     if (g[i]!=NULL)
-    { g[i]->OGLtexture=nativeFreeTexture(g[i]->OGLtexture);
+    { if (g[i]->OGLtexture!=0)
+        g[i]->OGLtexture=nativeFreeTexture(g[i]->OGLtexture);
       if (rm) {
       free(g[i]); g[i]=NULL;@+ }
     }
@@ -15656,7 +15619,7 @@ all of them in advance.
 We close with the functions to compute font metrics.
 
 @<FreeType font functions@>=
-scaled x_char_width(uint8_t f, int c)
+scaled ft_char_width(uint8_t f, int c)
 { FT_Face ft_face;
   if (font_def[f].ff==no_format) hload_font(f);
   ft_face=font_def[f].ft_face;
@@ -15666,6 +15629,21 @@ scaled x_char_width(uint8_t f, int c)
     return 0;
   return ft_width(ft_face, c, font_size[f]);
 }
+@
+
+
+@ @<\HINT\ declarations@>=
+#ifdef DEBUG
+static bool ft_exists(internal_font_number @!f, int c);
+#endif
+
+static scaled ft_char_width(uint8_t f, int c);
+static void ft_destroy(void);
+static FT_Face ft_load_font_face(uint8_t f);
+static void ft_unload_font_face(uint8_t f);
+static scaled ft_glyph_width(FT_Face ft_face, FT_UInt ft_gid, scaled s);
+static void ft_glyph_height_depth(FT_Face ft_face, FT_UInt ft_gid,
+  scaled *h, scaled *d, scaled s);
 @
 
 
@@ -16046,7 +16024,7 @@ static void list_leaks(void)
 }
 @ 
 
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 static void leak_in(pointer p, int s);
 static void leak_out(pointer p, int s);
 @
@@ -16090,11 +16068,11 @@ static void happend_insertion(pointer p);
 @<\HINT\ dependent types@>@;
 @<\HINT\ variables@>@;
 
-@<\HINT\ |static|@>@;
-
-@<\TeX\ functions@>@;
-
 @<\HINT\ declarations@>@;
+
+
+@<code from \TeX@>@;
+
 @<\HINT\ auxiliar functions@>@;
 
 @<get functions@>@;
@@ -16164,14 +16142,7 @@ extern uint64_t hint_link_page(int i);
 extern void hint_show_page(void);
 extern void hint_round_position(bool r, double t);
 
-typedef struct { 
-uint64_t pos;  
-uint8_t depth; 
-uint8_t where; 
-int p; /* pointer to the list of title nodes */
-char *title; /* title as sequence of utf8 character codes */
-} hint_Outline;
-
+@<definition of the |hint_Outline| type@>@;
 extern int hint_get_outline_max(void);
 extern hint_Outline *hint_get_outlines(void);
 extern uint64_t hint_outline_page(int i);
@@ -16181,30 +16152,7 @@ extern uint64_t hint_outline_page(int i);
 extern bool hint_map(void);
 extern void hint_unmap(void);
 
-
-
-
-
-
-
-
-
 #endif 
-@
-
-@ @<\HINT\ |static|@>=
-#ifdef DEBUG
-static bool ft_exists(internal_font_number @!f, int c);
-#endif
-
-static scaled x_char_width(uint8_t f, int c);
-static void hload_font(uint8_t f);
-static FT_Face ft_load_font_face(uint8_t f);
-static void ft_unload_faces(void);
-static void ft_unload_font_face(uint8_t f);
-static scaled ft_glyph_width(FT_Face ft_face, FT_UInt ft_gid, scaled s);
-static void ft_glyph_height_depth(FT_Face ft_face, FT_UInt ft_gid,
-  scaled *h, scaled *d, scaled s);
 @
 
 \subsection{{\tt rendernative.h}}
