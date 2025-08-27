@@ -60,7 +60,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_init(JNIEnv *env, jclass obj);
 JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_begin(JNIEnv *env, jclass obj, jint fileDescriptor);
 JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, jint height,
+Java_edu_hm_cs_hintview_HINTVIEWLib_resize(JNIEnv *env, jclass obj, jint width, jint height,
                                            jdouble xdpi, jdouble ydpi);
 JNIEXPORT jboolean JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_singleTap(JNIEnv *env, jclass obj, jdouble x, jdouble y,
@@ -142,7 +142,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_begin(JNIEnv *env, jclass obj, jint fileDesc
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, jint height,
+Java_edu_hm_cs_hintview_HINTVIEWLib_resize(JNIEnv *env, jclass obj, jint width, jint height,
                                            jdouble xdpi, jdouble ydpi) {
     LOGI("hint_resize(width=%d height=%d xdpi=%f ydpi=%f))\n", width, height, xdpi, ydpi);
     HINT_TRY {
@@ -226,7 +226,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_zoom(JNIEnv *env, jclass obj) {
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_clearFonts(JNIEnv *env, jclass obj) {
     LOGI("Clear fonts\n");
-    hint_clear_fonts(true);
+    hint_clear_fonts(false);
 }
 
 extern "C" JNIEXPORT void JNICALL

@@ -32,8 +32,7 @@ public class ScaleGestureHandler extends ScaleGestureDetector.SimpleOnScaleGestu
         //float x = detector.getFocusX();
         //float y = detector.getFocusY();
 
-        HINTVIEWView.scale *= f;
-        HINTVIEWView.Zooming = true;
+        view.setScale(HINTVIEWView.scale*f);
 
         view.requestRender();
 
