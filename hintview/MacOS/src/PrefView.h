@@ -10,7 +10,6 @@
 
 @interface PrefView : NSView
 {
-   NSInteger GammaValue;
 }
 
 @property (weak) IBOutlet NSButton *theHomeBox;
@@ -31,6 +30,9 @@
 - (void) setGammaText: (double) g;
 - (void) setGammaSlider: (double) g;
 
+- (NSString *) documentName;
+- (void) setDocumentName: (NSString *) doc;
+
 - (BOOL) acceptsFirstResponder;
 
 -(void)keyDown:(NSEvent *)theEvent;
@@ -38,5 +40,6 @@
 -(void) loadPreferences;
 - (void) storePreferences;
 - (void) resignKeyWindow;
+
 @end
 

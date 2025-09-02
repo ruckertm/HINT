@@ -30,6 +30,7 @@
 
 - (void) setDpi;
 - (void) setGamma: (double) g;
+- (void) setScale: (double) s;
 
 - (void) keyDown:(NSEvent *)theEvent;
 

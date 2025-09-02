@@ -10,6 +10,9 @@
 
 #import "HintOpenGLView.h"
 #import "SectionsController.h"
+#include "basetypes.h"
+#include "format.h"
+#include "get.h"
 #include "main.h"
 
 @implementation PrefView
@@ -24,6 +27,9 @@ static NSString * const NewWindowKey =@"HintviewNewWindow";
 static NSString * const DarkKey =@"HintviewDark";
 static NSString * const GammaKey =@"HintviewGamma";
 static NSString * const ScaleKey =@"HintviewScale";
+static NSString * const DocumentKey =@"HintviewDocument";
+
+static NSString * DocumentName = nil;
 
 - (IBAction)switchHome:(NSButton *)sender {
     if ([sender state]) start_home=1; else start_home=0;
@@ -106,17 +112,18 @@ static NSString * const ScaleKey =@"HintviewScale";
 
 }
 
+extern int set_hin_name(const char *fn);
 
 - (void) loadPreferences
-{
-    NSDictionary *appDefaults = @{
+{   NSDictionary *appDefaults = @{
         HomeKey : @YES,
         AutoreloadKey : @NO,
         ShowSearchKey: @NO,
         NewWindowKey: @YES,
         DarkKey: @NO,
         GammaKey : @GAMMA_NORMAL,
-        ScaleKey : @SCALE_NORMAL
+        ScaleKey : @SCALE_NORMAL,
+        DocumentKey : [NSString string]
     };
     NSUserDefaults *appPreferences = [NSUserDefaults standardUserDefaults];
     [appPreferences registerDefaults:appDefaults];
@@ -130,15 +137,17 @@ static NSString * const ScaleKey =@"HintviewScale";
     if (hgamma==0.0) hgamma=GAMMA_NORMAL;
     if (hgamma<GAMMA_MIN) hgamma=GAMMA_MIN;
     else if (hgamma>GAMMA_MAX) hgamma=GAMMA_MAX;
-    scale = [appPreferences doubleForKey:ScaleKey ];
+     scale = [appPreferences doubleForKey:ScaleKey ];
     if (scale==0.0) scale=SCALE_NORMAL;
     if (scale < SCALE_MIN) scale=SCALE_MIN;
     else if (scale > SCALE_MAX) scale=SCALE_MAX;
+    
+    DocumentName = [appPreferences stringForKey: DocumentKey];
+    
     [self setPreferences];
 }
 - (void) storePreferences
-{
-    NSUserDefaults *appPreferences = [NSUserDefaults standardUserDefaults];
+{   NSUserDefaults *appPreferences = [NSUserDefaults standardUserDefaults];
     [appPreferences setBool: start_home forKey: HomeKey ];
     [appPreferences setBool: start_autoreload forKey:AutoreloadKey ];
     [appPreferences setBool: start_showsearch forKey:ShowSearchKey];
@@ -146,6 +155,16 @@ static NSString * const ScaleKey =@"HintviewScale";
     [appPreferences setBool: dark forKey:DarkKey ];
     [appPreferences setDouble:hgamma forKey:GammaKey];
     [appPreferences setDouble:scale forKey:ScaleKey];
+    if (DocumentName!=nil && DocumentName.length>0)
+      [appPreferences setObject: DocumentName forKey:DocumentKey];
+}
+
+- (void) setDocumentName: (NSString *) doc
+{ DocumentName= [doc copy] ;
+}
+
+- (NSString *) documentName
+{ return DocumentName;
 }
 
 - (void)resignKeyWindow

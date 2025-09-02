@@ -29,7 +29,7 @@
 extern char*hin_name; /* from get.c */
 
 
-static int set_hin_name(const char *fn)
+int set_hin_name(const char *fn)
 { /* check for extension, keep a copy of fn in hurl_name */
   size_t sl;
   if (hin_name!=NULL) { free(hin_name); hin_name=NULL; }
@@ -54,6 +54,7 @@ static int set_hin_name(const char *fn)
 { if (!set_hin_name(filename.UTF8String)) return NO;
   hint_end();
   if (!hint_begin()) return NO;
+  [_thePreferences setDocumentName:filename];
   if (start_home)
      hint_page_home();
   else
@@ -80,7 +81,7 @@ static int set_hin_name(const char *fn)
     itemURLs = CFArrayCreate(NULL, (const void **)&s, 1, &kCFTypeArrayCallBacks);
     launchSpec.itemURLs = itemURLs; // CFBridgingRetain([NSURL fileURLWithPath: filename]);
     launchSpec.asyncRefCon = NULL;
-    launchSpec.launchFlags = kLSLaunchAsync|kLSLaunchNewInstance|kLSLaunchNoParams;
+    launchSpec.launchFlags = kLSLaunchAsync|kLSLaunchNewInstance;
     launchSpec.passThruParams = NULL;
          
     err = LSOpenFromURLSpec(&launchSpec, NULL);
@@ -95,13 +96,21 @@ static int set_hin_name(const char *fn)
 
 
 - (void)applicationWillFinishLaunching:(NSNotification *)notification
-{
+{ NSString *doc;
+    BOOL open=false;
     [_thePreferences loadPreferences];
+    doc= [_thePreferences documentName];
+    if (doc!=nil && doc.length>0)
+        open=[self openFile:doc ];
+    if (!open)
+        [[HintOpenGLView mainView] openFile:self];
+    [_theMainView setScale:scale];
 }
 
 
 - (void)applicationWillTerminate:(NSNotification *)notification
 {
     [_thePreferences storePreferences];
+
 }
 @end

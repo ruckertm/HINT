@@ -101,6 +101,16 @@ static double x_dpi, y_dpi;     /* resolution in dpi */
     NSLog(@"setGamma");
 }
 
+- (void) setScale:(double)s
+{   NSRect baseRect = [self convertRectToBacking:[self bounds]];
+    scale=s;
+    px_x = baseRect.size.width;
+    px_y = baseRect.size.height;
+    hint_resize(px_x,px_y,scale*x_dpi,scale*y_dpi);
+    hint_clear_fonts(false);
+    hint_page();
+    [self setNeedsDisplay: YES];
+}
 
 - (void)reshape
 {
@@ -120,7 +130,7 @@ static double x_dpi, y_dpi;     /* resolution in dpi */
     if (![self inLiveResize])  {// if not doing live resize eg moving to new monitor
         [self setDpi];
         hint_resize(px_x,px_y,scale*x_dpi,scale*y_dpi);
-        hint_clear_fonts(true);
+        hint_clear_fonts(false);
         if (!self->ready) return;
         hint_page();
         [self setNeedsDisplay: YES];
@@ -172,8 +182,9 @@ static void setResizeCursor(void)
 -(IBAction) zoom100:(id)sender
 { scale=SCALE_NORMAL;
   hint_resize(px_x,px_y,scale*x_dpi,scale*y_dpi);
+  hint_clear_fonts(false);
   hint_page();
-  hint_clear_fonts(true);
+ 
   clearCursor();
   [self setNeedsDisplay: YES];
 }
@@ -331,7 +342,7 @@ static double x_start, y_start, xy_start, scale_start, time_start;
     if (drag) {
         drag=0;
         clearCursor();
-        hint_clear_fonts(true);
+        hint_clear_fonts(false);
         [self setNeedsDisplay: YES];
     }
     else
@@ -443,7 +454,7 @@ static double x_start, y_start, xy_start, scale_start, time_start;
       {
         [op runOperation];
         hint_resize(px_x,px_y,scale*x_dpi,scale*y_dpi);
-        hint_clear_fonts(true);
+        hint_clear_fonts(false);
         hint_page_top(pos);
       }
       else
