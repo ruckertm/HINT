@@ -252,13 +252,10 @@ void redisplay(void)
 {
     if (sender.state == UIGestureRecognizerStateEnded)
     { CGPoint location = [sender locationInView: _theView];
-      double x,y;
       int link;
-      x=72.27*location.x*px_scale/(x_dpi*scale);
-      y=72.27*location.y*px_scale/(y_dpi*scale);
-      //NSLog(@"xy= %fx%f\n", x,y);
+      //NSLog(@"xy= %dx%d\n", location.x,location.y);
       HINT_TRY {
-        link=hint_find_link(x*(1<<16), y*(1<<16),4<<16);
+        link=hint_find_link(location.x,location.y,y_dpi/36);
         //Touch is less precise than mouse input
         if (link>=0)
         { hint_link_page(link);

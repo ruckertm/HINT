@@ -116,14 +116,11 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         return touchGestureDetector.onTouchEvent(motionEvent);
     }
 
-    public double getScale() {
-        return scale;
-    }
-
     public void setScale(double s) {
         scale = s;
-        if (scale < 0.1) scale = 0.1;
+        if (scale < 0.25) scale = 0.25;
         if (scale > 4.0) scale = 4.0;
+        Zooming=true;
     }
 
     public boolean getMode() {
@@ -352,10 +349,11 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         public void onDrawFrame(GL10 gl) {
             HINTVIEWLib.setMode(darkMode);
             if (Zooming) {
-                HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi); /* needed for zooming */
+                HINTVIEWLib.resize(width, height, scale * xdpi, scale * ydpi); /* needed for zooming */
                 Zooming=false;
             }
-            if (clearFonts) { clearFonts =false; HINTVIEWLib.clearFonts(); }
+            if (clearFonts)
+            { clearFonts =false; HINTVIEWLib.clearFonts(); }
             if (Page_prev) {
                 HINTVIEWLib.prev();
                 Page_prev = false;
@@ -379,7 +377,7 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
             width = w;
             height = h;
             HINTVIEWLib.setMode(darkMode);
-            HINTVIEWLib.change(width, height, scale * xdpi, scale * ydpi);
+            HINTVIEWLib.resize(width, height, scale * xdpi, scale * ydpi);
             render_OK();
         }
 

@@ -60,7 +60,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_init(JNIEnv *env, jclass obj);
 JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_begin(JNIEnv *env, jclass obj, jint fileDescriptor);
 JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, jint height,
+Java_edu_hm_cs_hintview_HINTVIEWLib_resize(JNIEnv *env, jclass obj, jint width, jint height,
                                            jdouble xdpi, jdouble ydpi);
 JNIEXPORT jboolean JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_singleTap(JNIEnv *env, jclass obj, jdouble x, jdouble y,
@@ -133,7 +133,7 @@ extern "C" void hint_unmap(void) {
 
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_begin(JNIEnv *env, jclass obj, jint fileDescriptor) {
-    LOGI("hint_end;hint_clear_fonts(true);hint_begin\n");
+    LOGI("hint_end;hint_begin\n");
      fd=fileDescriptor;
      HINT_TRY {
         hint_end();
@@ -142,7 +142,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_begin(JNIEnv *env, jclass obj, jint fileDesc
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_edu_hm_cs_hintview_HINTVIEWLib_change(JNIEnv *env, jclass obj, jint width, jint height,
+Java_edu_hm_cs_hintview_HINTVIEWLib_resize(JNIEnv *env, jclass obj, jint width, jint height,
                                            jdouble xdpi, jdouble ydpi) {
     LOGI("hint_resize(width=%d height=%d xdpi=%f ydpi=%f))\n", width, height, xdpi, ydpi);
     HINT_TRY {
@@ -157,8 +157,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_singleTap(JNIEnv *env, jclass obj, jdouble x
     int link;
     LOGI("hint_find_link(x=%f y=%f xdpi=%f ydpi=%f))\n", x, y, xdpi, ydpi);
     HINT_TRY {
-        link=hint_find_link(round((x*0x10000)*72.27/xdpi),
-                    round((y*0x10000)*72.27/ydpi),3*ONE);
+      link=hint_find_link(round(x), round(y),ydpi/36);
         if (link>=0) hint_link_page(link);
     } HINT_CATCH("singleTap");
     return link>=0;
@@ -227,7 +226,7 @@ Java_edu_hm_cs_hintview_HINTVIEWLib_zoom(JNIEnv *env, jclass obj) {
 extern "C" JNIEXPORT void JNICALL
 Java_edu_hm_cs_hintview_HINTVIEWLib_clearFonts(JNIEnv *env, jclass obj) {
     LOGI("Clear fonts\n");
-    hint_clear_fonts(true);
+    hint_clear_fonts(false);
 }
 
 extern "C" JNIEXPORT void JNICALL

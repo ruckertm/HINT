@@ -544,8 +544,7 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
       if (!DragDetect(hWnd,drag))
 	  { int link;
 	    HINT_TRY {
-	      link=hint_find_link(round((drag.x<<16)*72.27/(dpi_x*scale)),
-	                            round((drag.y<<16)*72.27/(dpi_y*scale)),2*ONE);
+	      link=hint_find_link(drag.x, drag.y, dpi_y/36);
 		  if (link>=0)
 	        hint_link_page(link);
 		}
@@ -591,8 +590,7 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	  }
 	  else
 	  {	int link;
-	    link=hint_find_link(round(((int)mouse.x<<16)*72.27/(dpi_x*scale)),
-	                            round(((int)mouse.y<<16)*72.27/(dpi_y*scale)),2*ONE);
+	    link=hint_find_link(mouse.x, mouse.y, dpi_y/36);
         if (link>=0 && !OnLink)
 	    { SetCursor(hHand); OnLink=true; }
 	    else if (link<0 && OnLink)

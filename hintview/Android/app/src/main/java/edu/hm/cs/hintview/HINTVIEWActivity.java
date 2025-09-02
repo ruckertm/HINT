@@ -295,7 +295,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
         editor.putString("fileURI", fileUriStr);
         long filePos = mView.getPos();
         editor.putLong("curPos", filePos);
-        editor.putFloat("textSize", (float) mView.getScale());
+        editor.putFloat("textSize", (float)HINTVIEWView.scale);
         editor.putBoolean("darkMode", mView.getMode());
         editor.apply();
         //Log.d(TAG, "onStop pos = " + Long.toHexString(filePos));
@@ -406,7 +406,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
             case R.id.scaleOne:
                 //Log.d(TAG, "scale one");
                 mView.setScale(1.0);
-                mView.clearFonts = true;
+                HINTVIEWView.clearFonts = true;
                 mView.requestRender();
                 break;
             case R.id.search:

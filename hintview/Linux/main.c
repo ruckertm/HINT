@@ -452,7 +452,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     scale=SCALE_NORMAL;
     hint_resize(px_h,px_v,scale*x_dpi,scale*y_dpi);
     hint_page();
-    hint_clear_fonts(true);
+    hint_clear_fonts(false);
     clear_cursor();
     break;
   case KEY(GLFW_KEY_HOME):
@@ -486,7 +486,7 @@ static void mouse_click(void)
   glfwGetCursorPos(window, &x, &y);
   //LOG("xy= %fx%f\n", x,y);
   HINT_TRY {
-    link=hint_find_link(PX2SP(x,x_dpi),PX2SP(y,y_dpi),2*ONE);
+    link=hint_find_link(x,y,y_dpi/36); /*about 2pt precission*/ 
     if (link>=0)
     { hint_link_page(link);
       clear_cursor();
@@ -503,7 +503,7 @@ static void cursor_position_callback(GLFWwindow* window, double x, double y)
   double f;
   if (!mouse_down)
   { int link;
-    link=hint_find_link(PX2SP(x,x_dpi),PX2SP(y,y_dpi),2*ONE);
+    link=hint_find_link(x,y,y_dpi/36); /*about 2pt precission*/ 
     if (link>=0 && !on_link)
     { glfwSetCursor(window, hand_cursor); on_link=1; }
     else if (link<0 && on_link)
@@ -544,7 +544,7 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
     else if (action == GLFW_RELEASE)
     { mouse_down=0;
       if (drag) /* end dragging */
-      {	hint_clear_fonts(true);
+      {	hint_clear_fonts(false);
         clear_cursor();
       }
       else

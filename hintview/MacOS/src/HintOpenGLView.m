@@ -326,9 +326,6 @@ static double x_start, y_start, xy_start, scale_start, time_start;
     //NSLog(@"mouse down");
 }
 
-#define ONE (1<<16)
-#define PX2SP(X,DPI) floor((X)*ONE*72.27/((DPI)*scale))
-
 - (void)mouseUp:(NSEvent *)theEvent
 {  //NSLog(@"mouse up");
     if (drag) {
@@ -339,13 +336,13 @@ static double x_start, y_start, xy_start, scale_start, time_start;
     }
     else
     { NSPoint location = [self convertPointToBacking:[theEvent locationInWindow]];
-      double x,y;
+      int x,y;
       int link;
-        x=location.x;
-        y=px_y-location.y;
+      x=location.x;
+      y=px_y-location.y;
       NSLog(@"xy= %fx%f\n", x,y);
 //          HINT_TRY {
-            link=hint_find_link(PX2SP(x,x_dpi),PX2SP(y,y_dpi),2*ONE);
+      link=hint_find_link(x,y,y_dpi/36);
             if (link>=0)
             { hint_link_page(link);
               [self setNeedsDisplay: YES];

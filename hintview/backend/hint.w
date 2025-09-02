@@ -611,7 +611,7 @@ We store the font name |n|, the section number for the font metrics
 from the design size), the pointer to the font glue |g|, the pointer
 to the font hyphen |h|, and the font parameters |p|.
 
-@<\HINT\ private types@>=
+@<\HINT\ dependent types@>=
 typedef struct {
 char *n;
 uint16_t m,q;
@@ -619,6 +619,11 @@ scaled s;
 pointer g;
 pointer h;
 pointer p[MAX_FONT_PARAMS+1];
+scaled hpxs,vpxs; /* the horizontal and vertical size of one pixel in scaled pt */
+FontFormat ff; /* the font format */
+FT_Face ft_face; /* a pointer to the font face for FreeType fonts */
+bool resize; /* Does the |ft_face| need resizing? */
+@<the glyph cache@>@;
 } FontDef;
 @
 
@@ -631,12 +636,18 @@ ALLOCATE(font_def, max_ref[font_kind]+1, FontDef);
 @
 
 @<free definitions@>=
-free(font_def); font_def=NULL;
+if (font_def!=NULL)
+{ hint_clear_fonts(true);
+  ft_destroy();
+  free(font_def);
+  font_def=NULL;
+}
 @
 
 The function |hget_font_def| is called with two different values of
 |INFO(a)|: If the value is |b000|, there is also a section for the
-\.{.TFM} file; otherwise, the font metrics need to be extracted from
+traditional \.{.TFM} file containing the font metrics;
+otherwise, the font metrics need to be extracted from
 the same section as the glyphs. In the latter case, we set the section
 number |m| for the font metrics and the |width_base| for the font to
 zero.  Either value can be tested to see whether traditional font
@@ -645,10 +656,15 @@ Freetype font faces were loaded in the \HINT\ viewer only when
 the first glyph from the font face was needed by the renderer.
 This is now possibly too late because the font metrics are
 needed much earlier.
-Because the viewer only displays a single page, we still will
-do ``on demand'' loading of font file information.
+Because the viewer only displays a single page at a time,
+we still will do ``on demand'' loading of font file information
+using the function |ft_load_font_face|.
 After a font face is loaded the |font_face| array contains
-a valid |FT_Face| pointer. 
+a valid |FT_Face| pointer. Reading the obligatory ``font hyphen''
+creates a character node which will trigger the loading of
+the |Font| structure. Because it is used only inside text-lists,
+which are currently not supported (except in ligatures), the
+reading is skipped for now.
 
 
 
@@ -663,8 +679,8 @@ static void hget_font_def(uint8_t a, uint8_t i)
   {  HGET16(f->m); @+RNG("Font metrics",f->m,3,max_section_no);}
   else width_base[i]=f->m=0;
   HGET16(f->q); @+RNG("Font glyphs",f->q,3,max_section_no);
-  f->g=hget_glue_spec(); 
-  f->h=hget_disc_node();
+  f->g=hget_glue_spec();
+  hff_hpos(); /*Skipping |f->h=hget_disc_node();| used only for texts*/
   DBG(DBGDEF,"Start font parameters\n");
   while (KIND(*hpos)!=font_kind)@/  
   { Kind k;
@@ -683,6 +699,13 @@ static void hget_font_def(uint8_t a, uint8_t i)
   DBG(DBGDEF,"End font definition\n");
 }
 @
+
+We used:
+
+@<\HINT\ declarations@>=
+static pointer hget_glue_spec(void);
+@
+
 
 After reading the definition section, we need to move the information
 from the \TeX\ font metric files included into \TeX's data
@@ -703,32 +726,6 @@ static void hget_font_metrics(void)
     else
       font_size[f]=font_def[f].s;
 }
-@
-
-The above code sets the |font_ptr| variable needed by \TeX.
-
-@<\HINT\ |static|@>=
-static uint8_t font_ptr;
-@
-
-
-We export the font section and at-size using two functions
-to be used in {\tt hfonts.c}, as well as the |font_nom| for
-use in printing font names.
-
-@<render functions@>=
-static uint16_t hglyph_section(uint8_t f)
-{   return font_def[f].q;
-}
-
-@
-
-
-We used:
-
-@<\HINT\ declarations@>=
-static pointer hget_glue_spec(void);
-static pointer hget_disc_node(void);
 @
 
 \subsection{Parameter Lists}\label{getparamlist}
@@ -898,7 +895,7 @@ static void hrestore_param_list(void)
   QUIT("Parameter save stack flow");
 }
 @
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 static void hrestore_param_list(void);
 @
 
@@ -953,17 +950,13 @@ The variable |streams| is used to contain the stream records
 that store the main content and the content of insertions.
 These records replace the box registers of \TeX.
 
-@<\HINT\ |static|@>=
+@<\HINT\ variables@>=
 typedef struct {
 pointer p, t; /* head and tail */
 } Stream;
 static Stream *streams;
 @
 
-@<\HINT\ variables@>=
-static Stream *streams;
-@
- 
 @<allocate definitions@>=
 ALLOCATE(streams, max_ref[stream_kind]+1, Stream);
 @
@@ -1170,7 +1163,7 @@ static void hfill_page_template(void)
 }
 @
 
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 static void hfill_page_template(void);
 @
 
@@ -1265,9 +1258,8 @@ The function |hlist_to_string| is defined in section~\secref{listtraversal}.
 To store colors, we use the same data type that is used for the
 |color_defaults| and give it the name |ColorSet|.
 
-@<\HINT\ |static|@>=
+@<\HINT\ types@>=
 typedef uint32_t ColorSet[12];
-extern ColorSet color_defaults[];
 @
 
 
@@ -1543,7 +1535,7 @@ static void hget_content(void)
 
 static pointer hget_definition(uint8_t a)
 {@+pointer p;
-  if (link(head)!=null) QUIT("Calling get_node with nonempty curent list");
+  if (link(head)!=null) QUIT("Calling get_node with nonempty current list");
   hget_node(a);
   p=link(head);
   if (p!=null && link(p)!=null) QUIT("get_node returns multiple nodes");
@@ -1553,7 +1545,7 @@ static pointer hget_definition(uint8_t a)
 }
 @
 
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 static void hget_content(void);
 @
 
@@ -1605,7 +1597,7 @@ static void hteg_content(void)
 }
 @
 
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 static void hteg_content(void);
 @
 
@@ -2310,9 +2302,7 @@ We start with boxes that just need their glue to be set.
   HTEG32(width(p));@+if ((I)&b001) HTEG32(depth(p));@+HTEG32(height(p)); \
   node_pos=hpos-hstart-1;
 @
-@<\HINT\ declarations@>=
-static scaled hget_xdimen_node(void);
-@
+
 
 @<cases to get content@>=
 case TAG(hset_kind,b000): @+{@+pointer p;HGET_SET(b000); @+hset(p,sto,st,sho,sh,x);@+happend_to_vlist(p);@+}@+break;
@@ -2781,6 +2771,8 @@ case TAG(disc_kind,b111): @+{@+HTEG_DISC(b111);@+tail_append(p);@+} @+break;
 
 
 @<\HINT\ auxiliar functions@>=
+#if 0
+/* see |hget_font_def| */
 static pointer hget_disc_node(void)
 {  @+@<read the start byte |a|@>@;
    if (KIND(a)!=disc_kind || INFO(a)==b000) 
@@ -2791,6 +2783,7 @@ static pointer hget_disc_node(void)
    return p;
    }
 }
+#endif
 @
 
 @<teg functions@>=
@@ -2899,7 +2892,7 @@ done: if (r!=head)
   } 
 } 
 @
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 static void hprune_unwanted_nodes(void);
 @
 
@@ -3144,7 +3137,7 @@ static void set_line_break_params(void)
 { hset_param_list(line_break_params);
 }
 @
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 static void set_line_break_params(void);
 @
 
@@ -3186,11 +3179,6 @@ static void hget_par_node(uint32_t offset)
   hget_paragraph(x,offset,q);
   @<read and check the end byte |z|@>@;
 }
-@
-@<\HINT\ |static|@>=
-#if 0
-static void hget_par_node(uint32_t offset);
-#endif
 @
 
 
@@ -3703,7 +3691,7 @@ We modify the corresponding macros accordingly.
 
 The variables containing the parameter definitions are declared |extern|.
 
-@<\HINT\ |static|@>=
+@<\HINT\ variables@>=
 static pointer*pointer_def[32];
 static scaled*dimen_def;
 static int32_t*integer_def;
@@ -3758,8 +3746,7 @@ that are yet undefined. Here is a list of all of them
 which we will put into a header file to force the compiler
 to check for consistent use accross compilation units.
 
-@<\HINT\ |static|@>=
-static Stream *streams;
+@<\HINT\ declarations@>=
 static bool flush_pages(uint32_t pos); 
 static pointer skip(uint8_t n);
 static pointer *box_ptr(uint8_t n);
@@ -3767,7 +3754,7 @@ static int count(uint8_t n);
 static scaled dimen(uint8_t n);
 @
 
-@<\HINT\ functions@>=
+@<\HINT\ auxiliar functions@>=
 pointer skip(uint8_t n)
 { return cur_page->s[n].g; }
 pointer *box_ptr(uint8_t n)
@@ -3815,7 +3802,7 @@ static void hpage_init(void)
 }
 @
 
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 static void hpage_init(void);
 @
 
@@ -3832,7 +3819,7 @@ static void hflush_contribution_list(void)
 }
 @
 
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 static void hflush_contribution_list(void);
 @
 
@@ -4113,7 +4100,7 @@ sections \gglob, \dots,'' also make it possible to look at the set of
 all global variables, if desired.  Similar remarks apply to the other
 portions of the program.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 @<Selected global variables@>@;
 @#
 #ifdef HINTTYPE
@@ -4610,7 +4597,7 @@ apply for |%| as well as for |/|.)
 @ Here is a routine that calculates half of an integer, using an
 unambiguous convention with respect to signed odd numbers.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 
 static int half(int @!x)
 {@+if (odd(x)) return(x+1)/2;
@@ -4694,13 +4681,13 @@ overflow; so the routines set the global variable |arith_error| to |true|
 instead of reporting errors directly to the user. Another global variable,
 |rem|, holds the remainder after a division.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static bool @!arith_error; /*has arithmetic overflow occurred recently?*/
 static scaled @!rem; /*amount subtracted to get an exact division*/
 
 @ We also need to divide scaled dimensions by integers.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static scaled x_over_n(scaled @!x, int @!n)
 {@+bool negative; /*should |rem| be negated?*/
 scaled x_over_n;
@@ -4727,7 +4714,8 @@ by~|d|, in separate operations, since overflow might well occur; and it
 would be too inaccurate to divide by |d| and then multiply by |n|. Hence
 this subroutine simulates 1.5-precision arithmetic.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
+#if 0 /* no longer used */
 static scaled xn_over_d(scaled @!x, int @!n, int @!d)
 {@+bool positive; /*was |x >= 0|?*/
 nonnegative_integer @!t, @!u, @!v; /*intermediate quantities*/
@@ -4746,6 +4734,7 @@ if (positive)
 else{@+xn_over_d=-u;rem=-(v%d);
   }
 return xn_over_d;}
+#endif
 
 @ The next subroutine is used to compute the ``badness'' of glue, when a
 total~|t| is supposed to be made from amounts that sum to~|s|.  According
@@ -4767,7 +4756,7 @@ computing at most 1095 distinct values, but that is plenty.
 
 @d inf_bad 10000 /*infinitely bad value*/
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static halfword badness(scaled @!t, scaled @!s) /*compute badness, given |t >= 0|*/
 {@+int r; /*approximation to $\alpha t/s$, where $\alpha^3\approx
   100\cdot2^{18}$*/
@@ -5013,7 +5002,7 @@ we try first to increase |mem_end|. If that cannot be done, i.e., if
 |mem_end==mem_max|, we try to decrease |hi_mem_min|. If that cannot be
 done, i.e., if |hi_mem_min==lo_mem_max+1|, we have to quit.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer get_avail(void) /*single-word node allocation*/
 {@+pointer p; /*the new node being got*/
 p=avail; /*get top location in the |avail| stack*/
@@ -5077,7 +5066,7 @@ space exists.
 If |get_node| is called with $s=2^{30}$, it simply merges adjacent free
 areas and returns the value |max_halfword|.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer get_node(int @!s) /*variable-size node allocation*/
 {@+
 pointer p; /*the node currently under inspection*/
@@ -5164,7 +5153,7 @@ the operation |free_node(p, s)| will make its words available, by inserting
 |p| as a new empty node just before where |rover| now points.
 @^inner loop@>
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static void free_node(pointer @!p, halfword @!s) /*variable-size node
   liberation*/
 {@+pointer q; /*|llink(rover)|*/
@@ -5279,7 +5268,7 @@ which all subfields have the values corresponding to `\.{\\hbox\{\}}'.
 (The |subtype| field is set to |min_quarterword|, for historic reasons
 that are no longer relevant.)
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer new_null_box(void) /*creates a new box node*/
 {@+pointer p; /*the new node*/
 p=get_node(box_node_size);type(p)=hlist_node;
@@ -5310,7 +5299,7 @@ an hlist; the |height| and |depth| are never running in a~vlist.
 makes all the dimensions ``running,'' so you have to change the
 ones that are not allowed to run.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer new_rule(void)
 {@+pointer p; /*the new node*/
 p=get_node(rule_node_size);type(p)=rule_node;
@@ -5380,7 +5369,7 @@ a |new_lig_item| function, which returns a two-word node having a given
 |character| field. Such nodes are used for temporary processing as ligatures
 are being created.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer new_ligature(quarterword @!f, quarterword @!c, pointer @!q)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=ligature_node;
@@ -5414,7 +5403,7 @@ not chosen.
 @d pre_break(A) llink(A) /*text that precedes a discretionary break*/
 @d post_break(A) rlink(A) /*text that follows a discretionary break*/
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer new_disc(void) /*creates an empty |disc_node|*/
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=disc_node;
@@ -5449,7 +5438,7 @@ the amount of surrounding space inserted by \.{\\mathsurround}.
 @d before 0 /*|subtype| for math node that introduces a formula*/
 @d after 1 /*|subtype| for math node that winds up a formula*/
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer new_math(scaled @!w, small_number @!s)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=math_node;
@@ -5531,7 +5520,7 @@ typedef int8_t glue_ord; /*infinity to the 0, 1, 2, or 3 power*/
 The reference count in the copy is |null|, because there is assumed
 to be exactly one reference to the new specification.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer new_spec(pointer @!p) /*duplicates a glue specification*/
 {@+pointer q; /*the new spec*/
 q=get_node(glue_spec_size);@/
@@ -5543,7 +5532,7 @@ return q;
 @ Glue nodes that are more or less anonymous are created by |new_glue|,
 whose argument points to a glue specification.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer new_glue(pointer @!q)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=glue_node;subtype(p)=normal;
@@ -5568,7 +5557,7 @@ inserted from \.{\\mkern} specifications in math formulas).
 
 @ The |new_kern| function creates a kern node having a given width.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer new_kern(scaled @!w)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=kern_node;
@@ -5592,7 +5581,7 @@ break will be forced.
 @ Anyone who has been reading the last few sections of the program will
 be able to guess what comes next.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer new_penalty(int @!m)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=penalty_node;
@@ -5661,7 +5650,7 @@ harmless to let |lig_trick| and |garbage| share the same location of |mem|.
 @d hi_mem_stat_usage 14 /*the number of one-word nodes always present*/
 
 
-@ @<\TeX\ functions@>=
+@ @<code from \TeX@>=
 static void mem_init(void)
 { @+ int k;
   @<Initialize |mem|@>@;
@@ -6044,7 +6033,7 @@ specification is being withdrawn.
   else decr(glue_ref_count(A));
   }
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static void delete_glue_ref(pointer @!p) /*|p| points to a glue specification*/
 fast_delete_glue_ref(p)
 static void delete_xdimen_ref(pointer @!p) /*|p| points to a xdimen specification*/
@@ -6058,7 +6047,7 @@ In practice, the nodes deleted are usually charnodes (about 2/3 of the time),
 and they are glue nodes in about half of the remaining cases.
 @^recursion@>
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static void flush_node_list(pointer @!p) /*erase list of nodes starting at |p|*/
 {@+ /*go here when node |p| has been freed*/
 pointer q; /*successor to node |p|*/
@@ -6121,7 +6110,7 @@ example, if the size is altered, or if some link field is moved to another
 relative position---then this code may need to be changed too.
 @^data structure assumptions@>
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer copy_node_list(pointer @!p) /*makes a duplicate of the
   node list that starts at |p| and returns a pointer to the new list*/
 {@+pointer h; /*temporary head of copied list*/
@@ -6359,7 +6348,7 @@ vertical mode, then ``contributed'' to the current page (during which time
 the page-breaking decisions are made). For now, we don't need to know
 any more details about the page-building process.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 
 @<List variables@>@;
 
@@ -6376,7 +6365,7 @@ calling |push_nest|. This routine changes |head| and |tail| so that
 a new (empty) list is begun; it does not change |mode| or |aux|.
 
 @s line mode_line
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static void push_nest(void) /*enter a new semantic level, save the old*/
 {@+if (nest_ptr > max_nest_stack)
   {@+max_nest_stack=nest_ptr;
@@ -6393,7 +6382,7 @@ state is restored by calling |pop_nest|. This routine will never be
 called at the lowest semantic level, nor will it be called unless |head|
 is a node that should be returned to free memory.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static void pop_nest(void) /*leave a semantic level, re-enter the old*/
 {@+free_avail(head);decr(nest_ptr);cur_list=nest[nest_ptr];
 }
@@ -6941,12 +6930,12 @@ typedef uint16_t font_index; /*index into |font_info|*/
 
 @s font_index int
 @s str_number int
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static memory_word @!font_info[font_mem_size+1];
    /*the big collection of font data*/
 static font_index @!fmem_ptr=0; /*first unused word of |font_info|*/
 
-static void hclear_fonts(void)
+static void hclear_font_info(void)
 { fmem_ptr=0;
 }
 static internal_font_number @!font_ptr; /*largest internal font number in use*/
@@ -6974,7 +6963,7 @@ part of this word (the |b0| field), the width of the character is
 |min_quarterword| has already been added to |c| and to |w|, since \TeX\
 stores its quarterwords that way.)
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static int @!char_base0[font_max-font_base+1],
   *const @!char_base = @!char_base0-font_base;
    /*base addresses for |char_info|*/
@@ -7023,7 +7012,7 @@ as fast as possible under the circumstances.
 
 @d char_info(A, B) font_info[char_base[A]+B].qqqq
 @d char_width(A, B) (width_base[A]!=0?
-   font_info[width_base[A]+char_info(A,B).b0].sc:x_char_width(A,B))
+   font_info[width_base[A]+char_info(A,B).b0].sc:ft_char_width(A,B))
 @d char_exists(A) (A.b0 > min_quarterword)
 @d height_depth(A) qo(A.b1)
 @d char_height(A, B) font_info[height_base[A]+(B)/16].sc
@@ -7054,7 +7043,7 @@ information is stored; |null_font| is returned in this case.
 
 @d abort goto bad_tfm /*do this when the \.{TFM} data is wrong*/
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static void read_font_info(int f, char *@!nom, scaled @!s)
 {@+
 int k; /*index into |font_info|*/
@@ -7151,14 +7140,11 @@ param_base[f]=depth_base[f]+nd
 fskip_four;
 fget;read_sixteen(z); /*this rejects a negative design size*/
 fget;z=z*0400+fbyte;fget;z=(z*020)+(fbyte/020);
-if (z < unity) abort;
+/* |if (z < unity) abort;| |z| is replaced by |s| in HINT files*/
 while (lh > 2)
   {@+fget;fget;fget;fget;decr(lh); /*ignore the rest of the header*/
   }
-if (s!=-1000)
-{ if (s >= 0) z=s;
-  else z=xn_over_d(z,-s, 1000);
-}
+z=s;
 font_size[f]=z;
 }
 
@@ -7248,16 +7234,20 @@ decr(param_base[f]);
 fmem_ptr=fmem_ptr+lf; goto done
 
 @ Here is a function that returns a pointer to a character node for a
-given character in a given font. If that character doesn't exist,
-|null| is returned instead.
+given character in a given font. The \HINT\ file is responsible to
+make sure that the character exists. The test for existence is here
+only for debugging purposes. This function also ensures that
+font |f| gets loaded if it occurs in a character node.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer new_character(internal_font_number @!f, eight_bits @!c)
 {@+ pointer p; /*newly allocated node*/
+    if (font_def[f].ff==no_format) hload_font(f);
 #ifdef DEBUG
+/*this Test is missing in |new_ligature|*/
 if (font_bc[f] > c || font_ec[f] < c ||
  (width_base[f]!=0 && ! char_exists(char_info(f, qi(c)))) ||
- (width_base[f]==0 && ! ft_exists(font_face[f], c)))
+ (width_base[f]==0 && ! ft_exists(f, c)))
   DBG(DBGFONT,"Warning: Character 0x%0X in font %d does not exist\n",c,f);
 #endif
 p=get_avail();font(p)=f;character(p)=qi(c);
@@ -7773,7 +7763,7 @@ static pointer @!adjust_tail=null; /*tail of adjustment list*/
 
 @ Here now is |hpack|, which contains few if any surprises.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer hpack(pointer @!p, scaled @!w, small_number @!m)
 {@+
 pointer r; /*the box node that will be returned*/
@@ -7861,9 +7851,9 @@ to be exercised one more time.
  }
  else
  { scaled ch, cd;
-   FT_Face ft_face=font_face[f];
+   FT_Face ft_face=font_def[f].ft_face;
    if (ft_face==NULL)
-     ft_face=hload_font_face(f);
+     ft_face=ft_load_font_face(f);
    if (ft_face!=NULL)
    { FT_UInt ft_gid = FT_Get_Char_Index(ft_face, character(p));
      if (ft_gid!=0)
@@ -7968,7 +7958,7 @@ point is simply moved down until the limiting depth is attained.
 
 @d vpack(A,B) @[vpackage(A,B, max_dimen)@] /*special case of unconstrained depth*/
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer vpackage(pointer @!p, scaled @!h, small_number @!m, scaled @!l)
 {@+
 pointer r; /*the box node that will be returned*/
@@ -8158,7 +8148,7 @@ itself---we must build it up little by little, somewhat more cautiously
 than we have done with the simpler procedures of \TeX. Here is the
 general outline.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 
 @<Declare subprocedures for |line_break|@>@;
 
@@ -9641,7 +9631,7 @@ for each node in the list.
 @^data structure assumptions@>
 
 \noindent
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 
 #define ensure_vbox(N) /* no longer needed */@#
 
@@ -9689,7 +9679,7 @@ its new significance.
 @d cur_height active_height[1] /*the natural height*/
 @d set_height_zero(A) active_height[A]=0 /*initialize the height to zero*/
 @#
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static pointer vert_break(pointer @!p, scaled @!h, scaled @!d)
    /*finds optimum page break*/
 {@+
@@ -9954,7 +9944,7 @@ from |empty| to |inserts_only| or |box_there|.
 
 @d set_page_so_far_zero(A) page_so_far[A]=0
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static void freeze_page_specs(small_number @!s)
 {@+page_contents=s;
 page_goal=hvsize;page_max_depth=max_depth;
@@ -10005,7 +9995,7 @@ the contribution list has been emptied. A call on |build_page| should
 be immediately followed by `|goto big_switch|', which is \TeX's central
 control point.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static bool hbuild_page(void) /*append contributions to the current page*/
 {@+
 pointer p; /*the node being appended*/
@@ -10181,7 +10171,7 @@ if (page_total < page_goal)
 else if (page_total-page_goal > page_shrink) b=awful_bad;
 else b=badness(page_total-page_goal, page_shrink)
 
-@ @<\TeX\ functions@>=
+@ @<code from \TeX@>=
 static void happend_insertion(pointer p)@/
 { uint8_t @!n; /*insertion box number*/
   scaled @!delta, @!h, @!w; /*sizes used for insertion calculations*/
@@ -10271,7 +10261,7 @@ else print_char('0');
 end_diagnostic(false);
 }
 
-@ @<\TeX\ functions@>=
+@ @<code from \TeX@>=
 static void hpack_page(void)
 {
 pointer p, @!q, @!r, @!s; /*nodes being examined and/or changed*/
@@ -10493,7 +10483,7 @@ process the partial paragraph that has just been interrupted by the
 display. Then we can set the proper values of |display_width| and
 |display_indent| and |pre_display_size|.
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 static void hdisplay(pointer p, pointer a, bool l)
 {@+
 scaled x; /* the |hsize| in the enclosing paragraph */
@@ -10628,7 +10618,7 @@ pointer @!t; /*tail of adjustment list*/
 |null| or it points to a box containing the equation number; and we are in
 vertical mode (or internal vertical mode).
 
-@<\TeX\ functions@>=
+@<code from \TeX@>=
 {@<Local variables for finishing a displayed formula@>@;
 adjust_tail=adjust_head;b=hpack(p, natural);p=list_ptr(b);
 t=adjust_tail;adjust_tail=null;@/
@@ -11657,7 +11647,7 @@ uint32_t hposition(pointer p)
 The function that takes information form the cache and converts it to a |uint64_t| location, as mentioned above, commes next. It returns |HINT_NO_LOC| if no information is in the cache.
 This value is used to indicate that a variable contains no valid location.
 
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 #define HINT_NO_LOC 0xFFFFFFFFFFFFFFFF
 #define PAGE_LOC(POS0,OFF) (((uint64_t)((POS0)+(OFF))<<32) + (uint64_t)(OFF))
 #define LOC_POS(P) ((P)>>32) /* the node position */
@@ -11696,9 +11686,7 @@ static uint64_t page_loc[MAX_PAGE_POS];
 static int cur_loc;
 static int lo_loc, hi_loc;
 @
-@<\HINT\ |static|@>=
-static int cur_loc;
-@
+
 
 The location of the current page is found at |page_loc[cur_loc]| which
 is always defined. Pages preceeding the current page may be found
@@ -11745,8 +11733,7 @@ static bool hloc_prev(void)
 }
 @
 
-@<\HINT\ |static|@>=
-static void hloc_clear(void); /* keep only |cur_loc| in the cache */
+@<\HINT\ declarations@>=
 static uint64_t hlocation(pointer p); /* map |p| to its file location */
 @
 
@@ -11861,7 +11848,7 @@ static void hloc_set_prev(pointer p)
 
 The following functions are called from the \TeX\ code:
 
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 static void hloc_init(void);
 static void store_map(pointer p, uint32_t pos, uint32_t offset); /*store the location of |p|*/
 static uint32_t hposition(pointer p); /* return the position of |p| or 0*/
@@ -11897,14 +11884,12 @@ int hint_begin(void)
   hpos=hstart=hin_addr;
   hend=hstart+hin_size;
   ft_init();
-  hint_clear_fonts(true);
   hflush_contribution_list(); hpage_init();
   flush_node_list(link(page_head));
-  free_definitions();
   mem_init();
   list_init(); 
   hclear_dir();
-  hclear_fonts();@/
+  hclear_font_info();@/
   hget_banner();@/
   if (!hcheck_banner("hint"))
   { hint_unmap(); return 0; }
@@ -11921,78 +11906,21 @@ int hint_begin(void)
 
 void hint_end(void)
 { @+if (hin_addr==NULL) return;
-  hint_unmap(); 
-  hin_addr=hpos=hstart=hend=NULL;
   hflush_contribution_list(); hpage_init();
   flush_node_list(link(page_head));
-  free_definitions();
   list_leaks();
+  free_definitions();
   hclear_dir();
-  hint_clear_fonts(true);
-  ft_destroy();
+  hint_unmap(); 
+  hin_addr=hpos=hstart=hend=NULL;
 }
 @
 
 
 \subsection{Changing the Page Dimensions}
-A central feature of a \HINT\ viewer is its ability to change the dimensions and the
-resolution of the displayed pages. To do so the function |hint_resize| is called.
-Using this function, the caller informs the rendering engine about the
-physical properties of the display aerea, its size in pixels and its resolution in
-dots per inch.
-Here is an example: Suppose the screen area is 300 pixel wide and 400 pixel high,
-and the resolution is 100 dpi in both directions (the screen has ``square'' pixels).
-Then the rendering engine can assume that the display aerea is 3 inches wide and
-4 inches high, and can render a 10pt font at exactly 10pt by computing the
-size of a single pixel as $1/100\,$inch or $0.7227\,$pt.
-If the user now wants the size scaled by a factor of 2, to make the small print of a contract
-easier to read (not that it would make the contract any better), 
-it is sufficient to set the resolution to 200 dpi.  The renderer would then
-compute the size of a single pixel to be only $1/200$ of an inch and conclude that
-the display aerea is only half as wide and half as high as it actually is.
-In summary: As far as the renderer is concerned, the rendering on an 3 by 4 inch display at 100dpi
-and a scale factor of 2 is equivalent to a rendering on a 1.5 by 2 inch display at 200dpi
-and a scale factor 1. In both cases, the renderer will produce a 300 by 400 pixel bitmap
-which would either fill the larger aerea at 100dpi or the smaler one at 200dpi.
-
-@<render variables@>=
-static double xdpi=600.0, ydpi=600.0;
-@
-
-@<\HINT\ functions@>=
-void hint_resize(int px_h, int px_v, double x_dpi, double y_dpi)
-{ double pt_h, pt_v;
-#if 0
-  /* this optimization causes the android viewer to display a blank page
-     after opening a new file. To be investigated!
-     using local static variables is discouraged.
-  */
-  static int old_px_h=0, old_px_v=0;
-  static double old_xdpi=0.0, old_ydpi=0.0;
-   if (old_px_h==px_h && old_px_v==px_v && old_xdpi==x_dpi && old_ydpi==y_dpi)
-    return;
-  old_px_h=px_h; old_px_v=px_v; old_xdpi=x_dpi; old_ydpi=y_dpi;
-#endif
-  xdpi=x_dpi; ydpi=y_dpi;
-  pt_h = px_h * 72.27 / x_dpi;
-  pt_v = px_v * 72.27 / y_dpi; 
-  page_h = round(pt_h * (1 << 16));
-  page_v = round(pt_v * (1 << 16));
-  nativeSetSize(px_h, px_v, pt_h, pt_v);
-  hloc_clear();
-  hflush_contribution_list(); hpage_init();
-  forward_mode=false;
-  backward_mode=false;
-}
-@
-
-The function tells the native renderer about the change, clears all locations
-from the location cache, removes nodes from the contribution list,
-and resets the rendering direction.
-
 Once a \HINT\ file is loaded, the GUI might be interested to know the ``design size''
 of the document. The following two functions will return the \.{\\hsize} and \.{\\vsize}
-as given to Hi\TeX.
+as given to Hi\TeX. If there is no file loaded, the funtions return zero.
 
 @<\HINT\ functions@>=
 scaled hint_hsize(void)
@@ -12005,6 +11933,151 @@ scaled hint_vsize(void)
   else return 0;
 }
 @
+
+A central feature of a \HINT\ viewer is its ability to change the dimensions and the
+resolution of the displayed pages. 
+In respect to ``dimensions'', we need to distinguish several different kind of coordinate
+systems:
+
+The first coordinate system is the coordinate system of the \TeX\ backend. It measures
+distances in scaled points and needs to know about the virtual ``paper size''
+$|page_h|\times|page_v|$. Nothing else is required for it to do its task.
+Given a position in the content section, it can compute a complete page and pass it 
+to the renderer. The ``complete page'' is a list of lists containing glyphs and rules
+(and a few other things) with their position on the page and their size given in scaled
+points. The renderer traverses this list and passes every glyph, for example,
+to the function |nativeGlyph(left,top,width,height,g->OGLtexture)|.
+
+The native renderer, as implemented so far, uses OpenGL to produce a visible
+image of the glyph on the screen. The visual image is contained in an OpenGL
+texture. And you can think of a texture as a bitmap, stored on the graphics
+card for fast access and identified by a single number.
+OpenGl will scale the texture to match the given width and height and display
+it at the position given by its top/left corner. This requires OpenGL
+to map \TeX's page coordinates to OpenGL virtual coordinates which range from
+$-1$ (bottom and left) to $+1$ (top and right). The mapping is accomplished
+by a 4 by 4 projective Matrix directly on the graphics card.
+
+The last step performed by OpenGL is coloring the individual pixels on the screen.
+The pixels on the screen have their own coordinate system and all the programm needs
+to do is inform OpenGL about the so called ``Viewport''. In the case of the \HINT\
+viewer, the viewport matches the entire window and it is sufficent
+to know the width and the heigth of the windows drawable area in pixels
+and call |glViewport(0, 0, pixel_width, pixel_height);
+
+The pixel coordinate system is, however, very important for another task:
+generating bitmap images for glyphs. Modern fonts store the outlines of glyphs
+as mathematical curves. If the \HINT\ viewer needs an OpenGL texture
+for a glyph, it uses the FreeType library to generate a bitmap image for the glyph
+and stores it as a texture on the graphics card. 
+
+Creating good bitmap images from the outlines of a glyph is no easy task.
+A simplified description is this: First the key points of the outlines
+are rounded to the closest pixel boundary, then the pixel inside the 
+outline are colored black, the pixels outside the outline are colored white,
+and the pixels that are part inside and part outside get a proportional grey
+value. The step that is most important for the quality of the bitmap image
+is the rounding of the key points to the pixel grid. It makes sure that the
+important lines of the glyph are aligned to the pixel grid and pixels are
+mostly completely inside or completely outside. The glyps will then look less 
+blury. Of course the renderer, as described above, will scale any bitmap
+image to the correct size when displaying it and does so for \TeX's
+traditional PK fonts that have a fixed resolution. But the result
+is much, much nicer if the glyps bitmap image needs no scaling and can
+be mapped pixel by pixel to the screen---which also requires rounding the glyph's
+position to the pixel grid. So the renderer should take the resolution of
+the phyical screen into account when generating bitmap images for the glyphs.
+
+The resolution of the screen
+is usually given in ``dots per inch'', short ``dpi''.
+A resolution of 100 dpi means that a sequence of 100 pixels is 1 inch long.
+Computer systems usually equal 1 inch to 72pt;
+\TEX\ assumes the slightly more precise equality 1 inch is 72.27 pt.
+Luckily one inch is one inch in both systems.
+
+The resolution of the screen can change dynamically, for example on a
+multi-monitor system if the window is moved from one screen to another screen.
+
+There is one complication left: The \HINT\ viewer can apply an almost arbitrary
+scale factor to the displayed document.
+Here is an example: Suppose the screen area is 300 pixel wide and 400 pixel high,
+and the resolution is 100 dpi in both directions (the screen has ``square'' pixels).
+Then the rendering engine can assume that the display aerea is 3 inches wide and
+4 inches high, and can render a 10pt font at exactly 10pt by computing the
+size of a single pixel as $1/100\,$inch or $0.7227\,$ scaled point.
+and the bitmap for a 10pt glyph is then typically 8 pixels high.
+
+If the user now wants the size scaled by a factor of 2, to make the small print of a contract
+easier to read (not that it would make the contract any better), 
+it is sufficient to set the resolution to 200 dpi.  The renderer would then
+compute the size of a single pixel to be only $1/200$ of an inch and conclude that
+300 pixels amount only to 1.5 inches and the display aerea is only half as wide (and half as tall) 
+as before. It would also conclude that the bitmap for the 10pt glyph should be twice as high
+and wide as before.
+In summary: As far as the \TeX\ backend is concerned, the rendering on an 3 by 4 inch display at 100dpi
+with a scale factor of 2 is equivalent to a rendering on a 1.5 by 2 inch display at 200dpi
+with a scale factor 1. Just the size of the bitmap immages used for the glyphs will change.
+
+Rerendering all the bitmap images and sending them to the graphics card requires a lot of
+computation. So for performance reason, the scaling and the rerendering are packed in two separate
+functions. When the user changes the scale factor by dragging with the mouse,
+an immediate feedback is more important than a few blurry pixels. Once the dragging ends,
+the old textures can be deleted and replaced by new ones.
+
+The first function is |hint_resize|. It informs the rendering engine about the
+physical properties of the display aerea, its size in pixels and its resolution in
+dots per inch. The function will not cause any rerendering of glyph images which
+is not required if just the window size is changing and the scaled screen 
+resolution stays constant.
+
+The function |hint_clear_fonts| that causes the rerendering of the glyph textures
+is described below.  
+
+To make the rounding of scaled points to pixel boundaries simple and
+efficient, we do not use the dpi values directly but store the size
+of a pixel measured in scaled points. This restricts the possible
+resolutions slightly because scaled points are integer values. 
+We restrict as well the range of possible resolutions to avoid
+situations where the size of glyphs or the number of glyphs on a page
+might grow beyond the bounds of any implementation.
+
+@<\HINT\ variables@>=
+#define PIXEL_SIZE_300_DPI (scaled)((72.27/300)*ONE+0.5)
+#define MAX_PIXEL_SIZE (PIXEL_SIZE_300_DPI*10)
+#define MIN_PIXEL_SIZE (PIXEL_SIZE_300_DPI/10)
+
+#if 0
+static double xdpi=600.0, ydpi=600.0;
+#endif
+static scaled x_px_size=PIXEL_SIZE_300_DPI, y_px_size=PIXEL_SIZE_300_DPI;
+@
+
+@<\HINT\ functions@>=
+void hint_resize(int px_h, int px_v, double x_dpi, double y_dpi)
+{
+  x_px_size=(scaled)((72.27/x_dpi)*ONE+0.5);
+  if (x_px_size<MIN_PIXEL_SIZE) x_px_size=MIN_PIXEL_SIZE;
+  else if (x_px_size>MAX_PIXEL_SIZE) x_px_size=MAX_PIXEL_SIZE;
+
+  y_px_size=(scaled)((72.27/y_dpi)*ONE+0.5);
+  if (y_px_size<MIN_PIXEL_SIZE) y_px_size=MIN_PIXEL_SIZE;
+  else if (y_px_size>MAX_PIXEL_SIZE) y_px_size=MAX_PIXEL_SIZE;
+
+  page_h = px_h*x_px_size;
+  page_v = px_v*y_px_size;
+
+  nativeSetSize(px_h, px_v, page_h, page_v);
+  hloc_clear();
+  hflush_contribution_list(); hpage_init();
+  forward_mode=false;
+  backward_mode=false;
+}
+@
+
+The function tells the native renderer about the change, clears all locations
+from the location cache, removes nodes from the contribution list,
+and resets the rendering direction.
+
 
 
 
@@ -12071,10 +12144,6 @@ belongs to the bottom of the preceeding page and |hpos| will
 indicate where parsing should contine when producing the previous page.
  After the call, we will have at least two enties in the location cache:
 the top of the current page and the top of the next page.
-@<\HINT\ |static|@>=
-extern bool hint_forward(void);
-extern bool hint_backward(void);
-@
 
 When the page builder has reached the end of the \HINT\ file, it must make sure that
 the material that still is in the contribution list gets flushed out.
@@ -12656,11 +12725,17 @@ a simple data type is used for outlines.
 It contains the information relevant to the 
 user interface.
 
+@<definition of the |hint_Outline| type@>=
+typedef struct { 
+uint64_t pos;  
+uint8_t depth; 
+uint8_t where; 
+int p; /* pointer to the list of title nodes */
+char *title; /* title as sequence of utf8 character codes */
+} hint_Outline;
+@
 
-The |hint_Outline| type is defined in the header file
-but the definition should be here.
-
-@<\HINT\ |static|@>=
+@<\HINT\ variables@>=
 static hint_Outline *hint_outlines;
 @
 
@@ -12671,7 +12746,7 @@ navigate to the desired position in the \HINT\ file.
 The |where| field indicates where the
 label should be placed on the page.
 The values are:
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 #define LABEL_UNDEF 0
 #define LABEL_TOP 1
 #define LABEL_BOT 2
@@ -12779,7 +12854,7 @@ To initialize the traversal, call |trv_init|. Its parameter
 is a function |f| that will receive the stream of characters.
 During traversal, the function is stored in the variable |trv_stream|. 
 
-@<\HINT\ functions@>=
+@<\HINT\ auxiliar functions@>=
 static bool trv_ignore=false;
 static bool trv_skip_space=false;
 static void (*trv_stream)(uint32_t c);
@@ -12794,6 +12869,8 @@ static void trv_char(uint32_t c)
     trv_stream(c);
   }
 }
+
+static void trv_vlist(pointer p);
 
 static void trv_hlist(pointer p)
 { while(p!=null)
@@ -12845,11 +12922,6 @@ static void trv_vlist(pointer p)
 }
 @
 
-@<\HINT\ |static|@>=
-static void trv_init(void (*f)(uint32_t c));
-static void trv_vlist(pointer p);
-static void trv_hlist(pointer p);
-@
 
 Using these functions we can now implement the function
 |hlist_to_string|. Currently this function is used only
@@ -13415,49 +13487,47 @@ if (cur_link>=0)
 
 To enable the user interface to take action if a link is clicked or
 if the mouse moves over a link, the backend supplies
-the necessary information in the |hint_links| and |max_link| variables.
-|hint_links| is a dynamic array, indexed from 0 to |max_link|.
+the necessary information in the |hlinks| and |max_link| variables.
+|hlinks| is a dynamic array, indexed from 0 to |max_link|.
 If |max_links| is negative, no links are available.
 
 
 
-@<\HINT\ |static|@>=
+@<\HINT\ types@>=
 typedef struct { 
 uint64_t pos;  
 uint8_t where; 
 scaled top, bottom, left, right;
-} hint_Link;
-extern hint_Link *hint_links;
-static int max_link;
+} Link;
 @
 
 @<\HINT\ variables@>=
-hint_Link *hint_links=NULL;
+static Link *hlinks=NULL;
 static int max_link=-1;
 @
 
-The |hint_links| array is filled with the necessary information
+The |hlinks| array is filled with the necessary information
 when the page is rendered.
 
 @<render functions@>=
 static int links_allocated=0;
 static void add_new_link(int n, pointer p, scaled h, scaled v)
-{ hint_Link *t;
+{ Link *t;
    uint64_t pos;
    uint8_t where;
   max_link++;
   if (max_link>=links_allocated)
   {  if (links_allocated<=0)
      { links_allocated=32;
-       ALLOCATE(hint_links,links_allocated,hint_Link);
+       ALLOCATE(hlinks,links_allocated,Link);
      }
      else
      { links_allocated=links_allocated*1.4142136+0.5; /* $\sqrt 2$ */
-        REALLOCATE(hint_links,links_allocated,hint_Link);
+        REALLOCATE(hlinks,links_allocated,Link);
      }
      DBG(DBGLABEL,"Links allocated %d\n",links_allocated);
   }
-  t=hint_links+max_link;
+  t=hlinks+max_link;
   DBG(DBGLABEL,"Link add %d\n",max_link);
   REF_RNG(label_kind,n);
   @<get |where| and |pos| from label |n|@>@;
@@ -13479,9 +13549,9 @@ static void add_new_link(int n, pointer p, scaled h, scaled v)
 }
 
 static void end_new_link(int n, pointer p, scaled h, scaled v)
-{ hint_Link *t;
+{ Link *t;
   if (max_link<0) return;
-  t=hint_links+max_link;
+  t=hlinks+max_link;
   DBG(DBGLABEL,"Link end %d\n",max_link);
   if (type(p)==hlist_node)
     t->right=h;
@@ -13507,13 +13577,13 @@ early. Together this should limit the search to a short stretch of links.
 The | precission| parameter allows to find links if their distance from
 the given coordinates is smaller than the given |precission|.
 
-The following function returns an index into the |hint_links|
+The following function returns an index into the |hlinks|
 array or $-1$ if no link is at the given position.
 
 To speed up processing, it remembers the last hit.
 
 @<render functions@>=
-static scaled hlink_distance(scaled x,scaled y, hint_Link *t)
+static scaled hlink_distance(scaled x,scaled y, Link *t)
 { scaled d, dx=0, dy=0;
   d = t->top-y;
   if (d>0) dy=d;
@@ -13534,20 +13604,24 @@ static scaled hlink_distance(scaled x,scaled y, hint_Link *t)
 
 static int last_hit_link=-1;
 
-int hint_find_link(scaled x, scaled y,scaled precission)
-{ int i;
-  hint_Link *t;
+int hint_find_link(int x_px, int y_px, int precission_px)
+{ scaled x, y, precission;
+  int i;
+  Link *t;
   if (max_link<0) return -1;
   if (last_hit_link<0 || last_hit_link>max_link) last_hit_link=max_link/2;
   i=last_hit_link;
-  t=hint_links+i;
+  t=hlinks+i;
   DBG(DBGLABEL,"Link find %d\n",max_link);
+  x = x_px*x_px_size;
+  y = y_px*y_px_size;
+  precission=precission_px*y_px_size;
   if (hlink_distance(x,y,t)<=precission)
     return i;
   else if (y<t->top) /* search up */
   { while (i>0)
     { i--;
-      t=hint_links+i;
+      t=hlinks+i;
       DBG(DBGLABEL,"Link up %d\n",max_link);
       if(hlink_distance(x,y,t)<=precission)
       { last_hit_link=i;  return i; }
@@ -13561,7 +13635,7 @@ int hint_find_link(scaled x, scaled y,scaled precission)
     for (k=0;k<=max_link;k++)
     { i=i+1;
       if (i>max_link) i=0;
-      t=hint_links+i;
+      t=hlinks+i;
       DBG(DBGLABEL,"Link scan %d\n",max_link);
       d=hlink_distance(x,y,t);
       if (d<min_d)
@@ -13583,19 +13657,13 @@ As a shortcut, it can call this function:
   uint8_t w;
   if (i<0||i>max_link) return  hint_page_get();
   DBG(DBGLABEL,"Link page %d\n",max_link);
-  h=hint_links[i].pos;
-  w=hint_links[i].where;
+  h=hlinks[i].pos;
+  w=hlinks[i].where;
   if (w==LABEL_TOP) return hint_page_top(h);
   else if (w==LABEL_BOT) return hint_page_bottom(h);
   else if (w==LABEL_MID) return hint_page_middle(h);
   else return  hint_page_get();
 }
-@
-
-Here is a summary of the above functions:
-@<\HINT\ |static|@>=
-extern int hint_find_link(scaled x, scaled y, scaled precission);
-extern uint64_t hint_link_page(int i);
 @
 
 
@@ -13626,11 +13694,12 @@ static void hSetColor(int c)
 void hint_render_on(void)
 { nativeInit();
   hSetColor(0);
-  hint_clear_fonts(true);
+ 
 }
 
 void hint_render_off(void)
-{ nativeClear();
+{ hint_clear_fonts(false);
+  nativeClear();
 }
 @
 
@@ -13663,103 +13732,93 @@ cluttering the global name space by using the |hint_|\dots prefix.
 
 
 \subsection{Fonts}
-The \HINT\ file format supports four different types of fonts:
-The traditional PK fonts\cite{TR:pkfile} and the more modern
-PostScript Type1 fonts\cite{PST1} which are used by many \TeX\ engines, 
-TrueType\cite{TTT:TT} fonts, and OpenType fonts\cite{MS:OTF}\cite{ISO:OTF}.
-To render the latter, we use the FreeType Library\cite{freetype}
+The \HINT\ file format supports two kind of font formats:
+The traditional PK fonts\cite{TR:pkfile} and fonts that
+can be rendered using the FreeType Library\cite{freetype}
 by David Turner, Werner Lemberg, and others.
+The latter are PostScript Type1 fonts\cite{PST1},
+TrueType\cite{TTT:TT} fonts, and OpenType fonts\cite{MS:OTF}\cite{ISO:OTF}.
 
 @<\HINT\ types@>=
-typedef	enum {@+ no_format, pk_format, ft_format@+ } FontFormat;
+typedef	enum {@+ no_format=0, pk_format, ft_format@+ } FontFormat;
 @
 
-
-The features of a font are described in a |font_s| structure.  A major
+The features of a font are described in a |Font| structure.  A major
 part of the structure is the glyph cache that provides fast access to
 the individual glyphs belonging to the font. Further, it includes an
-|ff| field containing the font format and a variant part that differs
-for the different font formats.
+|ff| field containing the font format.
 
-
-@<\HINT\ types@>=
-@<definitions of |PKfont| and |FTfont| types@>@;
-
-typedef struct font_s {
-  unsigned char n; /* the font number */
-  unsigned char *font_data; /* pointer to the font data in the HINT file */
-  int data_size; /* the size of the font data in byte */
-  double s; /* the size in pt */
-  double hpxs,vpxs; /* the horizontal and vertical size of one pixel in pt */
-  @<the glyph cache@>@;
-  bool resize;
-  FontFormat ff; /* the font format */
-} Font;
-@
 The |fonts| table contains an entry for every possible font number.
 
-@<\HINT\ variables@>=
-static Font *fonts[0x100]={NULL}; 
-@
 
-Given a font number |f| the following function returns a pointer to the 
-corresponding font structure, extracting the necessary information from the \HINT\ file if necessary.
-@<render functions@>=
-static struct font_s *hload_font(uint8_t f)
-{ Font *fp;
-  DBG(DBGFONT,"Decoding new font %d\n",f);
+Given a font number |f|, the following function initializes the |FontDef| structure
+with font specific data. This is mainly necessary for PK fonts.
+PK font files 
+, this means unpacking the
+font file which contains gly
+allocates a |Font| structure,
+extracting the necessary information from the \HINT\ file if necessary. 
+The pointer to the new |Font| is stored in the |fonts| array so this function
+should be called only if |fonts[f]==NULL|. For convenience the new |Font| pointer
+is the return value of the function. This function never returns |NULL|.
+
+This function needs rewriting!!
+ 
+@<\HINT\ functions@>=
+static void hload_font(uint8_t f)
+{ DBG(DBGFONT,"Decoding new font %d\n",f);
   if (f>max_ref[font_kind])
     QUIT("Undefined font %d\n",f);
-  fp = calloc(1,sizeof(*fp));
-  if (fp==NULL) 
-    QUIT("Out of memory for font %d",f);
+  font_def[f].resize=true;
+  if (unpack_pk_file(f))
+     font_def[f].ff=pk_format;
   else
-  { unsigned char *spos, *sstart, *send;
-    spos=hpos; sstart=hstart;send=hend;@/
-    fp->n=f;
-    hget_section(hglyph_section(f));@/
-    fp->font_data=hstart;
-    fp->data_size=hend-hstart;@/
-    hpos=spos; hstart=sstart;hend=send;
-    fp->resize=true;
-  }
-  fonts[f]=fp;
-  fp->s=font_def[f].s/(double)(1<<16);
-  @<determine the font format and unpack the font@>@;
-  return fonts[f];
+  { font_def[f].ff=ft_format;
+    font_def[f].hpxs=x_px_size;
+    font_def[f].vpxs=y_px_size;
+  } 
 }
+@
+
+@ @<\HINT\ declarations@>=
+static void hload_font(uint8_t f);
 @
 
 To initialize the |fonts| table and remove all fonts form memory, the
 function |hint_clear_fonts|  is used with the |rm| parameter set to
 |true|. If |rm| is set to |false| the action is less drastic: only the
-function |nativeFreeTexture| is called for all glyphs in the glyph cache,
-the |fonts| table and the glyph cache are retained.
-
+function |nativeFreeTexture| is used to release all glyph textures in the glyph cache,
+while the |Fonts| and the glyph cache entries are retained.
+Releasing the textures will cause the textures to be recomputed using the
+current resolution before rendering the glyph the next time.
 
 @<font functions@>=
-static void hfree_glyph_cache(Font *f, bool rm);
+static void hfree_glyph_cache(FontDef *f, bool rm);
 
 void hint_clear_fonts(bool rm)
 { int f;
   DBG(DBGFONT,rm?"Clear font data":"Clear native glyph data");
   for (f=0;f<=max_ref[font_kind];f++)
-    if (fonts[f]!=NULL)
-    { hfree_glyph_cache(fonts[f],rm);
-      if (rm)@+ { @+ fonts[f]->resize=true;@+ }
+  { if (font_def[f].ff==pk_format)
+    { hfree_glyph_cache(font_def+f,rm);
+      if (rm) font_def[f].ff=no_format;
     }
+    else
+      hfree_glyph_cache(font_def+f,rm);
+    if (font_def[f].ft_face!=NULL)@+ { @+ font_def[f].resize=true;@+ }
+  }
 }
 @
 
-We need a dummy version for our test programs.
+We need a dummy version for our test programs.w
 @<test functions@>=
 /* replaces the values from hrender.c */
-double xdpi=600.0,ydpi=600.0;
+
 unsigned int nativeFreeTexture(unsigned int t)  {return 0;}
 unsigned int nativeTexture(unsigned char *bits, int w, int h) {return 0;}
 void nativeGlyph(double x,double y,double w,double h,
    unsigned int t)  {return;}
-static void hfree_glyph_cache(Font *f, bool rm) {}
+static void hfree_glyph_cache(FontDef *f, bool rm) {}
 void nativeSetSize(int px_h, int px_v, double pt_x, double pt_v) {}
 @
 
@@ -13797,7 +13856,7 @@ we use the function |g_lookup|.
 #define G123_SIZE (1<<G123_BITS)
 #define G123_MASK (G123_SIZE-1)
 
-static Gcache *g_lookup(Font *f, unsigned int cc)
+static Gcache *g_lookup(FontDef *f, unsigned int cc)
 
 { if (cc >> G0_BITS) {
 	unsigned int cc1= (cc>>G0_BITS);
@@ -13842,7 +13901,7 @@ static Gcache *hnew_g(Gcache **g)
     *g=calloc(1, sizeof(Gcache));
   if (*g==NULL) 
     return &g_undefined;
-  (*g)->ff=no_format;
+  (*g)->OGLtexture=0;
   return *g;
 }
 
@@ -13882,7 +13941,7 @@ static Gcache *hnew_g3(Gcache ******g,unsigned int cc)
 }
 
 
-static Gcache *hnew_glyph(Font *f, unsigned int cc)
+static Gcache *hnew_glyph(FontDef *f, unsigned int cc)
 { if (cc<G0_SIZE) return hnew_g0(&(f->g0),cc);
   else if (cc<G123_SIZE*G0_SIZE) return hnew_g1(&(f->g1),cc);
   else if (cc<G123_SIZE*G123_SIZE*G0_SIZE) return hnew_g2(&(f->g2),cc);
@@ -13906,9 +13965,9 @@ static void hfree_g0(Gcache **g, bool rm)
   if (g==NULL) return;
   for (i=0;i<G0_SIZE;i++)
     if (g[i]!=NULL)
-    { g[i]->OGLtexture=nativeFreeTexture(g[i]->OGLtexture);
+    { if (g[i]->OGLtexture!=0)
+        g[i]->OGLtexture=nativeFreeTexture(g[i]->OGLtexture);
       if (rm) {
-      if (g[i]->bits!=NULL) free(g[i]->bits);
       free(g[i]); g[i]=NULL;@+ }
     }
 }
@@ -13945,7 +14004,7 @@ static void hfree_g3(Gcache *****g, bool rm)
 }
 
 
-static void hfree_glyph_cache(Font *f, bool rm)
+static void hfree_glyph_cache(FontDef *f, bool rm)
 { if (f->g0!=NULL)
   { hfree_g0(f->g0,rm);
      if (rm) {@+free(f->g0); f->g0=NULL;@+}
@@ -13965,42 +14024,23 @@ static void hfree_glyph_cache(Font *f, bool rm)
 }
 @
 \subsection{Glyphs}
-The |gcache_s| structure may depend on the font encoding but also on
-the rendering engine that is used to display the glyphs. While the
-dependency on the font encoding is dynamic, the dependency on the
-rendering engine can be resolved at compile time.
+The information in the |Gcache| structure depends on the font encoding.
+% but not on the rendering engine that is used to display the glyphs. 
+Every |Gcache| structure stores as scaled points |w| and |h|, the width and height of
+the minimum bounding box; |hoff| and |voff|, the horizontal
+and vertical offset from the upper left to the
+reference pixel (right and down are positive); and the
+OpenGL texture identifier used to store the gray values of the bitmap.
 
-Every |gcache_s| structure stores |w| and |h|, the width and height of
-the minimum bounding box in pixel; |hoff| and |voff|, the horizontal
-and vertical offset in pixel from the upper left pixel to the
-reference pixel (right and down are positive), and then the array of bytes
-that represents the gray values of the bitmap.
+Currently only two kind of font formats are supported:
+Formats supported by the FreeType library and \TeX's ``classic''
+PK fonts. The PK specific fields in the glyph cache help with on-demand decoding of glyphs.
 
-Next commes the
-representation of the glyph that is most convenient for rendering on
-the target sytem. For the Windows operating system, this is a handle to a
-device dependent bitmap.  For the Android
-operating system using Open~GLE~2.0 it's an identifier for the texture.
-Then there is a last part
-that is different for the different font encodings; it is taged by
-the font format number |ff|. The information in this last part helps
-with on-demand decoding of glyphs.
-
-
-
-@<definitions of |PKfont| and |FTfont| types@>=
-@<definitions of format specific types@>@;
-
+@<\HINT\ types@>=
 typedef struct {
-  int w,h; 
-  int hoff,voff; 
-  unsigned char *bits; 
+  scaled w, h, hoff, voff; 
   unsigned int OGLtexture;
-  FontFormat ff; 
-  union {@+
-	  PKglyph pk;@+
-	  FTglyph tt;@+
-  };
+  @<PK specific fields in the glyph cache@>@;
 } Gcache;
 @
  
@@ -14021,26 +14061,37 @@ glyphs and set the |OGLtexture| value to zero.
 
 The top level function to access a glyph is |hload_glyph|. Given a font pointer |fp| 
 and a character code |cc| it looks up the glyph in the glyph cache.
-For PK fonts, all cache entries are made when initializing the font.
+For PK fonts, all cache entries are made when initializing the font
+because PK fonts are read sequentialy.
 For FreeType fonts, a cache entry is made when the glyph is accessed the first time.
-For both types of fonts, the unpacking is done just before the first use.
+For both types of fonts, the unpacking and the creation of a texture 
+is done just before the first use.
+
+|hload_glyph| is tested for a |NULL| return value and a zero texture in render_char
+which is called very often. In all ``normal'' cases, calling |g_lookup| will
+not return |NULL| and provide a nonzero texture.
+A zero texture will usually become nonzero after unpacking the glyph.
+So the extra test in |render_char| should be avoided by returning
+a ``character missing'' glyph which should be created after calling |nativeInit|
+and released before calling |nativeClear|.
 
 @<render functions@>=
-static void ft_unpack_glyph(uint8_t f, Font *fp, Gcache *g, uint32_t cc);
+static void ft_unpack_glyph(uint8_t f, Gcache *g, uint32_t cc);
 
-static Gcache *hload_glyph(uint8_t f, Font *fp, unsigned int cc)
+static Gcache *hload_glyph(uint8_t f, unsigned int cc)
 {
   Gcache *g=NULL;
-  g=g_lookup(fp,cc);
+  g=g_lookup(font_def+f,cc);
   if (g==NULL)
-  { if (fp->ff==ft_format)
-      g=hnew_glyph(fp,cc);
+  { if (font_def[f].ff==no_format) hload_font(f);
+    if (font_def[f].ff==ft_format)
+      g=hnew_glyph(font_def+f,cc);
     else  
       return NULL;
   }
-  if (g->ff==no_format)           
-  { if (fp->ff==pk_format) pkunpack_glyph(g);
-    else if (fp->ff==ft_format) ft_unpack_glyph(f,fp,g,cc);
+  if (g->OGLtexture==0)           
+  { if (font_def[f].ff==pk_format) pk_unpack_glyph(f,g);
+    else if (font_def[f].ff==ft_format) ft_unpack_glyph(f,g,cc);
     else QUIT("Font format not supported");
   }
   return g;
@@ -14050,15 +14101,10 @@ static Gcache *hload_glyph(uint8_t f, Font *fp, unsigned int cc)
 Rendering a glyph is the most complex rendering procedure. But with
 all the preparations, it boils down to a pretty short function to
 display a glyph, given by its charcter code |cc|, its font |f|, and
-its position and size |x|, |y|, and |s| given as scaled points.  Most
-of the function deals with the conversion of \TeX's measuring system,
-that is scaled points stored as 32 bit integers, into a representation
-that is more convenient for non \TeX{nical} sytems, namely regular
-points stored as |double| values. The latter is used by the native
-rendering functions.
-The conversion is done by the macro |SP2PT|.
-Rounding the glyph coordinates to the closes pixel boundary
-makes sense only if using the native dpi, if using a multiple its of not much use.
+its position and size |x|, |y|, and |s| given as scaled points.  
+
+Rounding the glyph coordinates to the closest pixel boundary
+makes sense only if using the native dpi, if using a multiple, it's of not much use.
 Further, we round to pixels only if pixel size in pt is above a threshold.
 We might need to export these with a setter.
 Note: The function |nativeGlyphs| requires the top/left position of the
@@ -14068,36 +14114,31 @@ Further the units are points.
 
 @<render functions@>=
 static bool round_to_pixel=0;
-static double dpi_threshold= 100;
-
-#define SP2PT(X) ((X)/(double)(1<<16))
+static scaled pxs_threshold=ONE/2;
 
 void hint_round_position(bool r, double t)
 { round_to_pixel=r;
-  dpi_threshold=t;
+//  dpi_threshold=t;
+  pxs_threshold=ONE*72.27/t+0.5;
 }
 
 static void render_char(int x, int y, uint8_t f, uint32_t cc)
 
-{ double w, h, dx, dy, top, left;
-  Font *fp;
+{ scaled w, h, dx, dy, top, left;
   Gcache *g;
-  fp = fonts[f];
-  if (fp==NULL|| fp->resize) fp=hload_font(f);
-  if (fp==NULL) return;
-  g=hload_glyph(f,fp,cc);
-  if (g==NULL) return;
+  if (font_def[f].ff==no_format) hload_font(f);
+  g=hload_glyph(f,cc);
+  if (g==NULL || g->OGLtexture==0) return;
 
-  dx=(double)g->hoff*fp->hpxs;
-  dy=(double)g->voff*fp->vpxs;@/
-  w =(double)g->w*fp->hpxs;
-  h =(double)g->h*fp->vpxs;
-  if (g->OGLtexture==0)
-    g->OGLtexture=nativeTexture(g->bits,g->w,g->h);
+  dx=g->hoff;
+  dy=g->voff;@/
+  w =g->w;
+  h =g->h;
 
-  left=SP2PT(x)-dx;
-  top=SP2PT(y)+h-dy;
+  left=x-dx;
+  top=y+h-dy;
 
+#if 0
   if (round_to_pixel)
   { double pxs;
     if (xdpi<dpi_threshold)
@@ -14113,6 +14154,18 @@ static void render_char(int x, int y, uint8_t f, uint32_t cc)
       top=top*pxs;
     }
   }
+#endif
+ if (round_to_pixel)
+  { 
+    if (x_px_size>pxs_threshold)
+    { left=(left+(x_px_size/2))/x_px_size;
+      left=left*x_px_size;
+    }
+    if (y_px_size>pxs_threshold)
+    { top=(top+(y_px_size/2))/y_px_size;
+      top=top*y_px_size;
+    }
+  }
   nativeGlyph(left,top,w,h,g->OGLtexture);
 }
 
@@ -14125,7 +14178,7 @@ Rendering rules, that is black rectangles, is simpler.
 @<render functions@>=
 static void render_rule(int x, int y, int w, int h)
 {@+ if (w>0 &&  h>0)
-  nativeRule(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h));@+
+  nativeRule(x,y,w,h);@+
 }
 @
 
@@ -14140,7 +14193,7 @@ static void render_image(int x, int y, int w, int h, uint32_t n)
   uint8_t *spos, *sstart, *send;
   spos=hpos; sstart=hstart;send=hend;
   hget_section(n);
-  nativeImage(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),hstart,hend);
+  nativeImage(x,y,w,h,hstart,hend);
   hpos=spos; hstart=sstart;hend=send;
 }
 @
@@ -14178,7 +14231,7 @@ if (cur_color!=list_color && (CUR_BG&0xFF)>0)
   w=hcolor_distance(link(p),g_sign,g_order,glue_set(this_box));
   h=height(this_box)+depth(this_box);
   if (w>0 && h>0)
-    nativeBackground(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),CUR_BG);
+    nativeBackground(x,y,w,h,CUR_BG);
 }
 
 @
@@ -14191,7 +14244,7 @@ if (cur_color!=list_color && (CUR_BG&0xFF)>0)
   y=cur_v+h;
   w=width(this_box);
   if (w>0 && h>0)
-    nativeBackground(SP2PT(x),SP2PT(y),SP2PT(w),SP2PT(h),CUR_BG);
+    nativeBackground(x,y,w,h,CUR_BG);
 }
 @
 
@@ -14911,50 +14964,16 @@ the font format. We know, it contains a PK font if the first two byte contain th
 values |0xF7| and |0x59|.
 
 @<determine the font format and unpack the font@>=
-  if (fp->font_data[0]==0xF7 &&  fp->font_data[1]==0x59)
-  { fp->ff=pk_format;
-    if (!unpack_pk_file(fp)) { free(fp); fp=NULL; }
-  }
+  if (unpack_pk_file(f))
+     font_def[f].ff=pk_format; 
 @
-
-%After unpacking these fonts, we obtain a (device independent) bitmap for each glyph.
-%On Windows the bitmap can be displayed on a Device Context using the |StretchDIBits| function.
-%This function is capable of stretching or shrinking and hence can adjust the
-%resolution. The resolution of the bitmap in the pk file is given be the 
-%two parameters |hppp| (horizonttap pixel per point) and vppp (vertical pixel per point) which
-%are found in the preamble of the pk file.
-
-%For the memory device context we maintain its width, height as well as its
-%horizontal and vertical resolution in dpi (dots per inch).
-%Given the pixel position $(x,y)$ on |hmem|, the offset |d_h| and |d_v| of the hotspot of the
-%glyph, and |w| and |h| the width and height of the glyph, we can compute the necessary
-%parameters to display the glyph on |hmem| using the function |StretchDIBits|.
-
-%With the assembled page on |hmem| in the correct size and resolutio ends the job of the
-%user interface independent part of the hint viewer and the user interface takes over.
-
-%The user interface knows the size of the client window (in pixel) and its resolution. 
-%From this information, it can compute the true size in scaled point of the client window
-%and the desired resolution of |hmem|. The user interface for the WIN32 viewer makes the
-%resolution of |hmem| by a ceratin factor, called |render_factor| bigger. This has two advantages:
-%scaling a high resolution black and white image down produces grey pixels around the border
-%which makes the glyphs appear smoother; further, positions of glyphs are rounded to whole
-%pixels when rendering them on |hmem| and these positions translate to sub-pixel position when scaling
-%down. The user factor can also use a scale factor to display the page larger or smaller than its
-%true size. For example with a scale factor of 2, a glyph 10pt high would measure 20pt on the screen.
-%To make the enlaged page fit on the window, the user interface would request a window of only
-%half the actual width and height, but would double the render factor. The image it receives
-%cann then be displayed stretching it only be half the render factor thus obtaining an image
-%that is scaled down by exactly the render factor filling the complete client window.
 
 For every glyph, there is a |flag| byte in the PK file that tells how the corresponding glyph is
 encoded and a pointer to the encoding itself.
 
-@<definitions of format specific types@>=
-typedef struct
-{ unsigned char flag; /* encoding in the pk file */
-  unsigned char *encoding;
-} PKglyph;
+@<PK specific fields in the glyph cache@>=
+unsigned char pk_glyph_flags; /*how to decode the glyph*/
+unsigned char *pk_glyph_data; /*the data encoding the glyph*/
 @
 
 Before we define two functions, one to unpack a single glyph when it is needed for the first time,
@@ -14977,7 +14996,7 @@ To parse a PK font file, it is necessary to read numbers that are packed in a se
 The parse state therefore needs to be aware of positions inside a byte.
 We store this state as a |PKparse|.
 
-@<definitions of format specific types@>=
+@<PK font functions@>=
 typedef struct {
 int j; /* position of next nybble in |pk_data| */
 int r; /* current repeat count */
@@ -15044,20 +15063,20 @@ We traverse the |pk_data| nybbles sequentially in top-down order.
 The horizontal position |x| and the vertical position |y| in the
 target bitmap start at 0 and |g->h-1|.
 @<PK font functions@>=
-static void pk_runlength(Gcache *g, unsigned char *pk_data) {
+static unsigned char *pk_runlength(Gcache *g, unsigned char *pk_data) {
     PKparse p;
     int x, y; /* position in target bitmap */
     unsigned char *bits; /* target bitmap */
     int n; /* number of pixel left in current run */
     unsigned char gray; /* whether pixel is white in current run */
-    bits=g->bits = (unsigned char *) calloc(g->w * g->h, 1);
-    if (bits == NULL) { g->w = g->h = 0;  return; } /* out of memory */
+    bits = (unsigned char *) calloc(g->w * g->h, 1);
+    if (bits == NULL) { g->w = g->h = 0;  return NULL; } /* out of memory */
     p.j = 0; /* nybble position to start of data */
     p.r = 0; /* repeat count = 0 */
-    p.f = g->pk.flag >> 4; /* dynamic f value */
+    p.f = g->pk_glyph_flags >> 4; /* dynamic f value */
     p.pk_data=pk_data; /* data bytes */
     n = 0;
-    if ((g->pk.flag >> 3) & 1) gray=0x00;
+    if ((g->pk_glyph_flags >> 3) & 1) gray=0x00;
     else gray=0xff;
     y = 0;
     while (y <g->h) {
@@ -15082,6 +15101,7 @@ static void pk_runlength(Gcache *g, unsigned char *pk_data) {
           y++;
         }
     }
+  return bits;
 }
 @
 
@@ -15096,13 +15116,13 @@ using a |mask| to get the next bit and incrementing |pk_data| when necessary.
 The horizontal position |x| and the vertical position |y| in the
 target bitmap start at 0 and |g->h-1|.
 @<PK font functions@>=
-static void pk_bitmap(Gcache *g, unsigned char *pk_data) {
+static unsigned char *pk_bitmap(Gcache *g, unsigned char *pk_data) {
     unsigned char *bits; /* 1 bit per pixel */
     int x, y; /* position in target bitmap */
     unsigned char mask; /* bitmask for the next bit */
  
-    g->bits = bits = (unsigned char *) calloc(g->w * g->h, 1);
-    if (bits == NULL) {g->w = g->h = 0; return; } /* out of memory */
+    bits = (unsigned char *) calloc(g->w * g->h, 1);
+    if (bits == NULL) {g->w = g->h = 0; return NULL; } /* out of memory */
     mask=0x80;
     for (y=0; y<g->h; y++)
       for (x=0; x<g->w; x++)
@@ -15113,6 +15133,7 @@ static void pk_bitmap(Gcache *g, unsigned char *pk_data) {
           mask=mask>>1;
           if (mask==0) { pk_data++; mask=0x80; }
         }
+   return bits;
 }
 @
 
@@ -15120,18 +15141,18 @@ The next function unpacks the glyphs meta data and calls one of the
 unpacking functions just defined.
 @<PK font functions@>=
 
-static void pkunpack_glyph(Gcache *g)
+static void pk_unpack_glyph(uint8_t f, Gcache *g)
 { int i,k;
   unsigned char *pk_data;
-  if (g==NULL || g->pk.encoding==NULL) return; /* no glyph, no data */
-  g->ff=pk_format;
-  if (g->bits!=NULL) return; /* already unpacked */
+  unsigned char *bits;
+  if (g==NULL || g->pk_glyph_data==NULL) return; /* no glyph, no data */
+  if (g->OGLtexture!=0) return; /* already unpacked */
 #if 0  
   DBG(DBGRENDER,"Unpacking glyph %c (0x%x)",g->cc,g->cc);
 #endif 
-  pk_data=g->pk.encoding;
+  pk_data=g->pk_glyph_data;
   i=0;
-  if ((g->pk.flag&7)<4)  /* short form */
+  if ((g->pk_glyph_flags&7)<4)  /* short form */
   { i=i+3; /* skip the TeX font metrics */
 	i=i+1; /*escapement: |g->dy=0; g->dx=PK_READ_1_BYTE(); g->dx= g->dx<<16;| */
 	g->w=PK_READ_1_BYTE();
@@ -15139,7 +15160,7 @@ static void pkunpack_glyph(Gcache *g)
 	g->hoff=(signed char)PK_READ_1_BYTE();
 	g->voff=(signed char)PK_READ_1_BYTE();
   }
-  else if ((g->pk.flag&7)<7) /* extended short form */
+  else if ((g->pk_glyph_flags&7)<7) /* extended short form */
   {  i=i+3; /* skip the TeX font metrics */
 	i=i+2; /*escapement: |g->dy=0; g->dx=PK_READ_2_BYTE(); g->dx= g->dx<<16;| */
 	g->w=PK_READ_2_BYTE();
@@ -15155,9 +15176,16 @@ static void pkunpack_glyph(Gcache *g)
 	g->hoff=(signed int)PK_READ_4_BYTE();
 	g->voff=(signed int)PK_READ_4_BYTE();
   }
-  if ((g->pk.flag>>4)==14) pk_bitmap(g,pk_data+i);
-  else pk_runlength(g,pk_data+i);
-  g->OGLtexture=nativeTexture(g->bits,g->w,g->h);
+  if ((g->pk_glyph_flags>>4)==14) bits=pk_bitmap(g,pk_data+i);
+  else bits=pk_runlength(g,pk_data+i);
+  if (bits!=NULL)
+  { g->OGLtexture=nativeTexture(bits,g->w,g->h);
+    free(bits);
+  }
+  g->hoff*=font_def[f].hpxs;
+  g->voff*=font_def[f].vpxs;@/
+  g->w*=font_def[f].hpxs;
+  g->h*=font_def[f].vpxs;
 }
 @
 
@@ -15165,7 +15193,7 @@ We finish with unpacking the whole PK font file.
 
 @<PK font functions@>=
 
-static Gcache *hnew_glyph(Font *pk, unsigned int cc);
+static Gcache *hnew_glyph(FontDef *fp, unsigned int cc);
 
 
 /* opcodes of pk files */
@@ -15180,115 +15208,139 @@ static Gcache *hnew_glyph(Font *pk, unsigned int cc);
 #define PK_ID    89
 
 
-static int unpack_pk_file(Font *pk)
-/* scan |pk->pk_data| and extract information. Do not unpack glyphs, these are unpacked on demand. */
-{   int i,j;
-    unsigned int k;
-	unsigned char flag;
-	unsigned char *pk_data;
-    pk_data=pk->font_data;
-    i=0;
-	while (i< pk->data_size)
-	  switch(flag=pk_data[i++])
-	{ case PK_XXX1: j=PK_READ_1_BYTE(); i=i+j; break;
-	  case PK_XXX2: j=PK_READ_2_BYTE(); i=i+j;  break;
-	  case PK_XXX3: j=PK_READ_3_BYTE(); i=i+j;  break;
-	  case PK_XXX4: j=PK_READ_4_BYTE(); i=i+j;  break;
-	  case PK_YYY:  i=i+4; break;
-	  case PK_NO_OP: break;
-	  case PK_PRE:
-	  { int csize;
-            double ds; /* the design size in pt */
-            unsigned char id; /* the id currently allways 89 */
-	    id=PK_READ_1_BYTE();
-            if (id!=PK_ID) return 0;
-	    csize=PK_READ_1_BYTE();
-            i=i+csize; /* skip comment */
-            ds=PK_READ_4_BYTE()/(double)(1<<20); /*design size in pt*/
-	    i=i+4; /* skip checksum */
-	    pk->hpxs=(double)(1<<16)/PK_READ_4_BYTE(); /*scaled px/pt to pt/px*/
-	    pk->vpxs=(double)(1<<16)/PK_READ_4_BYTE();
-	    if (ds!=pk->s) 
-	    { double m=pk->s/ds;
-	      pk->hpxs*=m;
-	      pk->vpxs*=m;
-	    }
-	  }
-        break;
-	  case PK_POST: break;
-	  case 248: case 249: case 250: case 251: case 252: case 253: case 254: case 255: break; /* undefined */
-      default: /* the character codes */
-	  {
-		unsigned int pl;
-	    unsigned int cc;
-		Gcache *g;
-		if ((flag&7)==7) /* long form */
-		{ pl=PK_READ_4_BYTE();
-		  cc=PK_READ_4_BYTE();
-		} else if ((flag&4)==4) /* extended short form */
-		{ pl=PK_READ_2_BYTE();
-		  cc=PK_READ_1_BYTE();
-		  pl= pl+((flag&3)<<16);
-		}else /* short form */
-		{ pl=PK_READ_1_BYTE();
-		  cc=PK_READ_1_BYTE();
-		  pl= pl+((flag&3)<<8);
-		}
-		g = hnew_glyph(pk,cc);
-		g->pk.flag=flag;
-		g->pk.encoding=pk_data+i;
-		g->bits=NULL;
-		i=i+pl;
-	  }
-	  break;
+static int unpack_pk_file(internal_font_number f)
+/* scan font f and extract information. Do not unpack glyphs, these are unpacked on demand. */
+{ int i,j;
+  unsigned int k;
+  unsigned char flag;
+  unsigned char *pk_data;
+  int pk_size;
+  { unsigned char *spos, *sstart, *send;
+    spos=hpos; sstart=hstart;send=hend;@/
+    hget_section(font_def[f].q);@/
+    pk_data =hstart;
+    pk_size =hend-hstart;@/
+    hpos=spos; hstart=sstart;hend=send;
+  }
+  if (pk_data[0]!=0xF7 ||  pk_data[1]!=0x59)
+    return 0;
+  i=0;
+  while (i< pk_size)
+    switch(flag=pk_data[i++])
+    { case PK_XXX1: j=PK_READ_1_BYTE(); i=i+j; break;
+      case PK_XXX2: j=PK_READ_2_BYTE(); i=i+j; break;
+      case PK_XXX3: j=PK_READ_3_BYTE(); i=i+j; break;
+      case PK_XXX4: j=PK_READ_4_BYTE(); i=i+j; break;
+      case PK_YYY:  i=i+4; break;
+      case PK_NO_OP: break;
+      case PK_PRE:
+      { int csize;
+        unsigned int ds; /* the design size in 12.20 fixed-point format */
+        unsigned char id; /* the id currently allways 89 */
+        unsigned sdpp; /* scaled dots per point */
+	id=PK_READ_1_BYTE();
+        if (id!=PK_ID) return 0;
+	csize=PK_READ_1_BYTE();
+        i=i+csize; /* skip comment */
+        ds=PK_READ_4_BYTE(); /*design size in 12.20 pt*/
+	i=i+4; /* skip checksum */
+	sdpp=PK_READ_4_BYTE();
+	font_def[f].hpxs=((uint64_t)1<<32)/sdpp; /*scaled px/pt to scaled pt/px*/
+	sdpp=PK_READ_4_BYTE();
+	font_def[f].vpxs=((uint64_t)1<<32)/sdpp; /*scaled px/pt to scaled pt/px*/
+	if (ds!=(font_def[f].s<<4)) 
+	{ double m=(double)(font_def[f].s<<4)/ds;
+	  font_def[f].hpxs*=m;
+	  font_def[f].vpxs*=m;
 	}
-	return 1;
+        font_def[f].resize=false;
+      }
+      break;
+      case PK_POST: break;
+      case 248: case 249: case 250: case 251: case 252: case 253: case 254: case 255: break; /* undefined */
+      default: /* the character codes */
+      { unsigned int pl;
+        unsigned int cc;
+        Gcache *g;
+        if ((flag&7)==7) /* long form */
+        { pl=PK_READ_4_BYTE();
+          cc=PK_READ_4_BYTE();
+        } else if ((flag&4)==4) /* extended short form */
+        { pl=PK_READ_2_BYTE();
+          cc=PK_READ_1_BYTE();
+          pl= pl+((flag&3)<<16);
+        }else /* short form */
+        { pl=PK_READ_1_BYTE();
+          cc=PK_READ_1_BYTE();
+          pl= pl+((flag&3)<<8);
+        }
+        g = hnew_glyph(font_def+f,cc);
+        g->pk_glyph_flags=flag;
+        g->pk_glyph_data=pk_data+i;
+        i=i+pl;
+      }
+      break;
+    }
+  return 1;
 }
 
 @
 
+We need a dummy version for \.{hinttype}:
+
+@<test functions@>=
+static int unpack_pk_file(internal_font_number f)
+{ return 1; }
+@
 
 \subsection{PostScript Type 1, TrueType, and OpenType Fonts}
 
 To access font metrics that are otherwise contained in a \.{.TFM} file,
 there is a collection of functions that is shared with Hi\TeX.
-Make shure that any changes here are also made in  Hi\TeX.
+So make shure that any changes here are also made in  Hi\TeX!
 
-It defines some global varaibles:
+Here are some global variables. The FreeType libraray must be initialized
+before using any of its functions. You can test |ft_library| to see if the
+libraray needs initialization.
+The |font_face| array contains for each
+font number |f| an |FT_Face| if the font face is aleady loaded. 
+Before loading or after unloading the font face, the value in the array is |NULL|.
+If |ft_libraray==NULL| all entries in |font_face| are |NULL| as well. 
 
 @<\HINT\ variables@>=
-static FT_Library ft_library=0;
-static FT_Face font_face[0x100]={NULL};
+static FT_Library ft_library=NULL;
 static FT_Error ft_err;
 
 
-@ To initialize and destroy the Free Type library
-and the array of font faces, these functions are needed:
+@ To initialize and destroy the Free Type library we define the folowing functions.
+The functions to load and unload a font face are defined later.
 
 @<FreeType font functions@>=
+
 static void ft_init(void)
-{ int i;
+{
   if (ft_library) return;
   ft_err =  FT_Init_FreeType(&ft_library);
   if (ft_err)
+  { ft_library=NULL;
     QUIT("Unable to initialize the FreeType Library.");
-  for (i=0; i<0x100;i++)
-    font_face[i]=NULL;
+  }
 }
 
-static void ft_destroy(void)
+static void ft_unload_faces(void)
 { int i;
   if (ft_library==NULL) return;
-  for (i=0;i<0x100;i++)
-    if (font_face[i]!=NULL)
-    {  ft_err= FT_Done_Face(font_face[i]); font_face[i]=NULL; }
+  for (i=0; i<=max_ref[font_kind];i++)
+    if (font_def[i].ft_face!=NULL)
+      ft_unload_font_face(i);
+} 
+
+static void ft_destroy(void)
+{ ft_unload_faces();
   ft_err =  FT_Done_FreeType(ft_library);
   if (ft_err)
     MESSAGE("Error releasing the FreeType Library.");
   ft_library=NULL;
-  /* this should probably go somewhere else */
-  for (i=0;i<0x100;i++)
-  { free(fonts[i]); fonts[i]=NULL;} 
 }
 @
 
@@ -15320,8 +15372,14 @@ static FT_UInt ft_glyph(FT_Face ft_face, int c)
 #endif
 
 #ifdef DEBUG
-static bool ft_exists(FT_Face ft_face, int c)
-{ return FT_Get_Char_Index(ft_face, c)!=0;
+static bool ft_exists(internal_font_number @!f, int c)
+{ FT_Face ft_face;
+  if (font_def[f].ff==no_format) hload_font(f);
+  ft_face=font_def[f].ft_face;
+  if (ft_face==NULL)
+    ft_face=ft_load_font_face(f);
+  if (ft_face==NULL) return false;
+  return FT_Get_Char_Index(ft_face, c)!=0;
 }
 #endif
 
@@ -15402,14 +15460,8 @@ static int ft_first(FT_Face ft_face)
 
 To unpack these fonts, we use the FreeType library\cite{freetype}.
 
-The data type for FreeType glyphs is still empty.
-@<definitions of format specific types@>=
-typedef struct
-{ int dummy;
-} FTglyph;
-@
 
-We use |FT_New_Memory_Face| to unpack the font and initialize the |Font| structure.
+We use |FT_New_Memory_Face| to unpack the font.
 To determine the rendering size, we use the function |font_at_size| to
 obtain the size of the font in scaled point and convert it; the variable |f->s| then
 contains the size in point as a floating point value.
@@ -15418,36 +15470,50 @@ of |xdpi| and |ydpi|. If at a later time the resolution changes, for example
 because of a scaling operation, it might be necessary to rerender the fonts.
 This can be achived by calling |hint_clear_fonts(true)|.
 
-The function |load_font_face(f)| is called only if |font_face[f]==NULL|
-and should be called whenever |font_face[f]| is needed but not yet defined.
+The function |ft_load_font_face(f)| is called only if |fonts[f]->ft_face==NULL|
+and should be called whenever | |fonts[f]->ft_face| is needed but not yet defined.
 
 
 @<FreeType font functions@>=
 
-static FT_Face hload_font_face(uint8_t f)
+static FT_Face ft_load_font_face(uint8_t f)
 { int ft_err;
-  Font *fp=fonts[f];
   FT_Face ft_face;
+  unsigned char *ft_data;
+  int ft_size;
+  { unsigned char *spos, *sstart, *send;
+    spos=hpos; sstart=hstart;send=hend;@/
+    hget_section(font_def[f].q);@/
+    ft_data =hstart;
+    ft_size =hend-hstart;@/
+    hpos=spos; hstart=sstart;hend=send;
+  }
   ft_err = FT_New_Memory_Face(ft_library,
-                          fp->font_data, fp->data_size,0,&ft_face);                     
+                          ft_data, ft_size,0,&ft_face);                     
   if (ft_err)
   { LOG("Unable to create font %d\n",f);
     return NULL;
   }
-  font_face[f]=ft_face;
+  font_def[f].ft_face=ft_face;
   @<Select the correct encoding@>@;
   @<Set the required size@>@;
   FT_Set_Transform(ft_face,NULL,NULL);
   return ft_face;
 }
+
+static void ft_unload_font_face(uint8_t f)
+{  ft_err= FT_Done_Face(font_def[f].ft_face); 
+   font_def[f].ft_face=NULL; 
+}
+
 @
 
 A FreeType font file may contain different character encodings,
 the most common beeing the Unicode encoding. \TeX's character
 encoding is a very special encoding, but fortunately most
 of the fonts used with \TeX\ contain the correct character map
-marked as |FT_ENCODING_ADOBE_CUSTOM|. We do not check for 
-errors, because it is better to use the font with the wrong
+marked as |FT_ENCODING_ADOBE_CUSTOM|. We just log error, 
+because it is better to use the font with the wrong
 character map than to quit the program.
 
 @<Select the correct encoding@>=
@@ -15457,24 +15523,31 @@ character map than to quit the program.
  { ft_err = FT_Select_Charmap(ft_face,FT_ENCODING_ADOBE_CUSTOM); 
    if (ft_err)  ft_err =FT_Select_Charmap(ft_face,FT_ENCODING_UNICODE);
  }
- if (ft_err)  LOG("Unable to select encoding for font %d\n",fp->n);
+ if (ft_err)  LOG("Unable to select encoding for font %d\n",f);
 @
 
 We use the FreeType library to render outline fonts.
 These fonts can be rendered at any
 size and we need to set the correct size.
-Note that FreeType needs the size in ``big points''
-not \TeX\ points.
+ The size parameter of |FT_Set_Char_Size|
+is a fixed point rational number with 6 binary digits after
+the binary point where as the font size in |font_def[f].s]
+has 16 binary digits after the binary point.
+Note that FreeType needs the size in ``big points'' (72pt per inch)
+not \TeX\ points (72.27pt per inch)
 
 @<Set the required size@>=
-   ft_err = FT_Set_Char_Size(
+{ FT_F26Dot6 s;
+  s = font_def[f].s*(72.00/72.27)*((double)(1<<6)/(double)(1<<16))+0.5;
+  ft_err = FT_Set_Char_Size(
             ft_face,    /* handle to face object           */
             0,       /* |char_width| in $1/64$th of points  */
-            (FT_F26Dot6)(0.5+(fp->s*64.0*72.0/72.27)),  /* |char_height| in $1/64$th of points */
-            72.27/fp->hpxs,     /* horizontal device resolution    */
-            72.27/fp->vpxs);   /* vertical device resolution      */
+            s,  /* |char_height| in $1/64$th of points */
+            72.27/(font_def[f].hpxs/(double)ONE),     /* horizontal device resolution    */
+            72.27/(font_def[f].vpxs/(double)ONE));   /* vertical device resolution      */
   if (ft_err) QUIT("Unable to set FreeType glyph size"); 
- fp->resize=false;
+ font_def[f].resize=false;
+}
 @
 
 After translating the character code |cc| into the glyph index |i| using
@@ -15490,16 +15563,17 @@ displacement is magnified for scaled fonts, so subtracting 1 is not enough
 in this cases.
 
 @<render functions@>=
-static void ft_unpack_glyph(uint8_t f, Font *fp, Gcache *g, uint32_t cc)
+static void ft_unpack_glyph(uint8_t f, Gcache *g, uint32_t cc)
 { int e,i;
-  FT_Face ft_face=font_face[f];
+ unsigned char *bits;
+  FT_Face ft_face=font_def[f].ft_face;
   if (ft_face==NULL)
-    ft_face=hload_font_face(f);
+    ft_face=ft_load_font_face(f);
   if (ft_face==NULL)
    QUIT("Unable to create FreeType face for font %d (%s)",f, font_def[f].n);
-  if (fp->resize)
-  { fp->hpxs=72.27/xdpi;
-    fp->vpxs=72.27/ydpi;
+  if (font_def[f].resize)
+  { font_def[f].hpxs=x_px_size;
+    font_def[f].vpxs=y_px_size;
     @<Set the required size@>@;
   }
   i = FT_Get_Char_Index( ft_face, cc);
@@ -15513,12 +15587,15 @@ static void ft_unpack_glyph(uint8_t f, Font *fp, Gcache *g, uint32_t cc)
   g->h=ft_face->glyph->bitmap.rows;
   g->hoff=-ft_face->glyph->bitmap_left;
   g->voff=ft_face->glyph->bitmap_top-1;
-  g->bits=calloc(g->w*g->h, 1);
-  if (g->bits==NULL) QUIT("Out of memory for FreeType glyph %c (%u)",(char)cc,cc);
-  memcpy(g->bits,ft_face->glyph->bitmap.buffer,g->w*g->h);
-
-  g->ff=ft_format;
-  g->OGLtexture=nativeTexture(g->bits,g->w, g->h);
+  bits=calloc(g->w*g->h, 1);
+  if (bits==NULL) QUIT("Out of memory for FreeType glyph %c (%u)",(char)cc,cc);
+  memcpy(bits,ft_face->glyph->bitmap.buffer,g->w*g->h);
+  g->OGLtexture=nativeTexture(bits,g->w, g->h);
+  free(bits);
+  g->hoff*=font_def[f].hpxs;
+  g->voff*=font_def[f].vpxs;@/
+  g->w*=font_def[f].hpxs;
+  g->h*=font_def[f].vpxs;
 }
 
 @
@@ -15533,23 +15610,40 @@ all of them in advance.
 
 @<determine the font format and unpack the font@>=
   else
-  { fp->ff=ft_format;
-    fp->hpxs=72.27/xdpi;
-    fp->vpxs=72.27/ydpi;
+  { font_def[f].ff=ft_format;
+    font_def[f].hpxs=x_px_size;
+    font_def[f].vpxs=y_px_size;
   }
 @
 
 We close with the functions to compute font metrics.
 
 @<FreeType font functions@>=
-scaled x_char_width(uint8_t f, int c)
-{ FT_Face ft_face=font_face[f];
+scaled ft_char_width(uint8_t f, int c)
+{ FT_Face ft_face;
+  if (font_def[f].ff==no_format) hload_font(f);
+  ft_face=font_def[f].ft_face;
   if (ft_face==NULL)
-    ft_face=hload_font_face(f);
+    ft_face=ft_load_font_face(f);
   if (ft_face==NULL)
     return 0;
   return ft_width(ft_face, c, font_size[f]);
 }
+@
+
+
+@ @<\HINT\ declarations@>=
+#ifdef DEBUG
+static bool ft_exists(internal_font_number @!f, int c);
+#endif
+
+static scaled ft_char_width(uint8_t f, int c);
+static void ft_destroy(void);
+static FT_Face ft_load_font_face(uint8_t f);
+static void ft_unload_font_face(uint8_t f);
+static scaled ft_glyph_width(FT_Face ft_face, FT_UInt ft_gid, scaled s);
+static void ft_glyph_height_depth(FT_Face ft_face, FT_UInt ft_gid,
+  scaled *h, scaled *d, scaled s);
 @
 
 
@@ -15888,14 +15982,15 @@ We can then list the currently allocated records.
 
 @<\HINT\ auxiliar functions@>=
 #ifdef DEBUG
-static pointer leaks[1<<16] = {0};
+#define MAX_LEAKS (1<<16)
+static pointer leaks[MAX_LEAKS] = {0};
 #endif
 
 static void leak_clear(void)
 { 
 #ifdef DEBUG
   int i;
-  for (i=0;i<0x10000;i++)
+  for (i=0;i<MAX_LEAKS;i++)
      leaks[i]=0;
 #endif
 }
@@ -15922,14 +16017,14 @@ static void list_leaks(void)
 { 
 #ifdef DEBUG
   int i;
-  for (i=0;i<0x10000;i++)
+  for (i=0;i<MAX_LEAKS;i++)
    if (leaks[i]!=0)
      fprintf(stderr,"ERROR:leak final: p=%d, s=%d\n",i,leaks[i]);
 #endif
 }
 @ 
 
-@<\HINT\ |static|@>=
+@<\HINT\ declarations@>=
 static void leak_in(pointer p, int s);
 static void leak_out(pointer p, int s);
 @
@@ -15963,9 +16058,6 @@ static void leak_out(pointer p, int s);
 enum {@+@<Constants in the outer block@>@+};
 @<Types in the outer block@>@;
 
-
-@<\HINT\ |static|@>@;
-
 static void hpack_page(void);
 static void happend_insertion(pointer p);
 
@@ -15973,12 +16065,14 @@ static void happend_insertion(pointer p);
 @<TEG macros@>@;
 
 @<\HINT\ types@>@;
-@<\HINT\ private types@>@;
+@<\HINT\ dependent types@>@;
 @<\HINT\ variables@>@;
 
-@<\TeX\ functions@>@;
-
 @<\HINT\ declarations@>@;
+
+
+@<code from \TeX@>@;
+
 @<\HINT\ auxiliar functions@>@;
 
 @<get functions@>@;
@@ -16043,19 +16137,12 @@ extern void hint_gamma(double gamma);
 extern int hint_print_on(int w, int h,  int bpr, int bpp, unsigned char *bits);
 extern int hint_print_off(void);
 extern int hint_print(unsigned char *bits);
-extern int hint_find_link(scaled x, scaled y, scaled precission);
+extern int hint_find_link(int x_px, int y_px, int precission_px);
 extern uint64_t hint_link_page(int i);
 extern void hint_show_page(void);
 extern void hint_round_position(bool r, double t);
 
-typedef struct { 
-uint64_t pos;  
-uint8_t depth; 
-uint8_t where; 
-int p; /* pointer to the list of title nodes */
-char *title; /* title as sequence of utf8 character codes */
-} hint_Outline;
-
+@<definition of the |hint_Outline| type@>@;
 extern int hint_get_outline_max(void);
 extern hint_Outline *hint_get_outlines(void);
 extern uint64_t hint_outline_page(int i);
@@ -16065,27 +16152,7 @@ extern uint64_t hint_outline_page(int i);
 extern bool hint_map(void);
 extern void hint_unmap(void);
 
-
-
-
-
-
-
-
-
 #endif 
-@
-
-@ @<\HINT\ |static|@>=
-#ifdef DEBUG
-static bool ft_exists(FT_Face ft_face, int c);
-#endif
-
-static scaled x_char_width(uint8_t f, int c);
-static FT_Face hload_font_face(uint8_t f);
-static scaled ft_glyph_width(FT_Face ft_face, FT_UInt ft_gid, scaled s);
-static void ft_glyph_height_depth(FT_Face ft_face, FT_UInt ft_gid,
-  scaled *h, scaled *d, scaled s);
 @
 
 \subsection{{\tt rendernative.h}}

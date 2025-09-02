@@ -2,10 +2,6 @@ package edu.hm.cs.hintview;
 
 // Wrapper for native library
 
-import android.graphics.Bitmap;
-
-import java.util.BitSet;
-
 public class HINTVIEWLib {
 
     static {
@@ -18,7 +14,7 @@ public class HINTVIEWLib {
 
     public static native void begin(int fileDescriptor);
 
-    public static native void change(int width, int height, double xdpi, double ydpi);
+    public static native void resize(int width, int height, double xdpi, double ydpi);
 
     public static native boolean singleTap(double x, double y, double xdpi, double ydpi);
 
