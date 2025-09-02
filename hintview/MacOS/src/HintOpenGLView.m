@@ -246,6 +246,7 @@ static int search_length;
     { loading=1;
       NSLog(@"reload File");
       fpos=hint_get_fpos();
+      hint_end();
       hint_begin();
       pos=hint_set_fpos(fpos);
       clearCursor();
