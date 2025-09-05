@@ -235,6 +235,7 @@ return 1;
 
 static void reload_file(void)
 { double fpos=hint_get_fpos();
+  hint_end();
   hint_begin();
   pos=hint_set_fpos(fpos);
   //LOG("reloading...\n");
@@ -403,8 +404,8 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
   switch (KEY_MOD(key,mods)) {
   case CTRL(GLFW_KEY_A): /* auto reload */
     autoreload=!autoreload;
-    if (!autoreload)
-      break; /* else fall through to reload */
+    if (autoreload)
+      goto reload;
   case CTRL(GLFW_KEY_F): /* file */
     if (set_input_file(NULL))
       open_file(home);
@@ -438,6 +439,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     glfwSetWindowShouldClose(window,1);
     break;
   case CTRL(GLFW_KEY_R): /* reload */
+  reload:
     if (!loading)
     { loading=1;
       HINT_TRY reload_file();
