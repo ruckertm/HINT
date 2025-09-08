@@ -30,7 +30,7 @@
 
 @i symbols.w
 
-@
+
 
 \makeindex
 \maketoc
@@ -42,17 +42,8 @@
 
 \null
 
-\font\largetitlefont=cmssbx10 scaled\magstep4
-\font\Largetitlefont=cmssbx10 at 40pt
-\font\hugetitlefont=cmssbx10 at 48pt
-\font\smalltitlefontit=cmbxti10 scaled\magstep3
-\font\smalltitlefont=cmssbx10 scaled\magstep3
-
 %halftitle
-\def\raggedleft{\leftskip=0pt plus 5em\parfillskip=0pt
-\spaceskip=.3333em \xspaceskip=0.5em \emergencystretch=1em\relax
-\hyphenpenalty=1000\exhyphenpenalty=1000\pretolerance=10000\linepenalty=5000
-}
+
 \hbox{}
 \vskip 0pt plus 1fill
 { \baselineskip=60pt
@@ -96,7 +87,7 @@
 \figrm
 \parindent=0pt
 %\null
-{\raggedright\advance\rightskip 3.5pc
+{\raggedright
 The author has taken care in the preparation of this book,
 but makes no expressed or implied warranty of any kind and assumes no
 responsibility for errors or omissions. No liability is assumed for
@@ -112,7 +103,7 @@ Ruckert, Martin.
 }
 \bigskip
 
-{\raggedright\advance\rightskip 3.5pc
+{\raggedright
 \def\:{\discretionary{}{}{}}
 Internet page  {\tt http:\://hint.\:userweb.\:mwn.\:de/\:hint/\:format.html}
 may contain current information about this book, downloadable software,
@@ -194,19 +185,35 @@ August 20, 2019 \hfill Martin Ruckert}
 
 \mainmatter
 
-{\smalltitlefont Part One: \TeX}
+\part{Part One: \TeX}
 
 Some words about what comes here.
-\vfill
+\vskip 0pt plus 3fill
 \eject
 
-
 \begingroup
+\def\B{\rightskip=0pt plus 100pt minus 10pt % go into C mode
+  \sfcode`;=3000
+  \pretolerance 10000
+  \hyphenpenalty 1000 % so strings can be broken (discretionary \ is inserted)
+  \exhyphenpenalty 10000
+  \global\ind=2 \1\ \unskip}
 \def\M#1{\MN{#1}\ifon\vfil\penalty-100\vfilneg % beginning of section
-   \vskip\intersecskip
-   \noindent{\bf #1.\quad}\ignorespaces}
-\def\N#1#2#3.{\MN{#2}\ifon\stsec\smallskip
-\subsection{#3}}% beginning of section
+   \vskip\intersecskip\startsection\ignorespaces}
+\def\N#1#2#3.{% beginning of starred section
+  \MN{#2}%
+  \ifon\ifnum#1<\secpagedepth \vfil\eject % force page break if depth is small
+    \else\vfil\penalty-100\vfilneg\vskip\intersecskip\fi\fi
+  \message{*\secno} % progress report
+  \mark{{\sectionname}{\subsectionname}}%
+  \subsubsectioncount=0\subsectioncount=0%
+  \advance\sectioncount by 1%updating counts
+  \let\thesection\topsection
+  \gdef\sectionname{\topsection\quad#3}%
+  \gdef\subsectionname{\thesection\quad#3}%
+  \tocsection{1}{\thesection}{#3}%
+  \ifon\startsection{\bf#3.\quad}\ignorespaces
+}
 
 
 % This program is copyright (C) 1982 by D. E. Knuth; all rights are reserved.
@@ -359,6 +366,7 @@ features of the implementation, but they rarely attempt to explain the
 @.WEB@>
 @:TeXbook}{\sl The \TeX book@>
 
+
 @ The present implementation has a long ancestry, beginning in the summer
 of~1977, when Michael~F. Plass and Frank~M. Liang designed and coded
 a prototype
@@ -422,28 +430,6 @@ known as `\TeX' [cf.~Stanford Computer Science report CS1027,
 November 1984].
 
 @d banner "This is HINT based on TeX, Version 3.141592653" /*printed when \TeX\ starts*/
-
-@ The following is an outline of the program, whose
-components will be filled in later, using the conventions of \.{WEB}.
-@.WEB@>
-For example, the portion of the program called `\<Global
-variables>' below will be replaced by a sequence of variable declarations
-that starts in $\section 123$ of this documentation. In this way, we are able
-to define each individual global variable when we are prepared to
-understand what it means; we do not have to define all of the globals at
-once.  Cross references in $\section 123$, where it says ``See also
-sections 456, \dots,'' also make it possible to look at the set of
-all global variables, if desired.  Similar remarks apply to the other
-portions of the program.
-
-@<code from \TeX@>=
-@<Global variables@>@;
-@#
-#ifdef HINTTYPE
-@<Basic printing procedures@>@;
-#endif
-@<Basic error handling procedures@>@;
-
 
 @ Some of the code below is intended to be used only when diagnosing the
 strange behavior that sometimes occurs when \TeX\ is being installed or
@@ -542,40 +528,9 @@ because some fussy \PASCAL\ compilers will complain about redundant labels.
 @d do_nothing  /*empty statement*/
 @d empty 0 /*symbolic name for a null constant*/
 
-@* The character set.
-In order to make \TeX\ readily portable to a wide variety of
-computers, all of its input text is converted to an internal eight-bit
-code that includes standard ASCII, the ``American Standard Code for
-Information Interchange.''  This conversion is done immediately when each
-character is read in. Conversely, characters are converted from ASCII to
-the user's external representation just before they are output to a
-text file.
-
-Such an internal code is relevant to users of \TeX\ primarily because it
-governs the positions of characters in the fonts. For example, the
-character `\.A' has ASCII code $65=0101$, and when \TeX\ typesets
-this letter it specifies character number 65 in the current font.
-If that font actually has `\.A' in a different position, \TeX\ doesn't
-know what the real position is; the program that does the actual printing from
-\TeX's device-independent files is responsible for converting from ASCII to
-a particular font encoding.
-@^ASCII code@>
-
-\TeX's internal code also defines the value of constants
-that begin with a reverse apostrophe; and it provides an index to the
-\.{\\catcode}, \.{\\mathcode}, \.{\\uccode}, \.{\\lccode}, and \.{\\delcode}
-tables.
-
-@ Characters of text that have been converted to \TeX's internal form
-are said to be of type |ASCII_code|, which is a subrange of the integers.
-
-@<Types...@>=
-typedef uint8_t ASCII_code; /*eight-bit numbers*/
-
 
 @* Printing.
-
-@ Macro abbreviations for output to the terminal and to the log file are
+Macro abbreviations for output to the terminal and to the log file are
 defined here for convenience. Some systems need special conventions
 for terminal output, and it is possible to adhere to those conventions
 by changing |wterm|, |wterm_ln|, and |wterm_cr| in this section.
@@ -591,7 +546,7 @@ static void print_ln(void) /*prints an end-of-line*/
 { @+putc('\n',hlog); file_offset=0;
 }
 
-static void print_char(ASCII_code @!s) /*prints a single character*/
+static void print_char(uint8_t @!s) /*prints a single character*/
 {@+if (s=='\n')
   {@+print_ln();return;
   }
@@ -640,7 +595,7 @@ future software arch\ae ologists.
 
 @* Reporting errors.
 
-@ Since errors can be detected almost anywhere in \TeX, we want to declare the
+Since errors can be detected almost anywhere in \TeX, we want to declare the
 error procedures near the beginning of the program. But the error procedures
 in turn use some other procedures, which need to be declared |forward|
 before we get to |error| itself.
@@ -690,8 +645,7 @@ apply for |%| as well as for |/|.)
 @ Here is a routine that calculates half of an integer, using an
 unambiguous convention with respect to signed odd numbers.
 
-@<code from \TeX@>=
-
+@<\TeX\ functions@>=
 static int half(int @!x)
 {@+if (odd(x)) return(x+1)/2;
 else return x/2;
@@ -774,13 +728,13 @@ overflow; so the routines set the global variable |arith_error| to |true|
 instead of reporting errors directly to the user. Another global variable,
 |rem|, holds the remainder after a division.
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static bool @!arith_error; /*has arithmetic overflow occurred recently?*/
 static scaled @!rem; /*amount subtracted to get an exact division*/
 
 @ We also need to divide scaled dimensions by integers.
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static scaled x_over_n(scaled @!x, int @!n)
 {@+bool negative; /*should |rem| be negated?*/
 scaled x_over_n;
@@ -821,7 +775,7 @@ computing at most 1095 distinct values, but that is plenty.
 
 @d inf_bad 10000 /*infinitely bad value*/
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static halfword badness(scaled @!t, scaled @!s) /*compute badness, given |t >= 0|*/
 {@+int r; /*approximation to $\alpha t/s$, where $\alpha^3\approx
   100\cdot2^{18}$*/
@@ -1067,7 +1021,7 @@ we try first to increase |mem_end|. If that cannot be done, i.e., if
 |mem_end==mem_max|, we try to decrease |hi_mem_min|. If that cannot be
 done, i.e., if |hi_mem_min==lo_mem_max+1|, we have to quit.
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static pointer get_avail(void) /*single-word node allocation*/
 {@+pointer p; /*the new node being got*/
 p=avail; /*get top location in the |avail| stack*/
@@ -1131,7 +1085,7 @@ space exists.
 If |get_node| is called with $s=2^{30}$, it simply merges adjacent free
 areas and returns the value |max_halfword|.
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static pointer get_node(int @!s) /*variable-size node allocation*/
 {@+
 pointer p; /*the node currently under inspection*/
@@ -1218,7 +1172,7 @@ the operation |free_node(p, s)| will make its words available, by inserting
 |p| as a new empty node just before where |rover| now points.
 @^inner loop@>
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static void free_node(pointer @!p, halfword @!s) /*variable-size node
   liberation*/
 {@+pointer q; /*|llink(rover)|*/
@@ -1333,7 +1287,7 @@ which all subfields have the values corresponding to `\.{\\hbox\{\}}'.
 (The |subtype| field is set to |min_quarterword|, for historic reasons
 that are no longer relevant.)
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static pointer new_null_box(void) /*creates a new box node*/
 {@+pointer p; /*the new node*/
 p=get_node(box_node_size);type(p)=hlist_node;
@@ -1364,7 +1318,7 @@ an hlist; the |height| and |depth| are never running in a~vlist.
 makes all the dimensions ``running,'' so you have to change the
 ones that are not allowed to run.
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static pointer new_rule(void)
 {@+pointer p; /*the new node*/
 p=get_node(rule_node_size);type(p)=rule_node;
@@ -1391,15 +1345,9 @@ split insertion of the same class.  There is one more field, the
 @d ins_ptr(A) info(A+4) /*the vertical list to be inserted*/
 @d split_top_ptr(A) link(A+4) /*the |split_top_skip| to be used*/
 
-@ A |mark_node| has a |mark_ptr| field that points to the reference count
-of a token list that contains the user's \.{\\mark} text.
-This field occupies a full word instead of a halfword, because
-there's nothing to put in the other halfword; it is easier in \PASCAL\ to
-use the full word than to risk leaving garbage in the unused half.
+@ \TeX's |mark_node| is not used.
 
-@d mark_node 4 /*|type| of a mark node*/
-@d small_node_size 2 /*number of words to allocate for most node types*/
-@d mark_ptr(A) mem[A+1].i /*head of the token list for a mark*/
+
 
 @ An |adjust_node|, which occurs only in horizontal lists,
 specifies material that will be moved out into the surrounding
@@ -1408,7 +1356,7 @@ operation.  The |adjust_ptr| field points to the vlist containing this
 material.
 
 @d adjust_node 5 /*|type| of an adjust node*/
-@d adjust_ptr(A) mark_ptr(A) /*vertical list to be moved out of horizontal list*/
+@d adjust_ptr(A) mem[A+1].i /*vertical list to be moved out of horizontal list*/
 
 @ A |ligature_node|, which occurs only in horizontal lists, specifies
 a character that was fabricated from the interaction of two or more
@@ -1425,6 +1373,7 @@ The |subtype| field is 0, plus 2 and/or 1 if the original source of the
 ligature included implicit left and/or right boundaries.
 
 @d ligature_node 6 /*|type| of a ligature node*/
+@d small_node_size 2 /*number of words to allocate for most node types*/ 
 @d lig_char(A) A+1 /*the word where the ligature is to be found*/
 @d lig_ptr(A) link(lig_char(A)) /*the list of characters*/
 
@@ -1434,7 +1383,7 @@ a |new_lig_item| function, which returns a two-word node having a given
 |character| field. Such nodes are used for temporary processing as ligatures
 are being created.
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static pointer new_ligature(quarterword @!f, quarterword @!c, pointer @!q)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=ligature_node;
@@ -1468,7 +1417,7 @@ not chosen.
 @d pre_break(A) llink(A) /*text that precedes a discretionary break*/
 @d post_break(A) rlink(A) /*text that follows a discretionary break*/
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static pointer new_disc(void) /*creates an empty |disc_node|*/
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=disc_node;
@@ -1503,7 +1452,7 @@ the amount of surrounding space inserted by \.{\\mathsurround}.
 @d before 0 /*|subtype| for math node that introduces a formula*/
 @d after 1 /*|subtype| for math node that winds up a formula*/
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static pointer new_math(scaled @!w, small_number @!s)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=math_node;
@@ -1511,7 +1460,7 @@ subtype(p)=s;width(p)=w;return p;
 }
 
 @ \TeX\ makes use of the fact that |hlist_node|, |vlist_node|,
-|rule_node|, |ins_node|, |mark_node|, |adjust_node|, |ligature_node|,
+|rule_node|, |ins_node|, |adjust_node|, |ligature_node|,
 |disc_node|, |whatsit_node|, and |math_node| are at the low end of the
 type codes, by permitting a break at glue in a list if and only if the
 |type| of the previous node is less than |math_node|. Furthermore, a
@@ -1585,7 +1534,7 @@ typedef int8_t glue_ord; /*infinity to the 0, 1, 2, or 3 power*/
 The reference count in the copy is |null|, because there is assumed
 to be exactly one reference to the new specification.
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static pointer new_spec(pointer @!p) /*duplicates a glue specification*/
 {@+pointer q; /*the new spec*/
 q=get_node(glue_spec_size);@/
@@ -1597,7 +1546,7 @@ return q;
 @ Glue nodes that are more or less anonymous are created by |new_glue|,
 whose argument points to a glue specification.
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static pointer new_glue(pointer @!q)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=glue_node;subtype(p)=normal;
@@ -1622,7 +1571,7 @@ inserted from \.{\\mkern} specifications in math formulas).
 
 @ The |new_kern| function creates a kern node having a given width.
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static pointer new_kern(scaled @!w)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=kern_node;
@@ -1646,7 +1595,7 @@ break will be forced.
 @ Anyone who has been reading the last few sections of the program will
 be able to guess what comes next.
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static pointer new_penalty(int @!m)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=penalty_node;
@@ -1672,10 +1621,6 @@ Unset nodes will be changed to box nodes when alignment is completed.
 @d glue_stretch(A) mem[A+glue_offset].sc /*total stretch in an unset node*/
 @d glue_shrink(A) shift_amount(A) /*total shrink in an unset node*/
 @d span_count(A) subtype(A) /*indicates the number of spanned columns*/
-
-@ In fact, there are still more types coming. When we get to math formula
-processing we will see that a |style_node| has |type==14|; and a number
-of larger type codes will also be defined, for use in math mode only.
 
 @ Warning: If any changes are made to these data structure layouts, such as
 changing any of the node sizes or even reordering the words of nodes,
@@ -1715,7 +1660,7 @@ harmless to let |lig_trick| and |garbage| share the same location of |mem|.
 @d hi_mem_stat_usage 14 /*the number of one-word nodes always present*/
 
 
-@ @<code from \TeX@>=
+@ @<\TeX\ functions@>=
 static void mem_init(void)
 { @+ int k;
   @<Initialize |mem|@>@;
@@ -1779,7 +1724,7 @@ while (p > mem_min)
         {@+if ((font(p) < font_base)||(font(p) > font_max))
           print_char('*');
 @.*\relax@>
-        else@<Print the font identifier for |font(p)|@>;
+        else  print_esc(font_def[font(p)].n);
         print_char(' ');font_in_short_display=font(p);
         }
       print_ASCII(qo(character(p)));
@@ -1793,7 +1738,7 @@ while (p > mem_min)
 @ @<Print a short indication of the contents of node |p|@>=
 switch (type(p)) {
 case hlist_node: case vlist_node: case ins_node:
-  case whatsit_node: case mark_node: case adjust_node:
+  case whatsit_node: case adjust_node:
   case unset_node: print("[]");@+break;
 case rule_node: print_char('|');@+break;
 case glue_node: if (glue_ptr(p)!=zero_glue) print_char(' ');@+break;
@@ -1817,7 +1762,7 @@ its reference count, and one to print a rule dimension.
 @<Basic printing procedures@>=
 static void print_font_and_char(int @!p) /*prints |char_node| data*/
 {@+if (p > mem_end) print_esc("CLOBBERED.");
-else{@<Print the font identifier for |font(p)|@>;
+else{ print_esc(font_def[font(p)].n);
   print_char(' ');print_ASCII(character(p));
   }
 }
@@ -2098,7 +2043,7 @@ specification is being withdrawn.
   else decr(glue_ref_count(A));
   }
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static void delete_glue_ref(pointer @!p) /*|p| points to a glue specification*/
 fast_delete_glue_ref(p)
 static void delete_xdimen_ref(pointer @!p) /*|p| points to a xdimen specification*/
@@ -2112,7 +2057,7 @@ In practice, the nodes deleted are usually charnodes (about 2/3 of the time),
 and they are glue nodes in about half of the remaining cases.
 @^recursion@>
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static void flush_node_list(pointer @!p) /*erase list of nodes starting at |p|*/
 {@+ /*go here when node |p| has been freed*/
 pointer q; /*successor to node |p|*/
@@ -2175,7 +2120,7 @@ example, if the size is altered, or if some link field is moved to another
 relative position---then this code may need to be changed too.
 @^data structure assumptions@>
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static pointer copy_node_list(pointer @!p) /*makes a duplicate of the
   node list that starts at |p| and returns a pointer to the new list*/
 {@+pointer h; /*temporary head of copied list*/
@@ -2230,9 +2175,6 @@ case disc_node: {@+r=get_node(small_node_size);
   pre_break(r)=copy_node_list(pre_break(p));
   post_break(r)=copy_node_list(post_break(p));
   } @+break;
-case mark_node: {@+r=get_node(small_node_size);add_token_ref(mark_ptr(p));
-  words=small_node_size;
-  } @+break;
 case adjust_node: {@+r=get_node(small_node_size);
   adjust_ptr(r)=copy_node_list(adjust_ptr(p));
   } @+break; /*|words==1==small_node_size-1|*/
@@ -2252,30 +2194,6 @@ and building the vlist for the next page of a document. Similarly, when a
 interrupted from working in restricted horizontal mode, and it enters
 internal vertical mode.  The ``semantic nest'' is a stack that
 keeps track of what lists and modes are currently suspended.
-
-At each level of processing we are in one of six modes:
-
-\yskip\hang|vmode| stands for vertical mode (the page builder);
-
-\hang|hmode| stands for horizontal mode (the paragraph builder);
-
-\hang|mmode| stands for displayed formula mode;
-
-\hang|-vmode| stands for internal vertical mode (e.g., in a \.{\\vbox});
-
-\hang|-hmode| stands for restricted horizontal mode (e.g., in an \.{\\hbox});
-
-\hang|-mmode| stands for math formula mode (not displayed).
-
-\yskip\noindent The mode is temporarily set to zero while processing \.{\\write}
-texts.
-
-Numeric values are assigned to |vmode|, |hmode|, and |mmode| so that
-\TeX's ``big semantic switch'' can select the appropriate thing to
-do by computing the value |abs(mode)+cur_cmd|, where |mode| is the current
-mode and |cur_cmd| is the current command code.
-
-@d vmode 1 /*vertical mode*/
 
 
 @ The state of affairs at any semantic level can be represented by
@@ -2328,7 +2246,7 @@ be pushed onto |nest| if necessary.
 @d ignore_depth -65536000 /*|prev_depth| value that is ignored*/
 
 @<Types...@>=
-typedef struct { int16_t @!mode_field;@+
+typedef struct {@+
   pointer @!head_field, @!tail_field;
  int pg_field;
  pointer bs_field,ls_field; /* baseline skip and line skip */
@@ -2353,7 +2271,7 @@ typedef struct { int16_t @!mode_field;@+
 @d cur_lsl cur_list.lsl_field /*line skip limit*/
 @d needs_bs (cur_list.bs_pos!=NULL) /*is a baseline skip needed?*/
 @d prev_height cur_list.ht_field /* height of previous box */
-@d node_pos cur_list.np_field /*node position in the \HINT/ file or |NULL|*/
+@d node_pos cur_list.np_field /*node position in the \HINT\ file or |NULL|*/
 @d node_pos1 (nest_ptr==0?0:nest[nest_ptr-1].np_field) /*position of enclosing node*/
 
 @<List variables@>=
@@ -2375,7 +2293,7 @@ vertical mode, then ``contributed'' to the current page (during which time
 the page-breaking decisions are made). For now, we don't need to know
 any more details about the page-building process.
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 
 @<List variables@>@;
 
@@ -2392,7 +2310,7 @@ calling |push_nest|. This routine changes |head| and |tail| so that
 a new (empty) list is begun; it does not change |mode| or |aux|.
 
 @s line mode_line
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static void push_nest(void) /*enter a new semantic level, save the old*/
 {@+if (nest_ptr > max_nest_stack)
   {@+max_nest_stack=nest_ptr;
@@ -2409,16 +2327,14 @@ state is restored by calling |pop_nest|. This routine will never be
 called at the lowest semantic level, nor will it be called unless |head|
 is a node that should be returned to free memory.
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static void pop_nest(void) /*leave a semantic level, re-enter the old*/
 {@+free_avail(head);decr(nest_ptr);cur_list=nest[nest_ptr];
 }
 
 @* The table of equivalents.
-
-@ Region 3 of |eqtb| contains the 256 \.{\\skip} registers, as well as the
-glue parameters defined here. It is important that the ``muskip''
-parameters have larger numbers than the others.
+\TeX's table of equivalents are replaced by data found in the definition section
+of a \HINT\ file.
 
 @d right_skip_code 8 /*glue at right of justified lines*/
 @#
@@ -2428,27 +2344,10 @@ parameters have larger numbers than the others.
 @d right_skip pointer_def[glue_kind][right_skip_no]
 @d top_skip pointer_def[glue_kind][top_skip_no]
 @d split_top_skip pointer_def[glue_kind][split_top_skip_no]
-
-
-@ Region 4 of |eqtb| contains the local quantities defined here. The
-bulk of this region is taken up by five tables that are indexed by eight-bit
-characters; these tables are important to both the syntactic and semantic
-portions of \TeX. There are also a bunch of special things like font and
-token parameters, as well as the tables of \.{\\toks} and \.{\\box}
-registers.
-
+@#
 @d par_shape_ptr null
 @d box(A) (*box_ptr(A))
-
-
-@ Region 5 of |eqtb| contains the integer parameters and registers defined
-here, as well as the |del_code| table. The latter table differs from the
-|cat_code dotdot math_code| tables that precede it, since delimiter codes are
-fullword integers while the other kinds of codes occupy at most a
-halfword. This is what makes region~5 different from region~4. We will
-store the |eq_level| information in an auxiliary array of quarterwords
-that will be defined later.
-
+@#
 @d pretolerance integer_def[pretolerance_no]
 @d tolerance integer_def[tolerance_no]
 @d line_penalty integer_def[line_penalty_no]
@@ -2467,11 +2366,7 @@ that will be defined later.
 @d tracing_paragraphs (debugflags&DBGTEX)
 @d tracing_pages (debugflags&DBGPAGE)
 @d hang_after integer_def[hang_after_no]
-
-
-@ The final region of |eqtb| contains the dimension parameters defined
-here, and the 256 \.{\\dimen} registers.
-
+@#
 @d line_skip_limit dimen_def[line_skip_limit_no]
 @d max_depth dimen_def[max_depth_no]
 @d pre_display_size cur_list.ds_field
@@ -2479,272 +2374,25 @@ here, and the 256 \.{\\dimen} registers.
 @d display_indent cur_list.di_field
 @d hang_indent dimen_def[hang_indent_no]
 @d emergency_stretch dimen_def[emergency_stretch_no]
-
-
-@* The hash table.
-
-
-
-
-@ We will deal with the other primitives later, at some point in the program
-where their |eq_type| and |equiv| values are more meaningful.  For example,
-the primitives for math mode will be loaded when we consider the routines
-that deal with formulas. It is easy to find where each particular
-primitive was treated by looking in the index at the end; for example, the
-section where |"radical"| entered |eqtb| is listed under `\.{\\radical}
-primitive'. (Primitives consisting of a single nonalphabetic character,
-@!like `\.{\\/}', are listed under `Single-character primitives'.)
-@!@^Single-character primitives@>
-
-Meanwhile, this is a convenient place to catch up on something we were unable
-to do before the hash table was defined:
-
-@<Print the font identifier for |font(p)|@>=
-print_esc(font_def[font(p)].n);
-
-@* Saving and restoring equivalents.
-
-@ Here are the group codes that are used to discriminate between different
-kinds of groups. They allow \TeX\ to decide what special actions, if any,
-should be performed when a group ends.
-\def\grp{\.{\char'173...\char'175}}
-
-Some groups are not supposed to be ended by right braces. For example,
-the `\.\$' that begins a math formula causes a |math_shift_group| to
-be started, and this should be terminated by a matching `\.\$'. Similarly,
-a group that starts with \.{\\left} should end with \.{\\right}, and
-one that starts with \.{\\begingroup} should end with \.{\\endgroup}.
-
-
-@<Types...@>=
-typedef int8_t group_code; /*|save_level| for a level boundary*/
-
-
-
-
-@* Token lists.
-A \TeX\ token is either a character or a control sequence, and it is
-@^token@>
-represented internally in one of two ways: (1)~A character whose ASCII
-code number is |c| and whose command code is |m| is represented as the
-number $2^8m+c$; the command code is in the range |1 <= m <= 14|. (2)~A control
-sequence whose |eqtb| address is |p| is represented as the number
-|cs_token_flag+p|. Here |cs_token_flag==@t$2^{12}-1$@>| is larger than
-$2^8m+c$, yet it is small enough that |cs_token_flag+p < max_halfword|;
-thus, a token fits comfortably in a halfword.
-
-A token |t| represents a |left_brace| command if and only if
-|t < left_brace_limit|; it represents a |right_brace| command if and only if
-we have |left_brace_limit <= t < right_brace_limit|; and it represents a |match| or
-|end_match| command if and only if |match_token <= t <= end_match_token|.
-The following definitions take care of these token-oriented constants
-and a few others.
-
-@* Introduction to the syntactic routines.
-
-@* Input stacks and states.
-
-@ Let's look more closely now at the control variables
-(|state|,~|index|,~|start|,~|loc|,~|limit|,~|name|),
-assuming that \TeX\ is reading a line of characters that have been input
-from some file or from the user's terminal. There is an array called
-|buffer| that acts as a stack of all lines of characters that are
-currently being read from files, including all lines on subsidiary
-levels of the input stack that are not yet completed. \TeX\ will return to
-the other lines when it is finished with the present input file.
-
-(Incidentally, on a machine with byte-oriented addressing, it might be
-appropriate to combine |buffer| with the |str_pool| array,
-letting the buffer entries grow downward from the top of the string pool
-and checking that these two tables don't bump into each other.)
-
-The line we are currently working on begins in position |start| of the
-buffer; the next character we are about to read is |buffer[loc]|; and
-|limit| is the location of the last character present.  If |loc > limit|,
-the line has been completely read. Usually |buffer[limit]| is the
-|end_line_char|, denoting the end of a line, but this is not
-true if the current line is an insertion that was entered on the user's
-terminal in response to an error message.
-
-The |name| variable is a string number that designates the name of
-the current file, if we are reading a text file. It is zero if we
-are reading from the terminal; it is |n+1| if we are reading from
-input stream |n|, where |0 <= n <= 16|. (Input stream 16 stands for
-an invalid stream number; in such cases the input is actually from
-the terminal, under control of the procedure |read_toks|.)
-
-The |state| variable has one of three values, when we are scanning such
-files:
-$$\baselineskip 15pt\vbox{\halign{#\hfil\cr
-1) |state==mid_line| is the normal state.\cr
-2) |state==skip_blanks| is like |mid_line|, but blanks are ignored.\cr
-3) |state==new_line| is the state at the beginning of a line.\cr}}$$
-These state values are assigned numeric codes so that if we add the state
-code to the next character's command code, we get distinct values. For
-example, `|mid_line+spacer|' stands for the case that a blank
-space character occurs in the middle of a line when it is not being
-ignored; after this case is processed, the next value of |state| will
-be |skip_blanks|.
-
-@ However, all this discussion about input state really applies only to the
-case that we are inputting from a file. There is another important case,
-namely when we are currently getting input from a token list. In this case
-|state==token_list|, and the conventions about the other state variables
-are different:
-
-\yskip\hang|loc| is a pointer to the current node in the token list, i.e.,
-the node that will be read next. If |loc==null|, the token list has been
-fully read.
-
-\yskip\hang|start| points to the first node of the token list; this node
-may or may not contain a reference count, depending on the type of token
-list involved.
-
-\yskip\hang|token_type|, which takes the place of |index| in the
-discussion above, is a code number that explains what kind of token list
-is being scanned.
-
-\yskip\hang|name| points to the |eqtb| address of the control sequence
-being expanded, if the current token list is a macro.
-
-\yskip\hang|param_start|, which takes the place of |limit|, tells where
-the parameters of the current macro begin in the |param_stack|, if the
-current token list is a macro.
-
-\yskip\noindent The |token_type| can take several values, depending on
-where the current token list came from:
-
-\yskip\hang|parameter|, if a parameter is being scanned;
-
-\hang|u_template|, if the \<u_j> part of an alignment
-template is being scanned;
-
-\hang|v_template|, if the \<v_j> part of an alignment
-template is being scanned;
-
-\hang|backed_up|, if the token list being scanned has been inserted as
-`to be read again';
-
-\hang|inserted|, if the token list being scanned has been inserted as
-the text expansion of a \.{\\count} or similar variable;
-
-\hang|macro|, if a user-defined control sequence is being scanned;
-
-\hang|output_text|, if an \.{\\output} routine is being scanned;
-
-\hang|every_par_text|, if the text of \.{\\everypar} is being scanned;
-
-\hang|every_math_text|, if the text of \.{\\everymath} is being scanned;
-
-\hang|every_display_text|, if the text of \.{\\everydisplay} is being scanned;
-
-\hang|every_hbox_text|, if the text of \.{\\everyhbox} is being scanned;
-
-\hang|every_vbox_text|, if the text of \.{\\everyvbox} is being scanned;
-
-\hang|every_job_text|, if the text of \.{\\everyjob} is being scanned;
-
-\hang|every_cr_text|, if the text of \.{\\everycr} is being scanned;
-
-\hang|mark_text|, if the text of a \.{\\mark} is being scanned;
-
-\hang|write_text|, if the text of a \.{\\write} is being scanned.
-
-\yskip\noindent
-The codes for |output_text|, |every_par_text|, etc., are equal to a constant
-plus the corresponding codes for token list parameters |output_routine_loc|,
-|every_par_loc|, etc.  The token list begins with a reference count if and
-only if |token_type >= macro|.
-@^reference counts@>
-
-@d inserted 4 /*|token_type| code for inserted texts*/
-
-
-@* Maintaining the input stacks.
-
-@* Getting the next token.
-
-
-@ The present point in the program is reached only when the |expand|
-routine has inserted a special marker into the input. In this special
-case, |info(loc)| is known to be a control sequence token, and |link(loc)==null|.
-
-
-@ Since |get_next| is used so frequently in \TeX, it is convenient
-to define three related procedures that do a little more:
-
-\yskip\hang|get_token| not only sets |cur_cmd| and |cur_chr|, it
-also sets |cur_tok|, a packed halfword version of the current token.
-
-\yskip\hang|get_x_token|, meaning ``get an expanded token,'' is like
-|get_token|, but if the current token turns out to be a user-defined
-control sequence (i.e., a macro call), or a conditional,
-or something like \.{\\topmark} or \.{\\expandafter} or \.{\\csname},
-it is eliminated from the input by beginning the expansion of the macro
-or the evaluation of the conditional.
-
-\yskip\hang|x_token| is like |get_x_token| except that it assumes that
-|get_next| has already been called.
-
-\yskip\noindent
-In fact, these three procedures account for almost every use of |get_next|.
-
-@* Expanding the next token.
-
-@* Basic scanning subroutines.
-
-@ Inside an \.{\\output} routine, a user may wish to look at the page totals
-that were present at the moment when output was triggered.
-
+@#
 @d max_dimen 07777777777 /*$2^{30}-1$*/
+@#
+@d math_quad dimen_def[math_quad_no] /*\.{18mu}*/
 
+@* Font metric data.
+\TeX\ gets its knowledge about fonts from font metric files, also called
+\.{TFM} files; the `\.T' in `\.{TFM}' stands for \TeX,
+but other programs know about them too.
+@:TFM files}{\.{TFM} files@>
+@^font metric files@>
 
-@* Building token lists.
-
-@* Conditional processing.
-
-@* File names.
-It's time now to fret about file names.  Besides the fact that different
-operating systems treat files in different ways, we must cope with the
-fact that completely different naming conventions are used by different
-groups of people. The following programs show what is required for one
-particular operating system; similar routines for other systems are not
-difficult to devise.
-@^fingers@>
-@^system dependencies@>
-
-\TeX\ assumes that a file name has three parts: the name proper; its
-``extension''; and a ``file area'' where it is found in an external file
-system.  The extension of an input file or a write file is assumed to be
-`\.{.tex}' unless otherwise specified; it is `\.{.log}' on the
-transcript file that records each run of \TeX; it is `\.{.tfm}' on the font
-metric files that describe characters in the fonts \TeX\ uses; it is
-`\.{.dvi}' on the output files that specify typesetting information; and it
-is `\.{.fmt}' on the format files written by \.{INITEX} to initialize \TeX.
-The file area can be arbitrary on input files, but files are usually
-output to the user's current area.  If an input file cannot be
-found on the specified area, \TeX\ will look for it on a special system
-area; this special area is intended for commonly used input files like
-\.{webmac.tex}.
-
-Simple uses of \TeX\ refer only to file names that have no explicit
-extension or area. For example, a person usually says `\.{\\input} \.{paper}'
-or `\.{\\font\\tenrm} \.= \.{helvetica}' instead of `\.{\\input}
-\.{paper.new}' or `\.{\\font\\tenrm} \.= \.{<csd.knuth>test}'. Simple file
-names are best, because they make the \TeX\ source files portable;
-whenever a file name consists entirely of letters and digits, it should be
-treated in the same way by all implementations of \TeX. However, users
-need the ability to refer to other files in their environment, especially
-when responding to error messages concerning unopenable files; therefore
-we want to let them use the syntax that appears in their favorite
-operating system.
-
-The following procedures don't allow spaces to be part of
-file names; but some users seem to like names that are spaced-out.
-System-dependent changes to allow such things should probably
-be made with reluctance, and only when an entire file name that
-includes spaces is ``quoted'' somehow.
-
+The information in a \.{TFM} file appears in a sequence of 8-bit bytes.
+Since the number of bytes is always a multiple of 4, we could
+also regard the file as a sequence of 32-bit words, but \TeX\ uses the
+byte interpretation. The format of \.{TFM} files was designed by
+Lyle Ramshaw in 1980. The intent is to convey a lot of different kinds
+@^Ramshaw, Lyle Harold@>
+of information in a compact but useful form.
 
 
 @ The first 24 bytes (6 words) of a \.{TFM} file contain twelve 16-bit
@@ -2924,7 +2572,7 @@ typedef uint16_t font_index; /*index into |font_info|*/
 @
 
 @s font_index int
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static memory_word @!font_info[font_mem_size+1];
    /*the big collection of font data*/
 static font_index @!fmem_ptr=0; /*first unused word of |font_info|*/
@@ -2957,7 +2605,7 @@ part of this word (the |b0| field), the width of the character is
 |min_quarterword| has already been added to |c| and to |w|, since \TeX\
 stores its quarterwords that way.)
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static int @!char_base0[font_max-font_base+1],
   *const @!char_base = @!char_base0-font_base;
    /*base addresses for |char_info|*/
@@ -3037,7 +2685,7 @@ information is stored; |null_font| is returned in this case.
 
 @d abort goto bad_tfm /*do this when the \.{TFM} data is wrong*/
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static void read_font_info(int f, char *@!nom, scaled @!s)
 {@+
 int k; /*index into |font_info|*/
@@ -3069,9 +2717,7 @@ done:;
 @ Note: A malformed \.{TFM} file might be shorter than it claims to be;
 thus |eof(tfm_file)| might be true when |read_font_info| refers to
 |tfm_file.d| or when it says |get(tfm_file)|. If such circumstances
-cause system error messages, you will have to defeat them somehow,
-for example by defining |fget| to be `\ignorespaces|{@+get(tfm_file);|
-|if (eof(tfm_file)) abort;} |\unskip'.
+cause system error messages, you will have to defeat them somehow.
 @^system dependencies@>
 
 @d fget (hpos++)
@@ -3233,7 +2879,7 @@ make sure that the character exists. The test for existence is here
 only for debugging purposes. This function also ensures that
 font |f| gets loaded if it occurs in a character node.
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static pointer new_character(internal_font_number @!f, eight_bits @!c)
 {@+ pointer p; /*newly allocated node*/
     if (font_def[f].ff==no_format) hload_font(f);
@@ -3248,454 +2894,7 @@ p=get_avail();font(p)=f;character(p)=qi(c);
 return p;
 }
 
-@* Device-independent file format.
-The most important output produced by a run of \TeX\ is the ``device
-independent'' (\.{DVI}) file that specifies where characters and rules
-are to appear on printed pages. The form of these files was designed by
-David R. Fuchs in 1979. Almost any reasonable typesetting device can be
-@^Fuchs, David Raymond@>
-@:DVI\_files}{\.{DVI} files@>
-driven by a program that takes \.{DVI} files as input, and dozens of such
-\.{DVI}-to-whatever programs have been written. Thus, it is possible to
-print the output of \TeX\ on many different kinds of equipment, using \TeX\
-as a device-independent ``front end.''
-
-A \.{DVI} file is a stream of 8-bit bytes, which may be regarded as a
-series of commands in a machine-like language. The first byte of each command
-is the operation code, and this code is followed by zero or more bytes
-that provide parameters to the command. The parameters themselves may consist
-of several consecutive bytes; for example, the `|set_rule|' command has two
-parameters, each of which is four bytes long. Parameters are usually
-regarded as nonnegative integers; but four-byte-long parameters,
-and shorter parameters that denote distances, can be
-either positive or negative. Such parameters are given in two's complement
-notation. For example, a two-byte-long distance parameter has a value between
-$-2^{15}$ and $2^{15}-1$. As in \.{TFM} files, numbers that occupy
-more than one byte position appear in BigEndian order.
-
-A \.{DVI} file consists of a ``preamble,'' followed by a sequence of one
-or more ``pages,'' followed by a ``postamble.'' The preamble is simply a
-|pre| command, with its parameters that define the dimensions used in the
-file; this must come first.  Each ``page'' consists of a |bop| command,
-followed by any number of other commands that tell where characters are to
-be placed on a physical page, followed by an |eop| command. The pages
-appear in the order that \TeX\ generated them. If we ignore |nop| commands
-and \\{fnt\_def} commands (which are allowed between any two commands in
-the file), each |eop| command is immediately followed by a |bop| command,
-or by a |post| command; in the latter case, there are no more pages in the
-file, and the remaining bytes form the postamble.  Further details about
-the postamble will be explained later.
-
-Some parameters in \.{DVI} commands are ``pointers.'' These are four-byte
-quantities that give the location number of some other byte in the file;
-the first byte is number~0, then comes number~1, and so on. For example,
-one of the parameters of a |bop| command points to the previous |bop|;
-this makes it feasible to read the pages in backwards order, in case the
-results are being directed to a device that stacks its output face up.
-Suppose the preamble of a \.{DVI} file occupies bytes 0 to 99. Now if the
-first page occupies bytes 100 to 999, say, and if the second
-page occupies bytes 1000 to 1999, then the |bop| that starts in byte 1000
-points to 100 and the |bop| that starts in byte 2000 points to 1000. (The
-very first |bop|, i.e., the one starting in byte 100, has a pointer of~$-1$.)
-
-@ The \.{DVI} format is intended to be both compact and easily interpreted
-by a machine. Compactness is achieved by making most of the information
-implicit instead of explicit. When a \.{DVI}-reading program reads the
-commands for a page, it keeps track of several quantities: (a)~The current
-font |f| is an integer; this value is changed only
-by \\{fnt} and \\{fnt\_num} commands. (b)~The current position on the page
-is given by two numbers called the horizontal and vertical coordinates,
-|h| and |v|. Both coordinates are zero at the upper left corner of the page;
-moving to the right corresponds to increasing the horizontal coordinate, and
-moving down corresponds to increasing the vertical coordinate. Thus, the
-coordinates are essentially Cartesian, except that vertical directions are
-flipped; the Cartesian version of |(h, v)| would be |(h,-v)|.  (c)~The
-current spacing amounts are given by four numbers |w|, |x|, |y|, and |z|,
-where |w| and~|x| are used for horizontal spacing and where |y| and~|z|
-are used for vertical spacing. (d)~There is a stack containing
-|(h, v, w, x, y, z)| values; the \.{DVI} commands |push| and |pop| are used to
-change the current level of operation. Note that the current font~|f| is
-not pushed and popped; the stack contains only information about
-positioning.
-
-The values of |h|, |v|, |w|, |x|, |y|, and |z| are signed integers having up
-to 32 bits, including the sign. Since they represent physical distances,
-there is a small unit of measurement such that increasing |h| by~1 means
-moving a certain tiny distance to the right. The actual unit of
-measurement is variable, as explained below; \TeX\ sets things up so that
-its \.{DVI} output is in sp units, i.e., scaled points, in agreement with
-all the |scaled| dimensions in \TeX's data structures.
-
-@ Here is a list of all the commands that may appear in a \.{DVI} file. Each
-command is specified by its symbolic name (e.g., |bop|), its opcode byte
-(e.g., 139), and its parameters (if any). The parameters are followed
-by a bracketed number telling how many bytes they occupy; for example,
-`|p[4]|' means that parameter |p| is four bytes long.
-
-\yskip\hang|set_char_0| 0. Typeset character number~0 from font~|f|
-such that the reference point of the character is at |(h, v)|. Then
-increase |h| by the width of that character. Note that a character may
-have zero or negative width, so one cannot be sure that |h| will advance
-after this command; but |h| usually does increase.
-
-\yskip\hang\\{set\_char\_1} through \\{set\_char\_127} (opcodes 1 to 127).
-Do the operations of |set_char_0|; but use the character whose number
-matches the opcode, instead of character~0.
-
-\yskip\hang|set1| 128 |c[1]|. Same as |set_char_0|, except that character
-number~|c| is typeset. \TeX82 uses this command for characters in the
-range |128 <= c < 256|.
-
-\yskip\hang|@!set2| 129 |c[2]|. Same as |set1|, except that |c|~is two
-bytes long, so it is in the range |0 <= c < 65536|. \TeX82 never uses this
-command, but it should come in handy for extensions of \TeX\ that deal
-with oriental languages.
-@^oriental characters@>@^Chinese characters@>@^Japanese characters@>
-
-\yskip\hang|@!set3| 130 |c[3]|. Same as |set1|, except that |c|~is three
-bytes long, so it can be as large as $2^{24}-1$. Not even the Chinese
-language has this many characters, but this command might prove useful
-in some yet unforeseen extension.
-
-\yskip\hang|@!set4| 131 |c[4]|. Same as |set1|, except that |c|~is four
-bytes long. Imagine that.
-
-\yskip\hang|set_rule| 132 |a[4]| |b[4]|. Typeset a solid black rectangle
-of height~|a| and width~|b|, with its bottom left corner at |(h, v)|. Then
-set |h=h+b|. If either |a <= 0| or |b <= 0|, nothing should be typeset. Note
-that if |b < 0|, the value of |h| will decrease even though nothing else happens.
-See below for details about how to typeset rules so that consistency with
-\MF\ is guaranteed.
-
-\yskip\hang|@!put1| 133 |c[1]|. Typeset character number~|c| from font~|f|
-such that the reference point of the character is at |(h, v)|. (The `put'
-commands are exactly like the `set' commands, except that they simply put out a
-character or a rule without moving the reference point afterwards.)
-
-\yskip\hang|@!put2| 134 |c[2]|. Same as |set2|, except that |h| is not changed.
-
-\yskip\hang|@!put3| 135 |c[3]|. Same as |set3|, except that |h| is not changed.
-
-\yskip\hang|@!put4| 136 |c[4]|. Same as |set4|, except that |h| is not changed.
-
-\yskip\hang|put_rule| 137 |a[4]| |b[4]|. Same as |set_rule|, except that
-|h| is not changed.
-
-\yskip\hang|nop| 138. No operation, do nothing. Any number of |nop|'s
-may occur between \.{DVI} commands, but a |nop| cannot be inserted between
-a command and its parameters or between two parameters.
-
-\yskip\hang|bop| 139 $c_0[4]$ $c_1[4]$ $\ldots$ $c_9[4]$ $p[4]$. Beginning
-of a page: Set |(h, v, w, x, y, z)=(0, 0, 0, 0, 0, 0)| and set the stack empty. Set
-the current font |f| to an undefined value.  The ten $c_i$ parameters hold
-the values of \.{\\count0} $\ldots$ \.{\\count9} in \TeX\ at the time
-\.{\\shipout} was invoked for this page; they can be used to identify
-pages, if a user wants to print only part of a \.{DVI} file. The parameter
-|p| points to the previous |bop| in the file; the first
-|bop| has $p=-1$.
-
-\yskip\hang|eop| 140.  End of page: Print what you have read since the
-previous |bop|. At this point the stack should be empty. (The \.{DVI}-reading
-programs that drive most output devices will have kept a buffer of the
-material that appears on the page that has just ended. This material is
-largely, but not entirely, in order by |v| coordinate and (for fixed |v|) by
-|h|~coordinate; so it usually needs to be sorted into some order that is
-appropriate for the device in question.)
-
-\yskip\hang|push| 141. Push the current values of |(h, v, w, x, y, z)| onto the
-top of the stack; do not change any of these values. Note that |f| is
-not pushed.
-
-\yskip\hang|pop| 142. Pop the top six values off of the stack and assign
-them respectively to |(h, v, w, x, y, z)|. The number of pops should never
-exceed the number of pushes, since it would be highly embarrassing if the
-stack were empty at the time of a |pop| command.
-
-\yskip\hang|right1| 143 |b[1]|. Set |h=h+b|, i.e., move right |b| units.
-The parameter is a signed number in two's complement notation, |-128 <= b < 128|;
-if |b < 0|, the reference point moves left.
-
-\yskip\hang|@!right2| 144 |b[2]|. Same as |right1|, except that |b| is a
-two-byte quantity in the range |-32768 <= b < 32768|.
-
-\yskip\hang|@!right3| 145 |b[3]|. Same as |right1|, except that |b| is a
-three-byte quantity in the range |@t$-2^{23}$@> <= b < @t$2^{23}$@>|.
-
-\yskip\hang|@!right4| 146 |b[4]|. Same as |right1|, except that |b| is a
-four-byte quantity in the range |@t$-2^{31}$@> <= b < @t$2^{31}$@>|.
-
-\yskip\hang|w0| 147. Set |h=h+w|; i.e., move right |w| units. With luck,
-this parameterless command will usually suffice, because the same kind of motion
-will occur several times in succession; the following commands explain how
-|w| gets particular values.
-
-\yskip\hang|w1| 148 |b[1]|. Set |w=b| and |h=h+b|. The value of |b| is a
-signed quantity in two's complement notation, |-128 <= b < 128|. This command
-changes the current |w|~spacing and moves right by |b|.
-
-\yskip\hang|@!w2| 149 |b[2]|. Same as |w1|, but |b| is two bytes long,
-|-32768 <= b < 32768|.
-
-\yskip\hang|@!w3| 150 |b[3]|. Same as |w1|, but |b| is three bytes long,
-|@t$-2^{23}$@> <= b < @t$2^{23}$@>|.
-
-\yskip\hang|@!w4| 151 |b[4]|. Same as |w1|, but |b| is four bytes long,
-|@t$-2^{31}$@> <= b < @t$2^{31}$@>|.
-
-\yskip\hang|x0| 152. Set |h=h+x|; i.e., move right |x| units. The `|x|'
-commands are like the `|w|' commands except that they involve |x| instead
-of |w|.
-
-\yskip\hang|x1| 153 |b[1]|. Set |x=b| and |h=h+b|. The value of |b| is a
-signed quantity in two's complement notation, |-128 <= b < 128|. This command
-changes the current |x|~spacing and moves right by |b|.
-
-\yskip\hang|@!x2| 154 |b[2]|. Same as |x1|, but |b| is two bytes long,
-|-32768 <= b < 32768|.
-
-\yskip\hang|@!x3| 155 |b[3]|. Same as |x1|, but |b| is three bytes long,
-|@t$-2^{23}$@> <= b < @t$2^{23}$@>|.
-
-\yskip\hang|@!x4| 156 |b[4]|. Same as |x1|, but |b| is four bytes long,
-|@t$-2^{31}$@> <= b < @t$2^{31}$@>|.
-
-\yskip\hang|down1| 157 |a[1]|. Set |v=v+a|, i.e., move down |a| units.
-The parameter is a signed number in two's complement notation, |-128 <= a < 128|;
-if |a < 0|, the reference point moves up.
-
-\yskip\hang|@!down2| 158 |a[2]|. Same as |down1|, except that |a| is a
-two-byte quantity in the range |-32768 <= a < 32768|.
-
-\yskip\hang|@!down3| 159 |a[3]|. Same as |down1|, except that |a| is a
-three-byte quantity in the range |@t$-2^{23}$@> <= a < @t$2^{23}$@>|.
-
-\yskip\hang|@!down4| 160 |a[4]|. Same as |down1|, except that |a| is a
-four-byte quantity in the range |@t$-2^{31}$@> <= a < @t$2^{31}$@>|.
-
-\yskip\hang|y0| 161. Set |v=v+y|; i.e., move down |y| units. With luck,
-this parameterless command will usually suffice, because the same kind of motion
-will occur several times in succession; the following commands explain how
-|y| gets particular values.
-
-\yskip\hang|y1| 162 |a[1]|. Set |y=a| and |v=v+a|. The value of |a| is a
-signed quantity in two's complement notation, |-128 <= a < 128|. This command
-changes the current |y|~spacing and moves down by |a|.
-
-\yskip\hang|@!y2| 163 |a[2]|. Same as |y1|, but |a| is two bytes long,
-|-32768 <= a < 32768|.
-
-\yskip\hang|@!y3| 164 |a[3]|. Same as |y1|, but |a| is three bytes long,
-|@t$-2^{23}$@> <= a < @t$2^{23}$@>|.
-
-\yskip\hang|@!y4| 165 |a[4]|. Same as |y1|, but |a| is four bytes long,
-|@t$-2^{31}$@> <= a < @t$2^{31}$@>|.
-
-\yskip\hang|z0| 166. Set |v=v+z|; i.e., move down |z| units. The `|z|' commands
-are like the `|y|' commands except that they involve |z| instead of |y|.
-
-\yskip\hang|z1| 167 |a[1]|. Set |z=a| and |v=v+a|. The value of |a| is a
-signed quantity in two's complement notation, |-128 <= a < 128|. This command
-changes the current |z|~spacing and moves down by |a|.
-
-\yskip\hang|@!z2| 168 |a[2]|. Same as |z1|, but |a| is two bytes long,
-|-32768 <= a < 32768|.
-
-\yskip\hang|@!z3| 169 |a[3]|. Same as |z1|, but |a| is three bytes long,
-|@t$-2^{23}$@> <= a < @t$2^{23}$@>|.
-
-\yskip\hang|@!z4| 170 |a[4]|. Same as |z1|, but |a| is four bytes long,
-|@t$-2^{31}$@> <= a < @t$2^{31}$@>|.
-
-\yskip\hang|fnt_num_0| 171. Set |f=0|. Font 0 must previously have been
-defined by a \\{fnt\_def} instruction, as explained below.
-
-\yskip\hang\\{fnt\_num\_1} through \\{fnt\_num\_63} (opcodes 172 to 234). Set
-|f=1|, \dots, \hbox{|f=63|}, respectively.
-
-\yskip\hang|fnt1| 235 |k[1]|. Set |f=k|. \TeX82 uses this command for font
-numbers in the range |64 <= k < 256|.
-
-\yskip\hang|@!fnt2| 236 |k[2]|. Same as |fnt1|, except that |k|~is two
-bytes long, so it is in the range |0 <= k < 65536|. \TeX82 never generates this
-command, but large font numbers may prove useful for specifications of
-color or texture, or they may be used for special fonts that have fixed
-numbers in some external coding scheme.
-
-\yskip\hang|@!fnt3| 237 |k[3]|. Same as |fnt1|, except that |k|~is three
-bytes long, so it can be as large as $2^{24}-1$.
-
-\yskip\hang|@!fnt4| 238 |k[4]|. Same as |fnt1|, except that |k|~is four
-bytes long; this is for the really big font numbers (and for the negative ones).
-
-\yskip\hang|xxx1| 239 |k[1]| |x[k]|. This command is undefined in
-general; it functions as a $(k+2)$-byte |nop| unless special \.{DVI}-reading
-programs are being used. \TeX82 generates |xxx1| when a short enough
-\.{\\special} appears, setting |k| to the number of bytes being sent. It
-is recommended that |x| be a string having the form of a keyword followed
-by possible parameters relevant to that keyword.
-
-\yskip\hang|@!xxx2| 240 |k[2]| |x[k]|. Like |xxx1|, but |0 <= k < 65536|.
-
-\yskip\hang|@!xxx3| 241 |k[3]| |x[k]|. Like |xxx1|, but |0 <= k < @t$2^{24}$@>|.
-
-\yskip\hang|xxx4| 242 |k[4]| |x[k]|. Like |xxx1|, but |k| can be ridiculously
-large. \TeX82 uses |xxx4| when sending a string of length 256 or more.
-
-\yskip\hang|fnt_def1| 243 |k[1]| |c[4]| |s[4]| |d[4]| |a[1]| |l[1]| |n[a+l]|.
-Define font |k|, where |0 <= k < 256|; font definitions will be explained shortly.
-
-\yskip\hang|@!fnt_def2| 244 |k[2]| |c[4]| |s[4]| |d[4]| |a[1]| |l[1]| |n[a+l]|.
-Define font |k|, where |0 <= k < 65536|.
-
-\yskip\hang|@!fnt_def3| 245 |k[3]| |c[4]| |s[4]| |d[4]| |a[1]| |l[1]| |n[a+l]|.
-Define font |k|, where |0 <= k < @t$2^{24}$@>|.
-
-\yskip\hang|@!fnt_def4| 246 |k[4]| |c[4]| |s[4]| |d[4]| |a[1]| |l[1]| |n[a+l]|.
-Define font |k|, where |@t$-2^{31}$@> <= k < @t$2^{31}$@>|.
-
-\yskip\hang|pre| 247 |i[1]| |num[4]| |den[4]| |mag[4]| |k[1]| |x[k]|.
-Beginning of the preamble; this must come at the very beginning of the
-file. Parameters |i|, |num|, |den|, |mag|, |k|, and |x| are explained below.
-
-\yskip\hang|post| 248. Beginning of the postamble, see below.
-
-\yskip\hang|post_post| 249. Ending of the postamble, see below.
-
-\yskip\noindent Commands 250--255 are undefined at the present time.
-
-@ Font definitions for a given font number |k| contain further parameters
-$$\hbox{|c[4]| |s[4]| |d[4]| |a[1]| |l[1]| |n[a+l]|.}$$
-The four-byte value |c| is the check sum that \TeX\ found in the \.{TFM}
-file for this font; |c| should match the check sum of the font found by
-programs that read this \.{DVI} file.
-@^check sum@>
-
-Parameter |s| contains a fixed-point scale factor that is applied to
-the character widths in font |k|; font dimensions in \.{TFM} files and
-other font files are relative to this quantity, which is called the
-``at size'' elsewhere in this documentation. The value of |s| is
-always positive and less than $2^{27}$. It is given in the same units
-as the other \.{DVI} dimensions, i.e., in sp when \TeX82 has made the
-file.  Parameter |d| is similar to |s|; it is the ``design size,'' and
-(like~|s|) it is given in \.{DVI} units. Thus, font |k| is to be used
-at $|mag|\cdot s/1000d$ times its normal size.
-
-The remaining part of a font definition gives the external name of the font,
-which is an ASCII string of length |a+l|. The number |a| is the length
-of the ``area'' or directory, and |l| is the length of the font name itself;
-the standard local system font area is supposed to be used when |a==0|.
-The |n| field contains the area in its first |a| bytes.
-
-Font definitions must appear before the first use of a particular font number.
-Once font |k| is defined, it must not be defined again; however, we
-shall see below that font definitions appear in the postamble as well as
-in the pages, so in this sense each font number is defined exactly twice,
-if at all. Like |nop| commands, font definitions can
-appear before the first |bop|, or between an |eop| and a |bop|.
-
-@ Sometimes it is desirable to make horizontal or vertical rules line up
-precisely with certain features in characters of a font. It is possible to
-guarantee the correct matching between \.{DVI} output and the characters
-generated by \MF\ by adhering to the following principles: (1)~The \MF\
-characters should be positioned so that a bottom edge or left edge that is
-supposed to line up with the bottom or left edge of a rule appears at the
-reference point, i.e., in row~0 and column~0 of the \MF\ raster. This
-ensures that the position of the rule will not be rounded differently when
-the pixel size is not a perfect multiple of the units of measurement in
-the \.{DVI} file. (2)~A typeset rule of height $a>0$ and width $b>0$
-should be equivalent to a \MF-generated character having black pixels in
-precisely those raster positions whose \MF\ coordinates satisfy
-|0 <= x < @t$\alpha$@>b| and |0 <= y < @t$\alpha$@>a|, where $\alpha$ is the number
-of pixels per \.{DVI} unit.
-@:METAFONT}{\MF@>
-@^alignment of rules with characters@>
-@^rules aligning with characters@>
-
-@ The last page in a \.{DVI} file is followed by `|post|'; this command
-introduces the postamble, which summarizes important facts that \TeX\ has
-accumulated about the file, making it possible to print subsets of the data
-with reasonable efficiency. The postamble has the form
-$$\vbox{\halign{\hbox{#\hfil}\cr
-  |post| |p[4]| |num[4]| |den[4]| |mag[4]| |l[4]| |u[4]| |s[2]| |t[2]|\cr
-  $\langle\,$font definitions$\,\rangle$\cr
-  |post_post| |q[4]| |i[1]| 223's$[{\G}4]$\cr}}$$
-Here |p| is a pointer to the final |bop| in the file. The next three
-parameters, |num|, |den|, and |mag|, are duplicates of the quantities that
-appeared in the preamble.
-
-Parameters |l| and |u| give respectively the height-plus-depth of the tallest
-page and the width of the widest page, in the same units as other dimensions
-of the file. These numbers might be used by a \.{DVI}-reading program to
-position individual ``pages'' on large sheets of film or paper; however,
-the standard convention for output on normal size paper is to position each
-page so that the upper left-hand corner is exactly one inch from the left
-and the top. Experience has shown that it is unwise to design \.{DVI}-to-printer
-software that attempts cleverly to center the output; a fixed position of
-the upper left corner is easiest for users to understand and to work with.
-Therefore |l| and~|u| are often ignored.
-
-Parameter |s| is the maximum stack depth (i.e., the largest excess of
-|push| commands over |pop| commands) needed to process this file. Then
-comes |t|, the total number of pages (|bop| commands) present.
-
-The postamble continues with font definitions, which are any number of
-\\{fnt\_def} commands as described above, possibly interspersed with |nop|
-commands. Each font number that is used in the \.{DVI} file must be defined
-exactly twice: Once before it is first selected by a \\{fnt} command, and once
-in the postamble.
-
-@ The last part of the postamble, following the |post_post| byte that
-signifies the end of the font definitions, contains |q|, a pointer to the
-|post| command that started the postamble.  An identification byte, |i|,
-comes next; this currently equals~2, as in the preamble.
-
-The |i| byte is followed by four or more bytes that are all equal to
-the decimal number 223 (i.e., 0337 in octal). \TeX\ puts out four to seven of
-these trailing bytes, until the total length of the file is a multiple of
-four bytes, since this works out best on machines that pack four bytes per
-word; but any number of 223's is allowed, as long as there are at least four
-of them. In effect, 223 is a sort of signature that is added at the very end.
-@^Fuchs, David Raymond@>
-
-This curious way to finish off a \.{DVI} file makes it feasible for
-\.{DVI}-reading programs to find the postamble first, on most computers,
-even though \TeX\ wants to write the postamble last. Most operating
-systems permit random access to individual words or bytes of a file, so
-the \.{DVI} reader can start at the end and skip backwards over the 223's
-until finding the identification byte. Then it can back up four bytes, read
-|q|, and move to byte |q| of the file. This byte should, of course,
-contain the value 248 (|post|); now the postamble can be read, so the
-\.{DVI} reader can discover all the information needed for typesetting the
-pages. Note that it is also possible to skip through the \.{DVI} file at
-reasonably high speed to locate a particular page, if that proves
-desirable. This saves a lot of time, since \.{DVI} files used in production
-jobs tend to be large.
-
-Unfortunately, however, standard \PASCAL\ does not include the ability to
-@^system dependencies@>
-access a random position in a file, or even to determine the length of a file.
-Almost all systems nowadays provide the necessary capabilities, so \.{DVI}
-format has been designed to work most efficiently with modern operating systems.
-But if \.{DVI} files have to be processed under the restrictions of standard
-\PASCAL, one can simply read them from front to back, since the necessary
-header information is present in the preamble and in the font definitions.
-(The |l| and |u| and |s| and |t| parameters, which appear only in the
-postamble, are ``frills'' that are handy but not absolutely necessary.)
-
-@* Shipping pages out.
-
-@ @d billion float_constant(1000000000)
-@d vet_glue(A) glue_temp=A;
-  if (glue_temp > billion)
-           glue_temp=billion;
-  else if (glue_temp < -billion)
-           glue_temp=-billion
-
 @* Packaging.
-We're essentially done with the parts of \TeX\ that are concerned with
-the input (|get_next|) and the output (|ship_out|). So it's time to
-get heavily into the remaining part, which does the real work of typesetting.
-
 After lists are constructed, \TeX\ wraps them up and puts them into boxes.
 Two major subroutines are given the responsibility for this task: |hpack|
 applies to horizontal lists (hlists) and |vpack| applies to vertical lists
@@ -3747,7 +2946,7 @@ static scaled @!total_stretch0[filll-normal+1],
    /*glue found by |hpack| or |vpack|*/
 
 @ If the global variable |adjust_tail| is non-null, the |hpack| routine
-also removes all occurrences of |ins_node|, |mark_node|, and |adjust_node|
+also removes all occurrences of |ins_node|,  and |adjust_node|
 items and appends the resulting material onto the list that ends at
 location |adjust_tail|.
 
@@ -3757,7 +2956,7 @@ static pointer @!adjust_tail=null; /*tail of adjustment list*/
 
 @ Here now is |hpack|, which contains few if any surprises.
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static pointer hpack(pointer @!p, scaled @!w, small_number @!m)
 {@+
 pointer r; /*the box node that will be returned*/
@@ -3801,7 +3000,7 @@ if (p!=null)
   case unset_node:
     @<Incorporate box dimensions into the dimensions of the hbox that will
 contain~it@>@;@+break;
-  case ins_node: case mark_node: case adjust_node: if (adjust_tail!=null)
+  case ins_node: case adjust_node: if (adjust_tail!=null)
     @<Transfer node |p| to the adjustment list@>@;@+break;
   case whatsit_node: @<Incorporate a whatsit node into an hbox@>;@+break;
   case glue_node: @<Incorporate glue into the horizontal totals@>@;@+break;
@@ -3952,7 +3151,7 @@ point is simply moved down until the limiting depth is attained.
 
 @d vpack(A,B) @[vpackage(A,B, max_dimen)@] /*special case of unconstrained depth*/
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static pointer vpackage(pointer @!p, scaled @!h, small_number @!m, scaled @!l)
 {@+
 pointer r; /*the box node that will be returned*/
@@ -4073,16 +3272,6 @@ if (prev_depth > ignore_depth)
 link(tail)=b;tail=b;prev_depth=depth(b);
 }
 
-@* Data structures for math mode.
-
-@* Subroutines for math mode.
-
-
-@d math_quad dimen_def[math_quad_no] /*\.{18mu}*/
-
-
-
-@* Alignment.
 
 @* Breaking paragraphs into lines.
 We come now to what is probably the most interesting algorithm of \TeX:
@@ -4142,7 +3331,7 @@ itself---we must build it up little by little, somewhat more cautiously
 than we have done with the simpler procedures of \TeX. Here is the
 general outline.
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 
 @<Declare subprocedures for |line_break|@>@;
 
@@ -4302,8 +3491,12 @@ holds the length of an empty line (namely, the sum of \.{\\leftskip} and
 \.{\\rightskip}); and a fourth set is used to create new delta nodes.
 
 When we pass a delta node we want to do operations like
-$$\hbox{\ignorespaces|for
-k=1 to 6 do cur_active_width[k]=cur_active_width[k]+mem[q+k].sc|};$$ and we
+
+\noindent
+\ignorespaces
+|for k=1 to 6 do cur_active_width[k]=cur_active_width[k]+mem[q+k].sc;|
+
+\noindent and we
 want to do this without the overhead of |for| loops. The |do_all_six|
 macro makes such six-tuples convenient.
 
@@ -5174,7 +4367,7 @@ done5|@>@;
 case math_node: {@+auto_breaking=(subtype(cur_p)==after);kern_break;
   } @+break;
 case penalty_node: try_break(penalty(cur_p), unhyphenated);@+break;
-case mark_node: case ins_node: case adjust_node: do_nothing;@+break;
+case ins_node: case adjust_node: do_nothing;@+break;
 default:confusion("paragraph");
 @:this can't happen paragraph}{\quad paragraph@>
 } @/
@@ -5625,7 +4818,7 @@ for each node in the list.
 @^data structure assumptions@>
 
 \noindent
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 
 #define ensure_vbox(N) /* no longer needed */@#
 
@@ -5637,7 +4830,7 @@ while (p!=null)
   switch (type(p)) {
   case hlist_node: case vlist_node: case rule_node: @<Insert glue for |split_top_skip|
 and set~|p:=null|@>@;@+break;
-  case whatsit_node: case mark_node: case ins_node: {@+prev_p=p;p=link(prev_p);
+  case whatsit_node: case ins_node: {@+prev_p=p;p=link(prev_p);
     } @+break;
   case glue_node: case kern_node: case penalty_node: {@+q=p;p=link(q);link(q)=null;
     link(prev_p)=p;flush_node_list(q);
@@ -5673,7 +4866,7 @@ its new significance.
 @d cur_height active_height[1] /*the natural height*/
 @d set_height_zero(A) active_height[A]=0 /*initialize the height to zero*/
 @#
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static pointer vert_break(pointer @!p, scaled @!h, scaled @!d)
    /*finds optimum page break*/
 {@+
@@ -5737,7 +4930,7 @@ case kern_node: {@+if (link(p)==null) t=penalty_node;
   if (t==glue_node) pi=0;@+else goto update_heights;
   } @+break;
 case penalty_node: pi=penalty(p);@+break;
-case mark_node: case ins_node: goto not_found;
+case ins_node: goto not_found;
 default:confusion("vertbreak");
 @:this can't happen vertbreak}{\quad vertbreak@>
 }
@@ -5787,7 +4980,7 @@ else{@+q=glue_ptr(p);
 cur_height=cur_height+prev_dp+width(q);prev_dp=0
 
 
-@* The page builder.
+@* The page builder.\label{texbuildpage}
 When \TeX\ appends new material to its main vlist in vertical mode, it uses
 a method something like |vsplit| to decide where a page ends, except that
 the calculations are done ``on line'' as new items come in.
@@ -5938,7 +5131,7 @@ from |empty| to |inserts_only| or |box_there|.
 
 @d set_page_so_far_zero(A) page_so_far[A]=0
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static void freeze_page_specs(small_number @!s)
 {@+page_contents=s;
 page_goal=hvsize;page_max_depth=max_depth;
@@ -5987,7 +5180,7 @@ the contribution list has been emptied. A call on |build_page| should
 be immediately followed by `|goto big_switch|', which is \TeX's central
 control point.
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static bool hbuild_page(void) /*append contributions to the current page*/
 {@+
 pointer p; /*the node being appended*/
@@ -6064,7 +5257,6 @@ case kern_node: if (page_contents < box_there) goto done1;
   else if (type(link(p))==glue_node) pi=0;
   else goto update_heights;@+break;
 case penalty_node: if (page_contents < box_there) goto done1;@+else pi=penalty(p);@+break;
-case mark_node: goto contribute;
 case ins_node: happend_insertion(p); goto contribute;
 default:confusion("page");
 @:this can't happen page}{\quad page@>
@@ -6161,7 +5353,7 @@ if (page_total < page_goal)
 else if (page_total-page_goal > page_shrink) b=awful_bad;
 else b=badness(page_total-page_goal, page_shrink)
 
-@ @<code from \TeX@>=
+@ @<\TeX\ functions@>=
 static void happend_insertion(pointer p)@/
 { uint8_t @!n; /*insertion box number*/
   scaled @!delta, @!h, @!w; /*sizes used for insertion calculations*/
@@ -6250,7 +5442,7 @@ else if (type(q)==penalty_node) print_int(penalty(q));
 else print_char('0');
 }
 
-@ @<code from \TeX@>=
+@ @<\TeX\ functions@>=
 static void hpack_page(void)
 {
 pointer p, @!q, @!r, @!s; /*nodes being examined and/or changed*/
@@ -6392,86 +5584,14 @@ else{@+delete_glue_ref(split_top_ptr(p));
   }
 p=prev_p
 
-@* The chief executive.
-We come now to the |main_control| routine, which contains the master
-switch that causes all the various pieces of \TeX\ to do their things,
-in the right order.
-
-In a sense, this is the grand climax of the program: It applies all the
-tools that we have worked so hard to construct. In another sense, this is
-the messiest part of the program: It necessarily refers to other pieces
-of code all over the place, so that a person can't fully understand what is
-going on without paging back and forth to be reminded of conventions that
-are defined elsewhere. We are now at the hub of the web, the central nervous
-system that touches most of the other parts and ties them together.
-@^brain@>
-
-The structure of |main_control| itself is quite simple. There's a label
-called |big_switch|, at which point the next token of input is fetched
-using |get_x_token|. Then the program branches at high speed into one of
-about 100 possible directions, based on the value of the current
-mode and the newly fetched command code; the sum |abs(mode)+cur_cmd|
-indicates what to do next. For example, the case `|vmode+letter|' arises
-when a letter occurs in vertical mode (or internal vertical mode); this
-case leads to instructions that initialize a new paragraph and enter
-horizontal mode.
-
-The big |case| statement that contains this multiway switch has been labeled
-|reswitch|, so that the program can |goto reswitch| when the next token
-has already been fetched. Most of the cases are quite short; they call
-an ``action procedure'' that does the work for that case, and then they
-either |goto reswitch| or they ``fall through'' to the end of the |case|
-statement, which returns control back to |big_switch|. Thus, |main_control|
-is not an extremely large procedure, in spite of the multiplicity of things
-it must do; it is small enough to be handled by \PASCAL\ compilers that put
-severe restrictions on procedure size.
-@!@^action procedure@>
-
-One case is singled out for special treatment, because it accounts for most
-of \TeX's activities in typical applications. The process of reading simple
-text and converting it into |char_node| records, while looking for ligatures
-and kerns, is part of \TeX's ``inner loop''; the whole program runs
-efficiently when its inner loop is fast, so this part has been written
-with particular care.
-
-@ The boolean variables of the main loop are normally false, and always reset
-to false before the loop is left. That saves us the extra work of initializing
-each time.
-
-
-@* Building boxes and lists.
-The most important parts of |main_control| are concerned with \TeX's
-chief mission of box-making. We need to control the activities that put
-entries on vlists and hlists, as well as the activities that convert
-those lists into boxes. All of the necessary machinery has already been
-developed; it remains for us to ``push the buttons'' at the right times.
-
-
-@ Many of the actions related to box-making are triggered by the appearance
-of braces in the input. For example, when the user says `\.{\\hbox}
-\.{to} \.{100pt\{$\langle\,\hbox{\rm hlist}\,\rangle$\}}' in vertical mode,
-the information about the box size (100pt, |exactly|) is put onto |save_stack|
-with a level boundary word just above it, and |cur_group=adjusted_hbox_group|;
-\TeX\ enters restricted horizontal mode to process the hlist. The right
-brace eventually causes |save_stack| to be restored to its former state,
-at which time the information about the box size (100pt, |exactly|) is
-available once again; a box is packaged and we leave restricted horizontal
-mode, appending the new box to the current list of the enclosing mode
-(in this case to the current list of vertical mode), followed by any
-vertical adjustments that were removed from the box by |hpack|.
-
-The next few sections of the program are therefore concerned with the
-treatment of left and right curly braces.
 
 @* Building math lists.
-
-
-@ When we enter display math mode, we need to call |line_break| to
+When we enter display math mode, we need to call |line_break| to
 process the partial paragraph that has just been interrupted by the
 display. Then we can set the proper values of |display_width| and
 |display_indent| and |pre_display_size|.
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 static void hdisplay(pointer p, pointer a, bool l)
 {@+
 scaled x; /* the |hsize| in the enclosing paragraph */
@@ -6606,7 +5726,7 @@ pointer @!t; /*tail of adjustment list*/
 |null| or it points to a box containing the equation number; and we are in
 vertical mode (or internal vertical mode).
 
-@<code from \TeX@>=
+@<\TeX\ functions@>=
 {@<Local variables for finishing a displayed formula@>@;
 adjust_tail=adjust_head;b=hpack(p, natural);p=list_ptr(b);
 t=adjust_tail;adjust_tail=null;@/
@@ -6711,15 +5831,6 @@ tail_append(new_penalty(post_display_penalty));
 offset=(hpos-hstart)+1-node_pos; /*offset after the display*/
 store_map(tail, node_pos,offset);
 if (g2 > 0) { tail_append(new_glue(pointer_def[glue_kind][g2]));store_map(tail, node_pos, offset);}
-
-
-@* Mode-independent processing.
-
-@* Dumping and undumping the tables.
-
-@* The main program.
-
-@* Debugging.
 
 @* Extensions.
 The program above includes a bunch of ``hooks'' that allow further
@@ -7253,20 +6364,19 @@ goto contribute
 
 @ @<Process whatsit |p| in |vert_break| loop, |goto not_found|@>=
 goto not_found
-
-
 @
 
 \endgroup
+\vfill
+\eject
 
 
+\part{Part Two: HINT}
+Some words about what comes here.
+\vskip 0pt plus 3fill
+\eject
 
-{\smalltitlefont Part Two: \HINT}
-
-
-
-
-\section{Reading Definitions}
+\section{Reading \HINT\ Definitions}
 This chapter starts with the reimplementation of the parser for
 short format \HINT\ files as described in {\it HINT: The File Format}\cite{MR:format}
 which constitutes the definitive specification of this format.
@@ -7388,12 +6498,12 @@ static void hget_definition_section(void)
 @
 
 
-@<\HINT\ variables@>=
+@<Global variables@>=
 static pointer *pointer_def[32]={NULL};
 @
 
 
-@<\HINT\ declarations@>=
+@<forward declarations@>=
 static void hget_font_def(uint8_t a, uint8_t n);
 static int32_t hget_integer_def(uint8_t a);
 static scaled hget_dimen_def(uint8_t a);
@@ -7409,6 +6519,8 @@ static void hget_color_def(uint8_t a, int n);
 static pointer hget_definition(uint8_t a);
 static int hget_label_ref(void);
 static int hget_link_color(void);
+static void hpack_page(void);
+static void happend_insertion(pointer p);
 @
 
 
@@ -7441,7 +6553,7 @@ We start with the data types.
 \subsection{Data Types}
 \subsubsection{Integers}
 \noindent
-@<\HINT\ variables@>=
+@<Global variables@>=
 static int32_t *integer_def;
 @
 
@@ -7471,7 +6583,7 @@ static int32_t hget_integer_ref(uint8_t n)
 
 \subsubsection{Dimensions}
 
-@<\HINT\ variables@>=
+@<Global variables@>=
 static scaled *dimen_def;
 @
 
@@ -7501,7 +6613,7 @@ static scaled hget_dimen_def(uint8_t a)
 
 \subsubsection{Extended Dimensions}
 
-@<\HINT\ variables@>=
+@<Global variables@>=
 static Xdimen *xdimen_def;
 @
 
@@ -7565,11 +6677,11 @@ actual baseline skip glue will be inserted just before appending the
 next hbox or vbox to the list. Until then we keep a possible baseline
 specification on a stack that parallels \TeX's semantic nest.
 
-@<\HINT\ types@>=
+@<Types...@>=
 typedef struct { pointer bs, ls; scaled lsl;} BaselineSkip;
 @
 
-@<\HINT\ variables@>=
+@<Global variables@>=
 static BaselineSkip *baseline_def=NULL;
 @
 
@@ -7656,30 +6768,24 @@ return p;
 } 
 @
 
-@<\HINT\ declarations@>=
+@<forward declarations@>=
 static pointer hprepend_to_vlist(pointer b);
 @
 
 
 \subsection{Fonts}\label{fonts}
-\TeX\ gets ist knowlegde about fonts from font metric files. \HINT\
-will not need all of that information, but for now, the complete \TeX\
-font metric file is included inside the \HINT\ file.
-The procedure |read_font_info| of \TeX\ is modified to load
-only those parts that are needed.
-
-When rendering fonts, we will need to find the section containing the
-actual glyphs. For OpenType and TrueType fonts,
-there might be no font metric file. For these files the metric
-data is extracted from the same font file that contains the glyphs
-using the FreeType library.
-
-We store the font name |n|, the section number for the font metrics
-|m| and the glyphs |q|, the ``at size'' |s| (which might be different
+To store font related information, the |FontDef| structure is used.
+It stores the font name |n|, the section number for font metrics
+|m| and glyphs |q|, the ``at size'' |s| (which might be different
 from the design size), the pointer to the font glue |g|, the pointer
 to the font hyphen |h|, and the font parameters |p|.
+All these fields are filled when reading the font definitions.
+Further fields are: 
+the horizontal and vertical size of one pixel in scaled pt |hpxs| and |vpxs|,
+the font format |ff|, for FreeType fonts the font face |ft_face|,
+and the glyph cache. The use of these fields is described in section \secref{fontrender}.
 
-@<\HINT\ dependent types@>=
+@<Global variables@>=
 typedef struct {
 char *n;
 uint16_t m,q;
@@ -7687,15 +6793,12 @@ scaled s;
 pointer g;
 pointer h;
 pointer p[MAX_FONT_PARAMS+1];
-scaled hpxs,vpxs; /* the horizontal and vertical size of one pixel in scaled pt */
+scaled hpxs,vpxs; /**/
 FontFormat ff; /* the font format */
 FT_Face ft_face; /* a pointer to the font face for FreeType fonts */
-bool resize; /* Does the |ft_face| need resizing? */
 @<the glyph cache@>@;
 } FontDef;
-@
 
-@<\HINT\ variables@>=
 static FontDef *font_def;
 @
 
@@ -7770,31 +6873,10 @@ static void hget_font_def(uint8_t a, uint8_t i)
 
 We used:
 
-@<\HINT\ declarations@>=
+@<forward declarations@>=
 static pointer hget_glue_spec(void);
 @
 
-
-After reading the definition section, we need to move the information
-from the \TeX\ font metric files included into \TeX's data
-structures. Here we only load the font metric information from \.{.TFM}
-files, while the font faces from extended fonts are loaded on demand.
-If the ``on demand'' loading works, this should also be done for
-the \.{.TFM} files.
-
-@<\HINT\ auxiliar functions@>=
-static void hget_font_metrics(void)
-{ int f;
-  font_ptr=max_ref[font_kind];
-  for (f=0; f<=max_ref[font_kind]; f++)
-    if (font_def[f].m!=0)
-    { hget_section(font_def[f].m);
-      read_font_info(f,font_def[f].n,font_def[f].s);
-    }
-    else
-      font_size[f]=font_def[f].s;
-}
-@
 
 \subsection{Parameter Lists}\label{getparamlist}
 There are three types of data that we allow in parameter lists: integers, dimensions,
@@ -7803,7 +6885,7 @@ Since all values are integer types, a single integer type, large enough for |int
 is sufficient. 
 To form linked lists of parameter definitions, we add a |next| pointer. The variable |param_def| contains the dynamically allocated 
 array of lists of parameter definitions.
-@<\HINT\ types@>=
+@<Types...@>=
 typedef struct {
 uint8_t n,k;@+
 int32_t v;@+
@@ -7815,7 +6897,7 @@ Param p; } ParamDef;
 @
 
 
-@<\HINT\ variables@>=
+@<Global variables@>=
 static ParamDef **param_def;
 @
 
@@ -7963,12 +7045,14 @@ static void hrestore_param_list(void)
   QUIT("Parameter save stack flow");
 }
 @
-@<\HINT\ declarations@>=
+@<forward declarations@>=
 static void hrestore_param_list(void);
 @
 
+
+
 \subsection{Page Ranges}
-@<\HINT\ variables@>=
+@<Global variables@>=
 typedef struct {
  uint8_t pg;
  uint32_t f,t;
@@ -8018,7 +7102,7 @@ The variable |streams| is used to contain the stream records
 that store the main content and the content of insertions.
 These records replace the box registers of \TeX.
 
-@<\HINT\ variables@>=
+@<Global variables@>=
 typedef struct {
 pointer p, t; /* head and tail */
 } Stream;
@@ -8035,7 +7119,7 @@ free(streams); streams=NULL;
 
 
 We put a stream definition into avariable of type |StreamDef|.
-@<\HINT\ variables@>=
+@<Global variables@>=
 typedef struct {
   Xdimen x; /* maximum height */
   int f; /* factor */
@@ -8108,7 +7192,7 @@ case TAG(stream_kind,b100): hinsert_stream(HGET8); @+ break;
 \subsection{Page Templates}
 
 
-@<\HINT\ variables@>=
+@<Global variables@>=
 typedef struct {
   char *n; /* name */
   Dimen d; /* max page depth */
@@ -8231,7 +7315,7 @@ static void hfill_page_template(void)
 }
 @
 
-@<\HINT\ declarations@>=
+@<forward declarations@>=
 static void hfill_page_template(void);
 @
 
@@ -8243,7 +7327,7 @@ section~\secref{outlines}. Here we declare, allocate/deallocate,
 and initialize the variable |hint_outlines| together with the 
 variable |labels|.
 
-@<\HINT\ variables@>=
+@<Global variables@>=
 static hint_Outline *hint_outlines=NULL;
 static int outline_no=-1;
 @
@@ -8326,7 +7410,7 @@ The function |hlist_to_string| is defined in section~\secref{listtraversal}.
 To store colors, we use the same data type that is used for the
 |color_defaults| and give it the name |ColorSet|.
 
-@<\HINT\ types@>=
+@<Types...@>=
 typedef uint32_t ColorSet[12];
 @
 
@@ -8334,7 +7418,7 @@ typedef uint32_t ColorSet[12];
 
 We define a dynamic array for color sets based on |max_ref[color_kind]|.
 
-@<\HINT\ variables@>=
+@<Global variables@>=
 static ColorSet *color_def=color_defaults;
 static bool first_color=true;
 @
@@ -8559,7 +7643,7 @@ static void tag_mismatch(uint8_t a, uint8_t z, uint32_t a_pos, uint32_t z_pos)
 }
 @
 
-@<\HINT\ declarations@>=
+@<forward declarations@>=
 static void tag_mismatch(uint8_t a, uint8_t z, uint32_t a_pos, uint32_t z_pos);
 @
 
@@ -8613,7 +7697,7 @@ static pointer hget_definition(uint8_t a)
 }
 @
 
-@<\HINT\ declarations@>=
+@<forward declarations@>=
 static void hget_content(void);
 @
 
@@ -8665,7 +7749,7 @@ static void hteg_content(void)
 }
 @
 
-@<\HINT\ declarations@>=
+@<forward declarations@>=
 static void hteg_content(void);
 @
 
@@ -8955,7 +8039,7 @@ static pointer hteg_rule_node(void)
   if(I==b111) width(p)=hget_xdimen_node();
 @
 
-@<\HINT\ declarations@>=
+@<forward declarations@>=
 static scaled hget_xdimen_node(void);
 @
 
@@ -9252,7 +8336,7 @@ node_pos=hpos-hstart-1;
 
 
 
-@<\HINT\ declarations@>=
+@<forward declarations@>=
 static pointer hget_list_pointer(void);
 static pointer hteg_list_pointer(void);
 @
@@ -9960,7 +9044,7 @@ done: if (r!=head)
   } 
 } 
 @
-@<\HINT\ declarations@>=
+@<forward declarations@>=
 static void hprune_unwanted_nodes(void);
 @
 
@@ -10193,7 +9277,7 @@ When we parse a paragraph we put the current paragraph parameters in a global
 variable, and save a possible outer parameter list in a local variable to restore
 the global varaiable once the paragraph is finished.
 
-@<\HINT\ variables@>=
+@<Global variables@>=
 static ParamDef *line_break_params=NULL;
 @
 
@@ -10205,7 +9289,7 @@ static void set_line_break_params(void)
 { hset_param_list(line_break_params);
 }
 @
-@<\HINT\ declarations@>=
+@<forward declarations@>=
 static void set_line_break_params(void);
 @
 
@@ -10703,20 +9787,19 @@ static int hget_link_color(void)
 }
 @
 
-{\smalltitlefont Part Two}
-{\smalltitlefont Part Three: Rendering}
+\part{Part Three: Rendering}
 
+The next part needs to be rewritten!
+\vskip 0pt plus 3fill
+\eject
 
-\section{Reusing \TeX}
-
- The next part needs to be rewritten!
  
 \TeX's table of equivalents is no longer needed since \HINT\ will never change
 any assignments. The functions of \TeX, however, use several of \TeX's variables
 as parameters. These are now found as part of \HINT's definitions and
 we modify the corresponding macros accordingly.
 
-@<\HINT\ variables@>=
+@<Global variables@>=
 static pointer*pointer_def[32];
 static scaled*dimen_def;
 static int32_t*integer_def;
@@ -10725,7 +9808,7 @@ static int32_t*integer_def;
 The code of \TeX\ uses new functions to access this date.
 
 
-@<\HINT\ declarations@>=
+@<forward declarations@>=
 static bool flush_pages(uint32_t pos); 
 static pointer skip(uint8_t n);
 static pointer *box_ptr(uint8_t n);
@@ -10781,7 +9864,7 @@ static void hpage_init(void)
 }
 @
 
-@<\HINT\ declarations@>=
+@<forward declarations@>=
 static void hpage_init(void);
 @
 
@@ -10798,7 +9881,7 @@ static void hflush_contribution_list(void)
 }
 @
 
-@<\HINT\ declarations@>=
+@<forward declarations@>=
 static void hflush_contribution_list(void);
 @
 
@@ -10809,589 +9892,80 @@ static void hflush_contribution_list(void);
 
 
 
-\section{Building Pages Bottom Up}
-\TeX's page builder (see section~\secref{texbuildpage}) moves nodes from the contribution list 
-to the current page, filling it from top to bottom, and finds an optimal page break to end the page.
-When a \HINT\ viewer needs to move to the previous page, only the start of the present page 
-might be known. In this situation, the start of the present page determines the end of the
-previous page and the \HINT\ page builder needs to find an optimal page break to start the previous page.
+\section{The Native Rendering Interface}\label{native}
+The {\tt rendernative.h} header file lists all functions that the native renderer must implement.
 
-We have seen already, how parsing the \HINT\ file backwards will fill the contribution list,
-moving the current position backwards, and adding new nodes at the end of the list.
-Now we need to construct a page builder, that
-moves these nodes from the head of the contribution list to the top of the current page,
-building it from the bottom up until the optimal
-page start is found. It is clear that optimizing different objectives will produce different
-outcomes. So the pages \HINT\ finds in backward direction might be different from the ones
-\TeX\ or \HINT\ find when paging forward. Therefore complete compatibility with \TeX\ is
-not an issue. Still we want to do a good job and therefore the following exposition follows
-closely the exposition of \TeX's page builder in part 45 of {\it \TeX: The Program\/}\cite{Knuth:tex}.
+To initialize the renderer call |nativeInit|. To release all resorces allocated call |nativeClear|.
+If the rendering is supposed to go to memory (see section~\secref{printing}) instead of the screen, use |nativePrintStart|
+and |nativePrintEnd|. To transfer the memory content to a given byte array use |nativePrint| 
 
-So here is the outline of the function |hbuild_page_up|. 
-
-@<\HINT\ functions@>=
-static bool hbuild_page_up(void) /*append contributions to the current page*/ 
-{@+
-static scaled page_top_height;
-pointer p; /*the node being appended*/ 
-pointer @!q,@!r; /*nodes being examined*/ 
-int @!b, @!c; /*badness and cost of current page*/ 
-int @!pi=0; /*penalty to be added to the badness*/ 
-if (link(contrib_head)==null) return false;
-@/do@+{ p=link(contrib_head);@/
-@<Prepend node |p| to the current page; if it is time for a page break, fill the page template and return |true|@>;
-}@+ while (link(contrib_head)!=null);@/
-tail=contrib_head;
-return false;
-} 
-@
-
-We deleted references to |output_active| and output routines as well as the code to update
-the values of |last_glue|, |last_penalty|, and |last_kern|.
-
-Before we consider the core of this routine, let's start at the beginning and look at the
-variables |page_contents| and |page_total|
-
-
-The variable |page_contents| is |empty| when the
-current page contains only mark nodes and content-less whatsit nodes; it
-is |inserts_only| if the page contains only insertion nodes in addition to
-marks and whatsits, penalties, kern, and glue.  At the bottom of a page, only penalty nodes are
-discarded until |page_contents| is no longer |empty|.
-(At the page bottom, glue is not discarded!) 
-As soon as |page_contents| becomes non-|empty|,
-the current |vsize| and |max_depth| are squirreled away into |page_goal|
-and |page_max_depth|; the latter values will be used until the page has
-been forwarded to the renderer. The \.{\\topskip} adjustment
-is made when |page_contents| changes to |box_there|.
-
-
-The variable |page_total| is supposed to reflect the size of the page so far from the
-top of the page down to the baseline of the last item on the page. Not included is the
-depth of the last item on the page as long as it does not exceed |page_max_depth|.
-If it does, the excess is included in the |page_total|.
-Also the natural size of the topskip glue is included in the |page_total| and its value is
-set asside in the variable |page_top_height|. When we add a box or rule, we keep the height
-of it in the variable |page_height| and make sure it does not exceed |page_top_height|.
-If it does, the excess is again included in the |page_total|. 
-Before we render the page, we add the topskip glue and
- then the height plus depth of the page shoud be less or equal to
-$|page_total|+|max_page_depth|$, and it should be less only by the amount that the depth of the
-last node on the page is less than |page_max_depth|.
-
-We judge the goodness of a page break amoung other things by the amount of material
-that is supposed to fill the page. But \TeX\ discards penalties, glues and kerns at the top of a
-page. So we do not incorporate these nodes immediately into the |page_so_far| variables
-but keep track of them in the |top_so_far| variables. Whenever we add a node that makes the
-accumulated nodes at the top non-discardable, we add them to the |page_so_far| variables.
-
-@<\HINT\ variables@>=
-static scaled page_height;
-static scaled top_so_far[8];
-@
-
-Now we consider how to prepend the different types of nodes.
-We start with nodes that have height and depth.
-
-\subsection{Boxes and Rules}
-
-@<Prepend a box or rule node to the current page@>=
-if (page_contents < box_there)
-{ if (page_contents==empty) freeze_page_specs(box_there);
-  else  page_contents=box_there;
-  if(depth(p)> page_max_depth)
-    page_total=depth(p)-page_max_depth;
-  depth(p)=0;
-  @<Account for the insertion of the \.{\\topskip} glue@>@;
-}
-@<Add in the |top_so_far|@>@;
-page_total+= page_height+depth(p);
-if (height(p)>page_top_height)
-{ page_total=page_total+height(p)-page_top_height;
-  page_height=page_top_height;
-}
-else
-  page_height= height(p);
-@
-
-To fix page parameters before it is too late, \TeX\ uses the function |freeze_page_specs|.
-
-The necessary topskip glue is determined when the final box is inserted
-into the page. Until then its natural height is included in the |page_total|
-and the height of the the topmost box or rule is included only as far as it exceeds
-the topskip glue.
-
-@<Account for the insertion of the \.{\\topskip} glue@>=
-{ page_top_height=width(top_skip);
-  page_total=page_total+page_top_height;
-}
-@
-
-Glue that gets added to the top of the page is collected in the |top_so_far|
-array.  This glue will be discarded if it is not topped by a box or rule.
-In the latter case it is added to the |page_so_far| array.
-@<Add in the |top_so_far|@>=
-{ int i;
-  for (i=1; i<=6; i++)
-  { page_so_far[i]+=top_so_far[i];
-    top_so_far[i]=0;
-  } 
-}
-@
-
-\subsection{Stacking up the Page}
-
-This is (more or less) \TeX's way of building the page: 
-If the current page is empty and node |p| is to be deleted, |goto done1|; otherwise
-use node |p| to update the state of the current page; if this node is an insertion,
-|goto contribute|; otherwise if this node is not a legal breakpoint, |goto contribute|
-or |update_heights|; otherwise set |pi| to the penalty associated with this breakpoint.
-Check if node |p| is a new champion breakpoint; then if it is time for a page
-break, prepare for output, fire up the renderer, and |return|.
-
-And here is our new code:
-
-@<Prepend node |p| to the current page;...@>=
-switch (type(p)) {
-case hlist_node: case vlist_node: case rule_node: 
-    @<Prepend a box or rule node to the current page@>@; goto contribute;
-case whatsit_node: goto contribute;
-case glue_node: @<Prepend a glue node to the current page@>@; break;
-case kern_node: @<Prepend a kern node to the current page@>@; break;
-case penalty_node: if (page_contents == empty) goto done1;@+else pi=penalty(p);@+break;
-case ins_node: happend_insertion(p); goto contribute;
-default: DBG(DBGTEX,"Unexpected node type %d in build_page_up ignored\n",type(p));
-} 
-  @<Check if node |p| is a new champion breakpoint for the top of page@>@;
-contribute:
-@<Prepend node |p| to the current page and |goto done|@>@;
-done1: @<Recycle node |p|@>;
-done: 
-@
-
-@<Prepend node |p| to the current page and |goto done|@>=
-link(contrib_head)=link(p);
-link(p)=link(page_head);
-if (link(page_head)==null) page_tail=p;
-link(page_head)=p;
-goto done;
-@
-
-\subsection{Glues and Kerns}
-
-Page breaks are possible at a glue node, if the node just above the glue node is a
-|hlist_node|, |vlist_node|,
-|rule_node|, |ins_node|, |mark_node|, |adjust_node|, |ligature_node|,
-|disc_node|, or |whatsit_node|. We test this with the |precedes_break| macro.
-We silently return if the node above the glue is not yet known and
-we do not test for a page break if the page is still empty.
-
-@<Prepend a glue node to the current page@>=
-if(link(p)==null) return false;
-@<Add glue to |top_so_far|@>@;
-if (page_contents==empty || !precedes_break(link(p))) goto contribute;
-pi=0;
-@
-
-@<Add glue to |top_so_far|@>=
-#define top_shrink top_so_far[6]
-#define top_total top_so_far[1]
-
-{ pointer q=glue_ptr(p);
-  top_so_far[2+stretch_order(q)]+=stretch(q);
-  if((shrink_order(q)!=normal)&&(shrink(q)!=0))
-    DBG(DBGTEX,"Infinite glue shrinkage found on current page");
-  top_shrink+=shrink(q);
-  top_total+=width(q);
-}
-@
-
-Handling kern nodes is similar. A kern node is a possible page break if the 
-node below it is a glue node.
-
-@<Prepend a kern node to the current page@>=
-top_total+=width(p);
-if (page_contents ==empty ||
-    link(page_head)==null || 
-    type(link(page_head))!=glue_node)
-  goto contribute;
-pi=0;
-@
-
-\subsection{Checking Breakpoints}
-At this point |p| is a possible breakpoint and |pi| is the penalty associated with it.
-First we compute |c|, the cost or badness of the current page.
-The following code it taken from \TeX\ with only small modifications.
-
-@<Compute the cost |c| of a possible break at |p|@>=
-@<Compute the badness, |b|, of the current page, using |awful_bad| if the box is too full@>;
-if (b < awful_bad) 
-{ if (pi <= eject_penalty) c=pi;
-  else if (b < inf_bad) c=b+pi+insert_penalties;
-  else c=deplorable;
-}
-else c=b;
-if (insert_penalties >= 10000) c=awful_bad;
-@
-
-@<Check if node |p| is a new champion breakpoint for the top of page@>=
-if (pi < inf_penalty) 
-{@+@<Compute the cost |c| of a possible break at |p|@>@;
-  if (c <= least_page_cost) 
-  {@+best_page_break=p;best_size=page_goal;
-    least_page_cost=c;
-    r=link(page_ins_head);
-    while (r!=page_ins_head) 
-      {@+best_ins_ptr(r)=last_ins_ptr(r);
-      r=link(r);
-      }
-  } 
-  if ((c==awful_bad)||(pi <= eject_penalty)) 
-  {@+
-     @<Move nodes preceeding the best page break back to the contribution list@>@;
-     @<Replace leading white-space by the topskip glue@>@;
-     hpack_page();
-     hfill_page_template();
-     return true;
-  } 
-} 
+@<native rendering definitions@>=
+extern void nativeInit(void); 
+extern void nativeClear(void);
+extern int nativePrintStart(int w, int h, int bpr, int bpp, unsigned char *bits);
+extern int nativePrintEnd(void);
+extern int nativePrint(unsigned char *bits);
 @
 
 
-We have finaly found the best page break. If the best break is not the current node |p|,
-we might have moved some material
-preceeding this break already to the current page. Now we move it back to
-the contribution list. 
-
-
-@<Move nodes preceeding the best page break back to the contribution list@>=
-if (p!=best_page_break)
-{ while (link(page_head)!=best_page_break)
-  { q=link(page_head);
-    link(page_head)=link(q);
-    link(q)=null;
-    link(q)=link(head);
-    link(head)=q;
-  }
-}
-@
-
-The following code starts with recording the newly found top of the
-page in the page location cache.  For a discussion of why this location
-should or should not be recorded see section~\secref{locsetprev}.
-After we are done, the best page runs from
-|link(page_head)| to |page_tail| and we set |best_page_break| to |null|.
-
-@<Replace leading white-space by the topskip glue@>= 
-hloc_set_prev(link(page_head));
-while (true) {
-  q=link(page_head);
-  if (q==null) return false; /* empty page */
-  else if (q==best_page_break) /* dont remove the page break */
-    break;
-  else if (type(q)==penalty_node || type(q)==glue_node || type(q)==kern_node)
-  { link(page_head)=link(q);link(q)=null;flush_node_list(q); }
-  else break;
-}  
-temp_ptr= new_spec(top_skip);
-q= new_glue(temp_ptr);glue_ref_count(temp_ptr)= null;
-if(width(temp_ptr)> page_height) width(temp_ptr)= width(temp_ptr)-page_height;
-else width(temp_ptr)= 0;
-link(q)=link(page_head);
-link(page_head)=q;
-best_page_break=null;
-@
-
-\section{Recording Locations}
-When a \HINT\ viewer needs to output a certain page, it must be able to position
-the parser in the content section of the \HINT\ file.
-For example when we want to go backwards to the previous page, 
-we must position the parser where the current page starts and go backwards from there.
-The start of the current page was determined
-by the page builder. It is usually a penalty or glue node less often 
-also a kern node. So the page builder knows the node where the page break occurs
-and we simply need a way to determine the position in the content section from the
-node. We could of course store the position inside each node. But this would make 
-all nodes bigger and since (in the current implementation)
-\TeX's pointers are limited to 16 bit, this is not a good idea.
-A second alternative would be to generate the pages directly from
-the node representations in the \HINT\ file. This is ultimatively the best solution
-but requires rewriting \TeX's algorithms to work with that new representation---and I
-simply don't have the time to do that.
-So I choose a third alternative: 
-I implement a table to map node pointers to positions.
-Unfortunately, the position alone is not sufficient. Page breaks
-often occur in the middle of a paragraph, and for the line breaking
-algorithm, the information stored in the paragraph node is essential.
-Therefore the table will store also an offset to the enclosing top level node.
-(A text node---not implemented yet---will possibly need the current font.)
-We call the complete information associated with the position a ``location''
-and the location is what we store in the table.
-
-When implementing a \HINT\ viewer, it will become necessary to store
-positions inside a \HINT\ file for later use. For example, a \HINT\ viewer
-may want to open a \HINT\ file exactly at the position where the user has
-stopped reading last time. We do not want to burden such programs with
-all the details of a {\bf Location} type. Hence we commit ourself to code
-locations in an |uint64_t| value and will make sure that these
-values contain enough information to position the \HINT\ file to
-a unique and reproducible position.
-The |uint64_t| type is an opaque type for the user interface,
-but by storing the 32 bit position
-inside the content section in the most significant bits, the user interface can compare
-the 64 bit integers to find out if a location preceeds an other location. 
-
-\subsection{Mapping node pointers to locations}
-Since \TeX's pointers are only 16-bit integers the most simple
-implementation of the location table is an array indexed by the
-pointer values. Since we do not need locations for character nodes
-and all other nodes have two or more memory words, we can use not only
-the table entry at the pointer value |p| but also the table entry at $|p|+1$.
-We use the first for the node position and the second for a node's offset
-from the enclosing  paragraph node 
-or other top level node that is split across pages.
-
-@<\HINT\ variables@>=
-static uint32_t map[0x10000];
-@
-
-The first function is the initialization function that clears the table. It 
-sets all records to zero. 
-
-@<\HINT\ functions@>=
-static void clear_map(void)
-{ @+memset(map,0,sizeof(map));@+
-}
-@
-
-Next, we implement two
-functions that operate on the table:
-|store_map| stores or updates information inside the table,
-and |hposition| returns for a given pointer the position inside the 
-content section, or zero if no such position is known.
-To delete an entry, simply call |store_map(p,0,0)|.
-
-@<\HINT\ functions@>=
-static void store_map(pointer p, uint32_t pos0, uint32_t offset)
-{@+ map[p]=pos0;
-  map[p+1]=offset;@+
-}
-
-uint32_t hposition(pointer p) 
-{@+ return map[p];@+
-}
-@  
-
-The function that takes information form the cache and converts it to a |uint64_t| location, as mentioned above, commes next. It returns |HINT_NO_LOC| if no information is in the cache.
-This value is used to indicate that a variable contains no valid location.
-
-@<\HINT\ declarations@>=
-#define HINT_NO_LOC 0xFFFFFFFFFFFFFFFF
-#define PAGE_LOC(POS0,OFF) (((uint64_t)((POS0)+(OFF))<<32) + (uint64_t)(OFF))
-#define LOC_POS(P) ((P)>>32) /* the node position */
-#define LOC_OFF(P) ((P)&0xFFFFFFFF) /* the distance to the top level node */
-#define LOC_POS0(P) (LOC_POS(P)-LOC_OFF(P)) /* the top level position */
-@
-
-@<\HINT\ auxiliar functions@>=
-uint64_t hlocation(pointer p)
-{ @+ uint64_t h=PAGE_LOC(map[p],map[p+1]);
-   while (h==0 && link(p)!=null) /* search the list if necessary */
-   { p=link(p); h=PAGE_LOC(map[p],map[p+1]); }   
-   return h;
-}
-@  
-
-\subsection{Caching page locations}
-The location table is complemented by a cache for page locations.
-When we move trough a \HINT\ file by paging forward and then want to
-return to the previous page, we want to see the previous page exactly
-as we just have seen it. Generating the previous page based on its
-bottom location may, however, produce a completely different
-result because the page builder optimizes
-the start of the page where as previously it had optimized the end
-of the page. To obtain the same page again, we need to cache the location
-of the previous page and generate it again in forward mode.
-
-We do not cache an arbitraty amount of pages, because readers will
-not remember to many pages either. We keep a limited amount
-of locations sorted by their position in a circular buffer.
-
-@<\HINT\ variables@>=
-#define MAX_PAGE_POS (1<<3) /* must be a power of 2 */
-
-static uint64_t page_loc[MAX_PAGE_POS];
-static int cur_loc;
-static int lo_loc, hi_loc;
-@
-
-
-The location of the current page is found at |page_loc[cur_loc]| which
-is always defined. Pages preceeding the current page may be found
-in |page_loc| at an index $i$ that is strictly beween |lo_loc| and $|cur_loc|$ 
-($|lo_loc| < i < |cur_loc|$). Of course with the usual meaning of  `between'' in a circular buffer.
-Similarly, we have $|cur_loc| < i <|hi_loc|$ for the index of a page
-following the current page.
-
-So lets define routines to initialize and move around the indices
-in the circular buffer. |hloc_clear| clears the page location cache
-except for the current page. |hloc_next| moves the current location to the next page
-if there is a next page in the cache. |hloc_prev| does the same for the preceeding page.
-
-@<\HINT\ auxiliar functions@>=
-#define @[NEXT_PAGE(X)@] (X=(X+1)&(MAX_PAGE_POS-1))
-#define @[PREV_PAGE(X)@] (X=(X-1)&(MAX_PAGE_POS-1))
-@#
-static void hloc_clear(void)
-{ @+lo_loc=hi_loc=cur_loc;PREV_PAGE(lo_loc);NEXT_PAGE(hi_loc);@+
-}
-@
-
-@<render functions@>=
-static bool hloc_next(void)
-{ @+int i=cur_loc;
-  if (hstart+LOC_POS(page_loc[cur_loc])>=hend) 
-    return false;
-  NEXT_PAGE(i);
-  if (i==hi_loc) 
-    return false;
-  cur_loc=i;
-  return true;
-}
-
-static bool hloc_prev(void) 
-{ @+int i=cur_loc;
-  if (page_loc[cur_loc]==0) 
-    return false;
-  PREV_PAGE(i);
-  if (i==lo_loc) 
-    return false;
-  cur_loc=i;
-  return true;
-}
-@
-
-@<\HINT\ declarations@>=
-static uint64_t hlocation(pointer p); /* map |p| to its file location */
-@
-
-After these preparations, we can turn our attention to the functions that manage
-the page cache itself. We start with the initialization function:
-
-@<\HINT\ functions@>=
-static void hloc_init(void)
-{@+cur_loc=0;
-  hloc_clear();
-  page_loc[cur_loc]=0;
-  DBG(DBGPAGE,"loc_init: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
-}  
+To set the size of the drawing aerea in pixel and in point call |nativeSetSize|
+@<native rendering definitions@>=
+extern void nativeSetSize(int px_h, int px_v, double pt_x, double pt_v);
 @ 
 
-The function |hloc_set(h)| sets the location for the current page to 
-the value |h|.
-In many cases, |h| {\it is} the position of the current page.
-For example if only the format of the page changes. Then no action is necessary.
-In other cases, the new position is already somewhere in the page cache,
-for example if we follow a link, and later return to the same position.
-In this case we just change |cur_loc| to point to the new position in the cache.
-A more drastic action needs to be taken if the value of |h| is not in the page location cache.
-If the location of the current page is new, we do not know anything about the position
-of following or preceeding pages and we have to clear the cache. 
-
-@<render functions@>=
-
-static void hloc_set(uint64_t h)
-{@+ int i;
-  if (page_loc[cur_loc]==h) return;
-  for (i=lo_loc,NEXT_PAGE(i); i!=hi_loc; NEXT_PAGE(i))
-   if (page_loc[i]==h)
-   { cur_loc=i;
-     DBG(DBGPAGE,"loc_set: %d < %d < %d\n",lo_loc,cur_loc,hi_loc); 
-     return;}
-  page_loc[cur_loc]=h;
-  hloc_clear();
-  DBG(DBGPAGE,"loc_set: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
- }
- @
- 
- When we generate new pages, we discover new page locations: When paging forward,
- the bottom of the current page is the top of the next page and similar for
- paging backward. The actions required when storing the location of the next page in the
- page location cache differ in two aspects from storing the location of the current page:
- first, we might need to allocate a new entry in the cache; and second,
- assuming that the location of the current page does not change, a new location
- for the next page will not affect the locations of preceeding pages and we can
- keep them in the cache.
- 
- 
- @<\HINT\ auxiliar functions@>=
-
-static void hloc_set_next(pointer p)
-{ @+int i=cur_loc;
-  uint64_t h=hlocation(p); 
-  if (h==page_loc[cur_loc]) return;
-
-  NEXT_PAGE(i);
-  if (i==hi_loc) /* allocation needed */
-  {@+ if (hi_loc==lo_loc) /* deallocation needed */
-      NEXT_PAGE(lo_loc);
-    NEXT_PAGE(hi_loc);
-    page_loc[i]=h;
-  }
-  else if (h!=page_loc[i])
-  { page_loc[i]=h;
-    NEXT_PAGE(i);
-    hi_loc=i;
-  }
-  DBG(DBGPAGE,"loc_set_next: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
-}
+The native renderer may implement an optional procedure to switch between dark and light mode.
+The other procedure may change the $\gamma$-value.
+@<native rendering definitions@>=
+extern void nativeSetForeground(uint32_t fg);
+extern void nativeSetGamma(double gamma);
 @
 
-
-After these preparations, setting the position of the previous page should be no surprise.
-It is, however, questionable whether we should record these positions in the page 
-location cache. Just consider the following:\label{locsetprev}
-We discover new preceeding pages when paging backwards.
-While doing so, we generate pages in backward mode, optimizing the start of the page.
-When we later return to these pages, we are paging forward and therefore
-generate pages in forward mode optimizing the bottom of the page.
-Hence, the pages might still look different. 
-
-Since the function |hloc_set_prev| is called only after generating a new page in backward
-mode, we will set the current page to the new location and keep only the position of the 
-old current page as position of the next page in the cache.
-
-@<\HINT\ auxiliar functions@>=
-static void hloc_set_prev(pointer p)
-{ @+int i=cur_loc;
-  uint64_t h=hlocation(p); 
-  PREV_PAGE(i);
-  if (i==lo_loc) /* allocation needed */
-  {@+ if (lo_loc==hi_loc) /* deallocation needed */
-      PREV_PAGE(hi_loc);
-    PREV_PAGE(lo_loc);
-    page_loc[i]=h;
-  }
-  else if (h!=page_loc[i])
-  { page_loc[i]=h;
-    lo_loc=i;
-    PREV_PAGE(lo_loc);
-  }
-  hi_loc=cur_loc;
-  NEXT_PAGE(hi_loc);
-  cur_loc=i;
-  DBG(DBGPAGE,"loc_set_prev: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
-}
+To  render an empty page make sure that |hSetColor| ist called to
+establish a valid color schema and then call |nativeBlank|.
+@<native rendering definitions@>=
+extern void nativeBlank(uint32_t bg); 
 @
 
-The following functions are called from the \TeX\ code:
+In the following, if not otherwise stated, all dimensions are given as double values in point.
+We have $72.27\,\hbox{pt} = 1\,\hbox{inch}$ and $1\,\hbox{inch} = 2.54\, \hbox{cm}$.
 
-@<\HINT\ declarations@>=
-static void hloc_init(void);
-static void store_map(pointer p, uint32_t pos, uint32_t offset); /*store the location of |p|*/
-static uint32_t hposition(pointer p); /* return the position of |p| or 0*/
-static void hloc_set_next(pointer p);/* record the location of |p| as the start of the next page */
+
+To render the texture |t| with the top left point at $(|x|,|y|)$ and
+with width |w| and height |h| call:
+@<native rendering definitions@>=
+extern void nativeGlyph(double x, double y, double w, double h,
+  unsigned int t);
 @
+For an explanation of the style parameter see section~\secref{search}.
+
+
+
+To render a black rectangle at position  $(|x|,|y|)$ with width |w| and height |h| call:
+
+@<native rendering definitions@>=
+void nativeRule(double x, double y, double w, double h);
+@
+To render an image at position  $(|x|,|y|)$ with width |w| and height |h|,
+with the image data in memory from |istart| to (but not including) |iend| call:
+
+@<native rendering definitions@>=
+void nativeImage(double x, double y, double w, double h, unsigned char *istart, unsigned char *iend);
+@
+
+For PK fonts and FreeType fonts we need a function to translate the
+glyph bitmap in |g->bits| into a device dependent representation.
+@<native rendering definitions@>=
+extern unsigned int nativeTexture(unsigned char *bits, int w, int h);
+@
+
+To free any native resources associated with a cached glyph |g| call:
+
+@<native rendering definitions@>=
+unsigned int nativeFreeTexture(unsigned int t);
+@
+This function is also called for all glyphs by the function |hint_clear_fonts|.
+If the |rm| parameter to that function is |false|, the glyph cache is not deallocated
+only |nativeFreeTexture| is executed for all glyphs.
 
 \section{The Top-Level Interface}
 The \HINT\ library seeks to provide a basis for the implementation of
@@ -11579,7 +10153,7 @@ We restrict as well the range of possible resolutions to avoid
 situations where the size of glyphs or the number of glyphs on a page
 might grow beyond the bounds of any implementation.
 
-@<\HINT\ variables@>=
+@<Global variables@>=
 #define PIXEL_SIZE_300_DPI (scaled)((72.27/300)*ONE+0.5)
 #define MAX_PIXEL_SIZE (PIXEL_SIZE_300_DPI*10)
 #define MIN_PIXEL_SIZE (PIXEL_SIZE_300_DPI/10)
@@ -11620,6 +10194,309 @@ and resets the rendering direction.
 
 
 \subsection{Building Pages Forward and Backward}
+
+
+
+\subsection{Building Pages Bottom Up}
+\TeX's page builder (see \pageref{texbuildpage}) moves nodes from the contribution list 
+to the current page, filling it from top to bottom, and finds an optimal page break to end the page.
+When a \HINT\ viewer needs to move to the previous page, only the start of the present page 
+might be known. In this situation, the start of the present page determines the end of the
+previous page and the \HINT\ page builder needs to find an optimal page break to start the previous page.
+
+We have seen already, how parsing the \HINT\ file backwards will fill the contribution list,
+moving the current position backwards, and adding new nodes at the end of the list.
+Now we need to construct a page builder, that
+moves these nodes from the head of the contribution list to the top of the current page,
+building it from the bottom up until the optimal
+page start is found. It is clear that optimizing different objectives will produce different
+outcomes. So the pages \HINT\ finds in backward direction might be different from the ones
+\TeX\ or \HINT\ find when paging forward. Therefore complete compatibility with \TeX\ is
+not an issue. Still we want to do a good job and therefore the following exposition follows
+closely the exposition of \TeX's page builder in part 45 of {\it \TeX: The Program\/}\cite{Knuth:tex}.
+
+So here is the outline of the function |hbuild_page_up|. 
+
+@<\HINT\ functions@>=
+static bool hbuild_page_up(void) /*append contributions to the current page*/ 
+{@+
+static scaled page_top_height;
+pointer p; /*the node being appended*/ 
+pointer @!q,@!r; /*nodes being examined*/ 
+int @!b, @!c; /*badness and cost of current page*/ 
+int @!pi=0; /*penalty to be added to the badness*/ 
+if (link(contrib_head)==null) return false;
+@/do@+{ p=link(contrib_head);@/
+@<Prepend node |p| to the current page; if it is time for a page break, fill the page template and return |true|@>;
+}@+ while (link(contrib_head)!=null);@/
+tail=contrib_head;
+return false;
+} 
+@
+
+We deleted references to |output_active| and output routines as well as the code to update
+the values of |last_glue|, |last_penalty|, and |last_kern|.
+
+Before we consider the core of this routine, let's start at the beginning and look at the
+variables |page_contents| and |page_total|
+
+
+The variable |page_contents| is |empty| when the
+current page contains only mark nodes and content-less whatsit nodes; it
+is |inserts_only| if the page contains only insertion nodes in addition to
+marks and whatsits, penalties, kern, and glue.  At the bottom of a page, only penalty nodes are
+discarded until |page_contents| is no longer |empty|.
+(At the page bottom, glue is not discarded!) 
+As soon as |page_contents| becomes non-|empty|,
+the current |vsize| and |max_depth| are squirreled away into |page_goal|
+and |page_max_depth|; the latter values will be used until the page has
+been forwarded to the renderer. The \.{\\topskip} adjustment
+is made when |page_contents| changes to |box_there|.
+
+
+The variable |page_total| is supposed to reflect the size of the page so far from the
+top of the page down to the baseline of the last item on the page. Not included is the
+depth of the last item on the page as long as it does not exceed |page_max_depth|.
+If it does, the excess is included in the |page_total|.
+Also the natural size of the topskip glue is included in the |page_total| and its value is
+set asside in the variable |page_top_height|. When we add a box or rule, we keep the height
+of it in the variable |page_height| and make sure it does not exceed |page_top_height|.
+If it does, the excess is again included in the |page_total|. 
+Before we render the page, we add the topskip glue and
+ then the height plus depth of the page shoud be less or equal to
+$|page_total|+|max_page_depth|$, and it should be less only by the amount that the depth of the
+last node on the page is less than |page_max_depth|.
+
+We judge the goodness of a page break amoung other things by the amount of material
+that is supposed to fill the page. But \TeX\ discards penalties, glues and kerns at the top of a
+page. So we do not incorporate these nodes immediately into the |page_so_far| variables
+but keep track of them in the |top_so_far| variables. Whenever we add a node that makes the
+accumulated nodes at the top non-discardable, we add them to the |page_so_far| variables.
+
+@<Global variables@>=
+static scaled page_height;
+static scaled top_so_far[8];
+@
+
+Now we consider how to prepend the different types of nodes.
+We start with nodes that have height and depth.
+
+\subsubsection{Boxes and Rules}
+
+@<Prepend a box or rule node to the current page@>=
+if (page_contents < box_there)
+{ if (page_contents==empty) freeze_page_specs(box_there);
+  else  page_contents=box_there;
+  if(depth(p)> page_max_depth)
+    page_total=depth(p)-page_max_depth;
+  depth(p)=0;
+  @<Account for the insertion of the \.{\\topskip} glue@>@;
+}
+@<Add in the |top_so_far|@>@;
+page_total+= page_height+depth(p);
+if (height(p)>page_top_height)
+{ page_total=page_total+height(p)-page_top_height;
+  page_height=page_top_height;
+}
+else
+  page_height= height(p);
+@
+
+To fix page parameters before it is too late, \TeX\ uses the function |freeze_page_specs|.
+
+The necessary topskip glue is determined when the final box is inserted
+into the page. Until then its natural height is included in the |page_total|
+and the height of the the topmost box or rule is included only as far as it exceeds
+the topskip glue.
+
+@<Account for the insertion of the \.{\\topskip} glue@>=
+{ page_top_height=width(top_skip);
+  page_total=page_total+page_top_height;
+}
+@
+
+Glue that gets added to the top of the page is collected in the |top_so_far|
+array.  This glue will be discarded if it is not topped by a box or rule.
+In the latter case it is added to the |page_so_far| array.
+@<Add in the |top_so_far|@>=
+{ int i;
+  for (i=1; i<=6; i++)
+  { page_so_far[i]+=top_so_far[i];
+    top_so_far[i]=0;
+  } 
+}
+@
+
+\subsubsection{Stacking up the Page}
+
+This is (more or less) \TeX's way of building the page: 
+If the current page is empty and node |p| is to be deleted, |goto done1|; otherwise
+use node |p| to update the state of the current page; if this node is an insertion,
+|goto contribute|; otherwise if this node is not a legal breakpoint, |goto contribute|
+or |update_heights|; otherwise set |pi| to the penalty associated with this breakpoint.
+Check if node |p| is a new champion breakpoint; then if it is time for a page
+break, prepare for output, fire up the renderer, and |return|.
+
+And here is our new code:
+
+@<Prepend node |p| to the current page;...@>=
+switch (type(p)) {
+case hlist_node: case vlist_node: case rule_node: 
+    @<Prepend a box or rule node to the current page@>@; goto contribute;
+case whatsit_node: goto contribute;
+case glue_node: @<Prepend a glue node to the current page@>@; break;
+case kern_node: @<Prepend a kern node to the current page@>@; break;
+case penalty_node: if (page_contents == empty) goto done1;@+else pi=penalty(p);@+break;
+case ins_node: happend_insertion(p); goto contribute;
+default: DBG(DBGTEX,"Unexpected node type %d in build_page_up ignored\n",type(p));
+} 
+  @<Check if node |p| is a new champion breakpoint for the top of page@>@;
+contribute:
+@<Prepend node |p| to the current page and |goto done|@>@;
+done1: @<Recycle node |p|@>;
+done: 
+@
+
+@<Prepend node |p| to the current page and |goto done|@>=
+link(contrib_head)=link(p);
+link(p)=link(page_head);
+if (link(page_head)==null) page_tail=p;
+link(page_head)=p;
+goto done;
+@
+
+\subsubsection{Glues and Kerns}
+
+Page breaks are possible at a glue node, if the node just above the glue node is a
+|hlist_node|, |vlist_node|,
+|rule_node|, |ins_node|, |adjust_node|, |ligature_node|,
+|disc_node|, or |whatsit_node|. We test this with the |precedes_break| macro.
+We silently return if the node above the glue is not yet known and
+we do not test for a page break if the page is still empty.
+
+@<Prepend a glue node to the current page@>=
+if(link(p)==null) return false;
+@<Add glue to |top_so_far|@>@;
+if (page_contents==empty || !precedes_break(link(p))) goto contribute;
+pi=0;
+@
+
+@<Add glue to |top_so_far|@>=
+#define top_shrink top_so_far[6]
+#define top_total top_so_far[1]
+
+{ pointer q=glue_ptr(p);
+  top_so_far[2+stretch_order(q)]+=stretch(q);
+  if((shrink_order(q)!=normal)&&(shrink(q)!=0))
+    DBG(DBGTEX,"Infinite glue shrinkage found on current page");
+  top_shrink+=shrink(q);
+  top_total+=width(q);
+}
+@
+
+Handling kern nodes is similar. A kern node is a possible page break if the 
+node below it is a glue node.
+
+@<Prepend a kern node to the current page@>=
+top_total+=width(p);
+if (page_contents ==empty ||
+    link(page_head)==null || 
+    type(link(page_head))!=glue_node)
+  goto contribute;
+pi=0;
+@
+
+\subsubsection{Checking Breakpoints}
+At this point |p| is a possible breakpoint and |pi| is the penalty associated with it.
+First we compute |c|, the cost or badness of the current page.
+The following code it taken from \TeX\ with only small modifications.
+
+@<Compute the cost |c| of a possible break at |p|@>=
+@<Compute the badness, |b|, of the current page, using |awful_bad| if the box is too full@>;
+if (b < awful_bad) 
+{ if (pi <= eject_penalty) c=pi;
+  else if (b < inf_bad) c=b+pi+insert_penalties;
+  else c=deplorable;
+}
+else c=b;
+if (insert_penalties >= 10000) c=awful_bad;
+@
+
+@<Check if node |p| is a new champion breakpoint for the top of page@>=
+if (pi < inf_penalty) 
+{@+@<Compute the cost |c| of a possible break at |p|@>@;
+  if (c <= least_page_cost) 
+  {@+best_page_break=p;best_size=page_goal;
+    least_page_cost=c;
+    r=link(page_ins_head);
+    while (r!=page_ins_head) 
+      {@+best_ins_ptr(r)=last_ins_ptr(r);
+      r=link(r);
+      }
+  } 
+  if ((c==awful_bad)||(pi <= eject_penalty)) 
+  {@+
+     @<Move nodes preceeding the best page break back to the contribution list@>@;
+     @<Replace leading white-space by the topskip glue@>@;
+     hpack_page();
+     hfill_page_template();
+     return true;
+  } 
+} 
+@
+
+
+We have finaly found the best page break. If the best break is not the current node |p|,
+we might have moved some material
+preceeding this break already to the current page. Now we move it back to
+the contribution list. 
+
+
+@<Move nodes preceeding the best page break back to the contribution list@>=
+if (p!=best_page_break)
+{ while (link(page_head)!=best_page_break)
+  { q=link(page_head);
+    link(page_head)=link(q);
+    link(q)=null;
+    link(q)=link(head);
+    link(head)=q;
+  }
+}
+@
+
+The following code starts with recording the newly found top of the
+page in the page location cache.  For a discussion of why this location
+should or should not be recorded see section~\secref{locsetprev}.
+After we are done, the best page runs from
+|link(page_head)| to |page_tail| and we set |best_page_break| to |null|.
+
+@<Replace leading white-space by the topskip glue@>= 
+hloc_set_prev(link(page_head));
+while (true) {
+  q=link(page_head);
+  if (q==null) return false; /* empty page */
+  else if (q==best_page_break) /* dont remove the page break */
+    break;
+  else if (type(q)==penalty_node || type(q)==glue_node || type(q)==kern_node)
+  { link(page_head)=link(q);link(q)=null;flush_node_list(q); }
+  else break;
+}  
+temp_ptr= new_spec(top_skip);
+q= new_glue(temp_ptr);glue_ref_count(temp_ptr)= null;
+if(width(temp_ptr)> page_height) width(temp_ptr)= width(temp_ptr)-page_height;
+else width(temp_ptr)= 0;
+link(q)=link(page_head);
+link(page_head)=q;
+best_page_break=null;
+@
+
+
+
+
+
+
+
+
 After opening the \HINT\ file, \HINT\ viewers need a to be able to move forward to
 the next page. Here is the function to do that.
 
@@ -11706,7 +10583,7 @@ bool flush_pages(uint32_t pos)
 @
 We needed:
 
-@<\HINT\ variables@>=
+@<Global variables@>=
 static scaled hvsize, hhsize;
 @
 
@@ -11732,7 +10609,7 @@ and |page_v|, it computes the horizontal and vertical dimensions of
 the main body of text as well as the offset of its top/left
 position. The dimensions are given in scaled points.
 
-@<\HINT\ variables@>=
+@<Global variables@>=
 static int page_v, page_h, offset_v, offset_h;
 @
 
@@ -11794,6 +10671,304 @@ static void houtput_template(pointer p)
   streams[0].p= q;  
  }
 @
+
+\subsection{Mapping node pointers to locations}
+When a \HINT\ viewer needs to output a certain page, it must be able to position
+the parser in the content section of the \HINT\ file.
+For example when we want to go backwards to the previous page, 
+we must position the parser where the current page starts and go backwards from there.
+The start of the current page was determined
+by the page builder. It is usually a penalty or glue node less often 
+also a kern node. So the page builder knows the node where the page break occurs
+and we simply need a way to determine the position in the content section from the
+node. We could of course store the position inside each node. But this would make 
+all nodes bigger and since (in the current implementation)
+\TeX's pointers are limited to 16 bit, this is not a good idea.
+A second alternative would be to generate the pages directly from
+the node representations in the \HINT\ file. This is ultimatively the best solution
+but requires rewriting \TeX's algorithms to work with that new representation---and I
+simply don't have the time to do that.
+So I choose a third alternative: 
+I implement a table to map node pointers to positions.
+Unfortunately, the position alone is not sufficient. Page breaks
+often occur in the middle of a paragraph, and for the line breaking
+algorithm, the information stored in the paragraph node is essential.
+Therefore the table will store also an offset to the enclosing top level node.
+(A text node---not implemented yet---will possibly need the current font.)
+We call the complete information associated with the position a ``location''
+and the location is what we store in the table.
+
+When implementing a \HINT\ viewer, it will become necessary to store
+positions inside a \HINT\ file for later use. For example, a \HINT\ viewer
+may want to open a \HINT\ file exactly at the position where the user has
+stopped reading last time. We do not want to burden such programs with
+all the details of a {\bf Location} type. Hence we commit ourself to code
+locations in an |uint64_t| value and will make sure that these
+values contain enough information to position the \HINT\ file to
+a unique and reproducible position.
+The |uint64_t| type is an opaque type for the user interface,
+but by storing the 32 bit position
+inside the content section in the most significant bits, the user interface can compare
+the 64 bit integers to find out if a location preceeds an other location. 
+
+
+Since \TeX's pointers are only 16-bit integers the most simple
+implementation of the location table is an array indexed by the
+pointer values. Since we do not need locations for character nodes
+and all other nodes have two or more memory words, we can use not only
+the table entry at the pointer value |p| but also the table entry at $|p|+1$.
+We use the first for the node position and the second for a node's offset
+from the enclosing  paragraph node 
+or other top level node that is split across pages.
+
+@<Global variables@>=
+static uint32_t map[0x10000];
+@
+
+The first function is the initialization function that clears the table. It 
+sets all records to zero. 
+
+@<\HINT\ functions@>=
+static void clear_map(void)
+{ @+memset(map,0,sizeof(map));@+
+}
+@
+
+@<forward declarations@>=
+static void clear_map(void);
+@
+
+Next, we implement two
+functions that operate on the table:
+|store_map| stores or updates information inside the table,
+and |hposition| returns for a given pointer the position inside the 
+content section, or zero if no such position is known.
+To delete an entry, simply call |store_map(p,0,0)|.
+
+@<\HINT\ functions@>=
+static void store_map(pointer p, uint32_t pos0, uint32_t offset)
+{@+ map[p]=pos0;
+  map[p+1]=offset;@+
+}
+
+uint32_t hposition(pointer p) 
+{@+ return map[p];@+
+}
+@  
+
+The function that takes information form the cache and converts it to a |uint64_t| location, as mentioned above, commes next. It returns |HINT_NO_LOC| if no information is in the cache.
+This value is used to indicate that a variable contains no valid location.
+
+@<forward declarations@>=
+#define HINT_NO_LOC 0xFFFFFFFFFFFFFFFF
+#define PAGE_LOC(POS0,OFF) (((uint64_t)((POS0)+(OFF))<<32) + (uint64_t)(OFF))
+#define LOC_POS(P) ((P)>>32) /* the node position */
+#define LOC_OFF(P) ((P)&0xFFFFFFFF) /* the distance to the top level node */
+#define LOC_POS0(P) (LOC_POS(P)-LOC_OFF(P)) /* the top level position */
+@
+
+@<\HINT\ auxiliar functions@>=
+uint64_t hlocation(pointer p)
+{ @+ uint64_t h=PAGE_LOC(map[p],map[p+1]);
+   while (h==0 && link(p)!=null) /* search the list if necessary */
+   { p=link(p); h=PAGE_LOC(map[p],map[p+1]); }   
+   return h;
+}
+@  
+
+\subsection{Caching page locations}
+The location table is complemented by a cache for page locations.
+When we move trough a \HINT\ file by paging forward and then want to
+return to the previous page, we want to see the previous page exactly
+as we just have seen it. Generating the previous page based on its
+bottom location may, however, produce a completely different
+result because the page builder optimizes
+the start of the page where as previously it had optimized the end
+of the page. To obtain the same page again, we need to cache the location
+of the previous page and generate it again in forward mode.
+
+We do not cache an arbitraty amount of pages, because readers will
+not remember to many pages either. We keep a limited amount
+of locations sorted by their position in a circular buffer.
+
+@<Global variables@>=
+#define MAX_PAGE_POS (1<<3) /* must be a power of 2 */
+
+static uint64_t page_loc[MAX_PAGE_POS];
+static int cur_loc;
+static int lo_loc, hi_loc;
+@
+
+
+The location of the current page is found at |page_loc[cur_loc]| which
+is always defined. Pages preceeding the current page may be found
+in |page_loc| at an index $i$ that is strictly beween |lo_loc| and $|cur_loc|$ 
+($|lo_loc| < i < |cur_loc|$). Of course with the usual meaning of  `between'' in a circular buffer.
+Similarly, we have $|cur_loc| < i <|hi_loc|$ for the index of a page
+following the current page.
+
+So lets define routines to initialize and move around the indices
+in the circular buffer. |hloc_clear| clears the page location cache
+except for the current page. |hloc_next| moves the current location to the next page
+if there is a next page in the cache. |hloc_prev| does the same for the preceeding page.
+
+@<\HINT\ auxiliar functions@>=
+#define @[NEXT_PAGE(X)@] (X=(X+1)&(MAX_PAGE_POS-1))
+#define @[PREV_PAGE(X)@] (X=(X-1)&(MAX_PAGE_POS-1))
+@#
+static void hloc_clear(void)
+{ @+lo_loc=hi_loc=cur_loc;PREV_PAGE(lo_loc);NEXT_PAGE(hi_loc);@+
+}
+@
+
+@<render functions@>=
+static bool hloc_next(void)
+{ @+int i=cur_loc;
+  if (hstart+LOC_POS(page_loc[cur_loc])>=hend) 
+    return false;
+  NEXT_PAGE(i);
+  if (i==hi_loc) 
+    return false;
+  cur_loc=i;
+  return true;
+}
+
+static bool hloc_prev(void) 
+{ @+int i=cur_loc;
+  if (page_loc[cur_loc]==0) 
+    return false;
+  PREV_PAGE(i);
+  if (i==lo_loc) 
+    return false;
+  cur_loc=i;
+  return true;
+}
+@
+
+@<forward declarations@>=
+static uint64_t hlocation(pointer p); /* map |p| to its file location */
+@
+
+After these preparations, we can turn our attention to the functions that manage
+the page cache itself. We start with the initialization function:
+
+@<\HINT\ functions@>=
+static void hloc_init(void)
+{@+cur_loc=0;
+  hloc_clear();
+  page_loc[cur_loc]=0;
+  DBG(DBGPAGE,"loc_init: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
+}  
+@ 
+
+The function |hloc_set(h)| sets the location for the current page to 
+the value |h|.
+In many cases, |h| {\it is} the position of the current page.
+For example if only the format of the page changes. Then no action is necessary.
+In other cases, the new position is already somewhere in the page cache,
+for example if we follow a link, and later return to the same position.
+In this case we just change |cur_loc| to point to the new position in the cache.
+A more drastic action needs to be taken if the value of |h| is not in the page location cache.
+If the location of the current page is new, we do not know anything about the position
+of following or preceeding pages and we have to clear the cache. 
+
+@<render functions@>=
+
+static void hloc_set(uint64_t h)
+{@+ int i;
+  if (page_loc[cur_loc]==h) return;
+  for (i=lo_loc,NEXT_PAGE(i); i!=hi_loc; NEXT_PAGE(i))
+   if (page_loc[i]==h)
+   { cur_loc=i;
+     DBG(DBGPAGE,"loc_set: %d < %d < %d\n",lo_loc,cur_loc,hi_loc); 
+     return;}
+  page_loc[cur_loc]=h;
+  hloc_clear();
+  DBG(DBGPAGE,"loc_set: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
+ }
+ @
+ 
+ When we generate new pages, we discover new page locations: When paging forward,
+ the bottom of the current page is the top of the next page and similar for
+ paging backward. The actions required when storing the location of the next page in the
+ page location cache differ in two aspects from storing the location of the current page:
+ first, we might need to allocate a new entry in the cache; and second,
+ assuming that the location of the current page does not change, a new location
+ for the next page will not affect the locations of preceeding pages and we can
+ keep them in the cache.
+ 
+ 
+ @<\HINT\ auxiliar functions@>=
+
+static void hloc_set_next(pointer p)
+{ @+int i=cur_loc;
+  uint64_t h=hlocation(p); 
+  if (h==page_loc[cur_loc]) return;
+
+  NEXT_PAGE(i);
+  if (i==hi_loc) /* allocation needed */
+  {@+ if (hi_loc==lo_loc) /* deallocation needed */
+      NEXT_PAGE(lo_loc);
+    NEXT_PAGE(hi_loc);
+    page_loc[i]=h;
+  }
+  else if (h!=page_loc[i])
+  { page_loc[i]=h;
+    NEXT_PAGE(i);
+    hi_loc=i;
+  }
+  DBG(DBGPAGE,"loc_set_next: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
+}
+@
+
+
+After these preparations, setting the position of the previous page should be no surprise.
+It is, however, questionable whether we should record these positions in the page 
+location cache. Just consider the following:\label{locsetprev}
+We discover new preceeding pages when paging backwards.
+While doing so, we generate pages in backward mode, optimizing the start of the page.
+When we later return to these pages, we are paging forward and therefore
+generate pages in forward mode optimizing the bottom of the page.
+Hence, the pages might still look different. 
+
+Since the function |hloc_set_prev| is called only after generating a new page in backward
+mode, we will set the current page to the new location and keep only the position of the 
+old current page as position of the next page in the cache.
+
+@<\HINT\ auxiliar functions@>=
+static void hloc_set_prev(pointer p)
+{ @+int i=cur_loc;
+  uint64_t h=hlocation(p); 
+  PREV_PAGE(i);
+  if (i==lo_loc) /* allocation needed */
+  {@+ if (lo_loc==hi_loc) /* deallocation needed */
+      PREV_PAGE(hi_loc);
+    PREV_PAGE(lo_loc);
+    page_loc[i]=h;
+  }
+  else if (h!=page_loc[i])
+  { page_loc[i]=h;
+    lo_loc=i;
+    PREV_PAGE(lo_loc);
+  }
+  hi_loc=cur_loc;
+  NEXT_PAGE(hi_loc);
+  cur_loc=i;
+  DBG(DBGPAGE,"loc_set_prev: %d < %d < %d\n",lo_loc,cur_loc,hi_loc);
+}
+@
+
+The following functions are called from the \TeX\ code:
+
+@<forward declarations@>=
+static void hloc_init(void);
+static void store_map(pointer p, uint32_t pos, uint32_t offset); /*store the location of |p|*/
+static uint32_t hposition(pointer p); /* return the position of |p| or 0*/
+static void hloc_set_next(pointer p);/* record the location of |p| as the start of the next page */
+@
+
+
+
 
 \subsection{Moving around in the \HINT\ file}
 The basic capability of \HINT\ is producing a page that starts at a given position in the
@@ -11943,7 +11118,7 @@ If we produced the current page using |hint_forward|, we can simply call
 |hint_forward| again. For this reason, we use the variables  |forward_mode| and |backward_mode|
 to keep track of the direction used to render the current page.
 
-@<\HINT\ variables@>=
+@<Global variables@>=
 static bool forward_mode=false, backward_mode=false;
 @
 If simply moving forward does not work---we might not know the position of the next page,
@@ -12238,6 +11413,7 @@ material above the target.
 
 
 
+
 \subsection{Outlines}\label{outlines}
 A \HINT\ file may contain two types of links: internal links and outlines.
 We look at outlines first and deal with internal links after we have seen outlines
@@ -12273,7 +11449,7 @@ char *title; /* title as sequence of utf8 character codes */
 } hint_Outline;
 @
 
-@<\HINT\ variables@>=
+@<Global variables@>=
 static hint_Outline *hint_outlines;
 @
 
@@ -12284,7 +11460,7 @@ navigate to the desired position in the \HINT\ file.
 The |where| field indicates where the
 label should be placed on the page.
 The values are:
-@<\HINT\ declarations@>=
+@<forward declarations@>=
 #define LABEL_UNDEF 0
 #define LABEL_TOP 1
 #define LABEL_BOT 2
@@ -12646,6 +11822,8 @@ static uint32_t m_get(void)  /* read from |m_dist| */
 }
 @
 
+
+
 The next two functions are used to move the focus forward
 or backwards. |i| points past the distance that
 defined the current focus. It is moved forward or backward
@@ -12756,7 +11934,7 @@ static void hmark_page(void)
 }
 @
 
-@<\HINT\ declarations@>=
+@<forward declarations@>=
 static void hmark_page(void);
 @
 
@@ -13023,7 +12201,7 @@ If |max_links| is negative, no links are available.
 
 
 
-@<\HINT\ types@>=
+@<Types...@>=
 typedef struct { 
 uint64_t pos;  
 uint8_t where; 
@@ -13031,7 +12209,7 @@ scaled top, bottom, left, right;
 } Link;
 @
 
-@<\HINT\ variables@>=
+@<Global variables@>=
 static Link *hlinks=NULL;
 static int max_link=-1;
 @
@@ -13197,6 +12375,8 @@ As a shortcut, it can call this function:
 @
 
 
+
+
 \section{Rendering \HINT\ Files}
 How to render a \HINT\ file on any specific device depends largely on the
 operating system and its API encapsulating the device. Never the less, there
@@ -13261,7 +12441,7 @@ cluttering the global name space by using the |hint_|\dots prefix.
 
 
 
-\subsection{Fonts}
+\subsection{Fonts}\label{fontrenderer}
 The \HINT\ file format supports two kind of font formats:
 The traditional PK fonts\cite{TR:pkfile} and fonts that
 can be rendered using the FreeType Library\cite{freetype}
@@ -13269,7 +12449,7 @@ by David Turner, Werner Lemberg, and others.
 The latter are PostScript Type1 fonts\cite{PST1},
 TrueType\cite{TTT:TT} fonts, and OpenType fonts\cite{MS:OTF}\cite{ISO:OTF}.
 
-@<\HINT\ types@>=
+@<Types...@>=
 typedef	enum {@+ no_format=0, pk_format, ft_format@+ } FontFormat;
 @
 
@@ -13278,8 +12458,7 @@ part of the structure is the glyph cache that provides fast access to
 the individual glyphs belonging to the font. Further, it includes an
 |ff| field containing the font format.
 
-The |fonts| table contains an entry for every possible font number.
-
+The |font_def| table contains an entry for every possible font number.
 
 Given a font number |f|, the following function initializes the |FontDef| structure
 with font specific data. This is mainly necessary for PK fonts.
@@ -13290,18 +12469,17 @@ static void hload_font(uint8_t f)
 { DBG(DBGFONT,"Decoding new font %d\n",f);
   if (f>max_ref[font_kind])
     QUIT("Undefined font %d\n",f);
-  font_def[f].resize=true;
   if (unpack_pk_file(f))
      font_def[f].ff=pk_format;
   else
   { font_def[f].ff=ft_format;
-    font_def[f].hpxs=x_px_size;
-    font_def[f].vpxs=y_px_size;
+    font_def[f].hpxs=0;
+    font_def[f].vpxs=0;
   } 
 }
 @
 
-@ @<\HINT\ declarations@>=
+@ @<forward declarations@>=
 static void hload_font(uint8_t f);
 @
 
@@ -13320,13 +12498,9 @@ void hint_clear_fonts(bool rm)
 { int f;
   DBG(DBGFONT,rm?"Clear font data":"Clear native glyph data");
   for (f=0;f<=max_ref[font_kind];f++)
-  { if (font_def[f].ff==pk_format)
-    { hfree_glyph_cache(font_def+f,rm);
-      if (rm) font_def[f].ff=no_format;
-    }
-    else
-      hfree_glyph_cache(font_def+f,rm);
-    if (font_def[f].ft_face!=NULL)@+ { @+ font_def[f].resize=true;@+ }
+  { hfree_glyph_cache(font_def+f,rm);
+    if (rm && font_def[f].ff==pk_format)
+      font_def[f].ff=no_format;
   }
 }
 @
@@ -13343,7 +12517,711 @@ static void hfree_glyph_cache(FontDef *f, bool rm) {}
 void nativeSetSize(int px_h, int px_v, double pt_x, double pt_v) {}
 @
 
+\subsubsection{\TeX's font metric files} 
+\TeX\ gets ist knowlegde about fonts from font metric files. 
+And for the traditional \TeX\ fonts, \HINT\ will use this information
+as well. \HINT\ will not need all of that information, but for now, the complete \TeX\
+font metric file is included inside the \HINT\ file.
+The procedure |read_font_info| of \TeX\ is modified to load
+only those parts that are needed.
 
+When rendering fonts, we will need to find the section containing the
+actual glyphs. For OpenType and TrueType fonts,
+there might be no font metric file. For these files the metric
+data is extracted from the same font file that contains the glyphs
+using the FreeType library.
+
+After reading the definition section, we need to move the information
+from the \TeX\ font metric files included into \TeX's data
+structures. Here we only load the font metric information from \.{.TFM}
+files, while the font faces from extended fonts are loaded on demand.
+If the ``on demand'' loading works, this should also be done for
+the \.{.TFM} files.
+
+@<\HINT\ auxiliar functions@>=
+static void hget_font_metrics(void)
+{ int f;
+  font_ptr=max_ref[font_kind];
+  for (f=0; f<=max_ref[font_kind]; f++)
+    if (font_def[f].m!=0)
+    { hget_section(font_def[f].m);
+      read_font_info(f,font_def[f].n,font_def[f].s);
+    }
+    else
+      font_size[f]=font_def[f].s;
+}
+@
+
+\subsubsection{PK Fonts}
+
+PK Files
+contain a compressed representation of bitmap fonts  produced by \MF\ and {\tt gftopk}.
+The definitions and algorithms that follow here can be found,
+along with a more detailed description, in \cite{TR:pkfile}. 
+
+For every glyph, there is a |flag| byte in the PK file that tells how the corresponding glyph is
+encoded and a pointer to the encoding itself.
+
+@<PK specific fields in the glyph cache@>=
+unsigned char pk_glyph_flags; /*how to decode the glyph*/
+unsigned char *pk_glyph_data; /*the data encoding the glyph*/
+@
+
+Before we define two functions, one to unpack a single glyph when it is needed for the first time,
+and one to unpack a font when it is needed for the first time, we define four primitive
+reading operations as macros.
+
+@<PK font functions@>=
+#define PK_READ_1_BYTE() (pk_data[i++])
+#define PK_READ_2_BYTE() (k=PK_READ_1_BYTE(),k=k<<8,k=k+pk_data[i++],k)
+#define PK_READ_3_BYTE() (k=PK_READ_2_BYTE(),k=k<<8,k=k+pk_data[i++],k)
+#define PK_READ_4_BYTE() (k=PK_READ_3_BYTE(),k=k<<8,k=k+pk_data[i++],k)
+@
+
+Here is the function to unpack a single glyph. 
+To extract the actual bitmap it uses either
+the function |pk_bitmap| or |pk_runlength|
+
+To parse a PK font file, it is necessary to read numbers that are packed in a series of 
+4 bit values called ``nybbles''.
+The parse state therefore needs to be aware of positions inside a byte.
+We store this state as a |PKparse|.
+
+@<PK font functions@>=
+typedef struct {
+int j; /* position of next nybble in |pk_data| */
+int r; /* current repeat count */
+int f; /* dynamic f value */
+unsigned char *pk_data; /* array of data bytes */
+} PKparse;
+@
+Given a parse state |P|, we read the next nybble
+with the following macro:
+
+@<PK font functions@>=
+#define read_nybble(P) ((P).j&1?((P).pk_data[(P).j++>>1]&0xF):(((P).pk_data[(P).j++>>1]>>4)&0xF))
+@
+
+The pixel data stored in a PK file can be considered as a long sequence
+of black and white pixels. Instead of storing individual pixels,
+it is more space efficient to store run counts, that is the number of consecutive pixels
+of the same color. And since with glyphs often the same pattern of white and
+black pixels is repeated for several lines, it improves space efficiency if we
+store also repeat counts.
+
+Now here are the details of how run counts and repeat counts are stored
+as a sequence of nybbles:
+The value 15 indicates a repeat count of 1 (most common case).
+The value 14 indicates that the next nybble stores the repeat count.
+Values below 14 are dedicated to run counts.
+If the value $a$ is in the range $14>a>|f|$, we read a second nybble $b$
+and obtain the run count as $(a-|f|-1)*16+$b$+|f|+1$.
+Note that we add $|f|+1$; this is possible because
+the values from 1 to |f| are used directly as run counts.
+A sequence of |k| nybbles with value zero is followed by |k| nybbles
+that represent the run count---well, almost. We add the value of the
+largest run cont that can be expressed using any of the other methods plus one.
+
+The following function implements this procedure:
+
+@<PK font functions@>=
+static int packed_number(PKparse *p)
+{ int i, k;
+  i= read_nybble(*p);
+  if (i==0)
+  { do { k=read_nybble(*p); i++; } while (k==0);
+    while (i-->0) k=k*16+read_nybble(*p);
+	return k-15+(13-p->f)*16+p->f;
+  }
+  else if (i<=p->f) return i;
+  else if (i<14) return (i-p->f-1)*16+read_nybble(*p)+p->f+1;
+  else
+  { if (i==14) p->r=packed_number(p);
+    else p->r= 1;
+    return packed_number(p);
+  }
+}
+@
+
+Now here is the function, that reads a bitmap encoded using
+run counts and repeat counts.
+The |pk_data| array contains the run counts and repeat counts for a bitmap of height |g->h| and
+width |g->w| as a top-down bitmap, where the first bit corresponds to the
+top left pixel and the last bit to the bottom right pixel.
+The function will produce a bottom-up bitmap with one byte per pixel
+to conform to the format that is used by the FreeType library.
+We traverse the |pk_data| nybbles sequentially in top-down order.
+The horizontal position |x| and the vertical position |y| in the
+target bitmap start at 0 and |g->h-1|.
+@<PK font functions@>=
+static unsigned char *pk_runlength(Gcache *g, unsigned char *pk_data) {
+    PKparse p;
+    int x, y; /* position in target bitmap */
+    unsigned char *bits; /* target bitmap */
+    int n; /* number of pixel left in current run */
+    unsigned char gray; /* whether pixel is white in current run */
+    bits = (unsigned char *) calloc(g->w * g->h, 1);
+    if (bits == NULL) { g->w = g->h = 0;  return NULL; } /* out of memory */
+    p.j = 0; /* nybble position to start of data */
+    p.r = 0; /* repeat count = 0 */
+    p.f = g->pk_glyph_flags >> 4; /* dynamic f value */
+    p.pk_data=pk_data; /* data bytes */
+    n = 0;
+    if ((g->pk_glyph_flags >> 3) & 1) gray=0x00;
+    else gray=0xff;
+    y = 0;
+    while (y <g->h) {
+        x = 0;
+        while (x < (int) g->w) /* fill current line */
+        { int d;
+          if (n <= 0) {
+                n = packed_number(&p);
+                gray = ~gray;
+          }
+          d = g->w-x;
+            if (d>n) d=n; /* remaining pixel in current run and current line */
+            for (;d>0;d--,x++,n--)
+              bits[y*g->w+x] = gray;
+        }
+        y++;
+        while (p.r > 0 && y <g->h) /* copy previous line */
+        { int k;
+          for (k = 0; k < g->w; k++)
+            bits[y*g->w+k] = bits[(y-1)*g->w+k];
+          p.r--;
+          y++;
+        }
+    }
+  return bits;
+}
+@
+
+Very small bitmaps can be encoded simply using one bit per pixel.
+The |pk_data| array contains a 1 bit per pixel bitmap of height |g->h| and
+width |g->w| as a top-down bitmap, where the first bit corresponds to the
+top left pixel and the last bit to the bottom right pixel.
+The function will produce a bottom-up bitmap with one byte per pixel
+to conform to the format that is used by the FreeType library.
+We traverse the |pk_data| bits sequentially in top-down order
+using a |mask| to get the next bit and incrementing |pk_data| when necessary.
+The horizontal position |x| and the vertical position |y| in the
+target bitmap start at 0 and |g->h-1|.
+@<PK font functions@>=
+static unsigned char *pk_bitmap(Gcache *g, unsigned char *pk_data) {
+    unsigned char *bits; /* 1 bit per pixel */
+    int x, y; /* position in target bitmap */
+    unsigned char mask; /* bitmask for the next bit */
+ 
+    bits = (unsigned char *) calloc(g->w * g->h, 1);
+    if (bits == NULL) {g->w = g->h = 0; return NULL; } /* out of memory */
+    mask=0x80;
+    for (y=0; y<g->h; y++)
+      for (x=0; x<g->w; x++)
+        { if (*pk_data & mask)
+            bits[y*g->w+x] = 0x00; /* black */
+          else
+            bits[y*g->w+x] = 0xFF; /* white */
+          mask=mask>>1;
+          if (mask==0) { pk_data++; mask=0x80; }
+        }
+   return bits;
+}
+@
+
+The next function unpacks the glyphs meta data and calls one of the
+unpacking functions just defined.
+@<PK font functions@>=
+
+static void pk_unpack_glyph(uint8_t f, Gcache *g)
+{ int i,k;
+  unsigned char *pk_data;
+  unsigned char *bits;
+  if (g==NULL || g->pk_glyph_data==NULL) return; /* no glyph, no data */
+  if (g->OGLtexture!=0) return; /* already unpacked */
+#if 0  
+  DBG(DBGRENDER,"Unpacking glyph %c (0x%x)",g->cc,g->cc);
+#endif 
+  pk_data=g->pk_glyph_data;
+  i=0;
+  if ((g->pk_glyph_flags&7)<4)  /* short form */
+  { i=i+3; /* skip the TeX font metrics */
+	i=i+1; /*escapement: |g->dy=0; g->dx=PK_READ_1_BYTE(); g->dx= g->dx<<16;| */
+	g->w=PK_READ_1_BYTE();
+	g->h=PK_READ_1_BYTE();
+	g->hoff=(signed char)PK_READ_1_BYTE();
+	g->voff=(signed char)PK_READ_1_BYTE();
+  }
+  else if ((g->pk_glyph_flags&7)<7) /* extended short form */
+  {  i=i+3; /* skip the TeX font metrics */
+	i=i+2; /*escapement: |g->dy=0; g->dx=PK_READ_2_BYTE(); g->dx= g->dx<<16;| */
+	g->w=PK_READ_2_BYTE();
+	g->h=PK_READ_2_BYTE();
+	g->hoff=(signed short int)PK_READ_2_BYTE();
+	g->voff=(signed short int)PK_READ_2_BYTE();
+  }
+  else /* long form */
+  { i=i+4; /* skip the TeX font metrics */ 
+	i=i+8; /*escapement: |g->dx=PK_READ_4_BYTE();g->dy=PK_READ_4_BYTE();| */
+	g->w=PK_READ_4_BYTE();
+	g->h=PK_READ_4_BYTE();
+	g->hoff=(signed int)PK_READ_4_BYTE();
+	g->voff=(signed int)PK_READ_4_BYTE();
+  }
+  if ((g->pk_glyph_flags>>4)==14) bits=pk_bitmap(g,pk_data+i);
+  else bits=pk_runlength(g,pk_data+i);
+  if (bits!=NULL)
+  { g->OGLtexture=nativeTexture(bits,g->w,g->h);
+    free(bits);
+  }
+  g->hoff*=font_def[f].hpxs;
+  g->voff*=font_def[f].vpxs;@/
+  g->w*=font_def[f].hpxs;
+  g->h*=font_def[f].vpxs;
+}
+@
+
+We finish with unpacking the whole PK font file.
+A PK font file will start with an |PK_PRE| byte followed by an |PK_ID| byte.
+The function returns zero if that is not the case.
+
+@<PK font functions@>=
+
+
+
+/* opcodes of pk files */
+#define PK_XXX1 240
+#define PK_XXX2 241
+#define PK_XXX3 242
+#define PK_XXX4 243
+#define PK_YYY  244
+#define PK_POST 245
+#define PK_NO_OP 246
+#define PK_PRE   247
+#define PK_ID    89
+
+static Gcache *hnew_glyph(FontDef *fp, unsigned int cc);
+
+static int unpack_pk_file(internal_font_number f)
+/* scan font f and extract information. Do not unpack glyphs, these are unpacked on demand. */
+{ int i,j;
+  unsigned int k;
+  unsigned char flag;
+  unsigned char *pk_data;
+  int pk_size;
+  { unsigned char *spos, *sstart, *send;
+    spos=hpos; sstart=hstart;send=hend;@/
+    hget_section(font_def[f].q);@/
+    pk_data =hstart;
+    pk_size =hend-hstart;@/
+    hpos=spos; hstart=sstart;hend=send;
+  }
+  if (pk_data[0]!=PK_PRE ||  pk_data[1]!=PK_ID)
+    return 0;
+  i=0;
+  while (i< pk_size)
+    switch(flag=pk_data[i++])
+    { case PK_XXX1: j=PK_READ_1_BYTE(); i=i+j; break;
+      case PK_XXX2: j=PK_READ_2_BYTE(); i=i+j; break;
+      case PK_XXX3: j=PK_READ_3_BYTE(); i=i+j; break;
+      case PK_XXX4: j=PK_READ_4_BYTE(); i=i+j; break;
+      case PK_YYY:  i=i+4; break;
+      case PK_NO_OP: break;
+      case PK_PRE:
+      { int csize;
+        unsigned int ds; /* the design size in 12.20 fixed-point format */
+        unsigned char id; /* the id currently allways 89 */
+        unsigned sdpp; /* scaled dots per point */
+	id=PK_READ_1_BYTE();
+        if (id!=PK_ID) return 0;
+	csize=PK_READ_1_BYTE();
+        i=i+csize; /* skip comment */
+        ds=PK_READ_4_BYTE(); /*design size in 12.20 pt*/
+	i=i+4; /* skip checksum */
+	sdpp=PK_READ_4_BYTE();
+	font_def[f].hpxs=((uint64_t)1<<32)/sdpp; /*scaled px/pt to scaled pt/px*/
+	sdpp=PK_READ_4_BYTE();
+	font_def[f].vpxs=((uint64_t)1<<32)/sdpp; /*scaled px/pt to scaled pt/px*/
+	if (ds!=(font_def[f].s<<4)) 
+	{ double m=(double)(font_def[f].s<<4)/ds;
+	  font_def[f].hpxs*=m;
+	  font_def[f].vpxs*=m;
+	}
+      }
+      break;
+      case PK_POST: break;
+      case 248: case 249: case 250: case 251: case 252: case 253: case 254: case 255: break; /* undefined */
+      default: /* the character codes */
+      { unsigned int pl;
+        unsigned int cc;
+        Gcache *g;
+        if ((flag&7)==7) /* long form */
+        { pl=PK_READ_4_BYTE();
+          cc=PK_READ_4_BYTE();
+        } else if ((flag&4)==4) /* extended short form */
+        { pl=PK_READ_2_BYTE();
+          cc=PK_READ_1_BYTE();
+          pl= pl+((flag&3)<<16);
+        }else /* short form */
+        { pl=PK_READ_1_BYTE();
+          cc=PK_READ_1_BYTE();
+          pl= pl+((flag&3)<<8);
+        }
+        g = hnew_glyph(font_def+f,cc);
+        g->pk_glyph_flags=flag;
+        g->pk_glyph_data=pk_data+i;
+        i=i+pl;
+      }
+      break;
+    }
+  return 1;
+}
+
+@
+
+We need a dummy version for \.{hinttype}:
+
+@<test functions@>=
+static int unpack_pk_file(internal_font_number f)
+{ return 1; }
+@
+
+\subsubsection{PostScript Type 1, TrueType, and OpenType Fonts}
+
+To access font metrics that are otherwise contained in a \.{.TFM} file,
+there is a collection of functions that is shared with Hi\TeX.
+So make shure that any changes here are also made in  Hi\TeX!
+
+Here are some global variables. The FreeType libraray must be initialized
+before using any of its functions. You can test |ft_library| to see if the
+libraray needs initialization.
+The |font_face| array contains for each
+font number |f| an |FT_Face| if the font face is aleady loaded. 
+Before loading or after unloading the font face, the value in the array is |NULL|.
+If |ft_libraray==NULL| all entries in |font_face| are |NULL| as well. 
+
+@<Global variables@>=
+static FT_Library ft_library=NULL;
+static FT_Error ft_err;
+
+
+@ To initialize and destroy the Free Type library we define the folowing functions.
+The functions to load and unload a font face are defined later.
+
+@<FreeType font functions@>=
+
+static void ft_init(void)
+{
+  if (ft_library) return;
+  ft_err =  FT_Init_FreeType(&ft_library);
+  if (ft_err)
+  { ft_library=NULL;
+    QUIT("Unable to initialize the FreeType Library.");
+  }
+}
+
+static void ft_unload_faces(void)
+{ int i;
+  if (ft_library==NULL) return;
+  for (i=0; i<=max_ref[font_kind];i++)
+    if (font_def[i].ft_face!=NULL)
+      ft_unload_font_face(i);
+} 
+
+static void ft_destroy(void)
+{ ft_unload_faces();
+  ft_err =  FT_Done_FreeType(ft_library);
+  if (ft_err)
+    MESSAGE("Error releasing the FreeType Library.");
+  ft_library=NULL;
+}
+@
+
+Once the library is initialized, it is possible to
+create a font face from it either from a file
+using |FT_New_Face| or from memory using |FT_New_Memory_Face|.
+Both functions need an index to select a font face
+in case the file or memory image contains multiple
+faces. The functions that follow often have such a font face
+as parameter.
+
+The first example is a function to get the ``width'' of
+a character. What \TeX\ calls the ``width'' of the character
+is called the ``advance'' in freetype: it is the distance
+from one character to the next character including the
+space between the characters; while the ``width'' of the
+character is the distance between the left and right egdge
+of the characters glyph. The latter is not needed by \TeX.
+We give two version, one will accept a character code, the
+other assumes that the glyph id is already available.
+
+@<\HINT\ auxiliar functions@>=
+#if 0
+static FT_UInt ft_glyph(FT_Face ft_face, int c)
+{ FT_UInt ft_gid;
+  ft_gid = FT_Get_Char_Index(ft_face, c);
+  return ft_gid;
+}
+#endif
+
+#ifdef DEBUG
+static bool ft_exists(internal_font_number @!f, int c)
+{ FT_Face ft_face;
+  if (font_def[f].ff==no_format) hload_font(f);
+  ft_face=font_def[f].ft_face;
+  if (ft_face==NULL)
+    ft_face=ft_load_font_face(f);
+  if (ft_face==NULL) return false;
+  return FT_Get_Char_Index(ft_face, c)!=0;
+}
+#endif
+
+static scaled ft_glyph_width(FT_Face ft_face, FT_UInt ft_gid, scaled s)
+{ FT_Fixed a;
+  scaled w;
+  ft_err=FT_Get_Advance(ft_face, ft_gid, FT_LOAD_NO_SCALE, &a);
+  if (ft_err!=0) return 0;
+  w= (scaled)((double)s*(double)a/(double)ft_face->units_per_EM +0.5);
+  return w;
+}
+
+static scaled ft_width(FT_Face ft_face, int c, scaled s)
+{ FT_UInt ft_gid;
+  ft_gid = FT_Get_Char_Index(ft_face, c);
+  if (ft_gid==0) return 0;
+  return ft_glyph_width(ft_face, ft_gid, s);
+}
+@
+
+Finding the height and depth of a character is
+slightly more complex. It requires loading the glyph
+and retrieving its bounding box.
+Since most of the time we need the height and the depth
+together, we provide one function for both.
+We use |FT_Glyph_Get_CBox| to get the control box which is supposed to be fast.
+Because the glyph has been loaded with |FT_LOAD_NO_SCALE| we call
+|FT_Glyph_Get_CBox| with mode |FT_GLYPH_BBOX_UNSCALED| and
+get unscaled font units in 26.6 pixel format. 
+
+@<\HINT\ auxiliar functions@>=
+static FT_Error ft_glyph_bbox(FT_Face ft_face, FT_UInt ft_gid, FT_BBox *ft_bbox)
+{ FT_Glyph ft_glyph;
+  ft_err = FT_Load_Glyph(ft_face, ft_gid, FT_LOAD_NO_SCALE);
+  if (ft_err!=0) return ft_err;
+  ft_err = FT_Get_Glyph(ft_face->glyph, &ft_glyph);
+  if (ft_err!=0) return ft_err;
+  FT_Glyph_Get_CBox(ft_glyph, FT_GLYPH_BBOX_UNSCALED, ft_bbox);
+  return 0;
+}
+
+static void ft_glyph_height_depth(FT_Face ft_face, FT_UInt ft_gid,
+  scaled *h, scaled *d, scaled s)
+{ FT_BBox ft_bbox;
+  *h=*d=0;
+  ft_err= ft_glyph_bbox(ft_face, ft_gid, &ft_bbox);
+  if (ft_err!=0)
+    return;
+  if (ft_bbox.yMax>0)
+   *h=(scaled)((double)s*(double)(ft_bbox.yMax)/(double)ft_face->units_per_EM +0.5);
+  if (ft_bbox.yMin<0)
+   *d= (scaled)((double)s*(double)(-ft_bbox.yMin)/(double)ft_face->units_per_EM +0.5);
+}
+
+@
+
+
+
+
+The first character of a font can be obtained using
+|FT_Get_First_Char|. For now, I do not know a way to determine
+the last one. These functions are currently not used.
+
+@<\HINT\ auxiliar functions@>=
+#if 0
+static int ft_last(FT_Face ft_face)
+{ return 0x10FFFF; }
+
+static int ft_first(FT_Face ft_face)
+{ FT_UInt ft_gid;
+  FT_ULong c;
+  c = FT_Get_First_Char(ft_face,&ft_gid);
+  if (ft_gid==0) /* charmap empty*/
+    return ft_last(ft_face)+1;
+  else
+    return c;
+}
+#endif
+@
+
+To unpack these fonts, we use the FreeType library\cite{freetype}.
+
+
+We use |FT_New_Memory_Face| to unpack the font.
+To determine the rendering size, we use the function |font_at_size| to
+obtain the size of the font in scaled point and convert it; the variable |f->s| then
+contains the size in point as a floating point value.
+The resolution used to render the font's glyphs is based on the current setting
+of |xdpi| and |ydpi|. If at a later time the resolution changes, for example
+because of a scaling operation, it might be necessary to rerender the fonts.
+This can be achived by calling |hint_clear_fonts(true)|.
+
+The function |ft_load_font_face(f)| is called only if |fonts[f]->ft_face==NULL|
+and should be called whenever |fonts[f]->ft_face| is needed but not yet defined.
+
+
+@<FreeType font functions@>=
+
+static FT_Face ft_load_font_face(uint8_t f)
+{ int ft_err;
+  FT_Face ft_face;
+  unsigned char *ft_data;
+  int ft_size;
+  { unsigned char *spos, *sstart, *send;
+    spos=hpos; sstart=hstart;send=hend;@/
+    hget_section(font_def[f].q);@/
+    ft_data =hstart;
+    ft_size =hend-hstart;@/
+    hpos=spos; hstart=sstart;hend=send;
+  }
+  ft_err = FT_New_Memory_Face(ft_library,
+                          ft_data, ft_size,0,&ft_face);                     
+  if (ft_err)
+  { LOG("Unable to create font %d\n",f);
+    return NULL;
+  }
+  font_def[f].ft_face=ft_face;
+  @<Select the correct encoding@>@;
+  @<Set the required size@>@;
+  FT_Set_Transform(ft_face,NULL,NULL);
+  return ft_face;
+}
+
+static void ft_unload_font_face(uint8_t f)
+{  ft_err= FT_Done_Face(font_def[f].ft_face); 
+   font_def[f].ft_face=NULL; 
+}
+
+@
+
+A FreeType font file may contain different character encodings,
+the most common beeing the Unicode encoding. \TeX's character
+encoding is a very special encoding, but fortunately most
+of the fonts used with \TeX\ contain the correct character map
+marked as |FT_ENCODING_ADOBE_CUSTOM|. We just log error, 
+because it is better to use the font with the wrong
+character map than to quit the program.
+
+@<Select the correct encoding@>=
+ if (width_base[f]==0)
+   ft_err =FT_Select_Charmap(ft_face,FT_ENCODING_UNICODE);
+ else  
+ { ft_err = FT_Select_Charmap(ft_face,FT_ENCODING_ADOBE_CUSTOM); 
+   if (ft_err)  ft_err =FT_Select_Charmap(ft_face,FT_ENCODING_UNICODE);
+ }
+ if (ft_err)  LOG("Unable to select encoding for font %d\n",f);
+@
+
+We use the FreeType library to render outline fonts.
+These fonts can be rendered at any
+size and we need to set the correct size.
+The size parameter of |FT_Set_Char_Size|
+is a fixed point rational number with 6 binary digits after
+the binary point, where as the font size in |font_def[f].s]|
+has 16 binary digits after the binary point. So we need a conversion.
+Note that FreeType needs the size in ``big points'' (72pt per inch)
+not \TeX\ points (72.27pt per inch)
+
+@<Set the required size@>=
+if (font_def[f].hpxs!=x_px_size || font_def[f].vpxs!=y_px_size)
+{ FT_F26Dot6 ft_size;
+  ft_size = font_def[f].s*(72.00/72.27)*((double)(1<<6)/(double)(1<<16))+0.5;
+  font_def[f].hpxs=x_px_size;
+  font_def[f].vpxs=y_px_size;
+  ft_err = FT_Set_Char_Size(
+            ft_face,    /* handle to face object           */
+            0,       /* |char_width| in $1/64$th of points  */
+            ft_size,  /* |char_height| in $1/64$th of points */
+            72.27/(font_def[f].hpxs/(double)ONE),     /* horizontal device resolution    */
+            72.27/(font_def[f].vpxs/(double)ONE));   /* vertical device resolution      */
+  if (ft_err) QUIT("Unable to set FreeType glyph size"); 
+}
+@
+
+After translating the character code |cc| into the glyph index |i| using
+the character map selected above, we render the bitmap using |FT_Load_Glyph|
+with the |FT_LOAD_RENDER| flag. Instead of using |FT_LOAD_TARGET_NORMAL|
+one could also use |FT_LOAD_TARGET_LIGHT| which will apply hinting only
+to horizontal strokes, thereby keeping the character spacing undisturbed 
+but using slightly fuzzier bitmaps.
+We decrement the |bitmap_top| value by 1, mainly because {\tt dvips} does it,
+but comparing pk fonts to FreeType fonts, one can observe that glyphs
+in FreeType fonts are positioned slighly higher. Unfortunately the vertical
+displacement is magnified for scaled fonts, so subtracting 1 is not enough
+in this cases.
+
+@<render functions@>=
+static void ft_unpack_glyph(uint8_t f, Gcache *g, uint32_t cc)
+{ int e,i;
+ unsigned char *bits;
+  FT_Face ft_face=font_def[f].ft_face;
+  if (ft_face==NULL)
+    ft_face=ft_load_font_face(f);
+  if (ft_face==NULL)
+   QUIT("Unable to create FreeType face for font %d (%s)",f, font_def[f].n);
+  @<Set the required size@>@;
+  i = FT_Get_Char_Index( ft_face, cc);
+  e = FT_Load_Glyph(
+            ft_face,          /* handle to face object */
+            i,   /* glyph index           */
+            FT_LOAD_RENDER | FT_LOAD_TARGET_NORMAL );  /* load flags, see below */
+  if (e) MESSAGE("0x%xUnable to render FreeType glyph '%c' (%u)",e,(char)cc,cc);
+
+  g->w=ft_face->glyph->bitmap.width;
+  g->h=ft_face->glyph->bitmap.rows;
+  g->hoff=-ft_face->glyph->bitmap_left;
+  g->voff=ft_face->glyph->bitmap_top-1;
+  bits=calloc(g->w*g->h, 1);
+  if (bits==NULL) QUIT("Out of memory for FreeType glyph %c (%u)",(char)cc,cc);
+  memcpy(bits,ft_face->glyph->bitmap.buffer,g->w*g->h);
+  g->OGLtexture=nativeTexture(bits,g->w, g->h);
+  free(bits);
+  g->hoff*=font_def[f].hpxs;
+  g->voff*=font_def[f].vpxs;@/
+  g->w*=font_def[f].hpxs;
+  g->h*=font_def[f].vpxs;
+}
+
+@
+
+
+We close with the functions to compute font metrics.
+
+@<FreeType font functions@>=
+scaled ft_char_width(uint8_t f, int c)
+{ FT_Face ft_face;
+  if (font_def[f].ff==no_format) hload_font(f);
+  ft_face=font_def[f].ft_face;
+  if (ft_face==NULL)
+    ft_face=ft_load_font_face(f);
+  if (ft_face==NULL)
+    return 0;
+  return ft_width(ft_face, c, font_size[f]);
+}
+@
+
+
+@ @<forward declarations@>=
+#ifdef DEBUG
+static bool ft_exists(internal_font_number @!f, int c);
+#endif
+
+static scaled ft_char_width(uint8_t f, int c);
+static void ft_destroy(void);
+static FT_Face ft_load_font_face(uint8_t f);
+static void ft_unload_font_face(uint8_t f);
+static scaled ft_glyph_width(FT_Face ft_face, FT_UInt ft_gid, scaled s);
+static void ft_glyph_height_depth(FT_Face ft_face, FT_UInt ft_gid,
+  scaled *h, scaled *d, scaled s);
+@
 
 
 
@@ -13412,7 +13290,7 @@ Given a font and a charactercode it returns a pointer to the glyph,
 allocating a glyph if none is yet allocated, and returning a pointer to ``the undefined glyph''
 if no more memory is available.
 
-@<\HINT\ variables@>=
+@<Global variables@>=
 static Gcache g_undefined ={0};
 @
 
@@ -13557,7 +13435,7 @@ Currently only two kind of font formats are supported:
 Formats supported by the FreeType library and \TeX's ``classic''
 PK fonts. The PK specific fields in the glyph cache help with on-demand decoding of glyphs.
 
-@<\HINT\ types@>=
+@<Types...@>=
 typedef struct {
   scaled w, h, hoff, voff; 
   unsigned int OGLtexture;
@@ -13798,6 +13676,13 @@ and |cur_style| the current color style.
 static scaled cur_h, cur_v;
 static scaled rule_ht, rule_dp, rule_wd; 
 @
+
+@d billion float_constant(1000000000)
+@d vet_glue(A) glue_temp=A;
+  if (glue_temp > billion)
+           glue_temp=billion;
+  else if (glue_temp < -billion)
+           glue_temp=-billion
 
 @<render functions@>=
 static void vlist_render(pointer this_box);
@@ -14357,7 +14242,7 @@ void hint_render(void)
 @
 
 \subsection{Printing}\label{printing}
-To print the content of a \HINT/ file, it is necessary to convert
+To print the content of a \HINT\ file, it is necessary to convert
 the horizontal or vertical boxes representing the pages into a format
 that can be understood by the printer driver. Future versions of this
 document may, for example, contain a procedure to convert such boxes
@@ -14392,765 +14277,10 @@ int hint_print(unsigned char *bits)
 
 
 
-
-
-\section{Native Rendering}\label{native}
-The {\tt rendernative.h} header file lists all functions that the native renderer must implement.
-
-To initialize the renderer call |nativeInit|. To release all resorces allocated call |nativeClear|.
-If the rendering is supposed to go to memory (see section~\secref{printing}) instead of the screen, use |nativePrintStart|
-and |nativePrintEnd|. To transfer the memory content to a given byte array use |nativePrint| 
-
-@<native rendering definitions@>=
-extern void nativeInit(void); 
-extern void nativeClear(void);
-extern int nativePrintStart(int w, int h, int bpr, int bpp, unsigned char *bits);
-extern int nativePrintEnd(void);
-extern int nativePrint(unsigned char *bits);
-@
-
-
-To set the size of the drawing aerea in pixel and in point call |nativeSetSize|
-@<native rendering definitions@>=
-extern void nativeSetSize(int px_h, int px_v, double pt_x, double pt_v);
-@ 
-
-The native renderer may implement an optional procedure to switch between dark and light mode.
-The other procedure may change the $\gamma$-value.
-@<native rendering definitions@>=
-extern void nativeSetForeground(uint32_t fg);
-extern void nativeSetGamma(double gamma);
-@
-
-To  render an empty page make sure that |hSetColor| ist called to
-establish a valid color schema and then call |nativeBlank|.
-@<native rendering definitions@>=
-extern void nativeBlank(uint32_t bg); 
-@
-
-In the following, if not otherwise stated, all dimensions are given as double values in point.
-We have $72.27\,\hbox{pt} = 1\,\hbox{inch}$ and $1\,\hbox{inch} = 2.54\, \hbox{cm}$.
-
-
-To render the texture |t| with the top left point at $(|x|,|y|)$ and
-with width |w| and height |h| call:
-@<native rendering definitions@>=
-extern void nativeGlyph(double x, double y, double w, double h,
-  unsigned int t);
-@
-For an explanation of the style parameter see section~\secref{search}.
-
-
-
-To render a black rectangle at position  $(|x|,|y|)$ with width |w| and height |h| call:
-
-@<native rendering definitions@>=
-void nativeRule(double x, double y, double w, double h);
-@
-To render an image at position  $(|x|,|y|)$ with width |w| and height |h|,
-with the image data in memory from |istart| to (but not including) |iend| call:
-
-@<native rendering definitions@>=
-void nativeImage(double x, double y, double w, double h, unsigned char *istart, unsigned char *iend);
-@
-
-For PK fonts and FreeType fonts we need a function to translate the
-glyph bitmap in |g->bits| into a device dependent representation.
-@<native rendering definitions@>=
-extern unsigned int nativeTexture(unsigned char *bits, int w, int h);
-@
-
-To free any native resources associated with a cached glyph |g| call:
-
-@<native rendering definitions@>=
-unsigned int nativeFreeTexture(unsigned int t);
-@
-This function is also called for all glyphs by the function |hint_clear_fonts|.
-If the |rm| parameter to that function is |false|, the glyph cache is not deallocated
-only |nativeFreeTexture| is executed for all glyphs.
-
-
-\section{Font Files}
-
-\subsection{PK Fonts}
-
-PK Files
-contain a compressed representation of bitmap fonts  produced by \MF\ and {\tt gftopk}.
-The definitions and algorithms that follow here can be found,
-along with a more detailed description, in \cite{TR:pkfile}. 
-
-For every glyph, there is a |flag| byte in the PK file that tells how the corresponding glyph is
-encoded and a pointer to the encoding itself.
-
-@<PK specific fields in the glyph cache@>=
-unsigned char pk_glyph_flags; /*how to decode the glyph*/
-unsigned char *pk_glyph_data; /*the data encoding the glyph*/
-@
-
-Before we define two functions, one to unpack a single glyph when it is needed for the first time,
-and one to unpack a font when it is needed for the first time, we define four primitive
-reading operations as macros.
-
-@<PK font functions@>=
-#define PK_READ_1_BYTE() (pk_data[i++])
-#define PK_READ_2_BYTE() (k=PK_READ_1_BYTE(),k=k<<8,k=k+pk_data[i++],k)
-#define PK_READ_3_BYTE() (k=PK_READ_2_BYTE(),k=k<<8,k=k+pk_data[i++],k)
-#define PK_READ_4_BYTE() (k=PK_READ_3_BYTE(),k=k<<8,k=k+pk_data[i++],k)
-@
-
-Here is the function to unpack a single glyph. 
-To extract the actual bitmap it uses either
-the function |pk_bitmap| or |pk_runlength|
-
-To parse a PK font file, it is necessary to read numbers that are packed in a series of 
-4 bit values called ``nybbles''.
-The parse state therefore needs to be aware of positions inside a byte.
-We store this state as a |PKparse|.
-
-@<PK font functions@>=
-typedef struct {
-int j; /* position of next nybble in |pk_data| */
-int r; /* current repeat count */
-int f; /* dynamic f value */
-unsigned char *pk_data; /* array of data bytes */
-} PKparse;
-@
-Given a parse state |P|, we read the next nybble
-with the following macro:
-
-@<PK font functions@>=
-#define read_nybble(P) ((P).j&1?((P).pk_data[(P).j++>>1]&0xF):(((P).pk_data[(P).j++>>1]>>4)&0xF))
-@
-
-The pixel data stored in a PK file can be considered as a long sequence
-of black and white pixels. Instead of storing individual pixels,
-it is more space efficient to store run counts, that is the number of consecutive pixels
-of the same color. And since with glyphs often the same pattern of white and
-black pixels is repeated for several lines, it improves space efficiency if we
-store also repeat counts.
-
-Now here are the details of how run counts and repeat counts are stored
-as a sequence of nybbles:
-The value 15 indicates a repeat count of 1 (most common case).
-The value 14 indicates that the next nybble stores the repeat count.
-Values below 14 are dedicated to run counts.
-If the value $a$ is in the range $14>a>|f|$, we read a second nybble $b$
-and obtain the run count as $(a-|f|-1)*16+$b$+|f|+1$.
-Note that we add $|f|+1$; this is possible because
-the values from 1 to |f| are used directly as run counts.
-A sequence of |k| nybbles with value zero is followed by |k| nybbles
-that represent the run count---well, almost. We add the value of the
-largest run cont that can be expressed using any of the other methods plus one.
-
-The following function implements this procedure:
-
-@<PK font functions@>=
-static int packed_number(PKparse *p)
-{ int i, k;
-  i= read_nybble(*p);
-  if (i==0)
-  { do { k=read_nybble(*p); i++; } while (k==0);
-    while (i-->0) k=k*16+read_nybble(*p);
-	return k-15+(13-p->f)*16+p->f;
-  }
-  else if (i<=p->f) return i;
-  else if (i<14) return (i-p->f-1)*16+read_nybble(*p)+p->f+1;
-  else
-  { if (i==14) p->r=packed_number(p);
-    else p->r= 1;
-    return packed_number(p);
-  }
-}
-@
-
-Now here is the function, that reads a bitmap encoded using
-run counts and repeat counts.
-The |pk_data| array contains the run counts and repeat counts for a bitmap of height |g->h| and
-width |g->w| as a top-down bitmap, where the first bit corresponds to the
-top left pixel and the last bit to the bottom right pixel.
-The function will produce a bottom-up bitmap with one byte per pixel
-to conform to the format that is used by the FreeType library.
-We traverse the |pk_data| nybbles sequentially in top-down order.
-The horizontal position |x| and the vertical position |y| in the
-target bitmap start at 0 and |g->h-1|.
-@<PK font functions@>=
-static unsigned char *pk_runlength(Gcache *g, unsigned char *pk_data) {
-    PKparse p;
-    int x, y; /* position in target bitmap */
-    unsigned char *bits; /* target bitmap */
-    int n; /* number of pixel left in current run */
-    unsigned char gray; /* whether pixel is white in current run */
-    bits = (unsigned char *) calloc(g->w * g->h, 1);
-    if (bits == NULL) { g->w = g->h = 0;  return NULL; } /* out of memory */
-    p.j = 0; /* nybble position to start of data */
-    p.r = 0; /* repeat count = 0 */
-    p.f = g->pk_glyph_flags >> 4; /* dynamic f value */
-    p.pk_data=pk_data; /* data bytes */
-    n = 0;
-    if ((g->pk_glyph_flags >> 3) & 1) gray=0x00;
-    else gray=0xff;
-    y = 0;
-    while (y <g->h) {
-        x = 0;
-        while (x < (int) g->w) /* fill current line */
-        { int d;
-          if (n <= 0) {
-                n = packed_number(&p);
-                gray = ~gray;
-          }
-          d = g->w-x;
-            if (d>n) d=n; /* remaining pixel in current run and current line */
-            for (;d>0;d--,x++,n--)
-              bits[y*g->w+x] = gray;
-        }
-        y++;
-        while (p.r > 0 && y <g->h) /* copy previous line */
-        { int k;
-          for (k = 0; k < g->w; k++)
-            bits[y*g->w+k] = bits[(y-1)*g->w+k];
-          p.r--;
-          y++;
-        }
-    }
-  return bits;
-}
-@
-
-Very small bitmaps can be encoded simply using one bit per pixel.
-The |pk_data| array contains a 1 bit per pixel bitmap of height |g->h| and
-width |g->w| as a top-down bitmap, where the first bit corresponds to the
-top left pixel and the last bit to the bottom right pixel.
-The function will produce a bottom-up bitmap with one byte per pixel
-to conform to the format that is used by the FreeType library.
-We traverse the |pk_data| bits sequentially in top-down order
-using a |mask| to get the next bit and incrementing |pk_data| when necessary.
-The horizontal position |x| and the vertical position |y| in the
-target bitmap start at 0 and |g->h-1|.
-@<PK font functions@>=
-static unsigned char *pk_bitmap(Gcache *g, unsigned char *pk_data) {
-    unsigned char *bits; /* 1 bit per pixel */
-    int x, y; /* position in target bitmap */
-    unsigned char mask; /* bitmask for the next bit */
- 
-    bits = (unsigned char *) calloc(g->w * g->h, 1);
-    if (bits == NULL) {g->w = g->h = 0; return NULL; } /* out of memory */
-    mask=0x80;
-    for (y=0; y<g->h; y++)
-      for (x=0; x<g->w; x++)
-        { if (*pk_data & mask)
-            bits[y*g->w+x] = 0x00; /* black */
-          else
-            bits[y*g->w+x] = 0xFF; /* white */
-          mask=mask>>1;
-          if (mask==0) { pk_data++; mask=0x80; }
-        }
-   return bits;
-}
-@
-
-The next function unpacks the glyphs meta data and calls one of the
-unpacking functions just defined.
-@<PK font functions@>=
-
-static void pk_unpack_glyph(uint8_t f, Gcache *g)
-{ int i,k;
-  unsigned char *pk_data;
-  unsigned char *bits;
-  if (g==NULL || g->pk_glyph_data==NULL) return; /* no glyph, no data */
-  if (g->OGLtexture!=0) return; /* already unpacked */
-#if 0  
-  DBG(DBGRENDER,"Unpacking glyph %c (0x%x)",g->cc,g->cc);
-#endif 
-  pk_data=g->pk_glyph_data;
-  i=0;
-  if ((g->pk_glyph_flags&7)<4)  /* short form */
-  { i=i+3; /* skip the TeX font metrics */
-	i=i+1; /*escapement: |g->dy=0; g->dx=PK_READ_1_BYTE(); g->dx= g->dx<<16;| */
-	g->w=PK_READ_1_BYTE();
-	g->h=PK_READ_1_BYTE();
-	g->hoff=(signed char)PK_READ_1_BYTE();
-	g->voff=(signed char)PK_READ_1_BYTE();
-  }
-  else if ((g->pk_glyph_flags&7)<7) /* extended short form */
-  {  i=i+3; /* skip the TeX font metrics */
-	i=i+2; /*escapement: |g->dy=0; g->dx=PK_READ_2_BYTE(); g->dx= g->dx<<16;| */
-	g->w=PK_READ_2_BYTE();
-	g->h=PK_READ_2_BYTE();
-	g->hoff=(signed short int)PK_READ_2_BYTE();
-	g->voff=(signed short int)PK_READ_2_BYTE();
-  }
-  else /* long form */
-  { i=i+4; /* skip the TeX font metrics */ 
-	i=i+8; /*escapement: |g->dx=PK_READ_4_BYTE();g->dy=PK_READ_4_BYTE();| */
-	g->w=PK_READ_4_BYTE();
-	g->h=PK_READ_4_BYTE();
-	g->hoff=(signed int)PK_READ_4_BYTE();
-	g->voff=(signed int)PK_READ_4_BYTE();
-  }
-  if ((g->pk_glyph_flags>>4)==14) bits=pk_bitmap(g,pk_data+i);
-  else bits=pk_runlength(g,pk_data+i);
-  if (bits!=NULL)
-  { g->OGLtexture=nativeTexture(bits,g->w,g->h);
-    free(bits);
-  }
-  g->hoff*=font_def[f].hpxs;
-  g->voff*=font_def[f].vpxs;@/
-  g->w*=font_def[f].hpxs;
-  g->h*=font_def[f].vpxs;
-}
-@
-
-We finish with unpacking the whole PK font file.
-A PK font file will start with an |PK_PRE| byte followed by an |PK_ID| byte.
-The function returns zero if that is not the case.
-
-@<PK font functions@>=
-
-
-
-/* opcodes of pk files */
-#define PK_XXX1 240
-#define PK_XXX2 241
-#define PK_XXX3 242
-#define PK_XXX4 243
-#define PK_YYY  244
-#define PK_POST 245
-#define PK_NO_OP 246
-#define PK_PRE   247
-#define PK_ID    89
-
-static Gcache *hnew_glyph(FontDef *fp, unsigned int cc);
-
-static int unpack_pk_file(internal_font_number f)
-/* scan font f and extract information. Do not unpack glyphs, these are unpacked on demand. */
-{ int i,j;
-  unsigned int k;
-  unsigned char flag;
-  unsigned char *pk_data;
-  int pk_size;
-  { unsigned char *spos, *sstart, *send;
-    spos=hpos; sstart=hstart;send=hend;@/
-    hget_section(font_def[f].q);@/
-    pk_data =hstart;
-    pk_size =hend-hstart;@/
-    hpos=spos; hstart=sstart;hend=send;
-  }
-  if (pk_data[0]!=PK_PRE ||  pk_data[1]!=PK_ID)
-    return 0;
-  i=0;
-  while (i< pk_size)
-    switch(flag=pk_data[i++])
-    { case PK_XXX1: j=PK_READ_1_BYTE(); i=i+j; break;
-      case PK_XXX2: j=PK_READ_2_BYTE(); i=i+j; break;
-      case PK_XXX3: j=PK_READ_3_BYTE(); i=i+j; break;
-      case PK_XXX4: j=PK_READ_4_BYTE(); i=i+j; break;
-      case PK_YYY:  i=i+4; break;
-      case PK_NO_OP: break;
-      case PK_PRE:
-      { int csize;
-        unsigned int ds; /* the design size in 12.20 fixed-point format */
-        unsigned char id; /* the id currently allways 89 */
-        unsigned sdpp; /* scaled dots per point */
-	id=PK_READ_1_BYTE();
-        if (id!=PK_ID) return 0;
-	csize=PK_READ_1_BYTE();
-        i=i+csize; /* skip comment */
-        ds=PK_READ_4_BYTE(); /*design size in 12.20 pt*/
-	i=i+4; /* skip checksum */
-	sdpp=PK_READ_4_BYTE();
-	font_def[f].hpxs=((uint64_t)1<<32)/sdpp; /*scaled px/pt to scaled pt/px*/
-	sdpp=PK_READ_4_BYTE();
-	font_def[f].vpxs=((uint64_t)1<<32)/sdpp; /*scaled px/pt to scaled pt/px*/
-	if (ds!=(font_def[f].s<<4)) 
-	{ double m=(double)(font_def[f].s<<4)/ds;
-	  font_def[f].hpxs*=m;
-	  font_def[f].vpxs*=m;
-	}
-        font_def[f].resize=false;
-      }
-      break;
-      case PK_POST: break;
-      case 248: case 249: case 250: case 251: case 252: case 253: case 254: case 255: break; /* undefined */
-      default: /* the character codes */
-      { unsigned int pl;
-        unsigned int cc;
-        Gcache *g;
-        if ((flag&7)==7) /* long form */
-        { pl=PK_READ_4_BYTE();
-          cc=PK_READ_4_BYTE();
-        } else if ((flag&4)==4) /* extended short form */
-        { pl=PK_READ_2_BYTE();
-          cc=PK_READ_1_BYTE();
-          pl= pl+((flag&3)<<16);
-        }else /* short form */
-        { pl=PK_READ_1_BYTE();
-          cc=PK_READ_1_BYTE();
-          pl= pl+((flag&3)<<8);
-        }
-        g = hnew_glyph(font_def+f,cc);
-        g->pk_glyph_flags=flag;
-        g->pk_glyph_data=pk_data+i;
-        i=i+pl;
-      }
-      break;
-    }
-  return 1;
-}
-
-@
-
-We need a dummy version for \.{hinttype}:
-
-@<test functions@>=
-static int unpack_pk_file(internal_font_number f)
-{ return 1; }
-@
-
-\subsection{PostScript Type 1, TrueType, and OpenType Fonts}
-
-To access font metrics that are otherwise contained in a \.{.TFM} file,
-there is a collection of functions that is shared with Hi\TeX.
-So make shure that any changes here are also made in  Hi\TeX!
-
-Here are some global variables. The FreeType libraray must be initialized
-before using any of its functions. You can test |ft_library| to see if the
-libraray needs initialization.
-The |font_face| array contains for each
-font number |f| an |FT_Face| if the font face is aleady loaded. 
-Before loading or after unloading the font face, the value in the array is |NULL|.
-If |ft_libraray==NULL| all entries in |font_face| are |NULL| as well. 
-
-@<\HINT\ variables@>=
-static FT_Library ft_library=NULL;
-static FT_Error ft_err;
-
-
-@ To initialize and destroy the Free Type library we define the folowing functions.
-The functions to load and unload a font face are defined later.
-
-@<FreeType font functions@>=
-
-static void ft_init(void)
-{
-  if (ft_library) return;
-  ft_err =  FT_Init_FreeType(&ft_library);
-  if (ft_err)
-  { ft_library=NULL;
-    QUIT("Unable to initialize the FreeType Library.");
-  }
-}
-
-static void ft_unload_faces(void)
-{ int i;
-  if (ft_library==NULL) return;
-  for (i=0; i<=max_ref[font_kind];i++)
-    if (font_def[i].ft_face!=NULL)
-      ft_unload_font_face(i);
-} 
-
-static void ft_destroy(void)
-{ ft_unload_faces();
-  ft_err =  FT_Done_FreeType(ft_library);
-  if (ft_err)
-    MESSAGE("Error releasing the FreeType Library.");
-  ft_library=NULL;
-}
-@
-
-Once the library is initialized, it is possible to
-create a font face from it either from a file
-using |FT_New_Face| or from memory using |FT_New_Memory_Face|.
-Both functions need an index to select a font face
-in case the file or memory image contains multiple
-faces. The functions that follow often have such a font face
-as parameter.
-
-The first example is a function to get the ``width'' of
-a character. What \TeX\ calls the ``width'' of the character
-is called the ``advance'' in freetype: it is the distance
-from one character to the next character including the
-space between the characters; while the ``width'' of the
-character is the distance between the left and right egdge
-of the characters glyph. The latter is not needed by \TeX.
-We give two version, one will accept a character code, the
-other assumes that the glyph id is already available.
-
-@<\HINT\ auxiliar functions@>=
-#if 0
-static FT_UInt ft_glyph(FT_Face ft_face, int c)
-{ FT_UInt ft_gid;
-  ft_gid = FT_Get_Char_Index(ft_face, c);
-  return ft_gid;
-}
-#endif
-
-#ifdef DEBUG
-static bool ft_exists(internal_font_number @!f, int c)
-{ FT_Face ft_face;
-  if (font_def[f].ff==no_format) hload_font(f);
-  ft_face=font_def[f].ft_face;
-  if (ft_face==NULL)
-    ft_face=ft_load_font_face(f);
-  if (ft_face==NULL) return false;
-  return FT_Get_Char_Index(ft_face, c)!=0;
-}
-#endif
-
-static scaled ft_glyph_width(FT_Face ft_face, FT_UInt ft_gid, scaled s)
-{ FT_Fixed a;
-  scaled w;
-  ft_err=FT_Get_Advance(ft_face, ft_gid, FT_LOAD_NO_SCALE, &a);
-  if (ft_err!=0) return 0;
-  w= (scaled)((double)s*(double)a/(double)ft_face->units_per_EM +0.5);
-  return w;
-}
-
-static scaled ft_width(FT_Face ft_face, int c, scaled s)
-{ FT_UInt ft_gid;
-  ft_gid = FT_Get_Char_Index(ft_face, c);
-  if (ft_gid==0) return 0;
-  return ft_glyph_width(ft_face, ft_gid, s);
-}
-@
-
-Finding the height and depth of a character is
-slightly more complex. It requires loading the glyph
-and retrieving its bounding box.
-Since most of the time we need the height and the depth
-together, we provide one function for both.
-We use |FT_Glyph_Get_CBox| to get the control box which is supposed to be fast.
-Because the glyph has been loaded with |FT_LOAD_NO_SCALE| we call
-|FT_Glyph_Get_CBox| with mode |FT_GLYPH_BBOX_UNSCALED| and
-get unscaled font units in 26.6 pixel format. 
-
-@<\HINT\ auxiliar functions@>=
-static FT_Error ft_glyph_bbox(FT_Face ft_face, FT_UInt ft_gid, FT_BBox *ft_bbox)
-{ FT_Glyph ft_glyph;
-  ft_err = FT_Load_Glyph(ft_face, ft_gid, FT_LOAD_NO_SCALE);
-  if (ft_err!=0) return ft_err;
-  ft_err = FT_Get_Glyph(ft_face->glyph, &ft_glyph);
-  if (ft_err!=0) return ft_err;
-  FT_Glyph_Get_CBox(ft_glyph, FT_GLYPH_BBOX_UNSCALED, ft_bbox);
-  return 0;
-}
-
-static void ft_glyph_height_depth(FT_Face ft_face, FT_UInt ft_gid,
-  scaled *h, scaled *d, scaled s)
-{ FT_BBox ft_bbox;
-  *h=*d=0;
-  ft_err= ft_glyph_bbox(ft_face, ft_gid, &ft_bbox);
-  if (ft_err!=0)
-    return;
-  if (ft_bbox.yMax>0)
-   *h=(scaled)((double)s*(double)(ft_bbox.yMax)/(double)ft_face->units_per_EM +0.5);
-  if (ft_bbox.yMin<0)
-   *d= (scaled)((double)s*(double)(-ft_bbox.yMin)/(double)ft_face->units_per_EM +0.5);
-}
-
-@
-
-
-
-
-The first character of a font can be obtained using
-|FT_Get_First_Char|. For now, I do not know a way to determine
-the last one. These functions are currently not used.
-
-@<\HINT\ auxiliar functions@>=
-#if 0
-static int ft_last(FT_Face ft_face)
-{ return 0x10FFFF; }
-
-static int ft_first(FT_Face ft_face)
-{ FT_UInt ft_gid;
-  FT_ULong c;
-  c = FT_Get_First_Char(ft_face,&ft_gid);
-  if (ft_gid==0) /* charmap empty*/
-    return ft_last(ft_face)+1;
-  else
-    return c;
-}
-#endif
-@
-
-To unpack these fonts, we use the FreeType library\cite{freetype}.
-
-
-We use |FT_New_Memory_Face| to unpack the font.
-To determine the rendering size, we use the function |font_at_size| to
-obtain the size of the font in scaled point and convert it; the variable |f->s| then
-contains the size in point as a floating point value.
-The resolution used to render the font's glyphs is based on the current setting
-of |xdpi| and |ydpi|. If at a later time the resolution changes, for example
-because of a scaling operation, it might be necessary to rerender the fonts.
-This can be achived by calling |hint_clear_fonts(true)|.
-
-The function |ft_load_font_face(f)| is called only if |fonts[f]->ft_face==NULL|
-and should be called whenever |fonts[f]->ft_face| is needed but not yet defined.
-
-
-@<FreeType font functions@>=
-
-static FT_Face ft_load_font_face(uint8_t f)
-{ int ft_err;
-  FT_Face ft_face;
-  unsigned char *ft_data;
-  int ft_size;
-  { unsigned char *spos, *sstart, *send;
-    spos=hpos; sstart=hstart;send=hend;@/
-    hget_section(font_def[f].q);@/
-    ft_data =hstart;
-    ft_size =hend-hstart;@/
-    hpos=spos; hstart=sstart;hend=send;
-  }
-  ft_err = FT_New_Memory_Face(ft_library,
-                          ft_data, ft_size,0,&ft_face);                     
-  if (ft_err)
-  { LOG("Unable to create font %d\n",f);
-    return NULL;
-  }
-  font_def[f].ft_face=ft_face;
-  @<Select the correct encoding@>@;
-  @<Set the required size@>@;
-  FT_Set_Transform(ft_face,NULL,NULL);
-  return ft_face;
-}
-
-static void ft_unload_font_face(uint8_t f)
-{  ft_err= FT_Done_Face(font_def[f].ft_face); 
-   font_def[f].ft_face=NULL; 
-}
-
-@
-
-A FreeType font file may contain different character encodings,
-the most common beeing the Unicode encoding. \TeX's character
-encoding is a very special encoding, but fortunately most
-of the fonts used with \TeX\ contain the correct character map
-marked as |FT_ENCODING_ADOBE_CUSTOM|. We just log error, 
-because it is better to use the font with the wrong
-character map than to quit the program.
-
-@<Select the correct encoding@>=
- if (width_base[f]==0)
-   ft_err =FT_Select_Charmap(ft_face,FT_ENCODING_UNICODE);
- else  
- { ft_err = FT_Select_Charmap(ft_face,FT_ENCODING_ADOBE_CUSTOM); 
-   if (ft_err)  ft_err =FT_Select_Charmap(ft_face,FT_ENCODING_UNICODE);
- }
- if (ft_err)  LOG("Unable to select encoding for font %d\n",f);
-@
-
-We use the FreeType library to render outline fonts.
-These fonts can be rendered at any
-size and we need to set the correct size.
- The size parameter of |FT_Set_Char_Size|
-is a fixed point rational number with 6 binary digits after
-the binary point where as the font size in |font_def[f].s]|
-has 16 binary digits after the binary point.
-Note that FreeType needs the size in ``big points'' (72pt per inch)
-not \TeX\ points (72.27pt per inch)
-
-@<Set the required size@>=
-{ FT_F26Dot6 s;
-  s = font_def[f].s*(72.00/72.27)*((double)(1<<6)/(double)(1<<16))+0.5;
-  ft_err = FT_Set_Char_Size(
-            ft_face,    /* handle to face object           */
-            0,       /* |char_width| in $1/64$th of points  */
-            s,  /* |char_height| in $1/64$th of points */
-            72.27/(font_def[f].hpxs/(double)ONE),     /* horizontal device resolution    */
-            72.27/(font_def[f].vpxs/(double)ONE));   /* vertical device resolution      */
-  if (ft_err) QUIT("Unable to set FreeType glyph size"); 
- font_def[f].resize=false;
-}
-@
-
-After translating the character code |cc| into the glyph index |i| using
-the character map selected above, we render the bitmap using |FT_Load_Glyph|
-with the |FT_LOAD_RENDER| flag. Instead of using |FT_LOAD_TARGET_NORMAL|
-one could also use |FT_LOAD_TARGET_LIGHT| which will apply hinting only
-to horizontal strokes, thereby keeping the character spacing undisturbed 
-but using slightly fuzzier bitmaps.
-We decrement the |bitmap_top| value by 1, mainly because {\tt dvips} does it,
-but comparing pk fonts to FreeType fonts, one can observe that glyphs
-in FreeType fonts are positioned slighly higher. Unfortunately the vertical
-displacement is magnified for scaled fonts, so subtracting 1 is not enough
-in this cases.
-
-@<render functions@>=
-static void ft_unpack_glyph(uint8_t f, Gcache *g, uint32_t cc)
-{ int e,i;
- unsigned char *bits;
-  FT_Face ft_face=font_def[f].ft_face;
-  if (ft_face==NULL)
-    ft_face=ft_load_font_face(f);
-  if (ft_face==NULL)
-   QUIT("Unable to create FreeType face for font %d (%s)",f, font_def[f].n);
-  if (font_def[f].resize)
-  { font_def[f].hpxs=x_px_size;
-    font_def[f].vpxs=y_px_size;
-    @<Set the required size@>@;
-  }
-  i = FT_Get_Char_Index( ft_face, cc);
-  e = FT_Load_Glyph(
-            ft_face,          /* handle to face object */
-            i,   /* glyph index           */
-            FT_LOAD_RENDER | FT_LOAD_TARGET_NORMAL );  /* load flags, see below */
-  if (e) MESSAGE("0x%xUnable to render FreeType glyph '%c' (%u)",e,(char)cc,cc);
-
-  g->w=ft_face->glyph->bitmap.width;
-  g->h=ft_face->glyph->bitmap.rows;
-  g->hoff=-ft_face->glyph->bitmap_left;
-  g->voff=ft_face->glyph->bitmap_top-1;
-  bits=calloc(g->w*g->h, 1);
-  if (bits==NULL) QUIT("Out of memory for FreeType glyph %c (%u)",(char)cc,cc);
-  memcpy(bits,ft_face->glyph->bitmap.buffer,g->w*g->h);
-  g->OGLtexture=nativeTexture(bits,g->w, g->h);
-  free(bits);
-  g->hoff*=font_def[f].hpxs;
-  g->voff*=font_def[f].vpxs;@/
-  g->w*=font_def[f].hpxs;
-  g->h*=font_def[f].vpxs;
-}
-
-@
-
-
-We close with the functions to compute font metrics.
-
-@<FreeType font functions@>=
-scaled ft_char_width(uint8_t f, int c)
-{ FT_Face ft_face;
-  if (font_def[f].ff==no_format) hload_font(f);
-  ft_face=font_def[f].ft_face;
-  if (ft_face==NULL)
-    ft_face=ft_load_font_face(f);
-  if (ft_face==NULL)
-    return 0;
-  return ft_width(ft_face, c, font_size[f]);
-}
-@
-
-
-@ @<\HINT\ declarations@>=
-#ifdef DEBUG
-static bool ft_exists(internal_font_number @!f, int c);
-#endif
-
-static scaled ft_char_width(uint8_t f, int c);
-static void ft_destroy(void);
-static FT_Face ft_load_font_face(uint8_t f);
-static void ft_unload_font_face(uint8_t f);
-static scaled ft_glyph_width(FT_Face ft_face, FT_UInt ft_gid, scaled s);
-static void ft_glyph_height_depth(FT_Face ft_face, FT_UInt ft_gid,
-  scaled *h, scaled *d, scaled s);
-@
-
-
 \appendix
 
-
-\section{Error Handling}\label{error_section}
+\section{Testing  and Debugging \HINT}\label{testing}
+\subsection{Error Handling}\label{error_section}
 There is no good program without good error handling
 \index{error message}\index{debugging}.
 The file {\tt error.h} is responsible for defining these macros:
@@ -15249,13 +14379,13 @@ The following variables are required for the error handling.
 The |hint_error_exit| variable should be initialized before using the functions
 defined below in \.{hint.h}.
 
-@<\HINT\ variables@>=
+@<Global variables@>=
 jmp_buf hint_error_exit;
 char hint_error_string[MAX_HINT_ERROR];
 @
 
 
-\section{Testing \HINT}\label{testing}
+
 \subsection{Comparing \HINT\ Output to \TeX\ Output}
 One objective of \HINT\ is to make the following diagram commutative:
 $$\includefig{diagram}$$ 
@@ -15475,7 +14605,7 @@ void hint_show_page(void)
 @
 
 
-\section{Finding memory leaks}
+\subsection{Finding memory leaks}
 To find memory leaks, we make a table big enough for all 16 bit values (pointers)
 and record a pointer with the allocated size when allocated and remove it when deallocated.
 We can then list the currently allocated records.
@@ -15524,7 +14654,7 @@ static void list_leaks(void)
 }
 @ 
 
-@<\HINT\ declarations@>=
+@<forward declarations@>=
 static void leak_in(pointer p, int s);
 static void leak_out(pointer p, int s);
 @
@@ -15557,20 +14687,20 @@ static void leak_out(pointer p, int s);
 enum {@+@<Constants in the outer block@>@+};
 @<Types in the outer block@>@;
 
-static void hpack_page(void);
-static void happend_insertion(pointer p);
-
 @<GET macros@>@;
 @<TEG macros@>@;
 
-@<\HINT\ types@>@;
-@<\HINT\ dependent types@>@;
-@<\HINT\ variables@>@;
+@<Global variables@>@;
 
-@<\HINT\ declarations@>@;
+@<forward declarations@>@;
 
+#ifdef HINTTYPE
+@<Basic printing procedures@>@;
+#endif
 
-@<code from \TeX@>@;
+@<Basic error handling procedures@>@;
+
+@<\TeX\ functions@>@;
 
 @<\HINT\ auxiliar functions@>@;
 
