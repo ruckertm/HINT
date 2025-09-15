@@ -65,10 +65,7 @@
 		557A9BD528F4489D004772FE /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 557A9BD428F4489D004772FE /* GLKit.framework */; };
 		55CA1940291E896B00B30B11 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 55CA193F291E896B00B30B11 /* Settings.bundle */; };
 		55CDFDC529D2E244003D40D3 /* tables.c in Sources */ = {isa = PBXBuildFile; fileRef = 55CDFDB729D2E0CE003D40D3 /* tables.c */; };
-		55CDFDC629D2E244003D40D3 /* hrender.c in Sources */ = {isa = PBXBuildFile; fileRef = 55CDFDB829D2E0D1003D40D3 /* hrender.c */; };
-		55CDFDC729D2E252003D40D3 /* htex.c in Sources */ = {isa = PBXBuildFile; fileRef = 55CDFDBA29D2E0DF003D40D3 /* htex.c */; };
 		55CDFDC829D2E252003D40D3 /* get.c in Sources */ = {isa = PBXBuildFile; fileRef = 55CDFDBB29D2E0E2003D40D3 /* get.c */; };
-		55CDFDC929D2E25A003D40D3 /* hfonts.c in Sources */ = {isa = PBXBuildFile; fileRef = 55CDFDBD29D2E0ED003D40D3 /* hfonts.c */; };
 		55CDFDCA29D2E262003D40D3 /* hint.c in Sources */ = {isa = PBXBuildFile; fileRef = 55CDFDBF29D2E0F4003D40D3 /* hint.c */; };
 /* End PBXBuildFile section */
 
@@ -172,19 +169,13 @@
 		55CDFDB429D2E0B1003D40D3 /* rendernative.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = rendernative.h; sourceTree = "<group>"; };
 		55CDFDB629D2E0CB003D40D3 /* stb_image.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stb_image.h; sourceTree = "<group>"; };
 		55CDFDB729D2E0CE003D40D3 /* tables.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = tables.c; sourceTree = "<group>"; };
-		55CDFDB829D2E0D1003D40D3 /* hrender.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = hrender.c; sourceTree = "<group>"; };
-		55CDFDB929D2E0DA003D40D3 /* hrender.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hrender.h; sourceTree = "<group>"; };
-		55CDFDBA29D2E0DF003D40D3 /* htex.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = htex.c; sourceTree = "<group>"; };
 		55CDFDBB29D2E0E2003D40D3 /* get.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = get.c; sourceTree = "<group>"; };
 		55CDFDBC29D2E0EA003D40D3 /* get.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = get.h; sourceTree = "<group>"; };
-		55CDFDBD29D2E0ED003D40D3 /* hfonts.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = hfonts.c; sourceTree = "<group>"; };
-		55CDFDBE29D2E0F0003D40D3 /* hfonts.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hfonts.h; sourceTree = "<group>"; };
 		55CDFDBF29D2E0F4003D40D3 /* hint.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = hint.c; sourceTree = "<group>"; };
 		55CDFDC029D2E0F7003D40D3 /* hint.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hint.h; sourceTree = "<group>"; };
 		55CDFDC129D2E0FA003D40D3 /* basetypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = basetypes.h; sourceTree = "<group>"; };
 		55CDFDC229D2E0FE003D40D3 /* error.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = error.h; sourceTree = "<group>"; };
 		55CDFDC329D2E100003D40D3 /* format.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = format.h; sourceTree = "<group>"; };
-		55CDFDCB29D2E2EB003D40D3 /* htex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = htex.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -326,17 +317,11 @@
 			isa = PBXGroup;
 			children = (
 				555C72BB2CECB74A00F62BE6 /* stb_image.c */,
-				55CDFDCB29D2E2EB003D40D3 /* htex.h */,
 				55CDFDB429D2E0B1003D40D3 /* rendernative.h */,
 				55CDFDB629D2E0CB003D40D3 /* stb_image.h */,
 				55CDFDB729D2E0CE003D40D3 /* tables.c */,
-				55CDFDB829D2E0D1003D40D3 /* hrender.c */,
-				55CDFDB929D2E0DA003D40D3 /* hrender.h */,
-				55CDFDBA29D2E0DF003D40D3 /* htex.c */,
 				55CDFDBB29D2E0E2003D40D3 /* get.c */,
 				55CDFDBC29D2E0EA003D40D3 /* get.h */,
-				55CDFDBD29D2E0ED003D40D3 /* hfonts.c */,
-				55CDFDBE29D2E0F0003D40D3 /* hfonts.h */,
 				55CDFDBF29D2E0F4003D40D3 /* hint.c */,
 				55CDFDC029D2E0F7003D40D3 /* hint.h */,
 				55CDFDC129D2E0FA003D40D3 /* basetypes.h */,
@@ -491,11 +476,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				55CDFDCA29D2E262003D40D3 /* hint.c in Sources */,
-				55CDFDC929D2E25A003D40D3 /* hfonts.c in Sources */,
-				55CDFDC729D2E252003D40D3 /* htex.c in Sources */,
 				55CDFDC829D2E252003D40D3 /* get.c in Sources */,
 				55CDFDC529D2E244003D40D3 /* tables.c in Sources */,
-				55CDFDC629D2E244003D40D3 /* hrender.c in Sources */,
 				557A9BBE28F445B7004772FE /* ViewController.m in Sources */,
 				557A9BB828F445B7004772FE /* AppDelegate.m in Sources */,
 				557A9BC928F445B9004772FE /* main.m in Sources */,
