@@ -51,7 +51,6 @@
 		550C79312910077400FDBDA4 /* autofit.c in Sources */ = {isa = PBXBuildFile; fileRef = 550C79302910077400FDBDA4 /* autofit.c */; };
 		550C79342910086900FDBDA4 /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 550C78D1290FFF5D00FDBDA4 /* libfreetype.a */; };
 		550C79422910113600FDBDA4 /* ftsystem.c in Sources */ = {isa = PBXBuildFile; fileRef = 550C79412910113600FDBDA4 /* ftsystem.c */; };
-		555C72BC2CECB74A00F62BE6 /* stb_image.c in Sources */ = {isa = PBXBuildFile; fileRef = 555C72BB2CECB74A00F62BE6 /* stb_image.c */; };
 		555CAAAA2924EBF300C9C6AE /* HINT.icns in Resources */ = {isa = PBXBuildFile; fileRef = 555CAAA92924EBF300C9C6AE /* HINT.icns */; };
 		557A9BB828F445B7004772FE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 557A9BB728F445B7004772FE /* AppDelegate.m */; };
 		557A9BBB28F445B7004772FE /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 557A9BBA28F445B7004772FE /* SceneDelegate.m */; };
@@ -148,7 +147,6 @@
 		550C793F29100CE000FDBDA4 /* integer-types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "integer-types.h"; path = "include/freetype/config/integer-types.h"; sourceTree = "<group>"; };
 		550C79412910113600FDBDA4 /* ftsystem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftsystem.c; path = src/base/ftsystem.c; sourceTree = "<group>"; };
 		552970C4290AA93B003E61E0 /* main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
-		555C72BB2CECB74A00F62BE6 /* stb_image.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = stb_image.c; sourceTree = "<group>"; };
 		555CAAA92924EBF300C9C6AE /* HINT.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = HINT.icns; sourceTree = "<group>"; };
 		557A9BB328F445B7004772FE /* HintView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HintView.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		557A9BB628F445B7004772FE /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -316,7 +314,6 @@
 		55CDFDB229D2E086003D40D3 /* backend */ = {
 			isa = PBXGroup;
 			children = (
-				555C72BB2CECB74A00F62BE6 /* stb_image.c */,
 				55CDFDB429D2E0B1003D40D3 /* rendernative.h */,
 				55CDFDB629D2E0CB003D40D3 /* stb_image.h */,
 				55CDFDB729D2E0CE003D40D3 /* tables.c */,
@@ -377,7 +374,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastUpgradeCheck = 1340;
+				LastUpgradeCheck = 1620;
 				TargetAttributes = {
 					550C78D0290FFF5D00FDBDA4 = {
 						CreatedOnToolsVersion = 13.4.1;
@@ -483,7 +480,6 @@
 				557A9BC928F445B9004772FE /* main.m in Sources */,
 				550C78A9290FD99200FDBDA4 /* renderegl.m in Sources */,
 				557A9BBB28F445B7004772FE /* SceneDelegate.m in Sources */,
-				555C72BC2CECB74A00F62BE6 /* stb_image.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -598,6 +594,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -658,6 +655,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
