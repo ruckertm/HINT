@@ -1837,6 +1837,7 @@ contains a scaled integer, if |p| is a pointer that has been
 clobbered or chosen at random.
 
 @ @<Basic printing procedures@>=
+static void print_UTF8(int c);
 static void show_node_list(int @!p) /*prints a node list symbolically*/
 {@+
 int n; /*the number of items already printed at this level*/
@@ -3035,27 +3036,17 @@ to be exercised one more time.
 @^inner loop@>
 
 @<Incorporate character dimensions into the dimensions of the hbox...@>=
-{@+f=font(p);
+{@+
+ int c=character(p);
+ f=font(p);
  if (width_base[f]!=0)
- { i=char_info(f, character(p));hd=height_depth(i);
-   x=x+char_width(f, character(p));
+ { i=char_info(f, c);hd=height_depth(i);
+   x=x+char_width(f, c);
    s=char_height(f, hd);@+if (s > h) h=s;
    s=char_depth(f, hd);@+if (s > d) d=s;
  }
  else
- { scaled ch, cd;
-   FT_Face ft_face=font_def[f].ft_face;
-   if (ft_face==NULL)
-     ft_face=ft_load_font_face(f);
-   if (ft_face!=NULL)
-   { FT_UInt ft_gid = FT_Get_Char_Index(ft_face, character(p));
-     if (ft_gid!=0)
-     x=x+ft_glyph_width(ft_face, ft_gid,font_size[f]);
-     ft_glyph_height_depth(ft_face, ft_gid, &ch, &cd, font_size[f]);
-     if (ch > h) h=ch;
-     if (cd > d) d=cd;
-   }
- }
+ @<Incorporate dimensions of an utf character into the dimensions of the hbox@>@;
 p=link(p);
 }
 
@@ -6008,6 +5999,13 @@ to hold the string numbers for name, area, and extension.
 @d outline_ptr(A)   link(A+2) /* text to be displayed */
 @d outline_depth(A) info(A+2) /* depth of sub items */
 
+@d utf_char_node hitex_ext+27
+@d utf_char_node_size small_node_size
+@d utf_font_char(A) mem[A+1].i /*(8 bit font)<<24 + 24 bit char*/
+@d utf_font(A) (utf_font_char(A)>>24)
+@d utf_char(A) (utf_font_char(A)&0xFFFFFF)
+
+
 
 @ Each new type of node that appears in our data structure must be capable
 of being displayed, copied, destroyed, and so on. The routines that we
@@ -6121,6 +6119,9 @@ case outline_node:
 case stream_node:
   print_esc("HINTstream");print_int(stream_insertion(p));
   print_char('(');print_int(stream_number(p));print_char(')');
+  break;
+case utf_char_node:
+  print_esc(font_def[utf_font(p)].n);  print_char(' '); print_UTF8(utf_char(p));
   break;
 default: print("whatsit?");
 }
@@ -6243,6 +6244,10 @@ case xdimen_node:
     r=get_node(xdimen_node_size);
     words=xdimen_node_size;
   break;
+case utf_char_node:
+    r=get_node(utf_char_node_size);
+    words=utf_char_node_size;
+  break;
 default:confusion("ext2");
 @:this can't happen ext2}{\quad ext2@>
 }
@@ -6315,7 +6320,9 @@ case outline_node:
 case stream_node:
   free_node(p,stream_node_size); @+break;
 case xdimen_node:
-  free_node(p,xdimen_node_size);
+  free_node(p,xdimen_node_size); @+break;
+case utf_char_node:
+  free_node(p,utf_char_node_size); @+break;
 default:confusion("ext3");
 @:this can't happen ext3}{\quad ext3@>
 } @/
@@ -6327,33 +6334,68 @@ if (subtype(p)==image_node)
 { if (image_width(p)> w) w= image_width(p);
   x= x+d+image_height(p);d=0;
 }
+@
+
+@<Incorporate dimensions of an utf character into the dimensions of the hbox@>=
+{ scaled ch, cd;
+  FT_Face ft_face=ft_get_font_face(f);
+  if (ft_face!=NULL)
+  { FT_UInt ft_gid = FT_Get_Char_Index(ft_face, c);
+    if (ft_gid!=0)
+    x=x+ft_glyph_width(ft_face, ft_gid,font_size[f]);
+    ft_glyph_height_depth(ft_face, ft_gid, &ch, &cd, font_size[f]);
+    if (ch > h) h=ch;
+    if (cd > d) d=cd;
+  }
+}
 
 @ @<Incorporate a whatsit node into an hbox@>=
-if (subtype(p)==image_node)
-{@+if (image_height(p)> h) h= image_height(p);
+switch (subtype(p)) {
+case image_node:
+  if (image_height(p)> h) h= image_height(p);
   x= x+image_width(p);
-}
-else if (subtype(p)==color_node)
+  break;
+case color_node:
   just_color=color_ref(p);
-else if (subtype(p)==end_color_node)
+  break;
+case end_color_node:
   just_color=-1;
-else if (subtype(p)==start_link_node)
-{ just_label=label_ref(as_label(p)); just_color=color_ref(as_color(p));
+  break;
+case start_link_node:
+  just_label=label_ref(as_label(p)); just_color=color_ref(as_color(p));
   if (just_color==0xFF) just_color=-1;
+  break;
+case end_link_node:
+  just_label=-1; just_color=color_ref(as_color(p));
+  if (just_color==0xFF) just_color=-1;
+  break;
+case utf_char_node:
+{ int f= utf_font(p);
+  int c=utf_char(p);
+  @<Incorporate dimensions of an utf character into the dimensions of the hbox@>@;
+  break;
 }
-else if (subtype(p)==end_link_node)
-{ just_label=-1; just_color=color_ref(as_color(p));
-  if (just_color==0xFF) just_color=-1;
+default:
+  break;
 }
 
+
 @ @<Let |d| be the width of the whatsit |p|@>=
-d=((subtype(p)==image_node)?image_width(p):0)
+if (subtype(p)==image_node) 
+{ d=image_width(p); goto found; }
+else if (subtype(p)==utf_char_node) 
+{ d=ft_char_width(utf_font(p),utf_char(p)); goto found; }
+else d=0;
 
 @ @d adv_past(A) {}
 
 @<Advance \(p)past a whatsit node in the \(l)|line_break| loop@>=@+
-if (subtype(cur_p)==image_node)act_width=act_width+image_width(cur_p);
+if (subtype(cur_p)==image_node)
+  act_width=act_width+image_width(cur_p);
+else if (subtype(cur_p)==utf_char_node)
+  act_width=act_width+ft_char_width(utf_font(cur_p), utf_char(cur_p));
 adv_past(cur_p)
+
 
 @ @<Prepare to move whatsit |p| to the current page, then |goto contribute|@>=
 if (subtype(p)==image_node)
@@ -7894,7 +7936,8 @@ static scaled hteg_xdimen_node(void)
   else if (I==3) HGET24(c);\
   else if (I==4) HGET32(c);\
   f=HGET8; @+REF_RNG(font_kind,f);@/\
-  tail_append(new_character(f,c));\
+  if (c<0x100) tail_append(new_character(f,c))\
+  else tail_append(new_utf_char(f,c))\
 }
 @
 
@@ -7906,7 +7949,8 @@ static scaled hteg_xdimen_node(void)
   else if (I==2) HTEG16(c);\
   else if (I==3) HTEG24(c);\
   else if (I==4) HTEG32(c);\
-  tail_append(new_character(f,c));\
+  if (c<0x100) tail_append(new_character(f,c))\
+  else tail_append(new_utf_char(f,c))\
 }
 @
 
@@ -7921,6 +7965,34 @@ case TAG(glyph_kind,1): @+HTEG_GLYPH(1);@+break;
 case TAG(glyph_kind,2): @+HTEG_GLYPH(2);@+break;
 case TAG(glyph_kind,3): @+HTEG_GLYPH(3);@+break;
 case TAG(glyph_kind,4): @+HTEG_GLYPH(4);@+break;
+@
+
+For character codes above |0xFF| we need to create a new |utf_char_node|.
+
+@<\HINT\ auxiliar functions@>=
+static pointer new_utf_char(uint8_t f, int c)
+{@+pointer p; /*the new node*/
+p=get_node(utf_char_node_size);
+type(p)=whatsit_node; subtype(p)=utf_char_node;
+utf_font_char(p)=(f<<24)+c;
+return p;
+}
+@
+
+@<Basic printing procedures@>=
+static void print_UTF8(int c) /* outputs the character in UTF8 format */
+{@+ if (c<0x80) 
+  {  putc(c,hlog); }
+  else if (c<0x800)@/
+  { putc(0xC0|(c>>6),hlog);@+ putc(0x80|(c&0x3F),hlog);@+} 
+  else if (c<0x10000)@/
+  { putc(0xE0|(c>>12),hlog); putc(0x80|((c>>6)&0x3F),hlog);@+ putc(0x80|(c&0x3F),hlog); } 
+  else if (c<0x200000)@/
+  { putc(0xF0|(c>>18),hlog);@+ putc(0x80|((c>>12)&0x3F),hlog); 
+    putc(0x80|((c>>6)&0x3F),hlog);@+ putc(0x80|(c&0x3F),hlog); } 
+  file_offset++;
+  if (file_offset==max_print_line) print_ln(); 
+}
 @
 
 \subsection{Penalties}
@@ -11607,6 +11679,9 @@ static void trv_hlist(pointer p)
           else
             trv_ignore=false;          
         }
+        else if (subtype(p)==utf_char_node)
+        {  if (!trv_ignore) trv_char(utf_char(p));
+        }
         break;
       default: break;
     }
@@ -12055,7 +12130,8 @@ static void c_ignore_list(pointer p)
   s=cur_style;
   max_s=0;
   while(p!=null)
-  { if (is_char_node(p) && character(p)!=' ')
+  { if ((is_char_node(p) && character(p)!=' ') ||
+        (type(p)==whatsit_node&&subtype(p)==utf_char_node))
     { @<compute the |next_style|@>@;
       cur_style=next_style;
       if (next_style>max_s) max_s=next_style;
@@ -12496,6 +12572,7 @@ static void hfree_glyph_cache(FontDef *f, bool rm);
 
 void hint_clear_fonts(bool rm)
 { int f;
+  if (font_def==NULL) return;
   DBG(DBGFONT,rm?"Clear font data":"Clear native glyph data");
   for (f=0;f<=max_ref[font_kind];f++)
   { hfree_glyph_cache(font_def+f,rm);
@@ -12922,6 +12999,7 @@ static void ft_init(void)
 static void ft_unload_faces(void)
 { int i;
   if (ft_library==NULL) return;
+  if (font_def==NULL) return;
   for (i=0; i<=max_ref[font_kind];i++)
     if (font_def[i].ft_face!=NULL)
       ft_unload_font_face(i);
@@ -13195,16 +13273,22 @@ static void ft_unpack_glyph(uint8_t f, Gcache *g, uint32_t cc)
 
 We close with the functions to compute font metrics.
 
+
 @<FreeType font functions@>=
-scaled ft_char_width(uint8_t f, int c)
+static FT_Face ft_get_font_face(uint8_t f)
 { FT_Face ft_face;
   if (font_def[f].ff==no_format) hload_font(f);
   ft_face=font_def[f].ft_face;
   if (ft_face==NULL)
     ft_face=ft_load_font_face(f);
+  return ft_face;
+}
+static scaled ft_char_width(uint8_t f, int c)
+{ FT_Face ft_face= ft_get_font_face(f);
   if (ft_face==NULL)
     return 0;
-  return ft_width(ft_face, c, font_size[f]);
+  else
+    return ft_width(ft_face, c, font_size[f]);
 }
 @
 
@@ -13217,6 +13301,7 @@ static bool ft_exists(internal_font_number @!f, int c);
 static scaled ft_char_width(uint8_t f, int c);
 static void ft_destroy(void);
 static FT_Face ft_load_font_face(uint8_t f);
+static FT_Face ft_get_font_face(uint8_t f);
 static void ft_unload_font_face(uint8_t f);
 static scaled ft_glyph_width(FT_Face ft_face, FT_UInt ft_gid, scaled s);
 static void ft_glyph_height_depth(FT_Face ft_face, FT_UInt ft_gid,
@@ -13734,6 +13819,7 @@ if(link(p)==0xffff)
   { do
     { f= font(p);
       c= character(p);
+style_c:
       if (!c_ignore && c!=' ')
       { @<compute the |next_style|@>@;
         if (next_style!=cur_style)
@@ -13807,6 +13893,10 @@ render_c:
            render_image(cur_h, cur_v, w, h,image_no(p));
            cur_h= cur_h+w; 
          } break;
+         case utf_char_node:
+           f= utf_font(p);
+           c=utf_char(p);
+           goto style_c;
          default: break;
        }
        break;
@@ -14121,6 +14211,9 @@ character_distance:
 	    return dist;
           case image_node:
             dist= dist+image_width(p);
+            break;
+          case utf_char_node:
+            dist=dist+ft_char_width(utf_font(p),utf_char(p));
             break;
           default: break;
         }

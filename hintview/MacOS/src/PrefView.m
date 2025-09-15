@@ -29,7 +29,7 @@ static NSString * const GammaKey =@"HintviewGamma";
 static NSString * const ScaleKey =@"HintviewScale";
 static NSString * const DocumentKey =@"HintviewDocument";
 
-static NSString * DocumentName = nil;
+
 
 - (IBAction)switchHome:(NSButton *)sender {
     if ([sender state]) start_home=1; else start_home=0;
@@ -113,6 +113,7 @@ static NSString * DocumentName = nil;
 }
 
 extern int set_hin_name(const char *fn);
+extern NSString * DocumentName;
 
 - (void) loadPreferences
 {   NSDictionary *appDefaults = @{
