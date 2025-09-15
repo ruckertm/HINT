@@ -310,7 +310,7 @@ void hget_entry(Entry*e)
 	#line 723 "format.w"
 
 Tag a,z;
-uint32_t node_pos= hpos-hstart;
+uint32_t node_pos= (uint32_t)(hpos-hstart);
 if(hpos>=hend)QUIT("Attempt to read a start byte at the end of the section");
 HGETTAG(a);
 	/*:16*/
@@ -384,7 +384,7 @@ void hget_max_definitions(void)
 	#line 723 "format.w"
 
 Tag a,z;
-uint32_t node_pos= hpos-hstart;
+uint32_t node_pos= (uint32_t)(hpos-hstart);
 if(hpos>=hend)QUIT("Attempt to read a start byte at the end of the section");
 HGETTAG(a);
 	/*:16*/
@@ -503,7 +503,7 @@ else
 	#line 723 "format.w"
 
 Tag a,z;
-uint32_t node_pos= hpos-hstart;
+uint32_t node_pos= (uint32_t)(hpos-hstart);
 if(hpos>=hend)QUIT("Attempt to read a start byte at the end of the section");
 HGETTAG(a);
 	/*:16*/

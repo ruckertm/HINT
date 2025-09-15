@@ -722,7 +722,7 @@ Here is the code for the initial and final part of a get function:
 
 @<read the start byte |a|@>=
 Tag a,z; /* the start and the end byte*/
-uint32_t node_pos=hpos-hstart;
+uint32_t node_pos=(uint32_t)(hpos-hstart);
 if (hpos>=hend) QUIT("Attempt to read a start byte at the end of the section");
 HGETTAG(a);@/@t{}@>
 @
