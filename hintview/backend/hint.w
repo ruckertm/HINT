@@ -2179,7 +2179,7 @@ case disc_node: {@+r=get_node(small_node_size);
 case adjust_node: {@+r=get_node(small_node_size);
   adjust_ptr(r)=copy_node_list(adjust_ptr(p));
   } @+break; /*|words==1==small_node_size-1|*/
-default:confusion("copying");
+default: r=null; confusion("copying");
 @:this can't happen copying}{\quad copying@>
 }
 
@@ -6248,7 +6248,7 @@ case utf_char_node:
     r=get_node(utf_char_node_size);
     words=utf_char_node_size;
   break;
-default:confusion("ext2");
+default:r=null; confusion("ext2");
 @:this can't happen ext2}{\quad ext2@>
 }
 
