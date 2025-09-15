@@ -11,6 +11,7 @@
 #include "rendernative.h"
 #include "main.h"
 
+#define GL_SILENCE_DEPRECATION 1
 
 @implementation HintOpenGLView
 
@@ -57,8 +58,11 @@ static HintOpenGLView * main_view=nil;
   return self;
 }
 
+extern NSString * DocumentName;
+
 - (void) prepareOpenGL
-{   const GLint  swapInt = 1;
+{   bool open=NO;
+    const GLint  swapInt = 1;
     [super prepareOpenGL];
     [[self openGLContext] setValues:&swapInt forParameter:NSOpenGLCPSwapInterval]; // set to vbl sync
     nativeInit();
@@ -67,6 +71,11 @@ static HintOpenGLView * main_view=nil;
     [self nightMode:nil];
     [self autoReloadFile:nil];
     [self showSearch:nil];
+    [self setScale: scale];
+    if (DocumentName!=nil && DocumentName.length>0)
+        open= [[(AppDelegate*)NSApp delegate] openFile: DocumentName];
+    if (!open)
+        [self openFile:self];
     self->ready=YES;
 }
 

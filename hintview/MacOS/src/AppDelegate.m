@@ -54,12 +54,13 @@ int set_hin_name(const char *fn)
 { if (!set_hin_name(filename.UTF8String)) return NO;
   hint_end();
   if (!hint_begin()) return NO;
+  NSLog(@"file opend");
   [_thePreferences setDocumentName:filename];
   if (start_home)
      hint_page_home();
   else
      hint_page_top(0);
-  [[HintOpenGLView mainView].window setTitleWithRepresentedFilename:filename];
+  [_theMainView.window setTitleWithRepresentedFilename:filename];
   [[SectionsController  sectionOutlines] setSectionTree];
   //NSLog(@"Open %s",fn);
   [_theOutlineView reloadData];
@@ -96,21 +97,14 @@ int set_hin_name(const char *fn)
 
 
 - (void)applicationWillFinishLaunching:(NSNotification *)notification
-{ NSString *doc;
-    BOOL open=false;
+{
     [_thePreferences loadPreferences];
-    doc= [_thePreferences documentName];
-    if (doc!=nil && doc.length>0)
-        open=[self openFile:doc ];
-    if (!open)
-        [[HintOpenGLView mainView] openFile:self];
-    [_theMainView setScale:scale];
+    NSLog(@"loading preferences done");
 }
 
 
 - (void)applicationWillTerminate:(NSNotification *)notification
 {
     [_thePreferences storePreferences];
-
-}
+    NSLog(@"storing preferences done");}
 @end

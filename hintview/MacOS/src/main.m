@@ -12,8 +12,7 @@
 int dark = 0, loading=0, drag=0, autoreload=0, start_autoreload=0, start_home=1, start_showsearch, showsearch=0, start_newwindow=1;
 double scale=SCALE_NORMAL, hgamma=GAMMA_NORMAL;
 uint64_t pos; /* position of current page */
-
-
+NSString * DocumentName = nil;
 
 bool hint_map(void) /* open hurl_name and map to memory */
 { return hget_map();
