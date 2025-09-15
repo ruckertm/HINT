@@ -2831,7 +2831,7 @@ case utf_char_node:
 r= get_node(utf_char_node_size);
 words= utf_char_node_size;
 break;
-default:confusion("ext2");
+default:r= null;confusion("ext2");
 
 }
 
@@ -2855,7 +2855,7 @@ post_break(r)= copy_node_list(post_break(p));
 case adjust_node:{r= get_node(small_node_size);
 adjust_ptr(r)= copy_node_list(adjust_ptr(p));
 }break;
-default:confusion("copying");
+default:r= null;confusion("copying");
 
 }
 
