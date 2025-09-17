@@ -27,8 +27,7 @@ static NSString * const NewWindowKey =@"HintviewNewWindow";
 static NSString * const DarkKey =@"HintviewDark";
 static NSString * const GammaKey =@"HintviewGamma";
 static NSString * const ScaleKey =@"HintviewScale";
-static NSString * const DocumentKey =@"HintviewDocument";
-
+static NSString * const BookmarkKey =@"HintviewBookmark";
 
 
 - (IBAction)switchHome:(NSButton *)sender {
@@ -113,7 +112,7 @@ static NSString * const DocumentKey =@"HintviewDocument";
 }
 
 extern int set_hin_name(const char *fn);
-extern NSString * DocumentName;
+extern NSString * DocumentBookmark;
 
 - (void) loadPreferences
 {   NSDictionary *appDefaults = @{
@@ -124,8 +123,8 @@ extern NSString * DocumentName;
         DarkKey: @NO,
         GammaKey : @GAMMA_NORMAL,
         ScaleKey : @SCALE_NORMAL,
-        DocumentKey : [NSString string]
-    };
+        BookmarkKey : [NSString string]
+};
     NSUserDefaults *appPreferences = [NSUserDefaults standardUserDefaults];
     [appPreferences registerDefaults:appDefaults];
     
@@ -143,7 +142,7 @@ extern NSString * DocumentName;
     if (scale < SCALE_MIN) scale=SCALE_MIN;
     else if (scale > SCALE_MAX) scale=SCALE_MAX;
     
-    DocumentName = [appPreferences stringForKey: DocumentKey];
+    DocumentBookmark = [appPreferences stringForKey: BookmarkKey];
     
     [self setPreferences];
 }
@@ -156,16 +155,17 @@ extern NSString * DocumentName;
     [appPreferences setBool: dark forKey:DarkKey ];
     [appPreferences setDouble:hgamma forKey:GammaKey];
     [appPreferences setDouble:scale forKey:ScaleKey];
-    if (DocumentName!=nil && DocumentName.length>0)
-      [appPreferences setObject: DocumentName forKey:DocumentKey];
+    if (DocumentBookmark!=nil && DocumentBookmark.length>0)
+        [appPreferences setObject: DocumentBookmark forKey: BookmarkKey];
+ 
 }
 
-- (void) setDocumentName: (NSString *) doc
-{ DocumentName= [doc copy] ;
+- (void) setDocumentBookmark: (NSString *) doc
+{ DocumentBookmark= [doc copy] ;
 }
 
-- (NSString *) documentName
-{ return DocumentName;
+- (NSString *) documentBookmark
+{ return DocumentBookmark;
 }
 
 - (void)resignKeyWindow

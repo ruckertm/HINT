@@ -30,9 +30,6 @@
 - (void) setGammaText: (double) g;
 - (void) setGammaSlider: (double) g;
 
-- (NSString *) documentName;
-- (void) setDocumentName: (NSString *) doc;
-
 - (BOOL) acceptsFirstResponder;
 
 -(void)keyDown:(NSEvent *)theEvent;

@@ -53,9 +53,9 @@ int set_hin_name(const char *fn)
 - (BOOL) openFile: (NSString *) filename
 { if (!set_hin_name(filename.UTF8String)) return NO;
   hint_end();
-  if (!hint_begin()) return NO;
+  if (!hint_begin())
+      return NO;
   NSLog(@"file opend");
-  [_thePreferences setDocumentName:filename];
   if (start_home)
      hint_page_home();
   else
