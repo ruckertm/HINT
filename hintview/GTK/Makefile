@@ -8,25 +8,42 @@ GTK_LIBS = $(shell $(PKGCONFIG) --libs gtk+-3.0)
 FT_INCLUDES = -I/usr/include/freetype2
 
 CC= gcc
-CFLAGS= -ggdb -O0 -DDEBUG -Wall -I../backend $(FT_INCLUDES)
+ifdef DEBUG
+CFLAGS = -g -O0 -ggdb -DDEBUG -Wall -I../backend
+LDFLAGS = -g -Og -ggdb
+else
+CFLAGS = -O2 -Wall -I../backend
+LDFLAGS = -O2
+endif
+
+LIBS = -lGLEW -lGL -lfreetype -lz -lm
+
+OBJ= hintview.o renderOGL.o get.o hint.o tables.o
 
 all: hintview
 
 %.c: %.w
 	echo running ctangle disabled
 
+-include .depend
+
+.depend: main.c  renderOGL.c 
+	$(CC) -I../backend -MM *.c  > $@ || true
+
 hintview.o: hintview.c
-	$(CC) $(CFLAGS) $(GTK_CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
 
 renderOGL.o: renderOGL.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(FT_INCLUDES) -o $@ -c $< 
 
 hint.o: ../backend/hint.c
 	$(CC) $(CFLAGS) $(FT_INCLUDES) -o $@ -c $<
 
+%.o: ../backend/%.c 
+	$(CC) $(CFLAGS) $(FT_INCLUDES)  -o $@ -c $<
 
-hintview: hintview.o renderOGL.o hint.o
-	$(CC) hintview.o renderOGL.o hint.o $(GTK_LIBS) -lGLEW -lGL -lm -o $@
+hintview: $(OBJ)
+	$(CC) $(LDFLAGS) $(OBJ) $(GTK_LIBS) $(LIBS) -o $@
 
 clean:
 	rm -rf *~ *.o
