@@ -66,4 +66,5 @@ extern bool hint_map(void);
 extern void hint_unmap(void);
 
 #endif
+#line 14878 "hint.w"
 /*:687*/

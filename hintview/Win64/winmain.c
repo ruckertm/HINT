@@ -84,7 +84,7 @@ void set_dpi(HDC hdc)
   if (dpi_x != h_dpmm * 25.4 || dpi_y != v_dpmm * 25.4)
   { dpi_x = h_dpmm * 25.4;  /* dots per inch */
 	dpi_y = v_dpmm * 25.4;
-	hint_clear_fonts(true);
+	hint_clear_fonts(false);
   }
 }
 
@@ -291,9 +291,8 @@ static void open_file(void)
 }
 
 static void close_file(void)
-{ hint_end();
-  hint_clear_fonts(true);
-  ClearNavigationTree();
+{ ClearNavigationTree();
+  hint_end();
   title_name[0]=0;
   SetWindowText(hMainWnd,title_name);
 }
@@ -425,7 +424,7 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	  dpi_ac = SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 	  return 0;
 	case WM_DESTROY:
-	  hint_end(); hint_clear_fonts(true);
+	  hint_end(); 
 	  release_handles();
       PostQuitMessage(0);
       return 0;
@@ -511,7 +510,7 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		   return 0;
 		 case ID_KEY_ZOOM: /* zoom to 100% */
 		  scale=SCALE_NORMAL;
-		  hint_clear_fonts(true);
+		  hint_clear_fonts(false);
 		  HINT_TRY resize_page();
 		   return 0;
 		case ID_KEY_OUTLINE: /* outline window */
@@ -671,7 +670,7 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	  draging =false;
   	  ReleaseCapture();
 	  SetCursor(hArrow); 
-	  hint_clear_fonts(true);
+	  hint_clear_fonts(false);
       InvalidateRect(hMainWnd,NULL,FALSE);
 	return 0;
     case WM_SETCURSOR: 

@@ -11,6 +11,7 @@
 #include "rendernative.h"
 #include "main.h"
 
+#define GL_SILENCE_DEPRECATION 1
 
 @implementation HintOpenGLView
 
@@ -57,8 +58,11 @@ static HintOpenGLView * main_view=nil;
   return self;
 }
 
+extern NSString * DocumentBookmark;
+
 - (void) prepareOpenGL
-{   const GLint  swapInt = 1;
+{   bool open=NO;
+    const GLint  swapInt = 1;
     [super prepareOpenGL];
     [[self openGLContext] setValues:&swapInt forParameter:NSOpenGLCPSwapInterval]; // set to vbl sync
     nativeInit();
@@ -67,6 +71,20 @@ static HintOpenGLView * main_view=nil;
     [self nightMode:nil];
     [self autoReloadFile:nil];
     [self showSearch:nil];
+    [self setScale: scale];
+    if (DocumentBookmark!=nil && DocumentBookmark.length>0)
+    { NSData *bookmk = [ [NSData alloc] initWithBase64EncodedString:DocumentBookmark options:NSDataBase64DecodingIgnoreUnknownCharacters];
+        BOOL isStale;
+        NSError *err;
+      NSURL* bookmarkUrl = [NSURL URLByResolvingBookmarkData: bookmk
+                                   options:NSURLBookmarkResolutionWithSecurityScope
+                                                relativeToURL:nil bookmarkDataIsStale:&isStale error:&err];
+       [bookmarkUrl startAccessingSecurityScopedResource];
+        open= [[(AppDelegate*)NSApp delegate] openFile: bookmarkUrl.path];
+       [bookmarkUrl stopAccessingSecurityScopedResource];
+    }
+    if (!open)
+        [self openFile:self];
     self->ready=YES;
 }
 
@@ -189,11 +207,16 @@ static void setResizeCursor(void)
   [self setNeedsDisplay: YES];
 }
 
+extern NSString *DocumentBookmark;
+
 - (IBAction)openFile:(id)sender {
    NSOpenPanel* panel = [NSOpenPanel openPanel];
 #if 0
-    NSArray<UTType*>* hnt; // see Info.plist for URL types
-    [panel setAllowedContentTypes:hnt];
+    UTType *hnt;
+    [hnt init(@"hnt")];
+    [hnt ar aUTType init];
+    NSArray<UTType*>* hnt = @[@"hnt"]; // see "Info".plist for URL types
+    [panel setAllowedContentTypes: hnt;
 #endif
    // This method displays the panel and returns immediately.
    // The completion handler is called when the user selects an
@@ -201,8 +224,20 @@ static void setResizeCursor(void)
    [panel beginWithCompletionHandler:^(NSInteger result){
       if (result == NSFileHandlingPanelOKButton) {
          NSURL*  url = [[panel URLs] objectAtIndex:0];
-         if ([url isFileURL]) {
-             [(AppDelegate*)[NSApp delegate] openFile: [url path]];
+          if ([url isFileURL]) {
+              NSError *err;
+              BOOL isStale;
+              NSData *bookmk  = [url bookmarkDataWithOptions: NSURLBookmarkCreationSecurityScopeAllowOnlyReadAccess |
+                           NSURLBookmarkCreationWithSecurityScope
+                        includingResourceValuesForKeys:nil relativeToURL:nil error:&err];
+              DocumentBookmark = [[bookmk base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength] copy];
+              //NSLog(@"bs : %@ :",DocumentBookmark);
+              NSURL* bookmarkUrl = [NSURL URLByResolvingBookmarkData: bookmk
+                                         options:NSURLBookmarkResolutionWithSecurityScope
+                                                      relativeToURL:nil bookmarkDataIsStale:&isStale error:&err];
+             [bookmarkUrl startAccessingSecurityScopedResource];
+             [(AppDelegate*)[NSApp delegate] openFile: [bookmarkUrl path]];
+             [bookmarkUrl stopAccessingSecurityScopedResource];
            //open_file([url path]);
         }
       }

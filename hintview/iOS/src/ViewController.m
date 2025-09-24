@@ -37,8 +37,6 @@
 #import "UniformTypeIdentifiers/UniformTypeIdentifiers.h"
 #include "error.h"
 #include "hint.h"
-#include "hrender.h"
-#include "rendernative.h"
 #include "main.h"
 
 @interface ViewController ()
@@ -48,8 +46,9 @@
 @implementation ViewController
 static int x_pt, y_pt; /* for debugging used in drawRect*/
 
-static int px_x=1024, px_y=768, px_scale=2; /* size in pixel */
+static int px_x=1024, px_y=768; /* size in pixel */
 static int x_dpi, y_dpi;     /* resolution in dpi */
+static double screen_scale=1; /* conversion factor to pixels*/
 
 - (void) setSize: (CGSize)size
 {   UIScreen *screen = [UIScreen mainScreen];
@@ -58,9 +57,9 @@ static int x_dpi, y_dpi;     /* resolution in dpi */
     
   
     CGSize pt;
-    px_scale = screen.scale;
-    px_x=size.width*px_scale;
-    px_y=size.height*px_scale;
+    screen_scale = screen.scale;
+    px_x=size.width*screen_scale;
+    px_y=size.height*screen_scale;
     // this is the dpi setting for the iPadPro 9.7in
     //x_dpi=264.0; //72.0*sc;
     //y_dpi=264.0; //72.0*sc;
@@ -82,10 +81,13 @@ static int x_dpi, y_dpi;     /* resolution in dpi */
 }
 
 int dpi_default(void)
-/* It seems that Apple does not want the tprogrammer to determine the screen resolution so we guess.
+/* It seems that Apple does not want the programmer to determine the screen resolution so we guess.
    If you know a better solution, let me know. You can set the exact dpi values on the apps property page.
  */
 { double s =[UIScreen mainScreen].scale;
+    CGRect b =[UIScreen mainScreen].bounds;
+    double ns = [UIScreen mainScreen].nativeScale;
+    CGRect nb =[UIScreen mainScreen].nativeBounds;
     if (s<=1) return 132;
     if (s<=2) return 326;
     if (s<=3) return 460;
@@ -101,7 +103,7 @@ int dpi_default(void)
   { [_theToolbar setTintColor: [UIColor colorWithRed: 0.0 green:0.0 blue:0.0 alpha:1.0] ];
     [_theToolbar setBackgroundColor: [UIColor colorWithRed: 0.0 green: 0.0 blue:0.0 alpha:1.0]];
   }
-  nativeSetDark(dark);
+  hint_dark(dark);
 }
 
 // Handling Preferences
@@ -223,7 +225,7 @@ void redisplay(void)
      [EAGLContext setCurrentContext: context];
 
 
-    nativeInit();
+    hint_render_on();
     hint_clear_fonts(true);
     [self getPreferences];
    
@@ -255,7 +257,7 @@ void redisplay(void)
       int link;
       //NSLog(@"xy= %dx%d\n", location.x,location.y);
       HINT_TRY {
-        link=hint_find_link(location.x,location.y,y_dpi/36);
+          link=hint_find_link(location.x*screen_scale,location.y*screen_scale,y_dpi/36);
         //Touch is less precise than mouse input
         if (link>=0)
         { hint_link_page(link);
@@ -328,7 +330,9 @@ void redisplay(void)
 }
 
 - (IBAction)theMenuButton:(UIBarButtonItem *)sender {
-    [_theOptions.]
+#if 0
+    [_theOptions.options]
+#endif
     hintview_about();
      
 }
@@ -387,7 +391,7 @@ BOOL open_file(NSURL *url)
   { hint_error("Access NOT granted", [url path].UTF8String); return NO; }
   if (!set_hin_name([url path].UTF8String))
   { [url stopAccessingSecurityScopedResource]; return NO; }
-  hint_clear_fonts(true);
+  hint_end();
   //NSLog(@"hint begin %s",hin_name);
   if (!hint_begin()) /* this reads the file */
   {  hint_error("Error: Not a HINT file",[url path].UTF8String);

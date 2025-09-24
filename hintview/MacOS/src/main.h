@@ -48,8 +48,6 @@ extern int dark, loading, drag, start_autoreload, autoreload, start_home,
 extern double scale, hgamma;
 extern uint64_t pos; /* position of current page */
 
-
-
 extern void hint_log(const char*format,...);
 extern void hint_message(const char*format,...);
 extern int hint_error(const char*title,const char*msg);

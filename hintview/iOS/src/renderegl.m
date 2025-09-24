@@ -160,7 +160,7 @@ static GLfloat MVP[4][4] = {
   {0.0, 0.0, 0.0, 0.0 }, // z scale
   {0.0, 0.0, 0.0, 1.0 }}; // translation x, y, z
 
-static void mkRuleTexture() { /* the texture used for rules */
+static void mkRuleTexture(void) { /* the texture used for rules */
   GLubyte rule[1][1][1]={{{0xFF}}};
 
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
