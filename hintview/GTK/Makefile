@@ -18,7 +18,7 @@ endif
 
 LIBS = -lGLEW -lGL -lfreetype -lz -lm
 
-OBJ= hintview.o renderOGL.o get.o hint.o tables.o
+OBJ= main.o renderOGL.o get.o hint.o tables.o
 
 all: hintview
 
@@ -30,7 +30,7 @@ all: hintview
 .depend: main.c  renderOGL.c 
 	$(CC) -I../backend -MM *.c  > $@ || true
 
-hintview.o: hintview.c
+main.o: main.c
 	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
 
 renderOGL.o: renderOGL.c
