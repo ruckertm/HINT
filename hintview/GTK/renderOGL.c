@@ -27,7 +27,6 @@
  */
 
 #include <GL/glew.h>
-
 #include "basetypes.h"
 #include "error.h"
 #include <ft2build.h>
@@ -41,7 +40,6 @@
 
 
 #ifdef DEBUG
-
 
 static void checkGlError(const char *op)
 { GLint error;
@@ -254,8 +252,6 @@ static void mkRuleTexture() /* the texture used for rules */
 
 void nativeInit(void)
 { GLuint VertexArrayID;
- 
-#if 1
   static int glewInitialized=0;
   /* Initialize GLEW */
   glewExperimental = true; /* Needed for core profile */
@@ -264,7 +260,6 @@ void nativeInit(void)
   glewInitialized=1;
   while(glGetError()!= GL_NO_ERROR)
     continue; /* ignore errors in glewInit */
-#endif
   
   printGLString("Version", GL_VERSION);
   printGLString("Vendor", GL_VENDOR);

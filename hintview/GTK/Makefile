@@ -44,6 +44,7 @@ hint.o: ../backend/hint.c
 
 hintview: $(OBJ)
 	$(CC) $(LDFLAGS) $(OBJ) $(GTK_LIBS) $(LIBS) -o $@
+	cp ../backend/*.w .
 
 clean:
 	rm -rf *~ *.o
