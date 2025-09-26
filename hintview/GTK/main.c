@@ -33,6 +33,10 @@
 #include <GL/gl.h>
 #include <setjmp.h>
 
+extern void cb_search_quit(void);
+extern GtkWidget *do_search_entry (GtkWidget *do_widget);
+
+
 #define DEBUG 1
 
 #define VERSION 2
@@ -52,10 +56,12 @@ static int hint_error(const char *title, const char *message)
   return 0;
 }
 
+#if 0 /* not yet used */
 static void error_callback(int error, const char* description)
 { hint_error("OpenGL",description);
   longjmp(hint_error_exit,1);
 }
+#endif
 
 #define DIR_SEP '/'
 
@@ -165,6 +171,41 @@ bool hint_map(void)
 { return hget_map();
 }
 
+static char *search_buf=NULL;
+static int search_len=0;
+bool search_string(const char *str)
+  { int len = strlen(str);
+    if (len<search_len)
+      strncpy(search_buf,str,search_len);
+    else
+      { free(search_buf); search_len=0;
+	search_buf=strdup(str);
+	if (search_buf==NULL) return FALSE; /* just in case */
+	search_len=len;
+      }
+  hint_set_mark(search_buf,len);
+  RENDER;
+  return TRUE;
+}
+
+bool search_next(bool next)
+{uint64_t h=hint_page_get();
+  bool success; 
+  if(next)
+    success=hint_next_mark();
+ else
+   success=hint_prev_mark();
+  if (!success)
+	hint_page_top(h);
+  RENDER;
+  return success;
+}
+
+
+
+  
+
+
 static int open_file(int home)
 { hint_end();
   if (!hint_begin()) return 0;
@@ -195,6 +236,8 @@ static void reload_file(void)
   LOG("reloading...\n");
 }
 
+#if 0 /* not yet used */
+
 static int new_file_time(void)
 { struct stat st;
   if (hin_name!=NULL &&
@@ -209,6 +252,8 @@ static int new_file_time(void)
   }
   return 0;
 }
+
+#endif
 
 static int set_hin_name(char *fn)
 {  size_t sl;
@@ -230,7 +275,7 @@ static int set_hin_name(char *fn)
 }
 
 
-
+#if 0
 static gboolean
 dialog_key_press_event_cb (GtkWidget *window,
     GdkEvent *event,
@@ -292,7 +337,7 @@ search_bar(void)
 #endif  
   return 0;
 }
-
+#endif
 
 static int file_chooser(void)
 { GtkWidget *dialog;
@@ -550,7 +595,11 @@ cb_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data)
     break;
 
   case GDK_KEY_s: /* search */
-    search_bar();
+    {  GtkWidget *search_window;
+       search_window = do_search_entry(window);
+       g_signal_connect(search_window, "destroy", G_CALLBACK(cb_search_quit), NULL);
+       LOG("Search clicked\n");
+    }
     break;
 
   case GDK_KEY_z: 

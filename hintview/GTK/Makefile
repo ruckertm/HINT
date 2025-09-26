@@ -42,9 +42,22 @@ hint.o: ../backend/hint.c
 %.o: ../backend/%.c 
 	$(CC) $(CFLAGS) $(FT_INCLUDES)  -o $@ -c $<
 
-hintview: $(OBJ)
-	$(CC) $(LDFLAGS) $(OBJ) $(GTK_LIBS) $(LIBS) -o $@
+hintview: $(OBJ) search-bar.o
+	$(CC) $(LDFLAGS) $(OBJ)  search-bar.o $(GTK_LIBS) $(LIBS) -o $@
 	cp ../backend/*.w .
+
+
+message.o: message.c
+	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
+
+message: message.o
+	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
+
+search-bar.o: search-bar.c
+	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
+
+search-bar: search-bar.o
+	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
 
 clean:
 	rm -rf *~ *.o
