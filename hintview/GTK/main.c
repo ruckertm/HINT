@@ -36,6 +36,8 @@
 extern void cb_search_quit(void);
 extern GtkWidget *do_search_entry (GtkWidget *do_widget);
 
+extern void cb_tree_store_quit(void);
+extern GtkWidget *do_tree_store(GtkWidget *do_widget);
 
 #define DEBUG 1
 
@@ -568,6 +570,12 @@ cb_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data)
     RENDER;
     break;
   case GDK_KEY_o: /* outlines */
+    {  GtkWidget *tree_store_window;
+       tree_store_window = do_tree_store(window);
+       g_signal_connect(tree_store_window, "destroy", G_CALLBACK(cb_tree_store_quit), NULL);
+       LOG("Outline selected\n");
+    }
+    
     break;
   case GDK_KEY_p: /* round position to pixel */
     { static bool rpx=true;
