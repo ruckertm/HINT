@@ -39,13 +39,14 @@ void cb_search_changed(GtkEntry* entry,  gpointer user_data )
   search_string(str);
 }
 
-
+#if 0
 void cb_search_quit(void)
-{ g_print("Close Search\n");
+{ //g_print("Close Search\n");
 }
+#endif
 
 GtkWidget *
-do_search_entry (GtkWidget *do_widget)
+search_open (GtkWidget *parent_widget)
 {
   GtkWidget *vbox;
   GtkWidget *hbox;
@@ -56,12 +57,15 @@ do_search_entry (GtkWidget *do_widget)
   if (!search_window)
     {
       search_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-      gtk_window_set_screen (GTK_WINDOW (search_window), gtk_widget_get_screen (do_widget));
+      gtk_window_set_screen (GTK_WINDOW (search_window), gtk_widget_get_screen (parent_widget));
       gtk_window_set_title (GTK_WINDOW (search_window), "Search");
       //gtk_window_set_resizable (GTK_WINDOW (search_window), FALSE);
       g_signal_connect (search_window, "destroy",
                         G_CALLBACK (search_entry_destroyed), &search_window);
-
+#if 0      
+       g_signal_connect(search_window, "destroy",
+			G_CALLBACK(cb_search_quit), NULL);
+#endif
       vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 5);
       gtk_container_add (GTK_CONTAINER (search_window), vbox);
       gtk_container_set_border_width (GTK_CONTAINER (vbox), 5);

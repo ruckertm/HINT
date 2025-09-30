@@ -34,11 +34,11 @@
 #include <setjmp.h>
 
 extern void cb_search_quit(void);
-extern GtkWidget *do_search_entry (GtkWidget *do_widget);
+extern GtkWidget *search_open (GtkWidget *parent_widget);
 
-extern void cb_tree_store_quit(void);
-extern GtkWidget *do_tree_store(GtkWidget *do_widget);
-
+extern void outlines_open(GtkWidget *parent_widget);
+extern void outlines_set(void);
+extern void outlines_clear(void);
 #define DEBUG 1
 
 #define VERSION 2
@@ -209,18 +209,18 @@ void goto_outline(int i)
 }
 
 
-  
 
 
 static int open_file(int home)
 { hint_end();
-  if (!hint_begin()) return 0;
+  if (!hint_begin())
+    return 0;
   if (home)
     hint_page_home();
   else
     hint_page_top(0);
     //  strncpy(title_name,hin_name,MAX_PATH);
-    //	SetNavigationTree();
+  outlines_set();
    //SetWindowText(hMainWnd,title_name);
   { char *p, *q;
        p=q=hin_name;
@@ -526,7 +526,7 @@ static gboolean cb_mouse_motion(GtkWidget *area, GdkEventMotion *event, gpointer
   if (!is_scaling) /*we dont know whether this is a click or a drag */  
   { d = (x-down_x)*(x-down_x)+(y-down_y)*(y-down_y);
     if (d<=DELTA_XY && event->time-down_time <= DELTA_T)
-      return TRUE; /* click */
+      return TRUE; /* still dont know */
     is_scaling=TRUE;
     down_xy=down_x*down_x+down_y*down_y;
   }
@@ -548,8 +548,20 @@ static gboolean cb_mouse_button_up(GtkWidget *area, GdkEventButton *event, gpoin
     is_scaling=FALSE;
     RENDER;
   }
+  else /* click */
+  { int link;
+    LOG("Click %f x %f\n",down_x,down_y);
+    HINT_TRY {
+      link=hint_find_link((int)(down_x+0.5), (int)(down_y+0.5), y_dpi/36);
+      if (link>=0)
+        hint_link_page(link);
+    }
+    RENDER;
+  }
   return TRUE;
 }
+
+extern void outlines_clear(void);
 
 static gboolean
 cb_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data)
@@ -574,10 +586,8 @@ cb_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data)
     RENDER;
     break;
   case GDK_KEY_o: /* outlines */
-    {  GtkWidget *tree_store_window;
-       tree_store_window = do_tree_store(window);
-       g_signal_connect(tree_store_window, "destroy", G_CALLBACK(cb_tree_store_quit), NULL);
-       LOG("Outline selected\n");
+    {  outlines_open(window);
+       LOG("Outline open\n");
     }
     
     break;
@@ -607,10 +617,8 @@ cb_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data)
     break;
 
   case GDK_KEY_s: /* search */
-    {  GtkWidget *search_window;
-       search_window = do_search_entry(window);
-       g_signal_connect(search_window, "destroy", G_CALLBACK(cb_search_quit), NULL);
-       LOG("Search clicked\n");
+    { search_open(window);
+      //LOG("Search clicked\n");
     }
     break;
 
