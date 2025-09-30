@@ -1,13 +1,12 @@
-#include <gtk/gtk.h>
+/* This code is taken form the gtk-3 demo collection
+   and was simplified to meet the needs of the hintview application.
+*/
 
-/* TreeItem structure */
-typedef struct _TreeItem TreeItem;
-struct _TreeItem
-{
-  const gchar    *label;
-  int             link;
-  TreeItem       *children;
-};
+#include <gtk/gtk.h>
+#include "basetypes.h"
+#include "hint.h"
+
+extern void goto_outline(int i);
 
 /* columns */
 enum
@@ -17,86 +16,49 @@ enum
   NUM_COLUMNS
 };
 
-/* tree data */
-static TreeItem january[] =
-{
-  {"New Years Day", 1, NULL },
-  {"Presidential Inauguration", 2, NULL },
-  {"Martin Luther King Jr. day", 3, NULL },
-  { NULL }
-};
-
-static TreeItem february[] =
-{
-  { "Presidents' Day", 4, NULL },
-  { "Groundhog Day", 5,  NULL },
-  { "Valentine's Day", 6, NULL },
-  { NULL }
-};
-
-
-static TreeItem toplevel[] =
-{
-  {"January", 7, january},
-  {"February", 8, february},
-  {NULL}
-};
+static int
+add_outlines(hint_Outline *t, int i, int n, int depth, GtkTreeIter *base,GtkTreeStore *model)
+{ GtkTreeIter iter;
+  while (i<=n)
+    { g_print("Outline[%d]: %s %d\n",i, t[i].title,t[i].depth);
+    if (t[i].depth<depth) return i;
+    if (t[i].depth==depth)
+    { gtk_tree_store_append (model, &iter, base);
+      gtk_tree_store_set (model, &iter,
+                          SECTION_COL, t[i].title,
+                          LINK_COL, i,
+		        -1);
+      i++;
+    }
+    else /* subitems */
+      i=add_outlines(t, i, n, t[i].depth, &iter,model);
+  }
+  return i;
+}  
 
 
 static GtkTreeModel *
 create_model (void)
 {
   GtkTreeStore *model;
-  GtkTreeIter iter;
-  TreeItem *section = toplevel;
+  int n;
 
+  
   /* create tree store */
   model = gtk_tree_store_new (NUM_COLUMNS,
                               G_TYPE_STRING,
 			      G_TYPE_INT);
 
+  n= hint_get_outline_max(); /*outlines numbered 0 to n*/
 
-  /* add data to the tree store */
-  while (section->label)
-    {
-      TreeItem *subsection = section->children;
+  if (n<0)
+  { return GTK_TREE_MODEL (model);
+  }
 
-      gtk_tree_store_append (model, &iter, NULL);
-      gtk_tree_store_set (model, &iter,
-                          SECTION_COL, section->label,
-                          LINK_COL, section->link,
-                          -1);
-
-      /* add children */
-      while (subsection->label)
-        {
-          GtkTreeIter child_iter;
-
-          gtk_tree_store_append (model, &child_iter, &iter);
-          gtk_tree_store_set (model, &child_iter,
-                              SECTION_COL, subsection->label,
- 			      LINK_COL, subsection->link,
-                               -1);
-
-          subsection++;
-        }
-
-      section++;
-    }
+  add_outlines(hint_get_outlines(), 0, n, 0, NULL, model);
 
   return GTK_TREE_MODEL (model);
 }
-
-#if 0
-void
-cb_column_clicked (
-  GtkTreeViewColumn* self,
-  gpointer user_data)
-{
-  g_print("Clicked\n");
-}
-#endif
-
 
 static void
 add_columns (GtkTreeView *treeview)
@@ -121,19 +83,6 @@ add_columns (GtkTreeView *treeview)
 #endif
   }
 
-#if 0
-gboolean cb_selected (
-  GtkTreeSelection* selection,
-  GtkTreeModel* model,
-  GtkTreePath* path,
-  gboolean path_currently_selected,
-  gpointer data
-)
-{
-  g_print("Selected\n");
-  return TRUE;
-}
-#endif
 
 void
 cb_activated (
@@ -149,7 +98,8 @@ cb_activated (
   m= gtk_tree_view_get_model(self);
   gtk_tree_model_get_iter (m,&i,path); 
   gtk_tree_model_get (m,&i,SECTION_COL,&s,LINK_COL,&l,-1);
-  g_print("Activated %s %d\n",s,l);
+  // g_print("Activated %s %d\n",s,l);
+  goto_outline(l);
 }
 
 GtkWidget *
@@ -177,10 +127,6 @@ do_tree_store (GtkWidget *do_widget)
       gtk_container_add (GTK_CONTAINER (window), vbox);
 
       sw = gtk_scrolled_window_new (NULL, NULL);
-#if 0      
-      gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (sw),
-                                           GTK_SHADOW_ETCHED_IN);
-#endif
       gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw),
                                       GTK_POLICY_AUTOMATIC,
                                       GTK_POLICY_AUTOMATIC);
@@ -196,11 +142,6 @@ do_tree_store (GtkWidget *do_widget)
                                    GTK_SELECTION_SINGLE);
       gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (treeview),FALSE);
 
-#if 0
-      gtk_tree_selection_set_select_function(
-	     gtk_tree_view_get_selection (GTK_TREE_VIEW (treeview)),
-	     cb_selected,NULL,NULL);
-#endif
      g_signal_connect(treeview, "row-activated", G_CALLBACK(cb_activated), NULL);
      gtk_tree_view_set_activate_on_single_click (GTK_TREE_VIEW (treeview), TRUE);
 
@@ -226,18 +167,3 @@ void cb_tree_store_quit(void)
 { g_print("Close Tree Store\n");
 }
 
-
-#if 0
-int
-main(int argc, char **argv)
-{
-    GtkWidget *window;
-
-    gtk_init(&argc, &argv);
-    window = do_tree_store(NULL);
-    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
-    gtk_main();
-    return 0;
-}
-
-#endif

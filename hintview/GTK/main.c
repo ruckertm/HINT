@@ -203,6 +203,10 @@ bool search_next(bool next)
   return success;
 }
 
+void goto_outline(int i)
+{ hint_outline_page(i);
+  RENDER;
+}
 
 
   
