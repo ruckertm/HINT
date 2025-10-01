@@ -42,8 +42,8 @@ hint.o: ../backend/hint.c
 %.o: ../backend/%.c 
 	$(CC) $(CFLAGS) $(FT_INCLUDES)  -o $@ -c $<
 
-hintview: $(OBJ) search-bar.o  outline.o
-	$(CC) $(LDFLAGS) $(OBJ)  search-bar.o outline.o $(GTK_LIBS) $(LIBS) -o $@
+hintview: $(OBJ) search-bar.o  outline.o header.o
+	$(CC) $(LDFLAGS) $(OBJ)  search-bar.o outline.o header.o $(GTK_LIBS) $(LIBS) -o $@
 	cp ../backend/*.w .
 
 
@@ -64,6 +64,12 @@ outline.o: outline.c
 	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
 
 outline: outline.o
+	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
+
+header.o: header.c
+	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
+
+header: header.o
 	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
 
 

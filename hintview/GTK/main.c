@@ -39,6 +39,10 @@ extern GtkWidget *search_open (GtkWidget *parent_widget);
 extern void outlines_open(GtkWidget *parent_widget);
 extern void outlines_set(void);
 extern void outlines_clear(void);
+
+extern GtkWidget *create_headerbar (void);
+
+static GtkWidget *overlay_button;
 #define DEBUG 1
 
 #define VERSION 2
@@ -134,11 +138,13 @@ cb_configure(GtkWindow *window, GdkEvent *event, gpointer data)
     }
   }
   if (event->configure.width!=w ||event->configure.height!=h)
-  { px_h=w=event->configure.width;
-    px_v=h=event->configure.height;
+  { GtkAllocation a;
+    gtk_widget_get_allocation (area,&a);
+    px_h=w=a.width;
+    px_v=h=a.height;  
     size_change=TRUE;
     rerender=TRUE;
-    LOG("Size %d x %d\n",w,h);
+    //LOG("Size %d x %d or %d x %d\n",w,h,a.width,a.height);
   }
   if (rerender)
     RENDER;
@@ -551,6 +557,15 @@ static gboolean cb_mouse_button_up(GtkWidget *area, GdkEventButton *event, gpoin
   else /* click */
   { int link;
     LOG("Click %f x %f\n",down_x,down_y);
+    if (down_y<10)
+      { static int on=1;
+        on=!on;
+	LOG("Toggle Overlay\n");
+	if (on)
+	  gtk_widget_show(overlay_button);
+	else
+	   gtk_widget_hide(overlay_button);
+      }
     HINT_TRY {
       link=hint_find_link((int)(down_x+0.5), (int)(down_y+0.5), y_dpi/36);
       if (link>=0)
@@ -563,6 +578,13 @@ static gboolean cb_mouse_button_up(GtkWidget *area, GdkEventButton *event, gpoin
 
 extern void outlines_clear(void);
 
+void do_open_file(void)
+{    if (set_input_file(NULL))
+    { open_file(home);
+      RENDER;
+    }
+}
+
 static gboolean
 cb_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data)
 {
@@ -573,10 +595,7 @@ cb_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data)
     if (autoreload)
       goto reload;
   case GDK_KEY_f: /* file */
-    if (set_input_file(NULL))
-    { open_file(home);
-      RENDER;
-    }
+    do_open_file();
     break;
   case GDK_KEY_n:
     dark=!dark;
@@ -695,7 +714,23 @@ activate (GtkApplication *app,
   g_signal_connect (area, "realize", G_CALLBACK (cb_realize), NULL);
   g_signal_connect (area, "unrealize", G_CALLBACK (cb_unrealize), NULL);
   //g_signal_connect (area, "resize", G_CALLBACK (cb_resize), NULL);
-  gtk_container_add (GTK_CONTAINER (window), area);
+
+#if 1
+    gtk_container_add (GTK_CONTAINER (window), area);
+#else
+    { GtkWidget *overlay;
+     
+      
+      overlay = gtk_overlay_new ();
+      gtk_container_add (GTK_CONTAINER (overlay), area);
+      gtk_container_add (GTK_CONTAINER (window), overlay);
+      overlay_button = gtk_button_new_with_label ("Button");
+      gtk_overlay_add_overlay (GTK_OVERLAY (overlay), overlay_button);
+      gtk_widget_set_halign (overlay_button, GTK_ALIGN_CENTER);
+      gtk_widget_set_valign (overlay_button, GTK_ALIGN_START);
+      gtk_widget_hide(overlay);
+    }
+#endif
 
   gtk_widget_set_events (area, GDK_BUTTON_PRESS_MASK
 		       | GDK_BUTTON_RELEASE_MASK
@@ -704,7 +739,28 @@ activate (GtkApplication *app,
    g_signal_connect (area, "button_release_event", G_CALLBACK (cb_mouse_button_up), NULL);
    g_signal_connect (area, "motion_notify_event", G_CALLBACK (cb_mouse_motion), NULL);
    gamma_change=TRUE;
+#if 1
+    { GtkWidget *header;
+  header = create_headerbar();
+  gtk_window_set_titlebar (GTK_WINDOW (window), header);
+    }
+#else
+   { GtkWidget *header;
+     GtkWidget *button;
+     header = gtk_header_bar_new ();
+     gtk_header_bar_set_show_close_button (GTK_HEADER_BAR (header), TRUE);
+     gtk_header_bar_set_title (GTK_HEADER_BAR (header), "Welcome");
+     gtk_header_bar_set_has_subtitle (GTK_HEADER_BAR (header), FALSE);
+
+      button = gtk_button_new ();
+      gtk_header_bar_pack_start (GTK_HEADER_BAR (header), button);
+      gtk_window_set_titlebar (GTK_WINDOW (window), header);
+   }
+#endif
+
+   
    gtk_widget_show_all (window);
+   
 }
 
 int main (int argc, char *argv[])
