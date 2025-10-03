@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<schemalist>
+<schema path="/edu/hm/cs/hintview/" id="edu.hm.cs.hintview">
+
+<key name='autoreload' type='b'>
+  <default>false</default>
+  <summary>Automatically reload a changed document.</summary>
+  <description>
+  If enabled, hintview will check each time it receives the input focus
+  whether the document version on disk is newer than the version currently
+  loaded. If so, it will reload the document from disk trying to position
+  it as close as possible to the current position. If there are large changes
+  to the document, this might not always be the perfect spot.
+  </description>
+</key>
+<key name='dark' type='b'>
+  <default>false</default>
+  <summary>Render the document in dark mode.</summary>
+  <description>
+  The document can be rendered in dark mode or in light mode.
+  </description>
+</key>
+<key name='home' type='b'>
+  <default>true</default>
+  <summary>After opening a new document show the documents home page.</summary>
+  <description>
+    The author of a document can designate a page of the document as its
+    home page. Usualy this is a good page to start reading a document.
+    Often this is the first page. In reference documents this is usually
+    the table of content.
+  </description>
+</key>
+<key name='gcorrection' type='d'>
+  <default>1.8</default>
+  <summary>Set the gamma correction for your display.</summary>
+  <description>
+    Readability of text can often benefit from adjustung the gamma
+    correction for the specific display and the ambient light.
+    Higher values of gamma make the rendering of text darker,
+    lower values make it lighter. Typical values are between 1.8 and 2.2
+    but individual circumstances might require different value.
+  </description>
+</key>
+<key name='scale' type='d'>
+  <default>1.0</default>
+  <summary>Set the scale factor for rendering the document.</summary>
+  <description>
+    Hintview tries to display a document at its true size if the scale
+    factor is set to one. A 10pt font should then have exactly the same
+    size on the display as it has in a printed book. Likewise, a line
+    that is specified in the document to be 2 inches long, should be
+    exactly 2 inches long on the display.
+    In many situations, however, it is convenient to use a different
+    scale factors. On a small hand-held device, a smaller scale factor
+    gives smaller text so that more text will fit on the display.
+    Because a hand-held device is typically closer to the eye than
+    for example a big TV screen, the smaller text will still be readable.
+    On the other hand, for visually impaired users, a larger scale factor
+    might make the text easier to read.
+  </description>
+</key>
+<key name='document' type='s'>
+  <default>""</default>
+  <summary>The file name of the most recent document.</summary>
+  <description>
+    When started, hintview will usually open the most recent document.
+  </description>
+</key>
+<key name='position' type='t'>
+  <default>0</default>
+  <summary>The position in the most recent document.</summary>
+  <description>
+    The position value is a value that hintview uses to remember
+    the start of the page most recently viewed in the most recent document.
+    Except that the value 0 stands for the start of the document,
+    There is simple way to interpret the values of this variable.
+  </description>
+</key>
+</schema>
+</schemalist>

@@ -43,6 +43,11 @@ extern void outlines_clear(void);
 extern GtkWidget *create_headerbar (void);
 
 static GtkWidget *overlay_button;
+
+extern void read_settings(GSettings *settings);
+extern void write_settings(GSettings *settings);
+
+
 #define DEBUG 1
 
 #define VERSION 2
@@ -80,12 +85,12 @@ static bool gamma_change=FALSE; /* set to call hint_gamma */
 #define SCALE_MIN 0.5
 #define SCALE_NORMAL 1.0
 #define SCALE_MAX 4.0
-static double scale=SCALE_NORMAL;
-static uint64_t pos; /* position of current page */
+double scale=SCALE_NORMAL;
+guint64 position; /* position of current page */
 
 static int px_h=1024, px_v=768; // size in pixel
 static double  x_dpi=300, y_dpi=300;
-static double gamma=1.8;
+double gcorrection=1.8;
 
 static GtkApplication *app;
 static GtkWidget *window;
@@ -320,7 +325,7 @@ static int set_input_file(char *fn)
     return file_chooser();
 }
 
-static int dark = 0, autoreload=0, home=0;
+gboolean dark = 0, autoreload=0, home=0;
 
 static int usage(void)
 {    return hint_error("Usage:", "hintview [options] file\n"
@@ -417,7 +422,7 @@ static gboolean
     // already been set to be the size of the allocation
     if (gamma_change)
     { gamma_change=FALSE;
-	hint_gamma(gamma);
+	hint_gamma(gcorrection);
     }
     if (dpi_change)
       { dpi_change=FALSE;
@@ -536,7 +541,7 @@ void do_reload(void)
         fpos=hint_get_fpos();
         hint_end();
         hint_begin();
-        pos=hint_set_fpos(fpos);
+        position=hint_set_fpos(fpos);
       }
       //clear_cursor();
       loading=0;
@@ -604,28 +609,28 @@ cb_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data)
   }
   else
   switch (event->keyval)  {
-  case GDK_KEY_KP_Add: /* increase gamma */
-    { gamma=gamma+0.1;
-      if (gamma>4.0) gamma=4.0;
+  case GDK_KEY_KP_Add: /* increase gcorrection */
+    { gcorrection=gcorrection+0.1;
+      if (gcorrection>4.0) gcorrection=4.0;
       gamma_change=TRUE;
       RENDER;
     }
     break;
-  case GDK_KEY_KP_Subtract: /* decrease gamma */
-    { gamma=gamma-0.1;
-      if (gamma<0.1) gamma=0.1;
+  case GDK_KEY_KP_Subtract: /* decrease gcorrection */
+    { gcorrection=gcorrection-0.1;
+      if (gcorrection<0.1) gcorrection=0.1;
       gamma_change=TRUE;
       RENDER;
     }
     break;
   case GDK_KEY_Page_Down:
-    pos=hint_page_next();
+    position=hint_page_next();
     hint_page();
     RENDER;
     //clear_cursor();
     break;
   case GDK_KEY_Page_Up:
-    pos=hint_page_prev();
+    position=hint_page_prev();
     hint_page();
     RENDER;
     //clear_cursor();
@@ -701,18 +706,24 @@ activate (GtkApplication *app,
    gtk_widget_show_all (window);
    
 }
-
+  
 int main (int argc, char *argv[])
 { 
   int status;
-
+  GSettings *settings;
+  
   hlog=stderr;
   if (setjmp(hint_error_exit)!=0) return 1;
+
+  settings = g_settings_new("edu.hm.cs.hintview");
+  read_settings(settings);
+  
   if (!command_line(argc,argv))  return 1;
 
   app = gtk_application_new ("edu.hm.cs.hintview", G_APPLICATION_FLAGS_NONE);
   g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
   status = g_application_run (G_APPLICATION (app), 0, NULL);
+  write_settings(settings);
   g_object_unref (app);
 
   return status;

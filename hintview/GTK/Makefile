@@ -42,8 +42,8 @@ hint.o: ../backend/hint.c
 %.o: ../backend/%.c 
 	$(CC) $(CFLAGS) $(FT_INCLUDES)  -o $@ -c $<
 
-hintview: $(OBJ) search-bar.o  outline.o header.o
-	$(CC) $(LDFLAGS) $(OBJ)  search-bar.o outline.o header.o $(GTK_LIBS) $(LIBS) -o $@
+hintview: $(OBJ) search-bar.o  outline.o header.o settings.o
+	$(CC) $(LDFLAGS) $(OBJ)  search-bar.o outline.o header.o settings.o $(GTK_LIBS) $(LIBS) -o $@
 	cp ../backend/*.w .
 
 
@@ -72,6 +72,16 @@ header.o: header.c
 header: header.o
 	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
 
+settings.o: settings.c
+	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
+
+settings: settings.o
+	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
+
+.PHONY: install_schema
+install_schema: edu.hm.cs.hintview.gschema.xml
+	sudo install edu.hm.cs.hintview.gschema.xml /usr/share/glib-2.0/schemas/
+	sudo glib-compile-schemas /usr/share/glib-2.0/schemas/
 
 clean:
 	rm -rf *~ *.o
