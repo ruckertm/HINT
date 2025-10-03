@@ -240,13 +240,6 @@ static int open_file(int home)
 return 1;
 } 
 
-static void reload_file(void)
-{ double fpos=hint_get_fpos();
-  hint_end();
-  hint_begin();
-  pos=hint_set_fpos(fpos);
-  LOG("reloading...\n");
-}
 
 #if 0 /* not yet used */
 
@@ -287,69 +280,6 @@ static int set_hin_name(char *fn)
 }
 
 
-#if 0
-static gboolean
-dialog_key_press_event_cb (GtkWidget *window,
-    GdkEvent *event,
-    GtkSearchBar *search)
-{ LOG("Dialog\n");
-  return gtk_search_bar_handle_event (search, event);
-}
-
-static int
-search_bar(void)
-{ static GtkWidget *dialog, *search, *label, *button, *content_area, *entry, *box;
-  int res;
-  #if 0
-  dialog = gtk_dialog_new();
-  content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
-  #endif
-  search = gtk_search_bar_new ();
-  gtk_container_add (GTK_CONTAINER (window), search);
-  gtk_widget_show (search);
-  box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  gtk_container_add (GTK_CONTAINER (search), box);
-  gtk_widget_show (box);
-  entry = gtk_search_entry_new ();
-  gtk_box_pack_start (GTK_BOX (box), entry, TRUE, TRUE, 0);
-  gtk_widget_show (entry);
-  gtk_search_bar_connect_entry (GTK_SEARCH_BAR (search), GTK_ENTRY (entry));
-  g_signal_connect (dialog, "key-press-event",
-                    G_CALLBACK (dialog_key_press_event_cb),
-                    search);
-  gtk_widget_show_all (window);
-
-			 //res = gtk_dialog_run (GTK_DIALOG (dialog));
-
-  
-#if 0
-  //GtkWidget *window;
-  GtkWidget *search_bar;
-  GtkWidget *box;
-  GtkWidget *entry;
-  GtkWidget *menu_button;
-  //window = gtk_application_window_new (app);
-  //gtk_widget_show (window);
-  search_bar = gtk_search_bar_new ();
-  gtk_container_add (GTK_CONTAINER (window), search_bar);
-  gtk_widget_show (search_bar);
-  //box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
-  //gtk_container_add (GTK_CONTAINER (search_bar), box);
-  //gtk_widget_show (box);
-  entry = gtk_search_entry_new ();
-  gtk_box_pack_start (GTK_BOX (box), entry, TRUE, TRUE, 0);
-  gtk_widget_show (entry);
-  menu_button = gtk_menu_button_new ();
-  gtk_box_pack_start (GTK_BOX (box), menu_button, FALSE, FALSE, 0);
-  gtk_widget_show (menu_button);
-  gtk_search_bar_connect_entry (GTK_SEARCH_BAR (search_bar), GTK_ENTRY (entry));
-  g_signal_connect (window, "key-press-event",
-                    G_CALLBACK (window_key_press_event_cb),
-                    search_bar);
-#endif  
-  return 0;
-}
-#endif
 
 static int file_chooser(void)
 { GtkWidget *dialog;
@@ -390,7 +320,7 @@ static int set_input_file(char *fn)
     return file_chooser();
 }
 
-static int dark = 0, loading=0, autoreload=0, home=0;
+static int dark = 0, autoreload=0, home=0;
 
 static int usage(void)
 {    return hint_error("Usage:", "hintview [options] file\n"
@@ -578,11 +508,66 @@ static gboolean cb_mouse_button_up(GtkWidget *area, GdkEventButton *event, gpoin
 
 extern void outlines_clear(void);
 
+/* Actions */
+
 void do_open_file(void)
 {    if (set_input_file(NULL))
     { open_file(home);
       RENDER;
     }
+}
+
+int do_dark(void)
+{ dark=!dark;
+  gtk_gl_area_make_current (GTK_GL_AREA(area));
+  hint_dark(dark);
+  LOG("Dark %d\n",dark);
+  RENDER;
+  return dark;
+}
+
+void do_reload(void)
+{ static int loading=0;
+  if (!loading)
+    { double fpos;
+      loading=1;
+      LOG("reloading...\n");
+      HINT_TRY {
+        fpos=hint_get_fpos();
+        hint_end();
+        hint_begin();
+        pos=hint_set_fpos(fpos);
+      }
+      //clear_cursor();
+      loading=0;
+      RENDER;
+    }
+}
+
+void do_search(void)
+{  search_open(window);
+}
+
+void do_zoom_1(void)
+{ scale=SCALE_NORMAL;
+  dpi_change=size_change=TRUE;
+  RENDER;
+  //clear_cursor();
+}
+
+void do_home(void)
+{ HINT_TRY hint_page_home();
+  RENDER;
+  //clear_cursor();
+}
+
+void do_outlines(void)
+{  outlines_open(window);
+}
+
+void do_quit(void)
+{ g_application_quit(G_APPLICATION (app));
+  //gtk_application_remove_window(app,GTK_WINDOW (window));
 }
 
 static gboolean
@@ -592,24 +577,10 @@ cb_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data)
   switch (event->keyval)
   { case GDK_KEY_a: /* auto reload */
     autoreload=!autoreload;
-    if (autoreload)
-      goto reload;
-  case GDK_KEY_f: /* file */
-    do_open_file();
-    break;
-  case GDK_KEY_n:
-    dark=!dark;
-    gtk_gl_area_make_current (GTK_GL_AREA(area));
-    hint_dark(dark);
-    //LOG("Dark %d\n",dark);
-    RENDER;
-    break;
-  case GDK_KEY_o: /* outlines */
-    {  outlines_open(window);
-       LOG("Outline open\n");
-    }
-    
-    break;
+    if (autoreload) do_reload();
+  case GDK_KEY_f: do_open_file(); break;
+  case GDK_KEY_n: do_dark(); break;
+  case GDK_KEY_o: do_outlines(); break;
   case GDK_KEY_p: /* round position to pixel */
     { static bool rpx=true;
       static double th=1000; /*allmost no threshold*/
@@ -620,39 +591,11 @@ cb_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data)
       RENDER;
     }
     break;
-  case GDK_KEY_q:
-    g_application_quit(G_APPLICATION (app));
-    //gtk_application_remove_window(app,GTK_WINDOW (window));
-    break;
-  case GDK_KEY_r: /* reload */
-  reload:
-    if (!loading)
-    { loading=1;
-      HINT_TRY reload_file();
-      loading=0;
-      RENDER;
-    }
-    //clear_cursor();
-    break;
-
-  case GDK_KEY_s: /* search */
-    { search_open(window);
-      //LOG("Search clicked\n");
-    }
-    break;
-
-  case GDK_KEY_z: 
-    scale=SCALE_NORMAL;
-    dpi_change=size_change=TRUE;
-    RENDER;
-    //clear_cursor();
-    break;
-  case GDK_KEY_h:
-  //case KEY(GLFW_KEY_HOME:
-    HINT_TRY hint_page_home();
-    RENDER;
-    //clear_cursor();
-    break;
+  case GDK_KEY_q: do_quit();   break;
+  case GDK_KEY_r: do_reload(); break;
+  case GDK_KEY_s: do_search(); break;
+  case GDK_KEY_z: do_zoom_1(); break;
+  case GDK_KEY_h: do_home();   break;
   default:
     if (event->length > 0)
       LOG("The key event's string is `%s'\n", event->string);
@@ -687,11 +630,7 @@ cb_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data)
     RENDER;
     //clear_cursor();
     break;
-  case GDK_KEY_Home:
-    HINT_TRY hint_page_home();
-    RENDER;
-    //clear_cursor();
-    break;
+  case GDK_KEY_Home: do_home(); break;
   default:
     if (event->length > 0)
       LOG("The key event's string is `%s'\n", event->string);
