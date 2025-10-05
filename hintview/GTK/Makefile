@@ -5,7 +5,6 @@ PKGCONFIG = $(shell which pkg-config)
 GTK_CFLAGS = $(shell $(PKGCONFIG) --cflags gtk+-3.0) -DWITH_GTK=3
 GTK_LIBS = $(shell $(PKGCONFIG) --libs gtk+-3.0)
 
-FT_INCLUDES = -I/usr/include/freetype2
 
 CC= gcc
 ifdef DEBUG
@@ -16,7 +15,15 @@ CFLAGS = -O2 -Wall -I../backend
 LDFLAGS = -O2
 endif
 
+
+ifeq (Msys,$(shell uname -o))
+FT_INCLUDES = -I/mingw64/include/freetype2 
+LIBS = -lfreetype -lopengl32 -lglew32 -lz -lm
+else
+FT_INCLUDES = -I/usr/include/freetype2
 LIBS = -lGLEW -lGL -lfreetype -lz -lm
+endif
+
 
 OBJ= main.o renderOGL.o get.o hint.o tables.o
 
