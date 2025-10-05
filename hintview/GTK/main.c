@@ -710,7 +710,7 @@ int main (int argc, char *argv[])
   if (setjmp(hint_error_exit)!=0) return 1;
   if (!command_line(argc,argv))  return 1;
 
-  app = gtk_application_new ("edu.hm.cs.hintview", G_APPLICATION_FLAGS_NONE);
+  app = gtk_application_new ("edu.hm.cs.hintview", G_APPLICATION_DEFAULT_FLAGS);
   g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
   status = g_application_run (G_APPLICATION (app), 0, NULL);
   g_object_unref (app);
