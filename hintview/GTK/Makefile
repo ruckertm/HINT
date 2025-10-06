@@ -27,7 +27,7 @@ endif
 
 OBJ= main.o renderOGL.o get.o hint.o tables.o \
  search-bar.o  outline.o header.o settings.o about.o\
- resources.o
+ resources.o preferences.o
 
 
 all: hintview
@@ -82,10 +82,10 @@ header.o: header.c
 header: header.o
 	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
 
-dialog.o: dialog.c
+preferences.o: preferences.c
 	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
 
-dialog: dialog.o
+preferences: preferences.o
 	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
 
 about.o: about.c

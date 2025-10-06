@@ -9,6 +9,7 @@ extern void do_home(void);
 extern void do_outlines(void);
 extern void do_quit(void);
 extern void do_about(void);
+extern void do_preferences(void);
 
 void
 cb_document_open (GtkButton* self, gpointer user_data)
@@ -71,7 +72,7 @@ cb_quit (GtkButton* self, gpointer user_data)
 
 void
 cb_preferences (GtkButton* self, gpointer user_data)
-{ g_print("Preferences\n");
+{ do_preferences();
 }
 
 void

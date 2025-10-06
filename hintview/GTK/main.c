@@ -101,7 +101,17 @@ static GtkApplication *app;
 static GtkWidget *window;
 static GtkWidget *area;
 
+
+
 #define RENDER gtk_gl_area_queue_render (GTK_GL_AREA(area))
+
+void do_render(int d, int s, int g)
+{ dpi_change|=d;
+  size_change|=s;
+  gamma_change|=g;
+  RENDER;
+}
+
 
 static void
 set_monitor_dpi(GdkMonitor* m)
