@@ -26,7 +26,7 @@ endif
 
 
 OBJ= main.o renderOGL.o get.o hint.o tables.o \
- search-bar.o  outline.o header.o settings.o dialog.o\
+ search-bar.o  outline.o header.o settings.o about.o\
  resources.o
 
 
@@ -87,6 +87,13 @@ dialog.o: dialog.c
 
 dialog: dialog.o
 	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
+
+about.o: about.c
+	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
+
+about: about.o
+	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
+
 
 resources.o: resources.c resources.h
 	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
