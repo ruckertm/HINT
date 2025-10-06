@@ -59,7 +59,10 @@ int do_dark(int toggle);
 #include "hint.h"
 #include "rendernative.h"
 #include "main.h"
-#line 61 "main.c"
+#include "resources.h"
+
+#line 64 "main.c" /*ctangle generated files can confuse the debugger*/
+
 /* Error Handling */
 static int hint_error(const char *title, const char *message)
 { fprintf(stderr,"ERROR %s: %s\n",title,message);
@@ -718,6 +721,7 @@ int main (int argc, char *argv[])
 { 
   int status;
   GSettings *settings;
+  GResource *resources;
   
   hlog=stderr;
   if (setjmp(hint_error_exit)!=0) return 1;
@@ -727,10 +731,15 @@ int main (int argc, char *argv[])
   
   if (!command_line(argc,argv))  return 1;
 
+
+  resources=resources_get_resource ();
+  g_resources_register (resources);
+
   app = gtk_application_new ("edu.hm.cs.hintview", G_APPLICATION_FLAGS_NONE);
   g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
   status = g_application_run (G_APPLICATION (app), 0, NULL);
   write_settings(settings);
+  g_resources_unregister (resources);
   g_object_unref (app);
 
   return status;

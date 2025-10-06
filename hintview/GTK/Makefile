@@ -26,7 +26,9 @@ endif
 
 
 OBJ= main.o renderOGL.o get.o hint.o tables.o \
- search-bar.o  outline.o header.o settings.o dialog.o
+ search-bar.o  outline.o header.o settings.o dialog.o\
+ resources.o
+
 
 all: hintview
 
@@ -86,11 +88,23 @@ dialog.o: dialog.c
 dialog: dialog.o
 	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
 
+resources.o: resources.c resources.h
+	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
+
+resources.c: resources.xml
+	glib-compile-resources --generate-source  resources.xml 
+
+resources.h: resources.xml
+	glib-compile-resources --generate-header  resources.xml 
+
 settings.o: settings.c
 	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
 
 settings: settings.o
 	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
+
+
+
 
 .PHONY: install_schema
 install_schema: edu.hm.cs.hintview.gschema.xml

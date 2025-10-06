@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/edu/hm/cs/hintview">
+    <file alias="logo">../resources/logo/HINTLogoBuchFG64.png</file>
+  </gresource>
+</gresources>
