@@ -25,7 +25,8 @@ LIBS = -lGLEW -lGL -lfreetype -lz -lm
 endif
 
 
-OBJ= main.o renderOGL.o get.o hint.o tables.o
+OBJ= main.o renderOGL.o get.o hint.o tables.o \
+ search-bar.o  outline.o header.o settings.o dialog.o
 
 all: hintview
 
@@ -49,8 +50,8 @@ hint.o: ../backend/hint.c
 %.o: ../backend/%.c 
 	$(CC) $(CFLAGS) $(FT_INCLUDES)  -o $@ -c $<
 
-hintview: $(OBJ) search-bar.o  outline.o header.o settings.o
-	$(CC) $(LDFLAGS) $(OBJ)  search-bar.o outline.o header.o settings.o $(GTK_LIBS) $(LIBS) -o $@
+hintview: $(OBJ)
+	$(CC) $(LDFLAGS) $(OBJ) $(GTK_LIBS) $(LIBS) -o $@
 	cp ../backend/*.w .
 
 
@@ -77,6 +78,12 @@ header.o: header.c
 	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
 
 header: header.o
+	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
+
+dialog.o: dialog.c
+	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
+
+dialog: dialog.o
 	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
 
 settings.o: settings.c

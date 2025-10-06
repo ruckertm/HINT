@@ -3,7 +3,7 @@
 extern gboolean autoreload,dark,home;
 extern double gcorrection, scale;
 extern guint64 position;
-gchar *document;
+extern gchar *document;
 
 #define SR_BOOL(VAL) VAL=g_settings_get_boolean(settings,#VAL) 
 #define SR_DOUBLE(VAL) VAL=g_settings_get_double(settings,#VAL) 

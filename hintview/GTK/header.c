@@ -1,14 +1,14 @@
 #include <gtk/gtk.h>
 
 extern void do_open_file(void);
-extern int do_dark(void);
+extern int  do_dark(int toggle);
 extern void do_reload(void);
 extern void do_search(void);
 extern void do_zoom_1(void);
 extern void do_home(void);
 extern void do_outlines(void);
 extern void do_quit(void);
-
+extern void do_about(void);
 
 void
 cb_document_open (GtkButton* self, gpointer user_data)
@@ -32,13 +32,17 @@ cb_home (GtkButton* self, gpointer user_data)
 
 static GtkWidget *day, *night, *day_night_button;
 
-void
-cb_day_night (GtkButton* self, gpointer user_data)
-{
-  if (do_dark())
+
+void set_dark_button(gboolean dark)
+{  if (dark)
     gtk_button_set_image (GTK_BUTTON(day_night_button), day);
   else 
     gtk_button_set_image (GTK_BUTTON(day_night_button), night);
+}
+
+void
+cb_day_night (GtkButton* self, gpointer user_data)
+{ do_dark(1);
 }
 
 void
@@ -48,9 +52,15 @@ cb_reload (GtkButton* self, gpointer user_data)
 
 
 void
-cb_menu (GtkButton* self, gpointer user_data)
+cb_about (GtkButton* self, gpointer user_data)
+{ do_about();
+  g_print("About\n");
+}
+
+void
+cb_help (GtkButton* self, gpointer user_data)
 { 
-  g_print("Menu\n");
+  g_print("Help\n");
 }
 
 void
@@ -59,16 +69,9 @@ cb_quit (GtkButton* self, gpointer user_data)
   do_quit();
 }
 
-
 void
 cb_preferences (GtkButton* self, gpointer user_data)
 { g_print("Preferences\n");
-}
-
-
-void
-cb_help (GtkButton* self, gpointer user_data)
-{ g_print("Help\n");
 }
 
 void
@@ -196,14 +199,14 @@ create_menu (gint depth)
 
 
   /*Preferences*/
-  create_item(menu,"Preferences", G_CALLBACK(cb_menu));
+  create_item(menu,"Preferences", G_CALLBACK(cb_preferences));
 
   /* Help */
   item=create_item(menu,"Help", NULL);
   submenu= gtk_menu_new ();
-    create_item(submenu,"Get help...", G_CALLBACK(cb_menu));
+    create_item(submenu,"Get help...", G_CALLBACK(cb_help));
     create_separator(submenu);
-    create_item(submenu,"About Hintview", G_CALLBACK(cb_menu));
+    create_item(submenu,"About Hintview", G_CALLBACK(cb_about));
   gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), submenu);
 
   return menu;

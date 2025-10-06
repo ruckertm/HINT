@@ -47,12 +47,10 @@ static GtkWidget *overlay_button;
 extern void read_settings(GSettings *settings);
 extern void write_settings(GSettings *settings);
 
+extern void set_dark_button(gboolean dark);
+int do_dark(int toggle);
 
 #define DEBUG 1
-
-#define VERSION 2
-#define MINOR_VERSION 2
-#define REVISION 1
 
 #include "error.h"
 #include "basetypes.h"
@@ -60,7 +58,8 @@ extern void write_settings(GSettings *settings);
 #include "get.h"
 #include "hint.h"
 #include "rendernative.h"
-#line 45 "main.c"
+#include "main.h"
+#line 61 "main.c"
 /* Error Handling */
 static int hint_error(const char *title, const char *message)
 { fprintf(stderr,"ERROR %s: %s\n",title,message);
@@ -87,10 +86,13 @@ static bool gamma_change=FALSE; /* set to call hint_gamma */
 #define SCALE_MAX 4.0
 double scale=SCALE_NORMAL;
 guint64 position; /* position of current page */
+gchar *document=NULL;
 
 static int px_h=1024, px_v=768; // size in pixel
 static double  x_dpi=300, y_dpi=300;
 double gcorrection=1.8;
+
+gboolean dark = FALSE, autoreload=FALSE, home=FALSE;
 
 static GtkApplication *app;
 static GtkWidget *window;
@@ -149,8 +151,9 @@ cb_configure(GtkWindow *window, GdkEvent *event, gpointer data)
     px_v=h=a.height;  
     size_change=TRUE;
     rerender=TRUE;
-    //LOG("Size %d x %d or %d x %d\n",w,h,a.width,a.height);
+    LOG("Size %d x %d or %d x %d\n",w,h,a.width,a.height);
   }
+  LOG("Configure done\n");
   if (rerender)
     RENDER;
 }
@@ -325,7 +328,6 @@ static int set_input_file(char *fn)
     return file_chooser();
 }
 
-gboolean dark = 0, autoreload=0, home=0;
 
 static int usage(void)
 {    return hint_error("Usage:", "hintview [options] file\n"
@@ -372,7 +374,7 @@ static int command_line(int argc, char *argv[])
           else debugflags=strtol(argv[i],NULL,16);
           break;
         case 'n': dark=1; break;
-        case 'o': break;
+	  //case 'o': break; /* show outlines */
         case 'z': scale=SCALE_NORMAL; break;
         case 'h': home=1; break;  
         default: return usage();
@@ -385,7 +387,7 @@ static int command_line(int argc, char *argv[])
 
 static void
 cb_realize (GtkGLArea *area)
-  {
+  { LOG("Realize\n");
     set_dpi(GTK_WIDGET(area));
     // We need to make the context current if we want to
     // call GL API
@@ -400,10 +402,14 @@ cb_realize (GtkGLArea *area)
 
     hint_render_on();
     hint_dark(dark);
+    do_dark(0);
+    gamma_change=TRUE;
+    dpi_change=TRUE;
+    size_change=TRUE;
     if (!open_file(home))
       return;
     gtk_gl_area_queue_render (area);
-    LOG("Realize\n");
+    LOG("Realize Done\n");
 }
 
 static void
@@ -522,8 +528,9 @@ void do_open_file(void)
     }
 }
 
-int do_dark(void)
-{ dark=!dark;
+int do_dark(int toggle)
+{ if (toggle) dark=!dark;
+  set_dark_button(dark);
   gtk_gl_area_make_current (GTK_GL_AREA(area));
   hint_dark(dark);
   LOG("Dark %d\n",dark);
@@ -584,7 +591,7 @@ cb_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data)
     autoreload=!autoreload;
     if (autoreload) do_reload();
   case GDK_KEY_f: do_open_file(); break;
-  case GDK_KEY_n: do_dark(); break;
+  case GDK_KEY_n: do_dark(1); break;
   case GDK_KEY_o: do_outlines(); break;
   case GDK_KEY_p: /* round position to pixel */
     { static bool rpx=true;
@@ -682,7 +689,7 @@ activate (GtkApplication *app,
    g_signal_connect (area, "button_press_event", G_CALLBACK (cb_mouse_button_down), NULL);
    g_signal_connect (area, "button_release_event", G_CALLBACK (cb_mouse_button_up), NULL);
    g_signal_connect (area, "motion_notify_event", G_CALLBACK (cb_mouse_motion), NULL);
-   gamma_change=TRUE;
+
 #if 1
     { GtkWidget *header;
   header = create_headerbar();
@@ -720,7 +727,7 @@ int main (int argc, char *argv[])
   
   if (!command_line(argc,argv))  return 1;
 
-  app = gtk_application_new ("edu.hm.cs.hintview", G_APPLICATION_DEFAULT_FLAGS);
+  app = gtk_application_new ("edu.hm.cs.hintview", G_APPLICATION_FLAGS_NONE);
   g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
   status = g_application_run (G_APPLICATION (app), 0, NULL);
   write_settings(settings);
