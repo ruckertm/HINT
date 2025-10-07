@@ -21,6 +21,13 @@ void cb_toggled_home(GtkToggleButton* self, gpointer user_data)
     toggle_home=0;
 }
 
+
+void cb_toggled_rpx(GtkToggleButton* self, gpointer user_data)
+{  if (gtk_toggle_button_get_active (self))
+    rpx=1;
+  else
+    rpx=0;
+}
 void
 cb_spin_gamma (GtkSpinButton* self, gpointer user_data)
 { gcorrection = gtk_spin_button_get_value (self);
@@ -41,32 +48,45 @@ cb_dialog (GtkDialog* self, gint response, gpointer user_data)
       return;
     }
    gtk_widget_destroy(GTK_WIDGET(self));
-   is_running=FALSE;
+
+}
+
+void cb_dialog_unrealize(GtkWidget* self, gpointer user_data)
+{
+     is_running=FALSE;
+     // g_print("Preferences Unrealize\n");
 }
 
 
   void
 do_preferences (void)
 {
+  //g_print("Preferences\n");
   if (is_running) return;
+  //g_print("Preferences Create\n");
   is_running=TRUE;
   GtkWidget *content_area, *check, *spin;
   GtkWidget *label, *hbox;
   
-  dialog = gtk_dialog_new_with_buttons ("About HintView",NULL,
+  dialog = gtk_dialog_new_with_buttons ("HintView Preferences",NULL,
 					GTK_DIALOG_DESTROY_WITH_PARENT,
 					"OK",
                                         GTK_RESPONSE_OK,
 					"Cancel",
-                                        GTK_RESPONSE_CANCEL,
-					
+                                        GTK_RESPONSE_CANCEL,			
 					NULL);
 
-  // gtk_window_set_resizable(GTK_WINDOW(dialog),FALSE);
+  gtk_window_set_resizable(GTK_WINDOW(dialog),FALSE);
   gtk_window_set_modal(GTK_WINDOW(dialog),FALSE);
   gtk_window_set_type_hint(GTK_WINDOW(dialog),GDK_WINDOW_TYPE_HINT_DIALOG);
-  
+  g_signal_connect (dialog, "unrealize", G_CALLBACK (cb_dialog_unrealize), NULL);
+   
   content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
+  gtk_box_set_spacing(GTK_BOX(content_area),8);
+  gtk_widget_set_margin_start (content_area,8);
+  gtk_widget_set_margin_end (content_area,8);
+  gtk_widget_set_margin_top (content_area,8);
+  gtk_widget_set_margin_bottom (content_area,8);
 
   check=gtk_check_button_new_with_label("Autoreload");
   toggle_autoreload=autoreload;
@@ -82,6 +102,15 @@ do_preferences (void)
                     G_CALLBACK (cb_toggled_home), NULL);
   gtk_box_pack_start (GTK_BOX (content_area), check, FALSE, FALSE, 0);
 
+  check=gtk_check_button_new_with_label("Round position to pixel");
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),rpx); 
+  g_signal_connect (check, "toggled",
+                    G_CALLBACK (cb_toggled_rpx), NULL);
+  gtk_box_pack_start (GTK_BOX (content_area), check, FALSE, FALSE, 0);
+
+
+
+  
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8);
   gtk_box_pack_start (GTK_BOX (content_area), hbox, FALSE, FALSE, 0);
 

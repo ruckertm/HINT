@@ -82,7 +82,7 @@ static void error_callback(int error, const char* description)
 static bool dpi_change=FALSE; /*set to call hint_clear_fonts*/
 static bool size_change=FALSE; /* set to call hint_resize */
 static bool gamma_change=FALSE; /* set to call hint_gamma */
-
+ 
 
 #define SCALE_MIN 0.5
 #define SCALE_NORMAL 1.0
@@ -96,6 +96,9 @@ static double  x_dpi=300, y_dpi=300;
 double gcorrection=1.8;
 
 gboolean dark = FALSE, autoreload=FALSE, home=FALSE;
+
+gboolean rpx=TRUE;
+double rpx_th=200;
 
 static GtkApplication *app;
 static GtkWidget *window;
@@ -595,6 +598,14 @@ void do_quit(void)
   //gtk_application_remove_window(app,GTK_WINDOW (window));
 }
 
+
+void do_rpx(void)
+{ gtk_gl_area_make_current (GTK_GL_AREA(area));
+  hint_round_position(rpx,rpx_th);
+  LOG("Round to pixel %d\n",rpx);
+  RENDER;
+}
+
 static gboolean
 cb_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data)
 {
@@ -607,14 +618,10 @@ cb_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data)
   case GDK_KEY_n: do_dark(1); break;
   case GDK_KEY_o: do_outlines(); break;
   case GDK_KEY_p: /* round position to pixel */
-    { static bool rpx=true;
-      static double th=1000; /*allmost no threshold*/
+    {/*allmost no threshold*/
       rpx=!rpx;
-      gtk_gl_area_make_current (GTK_GL_AREA(area));
-      hint_round_position(rpx,th);
-      LOG("Round to pixel %d\n",rpx);
-      RENDER;
-    }
+      do_rpx();
+   }
     break;
   case GDK_KEY_q: do_quit();   break;
   case GDK_KEY_r: do_reload(); break;
