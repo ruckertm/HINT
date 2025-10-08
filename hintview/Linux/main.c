@@ -191,8 +191,8 @@ static void set_dpi(GLFWwindow* window, int px, int py)
   glfwGetWindowPos(window, &wx, &wy);
   glfwGetWindowSize(window, &ww, &wh);
   find_monitor(wx,wy);
-  x_dpi=25.5*px*m_width/width_mm/ww;
-  y_dpi=25.5*py*m_height/height_mm/wh;
+  x_dpi=25.4*px*m_width/width_mm/ww;
+  y_dpi=25.4*py*m_height/height_mm/wh;
   //LOG("Window pos:  %d x %d, size: %d x %d,  %dpx x %dpx\n",wx, wy,ww,wh,px,py);
   //LOG("dpi: %f x %f\n",x_dpi,y_dpi);
 }
