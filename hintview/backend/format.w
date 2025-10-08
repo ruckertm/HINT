@@ -4095,6 +4095,7 @@ Tag hput_ligature(Lig *l)
 { @+if (l->l.s < 7) return TAG(ligature_kind,l->l.s);
   else@/
   { uint32_t pos=l->l.p;
+    l->l.t=TAG(list_kind,b100);
     hput_tags(pos,hput_list(pos+1, &(l->l)));
     return TAG(ligature_kind,7);
   }

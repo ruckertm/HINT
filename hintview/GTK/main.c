@@ -95,9 +95,9 @@ static int px_h=1024, px_v=768; // size in pixel
 static double  x_dpi=300, y_dpi=300;
 double gcorrection=1.8;
 
-gboolean dark = FALSE, autoreload=FALSE, home=FALSE;
+bool dark = FALSE, autoreload=FALSE, home=FALSE;
 
-gboolean rpx=TRUE;
+bool rpx=TRUE;
 double rpx_th=200;
 
 static GtkApplication *app;

@@ -28,6 +28,7 @@
 
 #include <GL/glew.h>
 #include "basetypes.h"
+#include "main.h"
 #include "error.h"
 #include <ft2build.h>
 #include <freetype/freetype.h>
@@ -260,11 +261,32 @@ void nativeInit(void)
   glewInitialized=1;
   while(glGetError()!= GL_NO_ERROR)
     continue; /* ignore errors in glewInit */
-  
+#ifdef DEBUG
+  { int a=0;
+    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER,GL_FRONT_LEFT,
+					  GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE,&a);
+     fprintf(stderr,"Type = %d\n",a);
+
+
+    
+    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER,GL_FRONT_LEFT,
+					  GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE,&a);
+     fprintf(stderr,"Red Size = %d\n",a);
+    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER,GL_FRONT_LEFT,
+					  GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE,&a);
+     fprintf(stderr,"Green Size = %d\n",a);
+    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER,GL_FRONT_LEFT,
+					  GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE,&a);
+     fprintf(stderr,"Blue Size = %d\n",a);
+    glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER,GL_FRONT_LEFT,
+					  GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE,&a);
+     fprintf(stderr,"Alpha Size = %d\n",a);
+  }
+
   printGLString("Version", GL_VERSION);
   printGLString("Vendor", GL_VENDOR);
   printGLString("Renderer", GL_RENDERER);
-
+#endif
     /* Create the vertex array object (VAO) */
   glGenVertexArrays(1, &VertexArrayID);
   checkGlError("glGenVertexArrays");

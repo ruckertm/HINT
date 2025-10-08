@@ -6005,7 +6005,10 @@ to hold the string numbers for name, area, and extension.
 @d utf_font(A) (utf_font_char(A)>>24)
 @d utf_char(A) (utf_font_char(A)&0xFFFFFF)
 
-
+@d utf_lig_node hitex_ext+28
+@d utf_lig_node_size 3 /*Reuse the above macros for font and char.*/
+@d utf_lig_subtype(A) subtype(A+2) /*like |subtype| of a |ligature_node|*/
+@d utf_lig_ptr(A) link(A+2)
 
 @ Each new type of node that appears in our data structure must be capable
 of being displayed, copied, destroyed, and so on. The routines that we
@@ -6122,6 +6125,14 @@ case stream_node:
   break;
 case utf_char_node:
   print_esc(font_def[utf_font(p)].n);  print_char(' '); print_UTF8(utf_char(p));
+  break;
+case utf_lig_node:
+  print_esc(font_def[utf_font(p)].n);  print_char(' '); print_UTF8(utf_char(p));
+  print(" (ligature ");
+  if (utf_lig_subtype(p) > 1) print_char('|');
+  font_in_short_display=0; short_display(utf_lig_ptr(p));
+  if (odd(utf_lig_subtype(p))) print_char('|');
+  print_char(')');
   break;
 default: print("whatsit?");
 }
@@ -6248,6 +6259,12 @@ case utf_char_node:
     r=get_node(utf_char_node_size);
     words=utf_char_node_size;
   break;
+case utf_lig_node:
+    r=get_node(utf_lig_node_size);
+    utf_lig_subtype(r)=utf_lig_subtype(p);
+    utf_lig_ptr(r)= copy_node_list(utf_lig_ptr(p));
+    words=utf_lig_node_size-1;
+  break;
 default:r=null; confusion("ext2");
 @:this can't happen ext2}{\quad ext2@>
 }
@@ -6323,6 +6340,9 @@ case xdimen_node:
   free_node(p,xdimen_node_size); @+break;
 case utf_char_node:
   free_node(p,utf_char_node_size); @+break;
+case utf_lig_node:
+  flush_node_list(utf_lig_ptr(p));
+  free_node(p,utf_lig_node_size); @+break;
 default:confusion("ext3");
 @:this can't happen ext3}{\quad ext3@>
 } @/
@@ -6370,6 +6390,7 @@ case end_link_node:
   if (just_color==0xFF) just_color=-1;
   break;
 case utf_char_node:
+case utf_lig_node:
 { int f= utf_font(p);
   int c=utf_char(p);
   @<Incorporate dimensions of an utf character into the dimensions of the hbox@>@;
@@ -6383,7 +6404,7 @@ default:
 @ @<Let |d| be the width of the whatsit |p|@>=
 if (subtype(p)==image_node) 
 { d=image_width(p); goto found; }
-else if (subtype(p)==utf_char_node) 
+else if (subtype(p)==utf_char_node || subtype(p)==utf_lig_node) 
 { d=ft_char_width(utf_font(p),utf_char(p)); goto found; }
 else d=0;
 
@@ -6392,7 +6413,7 @@ else d=0;
 @<Advance \(p)past a whatsit node in the \(l)|line_break| loop@>=@+
 if (subtype(cur_p)==image_node)
   act_width=act_width+image_width(cur_p);
-else if (subtype(cur_p)==utf_char_node)
+else if (subtype(cur_p)==utf_char_node || subtype(cur_p)==utf_lig_node)
   act_width=act_width+ft_char_width(utf_font(cur_p), utf_char(cur_p));
 adv_past(cur_p)
 
@@ -7967,7 +7988,7 @@ case TAG(glyph_kind,3): @+HTEG_GLYPH(3);@+break;
 case TAG(glyph_kind,4): @+HTEG_GLYPH(4);@+break;
 @
 
-For character codes above |0xFF| we need to create a new |utf_char_node|.
+For character codes above |0xFF|, we need to create a new |utf_char_node|.
 
 @<\HINT\ auxiliar functions@>=
 static pointer new_utf_char(uint8_t f, int c)
@@ -8250,7 +8271,7 @@ static pointer hget_list_pointer(void)
       if ((INFO(a)&b100)==0)
         p=hget_node_list(s);
       else
-        p=hget_text_list(s);
+        p=hget_text_list(s); /*this should currently not happen*/
       hget_size_boundary(INFO(a));
       t=hget_list_size(INFO(a)); 
       if (t!=s) 
@@ -8892,7 +8913,14 @@ static pointer hget_text_list(uint32_t s)
 { pointer p=null;
   pointer *pp=&p;
   uint8_t *t=hpos+s;
-  while (hpos<t) {*pp=new_character(0,hget_utf8()); pp=&link(*pp);}
+  while (hpos<t) 
+  { uint32_t c=hget_utf8();
+    if (c<0x100)
+      *pp=new_character(0,c);
+    else
+      *pp=new_utf_char(0,c);
+    pp=&link(*pp);
+  }
   return p;
 }
 @
@@ -8904,20 +8932,24 @@ static pointer hget_text_list(uint32_t s)
 f=HGET8;\
 if ((I)==7) q=hget_list_pointer(); else q=hget_text_list(I);\
 if (q==null) QUIT("Ligature with empty list");\
-p=new_ligature(f, character(q), link(q)); tail_append(p);\
+if (is_char_node(q)) p=new_ligature(f, character(q), link(q));\
+else p=new_utf_lig(f, utf_char(q), link(q));\
+tail_append(p);\
 link(q)=null; flush_node_list(q);\
 }
 @
 
 @<TEG macros@>=
 #define @[HTEG_LIG(I)@] @/\
-{@+pointer p,q;\
-if ((I)==7) q=hteg_list_pointer();\
-else {uint8_t *t=hpos; hpos=t-I; q=hget_text_list(I); hpos=t-I;}\
+{@+pointer p,q;@+uint8_t f;\
+if ((I)==7) { q=hteg_list_pointer(); f=HTEG8;}\
+else {uint8_t *t=hpos;\
+  hpos=t-I; f=HTEG8; hpos=t-I; q=hget_text_list(I); hpos=t-I-1;}\
 if (q==null) QUIT("Ligature with empty list");\
-p=new_ligature(0, character(q), link(q)); tail_append(p);\
+if (is_char_node(q)) p=new_ligature(f, character(q), link(q));\
+else p=new_utf_lig(f, utf_char(q), link(q));\
+tail_append(p);\
 link(q)=null; flush_node_list(q);\
-font(lig_char(p))=HTEG8;\
 }
 @
 
@@ -8943,6 +8975,25 @@ case TAG(ligature_kind,5):@+ HTEG_LIG(5); @+break;
 case TAG(ligature_kind,6):@+ HTEG_LIG(6); @+break;
 case TAG(ligature_kind,7):@+ HTEG_LIG(7); @+break;
 @
+
+For ligatures using character codes above |0xFF|, 
+we need to create a new |utf_lig_node|.
+
+@<\HINT\ auxiliar functions@>=
+static pointer new_utf_lig(uint8_t f, int c, pointer q)
+{@+pointer p; /*the new node*/
+p=get_node(utf_lig_node_size);
+type(p)=whatsit_node; subtype(p)=utf_lig_node;
+utf_font_char(p)=(f<<24)+c;
+utf_lig_subtype(p)=0;
+utf_lig_ptr(p)=q;
+return p;
+}
+@
+
+
+
+
 
 
 \subsection{Hyphenation}
@@ -11682,6 +11733,15 @@ static void trv_hlist(pointer p)
         else if (subtype(p)==utf_char_node)
         {  if (!trv_ignore) trv_char(utf_char(p));
         }
+        else if (subtype(p)==utf_lig_node)
+        {  if (!trv_ignore) 
+           { pointer q=utf_lig_ptr(p);
+             while (q!=null)
+             { trv_char(utf_char(q));
+               q=link(q);
+             }
+           }
+        }
         break;
       default: break;
     }
@@ -12074,8 +12134,8 @@ If any of these characters is marked, the whole ligature is marked.
 @<account for the characters that generated the ligature@>=
 if (!c_ignore)
 { pointer q;
-  int s, max_s;
-  s=cur_style;
+  int old_s, max_s;
+  old_s=cur_style;
   max_s=0;
   q=lig_ptr(p);
   while (q!=null)
@@ -12086,12 +12146,9 @@ if (!c_ignore)
     }
     q=link(q);
   }
-  if (s!=max_s)
-  { cur_style=max_s;
+  cur_style=max_s;
+  if (old_s!=max_s)
     hSetColor(cur_color);
-  }
-  else
-    cur_style=s;
 }
 @
 
@@ -12127,6 +12184,7 @@ static void hSetColor(int c);
 
 static void c_ignore_list(pointer p)
 { int s, max_s;
+  pointer q;
   s=cur_style;
   max_s=0;
   while(p!=null)
@@ -12141,7 +12199,8 @@ static void c_ignore_list(pointer p)
       { case hlist_node:
         case vlist_node: c_ignore_list(list_ptr(p)); break;
         case ligature_node:
-        { pointer q=lig_ptr(p);
+        { q=lig_ptr(p);
+ignore_ligature:
           while (q!=null)
           { @<compute the |next_style|@>@;
             cur_style=next_style;
@@ -12149,6 +12208,12 @@ static void c_ignore_list(pointer p)
             q=link(q);
           }
         }
+        break;
+        case whatsit_node:
+          if (subtype(p)==utf_lig_node)
+          { q=utf_lig_ptr(p);
+            goto ignore_ligature;
+          }
         break;
       }
     }
@@ -13651,8 +13716,17 @@ static void render_char(int x, int y, uint8_t f, uint32_t cc)
   }
   nativeGlyph(left,top,w,h,g->OGLtexture);
 }
-
 @
+
+The rendering of a character is done by the above function and
+it remains to advance the current horizontal position.
+@<render character |c| in font |f|@>=
+      render_char(cur_h, cur_v, f,c);
+      cur_h= cur_h+char_width(f,  c);
+@
+
+
+
 \goodbreak
 
 \subsection{Rules}
@@ -13827,14 +13901,12 @@ style_c:
           hSetColor(cur_color);
 	}
       }
-render_c:        
 #ifdef DEBUG
         if(f> max_ref[font_kind])
            QUIT("Undefined Font %d mem[0x%x]=0x%x\n",
                 f,p,mem[p].i);
 #endif
-      render_char(cur_h, cur_v, f,c);
-      cur_h= cur_h+char_width(f,  c);
+      @<render character |c| in font |f|@>@;
 #ifdef DEBUG
       if(link(p)==0xffff)
         QUIT("Undefined link in charlist mem[0x%x]=0x%x\n",p,mem[p].i);
@@ -13894,6 +13966,7 @@ render_c:
            cur_h= cur_h+w; 
          } break;
          case utf_char_node:
+         case utf_lig_node:
            f= utf_font(p);
            c=utf_char(p);
            goto style_c;
@@ -13968,11 +14041,17 @@ render_c:
 	   cur_h= cur_h+width(p);
 	   break;
      case ligature_node:
-      f= font(lig_char(p));
-      c= character(lig_char(p));
-      @<account for the characters that generated the ligature@>@;
-      goto render_c;
-     default:;
+       f= font(lig_char(p));
+       c= character(lig_char(p));
+       @<account for the characters that generated the ligature@>@;
+       @<render character |c| in font |f|@>@;
+       if (next_style!=cur_style)
+       { cur_style =next_style;
+         hSetColor(cur_color);
+       }
+       break;
+     default:
+       break;
    }
    goto next_p;
 fin_rule:
@@ -14213,6 +14292,7 @@ character_distance:
             dist= dist+image_width(p);
             break;
           case utf_char_node:
+          case utf_lig_node:
             dist=dist+ft_char_width(utf_font(p),utf_char(p));
             break;
           default: break;

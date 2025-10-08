@@ -1,5 +1,5 @@
-/*674:*/
-#line 14404 "hint.w"
+/*676:*/
+#line 14484 "hint.w"
 
 #ifndef _ERROR_H
 #define _ERROR_H
@@ -22,9 +22,7 @@ extern void hint_message(char*title,char*format,...);
 extern int hint_error(char*title,char*msg);
 #define ERROR_MESSAGE  hint_error("HINT ERROR",hint_error_string)
 #endif
-#line 14426 "hint.w"
 #endif
-#line 14427 "hint.w"
 
 #ifdef __ANDROID__ 
 #include <android/log.h> 
@@ -34,7 +32,6 @@ extern int hint_error(char*title,char*msg);
 #define ERROR_MESSAGE __android_log_print(ANDROID_LOG_ERROR,__FILE__,"ERROR: %s\n", hint_error_string)
 
 #endif
-#line 14436 "hint.w"
 
 #ifdef __APPLE__
 extern void hint_log(const char*format,...);
@@ -45,34 +42,27 @@ extern int hint_error(const char*title,const char*msg);
                       hint_error("Warning",hint_error_string))
 #define ERROR_MESSAGE hint_error("ERROR",hint_error_string)
 #endif
-#line 14446 "hint.w"
 
 #ifndef LOG
 #define LOG(...) (fprintf(hlog,__VA_ARGS__),fflush(hlog))
 #endif
-#line 14450 "hint.w"
 
 #ifndef MESSAGE
 #define MESSAGE(...)  (fprintf(stderr,__VA_ARGS__),fflush(stderr))
 #endif
-#line 14454 "hint.w"
 
 #ifndef ERROR_MESSAGE
 #define ERROR_MESSAGE        fprintf(stderr,"ERROR: %s\n",hint_error_string)
 #endif
-#line 14458 "hint.w"
 
 #ifndef QUIT
 #define QUIT(...)    (snprintf(hint_error_string,MAX_HINT_ERROR-1,__VA_ARGS__),\
                      ERROR_MESSAGE,hint_end(),longjmp(hint_error_exit,1))
 #endif
-#line 14463 "hint.w"
 
 #ifndef HINT_TRY
 #define HINT_TRY if ((hint_error_string[0]= 0,setjmp(hint_error_exit)==0))
 #endif
-#line 14467 "hint.w"
 
 #endif
-#line 14469 "hint.w"
-/*:674*/
+/*:676*/
