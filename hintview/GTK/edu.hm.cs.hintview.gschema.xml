@@ -76,5 +76,27 @@
     There is simple way to interpret the values of this variable.
   </description>
 </key>
+<key name='rpx' type='b'>
+  <default>true</default>
+  <summary>Round glyph position to pixel.</summary>
+  <description>
+    If enabled, hintview will round the position of glyphs to the next pixel
+    boundary. Especially on low DPI screens, with large pixels, this can
+    improve readability because otherwise the color of one pixel in the glyph
+    will be distributed across several pixel on the screen.
+  </description>
+</key>
+<key name='rpxthreshold' type='d'>
+  <default>120</default>
+  <summary>The DPI threshold below which glyph positions are rounded.</summary>
+  <description>
+    Rounding glyph positions to the next pixel boundary will be used only
+    if the current DPI settings (including scaling) are below this threshold.
+    ON displays with larger DPI values, pixel are considered so small that
+    rounding is not deemed necessary. Set the threshold to a large value
+    to enforce rounding even on high DPI screens. Setting it to zero is
+    another way to disable rounding of glyph positions.
+  </description>
+</key>
 </schema>
 </schemalist>

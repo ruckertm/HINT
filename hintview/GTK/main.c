@@ -98,7 +98,7 @@ double gcorrection=1.8;
 bool dark = FALSE, autoreload=FALSE, home=FALSE;
 
 bool rpx=TRUE;
-double rpx_th=200;
+double rpxthreshold=200;
 
 static GtkApplication *app;
 static GtkWidget *window;
@@ -116,53 +116,68 @@ void do_render(int d, int s, int g)
 }
 
 
-static void
+static int
 set_monitor_dpi(GdkMonitor* m)
 { GdkRectangle r;
   int w_mm,h_mm,s;
+  double new_x_dpi, new_y_dpi;
   w_mm = gdk_monitor_get_width_mm (m);
   h_mm = gdk_monitor_get_height_mm (m);
   gdk_monitor_get_geometry (m,&r);
   s=gdk_monitor_get_scale_factor (m);
-  x_dpi=25.4*s*r.width/w_mm;
-  y_dpi=25.4*s*r.height/h_mm;
+  new_x_dpi=25.4*s*r.width/w_mm;
+  new_y_dpi=25.4*s*r.height/h_mm;
   LOG("%s dpi %f x %f\n", gdk_monitor_get_model(m),x_dpi,y_dpi);
+  if (new_x_dpi!=x_dpi || new_y_dpi!=y_dpi)
+  { x_dpi=new_x_dpi;
+    y_dpi=new_y_dpi;
+    LOG("Scale factor %d, mm=%d, px=%d\n",s,w_mm,r.width);
+    return 1;
+  }
+  else
+    return 0;
 }
 
+#if 0
 static void
 set_dpi(GtkWidget* a)
 { GdkWindow *w = gtk_widget_get_window(a);
   GdkDisplay* d=gdk_window_get_display (w);
   GdkMonitor* m= gdk_display_get_monitor_at_window (d,w);
-  set_monitor_dpi(m);
+  if (set_monitor_dpi(m))
+     dpi_change=size_change=TRUE;
 }
+#endif
 
 static void
 cb_configure(GtkWindow *window, GdkEvent *event, gpointer data)
-{ static GdkMonitor *p=NULL;
+{ //static GdkMonitor *p=NULL;
   static int x=INT_MIN,y=INT_MIN,w=INT_MIN,h=INT_MIN;
   bool rerender=FALSE;
-  LOG("Configure\n");
-  if (event->configure.x!=x ||event->configure.y!=y)
+  GtkAllocation a;
+  LOG("Configure %d\n",event->type);
+  //  if (event->configure.x!=x ||event->configure.y!=y)
+  // LOG("Move %d x %d\n",x,y);
+  if (event->type==GDK_CONFIGURE)
   { GdkDisplay* d;
     GdkMonitor* m;
     x=event->configure.x;
     y=event->configure.y;
-    LOG("Move %d x %d\n",x,y);
     d=gdk_window_get_display (event->configure.window);
     m= gdk_display_get_monitor_at_point (d,x,y);
-    if (p!=m)
+    //if (p!=m)
     { LOG("Monitor %s\n", gdk_monitor_get_model(m));
       gtk_gl_area_make_current (GTK_GL_AREA(area));
-      set_monitor_dpi(m);
-      dpi_change=size_change=TRUE;
-      rerender=1;
-      p=m;
+      if (set_monitor_dpi(m))
+      { dpi_change=size_change=TRUE;
+        rerender=TRUE;
+      }
+      //p=m;
     }
   }
-  if (event->configure.width!=w ||event->configure.height!=h)
-  { GtkAllocation a;
-    gtk_widget_get_allocation (area,&a);
+  gtk_widget_get_allocation (area,&a);
+  if (a.width!=w || a.height!=h)
+  { 
     px_h=w=a.width;
     px_v=h=a.height;  
     size_change=TRUE;
@@ -200,7 +215,10 @@ void hint_unmap(void)
 }
 
 bool hint_map(void)
-{ return hget_map();
+{ if (hin_name!=NULL && hin_name[0]!=0)
+  return hget_map();
+  else
+    return false;
 }
 
 static char *search_buf=NULL;
@@ -242,16 +260,18 @@ void goto_outline(int i)
 
 
 static int open_file(int home)
-{ hint_end();
+{
+  LOG("File open %d\n", home);
+  hint_end();
   if (!hint_begin())
     return 0;
   if (home)
     hint_page_home();
   else
     hint_page_top(0);
-    //  strncpy(title_name,hin_name,MAX_PATH);
+  if (document!=NULL) free(document);
+  document=strdup(hin_name);
   outlines_set();
-   //SetWindowText(hMainWnd,title_name);
   { char *p, *q;
        p=q=hin_name;
     while (*q!=0)
@@ -336,13 +356,6 @@ static int file_chooser(void)
   return res;
 }
 
-static int set_input_file(char *fn)
-{ 
-  if (fn!=NULL)
-    return set_hin_name(fn);
-  else  
-    return file_chooser();
-}
 
 
 static int usage(void)
@@ -396,7 +409,7 @@ static int command_line(int argc, char *argv[])
         default: return usage();
       }
     }
-  if (argv[i]!=NULL && !set_input_file(argv[i]))
+  if (argv[i]!=NULL && !set_hin_name(argv[i]))
     return usage();
   return 1;	
 }
@@ -404,7 +417,7 @@ static int command_line(int argc, char *argv[])
 static void
 cb_realize (GtkGLArea *area)
   { LOG("Realize\n");
-    set_dpi(GTK_WIDGET(area));
+    //   set_dpi(GTK_WIDGET(area));
     // We need to make the context current if we want to
     // call GL API
     gtk_gl_area_make_current (area);
@@ -419,14 +432,37 @@ cb_realize (GtkGLArea *area)
     hint_render_on();
     hint_dark(dark);
     do_dark(0);
-    gamma_change=TRUE;
-    dpi_change=TRUE;
-    size_change=TRUE;
     if (!open_file(home))
       return;
-    gtk_gl_area_queue_render (area);
+    do_render(1,1,1);
     LOG("Realize Done\n");
 }
+
+GdkGLContext* cb_create_context (GtkGLArea* self, gpointer user_data)
+{ GdkGLContext* c;
+  GError* error=NULL;
+  GdkWindow *gdk_window = gtk_widget_get_window(GTK_WIDGET(self));
+  c = gtk_gl_area_get_context(self);
+
+ if (c!=NULL)
+   LOG("Has context\n");
+ else
+ {   LOG("Has no context\n");
+     c = gdk_window_create_gl_context (gdk_window,&error);
+     if (c!=NULL)
+       LOG("Has context\n");
+     gdk_gl_context_set_required_version (c,3,3);
+ }
+  LOG("Create Context\n");
+
+
+  
+  return c;
+
+}
+
+  
+
 
 static void
 cb_unrealize (GtkGLArea* area, gpointer user_data)
@@ -440,7 +476,7 @@ static gboolean
   {
     // inside this function it's safe to use GL; the given
     // `GdkGLContext` has been made current to the drawable
-    // surface used by the `GtkGLArea` and the viewport has
+   // surface used by the `GtkGLArea` and the viewport has
     // already been set to be the size of the allocation
     if (gamma_change)
     { gamma_change=FALSE;
@@ -538,10 +574,10 @@ extern void outlines_clear(void);
 /* Actions */
 
 void do_open_file(void)
-{    if (set_input_file(NULL))
-    { open_file(home);
-      RENDER;
-    }
+{ if (file_chooser())
+  { open_file(home);
+    RENDER;
+  }
 }
 
 int do_dark(int toggle)
@@ -601,9 +637,8 @@ void do_quit(void)
 
 void do_rpx(void)
 { gtk_gl_area_make_current (GTK_GL_AREA(area));
-  hint_round_position(rpx,rpx_th);
+  hint_round_position(rpx,rpxthreshold);
   LOG("Round to pixel %d\n",rpx);
-  RENDER;
 }
 
 static gboolean
@@ -621,6 +656,7 @@ cb_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data)
     {/*allmost no threshold*/
       rpx=!rpx;
       do_rpx();
+      do_render(0,0,0);
    }
     break;
   case GDK_KEY_q: do_quit();   break;
@@ -675,7 +711,8 @@ cb_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data)
 static void
 activate (GtkApplication *app,
           gpointer        user_data)
-{ window = gtk_application_window_new (app);
+{ LOG("Activate\n");
+  window = gtk_application_window_new (app);
   gtk_window_set_title (GTK_WINDOW (window), "hintview");
   gtk_window_set_default_size (GTK_WINDOW (window), px_h, px_v);
   g_signal_connect(G_OBJECT(window), "configure-event", G_CALLBACK(cb_configure), NULL);
@@ -683,26 +720,12 @@ activate (GtkApplication *app,
   area= gtk_gl_area_new();
   g_signal_connect (area, "render", G_CALLBACK (cb_render), NULL);
   g_signal_connect (area, "realize", G_CALLBACK (cb_realize), NULL);
+  g_signal_connect (area, "create-context", G_CALLBACK (cb_create_context), NULL);
   g_signal_connect (area, "unrealize", G_CALLBACK (cb_unrealize), NULL);
+  // not working with configure-event
   //g_signal_connect (area, "resize", G_CALLBACK (cb_resize), NULL);
 
-#if 1
-    gtk_container_add (GTK_CONTAINER (window), area);
-#else
-    { GtkWidget *overlay;
-     
-      
-      overlay = gtk_overlay_new ();
-      gtk_container_add (GTK_CONTAINER (overlay), area);
-      gtk_container_add (GTK_CONTAINER (window), overlay);
-      overlay_button = gtk_button_new_with_label ("Button");
-      gtk_overlay_add_overlay (GTK_OVERLAY (overlay), overlay_button);
-      gtk_widget_set_halign (overlay_button, GTK_ALIGN_CENTER);
-      gtk_widget_set_valign (overlay_button, GTK_ALIGN_START);
-      gtk_widget_hide(overlay);
-    }
-#endif
-
+  gtk_container_add (GTK_CONTAINER (window), area);
   gtk_widget_set_events (area, GDK_BUTTON_PRESS_MASK
 		       | GDK_BUTTON_RELEASE_MASK
 		       | GDK_BUTTON1_MOTION_MASK );
@@ -710,27 +733,10 @@ activate (GtkApplication *app,
    g_signal_connect (area, "button_release_event", G_CALLBACK (cb_mouse_button_up), NULL);
    g_signal_connect (area, "motion_notify_event", G_CALLBACK (cb_mouse_motion), NULL);
 
-#if 1
-    { GtkWidget *header;
-  header = create_headerbar();
-  gtk_window_set_titlebar (GTK_WINDOW (window), header);
-    }
-#else
-   { GtkWidget *header;
-     GtkWidget *button;
-     header = gtk_header_bar_new ();
-     gtk_header_bar_set_show_close_button (GTK_HEADER_BAR (header), TRUE);
-     gtk_header_bar_set_title (GTK_HEADER_BAR (header), "Welcome");
-     gtk_header_bar_set_has_subtitle (GTK_HEADER_BAR (header), FALSE);
-
-      button = gtk_button_new ();
-      gtk_header_bar_pack_start (GTK_HEADER_BAR (header), button);
-      gtk_window_set_titlebar (GTK_WINDOW (window), header);
-   }
-#endif
-
-   
+  gtk_window_set_titlebar (GTK_WINDOW (window), create_headerbar());
+  LOG("Show all\n");
    gtk_widget_show_all (window);
+   LOG("Activate done\n");
    
 }
   
@@ -745,14 +751,14 @@ int main (int argc, char *argv[])
 
   settings = g_settings_new("edu.hm.cs.hintview");
   read_settings(settings);
-  
+  if (document!=NULL && document[0]!=0) set_hin_name(document);
   if (!command_line(argc,argv))  return 1;
 
 
   resources=resources_get_resource ();
   g_resources_register (resources);
 
-  app = gtk_application_new ("edu.hm.cs.hintview", G_APPLICATION_FLAGS_NONE);
+  app = gtk_application_new ("edu.hm.cs.hintview", G_APPLICATION_NON_UNIQUE);
   g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
   status = g_application_run (G_APPLICATION (app), 0, NULL);
   write_settings(settings);

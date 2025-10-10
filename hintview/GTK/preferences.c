@@ -5,20 +5,39 @@
 static GtkWidget *dialog=NULL;
 static int is_running=FALSE;
 
-gboolean toggle_autoreload, toggle_home;
+gboolean toggle_autoreload, toggle_home, toggle_rpx;
+double spin_gcorrection, spin_rpxthreshold;
+
+static void save_preferences(void)
+{ toggle_autoreload=autoreload;
+  toggle_home=home;
+  toggle_rpx=rpx;
+  spin_gcorrection=gcorrection;
+  spin_rpxthreshold=rpxthreshold;
+}
+
+static void restore_preferences(void)
+{ autoreload=toggle_autoreload;
+  home=toggle_home;
+  rpx=toggle_rpx;
+  gcorrection=spin_gcorrection;
+  rpxthreshold=spin_rpxthreshold;
+  do_rpx(); 
+  do_render(0,0,1);
+}
 
 void cb_toggled_autoreload(GtkToggleButton* self, gpointer user_data)
 { if (gtk_toggle_button_get_active (self))
-    toggle_autoreload=1;
+    autoreload=1;
   else
-    toggle_autoreload=0;
+    autoreload=0;
 }
 
 void cb_toggled_home(GtkToggleButton* self, gpointer user_data)
 { if (gtk_toggle_button_get_active (self))
-    toggle_home=1;
+    home=1;
   else
-    toggle_home=0;
+    home=0;
 }
 
 
@@ -27,9 +46,20 @@ void cb_toggled_rpx(GtkToggleButton* self, gpointer user_data)
     rpx=1;
   else
     rpx=0;
+  do_rpx();
+  do_render(0,0,0);
 }
+
 void
-cb_spin_gamma (GtkSpinButton* self, gpointer user_data)
+cb_spin_rpx_threshold(GtkSpinButton* self, gpointer user_data)
+{ rpxthreshold = gtk_spin_button_get_value (self);
+  do_rpx();
+  do_render(0,0,0);
+}
+
+
+void
+cb_spin_gcorrection (GtkSpinButton* self, gpointer user_data)
 { gcorrection = gtk_spin_button_get_value (self);
   g_print("Gamma %f\n", gcorrection);
   do_render(0,0,1);
@@ -38,11 +68,11 @@ cb_spin_gamma (GtkSpinButton* self, gpointer user_data)
 void
 cb_dialog (GtkDialog* self, gint response, gpointer user_data)
 { if (response==GTK_RESPONSE_OK)
-  { autoreload=toggle_autoreload;
-    home=toggle_home;
-  }
-  else if (response==GTK_RESPONSE_CANCEL)
     ;
+  else if (response==GTK_RESPONSE_CANCEL)
+    {  restore_preferences();
+      g_print("Cancel\n");
+    }
   else
     {// g_print("Other\n");
       return;
@@ -60,13 +90,12 @@ void cb_dialog_unrealize(GtkWidget* self, gpointer user_data)
 
   void
 do_preferences (void)
-{
-  //g_print("Preferences\n");
-  if (is_running) return;
-  //g_print("Preferences Create\n");
-  is_running=TRUE;
-  GtkWidget *content_area, *check, *spin;
+{ GtkWidget *content_area, *check, *spin;
   GtkWidget *label, *hbox;
+
+  if (is_running) return;
+  is_running=TRUE;
+  save_preferences();
   
   dialog = gtk_dialog_new_with_buttons ("HintView Preferences",NULL,
 					GTK_DIALOG_DESTROY_WITH_PARENT,
@@ -89,28 +118,48 @@ do_preferences (void)
   gtk_widget_set_margin_bottom (content_area,8);
 
   check=gtk_check_button_new_with_label("Autoreload");
-  toggle_autoreload=autoreload;
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),toggle_autoreload); 
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),autoreload); 
   g_signal_connect (check, "toggled",
                     G_CALLBACK (cb_toggled_autoreload), NULL);
   gtk_box_pack_start (GTK_BOX (content_area), check, FALSE, FALSE, 0);
   
   check=gtk_check_button_new_with_label("Start with home page");
-  toggle_home=home;
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),toggle_home); 
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),home); 
   g_signal_connect (check, "toggled",
                     G_CALLBACK (cb_toggled_home), NULL);
   gtk_box_pack_start (GTK_BOX (content_area), check, FALSE, FALSE, 0);
 
+#if 0
+  /* round to pixel does not work with GTK because GTK
+     renders the framebuffer produced by hintview using its own
+     scaling factor to the screen. So pixel precision is not 
+     possible.
+  */ 
   check=gtk_check_button_new_with_label("Round position to pixel");
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),rpx); 
   g_signal_connect (check, "toggled",
                     G_CALLBACK (cb_toggled_rpx), NULL);
   gtk_box_pack_start (GTK_BOX (content_area), check, FALSE, FALSE, 0);
 
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8);
+  gtk_box_pack_start (GTK_BOX (content_area), hbox, FALSE, FALSE, 0);
+  spin=gtk_spin_button_new (
+			    gtk_adjustment_new(120,0,999,10,100,1),
+			    1, /*climb rate*/
+			    0); /*digits*/
 
+   gtk_spin_button_set_numeric (GTK_SPIN_BUTTON(spin),TRUE);
+   gtk_spin_button_set_value (GTK_SPIN_BUTTON(spin),rpxthreshold);
 
-  
+   g_signal_connect (spin, "value-changed",
+                    G_CALLBACK (cb_spin_rpx_threshold), NULL);
+
+   
+   gtk_box_pack_start(GTK_BOX(hbox),spin,FALSE, FALSE, 0);
+   label =  gtk_label_new ("DPI rounding threshold");
+   gtk_box_pack_start(GTK_BOX(hbox),label,FALSE, FALSE, 0);
+#endif
+   
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8);
   gtk_box_pack_start (GTK_BOX (content_area), hbox, FALSE, FALSE, 0);
 
@@ -123,7 +172,7 @@ do_preferences (void)
    gtk_spin_button_set_value (GTK_SPIN_BUTTON(spin),gcorrection);
 
    g_signal_connect (spin, "value-changed",
-                    G_CALLBACK (cb_spin_gamma), NULL);
+                    G_CALLBACK (cb_spin_gcorrection), NULL);
 
    
    gtk_box_pack_start(GTK_BOX(hbox),spin,FALSE, FALSE, 0);

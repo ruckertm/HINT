@@ -509,8 +509,13 @@ unsigned int nativeTexture(unsigned char *bits, int w, int h) {
     checkGlError("glGenTextures");
     glBindTexture(GL_TEXTURE_2D, textureID);
     checkGlError("glBindTexture textureID");
-#if 0
+#if 0   /* testing pixel alignment */
     bits[0]=0xFF;      /* The first element in bits corresponds to the top left pixel.*/
+    bits[2]=0xFF; 
+    bits[4]=0xFF; 
+    bits[6]=0xFF; 
+    bits[8]=0xFF; 
+
     bits[w-1]=0xFF;    /* This is the top right pixel. */
     bits[w*h-1] =0xFF; /* The last element in bits is the bottom right pixel. */
 #endif    

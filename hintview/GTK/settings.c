@@ -1,9 +1,6 @@
 #include <gtk/gtk.h>
-
-extern gboolean autoreload,dark,home;
-extern double gcorrection, scale;
-extern guint64 position;
-extern gchar *document;
+#include "basetypes.h"
+#include "main.h"
 
 #define SR_BOOL(VAL) VAL=g_settings_get_boolean(settings,#VAL) 
 #define SR_DOUBLE(VAL) VAL=g_settings_get_double(settings,#VAL) 
@@ -14,6 +11,8 @@ void read_settings(GSettings *settings)
   SR_BOOL(home);
   SR_DOUBLE(gcorrection); 
   SR_DOUBLE(scale);
+  SR_DOUBLE(rpxthreshold);
+  SR_BOOL(rpx);
   position=g_settings_get_uint64(settings,"position");
   document=g_settings_get_string(settings,"document");
 }
@@ -29,6 +28,8 @@ void write_settings(GSettings *settings)
   SW_BOOL(home);
   SW_DOUBLE(gcorrection);
   SW_DOUBLE(scale);
+  SW_BOOL(rpx);
+  SW_DOUBLE(rpxthreshold);
   fail|=! g_settings_set_uint64 (settings,"position",position);
   fail|=! g_settings_set_string (settings,"document",document);
   if (fail)
