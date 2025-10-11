@@ -285,7 +285,7 @@ return 1;
 } 
 
 
-#if 0 /* not yet used */
+#if 1 /* not yet used */
 
 static int new_file_time(void)
 { struct stat st;
@@ -414,12 +414,23 @@ static int command_line(int argc, char *argv[])
   return 1;	
 }
 
+void do_reload(void);
+
+gboolean
+cb_enter_notify_event (  GtkWidget* self, GdkEventCrossing event,  gpointer user_data)
+{ if (autoreload && event.focus && new_file_time())
+    do_reload();
+  return TRUE;
+} 
+
 static void
 cb_realize (GtkGLArea *area)
   { LOG("Realize\n");
     //   set_dpi(GTK_WIDGET(area));
     // We need to make the context current if we want to
     // call GL API
+
+
     gtk_gl_area_make_current (area);
 
     // If there were errors during the initialization or
@@ -715,23 +726,30 @@ activate (GtkApplication *app,
   window = gtk_application_window_new (app);
   gtk_window_set_title (GTK_WINDOW (window), "hintview");
   gtk_window_set_default_size (GTK_WINDOW (window), px_h, px_v);
+
   g_signal_connect(G_OBJECT(window), "configure-event", G_CALLBACK(cb_configure), NULL);
   g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (cb_key_press), NULL);
+
+
   area= gtk_gl_area_new();
   g_signal_connect (area, "render", G_CALLBACK (cb_render), NULL);
   g_signal_connect (area, "realize", G_CALLBACK (cb_realize), NULL);
   g_signal_connect (area, "create-context", G_CALLBACK (cb_create_context), NULL);
   g_signal_connect (area, "unrealize", G_CALLBACK (cb_unrealize), NULL);
+
   // not working with configure-event
   //g_signal_connect (area, "resize", G_CALLBACK (cb_resize), NULL);
 
   gtk_container_add (GTK_CONTAINER (window), area);
+
   gtk_widget_set_events (area, GDK_BUTTON_PRESS_MASK
 		       | GDK_BUTTON_RELEASE_MASK
-		       | GDK_BUTTON1_MOTION_MASK );
+		       | GDK_BUTTON1_MOTION_MASK
+		       | GDK_ENTER_NOTIFY_MASK);
    g_signal_connect (area, "button_press_event", G_CALLBACK (cb_mouse_button_down), NULL);
    g_signal_connect (area, "button_release_event", G_CALLBACK (cb_mouse_button_up), NULL);
    g_signal_connect (area, "motion_notify_event", G_CALLBACK (cb_mouse_motion), NULL);
+   g_signal_connect (area, "enter-notify-event", G_CALLBACK (cb_enter_notify_event), NULL);
 
   gtk_window_set_titlebar (GTK_WINDOW (window), create_headerbar());
   LOG("Show all\n");
@@ -760,6 +778,7 @@ int main (int argc, char *argv[])
 
   app = gtk_application_new ("edu.hm.cs.hintview", G_APPLICATION_NON_UNIQUE);
   g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
+  
   status = g_application_run (G_APPLICATION (app), 0, NULL);
   write_settings(settings);
   g_resources_unregister (resources);
