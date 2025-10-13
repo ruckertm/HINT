@@ -5,8 +5,8 @@
 #include <gtk/gtk.h>
 #include "basetypes.h"
 #include "hint.h"
+#include "main.h"
 
-extern void goto_outline(int i);
 
 static hint_Outline *outlines;
 static int outlines_max;

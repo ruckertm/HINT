@@ -1,30 +1,10 @@
 #include <gtk/gtk.h>
 #include "basetypes.h"
 #include "main.h"
+#include "gui.h"
 
 static GtkWidget *dialog=NULL;
 static int is_running=FALSE;
-
-gboolean toggle_autoreload, toggle_home, toggle_rpx;
-double spin_gcorrection, spin_rpxthreshold;
-
-static void save_preferences(void)
-{ toggle_autoreload=autoreload;
-  toggle_home=home;
-  toggle_rpx=rpx;
-  spin_gcorrection=gcorrection;
-  spin_rpxthreshold=rpxthreshold;
-}
-
-static void restore_preferences(void)
-{ autoreload=toggle_autoreload;
-  home=toggle_home;
-  rpx=toggle_rpx;
-  gcorrection=spin_gcorrection;
-  rpxthreshold=spin_rpxthreshold;
-  do_rpx(); 
-  do_render(0,0,1);
-}
 
 void cb_toggled_autoreload(GtkToggleButton* self, gpointer user_data)
 { if (gtk_toggle_button_get_active (self))
@@ -66,18 +46,8 @@ cb_spin_gcorrection (GtkSpinButton* self, gpointer user_data)
 }
 
 void
-cb_dialog (GtkDialog* self, gint response, gpointer user_data)
-{ if (response==GTK_RESPONSE_OK)
-    ;
-  else if (response==GTK_RESPONSE_CANCEL)
-    {  restore_preferences();
-      g_print("Cancel\n");
-    }
-  else
-    {// g_print("Other\n");
-      return;
-    }
-   gtk_widget_destroy(GTK_WIDGET(self));
+cb_response (GtkDialog* self, gint response, gpointer user_data)
+{ gtk_widget_destroy(GTK_WIDGET(self));
 
 }
 
@@ -90,19 +60,16 @@ void cb_dialog_unrealize(GtkWidget* self, gpointer user_data)
 
   void
 do_preferences (void)
-{ GtkWidget *content_area, *check, *spin;
-  GtkWidget *label, *hbox;
+  { GtkWidget *content_area, *left_column, *right_column, *check, *spin;
+    GtkWidget *label, *hbox, *frame;
 
   if (is_running) return;
   is_running=TRUE;
-  save_preferences();
   
   dialog = gtk_dialog_new_with_buttons ("HintView Preferences",NULL,
 					GTK_DIALOG_DESTROY_WITH_PARENT,
 					"OK",
                                         GTK_RESPONSE_OK,
-					"Cancel",
-                                        GTK_RESPONSE_CANCEL,			
 					NULL);
 
   gtk_window_set_resizable(GTK_WINDOW(dialog),FALSE);
@@ -111,23 +78,35 @@ do_preferences (void)
   g_signal_connect (dialog, "unrealize", G_CALLBACK (cb_dialog_unrealize), NULL);
    
   content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
-  gtk_box_set_spacing(GTK_BOX(content_area),8);
-  gtk_widget_set_margin_start (content_area,8);
-  gtk_widget_set_margin_end (content_area,8);
-  gtk_widget_set_margin_top (content_area,8);
-  gtk_widget_set_margin_bottom (content_area,8);
+  gtk_box_set_spacing(GTK_BOX(content_area),10);
+  gtk_container_set_border_width (GTK_CONTAINER (content_area), 10);
 
+  hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 16);
+  gtk_box_pack_start (GTK_BOX (content_area), hbox, FALSE, FALSE, 0);
+  
+  frame = gtk_frame_new("Settings");
+  left_column = gtk_box_new (GTK_ORIENTATION_VERTICAL, 8);
+  gtk_container_set_border_width (GTK_CONTAINER (left_column), 10);
+  gtk_container_add (GTK_CONTAINER (frame), left_column);
+  gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 0);
+
+  frame = gtk_frame_new("Header Buttons");
+  right_column = button_preferences ();
+  gtk_container_set_border_width (GTK_CONTAINER (right_column), 10);
+  gtk_container_add (GTK_CONTAINER (frame), right_column);
+  gtk_box_pack_start (GTK_BOX (hbox), frame, FALSE, FALSE, 0);
+  
   check=gtk_check_button_new_with_label("Autoreload");
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),autoreload); 
   g_signal_connect (check, "toggled",
                     G_CALLBACK (cb_toggled_autoreload), NULL);
-  gtk_box_pack_start (GTK_BOX (content_area), check, FALSE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (left_column), check, FALSE, FALSE, 0);
   
   check=gtk_check_button_new_with_label("Start with home page");
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),home); 
   g_signal_connect (check, "toggled",
                     G_CALLBACK (cb_toggled_home), NULL);
-  gtk_box_pack_start (GTK_BOX (content_area), check, FALSE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (left_column), check, FALSE, FALSE, 0);
 
 #if 0
   /* round to pixel does not work with GTK because GTK
@@ -139,10 +118,10 @@ do_preferences (void)
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),rpx); 
   g_signal_connect (check, "toggled",
                     G_CALLBACK (cb_toggled_rpx), NULL);
-  gtk_box_pack_start (GTK_BOX (content_area), check, FALSE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (left_column), check, FALSE, FALSE, 0);
 
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8);
-  gtk_box_pack_start (GTK_BOX (content_area), hbox, FALSE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (left_column), hbox, FALSE, FALSE, 0);
   spin=gtk_spin_button_new (
 			    gtk_adjustment_new(120,0,999,10,100,1),
 			    1, /*climb rate*/
@@ -161,7 +140,7 @@ do_preferences (void)
 #endif
    
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8);
-  gtk_box_pack_start (GTK_BOX (content_area), hbox, FALSE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (left_column), hbox, FALSE, FALSE, 0);
 
   spin=gtk_spin_button_new (
 			    gtk_adjustment_new(2.2,0.1,4.0,0.05,0.1,0.00),
@@ -181,22 +160,10 @@ do_preferences (void)
 
    gtk_widget_show_all (dialog);
     g_signal_connect (dialog, "response",
-                    G_CALLBACK (cb_dialog), NULL);
+                    G_CALLBACK (cb_response), NULL);
   //gtk_dialog_run (GTK_DIALOG (dialog));
   //gtk_widget_destroy (dialog);
 }
 
 
-#if 0
-int
-main(int argc, char **argv)
-{
-
-
-    gtk_init(&argc, &argv);
-    do_preferences();
-    gtk_main();
-    return 0;
-}
-#endif
 

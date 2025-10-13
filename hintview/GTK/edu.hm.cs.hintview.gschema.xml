@@ -98,5 +98,15 @@
     another way to disable rounding of glyph positions.
   </description>
 </key>
+<key name='buttonvisibility' type='i'>
+  <default>0xFFFF</default>
+  <summary>A bit vector indicating the visible buttons in the header.</summary>
+  <description>
+    The header bar of HintView displays a sequence of buttons.
+    Using the preferences window, these buttons can be hidden or made
+    visible. For each button, this value contains a 1 bit if the button
+    is visible and a 0 bit if it is hidden.
+  </description>
+</key>
 </schema>
 </schemalist>

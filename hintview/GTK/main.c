@@ -33,22 +33,6 @@
 #include <GL/gl.h>
 #include <setjmp.h>
 
-extern void cb_search_quit(void);
-extern GtkWidget *search_open (GtkWidget *parent_widget);
-
-extern void outlines_open(GtkWidget *parent_widget);
-extern void outlines_set(void);
-extern void outlines_clear(void);
-
-extern GtkWidget *create_headerbar (void);
-
-static GtkWidget *overlay_button;
-
-extern void read_settings(GSettings *settings);
-extern void write_settings(GSettings *settings);
-
-extern void set_dark_button(gboolean dark);
-int do_dark(int toggle);
 
 #define DEBUG 1
 
@@ -59,9 +43,10 @@ int do_dark(int toggle);
 #include "hint.h"
 #include "rendernative.h"
 #include "main.h"
+#include "gui.h"
 #include "resources.h"
 
-#line 64 "main.c" /*ctangle generated files can confuse the debugger*/
+//line 64 "main.c" /*ctangle generated files can confuse the debugger*/
 
 /* Error Handling */
 static int hint_error(const char *title, const char *message)
@@ -95,9 +80,9 @@ static int px_h=1024, px_v=768; // size in pixel
 static double  x_dpi=300, y_dpi=300;
 double gcorrection=1.8;
 
-bool dark = FALSE, autoreload=FALSE, home=FALSE;
+int dark = FALSE, autoreload=FALSE, home=FALSE;
 
-bool rpx=TRUE;
+int rpx=TRUE;
 double rpxthreshold=200;
 
 static GtkApplication *app;
@@ -223,7 +208,7 @@ bool hint_map(void)
 
 static char *search_buf=NULL;
 static int search_len=0;
-bool search_string(const char *str)
+int search_string(const char *str)
   { int len = strlen(str);
     if (len<search_len)
       strncpy(search_buf,str,search_len);
@@ -238,7 +223,7 @@ bool search_string(const char *str)
   return TRUE;
 }
 
-bool search_next(bool next)
+int search_next(int next)
 {uint64_t h=hint_page_get();
   bool success; 
   if(next)
@@ -285,8 +270,6 @@ return 1;
 } 
 
 
-#if 1 /* not yet used */
-
 static int new_file_time(void)
 { struct stat st;
   if (hin_name!=NULL &&
@@ -301,8 +284,6 @@ static int new_file_time(void)
   }
   return 0;
 }
-
-#endif
 
 static int set_hin_name(char *fn)
 {  size_t sl;
@@ -322,8 +303,6 @@ static int set_hin_name(char *fn)
  
   return 1;
 }
-
-
 
 static int file_chooser(void)
 { GtkWidget *dialog;
@@ -355,8 +334,6 @@ static int file_chooser(void)
   while (gtk_events_pending()) gtk_main_iteration();
   return res;
 }
-
-
 
 static int usage(void)
 {    return hint_error("Usage:", "hintview [options] file\n"
@@ -414,9 +391,7 @@ static int command_line(int argc, char *argv[])
   return 1;	
 }
 
-void do_reload(void);
-
-gboolean
+static gboolean
 cb_enter_notify_event (  GtkWidget* self, GdkEventCrossing event,  gpointer user_data)
 { if (autoreload && event.focus && new_file_time())
     do_reload();
@@ -449,7 +424,7 @@ cb_realize (GtkGLArea *area)
     LOG("Realize Done\n");
 }
 
-GdkGLContext* cb_create_context (GtkGLArea* self, gpointer user_data)
+static GdkGLContext* cb_create_context (GtkGLArea* self, gpointer user_data)
 { GdkGLContext* c;
   GError* error=NULL;
   GdkWindow *gdk_window = gtk_widget_get_window(GTK_WIDGET(self));
@@ -465,9 +440,7 @@ GdkGLContext* cb_create_context (GtkGLArea* self, gpointer user_data)
      gdk_gl_context_set_required_version (c,3,3);
  }
   LOG("Create Context\n");
-
-
-  
+ 
   return c;
 
 }
@@ -483,7 +456,7 @@ cb_unrealize (GtkGLArea* area, gpointer user_data)
 }
 
 static gboolean
-  cb_render (GtkGLArea *area, GdkGLContext *context)
+cb_render (GtkGLArea *area, GdkGLContext *context)
   {
     // inside this function it's safe to use GL; the given
     // `GdkGLContext` has been made current to the drawable
@@ -526,6 +499,7 @@ static gboolean cb_mouse_button_down(GtkWidget *area, GdkEventButton *event, gpo
   LOG("Mouse button down %d,%d,  %f x %f\n", event->type,event->button, down_x-event->x, down_y-event->y);
   return TRUE;
 }
+
 #define DELTA_T 400
 #define DELTA_XY 16.0
 static gboolean cb_mouse_motion(GtkWidget *area, GdkEventMotion *event, gpointer data)
@@ -561,15 +535,6 @@ static gboolean cb_mouse_button_up(GtkWidget *area, GdkEventButton *event, gpoin
   else /* click */
   { int link;
     LOG("Click %f x %f\n",down_x,down_y);
-    if (down_y<10)
-      { static int on=1;
-        on=!on;
-	LOG("Toggle Overlay\n");
-	if (on)
-	  gtk_widget_show(overlay_button);
-	else
-	   gtk_widget_hide(overlay_button);
-      }
     HINT_TRY {
       link=hint_find_link((int)(down_x+0.5), (int)(down_y+0.5), y_dpi/36);
       if (link>=0)
@@ -580,7 +545,6 @@ static gboolean cb_mouse_button_up(GtkWidget *area, GdkEventButton *event, gpoin
   return TRUE;
 }
 
-extern void outlines_clear(void);
 
 /* Actions */
 
@@ -757,7 +721,8 @@ activate (GtkApplication *app,
    LOG("Activate done\n");
    
 }
-  
+
+
 int main (int argc, char *argv[])
 { 
   int status;

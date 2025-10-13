@@ -1,9 +1,11 @@
 #include <gtk/gtk.h>
 #include "basetypes.h"
 #include "main.h"
+#include "gui.h"
 
 #define SR_BOOL(VAL) VAL=g_settings_get_boolean(settings,#VAL) 
 #define SR_DOUBLE(VAL) VAL=g_settings_get_double(settings,#VAL) 
+#define SR_INT(VAL) VAL=g_settings_get_int(settings,#VAL) 
 
 void read_settings(GSettings *settings)
 { SR_BOOL(autoreload); 
@@ -13,12 +15,15 @@ void read_settings(GSettings *settings)
   SR_DOUBLE(scale);
   SR_DOUBLE(rpxthreshold);
   SR_BOOL(rpx);
+  SR_INT(buttonvisibility);
   position=g_settings_get_uint64(settings,"position");
   document=g_settings_get_string(settings,"document");
+  g_print("Reading buttons=%x\n", buttonvisibility);
 }
 
 #define SW_BOOL(VAL) fail|=! g_settings_set_boolean (settings,#VAL,VAL)
 #define SW_DOUBLE(VAL) fail|=! g_settings_set_double (settings,#VAL,VAL)
+#define SW_INT(VAL) fail|=! g_settings_set_int (settings,#VAL,VAL)
 
 void write_settings(GSettings *settings)
 { gboolean fail=FALSE;
@@ -30,6 +35,9 @@ void write_settings(GSettings *settings)
   SW_DOUBLE(scale);
   SW_BOOL(rpx);
   SW_DOUBLE(rpxthreshold);
+  SW_INT(buttonvisibility);
+  g_print("Writing buttons=%x\n", buttonvisibility);
+
   fail|=! g_settings_set_uint64 (settings,"position",position);
   fail|=! g_settings_set_string (settings,"document",document);
   if (fail)

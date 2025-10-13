@@ -1,15 +1,7 @@
 #include <gtk/gtk.h>
 #include "basetypes.h"
-extern void do_open_file(void);
-extern int  do_dark(int toggle);
-extern void do_reload(void);
-extern void do_search(void);
-extern void do_zoom_1(void);
-extern void do_home(void);
-extern void do_outlines(void);
-extern void do_quit(void);
-extern void do_about(void);
-extern void do_preferences(void);
+#include "main.h"
+#include "gui.h"
 
 void
 cb_document_open (GtkButton* self, gpointer user_data)
@@ -80,22 +72,23 @@ create_menu (void);
 
 enum {open_id=0, home_id, search_id, zoom_id,dark_id,reload_id,pref_id};
 
+int buttonvisibility;
+
 struct button_def {
   int id;
   char * label;
   char* icon_name;
   char* tool_tip;
-  bool is_visible;
   void (*cb)(GtkButton* self, gpointer user_data);
   GtkWidget *button;
 } button_def[] = {
-  {open_id, "Open file", "document-open-symbolic", "Open file (Ctrl+F)", TRUE, cb_document_open, NULL},
-  {home_id, "Home", "go-home-symbolic","Go to the document's home page (Ctrl+H)", TRUE, cb_home,NULL},
-  {search_id, "Search", "system-search-symbolic", "Search text (Ctrl+S)", TRUE, cb_search, NULL},
-  {zoom_id, "Zoom to 100%","zoom-original-symbolic", "Zoom to 100% (Ctrl+Z)",TRUE, cb_zoom_1,NULL},
-  {dark_id, "Dark mode",NULL,"Switch beween dark and light mode (Ctrl+N)",TRUE,cb_day_night,NULL},
-  {reload_id, "Reload file", "view-refresh-symbolic","Reload document (Ctrl+R)",TRUE,cb_reload,NULL},
-  {pref_id, "Preferences", "preferences-system-symbolic","Set Preferences",TRUE,cb_preferences,NULL}
+  {open_id, "Open file", "document-open-symbolic", "Open file (Ctrl+F)", cb_document_open, NULL},
+  {home_id, "Home", "go-home-symbolic","Go to the document's home page (Ctrl+H)", cb_home,NULL},
+  {search_id, "Search", "system-search-symbolic", "Search text (Ctrl+S)", cb_search, NULL},
+  {zoom_id, "Zoom to 100%","zoom-original-symbolic", "Zoom to 100% (Ctrl+Z)", cb_zoom_1,NULL},
+  {dark_id, "Dark mode",NULL,"Switch beween dark and light mode (Ctrl+N)", cb_day_night,NULL},
+  {reload_id, "Reload file", "view-refresh-symbolic","Reload document (Ctrl+R)", cb_reload,NULL},
+  {pref_id, "Preferences", "preferences-system-symbolic","Set Preferences", cb_preferences,NULL}
 };
 
 
@@ -129,7 +122,6 @@ create_headerbar (void)
   for (i=0; i< sizeof(button_def)/sizeof(struct button_def); i++)
   { struct button_def *b;
     b=button_def+i;
-    g_print("Button %d\n",i);
     b->button=button= gtk_button_new();
     if (b->icon_name!=NULL)
       gtk_button_set_image (GTK_BUTTON(button),
@@ -140,7 +132,9 @@ create_headerbar (void)
       { g_signal_connect (button, "clicked", G_CALLBACK (b->cb), NULL);
 	g_print("Connect cb\n"); 
       }
-    if (b->is_visible)
+    g_print("Button %d %d\n",i,buttonvisibility & (1<<i));
+    gtk_widget_set_no_show_all (GTK_WIDGET(button),TRUE);
+    if (buttonvisibility & (1<<i))
       gtk_widget_show(GTK_WIDGET(button));
     else 
       gtk_widget_hide(GTK_WIDGET(button));
@@ -150,8 +144,8 @@ create_headerbar (void)
   night=gtk_image_new_from_icon_name ("weather-clear-night", GTK_ICON_SIZE_BUTTON);
   g_object_ref(night);
   day=gtk_image_new_from_icon_name ("weather-clear", GTK_ICON_SIZE_BUTTON);
-  g_object_ref(day);       
-  gtk_button_set_image (GTK_BUTTON(button_def[dark_id].button),night);
+  g_object_ref(day);
+  set_dark_button(dark);
 
   /* I need an icon to open the outlines window */
       
@@ -188,41 +182,41 @@ static GtkWidget *create_separator(GtkWidget *menu)
 }
 
 void
-cb_toggled_button(
-  GtkCheckMenuItem* self,
-  gpointer button
-)
-{ if (gtk_check_menu_item_get_active (self))
-    gtk_widget_show(GTK_WIDGET(button));
+cb_toggled_button_preference(GtkToggleButton* self, gpointer data)
+{ uintptr_t i= (uintptr_t)data;
+  if(gtk_toggle_button_get_active (self))
+  { gtk_widget_show(GTK_WIDGET(button_def[i].button));
+    buttonvisibility |= (1<<i);
+  }
   else
-    gtk_widget_hide(GTK_WIDGET(button));
+  { gtk_widget_hide(GTK_WIDGET(button_def[i].button));
+    buttonvisibility &= ~(1<<i);
+  }
 }
 
-  
-
-static GtkWidget *create_button_item(GtkWidget *menu, const char *label, gpointer button)
-{ GtkWidget *item;
-  item=gtk_check_menu_item_new_with_label(label);
-  gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
-  gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM(item), gtk_widget_get_visible (GTK_WIDGET(button)));
-  g_signal_connect(item, "toggled", G_CALLBACK(cb_toggled_button), button);
-  gtk_widget_show (item);
-  return item;
-}
-
-static GtkWidget *
-button_menu (void)
-{ GtkWidget *menu;
+GtkWidget *
+button_preferences (void)
+{ GtkWidget *vbox, *check;
   int i;
-  menu = gtk_menu_new ();
+  vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 8);
   for (i=open_id; i<=pref_id; i++)
-    create_button_item(menu,button_def[i].label,button_def[i].button);
- return menu;
+  { check=gtk_check_button_new_with_label(button_def[i].label);
+     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+				  gtk_widget_get_visible (GTK_WIDGET(button_def[i].button)));
+     g_signal_connect (check, "toggled",
+		       G_CALLBACK (cb_toggled_button_preference), (gpointer)(uintptr_t)i);
+     gtk_box_pack_start (GTK_BOX (vbox), check, FALSE, FALSE, 0);
+  }
+ return vbox;
 }
+
+
+
+
 
 static GtkWidget *
 create_menu (void)
-{ GtkWidget *menu, *item, *submenu,*subitem;
+{ GtkWidget *menu, *item, *submenu;
   menu = gtk_menu_new ();
   /* File */
   item=create_item(menu,"File",NULL);
@@ -236,9 +230,6 @@ create_menu (void)
   submenu= gtk_menu_new ();
     create_item(submenu,"Search...", G_CALLBACK(cb_search));
     create_item(submenu,"Outline...", G_CALLBACK(cb_outline));
-    create_separator(submenu);
-    subitem=create_item(submenu,"Buttons...",NULL);
-      gtk_menu_item_set_submenu (GTK_MENU_ITEM (subitem), button_menu());
     create_separator(submenu);
     create_item(submenu,"Dark mode...", G_CALLBACK(cb_day_night));
     create_item(submenu,"Zoom to 100%", G_CALLBACK(cb_zoom_1));

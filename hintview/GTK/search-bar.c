@@ -4,9 +4,7 @@
 #include <glib/gi18n.h>
 #include <gtk/gtk.h>
 #include <stdbool.h>
-
-extern bool search_string(const char *str);
-extern bool search_next(bool next);
+#include "main.h"
 
 static GtkWidget *search_window = NULL;
 
