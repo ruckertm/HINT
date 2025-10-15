@@ -46,8 +46,6 @@
 #include "gui.h"
 #include "resources.h"
 
-//line 64 "main.c" /*ctangle generated files can confuse the debugger*/
-
 /* Error Handling */
 static int hint_error(const char *title, const char *message)
 { fprintf(stderr,"ERROR %s: %s\n",title,message);
@@ -61,13 +59,14 @@ static void error_callback(int error, const char* description)
 }
 #endif
 
-#define DIR_SEP '/'
 
 /* variables checked before rendering */
+
 static bool dpi_change=FALSE; /*set to call hint_clear_fonts*/
 static bool size_change=FALSE; /* set to call hint_resize */
 static bool gamma_change=FALSE; /* set to call hint_gamma */
  
+/* global state variables */
 
 #define SCALE_MIN 0.5
 #define SCALE_NORMAL 1.0
@@ -89,18 +88,7 @@ static GtkApplication *app;
 static GtkWidget *window;
 static GtkWidget *area;
 
-
-
-#define RENDER gtk_gl_area_queue_render (GTK_GL_AREA(area))
-
-void do_render(int d, int s, int g)
-{ dpi_change|=d;
-  size_change|=s;
-  gamma_change|=g;
-  RENDER;
-}
-
-
+/* System utilities */
 static int
 set_monitor_dpi(GdkMonitor* m)
 { GdkRectangle r;
@@ -123,77 +111,25 @@ set_monitor_dpi(GdkMonitor* m)
     return 0;
 }
 
-#if 0
-static void
-set_dpi(GtkWidget* a)
-{ GdkWindow *w = gtk_widget_get_window(a);
-  GdkDisplay* d=gdk_window_get_display (w);
-  GdkMonitor* m= gdk_display_get_monitor_at_window (d,w);
-  if (set_monitor_dpi(m))
-     dpi_change=size_change=TRUE;
-}
-#endif
 
-static void
-cb_configure(GtkWindow *window, GdkEvent *event, gpointer data)
-{ //static GdkMonitor *p=NULL;
-  static int x=INT_MIN,y=INT_MIN,w=INT_MIN,h=INT_MIN;
-  bool rerender=FALSE;
-  GtkAllocation a;
-  LOG("Configure %d\n",event->type);
-  //  if (event->configure.x!=x ||event->configure.y!=y)
-  // LOG("Move %d x %d\n",x,y);
-  if (event->type==GDK_CONFIGURE)
-  { GdkDisplay* d;
-    GdkMonitor* m;
-    x=event->configure.x;
-    y=event->configure.y;
-    d=gdk_window_get_display (event->configure.window);
-    m= gdk_display_get_monitor_at_point (d,x,y);
-    //if (p!=m)
-    { LOG("Monitor %s\n", gdk_monitor_get_model(m));
-      gtk_gl_area_make_current (GTK_GL_AREA(area));
-      if (set_monitor_dpi(m))
-      { dpi_change=size_change=TRUE;
-        rerender=TRUE;
-      }
-      //p=m;
-    }
+static int new_file_time(void)
+{ struct stat st;
+  if (hin_name!=NULL &&
+      stat(hin_name,&st)==0 &&
+      st.st_size>0)
+  {
+    //LOG("file %s %lu\n",hin_name,st.st_mtime);
+    if (st.st_mtime>hin_time)
+    return 1;
+  else
+    return 0;
   }
-  gtk_widget_get_allocation (area,&a);
-  if (a.width!=w || a.height!=h)
-  { 
-    px_h=w=a.width;
-    px_v=h=a.height;  
-    size_change=TRUE;
-    rerender=TRUE;
-    LOG("Size %d x %d or %d x %d\n",w,h,a.width,a.height);
-  }
-  LOG("Configure done\n");
-  if (rerender)
-    RENDER;
+  return 0;
 }
 
-#if 0 /* could not get it to work */
-static void
-cb_screen_changed (GtkWidget* self,  GdkScreen* previous_screen, gpointer user_data)
-{ LOG("Change\n");
-  set_dpi(self);
-}
-#endif
+/* Interface to the hintview backend */
 
-#if 0 /* is not called reliably if using cb_configure */
-void cb_resize(  GtkGLArea* self, gint width,  gint height,  gpointer user_data)
-{          
-   px_h = width;
-   px_v = height;
-   hint_resize(px_h,px_v,scale*x_dpi,scale*y_dpi);
-   hint_page();
-   gtk_gl_area_queue_render (self);
-
-   LOG("resize w=%d, h=%d\n",px_h , px_v);
-}
-#endif
+#define RENDER gtk_gl_area_queue_render (GTK_GL_AREA(area)) /* invoke the renderer */
 
 void hint_unmap(void)
 { hget_unmap();
@@ -236,13 +172,14 @@ int search_next(int next)
   return success;
 }
 
+
+
 void goto_outline(int i)
 { hint_outline_page(i);
   RENDER;
 }
 
-
-
+#define DIR_SEP '/'
 
 static int open_file(int home)
 {
@@ -270,21 +207,6 @@ return 1;
 } 
 
 
-static int new_file_time(void)
-{ struct stat st;
-  if (hin_name!=NULL &&
-      stat(hin_name,&st)==0 &&
-      st.st_size>0)
-  {
-    //LOG("file %s %lu\n",hin_name,st.st_mtime);
-    if (st.st_mtime>hin_time)
-    return 1;
-  else
-    return 0;
-  }
-  return 0;
-}
-
 static int set_hin_name(char *fn)
 {  size_t sl;
   if (hin_name!=NULL) { free(hin_name); hin_name=NULL; }
@@ -303,6 +225,9 @@ static int set_hin_name(char *fn)
  
   return 1;
 }
+
+
+/* the file chooser should probably move to a separate file */
 
 static int file_chooser(void)
 { GtkWidget *dialog;
@@ -335,68 +260,88 @@ static int file_chooser(void)
   return res;
 }
 
-static int usage(void)
-{    return hint_error("Usage:", "hintview [options] file\n"
-		  "Call 'hintview --help' for details.\n");
+
+
+/* Actions */
+
+void do_open_file(void)
+{ if (file_chooser())
+  { open_file(home);
+    RENDER;
+  }
 }
 
-static int help(void)
-{ fprintf(stdout,"%s",
-   "Usage: hintview [options] file\n"
-   "Options:\n"
-   "  -a         Start in autoreload mode.\n"	  
-   "  -h         Start with the documents home page.\n"	  
-   "  -n         Start in night mode.\n"	  
-#if 0
-   "  -o         Show the documents outline.\n"
-#endif
-   "  -z         Start with zoom level 100%.\n"	  
-   "  --help     Display this message.\n"	  
-   "  --version  Display the version.\n"	  
-   "\n"
-   "See the hintview man page for more details.\n"
-  );
-  return 0;
-}
-
-static int command_line(int argc, char *argv[])
-{ int i;
-  for (i=1; argv[i]!=NULL && argv[i][0]=='-'; i++)
-    { switch (argv[i][1])
-      { case '-':
-	    if (strcmp(argv[i]+2,"help")==0) return help();
-	    else if (strcmp(argv[i]+2,"version")==0)
-	      { fprintf(stdout,"hintview version %d.%d.%d\n"
-			"HINT file format version %d.%d\n", 
-			VERSION, MINOR_VERSION, REVISION,
-			HINT_VERSION, HINT_MINOR_VERSION);
-	        return 0;
-	      }
-	    else
-	      return usage();
-	case 'a': autoreload=1; break;
-        case 'd': 
-          i++; if (argv[i]==NULL) debugflags = -1;
-          else debugflags=strtol(argv[i],NULL,16);
-          break;
-        case 'n': dark=1; break;
-	  //case 'o': break; /* show outlines */
-        case 'z': scale=SCALE_NORMAL; break;
-        case 'h': home=1; break;  
-        default: return usage();
+void do_reload(void)
+{ static int loading=0;
+  if (!loading)
+    { double fpos;
+      loading=1;
+      LOG("reloading...\n");
+      HINT_TRY {
+        fpos=hint_get_fpos();
+        hint_end();
+        hint_begin();
+        position=hint_set_fpos(fpos);
       }
+      //clear_cursor();
+      loading=0;
+      RENDER;
     }
-  if (argv[i]!=NULL && !set_hin_name(argv[i]))
-    return usage();
-  return 1;	
 }
 
-static gboolean
-cb_enter_notify_event (  GtkWidget* self, GdkEventCrossing event,  gpointer user_data)
-{ if (autoreload && event.focus && new_file_time())
-    do_reload();
-  return TRUE;
-} 
+int do_dark(int toggle)
+{ if (toggle) dark=!dark;
+  set_dark_button(dark);
+  gtk_gl_area_make_current (GTK_GL_AREA(area));
+  hint_dark(dark);
+  LOG("Dark %d\n",dark);
+  RENDER;
+  return dark;
+}
+
+void do_zoom_1(void)
+{ scale=SCALE_NORMAL;
+  dpi_change=size_change=TRUE;
+  RENDER;
+  //clear_cursor();
+}
+
+void do_rpx(void) /* round glyph positions to pixel */
+{ gtk_gl_area_make_current (GTK_GL_AREA(area));
+  hint_round_position(rpx,rpxthreshold);
+  LOG("Round to pixel %d\n",rpx);
+}
+
+
+void do_home(void)
+{ HINT_TRY hint_page_home();
+  RENDER;
+  //clear_cursor();
+}
+
+void do_outlines(void)
+{  outlines_open(window);
+}
+
+void do_search(void)
+{  search_open(window);
+}
+
+void do_quit(void)
+{ g_application_quit(G_APPLICATION (app));
+  //gtk_application_remove_window(app,GTK_WINDOW (window));
+}
+
+
+
+void do_render(int d, int s, int g)
+{ dpi_change|=d;
+  size_change|=s;
+  gamma_change|=g;
+  RENDER;
+}
+
+/* OpenGL area callbacks */
 
 static void
 cb_realize (GtkGLArea *area)
@@ -424,6 +369,13 @@ cb_realize (GtkGLArea *area)
     LOG("Realize Done\n");
 }
 
+static void
+cb_unrealize (GtkGLArea* area, gpointer user_data)
+{ gtk_gl_area_make_current (area);
+  hint_render_off();
+  LOG("Unrealize");
+}
+
 static GdkGLContext* cb_create_context (GtkGLArea* self, gpointer user_data)
 { GdkGLContext* c;
   GError* error=NULL;
@@ -444,17 +396,6 @@ static GdkGLContext* cb_create_context (GtkGLArea* self, gpointer user_data)
   return c;
 
 }
-
-  
-
-
-static void
-cb_unrealize (GtkGLArea* area, gpointer user_data)
-{ gtk_gl_area_make_current (area);
-  hint_render_off();
-  LOG("Unrealize");
-}
-
 static gboolean
 cb_render (GtkGLArea *area, GdkGLContext *context)
   {
@@ -484,6 +425,31 @@ cb_render (GtkGLArea *area, GdkGLContext *context)
     // the buffers will be drawn on the window
     return TRUE;
   }
+
+
+static gboolean
+cb_scroll( GtkEventControllerScroll* self,  gdouble dx,  gdouble dy,  gpointer user_data)
+{ if (dy > 0.0)
+  { position=hint_page_next();
+    hint_page();
+    //clear_cursor();
+    RENDER;
+  }
+  else if (dy< 0.0)
+  { position=hint_page_prev();
+    hint_page();
+    //clear_cursor();
+    RENDER;
+  }
+  return TRUE;
+}
+
+static gboolean
+cb_enter_notify_event (  GtkWidget* self, GdkEventCrossing event,  gpointer user_data)
+{ if (autoreload && event.focus && new_file_time())
+    do_reload();
+  return TRUE;
+} 
 
 static double down_x, down_y, down_xy, down_scale;
 static uint32_t down_time;
@@ -546,76 +512,7 @@ static gboolean cb_mouse_button_up(GtkWidget *area, GdkEventButton *event, gpoin
 }
 
 
-/* Actions */
-
-void do_open_file(void)
-{ if (file_chooser())
-  { open_file(home);
-    RENDER;
-  }
-}
-
-int do_dark(int toggle)
-{ if (toggle) dark=!dark;
-  set_dark_button(dark);
-  gtk_gl_area_make_current (GTK_GL_AREA(area));
-  hint_dark(dark);
-  LOG("Dark %d\n",dark);
-  RENDER;
-  return dark;
-}
-
-void do_reload(void)
-{ static int loading=0;
-  if (!loading)
-    { double fpos;
-      loading=1;
-      LOG("reloading...\n");
-      HINT_TRY {
-        fpos=hint_get_fpos();
-        hint_end();
-        hint_begin();
-        position=hint_set_fpos(fpos);
-      }
-      //clear_cursor();
-      loading=0;
-      RENDER;
-    }
-}
-
-void do_search(void)
-{  search_open(window);
-}
-
-void do_zoom_1(void)
-{ scale=SCALE_NORMAL;
-  dpi_change=size_change=TRUE;
-  RENDER;
-  //clear_cursor();
-}
-
-void do_home(void)
-{ HINT_TRY hint_page_home();
-  RENDER;
-  //clear_cursor();
-}
-
-void do_outlines(void)
-{  outlines_open(window);
-}
-
-void do_quit(void)
-{ g_application_quit(G_APPLICATION (app));
-  //gtk_application_remove_window(app,GTK_WINDOW (window));
-}
-
-
-void do_rpx(void)
-{ gtk_gl_area_make_current (GTK_GL_AREA(area));
-  hint_round_position(rpx,rpxthreshold);
-  LOG("Round to pixel %d\n",rpx);
-}
-
+/* window callbacks */
 static gboolean
 cb_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data)
 {
@@ -683,22 +580,46 @@ cb_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data)
   return TRUE;
 }
 
-static gboolean
-cb_scroll( GtkEventControllerScroll* self,  gdouble dx,  gdouble dy,  gpointer user_data)
-{ if (dy > 0.0)
-  { position=hint_page_next();
-    hint_page();
-    //clear_cursor();
-    RENDER;
+static void
+cb_configure(GtkWindow *window, GdkEvent *event, gpointer data)
+{ //static GdkMonitor *p=NULL;
+  static int x=INT_MIN,y=INT_MIN,w=INT_MIN,h=INT_MIN;
+  bool rerender=FALSE;
+  GtkAllocation a;
+  LOG("Configure %d\n",event->type);
+  //  if (event->configure.x!=x ||event->configure.y!=y)
+  // LOG("Move %d x %d\n",x,y);
+  if (event->type==GDK_CONFIGURE)
+  { GdkDisplay* d;
+    GdkMonitor* m;
+    x=event->configure.x;
+    y=event->configure.y;
+    d=gdk_window_get_display (event->configure.window);
+    m= gdk_display_get_monitor_at_point (d,x,y);
+    //if (p!=m)
+    { LOG("Monitor %s\n", gdk_monitor_get_model(m));
+      gtk_gl_area_make_current (GTK_GL_AREA(area));
+      if (set_monitor_dpi(m))
+      { dpi_change=size_change=TRUE;
+        rerender=TRUE;
+      }
+      //p=m;
+    }
   }
-  else if (dy< 0.0)
-  { position=hint_page_prev();
-    hint_page();
-    //clear_cursor();
-    RENDER;
+  gtk_widget_get_allocation (area,&a);
+  if (a.width!=w || a.height!=h)
+  { 
+    px_h=w=a.width;
+    px_v=h=a.height;  
+    size_change=TRUE;
+    rerender=TRUE;
+    LOG("Size %d x %d or %d x %d\n",w,h,a.width,a.height);
   }
-  return TRUE;
+  LOG("Configure done\n");
+  if (rerender)
+    RENDER;
 }
+
 
 
 static void
@@ -713,10 +634,6 @@ activate (GtkApplication *app,
 
   g_signal_connect(G_OBJECT(window), "configure-event", G_CALLBACK(cb_configure), NULL);
   g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (cb_key_press), NULL);
-
-  //  g_signal_connect (G_OBJECT (window), "scroll-event", G_CALLBACK (cb_scroll_event), NULL);
-    gtk_widget_add_events (window, GDK_SCROLL_MASK);
-
 
   area= gtk_gl_area_new();
   g_signal_connect (area, "render", G_CALLBACK (cb_render), NULL);
@@ -735,21 +652,74 @@ activate (GtkApplication *app,
 		       | GDK_BUTTON_RELEASE_MASK
 		       | GDK_BUTTON1_MOTION_MASK
 		       | GDK_ENTER_NOTIFY_MASK
-			 //  | GDK_SCROLL_MASK
 		       );
-   g_signal_connect (area, "button_press_event", G_CALLBACK (cb_mouse_button_down), NULL);
-   g_signal_connect (area, "button_release_event", G_CALLBACK (cb_mouse_button_up), NULL);
-   g_signal_connect (area, "motion_notify_event", G_CALLBACK (cb_mouse_motion), NULL);
-   g_signal_connect (area, "enter-notify-event", G_CALLBACK (cb_enter_notify_event), NULL);
+  g_signal_connect (area, "button_press_event", G_CALLBACK (cb_mouse_button_down), NULL);
+  g_signal_connect (area, "button_release_event", G_CALLBACK (cb_mouse_button_up), NULL);
+  g_signal_connect (area, "motion_notify_event", G_CALLBACK (cb_mouse_motion), NULL);
+  g_signal_connect (area, "enter-notify-event", G_CALLBACK (cb_enter_notify_event), NULL);
 
-   
   gtk_window_set_titlebar (GTK_WINDOW (window), create_headerbar());
   LOG("Show all\n");
-   gtk_widget_show_all (window);
-   LOG("Activate done\n");
-   
+  gtk_widget_show_all (window);
+  LOG("Activate done\n"); 
 }
 
+
+static int usage(void)
+{    return hint_error("Usage:", "hintview [options] file\n"
+		  "Call 'hintview --help' for details.\n");
+}
+
+static int help(void)
+{ fprintf(stdout,"%s",
+   "Usage: hintview [options] file\n"
+   "Options:\n"
+   "  -a         Start in autoreload mode.\n"	  
+   "  -h         Start with the documents home page.\n"	  
+   "  -n         Start in night mode.\n"	  
+#if 0
+   "  -o         Show the documents outline.\n"
+#endif
+   "  -z         Start with zoom level 100%.\n"	  
+   "  --help     Display this message.\n"	  
+   "  --version  Display the version.\n"	  
+   "\n"
+   "See the hintview man page for more details.\n"
+  );
+  return 0;
+}
+
+static int command_line(int argc, char *argv[])
+{ int i;
+  for (i=1; argv[i]!=NULL && argv[i][0]=='-'; i++)
+    { switch (argv[i][1])
+      { case '-':
+	    if (strcmp(argv[i]+2,"help")==0) return help();
+	    else if (strcmp(argv[i]+2,"version")==0)
+	      { fprintf(stdout,"hintview version %d.%d.%d\n"
+			"HINT file format version %d.%d\n", 
+			VERSION, MINOR_VERSION, REVISION,
+			HINT_VERSION, HINT_MINOR_VERSION);
+	        return 0;
+	      }
+	    else
+	      return usage();
+	case 'a': autoreload=1; break;
+        case 'd': 
+          i++; if (argv[i]==NULL) debugflags = -1;
+          else debugflags=strtol(argv[i],NULL,16);
+          break;
+        case 'n': dark=1; break;
+	  //case 'o': break; /* show outlines */
+        case 'z': scale=SCALE_NORMAL; break;
+        case 'h': home=1; break;  
+        default: return usage();
+      }
+    }
+  if (argv[i]!=NULL && !set_hin_name(argv[i]))
+    return usage();
+  return 1;	
+}
 
 int main (int argc, char *argv[])
 { 
