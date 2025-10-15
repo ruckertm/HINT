@@ -40,13 +40,13 @@ cb_reload (GtkButton* self, gpointer user_data)
 void
 cb_about (GtkButton* self, gpointer user_data)
 { do_about();
-  g_print("About\n");
+  LOG("About\n");
 }
 
 void
 cb_help (GtkButton* self, gpointer user_data)
 { 
-  g_print("Help\n");
+  LOG("Help\n");
 }
 
 void
@@ -130,9 +130,9 @@ create_headerbar (void)
     gtk_header_bar_pack_start (GTK_HEADER_BAR (header), button);
     if (b->cb!=NULL)
       { g_signal_connect (button, "clicked", G_CALLBACK (b->cb), NULL);
-	g_print("Connect cb\n"); 
+	LOG("Connect cb\n"); 
       }
-    g_print("Button %d %d\n",i,buttonvisibility & (1<<i));
+    LOG("Button %d %d\n",i,buttonvisibility & (1<<i));
     gtk_widget_set_no_show_all (GTK_WIDGET(button),TRUE);
     if (buttonvisibility & (1<<i))
       gtk_widget_show(GTK_WIDGET(button));

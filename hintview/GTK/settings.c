@@ -18,7 +18,7 @@ void read_settings(GSettings *settings)
   SR_INT(buttonvisibility);
   position=g_settings_get_uint64(settings,"position");
   document=g_settings_get_string(settings,"document");
-  g_print("Reading buttons=%x\n", buttonvisibility);
+  LOG("Reading buttons=%x\n", buttonvisibility);
 }
 
 #define SW_BOOL(VAL) fail|=! g_settings_set_boolean (settings,#VAL,VAL)
@@ -36,12 +36,12 @@ void write_settings(GSettings *settings)
   SW_BOOL(rpx);
   SW_DOUBLE(rpxthreshold);
   SW_INT(buttonvisibility);
-  g_print("Writing buttons=%x\n", buttonvisibility);
+  LOG("Writing buttons=%x\n", buttonvisibility);
 
   fail|=! g_settings_set_uint64 (settings,"position",position);
   fail|=! g_settings_set_string (settings,"document",document);
   if (fail)
-    g_print("Failing to write all settings\n");
+    LOG("Failing to write all settings\n");
 }
 
 
@@ -50,12 +50,12 @@ void do_settings(void)
 {
   GSettings *settings = g_settings_new("edu.hm.cs.hintview");
   if (settings!=NULL)
-    g_print("Settings created\n");
+    LOG("Settings created\n");
   read_settings(settings);
-  //g_print("autoreload=%d\n",autoreload);
+  //LOG("autoreload=%d\n",autoreload);
   gcorrection=gcorrection+0.01;
   autoreload=!autoreload;
-  g_print("Position=0x%lx\n",position);
+  LOG("Position=0x%lx\n",position);
   position+=0x100000001;
   write_settings(settings);
 }

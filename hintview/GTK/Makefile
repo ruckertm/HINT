@@ -110,6 +110,14 @@ settings.o: settings.c
 settings: settings.o
 	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
 
+BINDIR=/usr/local/bin
+MANDIR=/usr/local/man
+
+
+install: hintview
+	strip hintview
+	install -t $(BINDIR) --mode=755 hintview
+	install -t $(MANDIR)/man1 --mode=644 hintview.1
 
 
 
@@ -118,6 +126,8 @@ install_schema: edu.hm.cs.hintview.gschema.xml
 	sudo install edu.hm.cs.hintview.gschema.xml /usr/share/glib-2.0/schemas/
 	sudo glib-compile-schemas /usr/share/glib-2.0/schemas/
 
+
+.PHONY: clean
 clean:
 	rm -rf *~ *.o
 	rm -rf hintview

@@ -34,15 +34,15 @@
 #include <setjmp.h>
 
 
-#define DEBUG 1
+//define DEBUG 1
 
+#include "main.h"
 #include "error.h"
 #include "basetypes.h"
 #include "format.h"
 #include "get.h"
 #include "hint.h"
 #include "rendernative.h"
-#include "main.h"
 #include "gui.h"
 #include "resources.h"
 
@@ -82,7 +82,7 @@ double gcorrection=1.8;
 int dark = FALSE, autoreload=FALSE, home=FALSE;
 
 int rpx=TRUE;
-double rpxthreshold=200;
+double rpxthreshold=160;
 
 static GtkApplication *app;
 static GtkWidget *window;
@@ -132,7 +132,7 @@ static int new_file_time(void)
 #define RENDER gtk_gl_area_queue_render (GTK_GL_AREA(area)) /* invoke the renderer */
 
 void hint_unmap(void)
-{ hget_unmap();
+{ hget_unmap(); 
 }
 
 bool hint_map(void)
@@ -705,10 +705,12 @@ static int command_line(int argc, char *argv[])
 	    else
 	      return usage();
 	case 'a': autoreload=1; break;
-        case 'd': 
+#ifdef DEBUG
+      case 'd': 
           i++; if (argv[i]==NULL) debugflags = -1;
           else debugflags=strtol(argv[i],NULL,16);
           break;
+#endif	  
         case 'n': dark=1; break;
 	  //case 'o': break; /* show outlines */
         case 'z': scale=SCALE_NORMAL; break;

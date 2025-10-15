@@ -1,6 +1,6 @@
-#define VERSION 2
-#define MINOR_VERSION 2
-#define REVISION 1
+#define VERSION 1
+#define MINOR_VERSION 0
+#define REVISION 0
 
 /* in main.c */
 extern double gcorrection, scale, rpxthreshold;
@@ -22,3 +22,9 @@ extern void goto_outline(int i);
 extern int search_string(const char *str);
 extern int search_next(int next);
 extern int main (int argc, char *argv[]);
+
+#ifdef DEBUG
+#define LOG(...) g_print(__VA_ARGS__)
+#else
+#define LOG(...)
+#endif

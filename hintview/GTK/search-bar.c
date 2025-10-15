@@ -11,8 +11,11 @@ static GtkWidget *search_window = NULL;
 static void
 cb_next_click (GtkButton *button,
               GtkEntry  *entry)
-{ GtkEntryBuffer *b=gtk_entry_get_buffer(entry);
-  g_print("Next %s\n", gtk_entry_buffer_get_text(b));
+{
+#ifdef DEBUG  
+  GtkEntryBuffer *b=gtk_entry_get_buffer(entry);
+  LOG("Next %s\n", gtk_entry_buffer_get_text(b));
+#endif  
   search_next(TRUE);
 }
 
@@ -33,13 +36,13 @@ search_entry_destroyed (GtkWidget *widget)
 void cb_search_changed(GtkEntry* entry,  gpointer user_data )
 { GtkEntryBuffer *b=gtk_entry_get_buffer(entry);
   const char *str=gtk_entry_buffer_get_text(b);
-  g_print("Search %s\n", str);
+  LOG("Search %s\n", str);
   search_string(str);
 }
 
 #if 0
 void cb_search_quit(void)
-{ //g_print("Close Search\n");
+{ //LOG("Close Search\n");
 }
 #endif
 

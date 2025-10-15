@@ -25,7 +25,7 @@ add_outlines(int i, int depth, GtkTreeIter *base, GtkTreeStore *model)
 { GtkTreeIter iter;
   while (i<=outlines_max)
   {
-    //g_print("Outline[%d]: %s %d\n",i, outlines[i].title,outlines[i].depth);
+    //LOG("Outline[%d]: %s %d\n",i, outlines[i].title,outlines[i].depth);
     if (outlines[i].depth<depth) return i;
     if (outlines[i].depth==depth)
     { gtk_tree_store_append (model, &iter, base);
@@ -77,7 +77,7 @@ static cb_activated (
   m= gtk_tree_view_get_model(self);
   gtk_tree_model_get_iter (m,&i,path); 
   gtk_tree_model_get (m,&i,SECTION_COL,&s,LINK_COL,&l,-1);
-  // g_print("Activated %s %d\n",s,l);
+  // LOG("Activated %s %d\n",s,l);
   goto_outline(l);
 }
 
@@ -86,7 +86,7 @@ static void cb_outlines_quit(void)
 { outlines=NULL;
   outlines_max=-1;
   tree_view=NULL;
-  //  g_print("Quit Tree Store\n");
+  //  LOG("Quit Tree Store\n");
 }
 
 
@@ -100,7 +100,7 @@ outlines_set(void)
   model = create_model ();
   gtk_tree_view_set_model(GTK_TREE_VIEW(tree_view), GTK_TREE_MODEL(model));
   g_object_unref (model);
-  //g_print("Outline set\n");  
+  //LOG("Outline set\n");  
 }
 
 /* clear the model in the outline window */
@@ -122,7 +122,7 @@ outlines_open (GtkWidget *parent_widget)
     GtkCellRenderer *renderer;
     GtkTreeViewColumn *column;
 
-    //g_print("Creating ts window\n");
+    //LOG("Creating ts window\n");
     /* create outline_window, etc */
     outline_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_window_set_screen (GTK_WINDOW (outline_window),

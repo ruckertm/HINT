@@ -41,7 +41,7 @@ cb_spin_rpx_threshold(GtkSpinButton* self, gpointer user_data)
 void
 cb_spin_gcorrection (GtkSpinButton* self, gpointer user_data)
 { gcorrection = gtk_spin_button_get_value (self);
-  g_print("Gamma %f\n", gcorrection);
+  LOG("Gamma %f\n", gcorrection);
   do_render(0,0,1);
 }
 
@@ -54,7 +54,7 @@ cb_response (GtkDialog* self, gint response, gpointer user_data)
 void cb_dialog_unrealize(GtkWidget* self, gpointer user_data)
 {
      is_running=FALSE;
-     // g_print("Preferences Unrealize\n");
+     // LOG("Preferences Unrealize\n");
 }
 
 
