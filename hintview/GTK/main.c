@@ -683,16 +683,39 @@ cb_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data)
   return TRUE;
 }
 
+static gboolean
+cb_scroll( GtkEventControllerScroll* self,  gdouble dx,  gdouble dy,  gpointer user_data)
+{ if (dy > 0.0)
+  { position=hint_page_next();
+    hint_page();
+    //clear_cursor();
+    RENDER;
+  }
+  else if (dy< 0.0)
+  { position=hint_page_prev();
+    hint_page();
+    //clear_cursor();
+    RENDER;
+  }
+  return TRUE;
+}
+
+
 static void
 activate (GtkApplication *app,
           gpointer        user_data)
-{ LOG("Activate\n");
+{ GtkEventController* scroll_controler;
+
+  LOG("Activate\n");
   window = gtk_application_window_new (app);
   gtk_window_set_title (GTK_WINDOW (window), "hintview");
   gtk_window_set_default_size (GTK_WINDOW (window), px_h, px_v);
 
   g_signal_connect(G_OBJECT(window), "configure-event", G_CALLBACK(cb_configure), NULL);
   g_signal_connect (G_OBJECT (window), "key_press_event", G_CALLBACK (cb_key_press), NULL);
+
+  //  g_signal_connect (G_OBJECT (window), "scroll-event", G_CALLBACK (cb_scroll_event), NULL);
+    gtk_widget_add_events (window, GDK_SCROLL_MASK);
 
 
   area= gtk_gl_area_new();
@@ -701,20 +724,25 @@ activate (GtkApplication *app,
   g_signal_connect (area, "create-context", G_CALLBACK (cb_create_context), NULL);
   g_signal_connect (area, "unrealize", G_CALLBACK (cb_unrealize), NULL);
 
-  // not working with configure-event
-  //g_signal_connect (area, "resize", G_CALLBACK (cb_resize), NULL);
+  scroll_controler= gtk_event_controller_scroll_new (area,
+		   GTK_EVENT_CONTROLLER_SCROLL_VERTICAL
+		 | GTK_EVENT_CONTROLLER_SCROLL_DISCRETE);
+  g_signal_connect (scroll_controler, "scroll", G_CALLBACK (cb_scroll), NULL);
 
   gtk_container_add (GTK_CONTAINER (window), area);
 
   gtk_widget_set_events (area, GDK_BUTTON_PRESS_MASK
 		       | GDK_BUTTON_RELEASE_MASK
 		       | GDK_BUTTON1_MOTION_MASK
-		       | GDK_ENTER_NOTIFY_MASK);
+		       | GDK_ENTER_NOTIFY_MASK
+			 //  | GDK_SCROLL_MASK
+		       );
    g_signal_connect (area, "button_press_event", G_CALLBACK (cb_mouse_button_down), NULL);
    g_signal_connect (area, "button_release_event", G_CALLBACK (cb_mouse_button_up), NULL);
    g_signal_connect (area, "motion_notify_event", G_CALLBACK (cb_mouse_motion), NULL);
    g_signal_connect (area, "enter-notify-event", G_CALLBACK (cb_enter_notify_event), NULL);
 
+   
   gtk_window_set_titlebar (GTK_WINDOW (window), create_headerbar());
   LOG("Show all\n");
    gtk_widget_show_all (window);
