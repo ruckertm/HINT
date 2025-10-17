@@ -8,8 +8,6 @@ LDFLAGS = -O2
 endif
 
 FT_INCLUDES = -I/usr/include/freetype2
-GL_INCLUDES = $(FT_INCLUDES)
-
 
 HFILES =     format.h get.h basetypes.h error.h \
 	     hint.h rendernative.h
@@ -22,7 +20,7 @@ ifeq (Msys,$(shell uname -o))
 LIBS= ../external/glfw-3.1.2/msys.build/src/libglfw3.a ../external/libglew.a  -lfreetype \
 	       -lm -lz
 else
-LIBS= -lglfw -lGLEW -ldl -lfreetype -lX11 -lXrandr -lXinerama -lXi -lXcursor -lGL -lz -lpthread -lm 
+LIBS= -lglfw -lGLEW -lfreetype -lGL -lz -lm 
 endif
 
 all: hintview
@@ -60,6 +58,7 @@ DIST_MAN = man/hintview.1
 
 BINDIR=/usr/local/bin
 MANDIR=/usr/local/man
+
 
 install: hintview
 	strip hintview
