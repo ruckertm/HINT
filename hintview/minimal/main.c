@@ -40,7 +40,7 @@
 
 #define VERSION 2
 #define MINOR_VERSION 2
-#define REVISION 1
+#define REVISION 2
 
 #include "error.h"
 #include "basetypes.h"
@@ -54,16 +54,6 @@ static int hint_error(const char *title, const char *message)
 { fprintf(stderr,"ERROR %s: %s\n",title,message);
   return 0;
 }
-
-#if 0
-/* currently not used */
-static int hmessage(char *title, char *format, ...)
-{ va_list vargs;
-  va_start(vargs,format);
-  vfprintf(stderr, format, vargs);
-  return 0;
-}
-#endif
 
 static void error_callback(int error, const char* description)
 { hint_error("OpenGL",description);
@@ -227,9 +217,6 @@ static int open_file(int home)
     hint_page_home();
   else
     hint_page_top(0);
-    //  strncpy(title_name,hin_name,MAX_PATH);
-    //	SetNavigationTree();
-   //SetWindowText(hMainWnd,title_name);
 return 1;
 } 
 
@@ -275,57 +262,7 @@ static int set_hin_name(char *fn)
   return 1;
 }
 
-#if (WITH_GTK==2) ||  (WITH_GTK==3)
-#include <gtk/gtk.h>
 
-static int file_chooser(void)
-{ GtkWidget *dialog;
-  GtkFileFilter *filter;
-  gint res;
-
-  if ( !gtk_init_check( NULL, NULL ) )
-  { fprintf(stderr,"ERROR: Unable to initialize GTK\n");
-       return 0;
-  }
-
-  dialog = gtk_file_chooser_dialog_new ("Open File",
-					NULL,/* no parent */
-                                      GTK_FILE_CHOOSER_ACTION_OPEN,
-                                      "_Cancel", GTK_RESPONSE_CANCEL,
-                                      "_Open", GTK_RESPONSE_ACCEPT,
-                                      NULL);
-  
-  filter = gtk_file_filter_new();
-  gtk_file_filter_set_name( filter, "HINT file" );
-  gtk_file_filter_add_pattern( filter, "*.hnt");
-  gtk_file_chooser_add_filter( GTK_FILE_CHOOSER(dialog), filter );
-
-  res = gtk_dialog_run (GTK_DIALOG (dialog));
-  if (res == GTK_RESPONSE_ACCEPT)
-  { char *fn;
-    fn = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
-    res=set_hin_name(fn);
-    g_free (fn);
-  }
-  else
-    res=0;
-  gtk_widget_destroy (dialog);
-  while (gtk_events_pending()) gtk_main_iteration();
-  return res;
-}
-#else
-static int file_chooser(void)
-{ return 0; }
-#endif
-
-
-static int set_input_file(char *fn)
-{ 
-  if (fn!=NULL)
-    return set_hin_name(fn);
-  else  
-    return file_chooser();
-}
 
 static int dark = 0, loading=0, autoreload=0, home=0;
 
@@ -380,7 +317,7 @@ static int command_line(int argc, char *argv[])
         default: return usage();
       }
     }
-  if (!set_input_file(argv[i]))
+  if (argv[i]==NULL || !set_hin_name(argv[i]))
     return usage();
   return 1;	
 }
@@ -406,15 +343,13 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     autoreload=!autoreload;
     if (autoreload)
       goto reload;
-  case CTRL(GLFW_KEY_F): /* file */
-    if (set_input_file(NULL))
-      open_file(home);
-    break;
   case CTRL(GLFW_KEY_N):
     dark=!dark;
     hint_dark(dark);
     break;
   case CTRL(GLFW_KEY_O): /* outlines */
+    break;
+  case CTRL(GLFW_KEY_F): /* open file dialog */
     break;
   case CTRL(GLFW_KEY_P): /* round position to pixel */
     { static bool rpx=true;
@@ -479,8 +414,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 }
 
 /* convert pixel to scaled points (including scale) */
-
-#define PX2SP(X,DPI) floor((X)*ONE*72.27/((DPI)*scale))
 
 static void mouse_click(void)
 { double x,y;
