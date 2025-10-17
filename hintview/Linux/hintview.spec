@@ -1,48 +1,61 @@
 Name: hintview
-Version: 2.1.0
+Version: 2.2.1
 Release: 1%{?dist}
-Summary: Hintview for Linux
+Summary: HintView for Linux (GTK)
 License: GPLv2.1
 Packager: Andreas Scherer <https://ascherer.github.io/>
 
 URL: https://hint.userweb.mwn.de/hint/%{name}.html
-Source0: https://github.com/ruckertm/HINT/eleases/%{name}-%{version}.tar.gz
+Source0: https://github.com/ruckertm/HINT/releases/%{name}-%{version}.tar.gz
 
 %if "%{_vendor}" == "debbuild"
-BuildRequires: libegl-dev libegl1-mesa-dev libffi-dev
-BuildRequires: libgl-dev libgl1-mesa-dev libgles-dev
-BuildRequires: libglew-dev libglfw3-dev libglu1-mesa-dev
-BuildRequires: libglvnd-core-dev libglvnd-dev libglx-dev
-BuildRequires: libopengl-dev libvulkan-dev libwayland-bin
-BuildRequires: libwayland-dev libxcursor-dev libxext-dev
-BuildRequires: libxfixes-dev libxi-dev libxinerama-dev
-BuildRequires: libxrandr-dev libxrender-dev
-Requires: libglew2.2 libglfw3
+BuildRequires: gir1.2-freedesktop-dev gir1.2-glib-2.0-dev icu-devtools
+BuildRequires: libatk-bridge2.0-dev libatk1.0-dev libatspi2.0-dev libblkid-dev
+BuildRequires: libcairo2-dev libdatrie-dev libdbus-1-dev libdeflate-dev
+BuildRequires: libepoxy-dev libfribidi-dev libgdk-pixbuf-2.0-dev libglib2.0-dev
+BuildRequires: libglib2.0-dev-bin libgraphite2-dev libgtk-3-dev libharfbuzz-dev
+BuildRequires: libice-dev libicu-dev libjbig-dev libjpeg-dev libjpeg-turbo8-dev
+BuildRequires: libjpeg8-dev liblerc-dev liblzma-dev libmount-dev
+BuildREquires: libpango1.0-dev libpcre2-dev libpixman-1-dev libselinux1-dev
+BuildRequires: libsepol-dev libsharpyuv-dev libsm-dev libthai-dev libtiff-dev
+BuildRequires: libwebp-dev libxcb-render0-dev libxcb-shm0-dev libxcomposite-dev
+BuildRequires: libxdamage-dev libxft-dev libxkbcommon-dev libxtst-dev
+BuildRequires: libzstd-dev
+Requires: gir1.2-atspi-2.0 libcairo-script-interpreter2 libgirepository-2.0-0
+Requires: libglib2.0-bin libharfbuzz-cairo0 libpcre2-posix3 libtiffxx6
+Requires: libwebpdecoder3 pango1.0-tools wayland-protocols
 %endif
 
 %description
-The Hintview program for Linux.
+The HintView program for Linux with GTK interface.
 
 %prep
 %autosetup -c
 
 %build
-cd %{name}/Linux
+cd %{name}/GTK
 make
 
 %install
-cd %{name}/Linux
+cd %{name}/GTK
 strip hintview
 %{__rm} -rf %{buildroot}
 %{__install} -d %{buildroot}%{_bindir} \
-	%{buildroot}%{_mandir}/man1
+    %{buildroot}%{_datadir}/glib-2.0/schemas
 %{__install} -t %{buildroot}%{_bindir} --mode=755 hintview
-%{__install} -t %{buildroot}%{_mandir}/man1 --mode=644 hintview.1
+%{__install} -t %{buildroot}%{_datadir}/glib-2.0/schemas \
+    edu.hm.cs.hintview.gschema.xml
 
 %files
 %{_bindir}/%{name}
-%{_mandir}/man1/%{name}.1.gz
+%{_datadir}/glib-2.0/schemas/edu.hm.cs.hintview.gschema.xml
+
+%post
+glib-compile-schemas %{_datadir}/glib-2.0/schemas/
+
+%postun
+glib-compile-schemas %{_datadir}/glib-2.0/schemas/
 
 %changelog
-* Fri Sep 29 2023 Andreas Scherer <https://ascherer.github.io>
-- First Hintview package
+* Sun Oct 12 2025 Andreas Scherer <https://ascherer.github.io>
+- HintView/GTK package

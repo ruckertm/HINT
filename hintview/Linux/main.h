@@ -1,31 +1,30 @@
-/* This file is part of HINT
- * Copyright 2017-2021 Martin Ruckert, Hochschule Muenchen, Lothstrasse 64, 80336 Muenchen
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
- * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
- * OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- * Except as contained in this notice, the name of the copyright holders shall
- * not be used in advertising or otherwise to promote the sale, use or other
- * dealings in this Software without prior written authorization from the
- * copyright holders.
- */
-#ifndef MAIN_H
-#define MAIN_H
+#define VERSION 3
+#define MINOR_VERSION 0
+#define REVISION 0
 
-#endif /*MAIN_H*/ 
+/* in main.c */
+extern double gcorrection, scale, rpxthreshold;
+extern int dark, autoreload, home, rpx;
+extern uint64_t position;
+extern char *document;
+
+extern void do_render(int d, int s, int g);
+extern void do_rpx(void);
+extern void do_open_file(void);
+extern void do_reload(void);
+extern void do_search(void);
+extern void do_zoom_1(void);
+extern void do_home(void);
+extern void do_outlines(void);
+extern void do_quit(void);
+extern int  do_dark(int toggle);
+extern void goto_outline(int i);
+extern int search_string(const char *str);
+extern int search_next(int next);
+extern int main (int argc, char *argv[]);
+
+#ifdef DEBUG
+#define LOG(...) g_print(__VA_ARGS__)
+#else
+#define LOG(...)
+#endif

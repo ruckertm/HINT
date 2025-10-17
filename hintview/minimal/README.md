@@ -15,9 +15,6 @@ Further, the following libraries mus be available:
 libdl, libglew, libglfw3 libfreetype, libX11, libXrandr, libXinerama, 
 libXi, libXcursor, libGL, libz, libpthread, libm, libc.
 
-Depending on the availability of gtk+ it will add a dialog for opening files.
-Without gtk+, the input file must be given on the command line.
-
 ### hintview.1
 The man page for hintview
 
