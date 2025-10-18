@@ -2,6 +2,7 @@
 #include "basetypes.h"
 #include "main.h"
 #include "gui.h"
+#include "error.h"
 
 #define SR_BOOL(VAL) VAL=g_settings_get_boolean(settings,#VAL) 
 #define SR_DOUBLE(VAL) VAL=g_settings_get_double(settings,#VAL) 

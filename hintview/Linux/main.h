@@ -22,9 +22,3 @@ extern void goto_outline(int i);
 extern int search_string(const char *str);
 extern int search_next(int next);
 extern int main (int argc, char *argv[]);
-
-#ifdef DEBUG
-#define LOG(...) g_print(__VA_ARGS__)
-#else
-#define LOG(...)
-#endif

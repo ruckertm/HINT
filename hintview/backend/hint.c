@@ -1,5 +1,5 @@
 /*688:*/
-#line 14840 "hint.w"
+#line 14877 "hint.w"
 
 #include "basetypes.h"
 #include <string.h> 
@@ -573,7 +573,7 @@ else if(glue_temp<-billion)  \
 glue_temp= -billion \
 
 
-#line 14859 "hint.w"
+#line 14896 "hint.w"
 
 enum{/*5:*/
 #line 468 "hint.w"
@@ -593,7 +593,7 @@ nest_size= 400,
 
 
 /*:5*/
-#line 14860 "hint.w"
+#line 14897 "hint.w"
 };
 /*15:*/
 #line 661 "hint.w"
@@ -716,7 +716,7 @@ unsigned char*pk_glyph_data;
 
 }Gcache;
 /*:659*/
-#line 14861 "hint.w"
+#line 14898 "hint.w"
 
 
 /*384:*/
@@ -947,7 +947,7 @@ tail_append(p);}
     RNG("label color",color_ref(as_color(p)),0,max_ref[color_kind]);\
   tail_append(p);}
 /*:506*/
-#line 14863 "hint.w"
+#line 14900 "hint.w"
 
 /*386:*/
 #line 7846 "hint.w"
@@ -1153,7 +1153,7 @@ tail_append(p);}
     RNG("label color",color_ref(as_color(p)),0,max_ref[color_kind]);\
   tail_append(p);}
 /*:507*/
-#line 14864 "hint.w"
+#line 14901 "hint.w"
 
 
 /*24:*/
@@ -1480,12 +1480,12 @@ static FT_Error ft_err;
 
 static Gcache g_undefined= {0};
 /*:656*//*677:*/
-#line 14555 "hint.w"
+#line 14592 "hint.w"
 
 jmp_buf hint_error_exit;
 char hint_error_string[MAX_HINT_ERROR];
 /*:677*/
-#line 14866 "hint.w"
+#line 14903 "hint.w"
 
 
 /*300:*/
@@ -1623,12 +1623,12 @@ static scaled ft_glyph_width(FT_Face ft_face,FT_UInt ft_gid,scaled s);
 static void ft_glyph_height_depth(FT_Face ft_face,FT_UInt ft_gid,
 scaled*h,scaled*d,scaled s);
 /*:653*//*687:*/
-#line 14830 "hint.w"
+#line 14867 "hint.w"
 
 static void leak_in(pointer p,int s);
 static void leak_out(pointer p,int s);
 /*:687*/
-#line 14868 "hint.w"
+#line 14905 "hint.w"
 
 
 #ifdef HINTTYPE
@@ -2196,7 +2196,7 @@ file_offset++;
 if(file_offset==max_print_line)print_ln();
 }
 /*:396*/
-#line 14871 "hint.w"
+#line 14908 "hint.w"
 
 #endif
 
@@ -2216,7 +2216,7 @@ static void confusion(char*s)
 
 
 /*:12*/
-#line 14874 "hint.w"
+#line 14911 "hint.w"
 
 
 /*14:*/
@@ -5600,7 +5600,7 @@ push_nest();
 }
 
 /*:280*/
-#line 14876 "hint.w"
+#line 14913 "hint.w"
 
 
 /*306:*/
@@ -7295,7 +7295,7 @@ return c;
 }
 #endif
 /*:646*//*686:*/
-#line 14786 "hint.w"
+#line 14823 "hint.w"
 
 #ifdef DEBUG
 #define MAX_LEAKS (1<<16)
@@ -7339,7 +7339,7 @@ fprintf(stderr,"ERROR:leak final: p=%d, s=%d\n",i,leaks[i]);
 #endif
 }
 /*:686*/
-#line 14878 "hint.w"
+#line 14915 "hint.w"
 
 
 /*298:*/
@@ -7985,7 +7985,7 @@ if(a!=z)tag_mismatch(a,z,node_pos,(uint32_t)(hpos-hstart-1));
 return par_ptr;
 }
 /*:470*/
-#line 14880 "hint.w"
+#line 14917 "hint.w"
 
 /*382:*/
 #line 7788 "hint.w"
@@ -8288,7 +8288,7 @@ return p;
 }
 #endif
 /*:458*/
-#line 14881 "hint.w"
+#line 14918 "hint.w"
 
 
 /*643:*/
@@ -8404,7 +8404,7 @@ else
 return ft_width(ft_face,c,font_size[f]);
 }
 /*:651*/
-#line 14883 "hint.w"
+#line 14920 "hint.w"
 
 
 
@@ -8424,7 +8424,7 @@ font_def[f].ff= no_format;
 }
 }
 /*:629*/
-#line 14886 "hint.w"
+#line 14923 "hint.w"
 
 
 #ifdef HINTTYPE
@@ -8451,13 +8451,13 @@ void nativeSetSize(int px_h,int px_v,double pt_x,double pt_v){}
 static int unpack_pk_file(internal_font_number f)
 {return 1;}
 /*:641*//*685:*/
-#line 14774 "hint.w"
+#line 14811 "hint.w"
 
 void hint_show_page(void)
 {show_box(streams[0].p);
 }
 /*:685*/
-#line 14890 "hint.w"
+#line 14927 "hint.w"
 
 #else
 
@@ -8505,7 +8505,7 @@ static uint32_t cur_fg;
 static scaled cur_h,cur_v;
 static scaled rule_ht,rule_dp,rule_wd;
 /*:670*/
-#line 14893 "hint.w"
+#line 14930 "hint.w"
 
 /*633:*/
 #line 12716 "hint.w"
@@ -8756,7 +8756,7 @@ return 1;
 }
 
 /*:640*/
-#line 14894 "hint.w"
+#line 14931 "hint.w"
 
 /*476:*/
 #line 9442 "hint.w"
@@ -10882,7 +10882,7 @@ int hint_print(unsigned char*bits)
 {return nativePrint(bits);
 }
 /*:675*/
-#line 14895 "hint.w"
+#line 14932 "hint.w"
 
 #endif
 
@@ -11647,7 +11647,7 @@ font_def[f].vpxs= 0;
 }
 }
 /*:626*/
-#line 14899 "hint.w"
+#line 14936 "hint.w"
 
 
 /*:688*/

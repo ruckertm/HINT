@@ -2,6 +2,7 @@
 #include "basetypes.h"
 #include "main.h"
 #include "gui.h"
+#include "error.h"
 
 void
 cb_document_open (GtkButton* self, gpointer user_data)
@@ -40,13 +41,12 @@ cb_reload (GtkButton* self, gpointer user_data)
 void
 cb_about (GtkButton* self, gpointer user_data)
 { do_about();
-  LOG("About\n");
 }
 
 void
 cb_help (GtkButton* self, gpointer user_data)
 { 
-  LOG("Help\n");
+  LOG("Help not yet implemented\n");
 }
 
 void
@@ -130,9 +130,9 @@ create_headerbar (void)
     gtk_header_bar_pack_start (GTK_HEADER_BAR (header), button);
     if (b->cb!=NULL)
       { g_signal_connect (button, "clicked", G_CALLBACK (b->cb), NULL);
-	LOG("Connect cb\n"); 
+	//LOG("Connect cb\n"); 
       }
-    LOG("Button %d %d\n",i,buttonvisibility & (1<<i));
+    //LOG("Button %d %d\n",i,buttonvisibility & (1<<i));
     gtk_widget_set_no_show_all (GTK_WIDGET(button),TRUE);
     if (buttonvisibility & (1<<i))
       gtk_widget_show(GTK_WIDGET(button));

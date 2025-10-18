@@ -8,10 +8,10 @@ GTK_LIBS = $(shell $(PKGCONFIG) --libs gtk+-3.0)
 
 CC= gcc
 ifdef DEBUG
-CFLAGS = -g -O0 -ggdb -DDEBUG -Wall -I../backend
+CFLAGS = -g -O0 -ggdb -DDEBUG -DHAVE_HINT_ERROR -DHAVE_HINT_MESSAGE -Wall -I../backend
 LDFLAGS = -g -Og -ggdb
 else
-CFLAGS = -O2 -Wall -I../backend
+CFLAGS = -O2 -Wall -I../backend -DHAVE_HINT_ERROR -DHAVE_HINT_MESSAGE
 LDFLAGS = -O2
 endif
 
@@ -25,6 +25,9 @@ LIBS = -lGLEW -lGL -lfreetype -lz -lm
 endif
 
 
+SRC= about.c main.c preferences.c resources.c settings.c \
+	header.c outline.c renderOGL.c search-bar.c 
+
 OBJ= main.o renderOGL.o get.o hint.o tables.o \
  search-bar.o  outline.o header.o settings.o about.o\
  resources.o preferences.o
@@ -37,7 +40,9 @@ all: hintview
 
 -include .depend
 
-.depend: main.c  renderOGL.c 
+
+
+.depend: $(SRC)
 	$(CC) -I../backend -MM *.c  > $@ || true
 
 main.o: main.c

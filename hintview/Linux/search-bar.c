@@ -5,6 +5,7 @@
 #include <gtk/gtk.h>
 #include <stdbool.h>
 #include "main.h"
+#include "error.h"
 
 static GtkWidget *search_window = NULL;
 

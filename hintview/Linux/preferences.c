@@ -2,6 +2,7 @@
 #include "basetypes.h"
 #include "main.h"
 #include "gui.h"
+#include "error.h"
 
 static GtkWidget *dialog=NULL;
 static int is_running=FALSE;

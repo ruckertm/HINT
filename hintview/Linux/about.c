@@ -1,14 +1,23 @@
 #include <gtk/gtk.h>
 #include "basetypes.h"
 #include "main.h"
+#include "error.h"
 
 #define STR(S) EXP(S)
 #define EXP(S) #S
 
+static GtkWidget *get_logo(void)
+{  static GtkWidget *logo=NULL;
+    if (logo==NULL)
+    { logo=gtk_image_new_from_resource ("/edu/hm/cs/hintview/logo");
+      g_object_ref(logo);
+    }
+    return logo;
+}
+
 void
 do_about (void)
-{ GtkWidget *logo;
-  GtkWidget *dialog,*content_area,*label, *hbox;
+{ GtkWidget *dialog,*content_area,*label, *hbox;
   
   dialog = gtk_dialog_new_with_buttons ("About HintView",NULL,
 					GTK_DIALOG_MODAL,
@@ -23,10 +32,8 @@ do_about (void)
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8);
   gtk_container_set_border_width (GTK_CONTAINER (hbox), 8);
   gtk_box_pack_start (GTK_BOX (content_area), hbox, FALSE, FALSE, 10);
-
-  logo=gtk_image_new_from_resource ("/edu/hm/cs/hintview/logo");
   
-  gtk_box_pack_start (GTK_BOX (hbox), logo, FALSE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (hbox), get_logo(), FALSE, FALSE, 0);
 
   label=gtk_label_new(NULL);
   gtk_label_set_markup (GTK_LABEL (label),
@@ -60,16 +67,53 @@ do_about (void)
 }
 
 
-#if 0
-int
-main(int argc, char **argv)
+int hint_error(const char *title, const char *message)
 {
-    GtkWidget *window;
+  GtkWidget *dialog,*content_area,*label;
+  
+  dialog = gtk_dialog_new_with_buttons (title,NULL,
+					GTK_DIALOG_MODAL,
+					"OK",
+                                        GTK_RESPONSE_OK,
+					NULL);
 
-    gtk_init(&argc, &argv);
-    do_about();
-    gtk_main();
-    return 0;
+  gtk_window_set_resizable(GTK_WINDOW(dialog),FALSE);
+  gtk_window_set_type_hint(GTK_WINDOW(dialog),GDK_WINDOW_TYPE_HINT_DIALOG);
+  
+  content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
+  gtk_box_pack_start (GTK_BOX (content_area), get_logo(), FALSE, FALSE, 10);
+  label=gtk_label_new(message);
+  gtk_box_pack_start (GTK_BOX (content_area), label, FALSE, FALSE, 10);
+  gtk_widget_show_all (dialog);
+  gtk_dialog_run (GTK_DIALOG (dialog));
+  gtk_widget_destroy (dialog);
+  return 0;
 }
-#endif
+
+
+
+void hint_message(char *title, char *format, ...)
+{ GtkWidget *dialog,*content_area,*label;
+  char str[1024];
+  va_list vargs;
+  va_start(vargs,format);
+  vsnprintf(str, 1024, format, vargs);
+  
+  dialog = gtk_dialog_new_with_buttons (title,NULL,
+					GTK_DIALOG_MODAL,
+					"OK",
+                                        GTK_RESPONSE_OK,
+					NULL);
+
+  gtk_window_set_resizable(GTK_WINDOW(dialog),FALSE);
+  gtk_window_set_type_hint(GTK_WINDOW(dialog),GDK_WINDOW_TYPE_HINT_DIALOG);
+  
+  content_area = gtk_dialog_get_content_area (GTK_DIALOG (dialog));
+  gtk_box_pack_start (GTK_BOX (content_area), get_logo(), FALSE, FALSE, 10);
+  label=gtk_label_new(str);
+  gtk_box_pack_start (GTK_BOX (content_area), label, FALSE, FALSE, 10);
+  gtk_widget_show_all (dialog);
+  gtk_dialog_run (GTK_DIALOG (dialog));
+  gtk_widget_destroy (dialog);
+}
 

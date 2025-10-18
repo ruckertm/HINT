@@ -99,7 +99,8 @@ outlines_set(void)
   if (tree_view==NULL) return;
   model = create_model ();
   gtk_tree_view_set_model(GTK_TREE_VIEW(tree_view), GTK_TREE_MODEL(model));
-  g_object_unref (model);
+  if (model!=NULL)
+    g_object_unref (model);
   //LOG("Outline set\n");  
 }
 

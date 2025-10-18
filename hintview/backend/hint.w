@@ -14477,6 +14477,12 @@ The file {\tt error.h} is responsible for defining these macros:
 The implementation of these macros is highly implementation dependent.
 So the following provides some  special solutions
 for Windows, Apple, and Android followed by useful defaults.
+To customize the error handling, an application may define 
+the macros |HAVE_HINT_LOG|, |HAVE_HINT_MESSAGE|, and |HAVE_HINT_ERROR|.
+In this case, the linker will expect the |extern| functions 
+|hint_log|, |hint_message|, and |hint_error| according to the
+prototypes given below.
+
 
 \index{LOG+\.{LOG}}
 \index{MESSAGE+\.{MESSAGE}}\index{QUIT+\.{QUIT}}
@@ -14484,9 +14490,11 @@ for Windows, Apple, and Android followed by useful defaults.
 @(error.h@>=
 #ifndef _ERROR_H
 #define _ERROR_H
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <setjmp.h>
+
 #define MAX_HINT_ERROR 1024
 extern char hint_error_string[MAX_HINT_ERROR];
 extern FILE *hlog;
@@ -14524,8 +14532,35 @@ extern int hint_error(const char*title,const char*msg);
 #define ERROR_MESSAGE hint_error("ERROR",hint_error_string)
 #endif
 
+/*Check for the |HAVE_|\dots macros.*/
+
+#ifdef HAVE_HINT_LOG
+#ifdef DEBUG
+extern void hint_log(const char*format,...);
+#define LOG(...) hint_log(__VA_ARGS__)
+#else
+#define @[LOG(...)@] /*do nothing*/
+#endif
+#endif
+
+#ifdef HAVE_HINT_MESSAGE
+extern void hint_message(char *title, char *format, ...);
+#define MESSAGE(...)  hint_message("HINT",__VA_ARGS__)
+#endif
+
+#ifdef HAVE_HINT_ERROR
+extern int hint_error(const char *title, const char *msg);
+#define ERROR_MESSAGE  hint_error("HINT ERROR",hint_error_string)
+#endif
+
+/* Fall back to |hlog| and |stderr|. */
+
 #ifndef LOG
+#ifdef DEBUG
 #define @[LOG(...)@] @[(fprintf(hlog,__VA_ARGS__),fflush(hlog))@]
+#else
+#define @[LOG(...)@] /*do nothing*/
+#endif
 #endif
 
 #ifndef MESSAGE
@@ -14535,6 +14570,8 @@ extern int hint_error(const char*title,const char*msg);
 #ifndef ERROR_MESSAGE
 #define ERROR_MESSAGE        fprintf(stderr,"ERROR: %s\n",hint_error_string)   
 #endif
+
+/* Sometimes we have to give up! */
 
 #ifndef QUIT
 #define QUIT(...)    (snprintf(hint_error_string,MAX_HINT_ERROR-1,__VA_ARGS__),\

@@ -47,10 +47,6 @@
 #include "resources.h"
 
 /* Error Handling */
-static int hint_error(const char *title, const char *message)
-{ fprintf(stderr,"ERROR %s: %s\n",title,message);
-  return 0;
-}
 
 #if 0 /* not yet used */
 static void error_callback(int error, const char* description)
@@ -160,8 +156,9 @@ int search_string(const char *str)
 }
 
 int search_next(int next)
-{uint64_t h=hint_page_get();
-  bool success; 
+{ uint64_t h=hint_page_get();
+  bool success;
+  HINT_TRY{
   if(next)
     success=hint_next_mark();
  else
@@ -170,6 +167,9 @@ int search_next(int next)
 	hint_page_top(h);
   RENDER;
   return success;
+  }
+  else
+    return 0;
 }
 
 
@@ -184,6 +184,7 @@ void goto_outline(int i)
 static int open_file(int home)
 {
   LOG("File open %d\n", home);
+  HINT_TRY {
   hint_end();
   if (!hint_begin())
     return 0;
@@ -203,6 +204,9 @@ static int open_file(int home)
       gtk_window_set_title (GTK_WINDOW (window), p);
   }
   LOG("File open\n");
+  }
+  else
+    return 0;
 return 1;
 } 
 
@@ -314,9 +318,11 @@ void do_rpx(void) /* round glyph positions to pixel */
 
 
 void do_home(void)
-{ HINT_TRY hint_page_home();
-  RENDER;
+{ HINT_TRY{
+    hint_page_home();
+    RENDER;
   //clear_cursor();
+  }
 }
 
 void do_outlines(void)
@@ -359,13 +365,14 @@ cb_realize (GtkGLArea *area)
     if (gtk_gl_area_get_error (area) != NULL)
       return;
     gtk_gl_area_set_auto_render (area,FALSE);
-
-    hint_render_on();
-    hint_dark(dark);
-    do_dark(0);
-    if (!open_file(home))
-      return;
-    do_render(1,1,1);
+    HINT_TRY{
+      hint_render_on();
+      hint_dark(dark);
+      do_dark(0);
+      if (!open_file(home))
+        return;
+      do_render(1,1,1);
+    }
     LOG("Realize Done\n");
 }
 
@@ -373,7 +380,7 @@ static void
 cb_unrealize (GtkGLArea* area, gpointer user_data)
 { gtk_gl_area_make_current (area);
   hint_render_off();
-  LOG("Unrealize");
+  LOG("Unrealize\n");
 }
 
 static GdkGLContext* cb_create_context (GtkGLArea* self, gpointer user_data)
@@ -413,11 +420,12 @@ cb_render (GtkGLArea *area, GdkGLContext *context)
       }
     if (size_change)
       { size_change=FALSE;
+	HINT_TRY{
 	hint_resize(px_h,px_v,scale*x_dpi,scale*y_dpi);
         hint_page();
+	}
       }
-    
-    hint_render();
+    HINT_TRY hint_render();
     LOG("Render\n");
 
     // we completed our drawing; the draw commands will be
@@ -430,15 +438,17 @@ cb_render (GtkGLArea *area, GdkGLContext *context)
 static gboolean
 cb_scroll( GtkEventControllerScroll* self,  gdouble dx,  gdouble dy,  gpointer user_data)
 { if (dy > 0.0)
-  { position=hint_page_next();
+    { HINT_TRY { position=hint_page_next();
     hint_page();
     //clear_cursor();
+      }
     RENDER;
   }
   else if (dy< 0.0)
-  { position=hint_page_prev();
+    { HINT_TRY{ position=hint_page_prev();
     hint_page();
     //clear_cursor();
+    }
     RENDER;
   }
   return TRUE;
@@ -559,16 +569,20 @@ cb_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data)
     }
     break;
   case GDK_KEY_Page_Down:
-    position=hint_page_next();
-    hint_page();
-    RENDER;
+    HINT_TRY{
+      position=hint_page_next();
+      hint_page();
+      RENDER;
     //clear_cursor();
+    }
     break;
   case GDK_KEY_Page_Up:
-    position=hint_page_prev();
-    hint_page();
-    RENDER;
-    //clear_cursor();
+    HINT_TRY{
+      position=hint_page_prev();
+      hint_page();
+      RENDER;
+      //clear_cursor();
+    }
     break;
   case GDK_KEY_Home: do_home(); break;
   default:
