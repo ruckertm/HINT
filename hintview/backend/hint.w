@@ -9215,7 +9215,7 @@ start a new nesting level, and set its horizontal size.
 @<prepare for reading the paragraph list@>=
   pointer par_ptr=null;
   if (KIND(*hpos)==list_kind)
-  { uint32_t s, t;
+  { uint32_t s=0, t=0;
     @<read the start byte |a|@>@;
     if ((INFO(a)&b011)==0) 
       HGET8; /* the empty list */
