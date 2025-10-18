@@ -608,9 +608,11 @@ typedef int8_t small_number;
 
 #if __SIZEOF_FLOAT__==4
 #else
+#line 817 "hint.w"
 #error  float type must have size 4
 #endif
-typedef float glue_ratio;
+#line 819 "hint.w"
+ typedef float glue_ratio;
 
 /*:20*//*23:*/
 #line 897 "hint.w"
@@ -1176,9 +1178,11 @@ static int var_used,dyn_used;
 #define incr_dyn_used incr(dyn_used)
 #define decr_dyn_used decr(dyn_used)
 #else
+#line 994 "hint.w"
 #define incr_dyn_used
 #define decr_dyn_used
 #endif
+#line 997 "hint.w"
 
 /*:26*//*27:*/
 #line 1012 "hint.w"
@@ -1429,7 +1433,8 @@ static int32_t*integer_def;
 #if 0
 static double xdpi= 600.0,ydpi= 600.0;
 #endif
-static scaled x_px_size= PIXEL_SIZE_300_DPI,y_px_size= PIXEL_SIZE_300_DPI;
+#line 10287 "hint.w"
+ static scaled x_px_size= PIXEL_SIZE_300_DPI,y_px_size= PIXEL_SIZE_300_DPI;
 /*:527*//*530:*/
 #line 10399 "hint.w"
 
@@ -1613,6 +1618,7 @@ static void hload_font(uint8_t f);
 #ifdef DEBUG
 static bool ft_exists(internal_font_number f,int c);
 #endif
+#line 13365 "hint.w"
 
 static scaled ft_char_width(uint8_t f,int c);
 static void ft_destroy(void);
@@ -2199,6 +2205,7 @@ if(file_offset==max_print_line)print_ln();
 #line 14908 "hint.w"
 
 #endif
+#line 14873 "hint.w"
 
 /*11:*/
 #line 605 "hint.w"
@@ -2291,6 +2298,7 @@ link(p)= null;
 #ifdef STAT
 incr(dyn_used);
 #endif
+#line 1041 "hint.w"
 
 return p;
 }
@@ -2376,6 +2384,7 @@ found:link(r)= null;
 #ifdef STAT
 var_used= var_used+s;
 #endif
+#line 1113 "hint.w"
 
 leak_in(r,s);
 return r;
@@ -2395,6 +2404,7 @@ llink(rover)= p;rlink(q)= p;
 #ifdef STAT
 var_used= var_used-s;
 #endif
+#line 1187 "hint.w"
 
 }
 
@@ -3163,7 +3173,8 @@ if(font_bc[f]> c||font_ec[f]<c||
 (width_base[f]==0&&!ft_exists(f,c)))
 DBG(DBGFONT,"Warning: Character 0x%0X in font %d does not exist\n",c,f);
 #endif
-p= get_avail();font(p)= f;character(p)= qi(c);
+#line 2894 "hint.w"
+ p= get_avail();font(p)= f;character(p)= qi(c);
 return p;
 }
 
@@ -3659,7 +3670,8 @@ bool artificial_demerits;
 #ifdef STAT
 pointer save_link;
 #endif
-scaled shortfall;
+#line 3664 "hint.w"
+ scaled shortfall;
 
 /*:172*/
 #line 3626 "hint.w"
@@ -3827,6 +3839,7 @@ link(q)= passive;passive= q;cur_break(q)= cur_p;
 #ifdef STAT
 incr(pass_number);serial(q)= pass_number;
 #endif
+#line 3919 "hint.w"
 
 prev_break(q)= best_place[fit_class];
 q= get_node(active_node_size);break_node(q)= passive;
@@ -3854,6 +3867,7 @@ else print_int(serial(prev_break(passive)));
 #line 3928 "hint.w"
 ;
 #endif
+#line 3930 "hint.w"
 
 }
 
@@ -4026,6 +4040,7 @@ if(artificial_demerits)print_char('*');else print_int(d);
 #line 4111 "hint.w"
 ;
 #endif
+#line 4113 "hint.w"
 
 d= d+total_demerits(r);
 
@@ -4096,6 +4111,7 @@ while(t> 0)
 #line 3642 "hint.w"
 ;
 #endif
+#line 3644 "hint.w"
 
 }
 
@@ -4446,6 +4462,7 @@ if(threshold>=0)
 if(tracing_paragraphs> 0)
 {print_nl("@firstpass");}
 #endif
+#line 4261 "hint.w"
 
 second_pass= false;final_pass= false;
 }
@@ -4453,6 +4470,7 @@ else{threshold= tolerance;second_pass= true;
 final_pass= (emergency_stretch<=0);
 #ifdef STAT
 #endif
+#line 4268 "hint.w"
 
 }
 loop{if(threshold> inf_bad)threshold= inf_bad;
@@ -4685,19 +4703,22 @@ if(!second_pass)
 #ifdef STAT
 if(tracing_paragraphs> 0)print_nl("@secondpass");
 #endif
-threshold= tolerance;second_pass= true;final_pass= (emergency_stretch<=0);
+#line 4287 "hint.w"
+ threshold= tolerance;second_pass= true;final_pass= (emergency_stretch<=0);
 }
 else{
 #ifdef STAT
 if(tracing_paragraphs> 0)
 print_nl("@emergencypass");
 #endif
-background[2]= background[2]+emergency_stretch;final_pass= true;
+#line 4294 "hint.w"
+ background[2]= background[2]+emergency_stretch;final_pass= true;
 }
 }
 done:
 #ifdef STAT
 #endif
+#line 4300 "hint.w"
 
 /*:205*/
 #line 3334 "hint.w"
@@ -4903,6 +4924,7 @@ if(tracing_pages> 0)
 print(", max depth=");print_scaled(page_max_depth);
 }
 #endif
+#line 5138 "hint.w"
 
 }
 
@@ -5024,6 +5046,7 @@ if(c<=least_page_cost)print_char('#');
 #line 5306 "hint.w"
 ;
 #endif
+#line 5308 "hint.w"
 
 if(c<=least_page_cost)
 {best_page_break= p;best_size= page_goal;
@@ -5184,6 +5207,7 @@ else print_char('0');
 #line 5414 "hint.w"
 ;
 #endif
+#line 5416 "hint.w"
 
 if(count(n)!=1000)
 best_height_plus_depth= x_over_n(best_height_plus_depth,1000)*count(n);
@@ -5217,7 +5241,8 @@ show_box(streams[0].p);
 print_str("\nstream 1:\n");
 show_box(streams[1].p);
 #endif
-if(box(0)!=null)
+#line 5452 "hint.w"
+ if(box(0)!=null)
 {flush_node_list(box(0));box(0)= null;}
 insert_penalties= 0;
 save_split_top_skip= split_top_skip;
@@ -5861,6 +5886,7 @@ if(range_def[i].f<=pos&&pos<range_def[i].t)return range_def[i].pg;
 return 0;
 }
 #endif
+#line 7161 "hint.w"
 /*:341*//*346:*/
 #line 7202 "hint.w"
 
@@ -6384,6 +6410,7 @@ QUIT("List sizes at "SIZE_F" and "SIZE_F" do not match 0x%x != 0x%x",list_start-
 return p;
 }
 #endif
+#line 8385 "hint.w"
 
 static ParamDef*hteg_param_list_node(void)
 {ParamDef*p;
@@ -6599,6 +6626,7 @@ return p;
 }
 }
 #endif
+#line 9062 "hint.w"
 /*:457*//*461:*/
 #line 9128 "hint.w"
 
@@ -6652,7 +6680,7 @@ pointer hget_paragraph_all(scaled x)
 
 pointer par_ptr= null;
 if(KIND(*hpos)==list_kind)
-{uint32_t s,t;
+{uint32_t s= 0,t= 0;
 /*374:*/
 #line 7687 "hint.w"
 
@@ -6740,7 +6768,7 @@ int par_color,par_label_ref;
 
 pointer par_ptr= null;
 if(KIND(*hpos)==list_kind)
-{uint32_t s,t;
+{uint32_t s= 0,t= 0;
 /*374:*/
 #line 7687 "hint.w"
 
@@ -7223,6 +7251,7 @@ ft_gid= FT_Get_Char_Index(ft_face,c);
 return ft_gid;
 }
 #endif
+#line 13108 "hint.w"
 
 #ifdef DEBUG
 static bool ft_exists(internal_font_number f,int c)
@@ -7235,6 +7264,7 @@ if(ft_face==NULL)return false;
 return FT_Get_Char_Index(ft_face,c)!=0;
 }
 #endif
+#line 13120 "hint.w"
 
 static scaled ft_glyph_width(FT_Face ft_face,FT_UInt ft_gid,scaled s)
 {FT_Fixed a;
@@ -7294,6 +7324,7 @@ else
 return c;
 }
 #endif
+#line 13196 "hint.w"
 /*:646*//*686:*/
 #line 14823 "hint.w"
 
@@ -7301,6 +7332,7 @@ return c;
 #define MAX_LEAKS (1<<16)
 static pointer leaks[MAX_LEAKS]= {0};
 #endif
+#line 14791 "hint.w"
 
 static void leak_clear(void)
 {
@@ -7309,6 +7341,7 @@ int i;
 for(i= 0;i<MAX_LEAKS;i++)
 leaks[i]= 0;
 #endif
+#line 14799 "hint.w"
 }
 
 static void leak_in(pointer p,int s)
@@ -7318,6 +7351,7 @@ if(0!=leaks[p])
 fprintf(stderr,"ERROR leak in: p=%d, s in=%d, leaks[p]= %d != 0\n",p,s,leaks[p]);
 leaks[p]= s;
 #endif
+#line 14808 "hint.w"
 }
 
 static void leak_out(pointer p,int s)
@@ -7327,6 +7361,7 @@ if(s!=leaks[p])
 fprintf(stderr,"ERROR: leak out: p=%d, s out=%d != %d = s in\n",p,s,leaks[p]);
 leaks[p]= 0;
 #endif
+#line 14817 "hint.w"
 }
 
 static void list_leaks(void)
@@ -7337,6 +7372,7 @@ for(i= 0;i<MAX_LEAKS;i++)
 if(leaks[i]!=0)
 fprintf(stderr,"ERROR:leak final: p=%d, s=%d\n",i,leaks[i]);
 #endif
+#line 14827 "hint.w"
 }
 /*:686*/
 #line 14915 "hint.w"
@@ -7720,9 +7756,11 @@ else
 #if 1
 pos= ((uint64_t)labels[n].pos<<32)+(labels[n].pos-labels[n].pos0);
 #else
-pos= ((uint64_t)labels[n].pos0<<32);
+#line 7463 "hint.w"
+ pos= ((uint64_t)labels[n].pos0<<32);
 
 #endif
+#line 7466 "hint.w"
 }
 /*:363*/
 #line 7449 "hint.w"
@@ -7884,7 +7922,7 @@ pointer hget_paragraph_initial(scaled x,uint8_t*to)
 
 pointer par_ptr= null;
 if(KIND(*hpos)==list_kind)
-{uint32_t s,t;
+{uint32_t s= 0,t= 0;
 /*374:*/
 #line 7687 "hint.w"
 
@@ -8255,6 +8293,7 @@ if(nest_ptr==0&&tail!=head
 ||type(tail)==hlist_node||type(tail)==vlist_node
 ||type(tail)==kern_node)
 #endif
+#line 7810 "hint.w"
 )
 store_map(tail,node_pos,0);
 }
@@ -8287,6 +8326,7 @@ return p;
 }
 }
 #endif
+#line 9077 "hint.w"
 /*:458*/
 #line 14918 "hint.w"
 
@@ -8460,6 +8500,7 @@ void hint_show_page(void)
 #line 14927 "hint.w"
 
 #else
+#line 14892 "hint.w"
 
 /*592:*/
 #line 11810 "hint.w"
@@ -8624,7 +8665,8 @@ if(g->OGLtexture!=0)return;
 #if 0
 DBG(DBGRENDER,"Unpacking glyph %c (0x%x)",g->cc,g->cc);
 #endif
-pk_data= g->pk_glyph_data;
+#line 12886 "hint.w"
+ pk_data= g->pk_glyph_data;
 i= 0;
 if((g->pk_glyph_flags&7)<4)
 {i= i+3;
@@ -8951,9 +8993,11 @@ else
 #if 1
 pos= ((uint64_t)labels[n].pos<<32)+(labels[n].pos-labels[n].pos0);
 #else
-pos= ((uint64_t)labels[n].pos0<<32);
+#line 7463 "hint.w"
+ pos= ((uint64_t)labels[n].pos0<<32);
 
 #endif
+#line 7466 "hint.w"
 }
 /*:363*/
 #line 11168 "hint.w"
@@ -9593,9 +9637,11 @@ else
 #if 1
 pos= ((uint64_t)labels[n].pos<<32)+(labels[n].pos-labels[n].pos0);
 #else
-pos= ((uint64_t)labels[n].pos0<<32);
+#line 7463 "hint.w"
+ pos= ((uint64_t)labels[n].pos0<<32);
 
 #endif
+#line 7466 "hint.w"
 }
 /*:363*/
 #line 12382 "hint.w"
@@ -10015,7 +10061,8 @@ top= top*pxs;
 }
 }
 #endif
-if(round_to_pixel)
+#line 13706 "hint.w"
+ if(round_to_pixel)
 {
 if(x_px_size> pxs_threshold)
 {left= (left+(x_px_size/2))/x_px_size;
@@ -10091,7 +10138,8 @@ if(p==0xffff)
 QUIT("Undefined list pointer in hbox 0x%x-> mem[0x%x] -> 0x%x\n",
 this_box,mem[this_box].i,p);
 #endif
-base_line= cur_v;
+#line 13881 "hint.w"
+ base_line= cur_v;
 left_edge= cur_h;
 /*617:*/
 #line 12329 "hint.w"
@@ -10112,7 +10160,8 @@ QUIT("Undefined pointer in hlist 0x%x\n",p);
 if(link(p)==0xffff)
 QUIT("Undefined link in hlist mem[0x%x]=0x%x\n",p,mem[p].i);
 #endif
-if(is_char_node(p))
+#line 13892 "hint.w"
+ if(is_char_node(p))
 {do
 {f= font(p);
 c= character(p);
@@ -10145,6 +10194,7 @@ if(f> max_ref[font_kind])
 QUIT("Undefined Font %d mem[0x%x]=0x%x\n",
 f,p,mem[p].i);
 #endif
+#line 13909 "hint.w"
 /*662:*/
 #line 13723 "hint.w"
 
@@ -10157,7 +10207,8 @@ cur_h= cur_h+char_width(f,c);
 if(link(p)==0xffff)
 QUIT("Undefined link in charlist mem[0x%x]=0x%x\n",p,mem[p].i);
 #endif
-p= link(p);
+#line 13914 "hint.w"
+ p= link(p);
 }while(is_char_node(p));
 }
 else
@@ -10169,7 +10220,8 @@ if(list_ptr(p)==0xffff)
 QUIT("Undefined list pointer in hlist mem[0x%x] = 0x%x -> 0x%x\n",
 p,mem[p].i,list_ptr(p));
 #endif
-if(list_ptr(p)==null)cur_h= cur_h+width(p);
+#line 13926 "hint.w"
+ if(list_ptr(p)==null)cur_h= cur_h+width(p);
 else
 {int cur_c= cur_color;
 cur_v= base_line+shift_amount(p);
@@ -10447,7 +10499,8 @@ next_p:
 if(link(p)==0xffff)
 QUIT("Undefined link in hlist mem[0x%x]=0x%x\n",p,mem[p].i);
 #endif
-p= link(p);
+#line 14074 "hint.w"
+ p= link(p);
 }
 }
 /*616:*/
@@ -10487,7 +10540,8 @@ if(p==0xffff)
 QUIT("Undefined list pointer in vbox 0x%x-> mem[0x%x] -> 0x%x\n",
 this_box,mem[this_box].i,p);
 #endif
-left_edge= cur_h;cur_v= cur_v-height(this_box);
+#line 14105 "hint.w"
+ left_edge= cur_h;cur_v= cur_v-height(this_box);
 top_edge= cur_v;
 while(p!=null)
 {if(is_char_node(p))DBG(DBGTEX,"Glyph in vertical list ignored");
@@ -10500,7 +10554,8 @@ if(list_ptr(p)==0xffff)
 QUIT("Undefined list pointer in vlist mem[0x%x] = 0x%x -> 0x%x\n",
 p,mem[p].i,list_ptr(p));
 #endif
-if(list_ptr(p)==null)cur_v= cur_v+height(p)+depth(p);
+#line 14118 "hint.w"
+ if(list_ptr(p)==null)cur_v= cur_v+height(p)+depth(p);
 else
 {int cur_c= cur_color;
 cur_v= cur_v+height(p);save_v= cur_v;
@@ -10885,6 +10940,7 @@ int hint_print(unsigned char*bits)
 #line 14932 "hint.w"
 
 #endif
+#line 14897 "hint.w"
 
 
 /*354:*/
