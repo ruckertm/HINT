@@ -1,5 +1,5 @@
 Name: hintview
-Version: 2.2.1
+Version: 3.0.0
 Release: 1%{?dist}
 Summary: HintView for Linux (GTK)
 License: GPLv2.1
@@ -33,11 +33,11 @@ The HintView program for Linux with GTK interface.
 %autosetup -c
 
 %build
-cd %{name}/GTK
+cd %{name}/Linux
 make
 
 %install
-cd %{name}/GTK
+cd %{name}/Linux
 strip hintview
 %{__rm} -rf %{buildroot}
 %{__install} -d %{buildroot}%{_bindir} \
