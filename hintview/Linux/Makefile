@@ -25,10 +25,10 @@ endif
 
 
 SRC= about.c main.c preferences.c resources.c settings.c \
-	header.c outline.c renderOGL.c search-bar.c 
+	header.c outline.c renderOGL.c search.c 
 
 OBJ= main.o renderOGL.o get.o hint.o tables.o \
- search-bar.o  outline.o header.o settings.o about.o\
+ search.o  outline.o header.o settings.o about.o\
  resources.o preferences.o
 
 
@@ -67,10 +67,10 @@ message.o: message.c
 message: message.o
 	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
 
-search-bar.o: search-bar.c
+search.o: search.c
 	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
 
-search-bar: search-bar.o
+search: search.o
 	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
 
 

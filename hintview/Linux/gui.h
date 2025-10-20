@@ -5,7 +5,7 @@ extern int hint_error(const char *title, const char *msg);
 /* in preferences.c */
 extern void do_preferences(void);
 
-/* in search-bar.c */
+/* in search.c */
 extern void cb_search_quit(void);
 extern GtkWidget *search_open (GtkWidget *parent_widget);
 

@@ -11,7 +11,7 @@ cb_document_open (GtkButton* self, gpointer user_data)
 
 void
 cb_search (GtkButton* self, gpointer user_data)
-{ do_search();
+{ do_find();
 }
 
 void

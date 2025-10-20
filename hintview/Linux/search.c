@@ -17,7 +17,7 @@ cb_next_click (GtkButton *button,
   GtkEntryBuffer *b=gtk_entry_get_buffer(entry);
   LOG("Next %s\n", gtk_entry_buffer_get_text(b));
 #endif  
-  search_next(TRUE);
+  find_next(TRUE);
 }
 
 
@@ -25,7 +25,7 @@ static void
 cb_prev_click (GtkButton *button,
              gpointer   data)
 {
-   search_next(FALSE);
+   find_next(FALSE);
 }
 
 static void
@@ -37,13 +37,13 @@ search_entry_destroyed (GtkWidget *widget)
 void cb_search_changed(GtkEntry* entry,  gpointer user_data )
 { GtkEntryBuffer *b=gtk_entry_get_buffer(entry);
   const char *str=gtk_entry_buffer_get_text(b);
-  LOG("Search %s\n", str);
+  LOG("Find %s\n", str);
   search_string(str);
 }
 
 #if 0
 void cb_search_quit(void)
-{ //LOG("Close Search\n");
+{ //LOG("Close Find\n");
 }
 #endif
 
@@ -60,7 +60,7 @@ search_open (GtkWidget *parent_widget)
     {
       search_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
       gtk_window_set_screen (GTK_WINDOW (search_window), gtk_widget_get_screen (parent_widget));
-      gtk_window_set_title (GTK_WINDOW (search_window), "Search");
+      gtk_window_set_title (GTK_WINDOW (search_window), "Find");
       //gtk_window_set_resizable (GTK_WINDOW (search_window), FALSE);
       g_signal_connect (search_window, "destroy",
                         G_CALLBACK (search_entry_destroyed), &search_window);

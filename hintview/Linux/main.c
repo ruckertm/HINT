@@ -155,7 +155,7 @@ int search_string(const char *str)
   return TRUE;
 }
 
-int search_next(int next)
+int find_next(int next)
 { uint64_t h=hint_page_get();
   bool success;
   HINT_TRY{
@@ -329,7 +329,7 @@ void do_outlines(void)
 {  outlines_open(window);
 }
 
-void do_search(void)
+void do_find(void)
 {  search_open(window);
 }
 
@@ -531,21 +531,25 @@ cb_key_press(GtkWidget* widget, GdkEventKey* event, gpointer data)
   { case GDK_KEY_a: /* auto reload */
     autoreload=!autoreload;
     if (autoreload) do_reload();
-  case GDK_KEY_f: do_open_file(); break;
-  case GDK_KEY_n: do_dark(1); break;
-  case GDK_KEY_o: do_outlines(); break;
-  case GDK_KEY_p: /* round position to pixel */
-    {/*allmost no threshold*/
-      rpx=!rpx;
+    break;
+  case GDK_KEY_d: do_dark(1); break;
+  case GDK_KEY_f: do_find(); break;
+  case GDK_KEY_g: find_next(TRUE); break;
+  case GDK_KEY_h: do_home();   break;
+  case GDK_KEY_o: do_open_file(); break;
+#if 0 /*this doesnt seem to work on a GTK3 glarea*/
+  case GDK_KEY_x: /* round position to pixel */
+    { rpx=!rpx;
       do_rpx();
       do_render(0,0,0);
    }
-    break;
+   break;
+#endif
+  case GDK_KEY_p: do_preferences(); break;
   case GDK_KEY_q: do_quit();   break;
   case GDK_KEY_r: do_reload(); break;
-  case GDK_KEY_s: do_search(); break;
+  case GDK_KEY_t: do_outlines(); break;
   case GDK_KEY_z: do_zoom_1(); break;
-  case GDK_KEY_h: do_home();   break;
   default:
     if (event->length > 0)
       LOG("The key event's string is `%s'\n", event->string);
