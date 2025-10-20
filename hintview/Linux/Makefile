@@ -1,9 +1,8 @@
 
+PKG_CONFIG ?= pkg-config
 
-
-PKGCONFIG = $(shell which pkg-config)
-GTK_CFLAGS = $(shell $(PKGCONFIG) --cflags gtk+-3.0) -DWITH_GTK=3
-GTK_LIBS = $(shell $(PKGCONFIG) --libs gtk+-3.0)
+GTK_CFLAGS = $(shell $(PKG_CONFIG) --cflags gtk+-3.0) 
+GTK_LIBS = $(shell $(PKG_CONFIG) --libs gtk+-3.0)
 
 
 CC= gcc
@@ -18,7 +17,7 @@ endif
 
 ifeq (Msys,$(shell uname -o))
 FT_INCLUDES = -I/mingw64/include/freetype2 
-LIBS = -lfreetype -lopengl32 -lglew32 -lz -lm
+LIBS = -lglew32 -lopengl32 -lfreetype -lz -lm
 else
 FT_INCLUDES = -I/usr/include/freetype2
 LIBS = -lGLEW -lGL -lfreetype -lz -lm
@@ -130,6 +129,11 @@ install: hintview
 install_schema: edu.hm.cs.hintview.gschema.xml
 	sudo install edu.hm.cs.hintview.gschema.xml /usr/share/glib-2.0/schemas/
 	sudo glib-compile-schemas /usr/share/glib-2.0/schemas/
+
+.PHONY: install_icon
+install_icon: hintview.xml
+	sudo install hintview.xml /usr/share/mime/packages
+	sudo update-mime-database /usr/share/mime/
 
 
 .PHONY: clean
