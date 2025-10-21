@@ -15,6 +15,7 @@ extern void do_reload(void);
 extern void do_zoom_1(void);
 extern void do_home(void);
 extern void do_outlines(void);
+extern void do_find(void);
 extern void do_quit(void);
 extern int  do_dark(int toggle);
 extern void goto_outline(int i);
