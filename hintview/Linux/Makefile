@@ -130,10 +130,33 @@ install_schema: edu.hm.cs.hintview.gschema.xml
 	sudo install edu.hm.cs.hintview.gschema.xml /usr/share/glib-2.0/schemas/
 	sudo glib-compile-schemas /usr/share/glib-2.0/schemas/
 
-.PHONY: install_icon
-install_icon: hintview.xml
+
+
+ICON_DIR=/usr/share/icons/hicolor
+ICON_NAME=mimetypes/x-hintview.png
+# Works also: ICON_NAME=apps/x-hintview.png
+#ICON_SRC= ../resources/logo/HINTLogoBuchGrey
+ICON_SRC= ../resources/logo/HINTLogoBuchFG
+ICON_SIZE = 16 32 48 64 128 256 512
+
+ICONS = $(patsubst %,$(ICON_SRC)%.png,$(ICON_SIZE))
+
+
+.PHONY: install_icons
+install_icons: hintview.xml
 	sudo install hintview.xml /usr/share/mime/packages
 	sudo update-mime-database /usr/share/mime/
+	for i in $(ICON_SIZE) ; do\
+	  sudo install $(ICON_SRC)$$i.png $(ICON_DIR)/"$$i"x"$$i"/$(ICON_NAME) ;\
+	done
+	sudo gtk-update-icon-cache  $(ICON_DIR)
+
+.PHONY: delete_icons
+delete_icons:
+	for i in $(ICON_SIZE) ; do\
+	  sudo rm -f $(ICON_DIR)/"$$i"x"$$i"/$(ICON_NAME) ;\
+	done
+	sudo gtk-update-icon-cache  $(ICON_DIR)
 
 
 .PHONY: clean
