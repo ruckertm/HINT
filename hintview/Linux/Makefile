@@ -102,7 +102,7 @@ about: about.o
 resources.o: resources.c resources.h
 	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
 
-resources.c: resources.xml
+resources.c: resources.xml help.sgml
 	glib-compile-resources --generate-source  resources.xml 
 
 resources.h: resources.xml
@@ -117,6 +117,8 @@ settings: settings.o
 BINDIR=/usr/local/bin
 MANDIR=/usr/local/man
 
+hintview.hnt: hintview.tex
+	hitex hintview.tex
 
 install: hintview
 	strip hintview
@@ -161,5 +163,5 @@ delete_icons:
 
 .PHONY: clean
 clean:
-	rm -rf *~ *.o
-	rm -rf hintview
+	rm -rf *~ *.o *.log *.w
+	rm -rf hintview .depend TAGS
