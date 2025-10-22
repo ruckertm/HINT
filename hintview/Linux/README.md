@@ -14,6 +14,9 @@ and ../resources directory are required.
 ### hintview.1
 The man page for hintview
 
+### hintview.tex
+The man page for hintview as a TeX file. Use "hitex hintview" to get the HINT version of the manual page.
+
 ### hintview.spec
 Packaging script for use with `rpmbuild` and `debbuild`
 
@@ -27,12 +30,15 @@ The rendering frontend using OpenGL.
 Function prototypes for the following C files implementing the GUI.
 
 ### about.c
-Implements the about box.
+Implements the about box and other message boxes.
+
+### header.c
+Implements the header bar and the menu.
 
 ### preferences.c
 Implements the preferences dialog.
 
-### search-bar.c
+### search.c
 Implements the search window.
 
 ### outline.c
