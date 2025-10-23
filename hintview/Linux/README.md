@@ -42,13 +42,13 @@ Implements the preferences dialog.
 Implements the search window.
 
 ### outline.c
-Implements the oulines window.
+Implements the outlines window.
 
 ### header.c
 Implements the header bar with buttons and menu.
 
 ### settings.c
-Implements saving prefences to make them persistent.
+Implements saving preferences to make them persistent.
 
 ### resources.xml
 Used to generate resources.c and resources.h files.
