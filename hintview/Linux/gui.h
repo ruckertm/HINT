@@ -1,5 +1,6 @@
 /* in about.c */
 extern void do_about(void);
+extern void do_help(void);
 extern int hint_error(const char *title, const char *msg);
 
 /* in preferences.c */

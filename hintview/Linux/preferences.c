@@ -39,20 +39,20 @@ cb_spin_rpx_threshold(GtkSpinButton* self, gpointer user_data)
 }
 
 
-void
+static void
 cb_spin_gcorrection (GtkSpinButton* self, gpointer user_data)
 { gcorrection = gtk_spin_button_get_value (self);
   LOG("Gamma %f\n", gcorrection);
   do_render(0,0,1);
 }
 
-void
+static void
 cb_response (GtkDialog* self, gint response, gpointer user_data)
 { gtk_widget_destroy(GTK_WIDGET(self));
 
 }
 
-void cb_dialog_unrealize(GtkWidget* self, gpointer user_data)
+static void cb_dialog_unrealize(GtkWidget* self, gpointer user_data)
 {
      is_running=FALSE;
      // LOG("Preferences Unrealize\n");

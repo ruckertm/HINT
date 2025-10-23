@@ -2,5 +2,6 @@
 <gresources>
   <gresource prefix="/edu/hm/cs/hintview">
     <file alias="logo">../resources/logo/HINTLogoBuchFG64.png</file>
+    <file alias="help">help.sgml</file>
   </gresource>
 </gresources>

@@ -1,0 +1,42 @@
+%\font\cmti=cmti10 %tfm font in texlive
+%\font\UnPilgi={[UnPilgi]} at 12pt  % .ttf font in texlive
+
+
+%to sind the special unicode characters use `gucharmap´.
+
+\font\largetitlefont=cmssbx10 scaled \magstep 2
+\hbox{\largetitlefont Open Type Fonts:}
+
+\font\LMSlantBold={[lmromanslant10-bold]} % otf font in texlive
+\hbox{\hskip 20pt\LMSlantBold Latin Modern Roman slanted bold}
+
+\font\NimbusSansBoldItalic={[/usr/share/fonts/opentype/urw-base35/NimbusSans-BoldItalic]} at 12pt 
+\hbox{\hskip 20pt\NimbusSansBoldItalic Nimbus Sans bold italic at 12 pt
+\chardef\ffi="FB03
+The small ffi ligature (0xfb03): \ffi
+}
+\font\URWGothicBook={[/usr/share/fonts/opentype/urw-base35/URWGothic-Book]} 
+\hbox{\hskip 20pt\URWGothicBook URW Gothic Book}
+
+\bigskip
+\hbox{\largetitlefont True Type Fonts:}
+
+\font\FreeSans={[/usr/share/fonts/truetype/freefont/FreeSans]} 
+\hbox{\hskip 20pt\FreeSans Free Sans
+\chardef\ffi="FB03
+The small ffi ligature (0xfb03): \ffi
+}
+
+\font\RobotoCondensedLightItalic={[/usr/share/fonts/truetype/roboto/unhinted/RobotoCondensed-LightItalic]} 
+\hbox{\hskip 20pt\RobotoCondensedLightItalic Roboto Condensed Light Italic unhinted}
+
+\font\DejaVuSerifBold={[/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold]} 
+\hbox{\hskip 20pt\DejaVuSerifBold DejaVu Serif Bold
+\chardef\Ao="212B
+The Angstrom A (0x212B): \Ao
+\chardef\st="FB06
+~The small st ligature (0xFB06): \st
+}
+
+\vfill
+\bye

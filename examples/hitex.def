@@ -1,0 +1,105 @@
+%%
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License, either version 1.3c
+%% of this license or (at your option) any later version.
+%% The latest version of this license is in
+%%   http://www.latex-project.org/lppl.txt
+%% and version 1.3c or later is part of all distributions of LaTeX
+%% version 2005/12/01 or later.
+%%
+%% This work has the LPPL maintenance status `maintained'.
+%%
+%% The Current Maintainer of this work is the LaTeX3 Project.
+%%
+%% https://github.com/latex3/graphics-def/issues
+%%
+
+% VERY MINIMAL hitex file for color/graphics
+\ProvidesFile{hitex.def}
+  [2023/04/17 v0.1a Graphics/color driver for hitex]
+
+\def\c@lor@arg#1{%
+  \dimen@#1\p@
+  \ifdim\dimen@<\z@\dimen@\maxdimen\fi
+  \ifdim\dimen@>\p@
+    \PackageError{color}{Argument `#1' not in range [0,1]}\@ehd
+  \fi}
+
+\global\def\current@color{0 0 0}
+\def\set@color{%\message{Set:\current@color.}
+ \HINTcolor{\current@color}%
+ \aftergroup\reset@color}
+\def\set@page@color{%\message{Set page:\current@color.}
+ \HINTcolor{\current@color}%
+ \aftergroup\reset@color}
+\def\reset@color{%\message{Reset()}
+  \HINTendcolor}%
+
+\def\hi@color@warn{%
+  \PackageWarning{color}{color not supported\@gobble}%
+  \global\let\hi@color@warn\relax}
+
+% Thanks to Ulrike Fischer
+\def\color@named#1#2{\c@lor@@named#2,,\@@#1}
+\def\define@color@named#1#2%
+    {\let\@@cls\@empty\@namedef{\@backslashchar color@#1}{{}{}{#2}{}{}}}
+\def\c@lor@@named#1,#2,#3\@@#4%
+    {\edef#4{\expandafter\expandafter\expandafter\@thirdoffive
+             \csname\@backslashchar color@#1\endcsname}}
+    
+
+\def\color@rgb#1#2{\c@lor@@rgb#2\@@#1}
+\def\c@lor@@rgb#1,#2,#3\@@#4{%
+  \c@lor@arg{#1}%
+  \c@lor@arg{#2}%
+  \c@lor@arg{#3}%
+  \edef#4{fg{#1 #2 #3}}%
+  }
+
+\def\color@RGB#1#2{\c@lor@@RGB#2\@@#1}
+\def\c@lor@@RGB#1,#2,#3\@@#4{%
+  \c@lor@arg{#1}%
+  \c@lor@arg{#2}%
+  \c@lor@arg{#3}%
+  \edef#4{FG{#1 #2 #3}}%
+  }
+
+
+\def\color@cmyk#1#2{\c@lor@@cmyk#2\@@#1}
+\def\c@lor@@cmyk#1,#2,#3,#4\@@#5{%
+  \c@lor@arg{#4}%
+  \c@lor@arg{#1}%
+  \c@lor@arg{#2}%
+  \c@lor@arg{#3}%
+  \edef#5{fg{cmyk #1 #2 #3 #4}}%
+  }
+  
+\def\color@gray#1#2{%
+  \c@lor@arg{#2}%
+  \edef#1{fg{#2 #2 #2}}%
+  }
+
+
+\def\Gin@extensions{.png,.jpg}
+\@namedef{Gin@rule@.png}#1{{png}{.png}{#1}}
+\@namedef{Gin@rule@.jpg}#1{{jpg}{.jpg}{#1}}
+
+
+\def\Gread@png#1{%
+\setbox\@tempboxa\hbox{\HINTimage=#1\relax}%
+      \def\Gin@llx{0}\let\Gin@lly\Gin@llx
+      \Gin@defaultbp\Gin@urx{\wd\@tempboxa}% = 0...
+      \Gin@defaultbp\Gin@ury{\ht\@tempboxa}% = 0...
+      %\def\Gin@urx{72}\let\Gin@ury\Gin@urx
+      \Gin@nat@height\Gin@ury bp
+      \Gin@nat@width\Gin@urx bp
+      }
+
+\def\Ginclude@png#1{%
+   \mbox{\HINTimage=#1 width \Gin@req@width height\Gin@req@height\relax}%
+}
+
+\let\Gread@jpg\Gread@png
+\let\Ginclude@jpg\Ginclude@png
+
+\endinput

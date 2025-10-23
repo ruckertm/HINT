@@ -46,7 +46,7 @@ cb_about (GtkButton* self, gpointer user_data)
 void
 cb_help (GtkButton* self, gpointer user_data)
 { 
-  LOG("Help not yet implemented\n");
+  do_help();
 }
 
 void
@@ -70,7 +70,7 @@ cb_outline (GtkButton* self, gpointer user_data)
 static GtkWidget *
 create_menu (void);
 
-enum {open_id=0, home_id, search_id, zoom_id,dark_id,reload_id,pref_id};
+enum {open_id=0, home_id, search_id, zoom_id,dark_id,reload_id,outline_id,pref_id};
 
 int buttonvisibility;
 
@@ -82,13 +82,14 @@ struct button_def {
   void (*cb)(GtkButton* self, gpointer user_data);
   GtkWidget *button;
 } button_def[] = {
-  {open_id, "Open file", "document-open-symbolic", "Open file (Ctrl+F)", cb_document_open, NULL},
+  {open_id, "Open file", "document-open-symbolic", "Open file (Ctrl+O)", cb_document_open, NULL},
   {home_id, "Home", "go-home-symbolic","Go to the document's home page (Ctrl+H)", cb_home,NULL},
-  {search_id, "Search", "system-search-symbolic", "Search text (Ctrl+S)", cb_search, NULL},
+  {search_id, "Search", "system-search-symbolic", "Find text (Ctrl+F)", cb_search, NULL},
   {zoom_id, "Zoom to 100%","zoom-original-symbolic", "Zoom to 100% (Ctrl+Z)", cb_zoom_1,NULL},
-  {dark_id, "Dark mode",NULL,"Switch beween dark and light mode (Ctrl+N)", cb_day_night,NULL},
+  {dark_id, "Dark mode",NULL,"Switch beween dark and light mode (Ctrl+D)", cb_day_night,NULL},
   {reload_id, "Reload file", "view-refresh-symbolic","Reload document (Ctrl+R)", cb_reload,NULL},
-  {pref_id, "Preferences", "preferences-system-symbolic","Set Preferences", cb_preferences,NULL}
+  {outline_id, "Outline", "view-list-symbolic","Show Outline (Ctrl+T)", cb_outline,NULL},
+  {pref_id, "Preferences", "preferences-system-symbolic","Set Preferences (Ctrl+P)", cb_preferences,NULL},
 };
 
 
@@ -147,7 +148,6 @@ create_headerbar (void)
   g_object_ref(day);
   set_dark_button(dark);
 
-  /* I need an icon to open the outlines window */
       
   button = gtk_button_new_from_icon_name ("help-contents",GTK_ICON_SIZE_BUTTON);
   gtk_widget_set_tooltip_text (button,"Help");
@@ -228,7 +228,7 @@ create_menu (void)
   /* View */
   item=create_item(menu,"View",NULL);
   submenu= gtk_menu_new ();
-    create_item(submenu,"Search...", G_CALLBACK(cb_search));
+    create_item(submenu,"Find...", G_CALLBACK(cb_search));
     create_item(submenu,"Outline...", G_CALLBACK(cb_outline));
     create_separator(submenu);
     create_item(submenu,"Dark mode...", G_CALLBACK(cb_day_night));
