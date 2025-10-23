@@ -1,5 +1,6 @@
 %\font\sans=lmsans10-regular.otf
 \font\sans=cmss10
+\font\large=cmss10 scaled 2000
 \sans
 \parskip 6pt plus 2pt minus 3pt
 \parindent 0pt
@@ -21,8 +22,8 @@
   \outline{#1}{1}\label{#1}\hbox to 0pt{\hss\hbox to 1in {#1\hfill}}\ignorespaces}
 \def\enditemize{\par\egroup}
 
-\noindent\hbox{\HINTimage "../resources/logo/HINTLogoBuchFG256.png" }
-The HintView Manual\hfill
+\noindent\lower 20pt \hbox{\HINTimage  "../resources/logo/HINTLogoBuchFG256.png" width 1in}
+{\large The HintView Manual}\hfill
 
 \section{NAME}
         hintview - displaying HINT files
