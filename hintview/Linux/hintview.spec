@@ -1,5 +1,5 @@
 Name: hintview
-Version: 3.0.0
+Version: 2.3.0
 Release: 1%{?dist}
 Summary: HintView for Linux (GTK)
 License: GPLv2.1
