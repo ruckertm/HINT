@@ -89,7 +89,7 @@ struct button_def {
   {dark_id, "Dark mode",NULL,"Switch beween dark and light mode (Ctrl+D)", cb_day_night,NULL},
   {reload_id, "Reload file", "view-refresh-symbolic","Reload document (Ctrl+R)", cb_reload,NULL},
   {outline_id, "Outline", "view-list-symbolic","Show Outline (Ctrl+T)", cb_outline,NULL},
-  {pref_id, "Preferences", "preferences-system-symbolic","Set Preferences (Ctrl+P)", cb_preferences,NULL},
+  {pref_id, "Preferences...", "preferences-system-symbolic","Set Preferences (Ctrl+P)", cb_preferences,NULL},
 };
 
 

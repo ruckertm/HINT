@@ -684,17 +684,18 @@ activate (GtkApplication *app,
 
 
 static int usage(void)
-{    return hint_error("Usage:", "hintview [options] file\n"
-		  "Call 'hintview --help' for details.\n");
+{ fprintf(stderr,"Usage: hintview [options] [file]\n"
+                 "Call 'hintview --help' for details.\n");
+  return 0;
 }
 
 static int help(void)
 { fprintf(stdout,"%s",
-   "Usage: hintview [options] file\n"
+   "Usage: hintview [options] [file]\n"
    "Options:\n"
    "  -a         Start in autoreload mode.\n"	  
    "  -h         Start with the documents home page.\n"	  
-   "  -n         Start in night mode.\n"	  
+   "  -d         Start in dark mode.\n"	  
 #if 0
    "  -o         Show the documents outline.\n"
 #endif
@@ -724,12 +725,12 @@ static int command_line(int argc, char *argv[])
 	      return usage();
 	case 'a': autoreload=1; break;
 #ifdef DEBUG
-      case 'd': 
+      case 'D': 
           i++; if (argv[i]==NULL) debugflags = -1;
           else debugflags=strtol(argv[i],NULL,16);
           break;
 #endif	  
-        case 'n': dark=1; break;
+        case 'd': dark=1; break;
 	  //case 'o': break; /* show outlines */
         case 'z': scale=SCALE_NORMAL; break;
         case 'h': home=1; break;  
