@@ -41,14 +41,17 @@ cd %{name}/Linux
 strip hintview
 %{__rm} -rf %{buildroot}
 %{__install} -d %{buildroot}%{_bindir} \
-    %{buildroot}%{_datadir}/glib-2.0/schemas
+    %{buildroot}%{_datadir}/glib-2.0/schemas \
+    %{buildroot}%{_mandir}/man1
 %{__install} -t %{buildroot}%{_bindir} --mode=755 hintview
 %{__install} -t %{buildroot}%{_datadir}/glib-2.0/schemas \
     edu.hm.cs.hintview.gschema.xml
+%{__install} -t %{buildroot}%{_mandir}/man1 hintview.1
 
 %files
 %{_bindir}/%{name}
 %{_datadir}/glib-2.0/schemas/edu.hm.cs.hintview.gschema.xml
+%{_mandir}/man1/hintview.1.gz
 
 %post
 glib-compile-schemas %{_datadir}/glib-2.0/schemas/
