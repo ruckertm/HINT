@@ -1,5 +1,5 @@
-#define VERSION 3
-#define MINOR_VERSION 0
+#define VERSION 2
+#define MINOR_VERSION 3
 #define REVISION 0
 
 /* in main.c */
