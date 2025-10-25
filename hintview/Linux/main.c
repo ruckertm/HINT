@@ -647,7 +647,7 @@ activate (GtkApplication *app,
 
   LOG("Activate\n");
   window = gtk_application_window_new (app);
-  gtk_window_set_title (GTK_WINDOW (window), "hintview");
+  gtk_window_set_title (GTK_WINDOW (window), "HintView");
   gtk_window_set_default_size (GTK_WINDOW (window), px_h, px_v);
 
   g_signal_connect(G_OBJECT(window), "configure-event", G_CALLBACK(cb_configure), NULL);
@@ -714,7 +714,7 @@ static int command_line(int argc, char *argv[])
       { case '-':
 	    if (strcmp(argv[i]+2,"help")==0) return help();
 	    else if (strcmp(argv[i]+2,"version")==0)
-	      { fprintf(stdout,"hintview version %d.%d.%d\n"
+	      { fprintf(stdout,"HintView version %d.%d.%d\n"
 			"HINT file format version %d.%d\n", 
 			VERSION, MINOR_VERSION, REVISION,
 			HINT_VERSION, HINT_MINOR_VERSION);

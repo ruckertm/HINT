@@ -231,7 +231,7 @@ create_menu (void)
     create_item(submenu,"Find...", G_CALLBACK(cb_search));
     create_item(submenu,"Outline...", G_CALLBACK(cb_outline));
     create_separator(submenu);
-    create_item(submenu,"Dark mode...", G_CALLBACK(cb_day_night));
+    create_item(submenu,"Dark mode", G_CALLBACK(cb_day_night));
     create_item(submenu,"Zoom to 100%", G_CALLBACK(cb_zoom_1));
   gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), submenu);
 
@@ -242,9 +242,9 @@ create_menu (void)
   /* Help */
   item=create_item(menu,"Help", NULL);
   submenu= gtk_menu_new ();
-    create_item(submenu,"Get help...", G_CALLBACK(cb_help));
+    create_item(submenu,"Get Help", G_CALLBACK(cb_help));
     create_separator(submenu);
-    create_item(submenu,"About Hintview", G_CALLBACK(cb_about));
+    create_item(submenu,"About HintView", G_CALLBACK(cb_about));
   gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), submenu);
 
   create_separator(menu);
