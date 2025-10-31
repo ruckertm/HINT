@@ -187,6 +187,8 @@ static void set_dpi(GLFWwindow* window, int px, int py)
   //LOG("dpi: %f x %f\n",x_dpi,y_dpi);
 }
 
+static int request_render=0;
+
 static void framebuffer_size_callback(GLFWwindow* window, int w, int h)
 { px_h=w; px_v=h;
   glViewport(0, 0, w, h);
@@ -194,6 +196,7 @@ static void framebuffer_size_callback(GLFWwindow* window, int w, int h)
   //LOG("w=%d, h=%d\n",w,h);
   hint_resize(px_h,px_v,scale*x_dpi,scale*y_dpi);
   hint_page();
+  request_render=1;
 }
 
 static void init_dpi(GLFWwindow* window)
@@ -217,6 +220,7 @@ static int open_file(int home)
     hint_page_home();
   else
     hint_page_top(0);
+   request_render=1;
 return 1;
 } 
 
@@ -225,6 +229,7 @@ static void reload_file(void)
   hint_end();
   hint_begin();
   pos=hint_set_fpos(fpos);
+  request_render=1;
   //LOG("reloading...\n");
 }
 
@@ -277,13 +282,16 @@ static int help(void)
    "Options:\n"
    "  -a         Start in autoreload mode.\n"	  
    "  -h         Start with the documents home page.\n"	  
-   "  -n         Start in night mode.\n"	  
+   "  -d         Start in night mode.\n"	  
 #if 0
    "  -o         Show the documents outline.\n"
 #endif
    "  -z         Start with zoom level 100%.\n"	  
    "  --help     Display this message.\n"	  
-   "  --version  Display the version.\n"	  
+   "  --version  Display the version.\n"
+#ifdef DEBUG
+   "  -D xxx     Set HINT debug flags to xxx.\n"
+#endif	  
    "\n"
    "See the hintview man page for more details.\n"
   );
@@ -306,11 +314,11 @@ static int command_line(int argc, char *argv[])
 	    else
 	      return usage();
 	case 'a': autoreload=1; break;
-        case 'd': 
+        case 'D': 
           i++; if (argv[i]==NULL) debugflags = -1;
           else debugflags=strtol(argv[i],NULL,16);
           break;
-        case 'n': dark=1; break;
+        case 'd': dark=1; break;
         case 'o': break;
         case 'z': scale=SCALE_NORMAL; break;
         case 'h': home=1; break;  
@@ -343,9 +351,10 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     autoreload=!autoreload;
     if (autoreload)
       goto reload;
-  case CTRL(GLFW_KEY_N):
+  case CTRL(GLFW_KEY_D):
     dark=!dark;
     hint_dark(dark);
+    request_render=1;
     break;
   case CTRL(GLFW_KEY_O): /* outlines */
     break;
@@ -356,18 +365,21 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
       static double th=1000; /*allmost no threshold*/
       rpx=!rpx;
       hint_round_position(rpx,th);
+      request_render=1;
     }
     break;
   case CTRL(GLFW_KEY_KP_ADD): /* round position to pixel */
     { gamma=gamma+0.1;
       if (gamma>4.0) gamma=4.0;
       hint_gamma(gamma);
+      request_render=1;
     }
     break;
   case CTRL(GLFW_KEY_KP_SUBTRACT): /* round position to pixel */
     { gamma=gamma-0.1;
       if (gamma<0.1) gamma=0.1;
       hint_gamma(gamma);
+      request_render=1;
     }
     break;
   case CTRL(GLFW_KEY_Q):
@@ -391,21 +403,25 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     hint_page();
     hint_clear_fonts(false);
     clear_cursor();
+    request_render=1;
     break;
   case KEY(GLFW_KEY_HOME):
   case CTRL(GLFW_KEY_H):
     hint_page_home();
     clear_cursor();
+    request_render=1;
     break;
   case KEY(GLFW_KEY_PAGE_DOWN):
     pos=hint_page_next();
     hint_page();
     clear_cursor();
+    request_render=1;
     break;
   case KEY(GLFW_KEY_PAGE_UP):
     pos=hint_page_prev();
     hint_page();
     clear_cursor();
+    request_render=1;
     break;
   default:
     // LOG("key %d, scan %d, action %d, mosd %d\n",key, scancode, action, mods);
@@ -425,6 +441,7 @@ static void mouse_click(void)
     if (link>=0)
     { hint_link_page(link);
       clear_cursor();
+      request_render=1;
     }
   }
 }
@@ -464,6 +481,7 @@ static void cursor_position_callback(GLFWwindow* window, double x, double y)
   if (scale > SCALE_MAX) scale=SCALE_MAX;
   hint_resize(px_h,px_v,scale*x_dpi,scale*y_dpi);
   hint_page();
+  request_render=1;
 }
 
 
@@ -481,6 +499,7 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
       if (drag) /* end dragging */
       {	hint_clear_fonts(false);
         clear_cursor();
+	request_render=1;
       }
       else
         mouse_click();
@@ -501,6 +520,7 @@ static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     hint_page();
     clear_cursor();
   }
+  request_render=1;
 }
 
 static void cursor_enter_callback(GLFWwindow* window, int entered)
@@ -568,12 +588,16 @@ int main(int argc, char *argv[])
   hint_resize(px_h,px_v,scale*x_dpi,scale*y_dpi);
   if (!open_file(home))
     return 1;
+  request_render=1;
   if (setjmp(hint_error_exit)==0)
     do
-    { hint_render();
-      glfwSwapBuffers(window);
+    { if (request_render)
+      {	request_render=0;
+	hint_render();
+        glfwSwapBuffers(window);
+      }
       glfwWaitEvents();
-    } // Check if the ESC key was pressed or the window was closed
+    } // Check if the Ctrl-Q key was pressed or the window was closed
     while(glfwWindowShouldClose(window) == 0 );
   //  nativeClear();
   glfwDestroyWindow(window); // part of glfwTerminate
