@@ -3325,11 +3325,13 @@ general outline.
 @<\TeX\ functions@>=
 
 @<Declare subprocedures for |line_break|@>@;
+static void hset_param_list(ParamDef *p);
 
 static void line_break(int final_widow_penalty, pointer par_ptr)
 {@+ scaled x=cur_list.hs_field; /* the |hsize| for this paragraph */
 @<Local variables for line breaking@>@;
-set_line_break_params(); just_color=-1; just_label=-1;
+hset_param_list(line_break_params);
+just_color=-1; just_label=-1;
 @<Get ready to start line breaking@>;
 @<Find optimal breakpoints@>;
 @<Break the paragraph at the chosen breakpoints, justify the resulting lines
@@ -5583,7 +5585,7 @@ display. Then we can set the proper values of |display_width| and
 |display_indent| and |pre_display_size|.
 
 @<\TeX\ functions@>=
-static void hdisplay(pointer p, pointer a, bool l)
+static void hdisplay(pointer p,  pointer a, ParamDef *pd,bool l)
 {@+
 scaled x; /* the |hsize| in the enclosing paragraph */
 uint32_t offset=node_pos-node_pos1; /* offset of the display node in the current parragraph */
@@ -5603,8 +5605,8 @@ if (head==tail)  /*`\.{\\noindent\$\$}' or `\.{\$\${ }\$\$}'*/
 else{@+ pointer par_ptr;
      hprune_unwanted_nodes();
      par_ptr=link(head);
-     pop_nest();
      store_map(par_ptr,node_pos,0);
+     pop_nest();
      line_break(display_widow_penalty,par_ptr);@/
      x=cur_list.hs_field;
   @<Calculate the natural width, |w|, by which the characters of the final
@@ -5612,8 +5614,13 @@ line extend to the right of the reference point, plus two ems; or set |w:=max_di
 if the non-blank information on that line is affected by stretching or shrinking@>;
   }
  /*now we are in vertical mode, working on the list that will contain the display*/
+
 @<Calculate the length, |l|, and the shift amount, |s|, of the display lines@>;
 pre_display_size=w;@+display_width=l; display_indent=s;
+}
+hset_param_list(pd);
+@<Centering and placing an optional equation number@>@;
+hrestore_param_list();
 }
 
 @ @<Calculate the natural width, |w|, by which...@>=
@@ -5717,7 +5724,7 @@ pointer @!t; /*tail of adjustment list*/
 |null| or it points to a box containing the equation number; and we are in
 vertical mode (or internal vertical mode).
 
-@<\TeX\ functions@>=
+@<Centering and placing an optional equation number@>=
 {@<Local variables for finishing a displayed formula@>@;
 adjust_tail=adjust_head;b=hpack(p, natural);p=list_ptr(b);
 t=adjust_tail;adjust_tail=null;@/
@@ -5739,7 +5746,7 @@ prev_graf=prev_graf+3;
 cur_list.bs_pos=hpos+node_pos;
 push_nest();
 } /* end of \<Finish displayed math> */
-} /* end of |hdisplay| */
+
 
 @ The user can force the equation number to go on a separate line
 by causing its width to be zero.
@@ -6557,6 +6564,7 @@ static void hget_definition_section(void)
     hget_def_node();
   hget_font_metrics();
   @<initialize the default page template@>@;
+  cur_bs=baseline_skip; cur_ls=line_skip; cur_lsl=line_skip_limit;
 }
 @
 
@@ -7087,13 +7095,15 @@ static void hset_param(uint8_t k, uint8_t n, int32_t v)
 static void hset_param_list(ParamDef *p)
 { hset_param(SAVE_BOUNDARY,0,0);
   while (p!=NULL)
-  { hset_param(p->p.k,p->p.n,p->p.v);
+  { DBG(DBGDEF,"Parameter saving kind=%d no=%d\n",p->p.k,p->p.n);
+    hset_param(p->p.k,p->p.n,p->p.v);
     p=p->next;
   }
+  DBG(DBGDEF,"Parameter save %d\n",par_save_ptr);
 }
 
 static void hrestore_param_list(void)
-{
+{ DBG(DBGDEF,"Parameter restore %d\n",par_save_ptr);
   while (par_save_ptr>0)
   { Param *q;
     q=&(par_save[--par_save_ptr]);
@@ -7105,7 +7115,7 @@ static void hrestore_param_list(void)
     else if (q->k==glue_kind)
     { pointer_def[glue_kind][q->n]=(pointer)q->v; }
   } 
-  QUIT("Parameter save stack flow");
+  QUIT("Parameter save stack underflow");
 }
 @
 @<forward declarations@>=
@@ -9215,7 +9225,7 @@ start a new nesting level, and set its horizontal size.
 @<prepare for reading the paragraph list@>=
   pointer par_ptr=null;
   if (KIND(*hpos)==list_kind)
-  { uint32_t s=0, t=0;
+  { uint32_t s, t;
     @<read the start byte |a|@>@;
     if ((INFO(a)&b011)==0) 
       HGET8; /* the empty list */
@@ -9404,19 +9414,6 @@ the global varaiable once the paragraph is finished.
 static ParamDef *line_break_params=NULL;
 @
 
-We provide a functions to set the parameters from this special variable,
-thus avoiding the export of the |ParamDef| type.
-
-@<\HINT\ functions@>=
-static void set_line_break_params(void)
-{ hset_param_list(line_break_params);
-}
-@
-@<forward declarations@>=
-static void set_line_break_params(void);
-@
-
-
 @<\HINT\ auxiliar functions@>=
 pointer hget_paragraph(scaled x, uint32_t offset, ParamDef *q)
 { @+
@@ -9561,9 +9558,9 @@ static void hteg_par_node(uint32_t offset)
 {@+ ParamDef *q;@+ pointer p=null, a=null;\
 if ((I)&b100) q=hget_param_list_node(); else q=hget_param_list_ref(HGET8);\
 if ((I)&b010) a=hget_hbox_node(); \
-p=hget_list_pointer(); \
+ p=hget_list_pointer();\
 if ((I)&b001) a=hget_hbox_node();\
-hset_param_list(q); hdisplay(p,a,((I)&b010)!=0); hrestore_param_list();\
+hdisplay(p,a,q,((I)&b010)!=0);\
 }
 @
 
@@ -9574,7 +9571,7 @@ if ((I)&b001) a=hteg_hbox_node();\
 p=hteg_list_pointer(); \
 if ((I)&b010) a=hteg_hbox_node(); \
 if ((I)&b100) q=hteg_param_list_node(); else q=hget_param_list_ref(HTEG8);\
-hset_param_list(q); hdisplay(p,a,((I)&b010)!=0); hrestore_param_list();\
+hdisplay(p,a,q,((I)&b010)!=0);\
 }
 @
 
