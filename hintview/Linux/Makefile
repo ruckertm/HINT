@@ -45,16 +45,16 @@ all: hintview
 	$(CC) -I../backend -MM *.c  > $@ || true
 
 main.o: main.c
-	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(GTK_CFLAGS) -o $@ -c $<
 
 renderOGL.o: renderOGL.c
-	$(CC) $(CFLAGS) $(FT_INCLUDES) -o $@ -c $< 
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(FT_INCLUDES) -o $@ -c $<
 
 hint.o: ../backend/hint.c
-	$(CC) $(CFLAGS) $(FT_INCLUDES) -o $@ -c $<
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(FT_INCLUDES) -o $@ -c $<
 
 %.o: ../backend/%.c 
-	$(CC) $(CFLAGS) $(FT_INCLUDES)  -o $@ -c $<
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(FT_INCLUDES) -o $@ -c $<
 
 hintview: $(OBJ)
 	$(CC) $(LDFLAGS) $(OBJ) $(GTK_LIBS) $(LIBS) -o $@
@@ -62,45 +62,45 @@ hintview: $(OBJ)
 
 
 message.o: message.c
-	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(GTK_CFLAGS) -o $@ -c $<
 
 message: message.o
 	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
 
 search.o: search.c
-	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(GTK_CFLAGS) -o $@ -c $<
 
 search: search.o
 	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
 
 
 outline.o: outline.c
-	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(GTK_CFLAGS) -o $@ -c $<
 
 outline: outline.o
 	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
 
 header.o: header.c
-	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(GTK_CFLAGS) -o $@ -c $<
 
 header: header.o
 	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
 
 preferences.o: preferences.c
-	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(GTK_CFLAGS) -o $@ -c $<
 
 preferences: preferences.o
 	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
 
 about.o: about.c
-	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(GTK_CFLAGS) -o $@ -c $<
 
 about: about.o
 	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
 
 
 resources.o: resources.c resources.h
-	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(GTK_CFLAGS) -o $@ -c $<
 
 resources.c: resources.xml # help.sgml
 	glib-compile-resources --generate-source  resources.xml 
@@ -109,7 +109,7 @@ resources.h: resources.xml
 	glib-compile-resources --generate-header  resources.xml 
 
 settings.o: settings.c
-	$(CC) $(CFLAGS) $(GTK_CFLAGS) -o $@ -c $< 
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(GTK_CFLAGS) -o $@ -c $<
 
 settings: settings.o
 	$(CC) $(LDFLAGS) $< $(GTK_LIBS) -o $@
