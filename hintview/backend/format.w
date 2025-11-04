@@ -38,6 +38,9 @@
 @s uint64_t int
 @s bool int
 
+%% defining hyphenation patterns
+\hyphenation{pa-ra-me-ter}
+
 @
 
 \makeindex
@@ -308,10 +311,10 @@ happens to be the ASCII code of the letter `a' and ``{\tt *1}'' is a font refere
 that stands for ``Computer Modern Roman 10pt''. 
 Reference numbers, as you can see, 
 start with an asterisk reminiscent of references in the \CEE\ programming language.
-The Astrix enables us to distinguish between ordinary numbers like ``\.{1}'' and references like ``{\tt *1}''.
+The asterisk enables us to distinguish between ordinary numbers like ``\.{1}'' and references like ``{\tt *1}''.
 
 To make this node more readable, we will see in section~\secref{chars} that it is also 
-possible to write `` \.{<glyph 'a' (cmr10) *1>}''.
+possible to write `` \.{<glyph 'a' *1 (cmr10)>}''.
 The latter form uses a comment ``\.{(cmr10)}'', enclosed in parentheses, to
 give an indication of what kind of font happens to be font 1, and it uses ``\.{'a'}'',
 the character enclosed in single quotes to denote the ASCII code of `a'. 
@@ -1152,7 +1155,7 @@ having the high bits |11110| indicating a four byte sequence followed by three c
 @
 
 @<scanning macros@>=
-#define @[SCAN_UTF8_4(S)@]   @[yylval.u=(((S)[0]&0x03)<<18)+(((S)[1]&0x3F)<<12)+@|(((S)[2]&0x3F)<<6)+((S)[3]&0x3F)@]
+#define @[SCAN_UTF8_4(S)@]   @[yylval.u=(((S)[0]&0x07)<<18)+(((S)[1]&0x3F)<<12)+@|(((S)[2]&0x3F)<<6)+((S)[3]&0x3F)@]
 @
 
 \enditemize
