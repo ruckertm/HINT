@@ -7471,7 +7471,7 @@ else
    pos=((uint64_t)labels[n].pos<<32)+@|(labels[n].pos-labels[n].pos0);
 #else
    pos=((uint64_t)labels[n].pos0<<32);
-   /* offsets still dont work in all cases and need fixing */
+   /* offsets still don't work in all cases and need fixing */
 #endif
 }
 @
@@ -9228,7 +9228,7 @@ start a new nesting level, and set its horizontal size.
   { uint32_t s, t;
     @<read the start byte |a|@>@;
     if ((INFO(a)&b011)==0) 
-      HGET8; /* the empty list */
+    {  HGET8; s=0; }/* the empty list */
     else if (INFO(a)&b100)
       QUIT("Text in paragraph not yet implemented");
     else
@@ -9284,7 +9284,7 @@ Otherwise we remove unwanted space from the beginning of the list.
 @<\HINT\ auxiliar functions@>=
 pointer hget_paragraph_final(scaled x, uint8_t *from)
 {@+uint8_t *to;
-  int par_color,par_label_ref;
+  int par_color=-1,par_label_ref=-1;
   @<prepare for reading the paragraph list@>@;
   @<check for a color change in the initial section of the paragraph@>@;
   hpos=from; to=list_end;
@@ -10595,7 +10595,7 @@ hloc_set_prev(link(page_head));
 while (true) {
   q=link(page_head);
   if (q==null) return false; /* empty page */
-  else if (q==best_page_break) /* dont remove the page break */
+  else if (q==best_page_break) /* don't remove the page break */
     break;
   else if (type(q)==penalty_node || type(q)==glue_node || type(q)==kern_node)
   { link(page_head)=link(q);link(q)=null;flush_node_list(q); }
@@ -10922,7 +10922,7 @@ static int lo_loc, hi_loc;
 
 The location of the current page is found at |page_loc[cur_loc]| which
 is always defined. Pages preceeding the current page may be found
-in |page_loc| at an index $i$ that is strictly beween |lo_loc| and $|cur_loc|$ 
+in |page_loc| at an index $i$ that is strictly between |lo_loc| and $|cur_loc|$ 
 ($|lo_loc| < i < |cur_loc|$). Of course with the usual meaning of  `between'' in a circular buffer.
 Similarly, we have $|cur_loc| < i <|hi_loc|$ for the index of a page
 following the current page.

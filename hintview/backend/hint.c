@@ -6669,7 +6669,7 @@ HGETTAG(a);
 #line 9229 "hint.w"
 
 if((INFO(a)&b011)==0)
-HGET8;
+{HGET8;s= 0;}
 else if(INFO(a)&b100)
 QUIT("Text in paragraph not yet implemented");
 else
@@ -6741,7 +6741,7 @@ return par_ptr;
 
 pointer hget_paragraph_final(scaled x,uint8_t*from)
 {uint8_t*to;
-int par_color,par_label_ref;
+int par_color= -1,par_label_ref= -1;
 /*464:*/
 #line 9225 "hint.w"
 
@@ -6757,7 +6757,7 @@ HGETTAG(a);
 #line 9229 "hint.w"
 
 if((INFO(a)&b011)==0)
-HGET8;
+{HGET8;s= 0;}
 else if(INFO(a)&b100)
 QUIT("Text in paragraph not yet implemented");
 else
@@ -7902,7 +7902,7 @@ HGETTAG(a);
 #line 9229 "hint.w"
 
 if((INFO(a)&b011)==0)
-HGET8;
+{HGET8;s= 0;}
 else if(INFO(a)&b100)
 QUIT("Text in paragraph not yet implemented");
 else

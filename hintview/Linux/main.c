@@ -223,7 +223,7 @@ static int set_hin_name(char *fn)
   }
   sl=strlen(hin_name);
   if (sl>4 && strncmp(hin_name+sl-4,".hnt",4)!=0)
-  {  hint_error("Unknown File Type, I dont know how to open this file", hin_name);
+  {  hint_error("Unknown File Type, I don't know how to open this file", hin_name);
     return 0;
   }
  
@@ -483,10 +483,10 @@ static gboolean cb_mouse_motion(GtkWidget *area, GdkEventMotion *event, gpointer
   x=event->x;
   y=event->y;
   LOG("Mouse move %f x %f \n", x-down_x, y-down_y);
-  if (!is_scaling) /*we dont know whether this is a click or a drag */  
+  if (!is_scaling) /*we don't know whether this is a click or a drag */  
   { d = (x-down_x)*(x-down_x)+(y-down_y)*(y-down_y);
     if (d<=DELTA_XY && event->time-down_time <= DELTA_T)
-      return TRUE; /* still dont know */
+      return TRUE; /* still don't know */
     is_scaling=TRUE;
     down_xy=down_x*down_x+down_y*down_y;
   }

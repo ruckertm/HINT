@@ -86,7 +86,7 @@ struct button_def {
   {home_id, "Home", "go-home-symbolic","Go to the document's home page (Ctrl+H)", cb_home,NULL},
   {search_id, "Search", "system-search-symbolic", "Find text (Ctrl+F)", cb_search, NULL},
   {zoom_id, "Zoom to 100%","zoom-original-symbolic", "Zoom to 100% (Ctrl+Z)", cb_zoom_1,NULL},
-  {dark_id, "Dark mode",NULL,"Switch beween dark and light mode (Ctrl+D)", cb_day_night,NULL},
+  {dark_id, "Dark mode",NULL,"Switch between dark and light mode (Ctrl+D)", cb_day_night,NULL},
   {reload_id, "Reload file", "view-refresh-symbolic","Reload document (Ctrl+R)", cb_reload,NULL},
   {outline_id, "Outline", "view-list-symbolic","Show Outline (Ctrl+T)", cb_outline,NULL},
   {pref_id, "Preferences", "preferences-system-symbolic","Set Preferences (Ctrl+P)", cb_preferences,NULL},
