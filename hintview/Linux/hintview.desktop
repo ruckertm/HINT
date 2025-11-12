@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=HINTView
+GenericName=HINT: The Viewer
+GenericName[de]=HINT: Der Betrachter
+GenericName[re]=HINT: Зритель
+Comment=Programs to view HINT files
+Comment[de]=Programm zum Betrachten von HINT Files
+Comment[ru]=Программа для просмотра файлов HINT
+Icon=x-hintview
+Exec=hintview %F
+MimeType=application/x-hintview;
+Categories=Office;
+Keywords=TeX;LaTeX;ConTeXt;XeTeX;

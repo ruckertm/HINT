@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
-    <mime-type type="mimetypes/x-hintview">
+    <mime-type type="application/x-hintview">
       <comment>Binary HINT File</comment>
       <generic-icon name="x-hintview"/>
       <glob pattern="*.hnt"/>
