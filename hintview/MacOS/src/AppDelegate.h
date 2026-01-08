@@ -22,7 +22,7 @@
 - (BOOL)application:(NSApplication *)sender openFile:(NSString *)filename;
 
 - (void)applicationWillFinishLaunching:(NSNotification *)notification;
-
+- (void) applicationDidFinishLaunching:(NSNotification *) notification;
 - (void)applicationWillTerminate:(NSNotification *)notification;
 
 - (BOOL) openFile: (NSString *) filename;

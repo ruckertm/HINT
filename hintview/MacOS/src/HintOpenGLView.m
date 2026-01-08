@@ -58,10 +58,10 @@ static HintOpenGLView * main_view=nil;
   return self;
 }
 
-extern NSString * DocumentBookmark;
+
 
 - (void) prepareOpenGL
-{   bool open=NO;
+{   
     const GLint  swapInt = 1;
     [super prepareOpenGL];
     [[self openGLContext] setValues:&swapInt forParameter:NSOpenGLCPSwapInterval]; // set to vbl sync
@@ -72,19 +72,7 @@ extern NSString * DocumentBookmark;
     [self autoReloadFile:nil];
     [self showSearch:nil];
     [self setScale: scale];
-    if (DocumentBookmark!=nil && DocumentBookmark.length>0)
-    { NSData *bookmk = [ [NSData alloc] initWithBase64EncodedString:DocumentBookmark options:NSDataBase64DecodingIgnoreUnknownCharacters];
-        BOOL isStale;
-        NSError *err;
-      NSURL* bookmarkUrl = [NSURL URLByResolvingBookmarkData: bookmk
-                                   options:NSURLBookmarkResolutionWithSecurityScope
-                                                relativeToURL:nil bookmarkDataIsStale:&isStale error:&err];
-       [bookmarkUrl startAccessingSecurityScopedResource];
-        open= [[(AppDelegate*)NSApp delegate] openFile: bookmarkUrl.path];
-       [bookmarkUrl stopAccessingSecurityScopedResource];
-    }
-    if (!open)
-        [self openFile:self];
+   
     self->ready=YES;
 }
 

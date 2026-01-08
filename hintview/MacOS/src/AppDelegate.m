@@ -77,7 +77,7 @@ int set_hin_name(const char *fn)
     LSLaunchURLSpec launchSpec;
     CFArrayRef itemURLs;
     NSURL *s = [NSURL fileURLWithPath:filename];
-    //hint_message("New application:openFile: %s", filename.UTF8String);
+    hint_message("New application:openFile: %s", filename.UTF8String);
     launchSpec.appURL = NULL;
     itemURLs = CFArrayCreate(NULL, (const void **)&s, 1, &kCFTypeArrayCallBacks);
     launchSpec.itemURLs = itemURLs; // CFBridgingRetain([NSURL fileURLWithPath: filename]);
@@ -97,9 +97,42 @@ int set_hin_name(const char *fn)
 
 
 - (void)applicationWillFinishLaunching:(NSNotification *)notification
-{
+{ // Called after the main run loop has been started before files are opened
     [_thePreferences loadPreferences];
     NSLog(@"loading preferences done");
+}
+extern NSString * DocumentBookmark;
+
+- (void) applicationDidFinishLaunching:(NSNotification *) notification
+{// Called after main run loop has started before processing events
+    // Called after application:openFile (above) if the app was launched by opening a file
+    bool open=NO;    
+    NSLog(@"App finished launching");
+    if (hin_name==NULL)
+    { if (DocumentBookmark!=nil && DocumentBookmark.length>0)
+      { NSData *bookmk = [ [NSData alloc] initWithBase64EncodedString:DocumentBookmark options:NSDataBase64DecodingIgnoreUnknownCharacters];
+        BOOL isStale=NO;
+        NSError *err=nil;
+        NSURL* bookmarkUrl = [NSURL URLByResolvingBookmarkData: bookmk
+                                                       options:NSURLBookmarkResolutionWithSecurityScope
+                                                 relativeToURL:nil bookmarkDataIsStale:&isStale error:&err];
+        if (err!= nil)
+            NSLog(@"Error reading file: %@", [err localizedDescription]);
+        else
+        {
+            [bookmarkUrl startAccessingSecurityScopedResource];
+            open= [self openFile: bookmarkUrl.path];
+            [bookmarkUrl stopAccessingSecurityScopedResource];
+        }
+      }
+        
+      if (!open)
+      { hint_error("Opening file","failed");
+          [_theMainView openFile:self];
+      }
+      else
+        hint_error("Opening file", "succeeds");
+    }
 }
 
 
