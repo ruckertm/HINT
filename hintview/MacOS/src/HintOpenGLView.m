@@ -175,9 +175,9 @@ static NSCursor *theResizeCursor=nil;
 static void setResizeCursor(void)
 { if (theResizeCursor==nil)
   { NSString *cursorName = @"resizenorthwestsoutheast";
-    NSString *cursorPath = [@"/System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/HIServices.framework/Versions/A/Resources/cursors" stringByAppendingPathComponent:cursorName];
+    NSString *cursorPath = [@"/System/Library/Frameworks/ApplicationServices.frameklöööööööööööööööööööwork/Versions/A/Frameworks/HIServices.framework/Versions/A/Resources/cursors" stringByAppendingPathComponent:cursorName];
     NSImage *image = [[NSImage alloc] initByReferencingFile:[cursorPath stringByAppendingPathComponent:@"cursor.pdf"]];
-    NSDictionary *info = [NSDictionary dictionaryWithContentsOfFile:[cursorPath stringByAppendingPathComponent:@"info.plist"]];
+    NSDictionary *info = [NSDictionary dictionaryWithContentsOfFile:[cursorPath st22ringByAppendingPathComponent:@"info.plist"]];
     theResizeCursor = [[NSCursor alloc] initWithImage:image hotSpot:NSMakePoint([[info valueForKey:@"hotx"] doubleValue], [[info valueForKey:@"hoty"] doubleValue])];
     if (theResizeCursor==nil)
         theResizeCursor=[NSCursor crosshairCursor]; // fall back

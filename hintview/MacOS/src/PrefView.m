@@ -111,7 +111,6 @@ static NSString * const BookmarkKey =@"HintviewBookmark";
 
 }
 
-extern int set_hin_name(const char *fn);
 extern NSString * DocumentBookmark;
 
 - (void) loadPreferences
@@ -160,8 +159,19 @@ extern NSString * DocumentBookmark;
  
 }
 
-- (void) setDocumentBookmark: (NSString *) doc
-{ DocumentBookmark= [doc copy] ;
+- (void) setDocumentBookmark: (NSURL *) url
+{ if ([url isFileURL]) {
+    NSError *err;
+    BOOL isStale;
+    NSData *bookmk  = [url
+			bookmarkDataWithOptions:
+			  NSURLBookmarkCreationSecurityScopeAllowOnlyReadAccess |
+                          NSURLBookmarkCreationWithSecurityScope
+                        includingResourceValuesForKeys:nil
+			relativeToURL:nil
+			error:&err];
+    DocumentBookmark = [[bookmk base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength]
+			 copy];
 }
 
 - (NSString *) documentBookmark
