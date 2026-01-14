@@ -297,7 +297,7 @@ void redisplay(void)
         start_scale=scale;
     else if (sender.state==UIGestureRecognizerStateEnded)
     {  setScale();
-       hint_clear_fonts(true);
+       hint_clear_fonts(false);
        [_theView setNeedsDisplay];
     }
     else
@@ -321,6 +321,7 @@ void redisplay(void)
     scale=1;
     hint_resize(px_x,px_y,scale*x_dpi,scale*y_dpi);
     hint_page();
+    hint_clear_fonts(false);
     [_theView setNeedsDisplay];
 }
 
