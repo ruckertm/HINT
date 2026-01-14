@@ -29,6 +29,7 @@
 
 - (void) setGammaText: (double) g;
 - (void) setGammaSlider: (double) g;
+- (void) setDocumentBookmark: (NSURL *) url;
 
 - (BOOL) acceptsFirstResponder;
 

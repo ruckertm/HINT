@@ -1,5 +1,7 @@
 #import <Cocoa/Cocoa.h>
 
+#define GL_SILENCE_DEPRECATION 1
+
 @interface HintOpenGLView : NSOpenGLView
 
 {

@@ -101,8 +101,8 @@ void pagination(void)
 { [super beginDocument];
   NSPrintOperation *op = [NSPrintOperation currentOperation];
   NSPrintInfo *pInfo = [op printInfo];
-  [pInfo setHorizontalPagination:NSClipPagination];
-  [pInfo setVerticalPagination:NSClipPagination];
+    [pInfo setHorizontalPagination:NSPrintingPaginationModeClip];
+    [pInfo setVerticalPagination:NSPrintingPaginationModeClip];
     
 #if 0 // runs but gives only 72x72 resolution
     PMResolution res;

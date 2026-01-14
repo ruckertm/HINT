@@ -1,4 +1,6 @@
+
 #import <Cocoa/Cocoa.h>
+
 #import "HintOpenGLView.h"
 #import "SectionsController.h"
 
