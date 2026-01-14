@@ -2579,7 +2579,8 @@ static memory_word @!font_info[font_mem_size+1];
 static font_index @!fmem_ptr=0; /*first unused word of |font_info|*/
 
 static void hclear_font_info(void)
-{ fmem_ptr=0;
+{
+  fmem_ptr=0;
 }
 static internal_font_number @!font_ptr; /*largest internal font number in use*/
 static scaled @!font_size0[font_max-font_base+1],
@@ -6883,6 +6884,7 @@ if (font_def!=NULL)
   ft_destroy();
   free(font_def);
   font_def=NULL;
+  max_ref[font_kind]=-1;
 }
 @
 
@@ -12546,7 +12548,7 @@ void hint_render_on(void)
 }
 
 void hint_render_off(void)
-{ hint_clear_fonts(false);
+{ hint_clear_fonts(true);
   nativeClear();
 }
 @
@@ -13064,7 +13066,8 @@ static void ft_unload_faces(void)
   if (font_def==NULL) return;
   for (i=0; i<=max_ref[font_kind];i++)
     if (font_def[i].ft_face!=NULL)
-      ft_unload_font_face(i);
+    {  ft_unload_font_face(i);
+    }
 } 
 
 static void ft_destroy(void)
