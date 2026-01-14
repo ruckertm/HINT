@@ -7801,7 +7801,7 @@ return 1;
 /*:372*//*373:*/
 #line 7683 "hint.w"
 
-static void hget_content_section()
+static void hget_content_section(void)
 {DBG(DBGDIR,"Reading Content Section\n");
 hget_section(2);
 }

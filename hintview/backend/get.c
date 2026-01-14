@@ -1,5 +1,5 @@
-	/*550:*/
-	#line 11491 "format.w"
+	/*552:*/
+	#line 11509 "format.w"
 
 #include "basetypes.h"
 #include <string.h>
@@ -45,12 +45,12 @@ char*hin_name= NULL;
 uint64_t hin_size= 0;
 uint8_t*hin_addr= NULL;
 uint64_t hin_time= 0;
-	/*:348*/	/*404:*/
-	#line 9100 "format.w"
+	/*:348*/	/*406:*/
+	#line 9118 "format.w"
 
 char**hfont_name;
-	/*:404*/	/*448:*/
-	#line 9866 "format.w"
+	/*:406*/	/*450:*/
+	#line 9884 "format.w"
 
 unsigned int debugflags= DBGNONE;
 int option_utf8= false;
@@ -61,12 +61,12 @@ int option_aux= false;
 int option_compress= false;
 char*stem_name= NULL;
 int stem_length= 0;
-	/*:448*/	/*451:*/
-	#line 10000 "format.w"
+	/*:450*/	/*453:*/
+	#line 10018 "format.w"
 
 FILE*hin= NULL,*hout= NULL,*hlog= NULL;
-	/*:451*/
-	#line 11504 "format.w"
+	/*:453*/
+	#line 11522 "format.w"
 
 
 	/*349:*/
@@ -164,7 +164,7 @@ return hin_size;
 #endif
 
 	/*:349*/
-	#line 11506 "format.w"
+	#line 11524 "format.w"
 
 	/*336:*/
 	#line 7382 "format.w"
@@ -207,7 +207,7 @@ DBG(DBGDIR,"banner size=0x%x\n",hbanner_size);
 return true;
 }
 	/*:336*/
-	#line 11507 "format.w"
+	#line 11525 "format.w"
 
 	/*358:*/
 	#line 7951 "format.w"
@@ -234,7 +234,7 @@ e->file_name= strdup(file_name);
 DBG(DBGDIR,"Creating entry %d: \"%s\" size=0x%x xsize=0x%x\n",i,file_name,size,xsize);
 }
 	/*:359*/
-	#line 11508 "format.w"
+	#line 11526 "format.w"
 
 
 	/*337:*/
@@ -375,8 +375,8 @@ if(dir[i].xsize>0&&dir[i].buffer!=NULL)free(dir[i].buffer);
 free(dir);dir= NULL;
 }
 
-	/*:370*/	/*388:*/
-	#line 8642 "format.w"
+	/*:370*/	/*390:*/
+	#line 8660 "format.w"
 
 void hget_max_definitions(void)
 {Kind k;
@@ -388,7 +388,7 @@ uint32_t node_pos= (uint32_t)(hpos-hstart);
 if(hpos>=hend)QUIT("Attempt to read a start byte at the end of the section");
 HGETTAG(a);
 	/*:16*/
-	#line 8645 "format.w"
+	#line 8663 "format.w"
 
 if(a!=TAG(list_kind,0))QUIT("Start of maximum list expected");
 for(k= 0;k<32;k++)max_ref[k]= max_default[k];max_outline= -1;
@@ -409,7 +409,7 @@ case TAG(outline_kind,b100):
 case TAG(outline_kind,b101):max_outline= n;
 DBG(DBGDEF|DBGLABEL,"max(outline) = %d\n",max_outline);break;
 	/*:246*/
-	#line 8657 "format.w"
+	#line 8675 "format.w"
 
 default:
 if(max_fixed[k]>max_default[k])
@@ -428,14 +428,14 @@ if(a!=z)
 QUIT("Tag mismatch [%s,%d]!=[%s,%d] at 0x%x to "SIZE_F"\n",
 NAME(a),INFO(a),NAME(z),INFO(z),node_pos,hpos-hstart-1);
 	/*:17*/
-	#line 8667 "format.w"
+	#line 8685 "format.w"
 
 }
 if(INFO(a)!=0)QUIT("End of maximum list with info %d",INFO(a));
 DBG(DBGDEF,"Getting Max Definitions END\n");
 }
-	/*:388*/
-	#line 11510 "format.w"
+	/*:390*/
+	#line 11528 "format.w"
 
 	/*53:*/
 	#line 1244 "format.w"
@@ -525,10 +525,10 @@ DBG(DBGNODE,"Get list at 0x%x size=%u\n",l->p,l->s);
 }
 }
 	/*:146*/
-	#line 11511 "format.w"
+	#line 11529 "format.w"
 
-	/*464:*/
-	#line 10181 "format.w"
+	/*466:*/
+	#line 10199 "format.w"
 
 uint32_t hff_list_pos= 0,hff_list_size= 0;
 Tag hff_tag;
@@ -547,8 +547,8 @@ hpos++;
 return;
 }
 else if(hff_tag<=TAG(param_kind,7))
-	/*467:*/
-	#line 10251 "format.w"
+	/*469:*/
+	#line 10269 "format.w"
 
 switch(INFO(hff_tag)&0x3){
 case 0:hff_list_pos= hpos-hstart+1;hff_list_size= 0;hpos= hpos+3;return;
@@ -557,21 +557,21 @@ case 2:hpos++;HGET16(hff_list_size);hff_list_pos= hpos-hstart+1;hpos= hpos+1+hff
 case 3:hpos++;HGET32(hff_list_size);hff_list_pos= hpos-hstart+1;hpos= hpos+1+hff_list_size+1+4+1;return;
 default:QUIT("List with unknown info [%s,%d] at "SIZE_F"\n",NAME(hff_tag),INFO(hff_tag),hpos-hstart);
 }
-	/*:467*/
-	#line 10199 "format.w"
+	/*:469*/
+	#line 10217 "format.w"
 
 TAGERR(hff_tag);
 }
-	/*:464*/	/*496:*/
-	#line 10672 "format.w"
+	/*:466*/	/*498:*/
+	#line 10690 "format.w"
 
 float32_t hteg_float32(void)
 {union{float32_t d;uint32_t bits;}u;
 HTEG32(u.bits);
 return u.d;
 }
-	/*:496*/	/*535:*/
-	#line 11122 "format.w"
+	/*:498*/	/*537:*/
+	#line 11140 "format.w"
 
 
 uint32_t hteg_list_size(Info info)
@@ -584,7 +584,7 @@ else if(info==3)HTEG32(n);
 else QUIT("List info %d must be 0, 1, 2, or 3",info);
 return n;
 }
-	/*:535*/
-	#line 11512 "format.w"
+	/*:537*/
+	#line 11530 "format.w"
 
-	/*:550*/
+	/*:552*/

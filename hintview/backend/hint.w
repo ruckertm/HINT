@@ -7681,7 +7681,7 @@ name.
 \subsection{The Content Section}
 To position the input stream on the content section we use the following function:
 @<get functions@>=
-static void hget_content_section()
+static void hget_content_section(void)
 { @+DBG(DBGDIR,"Reading Content Section\n");
   hget_section(2);@+
 }
