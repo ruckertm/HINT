@@ -25,6 +25,6 @@
 - (void) applicationDidFinishLaunching:(NSNotification *) notification;
 - (void)applicationWillTerminate:(NSNotification *)notification;
 
-- (BOOL) openFile: (NSString *) filename;
+- (BOOL) openFile: (NSURL *) url;
 
 @end

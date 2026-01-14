@@ -1,3 +1,5 @@
+#define GL_SILENCE_DEPRECATION 1
+
 #import <Foundation/Foundation.h>
 #import <ApplicationServices/ApplicationServices.h>
 #import "HintOpenGLView.h"
@@ -10,8 +12,6 @@
 #include "hint.h"
 #include "rendernative.h"
 #include "main.h"
-
-#define GL_SILENCE_DEPRECATION 1
 
 @implementation HintOpenGLView
 
@@ -175,9 +175,9 @@ static NSCursor *theResizeCursor=nil;
 static void setResizeCursor(void)
 { if (theResizeCursor==nil)
   { NSString *cursorName = @"resizenorthwestsoutheast";
-    NSString *cursorPath = [@"/System/Library/Frameworks/ApplicationServices.frameklöööööööööööööööööööwork/Versions/A/Frameworks/HIServices.framework/Versions/A/Resources/cursors" stringByAppendingPathComponent:cursorName];
+    NSString *cursorPath = [@"/System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/HIServices.framework/Versions/A/Resources/cursors" stringByAppendingPathComponent:cursorName];
     NSImage *image = [[NSImage alloc] initByReferencingFile:[cursorPath stringByAppendingPathComponent:@"cursor.pdf"]];
-    NSDictionary *info = [NSDictionary dictionaryWithContentsOfFile:[cursorPath st22ringByAppendingPathComponent:@"info.plist"]];
+    NSDictionary *info = [NSDictionary dictionaryWithContentsOfFile:[cursorPath stringByAppendingPathComponent:@"info.plist"]];
     theResizeCursor = [[NSCursor alloc] initWithImage:image hotSpot:NSMakePoint([[info valueForKey:@"hotx"] doubleValue], [[info valueForKey:@"hoty"] doubleValue])];
     if (theResizeCursor==nil)
         theResizeCursor=[NSCursor crosshairCursor]; // fall back
@@ -210,23 +210,10 @@ extern NSString *DocumentBookmark;
    // The completion handler is called when the user selects an
    // item or cancels the panel.
    [panel beginWithCompletionHandler:^(NSInteger result){
-      if (result == NSFileHandlingPanelOKButton) {
+        if (result == NSModalResponseOK) {
          NSURL*  url = [[panel URLs] objectAtIndex:0];
           if ([url isFileURL]) {
-              NSError *err;
-              BOOL isStale;
-              NSData *bookmk  = [url bookmarkDataWithOptions: NSURLBookmarkCreationSecurityScopeAllowOnlyReadAccess |
-                           NSURLBookmarkCreationWithSecurityScope
-                        includingResourceValuesForKeys:nil relativeToURL:nil error:&err];
-              DocumentBookmark = [[bookmk base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength] copy];
-              //NSLog(@"bs : %@ :",DocumentBookmark);
-              NSURL* bookmarkUrl = [NSURL URLByResolvingBookmarkData: bookmk
-                                         options:NSURLBookmarkResolutionWithSecurityScope
-                                                      relativeToURL:nil bookmarkDataIsStale:&isStale error:&err];
-             [bookmarkUrl startAccessingSecurityScopedResource];
-             [(AppDelegate*)[NSApp delegate] openFile: [bookmarkUrl path]];
-             [bookmarkUrl stopAccessingSecurityScopedResource];
-           //open_file([url path]);
+              [(AppDelegate*)sender openFile: url];
         }
       }
    }];
@@ -374,7 +361,7 @@ static double x_start, y_start, xy_start, scale_start, time_start;
       int link;
       x=location.x;
       y=px_y-location.y;
-      NSLog(@"xy= %fx%f\n", x,y);
+      NSLog(@"xy= %dx%d\n", x,y);
 //          HINT_TRY {
       link=hint_find_link(x,y,y_dpi/36);
             if (link>=0)
@@ -447,7 +434,7 @@ static double x_start, y_start, xy_start, scale_start, time_start;
     if (count)
     {
         if ([urls[0] isFileURL]) {
-            [(AppDelegate*)[NSApp delegate] openFile: [urls[0] path]];
+            [(AppDelegate*)[NSApp delegate] openFile: urls[0] ];
 
           //open_file([urls[0] path]);
           [self.window setTitleWithRepresentedFilename: [urls[0] path]];

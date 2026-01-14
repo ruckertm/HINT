@@ -46,6 +46,22 @@ static NSString * const BookmarkKey =@"HintviewBookmark";
     if ([sender state]) start_autoreload=1; else start_autoreload=0;
 }
 
+- (void) setDocumentBookmark: (NSURL *) url
+{ if ([url isFileURL]) {
+    NSError *err;
+    BOOL isStale;
+    NSData *bookmk  = [url
+                       bookmarkDataWithOptions:
+                           NSURLBookmarkCreationSecurityScopeAllowOnlyReadAccess |
+                       NSURLBookmarkCreationWithSecurityScope
+                       includingResourceValuesForKeys:nil
+                       relativeToURL:nil
+                       error:&err];
+    DocumentBookmark = [[bookmk base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength]
+                        copy];
+  }
+}
+
 - (void) setGammaText: (double) g
 { static char str[5];
   sprintf(str,"%.2f",g);
@@ -159,24 +175,6 @@ extern NSString * DocumentBookmark;
  
 }
 
-- (void) setDocumentBookmark: (NSURL *) url
-{ if ([url isFileURL]) {
-    NSError *err;
-    BOOL isStale;
-    NSData *bookmk  = [url
-			bookmarkDataWithOptions:
-			  NSURLBookmarkCreationSecurityScopeAllowOnlyReadAccess |
-                          NSURLBookmarkCreationWithSecurityScope
-                        includingResourceValuesForKeys:nil
-			relativeToURL:nil
-			error:&err];
-    DocumentBookmark = [[bookmk base64EncodedStringWithOptions:NSDataBase64Encoding64CharacterLineLength]
-			 copy];
-}
-
-- (NSString *) documentBookmark
-{ return DocumentBookmark;
-}
 
 - (void)resignKeyWindow
 {  NSLog(@"resign key settings");

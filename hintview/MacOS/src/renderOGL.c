@@ -221,7 +221,7 @@ static const GLfloat uv[6][2] = {
 static GLuint xybuffer, uvbuffer;
 
 
-static void mkRuleTexture() /* the texture used for rules */
+static void mkRuleTexture(void) /* the texture used for rules */
 {
 #define NO_TEST 1  
 #if NO_TEST	

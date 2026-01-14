@@ -8,6 +8,8 @@
 #include "hint.h"
 #include "main.h"
 
+#define GL_SILENCE_DEPRECATION 1
+
 @implementation AppDelegate
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication
@@ -51,17 +53,18 @@ int set_hin_name(const char *fn)
 
 
 - (BOOL) openFile: (NSURL *) url
-{ if (!set_hin_name(url.path.UTF8String)) return NO;
+{ if (!set_hin_name(url.path.UTF8String))
+    return NO;
   hint_end();
   if (!hint_begin())
       return NO;
   NSLog(@"file opend");
-  [_thePreferences setDocumentBookmark: url];
   if (start_home)
      hint_page_home();
   else
      hint_page_top(0);
-  [_theMainView.window setTitleWithRepresentedFilename:filename];
+  [_thePreferences setDocumentBookmark: url];
+  [_theMainView.window setTitleWithRepresentedFilename:url.path];
   [[SectionsController  sectionOutlines] setSectionTree];
   //NSLog(@"Open %s",fn);
   [_theOutlineView reloadData];
@@ -72,36 +75,39 @@ int set_hin_name(const char *fn)
 
 
 
+- (void)applicationWillFinishLaunching:(NSNotification *)notification
+{ // Called after the main run loop has been started before files are opened
+    [_thePreferences loadPreferences];
+    NSLog(@"loading preferences done");
+}
+
+
+
 - (BOOL)application:(NSApplication *)sender openFile:(NSString *)filename
-{ if (hin_name!=NULL && start_newwindow)
+{ NSURL *url = [NSURL fileURLWithPath:filename];
+  if (hin_name!=NULL && start_newwindow)
   { int err;
     LSLaunchURLSpec launchSpec;
     CFArrayRef itemURLs;
-    NSURL *s = [NSURL fileURLWithPath:filename];
-    hint_message("New application:openFile: %s", filename.UTF8String);
+    //hint_message("New application:openFile: %s", filename.UTF8String);
     launchSpec.appURL = NULL;
-    itemURLs = CFArrayCreate(NULL, (const void **)&s, 1, &kCFTypeArrayCallBacks);
+    itemURLs = CFArrayCreate(NULL, (const void **)&url, 1, &kCFTypeArrayCallBacks);
     launchSpec.itemURLs = itemURLs; // CFBridgingRetain([NSURL fileURLWithPath: filename]);
     launchSpec.asyncRefCon = NULL;
     launchSpec.launchFlags = kLSLaunchAsync|kLSLaunchNewInstance;
     launchSpec.passThruParams = NULL;
-         
     err = LSOpenFromURLSpec(&launchSpec, NULL);
     return err!=0;
   }
   else
-  {  if ([self openFile:filename])
+  {  if ([self openFile:url])
        return YES;
   }
   return NO;
 }
 
 
-- (void)applicationWillFinishLaunching:(NSNotification *)notification
-{ // Called after the main run loop has been started before files are opened
-    [_thePreferences loadPreferences];
-    NSLog(@"loading preferences done");
-}
+
 extern NSString * DocumentBookmark;
 
 - (void) applicationDidFinishLaunching:(NSNotification *) notification
@@ -115,24 +121,24 @@ extern NSString * DocumentBookmark;
         BOOL isStale=NO;
         NSError *err=nil;
         NSURL* bookmarkUrl = [NSURL URLByResolvingBookmarkData: bookmk
-                                                       options:NSURLBookmarkResolutionWithSecurityScope
-                                 ü                relativeToURL:nil bookmarkDataIsStale:&isStale error:&err];
+                                options:NSURLBookmarkResolutionWithSecurityScope
+                                relativeToURL:nil
+                                bookmarkDataIsStale:&isStale
+                                error:&err];
         if (err!= nil)
             NSLog(@"Error reading file: %@", [err localizedDescription]);
         else
         {
             [bookmarkUrl startAccessingSecurityScopedResource];
-            open= [self openFile: bookmarkUrl.path];
+            open= [self openFile: bookmarkUrl];
             [bookmarkUrl stopAccessingSecurityScopedResource];
         }
       }
         
       if (!open)
-      { hint_error("Opening file","failed");
+      { // hint_error("Opening file","failed");
           [_theMainView openFile:self];
       }
-      else
-        hint_error("Opening file", "succeeds");
     }
 }
 
