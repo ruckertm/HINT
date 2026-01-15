@@ -56,6 +56,7 @@ int set_hin_name(const char *fn)
 { if (!set_hin_name(url.path.UTF8String))
     return NO;
   hint_end();
+  NSLog(@"open File %@ path %@",url, url.path);
   if (!hint_begin())
       return NO;
   NSLog(@"file opend");
@@ -81,11 +82,35 @@ int set_hin_name(const char *fn)
     NSLog(@"loading preferences done");
 }
 
-
+- (void) application:(NSApplication *) application
+            openURLs:(NSArray<NSURL *> *) urls
+{
+    NSLog(@"Application open URLs %@",urls[0].path);
+    if (hin_name!=NULL && start_newwindow)
+  { int err;
+    LSLaunchURLSpec launchSpec;
+    CFArrayRef itemURLs;
+    //hint_message("New application:openFile: %s", filename.UTF8String);
+    launchSpec.appURL = NULL;
+    itemURLs = CFArrayCreate(NULL, (const void **)urls, 1, &kCFTypeArrayCallBacks);
+    launchSpec.itemURLs = itemURLs; // CFBridgingRetain([NSURL fileURLWithPath: filename]);
+    launchSpec.asyncRefCon = NULL;
+    launchSpec.launchFlags = kLSLaunchAsync|kLSLaunchNewInstance;
+    launchSpec.passThruParams = NULL;
+    err = LSOpenFromURLSpec(&launchSpec, NULL);
+    //return err!=0;
+  }
+  else
+  {  if ([self openFile:urls[0]])
+       return;
+  }
+}
 
 - (BOOL)application:(NSApplication *)sender openFile:(NSString *)filename
 { NSURL *url = [NSURL fileURLWithPath:filename];
-  if (hin_name!=NULL && start_newwindow)
+  //NSURL *url = [NSURL URLWithString: filename];
+    NSLog(@"Application open file %@ path %@",filename, url.path);
+    if (hin_name!=NULL && start_newwindow)
   { int err;
     LSLaunchURLSpec launchSpec;
     CFArrayRef itemURLs;
@@ -100,7 +125,11 @@ int set_hin_name(const char *fn)
     return err!=0;
   }
   else
-  {  if ([self openFile:url])
+  {  bool open=NO;
+      [url startAccessingSecurityScopedResource];
+      open= [self openFile: url];
+      [url stopAccessingSecurityScopedResource];
+  if (open)
        return YES;
   }
   return NO;

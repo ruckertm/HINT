@@ -212,8 +212,10 @@ extern NSString *DocumentBookmark;
    [panel beginWithCompletionHandler:^(NSInteger result){
         if (result == NSModalResponseOK) {
          NSURL*  url = [[panel URLs] objectAtIndex:0];
-          if ([url isFileURL]) {
-              [(AppDelegate*)sender openFile: url];
+            NSLog(@"Open panel Completion handler %@",url.path);
+            if ([url isFileURL]) {
+                [(AppDelegate*)[NSApp delegate] openFile: url];
+                //[(AppDelegate*)sender openFile: url];
         }
       }
    }];
