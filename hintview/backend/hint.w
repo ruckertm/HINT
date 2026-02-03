@@ -1,5 +1,5 @@
 % This file is part of HINT
-% Copyright 2017-2021 Martin Ruckert, Hochschule Muenchen, Lothstrasse 64, 80336 Muenchen
+% Copyright 2017-2026 Martin Ruckert, Hochschule Muenchen, Lothstrasse 64, 80336 Muenchen
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -6869,6 +6869,7 @@ scaled hpxs,vpxs; /**/
 FontFormat ff; /* the font format */
 FT_Face ft_face; /* a pointer to the font face for FreeType fonts */
 @<the glyph cache@>@;
+@<PK font specific fields@>@;
 } FontDef;
 
 static FontDef *font_def;
@@ -12643,6 +12644,9 @@ void hint_clear_fonts(bool rm)
     if (rm && font_def[f].ff==pk_format)
       font_def[f].ff=no_format;
   }
+  fprintf(stderr,"Fonts %d, Glyphs %d, Lookups %d\n",
+    font_count, glyph_count, lookup_count);
+  font_count=glyph_count=lookup_count=0;
 }
 @
 
@@ -12700,12 +12704,21 @@ contain a compressed representation of bitmap fonts  produced by \MF\ and {\tt g
 The definitions and algorithms that follow here can be found,
 along with a more detailed description, in \cite{TR:pkfile}. 
 
-For every glyph, there is a |flag| byte in the PK file that tells how the corresponding glyph is
-encoded and a pointer to the encoding itself.
+For every glyph, there is a |flags| byte in the PK file that tells how the
+corresponding glyph is encoded and the |offset| of the encoding itself.
 
-@<PK specific fields in the glyph cache@>=
-unsigned char pk_glyph_flags; /*how to decode the glyph*/
-unsigned char *pk_glyph_data; /*the data encoding the glyph*/
+@<Types...@>=
+typedef struct { 
+unsigned int flags:8; /*how to decode the glyph*/
+unsigned int offset:24; /*the data encoding the glyph*/
+} PK_Glyph_Info;
+
+
+@ We store this information for every PK font in the |FontDef| structure.
+
+@<PK font specific fields@>=
+PK_Glyph_Info *pk_glyphs;
+unsigned char *pk_data;
 @
 
 Before we define two functions, one to unpack a single glyph when it is needed for the first time,
@@ -12795,7 +12808,7 @@ We traverse the |pk_data| nybbles sequentially in top-down order.
 The horizontal position |x| and the vertical position |y| in the
 target bitmap start at 0 and |g->h-1|.
 @<PK font functions@>=
-static unsigned char *pk_runlength(Gcache *g, unsigned char *pk_data) {
+static unsigned char *pk_runlength(Gcache *g, unsigned char *pk_data, unsigned char pk_glyph_flags) {
     PKparse p;
     int x, y; /* position in target bitmap */
     unsigned char *bits; /* target bitmap */
@@ -12805,10 +12818,10 @@ static unsigned char *pk_runlength(Gcache *g, unsigned char *pk_data) {
     if (bits == NULL) { g->w = g->h = 0;  return NULL; } /* out of memory */
     p.j = 0; /* nybble position to start of data */
     p.r = 0; /* repeat count = 0 */
-    p.f = g->pk_glyph_flags >> 4; /* dynamic f value */
+    p.f = pk_glyph_flags >> 4; /* dynamic f value */
     p.pk_data=pk_data; /* data bytes */
     n = 0;
-    if ((g->pk_glyph_flags >> 3) & 1) gray=0x00;
+    if ((pk_glyph_flags >> 3) & 1) gray=0x00;
     else gray=0xff;
     y = 0;
     while (y <g->h) {
@@ -12873,18 +12886,24 @@ The next function unpacks the glyphs meta data and calls one of the
 unpacking functions just defined.
 @<PK font functions@>=
 
-static void pk_unpack_glyph(uint8_t f, Gcache *g)
+static void pk_unpack_glyph(uint8_t f, Gcache *g, unsigned int cc)
 { int i,k;
   unsigned char *pk_data;
+  unsigned char pk_flags;
   unsigned char *bits;
-  if (g==NULL || g->pk_glyph_data==NULL) return; /* no glyph, no data */
-  if (g->OGLtexture!=0) return; /* already unpacked */
+  if (g==NULL) return;
+  if (g->OGLtexture!=0) return;   /* already unpacked */
+  pk_data= font_def[f].pk_data;
+  if (pk_data==NULL|| font_def[f].pk_glyphs==NULL) return; /* no glyph, no data */
+
 #if 0  
   DBG(DBGRENDER,"Unpacking glyph %c (0x%x)",g->cc,g->cc);
-#endif 
-  pk_data=g->pk_glyph_data;
+#endif
+
+  pk_data=pk_data + font_def[f].pk_glyphs[cc].offset;
+  pk_flags=font_def[f].pk_glyphs[cc].flags;
   i=0;
-  if ((g->pk_glyph_flags&7)<4)  /* short form */
+  if ((pk_flags&7)<4)  /* short form */
   { i=i+3; /* skip the TeX font metrics */
 	i=i+1; /*escapement: |g->dy=0; g->dx=PK_READ_1_BYTE(); g->dx= g->dx<<16;| */
 	g->w=PK_READ_1_BYTE();
@@ -12892,7 +12911,7 @@ static void pk_unpack_glyph(uint8_t f, Gcache *g)
 	g->hoff=(signed char)PK_READ_1_BYTE();
 	g->voff=(signed char)PK_READ_1_BYTE();
   }
-  else if ((g->pk_glyph_flags&7)<7) /* extended short form */
+  else if ((pk_flags&7)<7) /* extended short form */
   {  i=i+3; /* skip the TeX font metrics */
 	i=i+2; /*escapement: |g->dy=0; g->dx=PK_READ_2_BYTE(); g->dx= g->dx<<16;| */
 	g->w=PK_READ_2_BYTE();
@@ -12908,8 +12927,8 @@ static void pk_unpack_glyph(uint8_t f, Gcache *g)
 	g->hoff=(signed int)PK_READ_4_BYTE();
 	g->voff=(signed int)PK_READ_4_BYTE();
   }
-  if ((g->pk_glyph_flags>>4)==14) bits=pk_bitmap(g,pk_data+i);
-  else bits=pk_runlength(g,pk_data+i);
+  if ((pk_flags>>4)==14) bits=pk_bitmap(g,pk_data+i);
+  else bits=pk_runlength(g,pk_data+i, pk_flags);
   if (bits!=NULL)
   { g->OGLtexture=nativeTexture(bits,g->w,g->h);
     free(bits);
@@ -12958,6 +12977,8 @@ static int unpack_pk_file(internal_font_number f)
   }
   if (pk_data[0]!=PK_PRE ||  pk_data[1]!=PK_ID)
     return 0;
+  font_def[f].pk_data=pk_data;
+  ALLOCATE(font_def[f].pk_glyphs,128,PK_Glyph_Info);
   i=0;
   while (i< pk_size)
     switch(flag=pk_data[i++])
@@ -12994,7 +13015,6 @@ static int unpack_pk_file(internal_font_number f)
       default: /* the character codes */
       { unsigned int pl;
         unsigned int cc;
-        Gcache *g;
         if ((flag&7)==7) /* long form */
         { pl=PK_READ_4_BYTE();
           cc=PK_READ_4_BYTE();
@@ -13007,9 +13027,14 @@ static int unpack_pk_file(internal_font_number f)
           cc=PK_READ_1_BYTE();
           pl= pl+((flag&3)<<8);
         }
-        g = hnew_glyph(font_def+f,cc);
-        g->pk_glyph_flags=flag;
-        g->pk_glyph_data=pk_data+i;
+	if (cc>255)
+	  MESSAGE("Ignoring character code %d from PK font %s",cc,font_def[f].n);
+	else 
+        { if (cc>127)
+	    REALLOCATE(font_def[f].pk_glyphs,256,PK_Glyph_Info);
+          font_def[f].pk_glyphs[cc].flags=flag;
+          font_def[f].pk_glyphs[cc].offset=i;
+	}
         i=i+pl;
       }
       break;
@@ -13378,6 +13403,88 @@ static void ft_glyph_height_depth(FT_Face ft_face, FT_UInt ft_gid,
 \subsubsection{The Glyph Cache}
 If possible, the glyphs belonging to a font are extracted only once from the font data,
 converted into a format suitable for the native rendering engine, and then cached for repeated use.
+
+When \HiTeX\ started to support OpenType fonts that were shaped using the Harfbuzz library,
+it was no longer possible to supply a Unicode codepoint for every glyph, because
+Harfbuzz would convert sequences of characters into ligatures, and these ligatures had a
+unique glyph identifier in the respective font, but no Unicode codepoint that would map to
+it. As a consequence, the \HINT\ viewer now needs to map Unicode codepoints as well as
+glyph identifiers to the corresponding textures before displaying the glyph.
+
+It would be possibly to cache only the mapping from glyph identifiers to textures,
+because the mapping from Unicode codepoint to glyph idendtifier can be obtained
+from the font file using the |FT_Get_Char_Index| function.
+However, looking up the glyph textures occurs much more frequently than creating new textures.
+Even on a page with complex typography, you might expect not more than 150 distinct glyphs
+from may be 7 different fonts. But rendering the page at a small font size might require 500 or even
+more lookups: one lookup for every glyph instance on the page.
+While zooming in or out on a page, the \HINT\ viewer rerenders the page with every mouse
+movement, and this can easily lead up to a hundred thousand lookups for a single zoom operation.
+To make the zoom operation smooth, obviously, the lookups need to be fast.
+Therefore, the extra call to |FT_Get_Char_Index| should be avoided.
+
+The tree implementation of the glyph cache can not cope with both Unicode codepoints
+and glyph identifiers, simply because the range of values overlaps. Using one tree for
+Unicode codepoints and a second tree for glyph identifiers is possible but a waste of
+memory, because the number of ligatures is an order of magnitude smaller than the number
+of ordinary characters, and even for ordinary characters, the tree implementation has
+already a large memory overhead. Fonts used for mathematical symbols
+or chapter headings often provide only a handfull of glyphs that are actually used;
+but the tree structure must be provided for the complete ASCII character set.
+
+So the decisson was made to replace the lookup tree by a new data structure.
+The old tree data structure required for a basic lookup (character range 0 to $2^7$)
+one shift, one pointer indirection, two test and an array lookup.
+The simplicity and speed of this implementation is hard to beat.
+For characters outside the ASCII range, each tree level requires additional operations:
+two shifts, one mask operation, two tests, and an array access.
+
+
+Given the example above, the 150 glyphs out of 7 fonts will require 18144 byte, assuming
+that the Unicode codepoints are all on the first tree level.
+% In a lookup on level 2 is needed,  an extra 512 byte is needed and
+% per font an extra 512 bytes for the first character from that font on level 2.
+% So the memory footprint commes to about 20kB
+%7* ((4*8) four level pointer per font
+%      + 128*(4*5)  w, h, hoff, voff, OGLtexture
+%      + 128*(1+8) pk_glyph_flags and data these should go into an extra array for pk fonts!
+%  2592 byte  for the first level data
+% 18144 byte for 7 fonts
+%  hashtable of size n
+% n*(4*6 w,h,hoff,voff,OGLtexture,key)
+% n=1024 means 24576 byte
+% this should be plenty. format.hnt has only 852 glyphs, and this is the most of all hnt files I have
+% and on an average page there are less than 200 glyphs
+% If the hashtable gets to full, its only a cache and I can replace any entry
+% Possibly it means: look up, if found return, if not replace
+% I add 0x200000 to a glyph id, making them bigger than all unicode codepoints
+% key is mem[p].hh which contains already the font and the codepoint or glyph id
+% Use fibonaccy hashing!
+
+The new data structure uses Fibonacci hashing, with an improvemnt by Brent (see TAOCP Section 6.4).
+Since the data structure is just a cache, it is further possible to set a bound on the number of
+conflicting entries. If the list of conflicting keys grows too long,
+instead of inserting a new item into the list, it is possible to replace an existing item
+in the list. How this modification will affect memory and time requirements need to be seen.
+
+
+
+@d GCACHE_BITS	 10
+@d GCACHE_SIZE	 (1<<GCACHE_BITS)
+@d GCACHE_MASK   (GCACHE_SIZE-1)
+
+@<Global variables@>
+
+static struct {
+  scaled w, h, hoff, voff; 
+  unsigned int OGLtexture;
+} glyph_cache[GCACHE_SIZE]={0};
+@
+
+
+
+
+
 The cached glyph representation for glyph |g| is stored in one of four trees. 
 The order and depth of the trees reflects UTF-8 encoding.
    The first tree is of oder $2^7$ and only 1 level deep; its root is |g0|.
@@ -13407,7 +13514,8 @@ we use the function |g_lookup|.
 
 static Gcache *g_lookup(FontDef *f, unsigned int cc)
 
-{ if (cc >> G0_BITS) {
+{  lookup_count++;
+   if (cc >> G0_BITS) {
 	unsigned int cc1= (cc>>G0_BITS);
 	if (cc1>>G123_BITS) {
 		unsigned int cc2= cc1>>G123_BITS;
@@ -13442,6 +13550,7 @@ if no more memory is available.
 
 @<Global variables@>=
 static Gcache g_undefined ={0};
+static int lookup_count=0, glyph_count=0, font_count=0;
 @
 
 @<render functions@>=
@@ -13515,7 +13624,9 @@ static void hfree_g0(Gcache **g, bool rm)
   for (i=0;i<G0_SIZE;i++)
     if (g[i]!=NULL)
     { if (g[i]->OGLtexture!=0)
-        g[i]->OGLtexture=nativeFreeTexture(g[i]->OGLtexture);
+      {  g[i]->OGLtexture=nativeFreeTexture(g[i]->OGLtexture);
+         glyph_count++;
+      }
       if (rm) {
       free(g[i]); g[i]=NULL;@+ }
     }
@@ -13554,22 +13665,28 @@ static void hfree_g3(Gcache *****g, bool rm)
 
 
 static void hfree_glyph_cache(FontDef *f, bool rm)
-{ if (f->g0!=NULL)
+{ int is_used=0;
+  if (f->g0!=NULL)
   { hfree_g0(f->g0,rm);
-     if (rm) {@+free(f->g0); f->g0=NULL;@+}
+    if (rm) {@+free(f->g0); f->g0=NULL;@+}
+    is_used++;
   }
   if (f->g1!=NULL)
   { hfree_g1(f->g1,rm);
-     if (rm) {@+free(f->g1); f->g1=NULL;@+}
+    if (rm) {@+free(f->g1); f->g1=NULL;@+}
+    is_used++;
   }
   if (f->g2!=NULL)
   { hfree_g2(f->g2,rm);
-     if (rm) {@+free(f->g2); f->g2=NULL;@+}
+    if (rm) {@+free(f->g2); f->g2=NULL;@+}
+    is_used++;
   }
   if (f->g3!=NULL)
   { hfree_g3(f->g3,rm);
-     if (rm) {@+free(f->g3); f->g3=NULL;@+}
+    if (rm) {@+free(f->g3); f->g3=NULL;@+}
+    is_used++;
   }
+  if (is_used>0) font_count++;
 }
 @
 \subsection{Glyphs}
@@ -13589,7 +13706,7 @@ PK fonts. The PK specific fields in the glyph cache help with on-demand decoding
 typedef struct {
   scaled w, h, hoff, voff; 
   unsigned int OGLtexture;
-  @<PK specific fields in the glyph cache@>@;
+ 
 } Gcache;
 @
  
@@ -13633,13 +13750,10 @@ static Gcache *hload_glyph(uint8_t f, unsigned int cc)
   g=g_lookup(font_def+f,cc);
   if (g==NULL)
   { if (font_def[f].ff==no_format) hload_font(f);
-    if (font_def[f].ff==ft_format)
-      g=hnew_glyph(font_def+f,cc);
-    else  
-      return NULL;
+    g=hnew_glyph(font_def+f,cc);
   }
   if (g->OGLtexture==0)           
-  { if (font_def[f].ff==pk_format) pk_unpack_glyph(f,g);
+  { if (font_def[f].ff==pk_format) pk_unpack_glyph(f,g,cc);
     else if (font_def[f].ff==ft_format) ft_unpack_glyph(f,g,cc);
     else QUIT("Font format not supported");
   }
