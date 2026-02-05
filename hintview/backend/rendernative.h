@@ -1,10 +1,10 @@
-/*690:*/
-#line 15115 "hint.w"
+/*687:*/
+#line 14994 "hint.w"
 
 #ifndef _RENDERNATIVE_H
 #define _RENDERNATIVE_H
 /*514:*/
-#line 10025 "hint.w"
+#line 10024 "hint.w"
 
 extern void nativeInit(void);
 extern void nativeClear(void);
@@ -12,45 +12,45 @@ extern int nativePrintStart(int w,int h,int bpr,int bpp,unsigned char*bits);
 extern int nativePrintEnd(void);
 extern int nativePrint(unsigned char*bits);
 /*:514*//*515:*/
-#line 10035 "hint.w"
+#line 10034 "hint.w"
 
 extern void nativeSetSize(int px_h,int px_v,double pt_x,double pt_v);
 /*:515*//*516:*/
-#line 10041 "hint.w"
+#line 10040 "hint.w"
 
 extern void nativeSetForeground(uint32_t fg);
 extern void nativeSetGamma(double gamma);
 /*:516*//*517:*/
-#line 10048 "hint.w"
+#line 10047 "hint.w"
 
 extern void nativeBlank(uint32_t bg);
 /*:517*//*518:*/
-#line 10058 "hint.w"
+#line 10057 "hint.w"
 
 extern void nativeGlyph(double x,double y,double w,double h,
 unsigned int t);
 /*:518*//*519:*/
-#line 10068 "hint.w"
+#line 10067 "hint.w"
 
 void nativeRule(double x,double y,double w,double h);
 /*:519*//*520:*/
-#line 10074 "hint.w"
+#line 10073 "hint.w"
 
 void nativeImage(double x,double y,double w,double h,unsigned char*istart,unsigned char*iend);
 /*:520*//*521:*/
-#line 10080 "hint.w"
+#line 10079 "hint.w"
 
 extern unsigned int nativeTexture(unsigned char*bits,int w,int h);
 /*:521*//*522:*/
-#line 10086 "hint.w"
+#line 10085 "hint.w"
 
 unsigned int nativeFreeTexture(unsigned int t);
-/*:522*//*665:*/
-#line 13882 "hint.w"
+/*:522*//*662:*/
+#line 13761 "hint.w"
 
 extern void nativeBackground(double x,double y,double h,double w,uint32_t bg);
-/*:665*/
-#line 15118 "hint.w"
+/*:662*/
+#line 14997 "hint.w"
 
 #endif
-/*:690*/
+/*:687*/

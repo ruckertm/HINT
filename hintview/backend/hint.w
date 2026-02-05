@@ -6868,7 +6868,6 @@ pointer p[MAX_FONT_PARAMS+1];
 scaled hpxs,vpxs; /**/
 FontFormat ff; /* the font format */
 FT_Face ft_face; /* a pointer to the font face for FreeType fonts */
-@<the glyph cache@>@;
 @<PK font specific fields@>@;
 } FontDef;
 
@@ -12545,7 +12544,7 @@ static void hSetColor(int c)
 void hint_render_on(void)
 { nativeInit();
   hSetColor(0);
- 
+  hinit_gh_cache(); 
 }
 
 void hint_render_off(void)
@@ -12633,20 +12632,27 @@ Releasing the textures will cause the textures to be recomputed using the
 current resolution before rendering the glyph the next time.
 
 @<font functions@>=
-static void hfree_glyph_cache(FontDef *f, bool rm);
+
+void  hinit_gh_cache(void)
+{ int i;
+  for (i=0;i<GCACHE_SIZE;i++)
+    glyph_cache[i].key=EMPTY_KEY;
+}
 
 void hint_clear_fonts(bool rm)
 { int f;
   if (font_def==NULL) return;
   DBG(DBGFONT,rm?"Clear font data":"Clear native glyph data");
-  for (f=0;f<=max_ref[font_kind];f++)
-  { hfree_glyph_cache(font_def+f,rm);
-    if (rm && font_def[f].ff==pk_format)
-      font_def[f].ff=no_format;
-  }
-  fprintf(stderr,"Fonts %d, Glyphs %d, Lookups %d\n",
-    font_count, glyph_count, lookup_count);
-  font_count=glyph_count=lookup_count=0;
+  for(f=0;f<GCACHE_SIZE;f++)
+  { if(glyph_cache[f].key!=EMPTY_KEY)
+    { if (glyph_cache[f].OGLtexture!=0)
+      { nativeFreeTexture(glyph_cache[f].OGLtexture);
+        glyph_cache[f].OGLtexture=0;
+      }
+      if (rm)
+      glyph_cache[f].key=EMPTY_KEY;
+    }
+  }  
 }
 @
 
@@ -12658,7 +12664,6 @@ unsigned int nativeFreeTexture(unsigned int t)  {return 0;}
 unsigned int nativeTexture(unsigned char *bits, int w, int h) {return 0;}
 void nativeGlyph(double x,double y,double w,double h,
    unsigned int t)  {return;}
-static void hfree_glyph_cache(FontDef *f, bool rm) {}
 void nativeSetSize(int px_h, int px_v, double pt_x, double pt_v) {}
 @
 
@@ -12808,8 +12813,8 @@ We traverse the |pk_data| nybbles sequentially in top-down order.
 The horizontal position |x| and the vertical position |y| in the
 target bitmap start at 0 and |g->h-1|.
 @<PK font functions@>=
-static unsigned char *pk_runlength(Gcache *g, unsigned char *pk_data, unsigned char pk_glyph_flags) {
-    PKparse p;
+static unsigned char *pk_runlength(GHcache *g, unsigned char *pk_data, unsigned char pk_glyph_flags)
+{   PKparse p;
     int x, y; /* position in target bitmap */
     unsigned char *bits; /* target bitmap */
     int n; /* number of pixel left in current run */
@@ -12861,8 +12866,8 @@ using a |mask| to get the next bit and incrementing |pk_data| when necessary.
 The horizontal position |x| and the vertical position |y| in the
 target bitmap start at 0 and |g->h-1|.
 @<PK font functions@>=
-static unsigned char *pk_bitmap(Gcache *g, unsigned char *pk_data) {
-    unsigned char *bits; /* 1 bit per pixel */
+static unsigned char *pk_bitmap(GHcache *g, unsigned char *pk_data)
+{   unsigned char *bits; /* 1 bit per pixel */
     int x, y; /* position in target bitmap */
     unsigned char mask; /* bitmask for the next bit */
  
@@ -12886,7 +12891,7 @@ The next function unpacks the glyphs meta data and calls one of the
 unpacking functions just defined.
 @<PK font functions@>=
 
-static void pk_unpack_glyph(uint8_t f, Gcache *g, unsigned int cc)
+static void pk_unpack_glyph(uint8_t f, GHcache *g, unsigned int cc)
 { int i,k;
   unsigned char *pk_data;
   unsigned char pk_flags;
@@ -12959,7 +12964,6 @@ The function returns zero if that is not the case.
 #define PK_PRE   247
 #define PK_ID    89
 
-static Gcache *hnew_glyph(FontDef *fp, unsigned int cc);
 
 static int unpack_pk_file(internal_font_number f)
 /* scan font f and extract information. Do not unpack glyphs, these are unpacked on demand. */
@@ -13327,7 +13331,7 @@ displacement is magnified for scaled fonts, so subtracting 1 is not enough
 in this cases.
 
 @<render functions@>=
-static void ft_unpack_glyph(uint8_t f, Gcache *g, uint32_t cc)
+static void ft_unpack_glyph(uint8_t f, GHcache *g, uint32_t cc)
 { int e,i;
  unsigned char *bits;
   FT_Face ft_face=font_def[f].ft_face;
@@ -13461,234 +13465,138 @@ that the Unicode codepoints are all on the first tree level.
 % key is mem[p].hh which contains already the font and the codepoint or glyph id
 % Use fibonaccy hashing!
 
-The new data structure uses Fibonacci hashing, with an improvemnt by Brent (see TAOCP Section 6.4).
-Since the data structure is just a cache, it is further possible to set a bound on the number of
+The new data structure uses Fibonacci double hashing (see TAOCP Section 6.4) 
+% An improvemnt following Brent did not prove to be an advantage
+Since the data structure is just a cache, it is possible to set a bound on the number of
 conflicting entries. If the list of conflicting keys grows too long,
 instead of inserting a new item into the list, it is possible to replace an existing item
-in the list. How this modification will affect memory and time requirements need to be seen.
+in the list. The present implementation limits the length of a list to 3.
+With a size of 1024 entries, measurements show that the table can hold over 90\% of
+all glyph entries at level 0, and the remaining glyphs at level 1 and 2. Typical books or
+papers usually contain less than 500 glyphs and cases where not all of these glyphs do
+not simultaneously fit into the table are rare.
 
+Given a table of size $m$ and load factor of $\alpha$,
+we can assume that for a given key $K$ and ``two'' good hash
+functions $h_1$ and $h_2$ the probability of entrys $h_1(K)\mod m$, $h_1(K)-h_2(K)\mod m$,
+and  $h_1(K)-h_2(K)-h_2(K) \mod m$ beeing all occupied is $\alpha^3$. So for
+$\alpha=50\%$ we have $\alpha^3=12.5\%$ and the probability that one of them is empty
+is $87.5\%$. But Fibonacci hashing outperforms this estimate, because the Unicode numbers
+often occur in sequences \.a, \.b, \.c,\dots, and Fibonacci hashing is very good at spreading
+the hash values evenly out over the entire table. So we can observe that for plain text and
+$\alpha\le50\%$ over 95\% of the glyphs are placed at level 0 and the rest on level 1 or 2,
+and less than 10 glyphs having conflicts that can not be resolved with only three levels.
 
+If the table fills up with $\alpha\ge99\%$, we still find, that over $90\%$ of all table
+lookups can be answered by inspecting the table entry at level 0 and in less than $3\%$
+the lookup fails completely and the glyph information needs to be recreated.
+
+In contrast to the former B-tree, there is no advantage in keeping glyph data in the
+table once the texture identifier gets invalid. So |hint_clear_fonts| can simply wipe
+out all keys from the hash table.
+At a later time, I probably want to move the keys into a separate array of the same size
+so that it is easier to set them all to empty.
 
 @d GCACHE_BITS	 10
 @d GCACHE_SIZE	 (1<<GCACHE_BITS)
 @d GCACHE_MASK   (GCACHE_SIZE-1)
 
-@<Global variables@>
+@<Global variables@>=
 
-static struct {
+typedef struct {
+  unsigned int key;
   scaled w, h, hoff, voff; 
   unsigned int OGLtexture;
-} glyph_cache[GCACHE_SIZE]={0};
+} GHcache;
+
+static GHcache glyph_cache[GCACHE_SIZE];
 @
 
 
 
+Next are a primary and a secondary has function both take as key an unsigned 32-bit integer
+that contains the font in the 8 most significant bits and the Unicode codepoint or glyph identifier in the
+lowest 21 bits. If bit 22 is set, the low bits contain a glyph identifier else it's a unicode codepoint.
 
-
-The cached glyph representation for glyph |g| is stored in one of four trees. 
-The order and depth of the trees reflects UTF-8 encoding.
-   The first tree is of oder $2^7$ and only 1 level deep; its root is |g0|.
-   The other trees, |g1|, |g2|, and |g3| are of order $2^6$ and have a depth
-   of 2, 3, and 4 levels respectively.
-
-@<the glyph cache@>=
-  Gcache **g0; /* $0 \le |g| < 2^7$ */
-  Gcache ***g1;  /* $2^7 \le |g| < 2^{12}$ */
-  Gcache ****g2; /* $2^{12} \le |g| < 2^{18}$ */
-  Gcache *****g3; /* $2^{18} \le |g| < 2^{24}$ */@/
-@t~@>
-@
-
-
-The glyphs are described using a |Gcache| structure. 
-To look up the cached glyph data for font |f| and charactercode |cc|,
-we use the function |g_lookup|.
+@d FIBONACCI_FACTOR 0x9F406BB9654C5A55 /* See ``The MMIX Supplement'' */
 
 @<render functions@>=
-#define G0_BITS 7
-#define G0_SIZE (1<<G0_BITS)
-#define G0_MASK (G0_SIZE-1)
-#define G123_BITS 6
-#define G123_SIZE (1<<G123_BITS)
-#define G123_MASK (G123_SIZE-1)
+static unsigned int glyph_hash_1(unsigned int key)
+{ unsigned int h = key * FIBONACCI_FACTOR;
+  h = h>>(32-GCACHE_BITS); /*the topmost 10 bits*/
+  return h;
+}
 
-static Gcache *g_lookup(FontDef *f, unsigned int cc)
+static unsigned int glyph_hash_2(unsigned int key)
+{ unsigned int h = key * FIBONACCI_FACTOR;
+  h = (h >>(32-2*GCACHE_BITS))&GCACHE_MASK; /*the next 10 bits*/
+  return h;
+}
+@
 
-{  lookup_count++;
-   if (cc >> G0_BITS) {
-	unsigned int cc1= (cc>>G0_BITS);
-	if (cc1>>G123_BITS) {
-		unsigned int cc2= cc1>>G123_BITS;
-		if (cc2>>G123_BITS) {
-			unsigned int cc3=cc2>>G123_BITS;
-			if (cc3>>G123_BITS) return NULL;
-			else if (f->g3 && 
-				f->g3[cc3&G123_MASK] && 
-				f->g3[cc3&G123_MASK][cc2&G123_MASK] &&  
-				f->g3[cc3&G123_MASK][cc2&G123_MASK][cc1&G123_MASK])  
-			return f->g3[cc3&G123_MASK][cc2&G123_MASK][cc1&G123_MASK][cc&G0_MASK];
-		}
-		else if (f->g2 && f->g2[cc2&G123_MASK] && f->g2[cc2&G123_MASK][cc1&G123_MASK]) 
-			return f->g2[cc2&G123_MASK][cc1&G123_MASK][cc&G0_MASK];
-	}
-	else if (f->g1 && f->g1[cc1&G123_MASK]) 
-		return f->g1[cc1&G123_MASK][cc&G0_MASK];
-  }
-  else if (f->g0) 
-	  return f->g0[cc];
+We limit the length of a lookup chain to 3 lookups. The insert function that we consider
+below will ensure that an entry is either found with three lookups, or otherwise, it is not
+in the table.
+
+
+@<render functions@>=
+static GHcache *gh_lookup(unsigned int key)
+{ int i,j;
+  i = glyph_hash_1(key);
+  if (glyph_cache[i].key==key)
+  { return glyph_cache+i; }
+  j = glyph_hash_2(key);
+  i=i-j;
+  if (i<0) i=i+GCACHE_SIZE;
+  if (glyph_cache[i].key==key)
+  { return glyph_cache+i; }
+  i=i-j;
+  if (i<0) i=i+GCACHE_SIZE;
+  if (glyph_cache[i].key==key)
+  { return glyph_cache+i; }
   return NULL;
 }
 @
 
-But of course, before we can look up entries, we have to allocate new entries.
-The actual entries are allocated with |hnew_g|. The functions |hnew_g0| to
-|hnew_g3| allocate the necessary path from the root to the leaf, and 
-the function |hnew_glyph| provides the top level function:
-Given a font and a charactercode it returns a pointer to the glyph,
-allocating a glyph if none is yet allocated, and returning a pointer to ``the undefined glyph''
-if no more memory is available.
+The insert function is only called after a call to |gh_lookup| returned |NULL|.
 
-@<Global variables@>=
-static Gcache g_undefined ={0};
-static int lookup_count=0, glyph_count=0, font_count=0;
-@
+We use a $-1$ key to mark an empty entry.
+Since the TeX fonts do use character 0 in font 0 this leads
+to a valid zero key. There are still bit left to make sure keys are not zero (adding 1
+or oring in a 1 in position 23) this would require one extra operation in the lookup
+or insert.
+
+@d EMPTY_KEY 0xFFFFFFFF
+
 
 @<render functions@>=
-static Gcache *hnew_g(Gcache **g)
-{ if (*g==NULL)
-    *g=calloc(1, sizeof(Gcache));
-  if (*g==NULL) 
-    return &g_undefined;
-  (*g)->OGLtexture=0;
-  return *g;
+static GHcache *gh_find_slot(unsigned int key)
+{ int i,j,k;
+  i = glyph_hash_1(key);
+  if (glyph_cache[i].key==EMPTY_KEY)
+  { return glyph_cache+i; }
+  j = glyph_hash_2(key);
+  k=i-j;
+  if (k<0) k=k+GCACHE_SIZE;
+  if (glyph_cache[k].key==EMPTY_KEY)
+  { return glyph_cache+k; }
+  k=k-j;
+  if (k<0) k=k+GCACHE_SIZE;
+  if (glyph_cache[k].key==EMPTY_KEY)
+  { return glyph_cache+k; }
+  if (glyph_cache[i].OGLtexture!=0)
+    nativeFreeTexture(glyph_cache[i].OGLtexture);
+  return glyph_cache+i;
 }
 
-static Gcache *hnew_g0(Gcache ***g,unsigned int cc)
-{ unsigned int cc0=cc&G0_MASK;
-  if (*g==NULL)
-    *g=calloc(G0_SIZE, sizeof(Gcache*));
-  if (*g==NULL) 
-    return &g_undefined;
-  return hnew_g((*g)+cc0);
-}
- 
-static Gcache *hnew_g1(Gcache ****g,unsigned int cc)
-{ unsigned int cc1=(cc>>G0_BITS)&G123_MASK;
-  if (*g==NULL)
-    *g=calloc(G123_SIZE, sizeof(Gcache**));
-  if (*g==NULL) 
-    return &g_undefined;
-  return hnew_g0((*g)+cc1,cc);
-}
-static Gcache *hnew_g2(Gcache *****g,unsigned int cc)
-{ unsigned int cc2=(cc>>(G123_BITS+G0_BITS))&G123_MASK;
-  if (*g==NULL)
-    *g=calloc(G123_SIZE, sizeof(Gcache***));
-  if (*g==NULL) 
-    return &g_undefined;
-  return hnew_g1((*g)+cc2,cc);
-}
-  
-static Gcache *hnew_g3(Gcache ******g,unsigned int cc)
-{ unsigned int cc3=(cc>>(G123_BITS+G123_BITS+G0_BITS))&G123_MASK;
-  if (*g==NULL)
-    *g=calloc(G123_SIZE, sizeof(Gcache****));
-  if (*g==NULL) 
-    return &g_undefined;
-  return hnew_g2((*g)+cc3,cc);
-}
-
-
-static Gcache *hnew_glyph(FontDef *f, unsigned int cc)
-{ if (cc<G0_SIZE) return hnew_g0(&(f->g0),cc);
-  else if (cc<G123_SIZE*G0_SIZE) return hnew_g1(&(f->g1),cc);
-  else if (cc<G123_SIZE*G123_SIZE*G0_SIZE) return hnew_g2(&(f->g2),cc);
-  else if (cc<G123_SIZE*G123_SIZE*G123_SIZE*G0_SIZE) return hnew_g3(&(f->g3),cc);
-  else return &g_undefined;
+static GHcache *gh_insert(unsigned int key)
+{ GHcache *c = gh_find_slot(key);
+  c->key= key;
+  c->OGLtexture=0;
+  return c;
 }
 @
 
-The next set of functions is used to clear the glyph cache.
-If the boolean parameter |rm| is |true|, the complete cache will 
-be deallocated. Otherwise only the function |nativeFreeTexture| will be called.
-Together with the exported function |hint_clear_fonts| this offers
-the native rendering engine a method to relase allocated resources
-without the need to know the deatails of the glyph cache.
-The construction of the functions |hfree_g0| to |hfree_g3| mirrors
-the construction of |hnew_g0| to  |hnew_g3|
-
-@<render functions@>=
-static void hfree_g0(Gcache **g, bool rm)
-{ int i;
-  if (g==NULL) return;
-  for (i=0;i<G0_SIZE;i++)
-    if (g[i]!=NULL)
-    { if (g[i]->OGLtexture!=0)
-      {  g[i]->OGLtexture=nativeFreeTexture(g[i]->OGLtexture);
-         glyph_count++;
-      }
-      if (rm) {
-      free(g[i]); g[i]=NULL;@+ }
-    }
-}
-
-static void hfree_g1(Gcache ***g, bool rm)
-{ int i;
-  if (g==NULL) return;
-  for (i=0;i<G123_SIZE;i++)
-	if (g[i]!=NULL)
-	{ hfree_g0(g[i],rm);
-      if (rm) {free(g[i]); g[i]=NULL;@+ }
-	}
-}
-
-static void hfree_g2(Gcache ****g, bool rm)
-{ int i;
-  if (g==NULL) return;
-  for (i=0;i<G123_SIZE;i++)
-	if (g[i]!=NULL)
-	{ hfree_g1(g[i],rm);
-      if (rm) {free(g[i]); g[i]=NULL;@+ }
-	}
-}
-
-
-static void hfree_g3(Gcache *****g, bool rm)
-{ int i;
-  if (g==NULL) return;
-  for (i=0;i<G123_SIZE;i++)
-	if (g[i]!=NULL)
-	{ hfree_g2(g[i],rm);
-      if (rm) {free(g[i]); g[i]=NULL;@+ }
-	}
-}
-
-
-static void hfree_glyph_cache(FontDef *f, bool rm)
-{ int is_used=0;
-  if (f->g0!=NULL)
-  { hfree_g0(f->g0,rm);
-    if (rm) {@+free(f->g0); f->g0=NULL;@+}
-    is_used++;
-  }
-  if (f->g1!=NULL)
-  { hfree_g1(f->g1,rm);
-    if (rm) {@+free(f->g1); f->g1=NULL;@+}
-    is_used++;
-  }
-  if (f->g2!=NULL)
-  { hfree_g2(f->g2,rm);
-    if (rm) {@+free(f->g2); f->g2=NULL;@+}
-    is_used++;
-  }
-  if (f->g3!=NULL)
-  { hfree_g3(f->g3,rm);
-    if (rm) {@+free(f->g3); f->g3=NULL;@+}
-    is_used++;
-  }
-  if (is_used>0) font_count++;
-}
-@
 \subsection{Glyphs}
 The information in the |Gcache| structure depends on the font encoding.
 % but not on the rendering engine that is used to display the glyphs. 
@@ -13698,20 +13606,7 @@ and vertical offset from the upper left to the
 reference pixel (right and down are positive); and the
 OpenGL texture identifier used to store the gray values of the bitmap.
 
-Currently only two kind of font formats are supported:
-Formats supported by the FreeType library and \TeX's ``classic''
-PK fonts. The PK specific fields in the glyph cache help with on-demand decoding of glyphs.
-
-@<Types...@>=
-typedef struct {
-  scaled w, h, hoff, voff; 
-  unsigned int OGLtexture;
- 
-} Gcache;
-@
- 
-
-The above structure has an |OGLtexture| member. To speed up the
+Most importantly, the |Gcache| structure has an |OGLtexture| member. To speed up the
 rendering of glyphs, the glyph bitmap is loaded into the graphics
 cards as a texture and from then on identified by a single integer,
 the |OGLtexture|.
@@ -13742,15 +13637,15 @@ a ``character missing'' glyph which should be created after calling |nativeInit|
 and released before calling |nativeClear|.
 
 @<render functions@>=
-static void ft_unpack_glyph(uint8_t f, Gcache *g, uint32_t cc);
 
-static Gcache *hload_glyph(uint8_t f, unsigned int cc)
-{
-  Gcache *g=NULL;
-  g=g_lookup(font_def+f,cc);
+static void ft_unpack_glyph(uint8_t f, GHcache *g, uint32_t cc);
+static GHcache *hload_glyph(uint8_t f, unsigned int cc)
+{ GHcache *g;
+  g=gh_lookup((f<<24)|cc);
   if (g==NULL)
-  { if (font_def[f].ff==no_format) hload_font(f);
-    g=hnew_glyph(font_def+f,cc);
+  { if (font_def[f].ff==no_format)
+      hload_font(f);
+    g=gh_insert((f<<24)|cc);
   }
   if (g->OGLtexture==0)           
   { if (font_def[f].ff==pk_format) pk_unpack_glyph(f,g,cc);
@@ -13787,7 +13682,8 @@ void hint_round_position(bool r, double t)
 static void render_char(int x, int y, uint8_t f, uint32_t cc)
 
 { scaled w, h, dx, dy, top, left;
-  Gcache *g;
+  GHcache *g;
+
   if (font_def[f].ff==no_format) hload_font(f);
   g=hload_glyph(f,cc);
   if (g==NULL || g->OGLtexture==0) return;
@@ -13800,24 +13696,7 @@ static void render_char(int x, int y, uint8_t f, uint32_t cc)
   left=x-dx;
   top=y+h-dy;
 
-#if 0
   if (round_to_pixel)
-  { double pxs;
-    if (xdpi<dpi_threshold)
-    { pxs = 72.27/xdpi; /* pixel size in point */
-      left=left/pxs;
-      left=floor(left+0.5);
-      left=left*pxs;
-    }
-    if (ydpi<dpi_threshold)
-    { pxs = 72.27/ydpi; /* pixel size in point */
-      top=top/pxs;
-      top=floor(top+0.5);
-      top=top*pxs;
-    }
-  }
-#endif
- if (round_to_pixel)
   { 
     if (x_px_size>pxs_threshold)
     { left=(left+(x_px_size/2))/x_px_size;
