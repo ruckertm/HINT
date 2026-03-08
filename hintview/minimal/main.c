@@ -538,17 +538,13 @@ static int create_window(void)
   }
   glfwSetErrorCallback(error_callback);
   glfwWindowHint(GLFW_SAMPLES, 4);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
   
   /* Open a window and create its OpenGL context */
   window = glfwCreateWindow( px_h, px_v, "HintView", NULL, NULL);
   if( window == NULL ){
-    hint_error("GLFW","Failed to open GLFW window.\n"
-	   "If you have an Intel GPU, they are not 3.3 compatible.\n"
-	   "Try the 2.1 version of the tutorials.\n" );
+    hint_error("GLFW","Failed to open GLFW window.\n");
     glfwTerminate();
     return 0;
   }
