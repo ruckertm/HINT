@@ -572,6 +572,10 @@ static void print_int(int @!n) /*prints an integer in decimal form*/
 { file_offset+=fprintf(hlog,"%d",n);
 }
 
+static void print_hex(int @!n) /*prints an integer in decimal form*/
+{ file_offset+=fprintf(hlog,"^^%x",n);
+}
+
 static void print_depth_level(void) /*prints a yet-unmade string*/
 {@+int i;
    for(i=0;i<depth_level;i++) @+
@@ -2581,7 +2585,7 @@ typedef uint16_t font_index; /*index into |font_info|*/
 @
 
 @s font_index int
-@<\TeX\ functions@>=
+@<Global variables@>=
 static memory_word @!font_info[font_mem_size+1];
    /*the big collection of font data*/
 static font_index @!fmem_ptr=0; /*first unused word of |font_info|*/
@@ -2590,6 +2594,9 @@ static void hclear_font_info(void)
 {
   fmem_ptr=0;
 }
+@
+
+@<Global variables@>=
 static internal_font_number @!font_ptr; /*largest internal font number in use*/
 static scaled @!font_size0[font_max-font_base+1],
   *const @!font_size = @!font_size0-font_base; /*``at'' size*/
@@ -2615,7 +2622,7 @@ part of this word (the |b0| field), the width of the character is
 |min_quarterword| has already been added to |c| and to |w|, since \TeX\
 stores its quarterwords that way.)
 
-@<\TeX\ functions@>=
+@<Global variables@>=
 static int @!char_base0[font_max-font_base+1],
   *const @!char_base = @!char_base0-font_base;
    /*base addresses for |char_info|*/
@@ -6178,7 +6185,7 @@ case utf_char_node:
   print_esc(font_def[utf_font(p)].n);  print_char(' '); print_UTF8(utf_char(p));
   break;
 case utf_lig_node:
-  print_esc(font_def[utf_font(p)].n);  print_char(' '); print_UTF8(utf_char(p));
+  print_esc(font_def[utf_font(p)].n);  print_char(' '); print_hex(utf_char(p)&~GLYPH_BIT);
   print(" (ligature ");
   if (utf_lig_subtype(p) > 1) print_char('|');
   font_in_short_display=0; short_display(utf_lig_ptr(p));
@@ -8052,15 +8059,21 @@ return p;
 
 @<Basic printing procedures@>=
 static void print_UTF8(int c) /* outputs the character in UTF8 format */
-{@+ if (c<0x80) 
-  {  putc(c,hlog); }
+{@+
+  if (c<0x100) 
+  {  print_ASCII(c);}
+#if 0
+else
+  print_hex(c);
+#else   
   else if (c<0x800)@/
   { putc(0xC0|(c>>6),hlog);@+ putc(0x80|(c&0x3F),hlog);@+} 
   else if (c<0x10000)@/
   { putc(0xE0|(c>>12),hlog); putc(0x80|((c>>6)&0x3F),hlog);@+ putc(0x80|(c&0x3F),hlog); } 
   else if (c<0x200000)@/
   { putc(0xF0|(c>>18),hlog);@+ putc(0x80|((c>>12)&0x3F),hlog); 
-    putc(0x80|((c>>6)&0x3F),hlog);@+ putc(0x80|(c&0x3F),hlog); } 
+    putc(0x80|((c>>6)&0x3F),hlog);@+ putc(0x80|(c&0x3F),hlog); }
+#endif    
   file_offset++;
   if (file_offset==max_print_line) print_ln(); 
 }
@@ -12176,15 +12189,14 @@ preceeds a ligature node this change might be important.
 When rendering a ligature, we consider for the purpose of marking
 the characters which generated the ligature.
 If any of these characters is marked, the whole ligature is marked.
-@<account for the characters that generated the ligature@>=
+@<account for the characters |q| that generated the ligature@>=
 if (!c_ignore)
-{ pointer q;
-  int old_s, max_s;
+{ int old_s, max_s;
   old_s=cur_style;
   max_s=0;
-  q=lig_ptr(p);
   while (q!=null)
-  { if (is_char_node(q) && character(q)!=' ')
+  { if ((is_char_node(q) && character(q)!=' ') ||
+        (type(q)==whatsit_node && subtype(q)==utf_char_node))
     { @<compute the |next_style|@>@;
       cur_style=next_style;
       if (next_style>max_s) max_s=next_style;
@@ -13993,10 +14005,21 @@ style_c:
            cur_h= cur_h+w; 
          } break;
          case utf_char_node:
-         case utf_lig_node:
            f= utf_font(p);
            c=utf_char(p);
            goto style_c;
+         case utf_lig_node:
+           f= utf_font(p);
+           c=utf_char(p);
+          { pointer q=utf_lig_ptr(p);
+            @<account for the characters |q| that generated the ligature@>@;
+          }
+          @<render character |c| in font |f|@>@;
+	  if (next_style!=cur_style)
+          { cur_style =next_style;
+            hSetColor(cur_color);
+          }
+          break;
          default: break;
        }
        break;
@@ -14070,7 +14093,9 @@ style_c:
      case ligature_node:
        f= font(lig_char(p));
        c= character(lig_char(p));
-       @<account for the characters that generated the ligature@>@;
+       { pointer q=lig_ptr(p);
+         @<account for the characters |q| that generated the ligature@>@;
+       }
        @<render character |c| in font |f|@>@;
        if (next_style!=cur_style)
        { cur_style =next_style;
