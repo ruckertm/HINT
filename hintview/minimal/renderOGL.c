@@ -40,6 +40,11 @@
 #include "stb_image.h"
 
 
+/* Thanks to Humm42 hummsmith42@gmail.com,
+   this is a version that works with OpenGL 2.0 and GLSL 1.10
+*/
+
+
 #ifdef DEBUG
 
 static void checkGlError(const char *op)
