@@ -414,16 +414,16 @@ cb_render (GtkGLArea *area, GdkGLContext *context)
     { gamma_change=FALSE;
 	hint_gamma(gcorrection);
     }
-    if (dpi_change)
-      { dpi_change=FALSE;
-	hint_clear_fonts(false);
-      }
     if (size_change)
       { size_change=FALSE;
 	HINT_TRY{
 	hint_resize(px_h,px_v,scale*x_dpi,scale*y_dpi);
         hint_page();
 	}
+      }
+     if (dpi_change)
+      { dpi_change=FALSE;
+	hint_clear_fonts(false);
       }
     HINT_TRY hint_render();
     LOG("Render\n");

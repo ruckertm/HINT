@@ -1,5 +1,5 @@
 % This file is part of HINT
-% Copyright 2017-2021 Martin Ruckert, Hochschule Muenchen, Lothstrasse 64, 80336 Muenchen
+% Copyright 2017-2026 Martin Ruckert, Hochschule Muenchen, Lothstrasse 64, 80336 Muenchen
 %
 % Permission is hereby granted, free of charge, to any person obtaining a copy
 % of this software and associated documentation files (the "Software"), to deal
@@ -570,6 +570,10 @@ static void print_esc(char *@!s) /*prints escape character, then |s|*/
 
 static void print_int(int @!n) /*prints an integer in decimal form*/
 { file_offset+=fprintf(hlog,"%d",n);
+}
+
+static void print_hex(int @!n) /*prints an integer in decimal form*/
+{ file_offset+=fprintf(hlog,"^^%x",n);
 }
 
 static void print_depth_level(void) /*prints a yet-unmade string*/
@@ -1383,12 +1387,20 @@ a |new_lig_item| function, which returns a two-word node having a given
 |character| field. Such nodes are used for temporary processing as ligatures
 are being created.
 
+
 @<\TeX\ functions@>=
 static pointer new_ligature(quarterword @!f, quarterword @!c, pointer @!q)
 {@+pointer p; /*the new node*/
 p=get_node(small_node_size);type(p)=ligature_node;
 font(lig_char(p))=f;character(lig_char(p))=c;lig_ptr(p)=q;
-subtype(p)=0;return p;
+subtype(p)=0;
+#ifdef DEBUG
+if (font_bc[f] > c || font_ec[f] < c ||
+ (width_base[f]!=0 && ! char_exists(char_info(f, c))) ||
+ (width_base[f]==0 && ! ft_char_exists(f, c)))
+  DBG(DBGFONT,"Warning: Character 0x%0X in font %d does not exist\n",c,f);
+#endif
+return p;
 }
 @#
 
@@ -2573,7 +2585,7 @@ typedef uint16_t font_index; /*index into |font_info|*/
 @
 
 @s font_index int
-@<\TeX\ functions@>=
+@<Global variables@>=
 static memory_word @!font_info[font_mem_size+1];
    /*the big collection of font data*/
 static font_index @!fmem_ptr=0; /*first unused word of |font_info|*/
@@ -2582,6 +2594,9 @@ static void hclear_font_info(void)
 {
   fmem_ptr=0;
 }
+@
+
+@<Global variables@>=
 static internal_font_number @!font_ptr; /*largest internal font number in use*/
 static scaled @!font_size0[font_max-font_base+1],
   *const @!font_size = @!font_size0-font_base; /*``at'' size*/
@@ -2607,7 +2622,7 @@ part of this word (the |b0| field), the width of the character is
 |min_quarterword| has already been added to |c| and to |w|, since \TeX\
 stores its quarterwords that way.)
 
-@<\TeX\ functions@>=
+@<Global variables@>=
 static int @!char_base0[font_max-font_base+1],
   *const @!char_base = @!char_base0-font_base;
    /*base addresses for |char_info|*/
@@ -2886,10 +2901,9 @@ static pointer new_character(internal_font_number @!f, eight_bits @!c)
 {@+ pointer p; /*newly allocated node*/
     if (font_def[f].ff==no_format) hload_font(f);
 #ifdef DEBUG
-/*this Test is missing in |new_ligature|*/
 if (font_bc[f] > c || font_ec[f] < c ||
  (width_base[f]!=0 && ! char_exists(char_info(f, qi(c)))) ||
- (width_base[f]==0 && ! ft_exists(f, c)))
+ (width_base[f]==0 && ! ft_char_exists(f, c)))
   DBG(DBGFONT,"Warning: Character 0x%0X in font %d does not exist\n",c,f);
 #endif
 p=get_avail();font(p)=f;character(p)=qi(c);
@@ -3853,6 +3867,16 @@ else switch (type(v)) {
   case hlist_node: case vlist_node: case rule_node:
   case kern_node:
     break_width[1]=break_width[1]-width(v);@+break;
+  case whatsit_node:
+  { switch (subtype(s)) {
+      case utf_char_node:  case utf_lig_node:
+        f=utf_font(s);
+        break_width[1]=break_width[1]-ft_char_width(utf_font(s), utf_char(s));
+        break;
+      default:confusion("disc1");
+    }
+  } break;
+  
   default:confusion("disc1");
 @:this can't happen disc1}{\quad disc1@>
   }
@@ -3870,6 +3894,15 @@ else switch (type(s)) {
   case hlist_node: case vlist_node: case rule_node:
   case kern_node:
     break_width[1]=break_width[1]+width(s);@+break;
+  case whatsit_node:
+  { switch (subtype(s)) {
+      case utf_char_node: case utf_lig_node:
+        f=utf_font(s);
+        break_width[1]=break_width[1]+ft_char_width(utf_font(s), utf_char(s));
+        break;
+      default:confusion("disc2");
+    }
+  } break;
   default:confusion("disc2");
 @:this can't happen disc2}{\quad disc2@>
   }
@@ -4435,6 +4468,15 @@ else switch (type(s)) {
   case hlist_node: case vlist_node: case rule_node:
   case kern_node:
     disc_width=disc_width+width(s);@+break;
+  case whatsit_node:
+  { switch (subtype(s)) {
+      case utf_char_node:  case utf_lig_node:
+        f=utf_font(s);
+        disc_width=disc_width+ft_char_width(utf_font(s), utf_char(s));
+        break;
+      default:confusion("disc3");
+    }
+  } break;
   default:confusion("disc3");
 @:this can't happen disc3}{\quad disc3@>
   }
@@ -4452,6 +4494,14 @@ else switch (type(s)) {
   case hlist_node: case vlist_node: case rule_node:
   case kern_node:
     act_width=act_width+width(s);@+break;
+  case whatsit_node:
+  { switch (subtype(s)) {
+      case utf_char_node: case utf_lig_node:
+        f=utf_font(s);
+        act_width=act_width+ft_char_width(utf_font(s), utf_char(s));
+        break;
+    }
+  } break;  
   default:confusion("disc4");
 @:this can't happen disc4}{\quad disc4@>
   }
@@ -6135,7 +6185,7 @@ case utf_char_node:
   print_esc(font_def[utf_font(p)].n);  print_char(' '); print_UTF8(utf_char(p));
   break;
 case utf_lig_node:
-  print_esc(font_def[utf_font(p)].n);  print_char(' '); print_UTF8(utf_char(p));
+  print_esc(font_def[utf_font(p)].n);  print_char(' '); print_hex(utf_char(p)&~GLYPH_BIT);
   print(" (ligature ");
   if (utf_lig_subtype(p) > 1) print_char('|');
   font_in_short_display=0; short_display(utf_lig_ptr(p));
@@ -6365,16 +6415,11 @@ if (subtype(p)==image_node)
 @
 
 @<Incorporate dimensions of an utf character into the dimensions of the hbox@>=
-{ scaled ch, cd;
-  FT_Face ft_face=ft_get_font_face(f);
-  if (ft_face!=NULL)
-  { FT_UInt ft_gid = FT_Get_Char_Index(ft_face, c);
-    if (ft_gid!=0)
-    x=x+ft_glyph_width(ft_face, ft_gid,font_size[f]);
-    ft_glyph_height_depth(ft_face, ft_gid, &ch, &cd, font_size[f]);
+{ scaled ch, cd, cw;
+    ft_glyph_height_depth_width(f,c, &ch, &cd, &cw);
+    x=x+cw;
     if (ch > h) h=ch;
     if (cd > d) d=cd;
-  }
 }
 
 @ @<Incorporate a whatsit node into an hbox@>=
@@ -6868,7 +6913,7 @@ pointer p[MAX_FONT_PARAMS+1];
 scaled hpxs,vpxs; /**/
 FontFormat ff; /* the font format */
 FT_Face ft_face; /* a pointer to the font face for FreeType fonts */
-@<the glyph cache@>@;
+@<PK font specific fields@>@;
 } FontDef;
 
 static FontDef *font_def;
@@ -6902,7 +6947,7 @@ This is now possibly too late because the font metrics are
 needed much earlier.
 Because the viewer only displays a single page at a time,
 we still will do ``on demand'' loading of font file information
-using the function |ft_load_font_face|.
+using the function |ft_get_font_face|.
 After a font face is loaded the |font_face| array contains
 a valid |FT_Face| pointer. Reading the obligatory ``font hyphen''
 creates a character node which will trigger the loading of
@@ -8014,15 +8059,21 @@ return p;
 
 @<Basic printing procedures@>=
 static void print_UTF8(int c) /* outputs the character in UTF8 format */
-{@+ if (c<0x80) 
-  {  putc(c,hlog); }
+{@+
+  if (c<0x100) 
+  {  print_ASCII(c);}
+#if 0
+else
+  print_hex(c);
+#else   
   else if (c<0x800)@/
   { putc(0xC0|(c>>6),hlog);@+ putc(0x80|(c&0x3F),hlog);@+} 
   else if (c<0x10000)@/
   { putc(0xE0|(c>>12),hlog); putc(0x80|((c>>6)&0x3F),hlog);@+ putc(0x80|(c&0x3F),hlog); } 
   else if (c<0x200000)@/
   { putc(0xF0|(c>>18),hlog);@+ putc(0x80|((c>>12)&0x3F),hlog); 
-    putc(0x80|((c>>6)&0x3F),hlog);@+ putc(0x80|(c&0x3F),hlog); } 
+    putc(0x80|((c>>6)&0x3F),hlog);@+ putc(0x80|(c&0x3F),hlog); }
+#endif    
   file_offset++;
   if (file_offset==max_print_line) print_ln(); 
 }
@@ -8944,7 +8995,9 @@ static pointer hget_text_list(uint32_t s)
 f=HGET8;\
 if ((I)==7) q=hget_list_pointer(); else q=hget_text_list(I);\
 if (q==null) QUIT("Ligature with empty list");\
-if (is_char_node(q)) p=new_ligature(f, character(q), link(q));\
+if (is_char_node(q))\
+{ if (is_otf_font(f)) p=new_utf_lig(f, character(q), link(q));\
+  else  p=new_ligature(f, character(q), link(q)); }\
 else p=new_utf_lig(f, utf_char(q), link(q));\
 tail_append(p);\
 link(q)=null; flush_node_list(q);\
@@ -8958,7 +9011,9 @@ if ((I)==7) { q=hteg_list_pointer(); f=HTEG8;}\
 else {uint8_t *t=hpos;\
   hpos=t-I; f=HTEG8; hpos=t-I; q=hget_text_list(I); hpos=t-I-1;}\
 if (q==null) QUIT("Ligature with empty list");\
-if (is_char_node(q)) p=new_ligature(f, character(q), link(q));\
+if (is_char_node(q)) \
+{ if (is_otf_font(f)) p=new_utf_lig(f, character(q), link(q));\
+  else  p=new_ligature(f, character(q), link(q)); }\
 else p=new_utf_lig(f, utf_char(q), link(q));\
 tail_append(p);\
 link(q)=null; flush_node_list(q);\
@@ -8991,12 +9046,16 @@ case TAG(ligature_kind,7):@+ HTEG_LIG(7); @+break;
 For ligatures using character codes above |0xFF|, 
 we need to create a new |utf_lig_node|.
 
+@d GLYPH_BIT 0x200000 /*If this bit is set in a character code, it's a glyph index.*/
+
 @<\HINT\ auxiliar functions@>=
 static pointer new_utf_lig(uint8_t f, int c, pointer q)
 {@+pointer p; /*the new node*/
 p=get_node(utf_lig_node_size);
 type(p)=whatsit_node; subtype(p)=utf_lig_node;
-utf_font_char(p)=(f<<24)+c;
+utf_font_char(p)=((f<<24)+c);
+if (is_otf_font(f))
+    utf_font_char(p)|=GLYPH_BIT;
 utf_lig_subtype(p)=0;
 utf_lig_ptr(p)=q;
 return p;
@@ -12130,15 +12189,14 @@ preceeds a ligature node this change might be important.
 When rendering a ligature, we consider for the purpose of marking
 the characters which generated the ligature.
 If any of these characters is marked, the whole ligature is marked.
-@<account for the characters that generated the ligature@>=
+@<account for the characters |q| that generated the ligature@>=
 if (!c_ignore)
-{ pointer q;
-  int old_s, max_s;
+{ int old_s, max_s;
   old_s=cur_style;
   max_s=0;
-  q=lig_ptr(p);
   while (q!=null)
-  { if (is_char_node(q) && character(q)!=' ')
+  { if ((is_char_node(q) && character(q)!=' ') ||
+        (type(q)==whatsit_node && subtype(q)==utf_char_node))
     { @<compute the |next_style|@>@;
       cur_style=next_style;
       if (next_style>max_s) max_s=next_style;
@@ -12544,7 +12602,7 @@ static void hSetColor(int c)
 void hint_render_on(void)
 { nativeInit();
   hSetColor(0);
- 
+  hinit_gh_cache(); 
 }
 
 void hint_render_off(void)
@@ -12582,15 +12640,29 @@ cluttering the global name space by using the |hint_|\dots prefix.
 
 
 \subsection{Fonts}\label{fontrenderer}
-The \HINT\ file format supports two kind of font formats:
+The \HINT\ file format supports three kind of font formats:
 The traditional PK fonts\cite{TR:pkfile} and fonts that
 can be rendered using the FreeType Library\cite{freetype}
 by David Turner, Werner Lemberg, and others.
-The latter are PostScript Type1 fonts\cite{PST1},
-TrueType\cite{TTT:TT} fonts, and OpenType fonts\cite{MS:OTF}\cite{ISO:OTF}.
+The PK fonts are bitmaped fonts, the fonts that are rendered
+with the FreeType library are outline fonts.
+The outline fonts fall again in two categories:
+PostScript Type1 fonts\cite{PST1} which require a supplemental \TeX\ font metric
+file for rendering, and  OpenType fonts\cite{MS:OTF}\cite{ISO:OTF} that
+contain the necessary font metrics directly.
+TrueType\cite{TTT:TT} fonts are a special kind of OpenType fonts and the \HINT\
+file format simply treats them like other OpenType fonts.
+\HiTeX\ uses the Harfbuzz library to read this metric information and arange the glyphs.
+You can test for an OpenType font by checking whether the section number for the
+\TeX\ font metric file of the font |font_def[f].m| is zero.
+
+The |FontFormat| enumeration defines constants that identify the different formats.
+|ft_format| and |hb_format| can be combined using bitwise or.
+
+@d is_otf_font(A) (font_def[f].m==0)
 
 @<Types...@>=
-typedef	enum {@+ no_format=0, pk_format, ft_format@+ } FontFormat;
+typedef	enum {@+ no_format=0, pk_format=1, ft_format=2@+ } FontFormat;
 @
 
 The features of a font are described in a |Font| structure.  A major
@@ -12632,16 +12704,32 @@ Releasing the textures will cause the textures to be recomputed using the
 current resolution before rendering the glyph the next time.
 
 @<font functions@>=
-static void hfree_glyph_cache(FontDef *f, bool rm);
+
+void  hinit_gh_cache(void)
+{ int i;
+  for (i=0;i<GCACHE_SIZE;i++)
+    glyph_cache[i].key=EMPTY_KEY;
+}
 
 void hint_clear_fonts(bool rm)
 { int f;
   if (font_def==NULL) return;
   DBG(DBGFONT,rm?"Clear font data":"Clear native glyph data");
+  for(f=0;f<GCACHE_SIZE;f++)
+  { if(glyph_cache[f].key!=EMPTY_KEY)
+    { if (glyph_cache[f].OGLtexture!=0)
+      { nativeFreeTexture(glyph_cache[f].OGLtexture);
+        glyph_cache[f].OGLtexture=0;
+      }
+      if (rm)
+      glyph_cache[f].key=EMPTY_KEY;
+    }
+  }
   for (f=0;f<=max_ref[font_kind];f++)
-  { hfree_glyph_cache(font_def+f,rm);
-    if (rm && font_def[f].ff==pk_format)
-      font_def[f].ff=no_format;
+  { FT_Face ft_face=font_def[f].ft_face;
+    if (ft_face!=NULL)
+    {@<Set the required size@>@;
+    }
   }
 }
 @
@@ -12654,7 +12742,6 @@ unsigned int nativeFreeTexture(unsigned int t)  {return 0;}
 unsigned int nativeTexture(unsigned char *bits, int w, int h) {return 0;}
 void nativeGlyph(double x,double y,double w,double h,
    unsigned int t)  {return;}
-static void hfree_glyph_cache(FontDef *f, bool rm) {}
 void nativeSetSize(int px_h, int px_v, double pt_x, double pt_v) {}
 @
 
@@ -12700,12 +12787,21 @@ contain a compressed representation of bitmap fonts  produced by \MF\ and {\tt g
 The definitions and algorithms that follow here can be found,
 along with a more detailed description, in \cite{TR:pkfile}. 
 
-For every glyph, there is a |flag| byte in the PK file that tells how the corresponding glyph is
-encoded and a pointer to the encoding itself.
+For every glyph, there is a |flags| byte in the PK file that tells how the
+corresponding glyph is encoded and the |offset| of the encoding itself.
 
-@<PK specific fields in the glyph cache@>=
-unsigned char pk_glyph_flags; /*how to decode the glyph*/
-unsigned char *pk_glyph_data; /*the data encoding the glyph*/
+@<Types...@>=
+typedef struct { 
+unsigned int flags:8; /*how to decode the glyph*/
+unsigned int offset:24; /*the data encoding the glyph*/
+} PK_Glyph_Info;
+
+
+@ We store this information for every PK font in the |FontDef| structure.
+
+@<PK font specific fields@>=
+PK_Glyph_Info *pk_glyphs;
+unsigned char *pk_data;
 @
 
 Before we define two functions, one to unpack a single glyph when it is needed for the first time,
@@ -12795,8 +12891,8 @@ We traverse the |pk_data| nybbles sequentially in top-down order.
 The horizontal position |x| and the vertical position |y| in the
 target bitmap start at 0 and |g->h-1|.
 @<PK font functions@>=
-static unsigned char *pk_runlength(Gcache *g, unsigned char *pk_data) {
-    PKparse p;
+static unsigned char *pk_runlength(GHcache *g, unsigned char *pk_data, unsigned char pk_glyph_flags)
+{   PKparse p;
     int x, y; /* position in target bitmap */
     unsigned char *bits; /* target bitmap */
     int n; /* number of pixel left in current run */
@@ -12805,10 +12901,10 @@ static unsigned char *pk_runlength(Gcache *g, unsigned char *pk_data) {
     if (bits == NULL) { g->w = g->h = 0;  return NULL; } /* out of memory */
     p.j = 0; /* nybble position to start of data */
     p.r = 0; /* repeat count = 0 */
-    p.f = g->pk_glyph_flags >> 4; /* dynamic f value */
+    p.f = pk_glyph_flags >> 4; /* dynamic f value */
     p.pk_data=pk_data; /* data bytes */
     n = 0;
-    if ((g->pk_glyph_flags >> 3) & 1) gray=0x00;
+    if ((pk_glyph_flags >> 3) & 1) gray=0x00;
     else gray=0xff;
     y = 0;
     while (y <g->h) {
@@ -12848,8 +12944,8 @@ using a |mask| to get the next bit and incrementing |pk_data| when necessary.
 The horizontal position |x| and the vertical position |y| in the
 target bitmap start at 0 and |g->h-1|.
 @<PK font functions@>=
-static unsigned char *pk_bitmap(Gcache *g, unsigned char *pk_data) {
-    unsigned char *bits; /* 1 bit per pixel */
+static unsigned char *pk_bitmap(GHcache *g, unsigned char *pk_data)
+{   unsigned char *bits; /* 1 bit per pixel */
     int x, y; /* position in target bitmap */
     unsigned char mask; /* bitmask for the next bit */
  
@@ -12873,18 +12969,24 @@ The next function unpacks the glyphs meta data and calls one of the
 unpacking functions just defined.
 @<PK font functions@>=
 
-static void pk_unpack_glyph(uint8_t f, Gcache *g)
+static void pk_unpack_glyph(uint8_t f, GHcache *g, unsigned int cc)
 { int i,k;
   unsigned char *pk_data;
+  unsigned char pk_flags;
   unsigned char *bits;
-  if (g==NULL || g->pk_glyph_data==NULL) return; /* no glyph, no data */
-  if (g->OGLtexture!=0) return; /* already unpacked */
+  if (g==NULL) return;
+  if (g->OGLtexture!=0) return;   /* already unpacked */
+  pk_data= font_def[f].pk_data;
+  if (pk_data==NULL|| font_def[f].pk_glyphs==NULL) return; /* no glyph, no data */
+
 #if 0  
   DBG(DBGRENDER,"Unpacking glyph %c (0x%x)",g->cc,g->cc);
-#endif 
-  pk_data=g->pk_glyph_data;
+#endif
+
+  pk_data=pk_data + font_def[f].pk_glyphs[cc].offset;
+  pk_flags=font_def[f].pk_glyphs[cc].flags;
   i=0;
-  if ((g->pk_glyph_flags&7)<4)  /* short form */
+  if ((pk_flags&7)<4)  /* short form */
   { i=i+3; /* skip the TeX font metrics */
 	i=i+1; /*escapement: |g->dy=0; g->dx=PK_READ_1_BYTE(); g->dx= g->dx<<16;| */
 	g->w=PK_READ_1_BYTE();
@@ -12892,7 +12994,7 @@ static void pk_unpack_glyph(uint8_t f, Gcache *g)
 	g->hoff=(signed char)PK_READ_1_BYTE();
 	g->voff=(signed char)PK_READ_1_BYTE();
   }
-  else if ((g->pk_glyph_flags&7)<7) /* extended short form */
+  else if ((pk_flags&7)<7) /* extended short form */
   {  i=i+3; /* skip the TeX font metrics */
 	i=i+2; /*escapement: |g->dy=0; g->dx=PK_READ_2_BYTE(); g->dx= g->dx<<16;| */
 	g->w=PK_READ_2_BYTE();
@@ -12908,8 +13010,8 @@ static void pk_unpack_glyph(uint8_t f, Gcache *g)
 	g->hoff=(signed int)PK_READ_4_BYTE();
 	g->voff=(signed int)PK_READ_4_BYTE();
   }
-  if ((g->pk_glyph_flags>>4)==14) bits=pk_bitmap(g,pk_data+i);
-  else bits=pk_runlength(g,pk_data+i);
+  if ((pk_flags>>4)==14) bits=pk_bitmap(g,pk_data+i);
+  else bits=pk_runlength(g,pk_data+i, pk_flags);
   if (bits!=NULL)
   { g->OGLtexture=nativeTexture(bits,g->w,g->h);
     free(bits);
@@ -12940,7 +13042,6 @@ The function returns zero if that is not the case.
 #define PK_PRE   247
 #define PK_ID    89
 
-static Gcache *hnew_glyph(FontDef *fp, unsigned int cc);
 
 static int unpack_pk_file(internal_font_number f)
 /* scan font f and extract information. Do not unpack glyphs, these are unpacked on demand. */
@@ -12958,6 +13059,8 @@ static int unpack_pk_file(internal_font_number f)
   }
   if (pk_data[0]!=PK_PRE ||  pk_data[1]!=PK_ID)
     return 0;
+  font_def[f].pk_data=pk_data;
+  ALLOCATE(font_def[f].pk_glyphs,128,PK_Glyph_Info);
   i=0;
   while (i< pk_size)
     switch(flag=pk_data[i++])
@@ -12994,7 +13097,6 @@ static int unpack_pk_file(internal_font_number f)
       default: /* the character codes */
       { unsigned int pl;
         unsigned int cc;
-        Gcache *g;
         if ((flag&7)==7) /* long form */
         { pl=PK_READ_4_BYTE();
           cc=PK_READ_4_BYTE();
@@ -13007,9 +13109,14 @@ static int unpack_pk_file(internal_font_number f)
           cc=PK_READ_1_BYTE();
           pl= pl+((flag&3)<<8);
         }
-        g = hnew_glyph(font_def+f,cc);
-        g->pk_glyph_flags=flag;
-        g->pk_glyph_data=pk_data+i;
+	if (cc>255)
+	  MESSAGE("Ignoring character code %d from PK font %s",cc,font_def[f].n);
+	else 
+        { if (cc>127)
+	    REALLOCATE(font_def[f].pk_glyphs,256,PK_Glyph_Info);
+          font_def[f].pk_glyphs[cc].flags=flag;
+          font_def[f].pk_glyphs[cc].offset=i;
+	}
         i=i+pl;
       }
       break;
@@ -13029,24 +13136,23 @@ static int unpack_pk_file(internal_font_number f)
 \subsubsection{PostScript Type 1, TrueType, and OpenType Fonts}
 
 To access font metrics that are otherwise contained in a \.{.TFM} file,
-there is a collection of functions that is shared with Hi\TeX.
-So make shure that any changes here are also made in  Hi\TeX!
-
-Here are some global variables. The FreeType libraray must be initialized
-before using any of its functions. You can test |ft_library| to see if the
-libraray needs initialization.
-The |font_face| array contains for each
-font number |f| an |FT_Face| if the font face is aleady loaded. 
-Before loading or after unloading the font face, the value in the array is |NULL|.
-If |ft_libraray==NULL| all entries in |font_face| are |NULL| as well. 
+there is a collection of functions that are based on the FreeType library.
+The variables |ft_err| is used to receive the return values of functions
+from the FreeType library and a non-zero value usually means trouble.
+But before using any of its functions, the FreeType libraray must be initialized,
+and you can test |ft_library| to see if the libraray still needs initialization. 
 
 @<Global variables@>=
 static FT_Library ft_library=NULL;
 static FT_Error ft_err;
 
+@ To initialize and destroy the Free Type library, we define the folowing functions.
+The functions to load and unload a font face are defined further below.
 
-@ To initialize and destroy the Free Type library we define the folowing functions.
-The functions to load and unload a font face are defined later.
+The |font_def| array contains for each
+font number |f| an |FT_Face| if the font face is aleady loaded. 
+Before loading or after unloading the |ft_face| field in |font_def| is |NULL|.
+If |ft_libraray==NULL| all |ft_face| fields in |font_def| are |NULL| as well. 
 
 @<FreeType font functions@>=
 
@@ -13080,135 +13186,10 @@ static void ft_destroy(void)
 @
 
 Once the library is initialized, it is possible to
-create a font face from it either from a file
-using |FT_New_Face| or from memory using |FT_New_Memory_Face|.
-Both functions need an index to select a font face
-in case the file or memory image contains multiple
-faces. The functions that follow often have such a font face
-as parameter.
+create a font face.
 
-The first example is a function to get the ``width'' of
-a character. What \TeX\ calls the ``width'' of the character
-is called the ``advance'' in freetype: it is the distance
-from one character to the next character including the
-space between the characters; while the ``width'' of the
-character is the distance between the left and right egdge
-of the characters glyph. The latter is not needed by \TeX.
-We give two version, one will accept a character code, the
-other assumes that the glyph id is already available.
-
-@<\HINT\ auxiliar functions@>=
-#if 0
-static FT_UInt ft_glyph(FT_Face ft_face, int c)
-{ FT_UInt ft_gid;
-  ft_gid = FT_Get_Char_Index(ft_face, c);
-  return ft_gid;
-}
-#endif
-
-#ifdef DEBUG
-static bool ft_exists(internal_font_number @!f, int c)
-{ FT_Face ft_face;
-  if (font_def[f].ff==no_format) hload_font(f);
-  ft_face=font_def[f].ft_face;
-  if (ft_face==NULL)
-    ft_face=ft_load_font_face(f);
-  if (ft_face==NULL) return false;
-  return FT_Get_Char_Index(ft_face, c)!=0;
-}
-#endif
-
-static scaled ft_glyph_width(FT_Face ft_face, FT_UInt ft_gid, scaled s)
-{ FT_Fixed a;
-  scaled w;
-  ft_err=FT_Get_Advance(ft_face, ft_gid, FT_LOAD_NO_SCALE, &a);
-  if (ft_err!=0) return 0;
-  w= (scaled)((double)s*(double)a/(double)ft_face->units_per_EM +0.5);
-  return w;
-}
-
-static scaled ft_width(FT_Face ft_face, int c, scaled s)
-{ FT_UInt ft_gid;
-  ft_gid = FT_Get_Char_Index(ft_face, c);
-  if (ft_gid==0) return 0;
-  return ft_glyph_width(ft_face, ft_gid, s);
-}
-@
-
-Finding the height and depth of a character is
-slightly more complex. It requires loading the glyph
-and retrieving its bounding box.
-Since most of the time we need the height and the depth
-together, we provide one function for both.
-We use |FT_Glyph_Get_CBox| to get the control box which is supposed to be fast.
-Because the glyph has been loaded with |FT_LOAD_NO_SCALE| we call
-|FT_Glyph_Get_CBox| with mode |FT_GLYPH_BBOX_UNSCALED| and
-get unscaled font units in 26.6 pixel format. 
-
-@<\HINT\ auxiliar functions@>=
-static FT_Error ft_glyph_bbox(FT_Face ft_face, FT_UInt ft_gid, FT_BBox *ft_bbox)
-{ FT_Glyph ft_glyph;
-  ft_err = FT_Load_Glyph(ft_face, ft_gid, FT_LOAD_NO_SCALE);
-  if (ft_err!=0) return ft_err;
-  ft_err = FT_Get_Glyph(ft_face->glyph, &ft_glyph);
-  if (ft_err!=0) return ft_err;
-  FT_Glyph_Get_CBox(ft_glyph, FT_GLYPH_BBOX_UNSCALED, ft_bbox);
-  return 0;
-}
-
-static void ft_glyph_height_depth(FT_Face ft_face, FT_UInt ft_gid,
-  scaled *h, scaled *d, scaled s)
-{ FT_BBox ft_bbox;
-  *h=*d=0;
-  ft_err= ft_glyph_bbox(ft_face, ft_gid, &ft_bbox);
-  if (ft_err!=0)
-    return;
-  if (ft_bbox.yMax>0)
-   *h=(scaled)((double)s*(double)(ft_bbox.yMax)/(double)ft_face->units_per_EM +0.5);
-  if (ft_bbox.yMin<0)
-   *d= (scaled)((double)s*(double)(-ft_bbox.yMin)/(double)ft_face->units_per_EM +0.5);
-}
-
-@
-
-
-
-
-The first character of a font can be obtained using
-|FT_Get_First_Char|. For now, I do not know a way to determine
-the last one. These functions are currently not used.
-
-@<\HINT\ auxiliar functions@>=
-#if 0
-static int ft_last(FT_Face ft_face)
-{ return 0x10FFFF; }
-
-static int ft_first(FT_Face ft_face)
-{ FT_UInt ft_gid;
-  FT_ULong c;
-  c = FT_Get_First_Char(ft_face,&ft_gid);
-  if (ft_gid==0) /* charmap empty*/
-    return ft_last(ft_face)+1;
-  else
-    return c;
-}
-#endif
-@
-
-To unpack these fonts, we use the FreeType library\cite{freetype}.
-
-
-We use |FT_New_Memory_Face| to unpack the font.
-To determine the rendering size, we use the function |font_at_size| to
-obtain the size of the font in scaled point and convert it; the variable |f->s| then
-contains the size in point as a floating point value.
-The resolution used to render the font's glyphs is based on the current setting
-of |xdpi| and |ydpi|. If at a later time the resolution changes, for example
-because of a scaling operation, it might be necessary to rerender the fonts.
-This can be achived by calling |hint_clear_fonts(true)|.
-
-The function |ft_load_font_face(f)| is called only if |fonts[f]->ft_face==NULL|
-and should be called whenever |fonts[f]->ft_face| is needed but not yet defined.
+We use |FT_New_Memory_Face| to load the font from an auxiliar section of the
+\HINT\ file.
 
 
 @<FreeType font functions@>=
@@ -13228,9 +13209,8 @@ static FT_Face ft_load_font_face(uint8_t f)
   ft_err = FT_New_Memory_Face(ft_library,
                           ft_data, ft_size,0,&ft_face);                     
   if (ft_err)
-  { LOG("Unable to create font %d\n",f);
     return NULL;
-  }
+    
   font_def[f].ft_face=ft_face;
   @<Select the correct encoding@>@;
   @<Set the required size@>@;
@@ -13242,8 +13222,29 @@ static void ft_unload_font_face(uint8_t f)
 {  ft_err= FT_Done_Face(font_def[f].ft_face); 
    font_def[f].ft_face=NULL; 
 }
-
 @
+
+
+The function |ft_load_font_face(f)| is called only if |fonts[f]->ft_face==NULL|
+and should be called whenever |fonts[f]->ft_face| is needed but is not yet defined.
+The |ft_get_font_face| function performs the necessary checks and returns always
+a valid font face.
+
+@<FreeType font functions@>=
+static FT_Face ft_get_font_face(uint8_t f)
+{ FT_Face ft_face;
+  ft_face=font_def[f].ft_face;
+  if (ft_face!=NULL)
+    return ft_face;
+  if (font_def[f].ff==no_format) hload_font(f);
+  ft_face=ft_load_font_face(f);
+  if (ft_face==NULL)
+    QUIT("Unable to create FreeType face for font %d (%s)",f, font_def[f].n);
+  return ft_face;
+}
+@
+
+We have to fill in two omissions: selecting the font encoding and the font size:
 
 A FreeType font file may contain different character encodings,
 the most common beeing the Unicode encoding. \TeX's character
@@ -13283,14 +13284,101 @@ if (font_def[f].hpxs!=x_px_size || font_def[f].vpxs!=y_px_size)
             ft_face,    /* handle to face object           */
             0,       /* |char_width| in $1/64$th of points  */
             ft_size,  /* |char_height| in $1/64$th of points */
-            72.27/(font_def[f].hpxs/(double)ONE),     /* horizontal device resolution    */
-            72.27/(font_def[f].vpxs/(double)ONE));   /* vertical device resolution      */
-  if (ft_err) QUIT("Unable to set FreeType glyph size"); 
+            (ONE*72.27)/(double)font_def[f].hpxs,     /* horizontal device resolution    */
+            (ONE*72.27)/(double)font_def[f].vpxs);   /* vertical device resolution      */
+  if (ft_err) LOG("Unable to set FreeType glyph size"); 
 }
 @
 
-After translating the character code |cc| into the glyph index |i| using
-the character map selected above, we render the bitmap using |FT_Load_Glyph|
+The first thing the \HINT\ viewer wants to know about a character are usually
+its dimensions. So next we consider the functions to obtaint the font metrics.
+
+First example isa function to get the ``width'' of
+a character. What \TeX\ calls the ``width'' of the character
+is called the ``advance'' in freetype: it is the distance
+from one character to the next character including the
+space between the characters; while for FreeType the ``width'' of the
+character is the distance between the left and right egdge
+of the characters glyph. The latter is not needed by \TeX.
+
+Further, FreeType associats width, height, depth, and other metrics
+not with the character code, but with the glyph id.
+So unless we have already a glyph id, we first need to map the character
+code to the glyph id.
+
+
+@d ft_glyph_id(F,C) (((C)&GLYPH_BIT)?((C)&~GLYPH_BIT):FT_Get_Char_Index(F, C))
+
+@<FreeType font functions@>=
+
+static scaled ft_char_width(uint8_t f, int c)
+{ FT_Fixed a;
+  scaled w,s;
+  FT_Face ft_face= ft_get_font_face(f);
+  FT_UInt ft_gid=ft_glyph_id(ft_face,c);
+  ft_err=FT_Get_Advance(ft_face, ft_gid, FT_LOAD_NO_SCALE, &a);
+  if (ft_err!=0)
+  { LOG("Unable to get character width");
+    return 0;
+  }
+  s= font_size[f];
+  w= (scaled)((double)s*(double)a/(double)ft_face->units_per_EM +0.5);
+  return w;
+}
+@
+
+Finding the height and depth of a character is
+slightly more complex. It requires loading the glyph
+and retrieving its bounding box.
+Since most of the time we need the height and the depth
+together, we provide one function for both.
+We use |FT_Glyph_Get_CBox| to get the control box which is supposed to be fast.
+Because the glyph has been loaded with |FT_LOAD_NO_SCALE| we call
+|FT_Glyph_Get_CBox| with mode |FT_GLYPH_BBOX_UNSCALED| and
+get unscaled font units in 26.6 pixel format. 
+
+@<\HINT\ auxiliar functions@>=
+static FT_Error ft_glyph_bbox(FT_Face ft_face, FT_UInt ft_gid, FT_BBox *ft_bbox)
+{ FT_Glyph ft_glyph;
+  ft_err = FT_Load_Glyph(ft_face, ft_gid, FT_LOAD_NO_SCALE);
+  if (ft_err!=0) return ft_err;
+  ft_err = FT_Get_Glyph(ft_face->glyph, &ft_glyph);
+  if (ft_err!=0) return ft_err;
+  FT_Glyph_Get_CBox(ft_glyph, FT_GLYPH_BBOX_UNSCALED, ft_bbox);
+  return 0;
+}
+
+static void ft_glyph_height_depth_width(uint8_t f, int c, scaled *h, scaled *d,scaled *w)
+{ FT_Fixed a;
+  double s, upem;
+  FT_BBox ft_bbox;
+  FT_Face ft_face=ft_get_font_face(f);
+  FT_UInt ft_gid=ft_glyph_id(ft_face,c);
+  *h=*d=*w=0;
+  s= (double)font_size[f];
+  upem=(double)ft_face->units_per_EM;
+  ft_err= ft_glyph_bbox(ft_face, ft_gid, &ft_bbox);
+  if (ft_err!=0)
+   LOG("Unable to get character bounding box");
+  else
+  { if (ft_bbox.yMax>0)
+      *h=(scaled)(s*(double)(ft_bbox.yMax)/upem +0.5);
+    if (ft_bbox.yMin<0)
+      *d= (scaled)(s*(double)(-ft_bbox.yMin)/upem +0.5);
+  }
+  ft_err=FT_Get_Advance(ft_face, ft_gid, FT_LOAD_NO_SCALE, &a);
+  if (ft_err!=0)
+    LOG("Unable to get character width");
+  else
+    *w= (scaled)(s*(double)a/upem +0.5);
+}
+
+@
+
+After the \HINT\ viewer has arranged the characters on the page at appropriate
+positions using the font metrics, it needs to render the characters.
+It translates again the character code |cc| into the glyph index |i|
+and renders the glyph as a bitmap using |FT_Load_Glyph|
 with the |FT_LOAD_RENDER| flag. Instead of using |FT_LOAD_TARGET_NORMAL|
 one could also use |FT_LOAD_TARGET_LIGHT| which will apply hinting only
 to horizontal strokes, thereby keeping the character spacing undisturbed 
@@ -13302,16 +13390,11 @@ displacement is magnified for scaled fonts, so subtracting 1 is not enough
 in this cases.
 
 @<render functions@>=
-static void ft_unpack_glyph(uint8_t f, Gcache *g, uint32_t cc)
+static void ft_unpack_glyph(uint8_t f, GHcache *g, uint32_t cc)
 { int e,i;
- unsigned char *bits;
-  FT_Face ft_face=font_def[f].ft_face;
-  if (ft_face==NULL)
-    ft_face=ft_load_font_face(f);
-  if (ft_face==NULL)
-   QUIT("Unable to create FreeType face for font %d (%s)",f, font_def[f].n);
-  @<Set the required size@>@;
-  i = FT_Get_Char_Index( ft_face, cc);
+  unsigned char *bits;
+  FT_Face ft_face=ft_get_font_face(f);
+  i=ft_glyph_id(ft_face,cc);
   e = FT_Load_Glyph(
             ft_face,          /* handle to face object */
             i,   /* glyph index           */
@@ -13333,44 +13416,36 @@ static void ft_unpack_glyph(uint8_t f, Gcache *g, uint32_t cc)
   g->h*=font_def[f].vpxs;
 }
 
-@
-
-
-We close with the functions to compute font metrics.
-
+@ We close with a functions to test for the existence of a character
+when running with |DEBUG| enabled.
 
 @<FreeType font functions@>=
-static FT_Face ft_get_font_face(uint8_t f)
+
+#ifdef DEBUG
+static bool ft_char_exists(internal_font_number @!f, int c)
 { FT_Face ft_face;
-  if (font_def[f].ff==no_format) hload_font(f);
-  ft_face=font_def[f].ft_face;
-  if (ft_face==NULL)
-    ft_face=ft_load_font_face(f);
-  return ft_face;
+  FT_UInt ft_gid;
+  if (c&GLYPH_BIT) return true;
+  ft_face= ft_get_font_face(f);
+  ft_gid=ft_glyph_id(ft_face,c);
+  return ft_gid!=0;
 }
-static scaled ft_char_width(uint8_t f, int c)
-{ FT_Face ft_face= ft_get_font_face(f);
-  if (ft_face==NULL)
-    return 0;
-  else
-    return ft_width(ft_face, c, font_size[f]);
-}
+#endif
+
 @
 
 
 @ @<forward declarations@>=
 #ifdef DEBUG
-static bool ft_exists(internal_font_number @!f, int c);
+static bool ft_char_exists(internal_font_number @!f, int c);
 #endif
 
 static scaled ft_char_width(uint8_t f, int c);
 static void ft_destroy(void);
-static FT_Face ft_load_font_face(uint8_t f);
 static FT_Face ft_get_font_face(uint8_t f);
 static void ft_unload_font_face(uint8_t f);
-static scaled ft_glyph_width(FT_Face ft_face, FT_UInt ft_gid, scaled s);
-static void ft_glyph_height_depth(FT_Face ft_face, FT_UInt ft_gid,
-  scaled *h, scaled *d, scaled s);
+static void ft_glyph_height_depth_width(uint8_t f, int c, scaled *h, scaled *d,scaled *w);
+
 @
 
 
@@ -13378,200 +13453,196 @@ static void ft_glyph_height_depth(FT_Face ft_face, FT_UInt ft_gid,
 \subsubsection{The Glyph Cache}
 If possible, the glyphs belonging to a font are extracted only once from the font data,
 converted into a format suitable for the native rendering engine, and then cached for repeated use.
-The cached glyph representation for glyph |g| is stored in one of four trees. 
-The order and depth of the trees reflects UTF-8 encoding.
-   The first tree is of oder $2^7$ and only 1 level deep; its root is |g0|.
-   The other trees, |g1|, |g2|, and |g3| are of order $2^6$ and have a depth
-   of 2, 3, and 4 levels respectively.
 
-@<the glyph cache@>=
-  Gcache **g0; /* $0 \le |g| < 2^7$ */
-  Gcache ***g1;  /* $2^7 \le |g| < 2^{12}$ */
-  Gcache ****g2; /* $2^{12} \le |g| < 2^{18}$ */
-  Gcache *****g3; /* $2^{18} \le |g| < 2^{24}$ */@/
-@t~@>
+When \HiTeX\ started to support OpenType fonts that were shaped using the Harfbuzz library,
+it was no longer possible to supply a Unicode codepoint for every glyph, because
+Harfbuzz would convert sequences of characters into ligatures, and these ligatures had a
+unique glyph identifier in the respective font, but no Unicode codepoint that would map to
+it. As a consequence, the \HINT\ viewer now needs to map Unicode codepoints as well as
+glyph identifiers to the corresponding textures before displaying the glyph.
+
+It would be possibly to cache only the mapping from glyph identifiers to textures,
+because the mapping from Unicode codepoint to glyph idendtifier can be obtained
+from the font file using the |FT_Get_Char_Index| function.
+However, looking up the glyph textures occurs much more frequently than creating new textures.
+Even on a page with complex typography, you might expect not more than 150 distinct glyphs
+from may be 7 different fonts. But rendering the page at a small font size might require 500 or even
+more lookups: one lookup for every glyph instance on the page.
+While zooming in or out on a page, the \HINT\ viewer rerenders the page with every mouse
+movement, and this can easily lead up to a hundred thousand lookups for a single zoom operation.
+To make the zoom operation smooth, obviously, the lookups need to be fast.
+Therefore, the extra call to |FT_Get_Char_Index| should be avoided.
+
+The tree implementation of the glyph cache can not cope with both Unicode codepoints
+and glyph identifiers, simply because the range of values overlaps. Using one tree for
+Unicode codepoints and a second tree for glyph identifiers is possible but a waste of
+memory, because the number of ligatures is an order of magnitude smaller than the number
+of ordinary characters, and even for ordinary characters, the tree implementation has
+already a large memory overhead. Fonts used for mathematical symbols
+or chapter headings often provide only a handfull of glyphs that are actually used;
+but the tree structure must be provided for the complete ASCII character set.
+
+So the decisson was made to replace the lookup tree by a new data structure.
+The old tree data structure required for a basic lookup (character range 0 to $2^7$)
+one shift, one pointer indirection, two test and an array lookup.
+The simplicity and speed of this implementation is hard to beat.
+For characters outside the ASCII range, each tree level requires additional operations:
+two shifts, one mask operation, two tests, and an array access.
+
+
+Given the example above, the 150 glyphs out of 7 fonts will require 18144 byte, assuming
+that the Unicode codepoints are all on the first tree level.
+% In a lookup on level 2 is needed,  an extra 512 byte is needed and
+% per font an extra 512 bytes for the first character from that font on level 2.
+% So the memory footprint commes to about 20kB
+%7* ((4*8) four level pointer per font
+%      + 128*(4*5)  w, h, hoff, voff, OGLtexture
+%      + 128*(1+8) pk_glyph_flags and data these should go into an extra array for pk fonts!
+%  2592 byte  for the first level data
+% 18144 byte for 7 fonts
+%  hashtable of size n
+% n*(4*6 w,h,hoff,voff,OGLtexture,key)
+% n=1024 means 24576 byte
+% this should be plenty. format.hnt has only 852 glyphs, and this is the most of all hnt files I have
+% and on an average page there are less than 200 glyphs
+% If the hashtable gets to full, its only a cache and I can replace any entry
+% Possibly it means: look up, if found return, if not replace
+% I add 0x200000 to a glyph id, making them bigger than all unicode codepoints
+% key is mem[p].hh which contains already the font and the codepoint or glyph id
+% Use fibonaccy hashing!
+
+The new data structure uses Fibonacci double hashing (see TAOCP Section 6.4) 
+% An improvemnt following Brent did not prove to be an advantage
+Since the data structure is just a cache, it is possible to set a bound on the number of
+conflicting entries. If the list of conflicting keys grows too long,
+instead of inserting a new item into the list, it is possible to replace an existing item
+in the list. The present implementation limits the length of a list to 3.
+With a size of 1024 entries, measurements show that the table can hold over 90\% of
+all glyph entries at level 0, and the remaining glyphs at level 1 and 2. Typical books or
+papers usually contain less than 500 glyphs and cases where not all of these glyphs do
+not simultaneously fit into the table are rare.
+
+Given a table of size $m$ and load factor of $\alpha$,
+we can assume that for a given key $K$ and ``two'' good hash
+functions $h_1$ and $h_2$ the probability of entrys $h_1(K)\mod m$, $h_1(K)-h_2(K)\mod m$,
+and  $h_1(K)-h_2(K)-h_2(K) \mod m$ beeing all occupied is $\alpha^3$. So for
+$\alpha=50\%$ we have $\alpha^3=12.5\%$ and the probability that one of them is empty
+is $87.5\%$. But Fibonacci hashing outperforms this estimate, because the Unicode numbers
+often occur in sequences \.a, \.b, \.c,\dots, and Fibonacci hashing is very good at spreading
+the hash values evenly out over the entire table. So we can observe that for plain text and
+$\alpha\le50\%$ over 95\% of the glyphs are placed at level 0 and the rest on level 1 or 2,
+and less than 10 glyphs having conflicts that can not be resolved with only three levels.
+
+If the table fills up with $\alpha\ge99\%$, we still find, that over $90\%$ of all table
+lookups can be answered by inspecting the table entry at level 0 and in less than $3\%$
+the lookup fails completely and the glyph information needs to be recreated.
+
+In contrast to the former B-tree, there is no advantage in keeping glyph data in the
+table once the texture identifier gets invalid. So |hint_clear_fonts| can simply wipe
+out all keys from the hash table.
+At a later time, I probably want to move the keys into a separate array of the same size
+so that it is easier to set them all to empty.
+
+@d GCACHE_BITS	 10
+@d GCACHE_SIZE	 (1<<GCACHE_BITS)
+@d GCACHE_MASK   (GCACHE_SIZE-1)
+
+@<Global variables@>=
+
+typedef struct {
+  unsigned int key;
+  scaled w, h, hoff, voff; 
+  unsigned int OGLtexture;
+} GHcache;
+
+static GHcache glyph_cache[GCACHE_SIZE];
 @
 
 
-The glyphs are described using a |Gcache| structure. 
-To look up the cached glyph data for font |f| and charactercode |cc|,
-we use the function |g_lookup|.
+
+Next are a primary and a secondary has function both take as key an unsigned 32-bit integer
+that contains the font in the 8 most significant bits and the Unicode codepoint or glyph identifier in the
+lowest 21 bits. If bit 22 is set, the low bits contain a glyph identifier else it's a unicode codepoint.
+
+@d FIBONACCI_FACTOR 0x9F406BB9654C5A55 /* See ``The MMIX Supplement'' */
 
 @<render functions@>=
-#define G0_BITS 7
-#define G0_SIZE (1<<G0_BITS)
-#define G0_MASK (G0_SIZE-1)
-#define G123_BITS 6
-#define G123_SIZE (1<<G123_BITS)
-#define G123_MASK (G123_SIZE-1)
+static unsigned int glyph_hash_1(unsigned int key)
+{ unsigned int h = key * FIBONACCI_FACTOR;
+  h = h>>(32-GCACHE_BITS); /*the topmost 10 bits*/
+  return h;
+}
 
-static Gcache *g_lookup(FontDef *f, unsigned int cc)
+static unsigned int glyph_hash_2(unsigned int key)
+{ unsigned int h = key * FIBONACCI_FACTOR;
+  h = (h >>(32-2*GCACHE_BITS))&GCACHE_MASK; /*the next 10 bits*/
+  return h;
+}
+@
 
-{ if (cc >> G0_BITS) {
-	unsigned int cc1= (cc>>G0_BITS);
-	if (cc1>>G123_BITS) {
-		unsigned int cc2= cc1>>G123_BITS;
-		if (cc2>>G123_BITS) {
-			unsigned int cc3=cc2>>G123_BITS;
-			if (cc3>>G123_BITS) return NULL;
-			else if (f->g3 && 
-				f->g3[cc3&G123_MASK] && 
-				f->g3[cc3&G123_MASK][cc2&G123_MASK] &&  
-				f->g3[cc3&G123_MASK][cc2&G123_MASK][cc1&G123_MASK])  
-			return f->g3[cc3&G123_MASK][cc2&G123_MASK][cc1&G123_MASK][cc&G0_MASK];
-		}
-		else if (f->g2 && f->g2[cc2&G123_MASK] && f->g2[cc2&G123_MASK][cc1&G123_MASK]) 
-			return f->g2[cc2&G123_MASK][cc1&G123_MASK][cc&G0_MASK];
-	}
-	else if (f->g1 && f->g1[cc1&G123_MASK]) 
-		return f->g1[cc1&G123_MASK][cc&G0_MASK];
-  }
-  else if (f->g0) 
-	  return f->g0[cc];
+We limit the length of a lookup chain to 3 lookups. The insert function that we consider
+below will ensure that an entry is either found with three lookups, or otherwise, it is not
+in the table.
+
+
+@<render functions@>=
+static GHcache *gh_lookup(unsigned int key)
+{ int i,j;
+  i = glyph_hash_1(key);
+  if (glyph_cache[i].key==key)
+  { return glyph_cache+i; }
+  j = glyph_hash_2(key);
+  i=i-j;
+  if (i<0) i=i+GCACHE_SIZE;
+  if (glyph_cache[i].key==key)
+  { return glyph_cache+i; }
+  i=i-j;
+  if (i<0) i=i+GCACHE_SIZE;
+  if (glyph_cache[i].key==key)
+  { return glyph_cache+i; }
   return NULL;
 }
 @
 
-But of course, before we can look up entries, we have to allocate new entries.
-The actual entries are allocated with |hnew_g|. The functions |hnew_g0| to
-|hnew_g3| allocate the necessary path from the root to the leaf, and 
-the function |hnew_glyph| provides the top level function:
-Given a font and a charactercode it returns a pointer to the glyph,
-allocating a glyph if none is yet allocated, and returning a pointer to ``the undefined glyph''
-if no more memory is available.
+The insert function is only called after a call to |gh_lookup| returned |NULL|.
 
-@<Global variables@>=
-static Gcache g_undefined ={0};
-@
+We use a $-1$ key to mark an empty entry.
+Since the TeX fonts do use character 0 in font 0 this leads
+to a valid zero key. There are still bit left to make sure keys are not zero (adding 1
+or oring in a 1 in position 23) this would require one extra operation in the lookup
+or insert.
+
+@d EMPTY_KEY 0xFFFFFFFF
+
 
 @<render functions@>=
-static Gcache *hnew_g(Gcache **g)
-{ if (*g==NULL)
-    *g=calloc(1, sizeof(Gcache));
-  if (*g==NULL) 
-    return &g_undefined;
-  (*g)->OGLtexture=0;
-  return *g;
+static GHcache *gh_find_slot(unsigned int key)
+{ int i,j,k;
+  i = glyph_hash_1(key);
+  if (glyph_cache[i].key==EMPTY_KEY)
+  { return glyph_cache+i; }
+  j = glyph_hash_2(key);
+  k=i-j;
+  if (k<0) k=k+GCACHE_SIZE;
+  if (glyph_cache[k].key==EMPTY_KEY)
+  { return glyph_cache+k; }
+  k=k-j;
+  if (k<0) k=k+GCACHE_SIZE;
+  if (glyph_cache[k].key==EMPTY_KEY)
+  { return glyph_cache+k; }
+  if (glyph_cache[i].OGLtexture!=0)
+    nativeFreeTexture(glyph_cache[i].OGLtexture);
+  return glyph_cache+i;
 }
 
-static Gcache *hnew_g0(Gcache ***g,unsigned int cc)
-{ unsigned int cc0=cc&G0_MASK;
-  if (*g==NULL)
-    *g=calloc(G0_SIZE, sizeof(Gcache*));
-  if (*g==NULL) 
-    return &g_undefined;
-  return hnew_g((*g)+cc0);
-}
- 
-static Gcache *hnew_g1(Gcache ****g,unsigned int cc)
-{ unsigned int cc1=(cc>>G0_BITS)&G123_MASK;
-  if (*g==NULL)
-    *g=calloc(G123_SIZE, sizeof(Gcache**));
-  if (*g==NULL) 
-    return &g_undefined;
-  return hnew_g0((*g)+cc1,cc);
-}
-static Gcache *hnew_g2(Gcache *****g,unsigned int cc)
-{ unsigned int cc2=(cc>>(G123_BITS+G0_BITS))&G123_MASK;
-  if (*g==NULL)
-    *g=calloc(G123_SIZE, sizeof(Gcache***));
-  if (*g==NULL) 
-    return &g_undefined;
-  return hnew_g1((*g)+cc2,cc);
-}
-  
-static Gcache *hnew_g3(Gcache ******g,unsigned int cc)
-{ unsigned int cc3=(cc>>(G123_BITS+G123_BITS+G0_BITS))&G123_MASK;
-  if (*g==NULL)
-    *g=calloc(G123_SIZE, sizeof(Gcache****));
-  if (*g==NULL) 
-    return &g_undefined;
-  return hnew_g2((*g)+cc3,cc);
-}
-
-
-static Gcache *hnew_glyph(FontDef *f, unsigned int cc)
-{ if (cc<G0_SIZE) return hnew_g0(&(f->g0),cc);
-  else if (cc<G123_SIZE*G0_SIZE) return hnew_g1(&(f->g1),cc);
-  else if (cc<G123_SIZE*G123_SIZE*G0_SIZE) return hnew_g2(&(f->g2),cc);
-  else if (cc<G123_SIZE*G123_SIZE*G123_SIZE*G0_SIZE) return hnew_g3(&(f->g3),cc);
-  else return &g_undefined;
+static GHcache *gh_insert(unsigned int key)
+{ GHcache *c = gh_find_slot(key);
+  c->key= key;
+  c->OGLtexture=0;
+  return c;
 }
 @
 
-The next set of functions is used to clear the glyph cache.
-If the boolean parameter |rm| is |true|, the complete cache will 
-be deallocated. Otherwise only the function |nativeFreeTexture| will be called.
-Together with the exported function |hint_clear_fonts| this offers
-the native rendering engine a method to relase allocated resources
-without the need to know the deatails of the glyph cache.
-The construction of the functions |hfree_g0| to |hfree_g3| mirrors
-the construction of |hnew_g0| to  |hnew_g3|
-
-@<render functions@>=
-static void hfree_g0(Gcache **g, bool rm)
-{ int i;
-  if (g==NULL) return;
-  for (i=0;i<G0_SIZE;i++)
-    if (g[i]!=NULL)
-    { if (g[i]->OGLtexture!=0)
-        g[i]->OGLtexture=nativeFreeTexture(g[i]->OGLtexture);
-      if (rm) {
-      free(g[i]); g[i]=NULL;@+ }
-    }
-}
-
-static void hfree_g1(Gcache ***g, bool rm)
-{ int i;
-  if (g==NULL) return;
-  for (i=0;i<G123_SIZE;i++)
-	if (g[i]!=NULL)
-	{ hfree_g0(g[i],rm);
-      if (rm) {free(g[i]); g[i]=NULL;@+ }
-	}
-}
-
-static void hfree_g2(Gcache ****g, bool rm)
-{ int i;
-  if (g==NULL) return;
-  for (i=0;i<G123_SIZE;i++)
-	if (g[i]!=NULL)
-	{ hfree_g1(g[i],rm);
-      if (rm) {free(g[i]); g[i]=NULL;@+ }
-	}
-}
-
-
-static void hfree_g3(Gcache *****g, bool rm)
-{ int i;
-  if (g==NULL) return;
-  for (i=0;i<G123_SIZE;i++)
-	if (g[i]!=NULL)
-	{ hfree_g2(g[i],rm);
-      if (rm) {free(g[i]); g[i]=NULL;@+ }
-	}
-}
-
-
-static void hfree_glyph_cache(FontDef *f, bool rm)
-{ if (f->g0!=NULL)
-  { hfree_g0(f->g0,rm);
-     if (rm) {@+free(f->g0); f->g0=NULL;@+}
-  }
-  if (f->g1!=NULL)
-  { hfree_g1(f->g1,rm);
-     if (rm) {@+free(f->g1); f->g1=NULL;@+}
-  }
-  if (f->g2!=NULL)
-  { hfree_g2(f->g2,rm);
-     if (rm) {@+free(f->g2); f->g2=NULL;@+}
-  }
-  if (f->g3!=NULL)
-  { hfree_g3(f->g3,rm);
-     if (rm) {@+free(f->g3); f->g3=NULL;@+}
-  }
-}
-@
 \subsection{Glyphs}
 The information in the |Gcache| structure depends on the font encoding.
 % but not on the rendering engine that is used to display the glyphs. 
@@ -13581,20 +13652,7 @@ and vertical offset from the upper left to the
 reference pixel (right and down are positive); and the
 OpenGL texture identifier used to store the gray values of the bitmap.
 
-Currently only two kind of font formats are supported:
-Formats supported by the FreeType library and \TeX's ``classic''
-PK fonts. The PK specific fields in the glyph cache help with on-demand decoding of glyphs.
-
-@<Types...@>=
-typedef struct {
-  scaled w, h, hoff, voff; 
-  unsigned int OGLtexture;
-  @<PK specific fields in the glyph cache@>@;
-} Gcache;
-@
- 
-
-The above structure has an |OGLtexture| member. To speed up the
+Most importantly, the |Gcache| structure has an |OGLtexture| member. To speed up the
 rendering of glyphs, the glyph bitmap is loaded into the graphics
 cards as a texture and from then on identified by a single integer,
 the |OGLtexture|.
@@ -13625,22 +13683,19 @@ a ``character missing'' glyph which should be created after calling |nativeInit|
 and released before calling |nativeClear|.
 
 @<render functions@>=
-static void ft_unpack_glyph(uint8_t f, Gcache *g, uint32_t cc);
 
-static Gcache *hload_glyph(uint8_t f, unsigned int cc)
-{
-  Gcache *g=NULL;
-  g=g_lookup(font_def+f,cc);
+static void ft_unpack_glyph(uint8_t f, GHcache *g, uint32_t cc);
+static GHcache *hload_glyph(uint8_t f, unsigned int cc)
+{ GHcache *g;
+  g=gh_lookup((f<<24)|cc);
   if (g==NULL)
-  { if (font_def[f].ff==no_format) hload_font(f);
-    if (font_def[f].ff==ft_format)
-      g=hnew_glyph(font_def+f,cc);
-    else  
-      return NULL;
+  { if (font_def[f].ff==no_format)
+      hload_font(f);
+    g=gh_insert((f<<24)|cc);
   }
   if (g->OGLtexture==0)           
-  { if (font_def[f].ff==pk_format) pk_unpack_glyph(f,g);
-    else if (font_def[f].ff==ft_format) ft_unpack_glyph(f,g,cc);
+  { if (font_def[f].ff&pk_format) pk_unpack_glyph(f,g,cc);
+    else if (font_def[f].ff&ft_format) ft_unpack_glyph(f,g,cc);
     else QUIT("Font format not supported");
   }
   return g;
@@ -13673,7 +13728,8 @@ void hint_round_position(bool r, double t)
 static void render_char(int x, int y, uint8_t f, uint32_t cc)
 
 { scaled w, h, dx, dy, top, left;
-  Gcache *g;
+  GHcache *g;
+
   if (font_def[f].ff==no_format) hload_font(f);
   g=hload_glyph(f,cc);
   if (g==NULL || g->OGLtexture==0) return;
@@ -13686,24 +13742,7 @@ static void render_char(int x, int y, uint8_t f, uint32_t cc)
   left=x-dx;
   top=y+h-dy;
 
-#if 0
   if (round_to_pixel)
-  { double pxs;
-    if (xdpi<dpi_threshold)
-    { pxs = 72.27/xdpi; /* pixel size in point */
-      left=left/pxs;
-      left=floor(left+0.5);
-      left=left*pxs;
-    }
-    if (ydpi<dpi_threshold)
-    { pxs = 72.27/ydpi; /* pixel size in point */
-      top=top/pxs;
-      top=floor(top+0.5);
-      top=top*pxs;
-    }
-  }
-#endif
- if (round_to_pixel)
   { 
     if (x_px_size>pxs_threshold)
     { left=(left+(x_px_size/2))/x_px_size;
@@ -13966,10 +14005,21 @@ style_c:
            cur_h= cur_h+w; 
          } break;
          case utf_char_node:
-         case utf_lig_node:
            f= utf_font(p);
            c=utf_char(p);
            goto style_c;
+         case utf_lig_node:
+           f= utf_font(p);
+           c=utf_char(p);
+          { pointer q=utf_lig_ptr(p);
+            @<account for the characters |q| that generated the ligature@>@;
+          }
+          @<render character |c| in font |f|@>@;
+	  if (next_style!=cur_style)
+          { cur_style =next_style;
+            hSetColor(cur_color);
+          }
+          break;
          default: break;
        }
        break;
@@ -14043,7 +14093,9 @@ style_c:
      case ligature_node:
        f= font(lig_char(p));
        c= character(lig_char(p));
-       @<account for the characters that generated the ligature@>@;
+       { pointer q=lig_ptr(p);
+         @<account for the characters |q| that generated the ligature@>@;
+       }
        @<render character |c| in font |f|@>@;
        if (next_style!=cur_style)
        { cur_style =next_style;
