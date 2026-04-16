@@ -851,7 +851,7 @@ tail_append(p);}
 #define HGET_LIG(I) \
 {pointer p,q;uint8_t f;\
 f= HGET8;\
-if ((I)==7) q= hget_list_pointer(); else q= hget_text_list(I);\
+if ((I)==7) q= hget_list_pointer(); else q= hget_text_list(I,f);\
 if (q==null) QUIT("Ligature with empty list");\
 if (is_char_node(q))\
 { if (is_otf_font(f)) p= new_utf_lig(f, character(q), link(q));\
@@ -1080,7 +1080,7 @@ tail_append(p);}
 {pointer p,q;uint8_t f;\
 if ((I)==7) { q= hteg_list_pointer(); f= HTEG8;}\
 else {uint8_t *t= hpos;\
-  hpos= t-I; f= HTEG8; hpos= t-I; q= hget_text_list(I); hpos= t-I-1;}\
+  hpos= t-I; f= HTEG8; hpos= t-I; q= hget_text_list(I,f); hpos= t-I-1;}\
 if (q==null) QUIT("Ligature with empty list");\
 if (is_char_node(q)) \
 { if (is_otf_font(f)) p= new_utf_lig(f, character(q), link(q));\
@@ -2102,7 +2102,7 @@ case utf_lig_node:
 print_esc(font_def[utf_font(p)].n);print_char(' ');print_hex(utf_char(p)&~GLYPH_BIT);
 print(" (ligature ");
 if(utf_lig_subtype(p)> 1)print_char('|');
-font_in_short_display= 0;short_display(utf_lig_ptr(p));
+font_in_short_display= utf_font(p);short_display(utf_lig_ptr(p));
 if(odd(utf_lig_subtype(p)))print_char('|');
 print_char(')');
 break;
@@ -3749,10 +3749,10 @@ case hlist_node:case vlist_node:case rule_node:
 case kern_node:
 break_width[1]= break_width[1]-width(v);break;
 case whatsit_node:
-{switch(subtype(s)){
+{switch(subtype(v)){
 case utf_char_node:case utf_lig_node:
-f= utf_font(s);
-break_width[1]= break_width[1]-ft_char_width(utf_font(s),utf_char(s));
+f= utf_font(v);
+break_width[1]= break_width[1]-ft_char_width(utf_font(v),utf_char(v));
 break;
 default:confusion("disc1");
 }
@@ -6310,7 +6310,7 @@ pop_nest();
 return p;
 }
 
-static pointer hget_text_list(uint32_t s);
+static pointer hget_text_list(uint32_t s,uint8_t f);
 static pointer hget_list_pointer(void)
 {pointer p= null;
 uint32_t s,t;
@@ -6331,7 +6331,7 @@ hget_size_boundary(INFO(a));
 if((INFO(a)&b100)==0)
 p= hget_node_list(s);
 else
-p= hget_text_list(s);
+p= hget_text_list(s,0);
 hget_size_boundary(INFO(a));
 t= hget_list_size(INFO(a));
 if(t!=s)
@@ -6610,16 +6610,16 @@ return p;
 /*:435*//*448:*/
 #line 8974 "hint.w"
 
-static pointer hget_text_list(uint32_t s)
+static pointer hget_text_list(uint32_t s,uint8_t f)
 {pointer p= null;
 pointer*pp= &p;
 uint8_t*t= hpos+s;
 while(hpos<t)
 {uint32_t c= hget_utf8();
 if(c<0x100)
-*pp= new_character(0,c);
+*pp= new_character(f,c);
 else
-*pp= new_utf_char(0,c);
+*pp= new_utf_char(f,c);
 pp= &link(*pp);
 }
 return p;

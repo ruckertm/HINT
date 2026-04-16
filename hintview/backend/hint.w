@@ -3852,7 +3852,7 @@ if (post_break(cur_p)==null) s=link(v);
 }
 
 @ Replacement texts and discretionary texts are supposed to contain
-only character nodes, kern nodes, ligature nodes, and box or rule nodes.
+only character nodes, kern nodes, ligature nodes, box nodes, or rule nodes.
 
 @<Subtract the width of node |v|...@>=
 if (is_char_node(v))
@@ -3868,10 +3868,10 @@ else switch (type(v)) {
   case kern_node:
     break_width[1]=break_width[1]-width(v);@+break;
   case whatsit_node:
-  { switch (subtype(s)) {
+  { switch (subtype(v)) {
       case utf_char_node:  case utf_lig_node:
-        f=utf_font(s);
-        break_width[1]=break_width[1]-ft_char_width(utf_font(s), utf_char(s));
+        f=utf_font(v);
+        break_width[1]=break_width[1]-ft_char_width(utf_font(v), utf_char(v));
         break;
       default:confusion("disc1");
     }
@@ -6188,7 +6188,7 @@ case utf_lig_node:
   print_esc(font_def[utf_font(p)].n);  print_char(' '); print_hex(utf_char(p)&~GLYPH_BIT);
   print(" (ligature ");
   if (utf_lig_subtype(p) > 1) print_char('|');
-  font_in_short_display=0; short_display(utf_lig_ptr(p));
+  font_in_short_display=utf_font(p); short_display(utf_lig_ptr(p));
   if (odd(utf_lig_subtype(p))) print_char('|');
   print_char(')');
   break;
@@ -8320,7 +8320,7 @@ static pointer hget_node_list(uint32_t s)
   return p;  
 }
 
-static pointer hget_text_list(uint32_t s);
+static pointer hget_text_list(uint32_t s, uint8_t f);
 static pointer hget_list_pointer(void)
 {@+pointer p=null;
   uint32_t s, t;
@@ -8334,7 +8334,7 @@ static pointer hget_list_pointer(void)
       if ((INFO(a)&b100)==0)
         p=hget_node_list(s);
       else
-        p=hget_text_list(s); /*this should currently not happen*/
+        p=hget_text_list(s,0); /*this should currently not happen*/
       hget_size_boundary(INFO(a));
       t=hget_list_size(INFO(a)); 
       if (t!=s) 
@@ -8972,16 +8972,16 @@ encoded as texts. So we define first a simplified version of |hget_text_list|.
 
 
 @<\HINT\ auxiliar functions@>=
-static pointer hget_text_list(uint32_t s)
+static pointer hget_text_list(uint32_t s, uint8_t f)
 { pointer p=null;
   pointer *pp=&p;
   uint8_t *t=hpos+s;
   while (hpos<t) 
   { uint32_t c=hget_utf8();
     if (c<0x100)
-      *pp=new_character(0,c);
+      *pp=new_character(f,c);
     else
-      *pp=new_utf_char(0,c);
+      *pp=new_utf_char(f,c);
     pp=&link(*pp);
   }
   return p;
@@ -8993,7 +8993,7 @@ static pointer hget_text_list(uint32_t s)
 #define @[HGET_LIG(I)@] @/\
 {@+pointer p,q;@+uint8_t f;\
 f=HGET8;\
-if ((I)==7) q=hget_list_pointer(); else q=hget_text_list(I);\
+if ((I)==7) q=hget_list_pointer(); else q=hget_text_list(I,f);\
 if (q==null) QUIT("Ligature with empty list");\
 if (is_char_node(q))\
 { if (is_otf_font(f)) p=new_utf_lig(f, character(q), link(q));\
@@ -9009,7 +9009,7 @@ link(q)=null; flush_node_list(q);\
 {@+pointer p,q;@+uint8_t f;\
 if ((I)==7) { q=hteg_list_pointer(); f=HTEG8;}\
 else {uint8_t *t=hpos;\
-  hpos=t-I; f=HTEG8; hpos=t-I; q=hget_text_list(I); hpos=t-I-1;}\
+  hpos=t-I; f=HTEG8; hpos=t-I; q=hget_text_list(I,f); hpos=t-I-1;}\
 if (q==null) QUIT("Ligature with empty list");\
 if (is_char_node(q)) \
 { if (is_otf_font(f)) p=new_utf_lig(f, character(q), link(q));\
@@ -13524,8 +13524,8 @@ not simultaneously fit into the table are rare.
 
 Given a table of size $m$ and load factor of $\alpha$,
 we can assume that for a given key $K$ and ``two'' good hash
-functions $h_1$ and $h_2$ the probability of entrys $h_1(K)\mod m$, $h_1(K)-h_2(K)\mod m$,
-and  $h_1(K)-h_2(K)-h_2(K) \mod m$ beeing all occupied is $\alpha^3$. So for
+functions $h_1$ and $h_2$ the probability of entrys $h_1(K)\bmod m$, $h_1(K)-h_2(K)\bmod m$,
+and  $h_1(K)-h_2(K)-h_2(K) \bmod m$ beeing all occupied is $\alpha^3$. So for
 $\alpha=50\%$ we have $\alpha^3=12.5\%$ and the probability that one of them is empty
 is $87.5\%$. But Fibonacci hashing outperforms this estimate, because the Unicode numbers
 often occur in sequences \.a, \.b, \.c,\dots, and Fibonacci hashing is very good at spreading
