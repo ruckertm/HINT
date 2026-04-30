@@ -11864,40 +11864,154 @@ its length. Further, |m_chars| keeps track of the number of characters,
 not counting the spaces, in the search string for reasons explained below.
 The |hint_set_mark| function can be used to initialize these variables
 from a mark string |m| with length |s|.
+It is assumed that the mark string |m| is UTF8 encoded where as the search string |m_str| is
+UTF32 encoded. 
 
 @<render variables@>=
-static char *m_str;
-static int  m_length, m_chars;
+static uint32_t *m_str=NULL;
+static int  m_size=0, m_length=0, m_chars=0;
 @
 
 @<render functions@>=
 void hint_set_mark(char *m, int s)
-{ m_str=m;
-  m_length=s;
-  @<remove unwanted spaces@>@;
+{ @<convert |m| to |m_str|@>@;
   hmark_page();
 }
 @
 
-Leading spaces are removed and
+
+
+Leading and trailing spaces are removed and
 multiple spaces in the search string are reduced to a single space.
+Further multicharacter UTF8 codes in |m| are substituted by single character UTF32 codes in |m_str|.
+These operations make the string possibly shorter but not longer so the length of |m| is a
+upperbound to the length of |m_str|.
+
+@<convert |m| to |m_str|@>=
+@<remove unwanted spaces@>@;
+if (s+1>m_size)
+{ free(m_str); ALLOCATE(m_str,s+1,uint32_t); m_size=s+1; }
+@<substitute UTF32 for UTF8 codes@>
+
+
+
+@ The removal of leading and trailing spaces is simple.
+
 @<remove unwanted spaces@>=
-if (m_length>0)
+while (m[0]==' ' && s>0)
+{ m++; s--; }
+while (s>0 && m[s-1]==' ') s--;
+
+@ When putting a space into |m_str|, we convert multiple spaces into a singe space.
+We travers |m| useing index |i| and put new codes into |m_str| using index |k|.
+Instead of counting the numer of non-spaces for |m_chars|, it is simpler
+to count the number of spaces using |j|.
+
+ @<put a space into |m_str|@>=
+{ if (k>0 && m_str[k-1]==' ') i++;
+  else
+  { i++; j++; m_str[k++]=' '; }
+}
+
+
+
+
+@ The translation of UTF8 coded characters to UTF32 coded charactes,
+has four similar cases depending on the number of bytes that define a single UTF code.
+In a one byte sequence, the high bit of the UTF8 code is zero
+and the lower 7 bits are the UTF code. This is the simplest case, but it requires
+thehandling of spaces.
+
+@<if there is a one byte UTF8 sequence, put it into |m_str|@>=
+if ((m[i]&0x80)==0)
+{ if (m[i]==' ')
+   @<put a space into |m_str|@>@;
+  else
+    m_str[k++]=m[i++];
+}
+
+
+@ In a two byte UTF8 code sequence, the first byte has the three high bits |110|
+followed by the five high bits of the UTF code and the second byte
+is a continuation byte.
+
+@<if there is a two byte UTF8 sequence, put it into |m_str|@>=
+if ((m[i]&0xE0)==0xC0)
+{ m_str[k]=m[i++]&0x1F;
+  @<add a continuation byte to |m_str[k]|@>@;
+  k++;
+}
+
+@ The continuation byte has the two high bits |10| and the
+lower six bits of the UTF code. When we expect a continuation byte and do not find one,
+we resolve this problem by terminating the current code sequence prematurely.
+We do not give an error message (except when debugging) because the input string
+most probably comes from user input. And the user does not want to be bothered with the
+intricate details of UTF8 character encoding.
+
+@<add a continuation byte to |m_str[k]|@>=
+if (i<s && (m[i]&0xC0)==0x80)
+  m_str[k]= (m_str[k]<<6)+(m[i++]&0x3F);
+#ifdef DEBUG  
+else
+ MESSAGE("Continuation byte expected in search string 0x%x\n",m[i]);
+#endif
+
+@ In a three byte UTF8 code sequence, the first byte has the four high bits |1110|.
+Its four low bits are the four high bits of the UTF code. Two continuation bytes follow.
+
+
+@<if there is a three byte UTF8 sequence, put it into |m_str|@>=
+if ((m[i]&0xF0)==0xE0)
+{ m_str[k]=m[i++]&0x0F;
+  @<add a continuation byte to |m_str[k]|@>@;
+  @<add a continuation byte to |m_str[k]|@>@;
+  k++;
+}
+
+@ Finaly in a four byte UTF8 code sequence, the first byte has the five high bits |11110|.
+Its three low bits are the three high bits of the UTF code. Three continuation bytes follow.
+This range is far greater than the actual range of UTF8 codes which
+ends with |0x10FFFF|.
+
+
+@<if there is a four byte UTF8 sequence, put it into |m_str|@>=
+if ((m[i]&0xF8)==0xF0)
+{ m_str[k]=m[i++]&0x07;
+  @<add a continuation byte to |m_str[k]|@>@;
+  @<add a continuation byte to |m_str[k]|@>@;
+  @<add a continuation byte to |m_str[k]|@>@;
+#ifdef DEBUG
+  if (m_str[k]>0x10FFFF)
+    MESSAGE("UTF code in search string out of range 0x%x\n",m_str[k]);
+#endif    
+  k++;
+}
+
+@ Now we can put all the details together:
+
+@<substitute UTF32 for UTF8 codes@>=
 { int i,j,k;
-  for (i=j=k=0;i<m_length && m_str[i]==' ';i++) continue;
-  for (;i<m_length;i++)
-    if (m_str[i]!=' '|| m_str[i+1]!=' ')
-    { m_str[k]=m_str[i];
-      if (m_str[k]==' ') j++;
-      k++;
+  i=j=k=0;
+  while (i<s)
+  { @<if there is a one byte UTF8 sequence...@>@;
+    else @<if there is a two byte UTF8 sequence...@>@;
+    else @<if there is a three byte UTF8 sequence...@>@;
+    else @<if there is a four byte UTF8 sequence...@>@;
+    else
+    {
+#ifdef DEBUG    
+      MESSAGE("Skipping illegal UTF8 code in search string 0x%x\n",m[i]);
+#endif
+      i++;
     }
+  }
   m_str[k]=0;
   m_length=k;
   m_chars=m_length-j;
 }
-@
 
-In its simplest form, searching is the marking of all
+@ In its simplest form, searching is the marking of all
 matching strings on the current page. The marking itself is the
 responsibility of the graphical user interface.  The backend just needs
 to indicate which glyphs must be marked.  For this
@@ -12087,11 +12201,15 @@ moving |i| forward as far as necessary. Then we jump back to
 the beginning of the matching routine to reconsider matching |c|.
 
 @<end of matching prefix@>=
-  { int i=0,j=0;
+  { int i=0,j=0,k=0;
     do {
       if (m_str[i]==' ') j++;
       i++;
-    } while (i<m_state && strncmp(m_str,m_str+i,m_state-i)!=0);
+      if (i>=m_state)
+        break;
+      for (k=0;k<m_state-i&&m_str[k]==m_str[i+k];k++)
+        ;
+    } while (k<m_state-i);
     m_d=m_d+i-j;
     m_state=m_state-i;
     goto reconsider;
