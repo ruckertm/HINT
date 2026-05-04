@@ -40,6 +40,11 @@
 #include "stb_image.h"
 
 
+/* Thanks to Humm42 hummsmith42@gmail.com,
+   this is a version that works with OpenGL 2.0 and GLSL 1.10
+*/
+
+
 #ifdef DEBUG
 
 static void checkGlError(const char *op)
@@ -71,12 +76,12 @@ static uint32_t cur_fg=0; /*the current foreground color*/
 #define STR(X) QUOTE(X)
 #define QUOTE(X) #X
 static const char VertexShader[]=
-  "#version 330 core\n"
+  "#version 110\n"
   /* Input */
-  "layout(location = " STR(xyID) ") in vec2 vertexXY;\n"
-  "layout(location = " STR(uvID) ") in vec2 vertexUV;\n"
+  "attribute vec2 vertexXY;\n"
+  "attribute vec2 vertexUV;\n"
   /* output */
-   "out vec2 UV;\n"
+  "varying vec2 UV;\n"
   /* Constants for the current triangles */
   "uniform mat4 MVP;\n"
 
@@ -87,12 +92,10 @@ static const char VertexShader[]=
 
   
 static const char FragmentShader[]=
-  "#version 330 core\n"
+  "#version 110\n"
 
   /* Input */
-  "in vec2 UV;\n"
-  /* Output */
-  "out vec4 color;\n"
+  "varying vec2 UV;\n"
   /* Constants for the current triangles */
   "uniform sampler2D theTexture;\n"
   "uniform vec4 FGcolor;\n"
@@ -102,12 +105,12 @@ static const char FragmentShader[]=
   "void main()\n"
   "{ vec4 texColor = texture2D( theTexture, UV );\n"
     "if (IsImage==0) {\n"
-      "color.a = pow(texColor.r*FGcolor.a,Gamma);\n"
-      "color.r = FGcolor.r;\n"
-      "color.g = FGcolor.g;\n"
-      "color.b = FGcolor.b;\n"
+      "gl_FragColor.a = pow(texColor.r*FGcolor.a,Gamma);\n"
+      "gl_FragColor.r = FGcolor.r;\n"
+      "gl_FragColor.g = FGcolor.g;\n"
+      "gl_FragColor.b = FGcolor.b;\n"
     "}\n"
-    "else color = texColor;\n"
+    "else gl_FragColor = texColor;\n"
   "}\n"
 ;
 
@@ -164,6 +167,10 @@ static void createProgram(void)
   /* Create, linking, and check the program */
   ProgramID = glCreateProgram();
   if (ProgramID) {
+    glBindAttribLocation(ProgramID, xyID, "vertexXY");
+    checkGlError("vertexXY");
+    glBindAttribLocation(ProgramID, uvID, "vertexUV");
+    checkGlError("vertexUV");
     glAttachShader(ProgramID, vertexID);
     checkGlError("glAttachShader");
     glAttachShader(ProgramID, fragmentID);
@@ -445,6 +452,7 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
     glGenTextures(1, &ImageID);
     glBindTexture(GL_TEXTURE_2D, ImageID);
     checkGlError("glBindTexture ImageID");
+    glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
     glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0,
                  format, GL_UNSIGNED_BYTE, data);
     if (glGetError()!= GL_NO_ERROR)
@@ -452,8 +460,6 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
     		  format, GL_UNSIGNED_BYTE, data);
     checkGlError("glTexImage2D(image)");
     if (data!=grey) { stbi_image_free(data); data=NULL; }
-    glGenerateMipmap(GL_TEXTURE_2D);
-    checkGlError("glGenerateMipmap(image)");
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   }
