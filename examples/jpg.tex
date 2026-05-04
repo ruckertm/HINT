@@ -5,14 +5,28 @@
 \def\makeatother{\catcode`\@=12\relax}
 
 \makeatletter
-  \message{\the\language\ number}
+  %\message{\the\language\ number}
   \let\l@german=\lang@german
  % \language=\lang@german
-  \showhyphens{Umgehungsstrasse}
+  \showhyphens{Maßband München}
 \makeatother
 
 \input german.sty
+
+
 \selectlanguage{german}
+
+\ifhint
+% german.sty isnerts a \penalty\@M \hskip\z@skip after an accent
+% making the remainder a separate word which is then hypenated separately
+% HiTeX's accent will produce a UTF umlaut and making separate words is a nuisance.
+
+\def\allowhyphens{\relax}
+\chardef\ss="DF
+\font\tenrm=lmroman10-regular.otf
+\tenrm
+\fi
+
 
 \parskip=0pt
 \parindent=0pt
