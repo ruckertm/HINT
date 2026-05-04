@@ -3852,7 +3852,7 @@ if (post_break(cur_p)==null) s=link(v);
 }
 
 @ Replacement texts and discretionary texts are supposed to contain
-only character nodes, kern nodes, ligature nodes, and box or rule nodes.
+only character nodes, kern nodes, ligature nodes, box nodes, or rule nodes.
 
 @<Subtract the width of node |v|...@>=
 if (is_char_node(v))
@@ -3868,10 +3868,10 @@ else switch (type(v)) {
   case kern_node:
     break_width[1]=break_width[1]-width(v);@+break;
   case whatsit_node:
-  { switch (subtype(s)) {
+  { switch (subtype(v)) {
       case utf_char_node:  case utf_lig_node:
-        f=utf_font(s);
-        break_width[1]=break_width[1]-ft_char_width(utf_font(s), utf_char(s));
+        f=utf_font(v);
+        break_width[1]=break_width[1]-ft_char_width(utf_font(v), utf_char(v));
         break;
       default:confusion("disc1");
     }
@@ -6188,7 +6188,7 @@ case utf_lig_node:
   print_esc(font_def[utf_font(p)].n);  print_char(' '); print_hex(utf_char(p)&~GLYPH_BIT);
   print(" (ligature ");
   if (utf_lig_subtype(p) > 1) print_char('|');
-  font_in_short_display=0; short_display(utf_lig_ptr(p));
+  font_in_short_display=utf_font(p); short_display(utf_lig_ptr(p));
   if (odd(utf_lig_subtype(p))) print_char('|');
   print_char(')');
   break;
@@ -8320,7 +8320,7 @@ static pointer hget_node_list(uint32_t s)
   return p;  
 }
 
-static pointer hget_text_list(uint32_t s);
+static pointer hget_text_list(uint32_t s, uint8_t f);
 static pointer hget_list_pointer(void)
 {@+pointer p=null;
   uint32_t s, t;
@@ -8334,7 +8334,7 @@ static pointer hget_list_pointer(void)
       if ((INFO(a)&b100)==0)
         p=hget_node_list(s);
       else
-        p=hget_text_list(s); /*this should currently not happen*/
+        p=hget_text_list(s,0); /*this should currently not happen*/
       hget_size_boundary(INFO(a));
       t=hget_list_size(INFO(a)); 
       if (t!=s) 
@@ -8972,16 +8972,16 @@ encoded as texts. So we define first a simplified version of |hget_text_list|.
 
 
 @<\HINT\ auxiliar functions@>=
-static pointer hget_text_list(uint32_t s)
+static pointer hget_text_list(uint32_t s, uint8_t f)
 { pointer p=null;
   pointer *pp=&p;
   uint8_t *t=hpos+s;
   while (hpos<t) 
   { uint32_t c=hget_utf8();
     if (c<0x100)
-      *pp=new_character(0,c);
+      *pp=new_character(f,c);
     else
-      *pp=new_utf_char(0,c);
+      *pp=new_utf_char(f,c);
     pp=&link(*pp);
   }
   return p;
@@ -8993,7 +8993,7 @@ static pointer hget_text_list(uint32_t s)
 #define @[HGET_LIG(I)@] @/\
 {@+pointer p,q;@+uint8_t f;\
 f=HGET8;\
-if ((I)==7) q=hget_list_pointer(); else q=hget_text_list(I);\
+if ((I)==7) q=hget_list_pointer(); else q=hget_text_list(I,f);\
 if (q==null) QUIT("Ligature with empty list");\
 if (is_char_node(q))\
 { if (is_otf_font(f)) p=new_utf_lig(f, character(q), link(q));\
@@ -9009,7 +9009,7 @@ link(q)=null; flush_node_list(q);\
 {@+pointer p,q;@+uint8_t f;\
 if ((I)==7) { q=hteg_list_pointer(); f=HTEG8;}\
 else {uint8_t *t=hpos;\
-  hpos=t-I; f=HTEG8; hpos=t-I; q=hget_text_list(I); hpos=t-I-1;}\
+  hpos=t-I; f=HTEG8; hpos=t-I; q=hget_text_list(I,f); hpos=t-I-1;}\
 if (q==null) QUIT("Ligature with empty list");\
 if (is_char_node(q)) \
 { if (is_otf_font(f)) p=new_utf_lig(f, character(q), link(q));\
@@ -11864,40 +11864,154 @@ its length. Further, |m_chars| keeps track of the number of characters,
 not counting the spaces, in the search string for reasons explained below.
 The |hint_set_mark| function can be used to initialize these variables
 from a mark string |m| with length |s|.
+It is assumed that the mark string |m| is UTF8 encoded where as the search string |m_str| is
+UTF32 encoded. 
 
 @<render variables@>=
-static char *m_str;
-static int  m_length, m_chars;
+static uint32_t *m_str=NULL;
+static int  m_size=0, m_length=0, m_chars=0;
 @
 
 @<render functions@>=
 void hint_set_mark(char *m, int s)
-{ m_str=m;
-  m_length=s;
-  @<remove unwanted spaces@>@;
+{ @<convert |m| to |m_str|@>@;
   hmark_page();
 }
 @
 
-Leading spaces are removed and
+
+
+Leading and trailing spaces are removed and
 multiple spaces in the search string are reduced to a single space.
+Further multicharacter UTF8 codes in |m| are substituted by single character UTF32 codes in |m_str|.
+These operations make the string possibly shorter but not longer so the length of |m| is a
+upperbound to the length of |m_str|.
+
+@<convert |m| to |m_str|@>=
+@<remove unwanted spaces@>@;
+if (s+1>m_size)
+{ free(m_str); ALLOCATE(m_str,s+1,uint32_t); m_size=s+1; }
+@<substitute UTF32 for UTF8 codes@>
+
+
+
+@ The removal of leading and trailing spaces is simple.
+
 @<remove unwanted spaces@>=
-if (m_length>0)
+while (m[0]==' ' && s>0)
+{ m++; s--; }
+while (s>0 && m[s-1]==' ') s--;
+
+@ When putting a space into |m_str|, we convert multiple spaces into a singe space.
+We travers |m| useing index |i| and put new codes into |m_str| using index |k|.
+Instead of counting the numer of non-spaces for |m_chars|, it is simpler
+to count the number of spaces using |j|.
+
+ @<put a space into |m_str|@>=
+{ if (k>0 && m_str[k-1]==' ') i++;
+  else
+  { i++; j++; m_str[k++]=' '; }
+}
+
+
+
+
+@ The translation of UTF8 coded characters to UTF32 coded charactes,
+has four similar cases depending on the number of bytes that define a single UTF code.
+In a one byte sequence, the high bit of the UTF8 code is zero
+and the lower 7 bits are the UTF code. This is the simplest case, but it requires
+thehandling of spaces.
+
+@<if there is a one byte UTF8 sequence, put it into |m_str|@>=
+if ((m[i]&0x80)==0)
+{ if (m[i]==' ')
+   @<put a space into |m_str|@>@;
+  else
+    m_str[k++]=m[i++];
+}
+
+
+@ In a two byte UTF8 code sequence, the first byte has the three high bits |110|
+followed by the five high bits of the UTF code and the second byte
+is a continuation byte.
+
+@<if there is a two byte UTF8 sequence, put it into |m_str|@>=
+if ((m[i]&0xE0)==0xC0)
+{ m_str[k]=m[i++]&0x1F;
+  @<add a continuation byte to |m_str[k]|@>@;
+  k++;
+}
+
+@ The continuation byte has the two high bits |10| and the
+lower six bits of the UTF code. When we expect a continuation byte and do not find one,
+we resolve this problem by terminating the current code sequence prematurely.
+We do not give an error message (except when debugging) because the input string
+most probably comes from user input. And the user does not want to be bothered with the
+intricate details of UTF8 character encoding.
+
+@<add a continuation byte to |m_str[k]|@>=
+if (i<s && (m[i]&0xC0)==0x80)
+  m_str[k]= (m_str[k]<<6)+(m[i++]&0x3F);
+#ifdef DEBUG  
+else
+ MESSAGE("Continuation byte expected in search string 0x%x\n",m[i]);
+#endif
+
+@ In a three byte UTF8 code sequence, the first byte has the four high bits |1110|.
+Its four low bits are the four high bits of the UTF code. Two continuation bytes follow.
+
+
+@<if there is a three byte UTF8 sequence, put it into |m_str|@>=
+if ((m[i]&0xF0)==0xE0)
+{ m_str[k]=m[i++]&0x0F;
+  @<add a continuation byte to |m_str[k]|@>@;
+  @<add a continuation byte to |m_str[k]|@>@;
+  k++;
+}
+
+@ Finaly in a four byte UTF8 code sequence, the first byte has the five high bits |11110|.
+Its three low bits are the three high bits of the UTF code. Three continuation bytes follow.
+This range is far greater than the actual range of UTF8 codes which
+ends with |0x10FFFF|.
+
+
+@<if there is a four byte UTF8 sequence, put it into |m_str|@>=
+if ((m[i]&0xF8)==0xF0)
+{ m_str[k]=m[i++]&0x07;
+  @<add a continuation byte to |m_str[k]|@>@;
+  @<add a continuation byte to |m_str[k]|@>@;
+  @<add a continuation byte to |m_str[k]|@>@;
+#ifdef DEBUG
+  if (m_str[k]>0x10FFFF)
+    MESSAGE("UTF code in search string out of range 0x%x\n",m_str[k]);
+#endif    
+  k++;
+}
+
+@ Now we can put all the details together:
+
+@<substitute UTF32 for UTF8 codes@>=
 { int i,j,k;
-  for (i=j=k=0;i<m_length && m_str[i]==' ';i++) continue;
-  for (;i<m_length;i++)
-    if (m_str[i]!=' '|| m_str[i+1]!=' ')
-    { m_str[k]=m_str[i];
-      if (m_str[k]==' ') j++;
-      k++;
+  i=j=k=0;
+  while (i<s)
+  { @<if there is a one byte UTF8 sequence...@>@;
+    else @<if there is a two byte UTF8 sequence...@>@;
+    else @<if there is a three byte UTF8 sequence...@>@;
+    else @<if there is a four byte UTF8 sequence...@>@;
+    else
+    {
+#ifdef DEBUG    
+      MESSAGE("Skipping illegal UTF8 code in search string 0x%x\n",m[i]);
+#endif
+      i++;
     }
+  }
   m_str[k]=0;
   m_length=k;
   m_chars=m_length-j;
 }
-@
 
-In its simplest form, searching is the marking of all
+@ In its simplest form, searching is the marking of all
 matching strings on the current page. The marking itself is the
 responsibility of the graphical user interface.  The backend just needs
 to indicate which glyphs must be marked.  For this
@@ -12087,11 +12201,15 @@ moving |i| forward as far as necessary. Then we jump back to
 the beginning of the matching routine to reconsider matching |c|.
 
 @<end of matching prefix@>=
-  { int i=0,j=0;
+  { int i=0,j=0,k=0;
     do {
       if (m_str[i]==' ') j++;
       i++;
-    } while (i<m_state && strncmp(m_str,m_str+i,m_state-i)!=0);
+      if (i>=m_state)
+        break;
+      for (k=0;k<m_state-i&&m_str[k]==m_str[i+k];k++)
+        ;
+    } while (k<m_state-i);
     m_d=m_d+i-j;
     m_state=m_state-i;
     goto reconsider;
@@ -13524,8 +13642,8 @@ not simultaneously fit into the table are rare.
 
 Given a table of size $m$ and load factor of $\alpha$,
 we can assume that for a given key $K$ and ``two'' good hash
-functions $h_1$ and $h_2$ the probability of entrys $h_1(K)\mod m$, $h_1(K)-h_2(K)\mod m$,
-and  $h_1(K)-h_2(K)-h_2(K) \mod m$ beeing all occupied is $\alpha^3$. So for
+functions $h_1$ and $h_2$ the probability of entrys $h_1(K)\bmod m$, $h_1(K)-h_2(K)\bmod m$,
+and  $h_1(K)-h_2(K)-h_2(K) \bmod m$ beeing all occupied is $\alpha^3$. So for
 $\alpha=50\%$ we have $\alpha^3=12.5\%$ and the probability that one of them is empty
 is $87.5\%$. But Fibonacci hashing outperforms this estimate, because the Unicode numbers
 often occur in sequences \.a, \.b, \.c,\dots, and Fibonacci hashing is very good at spreading
