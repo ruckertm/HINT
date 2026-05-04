@@ -218,6 +218,7 @@ void redisplay(void)
     theViewControler = self;
     _theView.delegate=self;
     _theSearchBar.delegate=self;
+    _theSearchBar.searchTextField.autocapitalizationType=0;
    // [_theToolbar setAlpha:0.6];
 
     EAGLContext * context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
@@ -468,7 +469,7 @@ static int search_length;
     hint_next_mark();
     [_theView setNeedsDisplay];
 }
--(void) searchBarCancelButtonClicked:(UISearchBar *)searchBar
+-(void) searchBarCancelButtonClicked:(UISearchBar *)h
 {
     [_theSearchBar  endEditing:YES];
     [_theSearchBar setHidden:YES];
