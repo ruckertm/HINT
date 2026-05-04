@@ -20,11 +20,12 @@
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)theApplication;
 
 - (BOOL)application:(NSApplication *)sender openFile:(NSString *)filename;
-
+- (void)application:(NSApplication *) application
+            openURLs:(NSArray<NSURL *> *) urls;
 - (void)applicationWillFinishLaunching:(NSNotification *)notification;
-- (void) applicationDidFinishLaunching:(NSNotification *) notification;
+- (void)applicationDidFinishLaunching:(NSNotification *) notification;
 - (void)applicationWillTerminate:(NSNotification *)notification;
-
-- (BOOL) openFile: (NSURL *) url;
+- (BOOL)applicationSupportsSecureRestorableState:(NSApplication *) app;
+- (BOOL)openFile: (NSURL *) url;
 
 @end

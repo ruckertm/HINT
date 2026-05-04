@@ -51,6 +51,7 @@
 		550C79312910077400FDBDA4 /* autofit.c in Sources */ = {isa = PBXBuildFile; fileRef = 550C79302910077400FDBDA4 /* autofit.c */; };
 		550C79342910086900FDBDA4 /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 550C78D1290FFF5D00FDBDA4 /* libfreetype.a */; };
 		550C79422910113600FDBDA4 /* ftsystem.c in Sources */ = {isa = PBXBuildFile; fileRef = 550C79412910113600FDBDA4 /* ftsystem.c */; };
+		553FDE722F17DFEC00EDACFF /* hint.w in Resources */ = {isa = PBXBuildFile; fileRef = 553FDE712F17DFEC00EDACFF /* hint.w */; };
 		555CAAAA2924EBF300C9C6AE /* HINT.icns in Resources */ = {isa = PBXBuildFile; fileRef = 555CAAA92924EBF300C9C6AE /* HINT.icns */; };
 		557A9BB828F445B7004772FE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 557A9BB728F445B7004772FE /* AppDelegate.m */; };
 		557A9BBB28F445B7004772FE /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 557A9BBA28F445B7004772FE /* SceneDelegate.m */; };
@@ -147,6 +148,7 @@
 		550C793F29100CE000FDBDA4 /* integer-types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "integer-types.h"; path = "include/freetype/config/integer-types.h"; sourceTree = "<group>"; };
 		550C79412910113600FDBDA4 /* ftsystem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftsystem.c; path = src/base/ftsystem.c; sourceTree = "<group>"; };
 		552970C4290AA93B003E61E0 /* main.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = main.h; sourceTree = "<group>"; };
+		553FDE712F17DFEC00EDACFF /* hint.w */ = {isa = PBXFileReference; lastKnownFileType = text; path = hint.w; sourceTree = "<group>"; };
 		555CAAA92924EBF300C9C6AE /* HINT.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = HINT.icns; sourceTree = "<group>"; };
 		557A9BB328F445B7004772FE /* HintView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HintView.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		557A9BB628F445B7004772FE /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -314,6 +316,7 @@
 		55CDFDB229D2E086003D40D3 /* backend */ = {
 			isa = PBXGroup;
 			children = (
+				553FDE712F17DFEC00EDACFF /* hint.w */,
 				55CDFDB429D2E0B1003D40D3 /* rendernative.h */,
 				55CDFDB629D2E0CB003D40D3 /* stb_image.h */,
 				55CDFDB729D2E0CE003D40D3 /* tables.c */,
@@ -412,6 +415,7 @@
 				555CAAAA2924EBF300C9C6AE /* HINT.icns in Resources */,
 				55CA1940291E896B00B30B11 /* Settings.bundle in Resources */,
 				557A9BC328F445B9004772FE /* Assets.xcassets in Resources */,
+				553FDE722F17DFEC00EDACFF /* hint.w in Resources */,
 				557A9BC128F445B7004772FE /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
