@@ -17,8 +17,9 @@ uint64_t pos; /* position of current page */
 NSString * DocumentBookmark = nil;
 
 bool hint_map(void) /* open hurl_name and map to memory */
-{  NSLog(@"Get map %s", hin_name);
-   return hget_map();
+{
+    
+    return hget_map();
 }
 
 void hint_unmap(void) /* unmap */
