@@ -284,12 +284,23 @@ void redisplay(void)
 }
 
 - (IBAction)theUpSwipe:(UISwipeGestureRecognizer *)sender
-{
+{ int y=[sender locationInView:_theView].y;
+  int h=_theView.bounds.size.height;
+  //NSLog(@"Up swipe y=%d c=%d",y,h/2);
+  if (y<h/2)
+    [_theToolbar setHidden:YES];
+  else
     [_theToolbar setHidden:NO];
 }
 
 - (IBAction)theDownSwipe:(UISwipeGestureRecognizer *)sender
-{ [_theToolbar setHidden:YES];
+{ int y=[sender locationInView:_theView].y;
+    int h=_theView.bounds.size.height;
+    //NSLog(@"Down swipe y=%d c=%d",y,h/2);
+    if (y<h/2)
+      [_theToolbar setHidden:NO];
+    else
+      [_theToolbar setHidden:YES];
     
 }
 - (IBAction)theScale:(UIPinchGestureRecognizer *)sender {
