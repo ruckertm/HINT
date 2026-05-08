@@ -4725,7 +4725,15 @@ else{@+q=temp_head;
 @<Put the \(r)\.{\\rightskip} glue after node |q|@>;
 done:
 
-@ @<Change discretionary to compulsory...@>=
+@ When we change a discretionary break into a compulsory break,
+We insert an |ignore_node| before the pre-break list and another
+one after the post-break list. Because whatever is in these list
+will be ignored when it comes to matching a search string.
+Instead, we keep the original nodes that are going to be replaced
+by the pre- and post-break lists in the |ignore_list| and use
+them for matching as if there where no break.
+
+@<Change discretionary to compulsory...@>=
 {@+pointer pre_q = pre_break(q);
 pointer post_q = post_break(q);
 t=replace_count(q);
@@ -6032,7 +6040,7 @@ to hold the string numbers for name, area, and extension.
 @d xdimen_vfactor(A)   mem[A+3].sc
 
 @d ignore_node hitex_ext+16 /* ignored used to attach extra information */
-@d ignore_node_size small_node_size /* same as |disc_node| */
+@d ignore_node_size small_node_size /*must be equal to |disc_node| size*/
 @d ignore_info(A)    type(A+1)
 @d ignore_list(A)    link(A+1)
 
@@ -12075,7 +12083,7 @@ a) with such large distances there can't be many occurrences
 on a single page, and 
 b) the current implementation uses 16 bit pointers
 and that gives a strict upper bound on the number of characters.
-All multibyte encodings start with a sequence of bytes that have a zeros as most significant bits
+All multibyte encodings start with a sequence of bytes that have zeros as most significant bits
 and terminate with a byte that has a one as most significant bit.
 Because the \HINT\ file format limits the content section to $2^{32}$ byte
 a 5 byte encoding is sufficient for any distance that could occur in any \HINT\ file.
@@ -12258,6 +12266,7 @@ static void hmark_page(void)
 When the renderer traverses the page more variables are needed.
 @<render variables@>=
 static bool c_ignore;
+static int max_style, ignore_style;
 @
 
 |cur_style| will be non zero while rendering a marked sequence
@@ -12275,13 +12284,14 @@ The distance |m_d| to the first marked glyph is set by calling |m_get()|.
 
 @<initialize marking@>=
 m_ptr=0; m_d=m_get(); c_ignore=false; cur_style=next_style=0;
+ fprintf(stderr,"mark INIT m_d=%d ns=%d cs=%d\n",m_d,next_style,cur_style);
 @
 
-Whenever the renderer encounters a character, it will need to
-update |cur_style|.
+Whenever the renderer encounters a character (and is currently not
+ignoring characters), it will need to update |cur_style|.
 The new value of |cur_style| is assigned to |next_style| and
-the latter value is used when calling |render_char|. This is needed
-because the call to render char is shared with a |goto render_c;|
+the latter value is used to change the culor before rendering the next character.
+This is needed because the call to render char is shared with a |goto render_c;|
 when handling a ligature. The handling of the ligature might
 then change the value of |next_char|. Whether this detour is realy
 necessary remains unclear. It seems simpler to change the value of
@@ -12297,11 +12307,15 @@ preceeds a ligature node this change might be important.
     if (next_style>0)
     { if (m_ptr==m_focus) next_style=2;
       m_d=m_chars;
+      fprintf(stderr,"m_d=m_chars=%d ns=%d\n",m_d,next_style);
     }
     else
-      m_d=m_get();
+    {  m_d=m_get();
+      fprintf(stderr,"m_d=m_get()=%d ns=%d\n",m_d,next_style);
+    }
   }
   m_d--;
+
 @
 
 When rendering a ligature, we consider for the purpose of marking
@@ -12328,46 +12342,67 @@ if (!c_ignore)
 @
 
 When the renderer encounters an ignore node with |ignore_info(p)==1|
-it should ignore all the following characters until
+it can not use the following characters to compute style changes until
 it encounters the matching ignore node with |ignore_info(p)==0|.
-Instead, it uses the characters in |ignore_list(p)|.
-This is done by setting |c_ignore|.
+Instead it should use the characters in the |ignore_list| to compute style
+changes.
+Because there is no simple relation between the characters that must be rendered and
+the characters in the |ignore_list|,
+we will render all characters between the two ignore nodes in the same style.
+This common style will be the maximum of all styles encountered while
+processing the |ignore_list|. As a result the marked area might be
+larger than necessary, but at least it will not be smaller or even miss a match.
+The style to use after the second ignore_node is kept in the variable
+|ignore_style|.
 
 @<handle an ignore node@>=
+fprintf(stderr,"ignore ?? m_d=%d ns=%d cs=%d\n",m_d,next_style,cur_style);
 if (ignore_info(p)==1)
-{ next_style=0;
+{ int save_style=cur_style;
+  max_style=0;
   c_ignore_list(ignore_list(p));
+  ignore_style=cur_style;
+  cur_style=max_style;
+  if (save_style!=cur_style)
+     hSetColor(cur_color);
   c_ignore=true;
+  fprintf(stderr,"ignore ON m_d=%d ns=%d cs=%d\n",m_d,next_style,cur_style);
 }
 else
+{ fprintf(stderr,"ignore OFF m_d=%d ns=%d cs=%d\n",m_d,next_style,cur_style);
   c_ignore=false;
+  if (ignore_style!=cur_style)
+  { cur_style =ignore_style;
+    hSetColor(cur_color);
+  }
+}
 @
 
-Instead of the ignored nodes, the renderer considers the characters
-stored in the |ignore_list|.
-Because there is no simple relation between the |ignore_list| and its replacement,
-we will mark the whole replacement if any part of the ignore
-list is marked.
+Instead of the ignored nodes, the renderer traverses the characters
+stored in the |ignore_list| to determine |cur_style. While doing so,
+it keeps the maximum style in |max_style|. This style is used for the
+characters that are between the two ignore nodes.
+
 Because the |ignore_list| may contain boxes, traversing it
 is inherently recursive and we start with a function that
 traverses a list of nodes accounting for |cur_style| changes
 but without rendering them. We assume that the |ignore_list|
 consists (recursively!) entirely of character, kern, box, rule, and ligature nodes.
+The function will advance the style changes to the point after the ignore list
+and returns the maximum style encountered.
 
 @<render functions@>=
 static void hSetColor(int c);
 
+
 static void c_ignore_list(pointer p)
-{ int s, max_s;
-  pointer q;
-  s=cur_style;
-  max_s=0;
+{ pointer q;
   while(p!=null)
   { if ((is_char_node(p) && character(p)!=' ') ||
         (type(p)==whatsit_node&&subtype(p)==utf_char_node))
     { @<compute the |next_style|@>@;
       cur_style=next_style;
-      if (next_style>max_s) max_s=next_style;
+      if (cur_style>max_style) max_style=cur_style;
     }
     else
     { switch(type(p)) 
@@ -12379,7 +12414,7 @@ ignore_ligature:
           while (q!=null)
           { @<compute the |next_style|@>@;
             cur_style=next_style;
-            if (next_style>max_s) max_s=next_style;
+            if (cur_style>max_style) max_style=cur_style;
             q=link(q);
           }
         }
@@ -12394,12 +12429,6 @@ ignore_ligature:
     }
     p=link(p);
   }
-  if (s!=max_s)
-  { cur_style=max_s;
-    hSetColor(cur_color);
-  }
-  else
-    cur_style=s;
 }
 @
 
