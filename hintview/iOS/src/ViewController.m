@@ -218,6 +218,7 @@ void redisplay(void)
     theViewControler = self;
     _theView.delegate=self;
     _theSearchBar.delegate=self;
+    _theSearchBar.searchTextField.autocapitalizationType=0;
    // [_theToolbar setAlpha:0.6];
 
     EAGLContext * context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
@@ -283,12 +284,23 @@ void redisplay(void)
 }
 
 - (IBAction)theUpSwipe:(UISwipeGestureRecognizer *)sender
-{
+{ int y=[sender locationInView:_theView].y;
+  int h=_theView.bounds.size.height;
+  //NSLog(@"Up swipe y=%d c=%d",y,h/2);
+  if (y<h/2)
+    [_theToolbar setHidden:YES];
+  else
     [_theToolbar setHidden:NO];
 }
 
 - (IBAction)theDownSwipe:(UISwipeGestureRecognizer *)sender
-{ [_theToolbar setHidden:YES];
+{ int y=[sender locationInView:_theView].y;
+    int h=_theView.bounds.size.height;
+    //NSLog(@"Down swipe y=%d c=%d",y,h/2);
+    if (y<h/2)
+      [_theToolbar setHidden:NO];
+    else
+      [_theToolbar setHidden:YES];
     
 }
 - (IBAction)theScale:(UIPinchGestureRecognizer *)sender {
@@ -468,7 +480,7 @@ static int search_length;
     hint_next_mark();
     [_theView setNeedsDisplay];
 }
--(void) searchBarCancelButtonClicked:(UISearchBar *)searchBar
+-(void) searchBarCancelButtonClicked:(UISearchBar *)h
 {
     [_theSearchBar  endEditing:YES];
     [_theSearchBar setHidden:YES];
