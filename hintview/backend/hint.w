@@ -12284,7 +12284,6 @@ The distance |m_d| to the first marked glyph is set by calling |m_get()|.
 
 @<initialize marking@>=
 m_ptr=0; m_d=m_get(); c_ignore=false; cur_style=next_style=0;
- fprintf(stderr,"mark INIT m_d=%d ns=%d cs=%d\n",m_d,next_style,cur_style);
 @
 
 Whenever the renderer encounters a character (and is currently not
@@ -12307,11 +12306,9 @@ preceeds a ligature node this change might be important.
     if (next_style>0)
     { if (m_ptr==m_focus) next_style=2;
       m_d=m_chars;
-      fprintf(stderr,"m_d=m_chars=%d ns=%d\n",m_d,next_style);
     }
     else
     {  m_d=m_get();
-      fprintf(stderr,"m_d=m_get()=%d ns=%d\n",m_d,next_style);
     }
   }
   m_d--;
@@ -12356,7 +12353,6 @@ The style to use after the second ignore_node is kept in the variable
 |ignore_style|.
 
 @<handle an ignore node@>=
-fprintf(stderr,"ignore ?? m_d=%d ns=%d cs=%d\n",m_d,next_style,cur_style);
 if (ignore_info(p)==1)
 { int save_style=cur_style;
   max_style=0;
@@ -12366,11 +12362,9 @@ if (ignore_info(p)==1)
   if (save_style!=cur_style)
      hSetColor(cur_color);
   c_ignore=true;
-  fprintf(stderr,"ignore ON m_d=%d ns=%d cs=%d\n",m_d,next_style,cur_style);
 }
 else
-{ fprintf(stderr,"ignore OFF m_d=%d ns=%d cs=%d\n",m_d,next_style,cur_style);
-  c_ignore=false;
+{ c_ignore=false;
   if (ignore_style!=cur_style)
   { cur_style =ignore_style;
     hSetColor(cur_color);
