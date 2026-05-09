@@ -15,9 +15,10 @@ find_library( # Defines the name of the path variable that stores the
 
 
 set(TOP_SOURCE_DIR "${PROJECT_SOURCE_DIR}/../../../../..")
+set(BACKEND_SOURCE_DIR "${TOP_SOURCE_DIR}/backend")
 set(FREETYPE_SOURCE_DIR "${TOP_SOURCE_DIR}/external/freetype-2.12.1")
 # include files
-include_directories("${TOP_SOURCE_DIR}/backend")
+include_directories("${BACKEND_SOURCE_DIR}")
 include_directories("${FREETYPE_SOURCE_DIR}/include")
 include_directories("${FREETYPE_SOURCE_DIR}/include/freetype")
 include_directories("${FREETYPE_SOURCE_DIR}/include/freetype/config")
@@ -57,9 +58,17 @@ target_compile_options(freetype  PRIVATE -Wno-shift-negative-value -Wno-empty-bo
 add_library(hintview SHARED
         gl_code.cpp
         rendergl.c
-        tables.c
-        get.c
-        hint.c
+        ${BACKEND_SOURCE_DIR}/tables.c
+        ${BACKEND_SOURCE_DIR}/get.c
+        ${BACKEND_SOURCE_DIR}/hint.c
+        )
+
+target_sources(hintview PRIVATE
+        ${BACKEND_SOURCE_DIR}/hint.w
+        )
+
+add_custom_target(backend_sources SOURCES
+        ${BACKEND_SOURCE_DIR}/hint.w
         )
 target_compile_options(hintview PRIVATE -Wno-dangling-else)
 
