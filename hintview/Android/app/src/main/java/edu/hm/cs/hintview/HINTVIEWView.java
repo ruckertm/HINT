@@ -26,7 +26,8 @@ import android.opengl.GLSurfaceView;
 import android.os.ParcelFileDescriptor;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-//import android.util.Log;
+
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -45,7 +46,7 @@ import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.opengles.GL10;
 
 public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener {
-    //private static final String TAG = "HINTVIEWView";
+    private static final String TAG = "HINTVIEWView";
     //private static final boolean DEBUG = false;
     public static double xdpi, ydpi;
     public static double scale = 1.0;
@@ -108,12 +109,19 @@ public class HINTVIEWView extends GLSurfaceView implements View.OnTouchListener 
         return fileRenderer.getFileUriStr();
     }
 
-
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
-        scaleGestureDetector.onTouchEvent(motionEvent);
-        if (scaleGestureDetector.isInProgress()) return true;
-        return touchGestureDetector.onTouchEvent(motionEvent);
+        boolean handled;
+        Log.w(TAG, String.format("onTouch"));
+        handled= scaleGestureDetector.onTouchEvent(motionEvent);
+
+        if (!scaleGestureDetector.isInProgress()) {
+            handled = touchGestureDetector.onTouchEvent(motionEvent) || handled;
+        }
+        if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+            return true;
+        }
+        return handled;
     }
 
     public void setScale(double s) {

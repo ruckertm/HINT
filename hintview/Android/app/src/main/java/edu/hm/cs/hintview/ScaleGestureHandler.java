@@ -1,10 +1,10 @@
 package edu.hm.cs.hintview;
 
-//import android.util.Log;
+import android.util.Log;
 import android.view.ScaleGestureDetector;
 
 public class ScaleGestureHandler extends ScaleGestureDetector.SimpleOnScaleGestureListener {
-    //private static final String TAG = "ScaleGestureDetector";
+    private static final String TAG = "ScaleGestureDetector";
 
     private final HINTVIEWView view;
 
@@ -22,7 +22,7 @@ public class ScaleGestureHandler extends ScaleGestureDetector.SimpleOnScaleGestu
     @Override
     public void onScaleEnd(ScaleGestureDetector detector) {
         HINTVIEWView.clearFonts =true;
-        //Log.w(TAG, "onScaleEnd "+ detector.isInProgress());
+        Log.w(TAG, "onScaleEnd "+ detector.isInProgress());
         view.requestRender();
         HINTVIEWView.ZoomOn=false;
        }
@@ -31,7 +31,7 @@ public class ScaleGestureHandler extends ScaleGestureDetector.SimpleOnScaleGestu
         float f = detector.getScaleFactor();
         //float x = detector.getFocusX();
         //float y = detector.getFocusY();
-
+        Log.w(TAG, "onScale "+ detector.isInProgress());
         view.setScale(HINTVIEWView.scale*f);
 
         view.requestRender();
