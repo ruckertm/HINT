@@ -104,7 +104,7 @@ static PBITMAPINFO CreateBitmapInfoStruct(HBITMAP hBmp)
  } 
 
 
-static int CreateBMPFile(LPTSTR pszFile,  HBITMAP hBMP, HDC hDC) 
+static int CreateBMPFile(LPWSTR pszFile,  HBITMAP hBMP, HDC hDC) 
  { 
     HANDLE hf;                 // file handle  
     BITMAPFILEHEADER hdr = { 0 };       // bitmap file-header  
@@ -190,7 +190,7 @@ free_memory:
 
 
 
-void write_bmp(char *filename)
+void write_bmp(WCHAR *filename)
 { HDC hDCmem = CreateCompatibleDC(hDCMain); 
   HBITMAP hBMPmem = CreateCompatibleBitmap(hDCMain, client_width, client_height); 
   HBITMAP hOld=(HBITMAP)SelectObject(hDCmem, hBMPmem); 

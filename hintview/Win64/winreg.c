@@ -69,13 +69,13 @@ void write_regtab(void)
 { HKEY program_key=0, project_key=0, software_key=0;
   LONG r;
   int success=0;
-  r = RegOpenKeyEx(HKEY_CURRENT_USER,"Software",0,KEY_ALL_ACCESS,&software_key);
+  r = RegOpenKeyExA(HKEY_CURRENT_USER,"Software",0,KEY_ALL_ACCESS,&software_key);
   if (r==ERROR_SUCCESS)
   {  DWORD n;
-	  r = RegCreateKeyEx(software_key,PROJECT_KEY,0,NULL,REG_OPTION_NON_VOLATILE,
+	  r = RegCreateKeyExA(software_key,PROJECT_KEY,0,NULL,REG_OPTION_NON_VOLATILE,
                KEY_ALL_ACCESS,NULL,&project_key,&n);
      if (r==ERROR_SUCCESS)
-	 {  r = RegCreateKeyEx(project_key,PROGRAM_KEY,0,NULL,REG_OPTION_NON_VOLATILE,
+	 {  r = RegCreateKeyExA(project_key,PROGRAM_KEY,0,NULL,REG_OPTION_NON_VOLATILE,
                KEY_ALL_ACCESS,NULL,&program_key,&n);
         if (r==ERROR_SUCCESS)
 	    { int i=0;
@@ -84,17 +84,17 @@ void write_regtab(void)
 		  while(regtab[i].key!=NULL)
 		  { if (regtab[i].type==TYPE_INT32)
 		    { DWORD tmp=*(int*)regtab[i].value;
-              RegSetValueEx(program_key,regtab[i].key,0,REG_DWORD,(BYTE*)&tmp,sizeof(DWORD));
+              RegSetValueExA(program_key,regtab[i].key,0,REG_DWORD,(BYTE*)&tmp,sizeof(DWORD));
 		    }
 		    else if (regtab[i].type==TYPE_DOUBLE)
 		    { void *tmp=regtab[i].value;
-              RegSetValueEx(program_key,regtab[i].key,0,REG_BINARY,(BYTE*)tmp,sizeof(double));
+              RegSetValueExA(program_key,regtab[i].key,0,REG_BINARY,(BYTE*)tmp,sizeof(double));
 		    }
 		    else if (regtab[i].type==TYPE_STRING)
 		    { char **tmp=regtab[i].value;
 		      char zero=0, *empty=&zero;	
               if (*tmp==NULL) tmp=&empty;
-			  RegSetValueEx(program_key,regtab[i].key,0,REG_SZ,(BYTE*)*tmp,(DWORD)strlen((char*)*tmp)+1);
+			  RegSetValueExA(program_key,regtab[i].key,0,REG_SZ,(BYTE*)*tmp,(DWORD)strlen((char*)*tmp)+1);
 		    } 
 		    else if (0<=regtab[i].type && regtab[i].type<FLAG_SIZE)
 		    { int tmp = *(int*)regtab[i].value;
@@ -104,7 +104,7 @@ void write_regtab(void)
 			i++;
 		  }
 		  if (has_flags)	
-		    RegSetValueEx(program_key,"flags",0,REG_DWORD,(BYTE*)&flags,sizeof(DWORD));
+		    RegSetValueExA(program_key,"flags",0,REG_DWORD,(BYTE*)&flags,sizeof(DWORD));
 		  RegCloseKey(program_key);
 		}
        RegCloseKey(project_key);
@@ -116,45 +116,45 @@ void write_regtab(void)
 void read_regtab(void)
 { HKEY program_key=0,project_key=0, software_key=0;
   LONG r;  /* get values from the registry */
-  r = RegOpenKeyEx(HKEY_CURRENT_USER,"Software",0,KEY_ALL_ACCESS,&software_key);
+  r = RegOpenKeyExA(HKEY_CURRENT_USER,"Software",0,KEY_ALL_ACCESS,&software_key);
   if (r==ERROR_SUCCESS)
   {  DWORD n;
-	  r = RegCreateKeyEx(software_key,PROJECT_KEY,0,NULL,REG_OPTION_NON_VOLATILE,
+	  r = RegCreateKeyExA(software_key,PROJECT_KEY,0,NULL,REG_OPTION_NON_VOLATILE,
                KEY_ALL_ACCESS,NULL,&project_key,&n);
      if (r==ERROR_SUCCESS)
-	 { r = RegCreateKeyEx(project_key,PROGRAM_KEY,0,NULL,REG_OPTION_NON_VOLATILE,
+	 { r = RegCreateKeyExA(project_key,PROGRAM_KEY,0,NULL,REG_OPTION_NON_VOLATILE,
                KEY_ALL_ACCESS,NULL,&program_key,&n);
         if (r==ERROR_SUCCESS)
 	    { DWORD bc = sizeof(DWORD);
 		  int i=0;
 		  int has_flags=0;
 		  DWORD flags=0;
-		  r = RegQueryValueEx(program_key,"flags",0,NULL,(LPBYTE)&flags,&bc);
+		  r = RegQueryValueExA(program_key,"flags",0,NULL,(LPBYTE)&flags,&bc);
 		  has_flags=(r==ERROR_SUCCESS);
 		  while(regtab[i].key!=NULL)
 		  { if (regtab[i].type==TYPE_INT32)
 		    { DWORD tmp;
 		      bc=sizeof(DWORD);
-		  	  r = RegQueryValueEx(program_key,regtab[i].key,0,NULL,(LPBYTE)&tmp,&bc);
+		  	  r = RegQueryValueExA(program_key,regtab[i].key,0,NULL,(LPBYTE)&tmp,&bc);
 			  if (r==ERROR_SUCCESS)
 			    *(int*)regtab[i].value=tmp;
 		    }
 		    else if (regtab[i].type==TYPE_DOUBLE)
 		    { double tmp;
 		      bc=sizeof(double);
-		  	  r = RegQueryValueEx(program_key,regtab[i].key,0,NULL,(LPBYTE)&tmp,&bc);
+		  	  r = RegQueryValueExA(program_key,regtab[i].key,0,NULL,(LPBYTE)&tmp,&bc);
 			  if (r==ERROR_SUCCESS)
 			    *(double*)regtab[i].value=tmp;
 		    }
 		    else if (regtab[i].type==TYPE_STRING)
 		    { char *str;
-			  r = RegQueryValueEx(program_key,regtab[i].key,0,NULL,NULL,&bc); /* get size */
+			  r = RegQueryValueExA(program_key,regtab[i].key,0,NULL,NULL,&bc); /* get size */
 			  if (r==ERROR_SUCCESS)
 			  { str=(char *)malloc(bc);
 			    if (str==NULL)
 					hint_error("Out of memory reading registry",regtab[i].key);
 				else
-				{ r = RegQueryValueEx(program_key,regtab[i].key,0,NULL,(LPBYTE)str,&bc);
+				{ r = RegQueryValueExA(program_key,regtab[i].key,0,NULL,(LPBYTE)str,&bc);
 			      if (r!=ERROR_SUCCESS)
 					hint_error("Error reading registry",regtab[i].key);
 				  else

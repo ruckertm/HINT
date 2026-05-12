@@ -44,22 +44,22 @@ double gamma=2.2;
 
 enum units {mm=0,in=1,pt=2,pc=3,px=4} unit;
 #define MAXUNIT (px+1)
-const char unitstr[MAXUNIT][3]={"mm","in","pt","pc","px"};
+const WCHAR unitstr[MAXUNIT][3]={L"mm",L"in",L"pt",L"pc",L"px"};
 double sp2unit[MAXUNIT] ={25.4/(72.27*0x10000),1.0/(72.27*0x10000),1.0/0x10000,1.0/(12.0*0x10000),100.0/(72.27*0x10000)  }; /*convert scaled points to unit */
 enum units unit=mm;
 
 
 static double GetDlgItemDouble(HWND hDlg,UINT DlgItem)
-{ char c[20];
+{ WCHAR c[20];
   GetDlgItemText(hDlg,DlgItem,c,20);
-  return atof(c);
+  return _wtof(c);
 }
 static double SetDlgItemDouble(HWND hDlg,UINT DlgItem, double x)
-{ char c[20];
-   _snprintf(c,20,"%0.3f",x);
+{ WCHAR c[20];
+   _snwprintf(c,20,L"%0.3f",x);
    c[19] = 0;
   SetDlgItemText(hDlg,DlgItem,c);
-  return atof(c);
+  return _wtof(c);
 }
 
 void set_unit( HWND hDlg, int i)

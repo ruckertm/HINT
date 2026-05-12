@@ -80,7 +80,7 @@ void* glGetAnyProcAddress(const char* name) {
 };
 
 
-char tmpClassName[]="tmpClass";
+WCHAR tmpClassName[]=L"tmpClass";
 /* the next function must be called
    after InitInstance and before Create Window */
 BOOL InitGLextensions(void)

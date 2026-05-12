@@ -44,14 +44,22 @@ static HWND hTV=NULL;
 
 
 
-HTREEITEM AddItemToTree(HTREEITEM hParent, LPSTR title, int i)
+HTREEITEM AddItemToTree(HTREEITEM hParent, char *title, int i)
 { 
     TVITEM tvi; 
     TVINSERTSTRUCT tvins; 
     HTREEITEM hTVI;
-
+	WCHAR *wtitle;
+	int wsize;
+	static WCHAR outofmemory[] = L"Out of memory";
+	wsize=MultiByteToWideChar(CP_UTF8, 0, title, -1, NULL, 0);
+	wtitle=(WCHAR*)malloc(wsize * sizeof(WCHAR));
+	if (wtitle == NULL)
+		wtitle = outofmemory;
+	else
+		MultiByteToWideChar(CP_UTF8, 0, title, -1, wtitle, wsize);
     tvi.mask = TVIF_TEXT | TVIF_PARAM; 
-    tvi.pszText = title;  // Set the text of the item. 
+    tvi.pszText = wtitle;  // Set the text of the item. 
     tvi.cchTextMax = sizeof(tvi.pszText)/sizeof(tvi.pszText[0]); 
     tvi.lParam = (LPARAM)i; 
 
@@ -77,7 +85,9 @@ void makeNavTree(hint_Outline *t, int n, HTREEITEM hParent, int depth)
 { HTREEITEM hPrev=TVI_ROOT; /* previous item handle*/
   while (iItem<=n)
   { if (t[iItem].depth==depth) 
-    {  hPrev=AddItemToTree(hParent ,t[iItem].title,iItem); 
+    {
+	  
+	   hPrev=AddItemToTree(hParent ,t[iItem].title,iItem); 
 	   iItem++;
     }
     else if (t[iItem].depth>depth) 

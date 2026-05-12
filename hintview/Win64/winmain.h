@@ -28,8 +28,8 @@
 #ifndef WINMAIN_H
 #define WINMAIN_H
 
-#define VERSION "Version 2.2.1"
-#define COPYRIGHT "© Martin Ruckert 2021, 2024, 2025"
+#define VERSION L"Version 2.2.2"
+#define COPYRIGHT L"© Martin Ruckert 2021, 2024, 2025, 2026"
 
 #if 0
 extern HDC hDCMain;  
@@ -50,7 +50,7 @@ extern HWND hMainWnd;
 extern HWND hSearchWnd;
 extern HWND hOutlineWnd;
 extern HDC hDCMain;
-extern char szClassName[];
+
 extern HINSTANCE hInst;
 extern int client_width, client_height; /* size of client aerea in pixel */
 extern double xdpi, ydpi; /* dots per inch */

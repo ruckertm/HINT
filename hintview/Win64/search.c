@@ -33,7 +33,7 @@
 #include "winmain.h"
 #include "hint.h"
 
-char *search_string=NULL;
+WCHAR *search_string=NULL;
 static int search_max=0;
 int search_length=0;
 
@@ -60,7 +60,16 @@ SearchDialogProc( HWND hDlg, UINT msg, WPARAM wparam, LPARAM lparam )
 		  }
 		}
 		SendDlgItemMessage(hDlg,IDC_SEARCH,WM_GETTEXT,search_max+1,(LPARAM)search_string); 
-		hint_set_mark(search_string,search_length);
+		{	int len;
+		    char* str;
+			len = WideCharToMultiByte(CP_UTF8, 0, search_string, -1, NULL, 0, NULL, NULL);
+			str = malloc(len);
+			if (str == NULL)
+				return hint_error("Out of memory", "Allocating search string");
+			WideCharToMultiByte(CP_UTF8, 0, search_string, -1, str, len, NULL, NULL);
+			hint_set_mark(str, len-1);
+			free(str);
+		}
         InvalidateRect(hMainWnd,NULL,FALSE);
         return TRUE;
       case MAKEWPARAM(IDC_SEARCH_PREV,BN_CLICKED): 
@@ -79,7 +88,7 @@ SearchDialogProc( HWND hDlg, UINT msg, WPARAM wparam, LPARAM lparam )
         return TRUE;
       case IDCANCEL: 
 	    search_length=0;
-		hint_set_mark(search_string,search_length);
+		hint_set_mark("", search_length);
         InvalidateRect(hMainWnd,NULL,FALSE);
 		DestroyWindow(hDlg); 
         hSearchWnd = NULL; 

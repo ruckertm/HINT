@@ -142,7 +142,7 @@ static BOOL start_printer(void)
 
   memset( &di, 0, sizeof(DOCINFO) );
   di.cbSize = sizeof(DOCINFO); 
-  di.lpszDocName = hin_name;
+  di.lpszDocName = NULL; /* hin_name is no WCHAR array */
   di.lpszOutput = (LPTSTR) NULL; 
   di.lpszDatatype = (LPTSTR) NULL; 
   di.fwType = 0; 

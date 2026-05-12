@@ -179,7 +179,7 @@ void create_button(int n, int i,int j,int key, BITMAP *bm)
     hint_error("Error","Button number out of range");
   bi[n].key=key;
   bi[n].on=0;
-  bi[n].h=CreateWindow("RoundButtons","RoundButton",WS_CHILD|WS_CLIPSIBLINGS,
+  bi[n].h=CreateWindow(L"RoundButtons",L"RoundButton",WS_CHILD|WS_CLIPSIBLINGS,
 	  n*BWIN_SIZE,0,BWIN_SIZE,BWIN_SIZE,hMainWnd,NULL,hInst,bi+n);
   br= CreateEllipticRgn(BBORDER_SIZE+1,BBORDER_SIZE+1,BBORDER_SIZE+BUTTON_SIZE+1-1,BBORDER_SIZE+BUTTON_SIZE+1-1);
   SetWindowRgn(bi[n].h, br, FALSE);
@@ -236,7 +236,7 @@ void init_button_class(void)
 	wcex.hCursor		= NULL;
 	wcex.hbrBackground	= GetStockObject(NULL_BRUSH);//(HBRUSH)(COLOR_WINDOW+1);
 	wcex.lpszMenuName	= NULL;
-	wcex.lpszClassName = "RoundButtons";
+	wcex.lpszClassName = L"RoundButtons";
 	wcex.hIconSm		= NULL;
 	if (!RegisterClassEx(&wcex)) 
 	  hint_error("Fatal Error", "Unable to register window class.");

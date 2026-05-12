@@ -53,7 +53,7 @@
 
 
 /* Windows */
-char szClassName[]="HintView";    
+WCHAR szClassName[] = L"HintView";    
 HINSTANCE hInst = NULL;          
 HWND hMainWnd=NULL;	   
 HWND hSearchWnd=NULL;
@@ -127,28 +127,27 @@ static void resize_page(void)
 
 /* Saving an Image */
 static void save_image(void)
-{	static char asname[MAX_PATH+1] = "";
-	OPENFILENAME ofn ={0};
+{	static WCHAR asname[MAX_PATH] = L"";
+	OPENFILENAMEW ofn ={0};
 	ofn.lStructSize= sizeof(ofn);
-	ofn.lpstrFile = asname;
 	ofn.hwndOwner = hMainWnd;
 	ofn.hInstance = hInst;
 	ofn.lpstrFile = asname;
-	ofn.lpstrFilter = "Bitmap (.bmp)\0*.bmp\0" "All Files (*.*)\0*.*\0\0";
+	ofn.lpstrFilter = L"Bitmap (.bmp)\0*.bmp\0" L"All Files (*.*)\0*.*\0\0";
 	ofn.nMaxFile = MAX_PATH;
-	ofn.lpstrTitle = "Save Image";
-	ofn.lpstrDefExt = "bmp";
+	ofn.lpstrTitle = L"Save Image";
+	ofn.lpstrDefExt = L"bmp";
 	ofn.Flags = OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT;
 
-	if (GetSaveFileName(&ofn))
+	if (GetSaveFileNameW(&ofn))
 	   write_bmp(asname);
 }
 
 
 /* File Handling */
-static char title_name[MAX_PATH+1]={0};
+static WCHAR title_name[MAX_PATH+1]={0};
 
-static void normalize_file_name(char *n)
+static void normalize_file_name(WCHAR *n)
 { if (n==NULL) return;
   while(*n!=0)
   { if (*n=='\\') *n='/';
@@ -156,18 +155,21 @@ static void normalize_file_name(char *n)
   }	  
 }
 
-static int assign_file_name(char *new_name)
-{ normalize_file_name(new_name);
+static int assign_file_name(WCHAR *new_name)
+{
+  int s;
+  normalize_file_name(new_name);
   if (hin_name!=NULL) free(hin_name);
-  hin_name=malloc(strlen(new_name)+1);
+  s= WideCharToMultiByte(CP_UTF8, 0, new_name, -1, NULL, 0, NULL, NULL);
+  hin_name=malloc(s);
   if (hin_name==NULL) 
-	return hint_error("Out of memory",new_name);
-  strcpy(hin_name,new_name);
+	return hint_error("Out of memory","Allocating filename");
+  WideCharToMultiByte(CP_UTF8, 0, new_name, -1, hin_name, s, NULL, NULL);
   return 1;
 }
 
 static int get_file_name(void)
-{	char new_name[MAX_PATH+1];
+{	WCHAR new_name[MAX_PATH+1];
 	OPENFILENAME ofn ={0};
 	//if (hin_name==NULL)
 		new_name[0]=0;
@@ -177,15 +179,15 @@ static int get_file_name(void)
 	ofn.lpstrFile = new_name;
 	ofn.hwndOwner = hMainWnd;
 	ofn.hInstance = hInst;
-	ofn.lpstrFilter = "HINT File (.hnt)\0*.hnt\0\0";
+	ofn.lpstrFilter = L"HINT File (.hnt)\0*.hnt\0\0";
     ofn.nFilterIndex = 1;
 	ofn.nMaxFile = MAX_PATH;
 	ofn.lpstrFileTitle = title_name;
 	ofn.nMaxFileTitle = MAX_PATH;
-	ofn.lpstrDefExt = "hnt";
+	ofn.lpstrDefExt = L"hnt";
     ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
-	if (!GetOpenFileName(&ofn)) 
+	if (!GetOpenFileNameW(&ofn)) 
 	{ DWORD d=CommDlgExtendedError();
 	  if (d==0)
 		return 0;
@@ -279,11 +281,11 @@ static void open_file(void)
   sl=strlen(hin_name);
   if (sl>4 && strncmp(hin_name+sl-4,".hnt",4)==0)
   { hint_end();
-  if (!hint_begin())
+    if (!hint_begin())
 	  return;
-	strncpy(title_name,hin_name,MAX_PATH);
-	title_name[MAX_PATH - 1] = 0;
-	SetNavigationTree();
+    MultiByteToWideChar(CP_UTF8, 0, hin_name, -1, title_name, MAX_PATH);
+    title_name[MAX_PATH - 1] = 0;
+    SetNavigationTree();
   }
   else
     hint_message("Unknown File Type","I dont know how to open this file:\n%s",hin_name);
@@ -332,8 +334,8 @@ AboutDialogProc( HWND hDlg, UINT message, WPARAM wparam, LPARAM lparam )
   { case WM_INITDIALOG:
       SetDlgItemText(hDlg,IDC_VERSION,VERSION);
 	  SetDlgItemText(hDlg, IDC_COPYRIGHT, COPYRIGHT);
-	  { char format_version[100];
-	    _snprintf(format_version,99,"HINT Format Version %d.%d",HINT_VERSION, HINT_MINOR_VERSION);
+	  { WCHAR format_version[100];
+	    _snwprintf(format_version,99,L"HINT Format Version %d.%d",HINT_VERSION, HINT_MINOR_VERSION);
 		format_version[99] = 0;
          SetDlgItemText(hDlg,IDC_HINT_VERSION,format_version);
 	  }
@@ -430,7 +432,7 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
       return 0;
 	case WM_DROPFILES:
 	  { HDROP hDrop = (HDROP)wParam;
-	    char new_name[MAX_PATH+1];
+	    WCHAR new_name[MAX_PATH];
 		DragQueryFile(hDrop,0,new_name,MAX_PATH);
 		assign_file_name(new_name);
         DragFinish(hDrop);
@@ -730,7 +732,8 @@ static int do_command_line(char *c)
 	}
 	else
 	{ bool quoted=false;
-	  char new_name[MAX_PATH+1];
+	  WCHAR new_name[MAX_PATH+1];
+	  char* cmd = c;
 	  /* scan filename */
 	  if (*c=='"') { c++; quoted=true; }
       i=0;
@@ -739,16 +742,9 @@ static int do_command_line(char *c)
 	  if (quoted && i>0 && new_name[i-1]=='"') i--;
       new_name[i]=0;
       if (i>MAX_PATH)
-		return hint_error("Error: File name too long, truncated!", new_name);
-	  normalize_file_name(new_name);
-	  if (hin_name==NULL || strcmp(new_name,hin_name)!=0)
-	  { pos=0;
-		if (hin_name!=NULL) free(hin_name);
-	    hin_name=malloc(strlen(new_name)+1);
-        if (hin_name==NULL)
-		  return hint_error("Out of memory for file name", new_name);
-	    strcpy(hin_name,new_name);
-	  }
+		return hint_error("Error: File name too long, truncated!", cmd);
+	  assign_file_name(new_name); 
+	  pos = 0;
 	  return 1; /* ignore the rest */
 	}
   }
@@ -785,7 +781,7 @@ int WINAPI
 WinMain(
 	_In_ HINSTANCE hCurrentInst,
 	_In_opt_ HINSTANCE hPreviousInst,
-	_In_ LPSTR lpCmdLine,
+	_In_ LPSTR lpCmdLine, /* I could change WinMain to wWinMain to get a UNICODE command line or use CommandLineToArgvW*/
 	_In_ int nCmdShow
 )
 //WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst,LPSTR lpCmdLine, int nCmdShow)
@@ -887,9 +883,9 @@ WinMain(
     return (int)msg.wParam;
 }
 
-/* Error Handling */
+/* Error Handling: these functions use UTF8 stings because they are used in the backend */
 int hint_error(char *title, char *message)
-{ MessageBox(NULL,message,title,MB_OK|MB_ICONEXCLAMATION);
+{ MessageBoxA(NULL,message,title,MB_OK|MB_ICONEXCLAMATION);
   return 0;
 }
 
@@ -899,5 +895,5 @@ void hint_message(char *title, char *format, ...)
   va_list vargs;
   va_start(vargs,format);
   vsnprintf(str, 1024, format, vargs);
-  MessageBox(NULL,str,title,MB_OK);
+  MessageBoxA(NULL,str,title,MB_OK);
 }
