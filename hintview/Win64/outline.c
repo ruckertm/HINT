@@ -50,15 +50,8 @@ HTREEITEM AddItemToTree(HTREEITEM hParent, char *title, int i)
     TVINSERTSTRUCT tvins; 
     HTREEITEM hTVI;
 	WCHAR *wtitle;
-	int wsize;
-	static WCHAR outofmemory[] = L"Out of memory";
-	wsize=MultiByteToWideChar(CP_UTF8, 0, title, -1, NULL, 0);
-	wtitle=(WCHAR*)malloc(wsize * sizeof(WCHAR));
-	if (wtitle == NULL)
-		wtitle = outofmemory;
-	else
-		MultiByteToWideChar(CP_UTF8, 0, title, -1, wtitle, wsize);
-    tvi.mask = TVIF_TEXT | TVIF_PARAM; 
+	wtitle = UTF8to16(title);
+	tvi.mask = TVIF_TEXT | TVIF_PARAM; 
     tvi.pszText = wtitle;  // Set the text of the item. 
     tvi.cchTextMax = sizeof(tvi.pszText)/sizeof(tvi.pszText[0]); 
     tvi.lParam = (LPARAM)i; 

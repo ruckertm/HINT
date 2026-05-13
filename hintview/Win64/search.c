@@ -60,15 +60,10 @@ SearchDialogProc( HWND hDlg, UINT msg, WPARAM wparam, LPARAM lparam )
 		  }
 		}
 		SendDlgItemMessage(hDlg,IDC_SEARCH,WM_GETTEXT,search_max+1,(LPARAM)search_string); 
-		{	int len;
-		    char* str;
-			len = WideCharToMultiByte(CP_UTF8, 0, search_string, -1, NULL, 0, NULL, NULL);
-			str = malloc(len);
-			if (str == NULL)
-				return hint_error("Out of memory", "Allocating search string");
-			WideCharToMultiByte(CP_UTF8, 0, search_string, -1, str, len, NULL, NULL);
-			hint_set_mark(str, len-1);
-			free(str);
+		{	char* str;
+			str = UTF16to8(search_string);
+			hint_set_mark(str, (int)strlen(str));
+			
 		}
         InvalidateRect(hMainWnd,NULL,FALSE);
         return TRUE;

@@ -88,6 +88,20 @@ void set_dpi(HDC hdc)
   }
 }
 
+/* UTF8 to/from UTF16 conversion */
+/*We assume that the strings are short enough (MAX_PATH*2) and truncate otherwise*/
+unsigned char *UTF16to8(WCHAR *utf_16)
+{ static unsigned char utf_8[MAX_PATH * 2 + 1] = { 0 }; /* Last byte is forever zero*/
+  WideCharToMultiByte(CP_UTF8, 0, utf_16, -1, utf_8, MAX_PATH*2, NULL, NULL);
+
+  return utf_8;
+}
+WCHAR *UTF8to16(unsigned char *utf_8)
+{ static WCHAR utf_16[MAX_PATH * 2 + 1] = { 0 };
+  MultiByteToWideChar(CP_UTF8, 0, utf_8, -1, utf_16, MAX_PATH * 2);
+  return utf_16;
+}
+
 /* Rendering Functions */
 
 uint64_t pos; /* position of current page */
@@ -147,7 +161,7 @@ static void save_image(void)
 /* File Handling */
 static WCHAR title_name[MAX_PATH+1]={0};
 
-static void normalize_file_name(WCHAR *n)
+static void normalize_file_name(char *n)
 { if (n==NULL) return;
   while(*n!=0)
   { if (*n=='\\') *n='/';
@@ -157,14 +171,16 @@ static void normalize_file_name(WCHAR *n)
 
 static int assign_file_name(WCHAR *new_name)
 {
-  int s;
-  normalize_file_name(new_name);
+  char* str;
+  size_t len;
+  str = UTF16to8(new_name);
+  normalize_file_name(str);
   if (hin_name!=NULL) free(hin_name);
-  s= WideCharToMultiByte(CP_UTF8, 0, new_name, -1, NULL, 0, NULL, NULL);
-  hin_name=malloc(s);
-  if (hin_name==NULL) 
-	return hint_error("Out of memory","Allocating filename");
-  WideCharToMultiByte(CP_UTF8, 0, new_name, -1, hin_name, s, NULL, NULL);
+  len = strlen(str);
+  hin_name=malloc(len+1);
+  if (hin_name == NULL)
+	  return hint_error("Out of memory", "Not enough memory to store input file name");
+  strncpy(hin_name, str, len + 1);
   return 1;
 }
 
@@ -264,11 +280,62 @@ void hint_unmap(void)
 #include <fcntl.h>
 
 void hint_unmap(void)
-{ hget_unmap();
+{
+    if (hin_addr != NULL) free(hin_addr);
+	hin_addr = NULL;
+	hin_size = 0;
 }
 
 bool hint_map(void)
-{ return hget_map();
+{
+	FILE* f;
+	struct __stat64 f_status;
+	size_t s, t;
+	uint64_t u;
+	WCHAR* str;
+	if (hin_name == NULL || hin_name[0] == 0)
+		return false;
+	str= UTF8to16(hin_name);
+	
+	if (_wstat64(str, &f_status) != 0 || (f = _wfopen(str, L"rb"))==NULL)
+	{
+		MESSAGE("Unable to open file: %s\n", hin_name); return false;
+	}
+
+	u= f_status.st_size;
+
+	if (u == 0)
+	{
+		MESSAGE("File %s is empty\n", hin_name);
+		fclose(f);
+		return false;
+	}
+	if (hin_addr != NULL) hget_unmap();
+	hin_addr = malloc(u);
+	if (hin_addr == NULL)
+	{
+		MESSAGE("Unable to allocate 0x%"PRIx64" byte for File %s\n", u, hin_name);
+		fclose(f);
+		return 0;
+	}
+	t = 0;
+	do {
+		s = fread(hin_addr + t, 1, u, f);
+		if (s <= 0)
+		{
+			MESSAGE("Unable to read file %s\n", hin_name);
+			fclose(f);
+			free(hin_addr);
+			hin_addr = NULL;
+			return false;
+		}
+		t = t + s;
+		u = u - s;
+	} while (u > 0);
+	hin_size = t; 
+	hin_time=f_status.st_mtime;
+
+	return true;
 }
 #endif
 
@@ -283,8 +350,7 @@ static void open_file(void)
   { hint_end();
     if (!hint_begin())
 	  return;
-    MultiByteToWideChar(CP_UTF8, 0, hin_name, -1, title_name, MAX_PATH);
-    title_name[MAX_PATH - 1] = 0;
+	wcsncpy(title_name,UTF8to16(hin_name),MAX_PATH);
     SetNavigationTree();
   }
   else
@@ -314,15 +380,14 @@ static void reload_file(void)
 
 
 static bool new_file_time(void)
-{ struct _stat st;
-  if (hin_name!=NULL && hin_name[0]!=0 &&
-      _stat(hin_name,&st)==0 &&
-	  st.st_size>0 &&
-      st.st_mtime>(__time64_t)hin_time)
-	  return true;
-  else
+{ struct __stat64 file_status;
+   WCHAR* str;
+   if (hin_name == NULL || hin_name[0] == 0)
+	   return false;
+   str = UTF8to16(hin_name);
+   if (_wstat64(str, &file_status) != 0) 
 	  return false;
-
+   return 	(UINT64)file_status.st_mtime > hin_time;
 }
 
 /* Help  About */
@@ -715,7 +780,7 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 /* Command line */
 
-static int do_command_line(char *c)
+static int do_command_line(WCHAR *c)
 { int i;
   /* scan arguments */
   while (*c!=0)
@@ -725,7 +790,7 @@ static int do_command_line(char *c)
       c++;
 	  if (*c=='d')
 	  { c++;
-	    debugflags=strtol(c,&c,16);
+	    debugflags=wcstol(c,&c,16);
 	  }
 	  else
   	    while (*c!=0 && !isspace(*c)) c++; /* skip option */
@@ -733,7 +798,6 @@ static int do_command_line(char *c)
 	else
 	{ bool quoted=false;
 	  WCHAR new_name[MAX_PATH+1];
-	  char* cmd = c;
 	  /* scan filename */
 	  if (*c=='"') { c++; quoted=true; }
       i=0;
@@ -742,7 +806,7 @@ static int do_command_line(char *c)
 	  if (quoted && i>0 && new_name[i-1]=='"') i--;
       new_name[i]=0;
       if (i>MAX_PATH)
-		return hint_error("Error: File name too long, truncated!", cmd);
+		return hint_error("Error: File name too long, truncated!", "");
 	  assign_file_name(new_name); 
 	  pos = 0;
 	  return 1; /* ignore the rest */
@@ -778,10 +842,10 @@ BOOL InitInstance(HINSTANCE hInstance)
 
 
 int WINAPI
-WinMain(
+wWinMain(
 	_In_ HINSTANCE hCurrentInst,
 	_In_opt_ HINSTANCE hPreviousInst,
-	_In_ LPSTR lpCmdLine, /* I could change WinMain to wWinMain to get a UNICODE command line or use CommandLineToArgvW*/
+	_In_ LPWSTR lpCmdLine, /* I could change WinMain to wWinMain to get a UNICODE command line or use CommandLineToArgvW*/
 	_In_ int nCmdShow
 )
 //WinMain(HINSTANCE hCurrentInst, HINSTANCE hPreviousInst,LPSTR lpCmdLine, int nCmdShow)
@@ -837,7 +901,7 @@ WinMain(
 
 	read_regtab(); 
 	do_command_line(lpCmdLine);
-
+	
 	SetWindowText(hMainWnd,title_name);
 	printer_init();
 	init_button_class();

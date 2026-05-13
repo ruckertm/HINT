@@ -80,7 +80,7 @@ extern double gamma;
 #define BF_ON_NIGHT RGB(0x90,0x90, 0x90) /* medium grey */
 #define BF_OFF_NIGHT RGB(0x60,0x60, 0x60) /* dark grey */
 
-
-
+extern unsigned char* UTF16to8(WCHAR* utf_16);
+extern WCHAR* UTF8to16(unsigned char* utf_8);
 #endif
 //include "error.h"

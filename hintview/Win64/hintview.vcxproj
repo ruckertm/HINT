@@ -110,6 +110,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <ImageHasSafeExceptionHandlers />
       <IgnoreSpecificDefaultLibraries>MSVCRTD;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <EntryPointSymbol>wWinMainCRTStartup </EntryPointSymbol>
     </Link>
     <PostBuildEvent>
       <Command>copy ..\backend\*.w .</Command>
@@ -147,6 +148,7 @@
       <ImageHasSafeExceptionHandlers>
       </ImageHasSafeExceptionHandlers>
       <IgnoreSpecificDefaultLibraries>MSVCRTD;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <EntryPointSymbol>wWinMainCRTStartup </EntryPointSymbol>
     </Link>
     <PostBuildEvent>
       <Command>copy ..\backend\*.w .</Command>
@@ -181,6 +183,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
+      <EntryPointSymbol>wWinMainCRTStartup </EntryPointSymbol>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>$(WindowsSDK_IncludePath);</AdditionalIncludeDirectories>
@@ -219,6 +222,7 @@
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <EntryPointSymbol>wWinMainCRTStartup </EntryPointSymbol>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>$(WindowsSDK_IncludePath);</AdditionalIncludeDirectories>
