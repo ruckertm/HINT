@@ -50,6 +50,7 @@
 #include "button.h"
 #include "get.h"
 #include "hint.h"
+#include "rendernative.h"
 
 
 /* Windows */
@@ -70,7 +71,7 @@ int client_width=0, client_height=0; /* size of client aerea in pixel */
 #define SCALE_MAX 5.0
 double scale=SCALE_NORMAL, dpi_x, dpi_y; /* dpi and scale factor to zoom the rendering */
 
-void set_dpi(HDC hdc)
+static void set_dpi(HDC hdc)
 { 
   int h_mm, v_mm,h_px, v_px;
   double h_dpmm,v_dpmm; 
@@ -90,15 +91,21 @@ void set_dpi(HDC hdc)
 
 /* UTF8 to/from UTF16 conversion */
 /*We assume that the strings are short enough (MAX_PATH*2) and truncate otherwise*/
+#if MAX_PATH>1024
+#define MAX_UTFSTR MAX_PATH
+#else
+#define MAX_UTFSTR 1024
+#endif
+
 unsigned char *UTF16to8(WCHAR *utf_16)
-{ static unsigned char utf_8[MAX_PATH * 2 + 1] = { 0 }; /* Last byte is forever zero*/
-  WideCharToMultiByte(CP_UTF8, 0, utf_16, -1, utf_8, MAX_PATH*2, NULL, NULL);
+{ static unsigned char utf_8[MAX_UTFSTR + 1] = { 0 }; /* Last byte is forever zero*/
+  WideCharToMultiByte(CP_UTF8, 0, utf_16, -1, utf_8, MAX_UTFSTR, NULL, NULL);
 
   return utf_8;
 }
 WCHAR *UTF8to16(unsigned char *utf_8)
-{ static WCHAR utf_16[MAX_PATH * 2 + 1] = { 0 };
-  MultiByteToWideChar(CP_UTF8, 0, utf_8, -1, utf_16, MAX_PATH * 2);
+{ static WCHAR utf_16[MAX_UTFSTR + 1] = { 0 };
+  MultiByteToWideChar(CP_UTF8, 0, utf_8, -1, utf_16, MAX_UTFSTR);
   return utf_16;
 }
 
@@ -433,42 +440,60 @@ static HRESULT dpi_err = 0;
 
 static BOOL set_monitor_dpi(
 	HMONITOR hm,
-	HDC hdc,
+	HDC hMonitorDC,
 	LPRECT rc,
 	LPARAM unnamedParam4
 )
 { if (hm == hMonitor)
-    set_dpi(hdc);
+    set_dpi(hMonitorDC);
   return TRUE;
 }
 
  /* Resources */
+static BOOL init_contexts(void)
+{
+  hDCMain=GetDC(hMainWnd);
+  if (hDCMain==NULL)
+    return FALSE;
+   hRCMain=GetGLContext(hDCMain);
+   if (hRCMain==NULL)
+     return FALSE;
+   return TRUE;
+}
+
 
 static void init_handles(void)
 /* create all necessary global Window handles */
-{   
-	hDCMain=GetDC(hMainWnd);
-    hRCMain=GetGLContext(hDCMain);
-    if (!hRCMain) 
-	{  hint_error("Fatal Error","Unable to create rendering context");
+{   if (!init_contexts())
+    {  hint_error("Fatal Error","Unable to create rendering context");
 		 exit(1);
-	}
-	else
-	  hint_render_on();
-	hMenu = LoadMenu(hInst,MAKEINTRESOURCE(IDR_MENU));
-	hSizeNWSE=LoadCursor(NULL,IDC_SIZENWSE);
-	hArrow=LoadCursor(NULL,IDC_ARROW);
-	hHand=LoadCursor(NULL,IDC_HAND); 
+    }
+    else
+       hint_render_on();
+    hMenu = LoadMenu(hInst,MAKEINTRESOURCE(IDR_MENU));
+    hSizeNWSE=LoadCursor(NULL,IDC_SIZENWSE);
+    hArrow=LoadCursor(NULL,IDC_ARROW);
+    hHand=LoadCursor(NULL,IDC_HAND); 
 }
 
-static void release_handles(void)
+static void release_contexts(void)
 /* release all handles created by init_handles */
-{   hint_render_off();
+{   nativeClear();
     wglMakeCurrent(hDCMain, NULL);
     if (hRCMain!=NULL) wglDeleteContext(hRCMain);
-	hRCMain=NULL;
-	if (hDCMain!=NULL) ReleaseDC(hMainWnd, hDCMain);
-	hDCMain=NULL;
+    hRCMain=NULL;
+    if (hDCMain!=NULL) ReleaseDC(hMainWnd, hDCMain);
+    hDCMain=NULL;
+}
+
+static void change_monitor(void)
+/* refresh the handles after moving the window to a different monitor*/
+{ release_contexts();
+  if (!init_contexts())
+  {  hint_error("Fatal Error","Unable to move to other monitor");
+		 exit(1);
+  }
+  nativeInit();
 }
 
 bool onTop=false;
@@ -491,8 +516,9 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	  dpi_ac = SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 	  return 0;
 	case WM_DESTROY:
-	  hint_end(); 
-	  release_handles();
+	  hint_end();
+	  hint_render_off();
+	  release_contexts();
       PostQuitMessage(0);
       return 0;
 	case WM_DROPFILES:
@@ -579,7 +605,8 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		  scale=SCALE_NORMAL;
 		  hint_clear_fonts(false);
 		  HINT_TRY resize_page();
-		   return 0;
+		  InvalidateRect(hMainWnd, NULL, FALSE);
+		  return 0;
 		case ID_KEY_OUTLINE: /* outline window */
            if (!IsWindow(hOutlineWnd)) 
 		   {   hOutlineWnd=CreateDialog(hInst,MAKEINTRESOURCE(IDD_OUTLINE),hWnd,OutlineDialogProc);
@@ -641,6 +668,7 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		  return 0;
     case WM_PAINT:
 	  BeginPaint(hWnd, &ps);
+	  wglMakeCurrent(hDCMain,hRCMain);
 	  HINT_TRY hint_render();
       SwapBuffers(hDCMain);
 	  EndPaint(hWnd, &ps);
@@ -667,25 +695,30 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		if (!(p->flags & SWP_NOMOVE) || !(p->flags & SWP_NOSIZE))
 		{ HMONITOR n;
 		  n = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
-		  if (n != hMonitor)
+		  if (n!=NULL && n != hMonitor)
 		  { RECT rc;
-			HDC hdc;
-			hMonitor = n;
-			hdc = GetDC(hWnd);
-			GetClientRect(hWnd, &rc);
-			EnumDisplayMonitors(hdc, &rc, set_monitor_dpi, 0);
-			ReleaseDC(hWnd, hdc);
-			needs_resize = true;
+		    HDC hdc;
+		    hMonitor = n;
+		    change_monitor();
+		    hdc = GetDC(hWnd);
+		    GetClientRect(hWnd, &rc);
+		    EnumDisplayMonitors(hdc, &rc, set_monitor_dpi, 0);
+		    ReleaseDC(hWnd, hdc);
+		    needs_resize = true;
 		  }
 		  if (!(p->flags & SWP_NOSIZE)) 
-		  {	RECT r;
-			GetClientRect(hWnd, &r);
-			client_width = r.right - r.left;
-			client_height = r.bottom - r.top;
-			needs_resize = true;
-		   }
+		  { RECT r;
+		    GetClientRect(hWnd, &r);
+		    client_width = r.right - r.left;
+		    client_height = r.bottom - r.top;
+		    needs_resize = true;
+		  }
 		  if (needs_resize)
-			HINT_TRY resize_page();
+		  {
+			  hint_clear_fonts(false);
+			  HINT_TRY resize_page();
+			  InvalidateRect(hMainWnd, NULL, FALSE);
+		  }
 		}
 		return 0;
 	  }
@@ -956,8 +989,10 @@ int hint_error(char *title, char *message)
 
 void hint_message(char *title, char *format, ...)
 { char str[1024];
+  WCHAR Wtitle[1024 + 1];
   va_list vargs;
+  lstrcpynW(Wtitle, UTF8to16(title), 1024 + 1);
   va_start(vargs,format);
   vsnprintf(str, 1024, format, vargs);
-  MessageBoxA(NULL,str,title,MB_OK);
+  MessageBoxW(NULL,UTF8to16(str),Wtitle,MB_OK);
 }
