@@ -36,7 +36,7 @@
 #include "hint.h"
 
 
-int round_to_pixel;
+int round_pxl;
 int dpi_threshold;
 double gamma=2.2;
 
@@ -127,7 +127,7 @@ SettingsDialogProc( HWND hDlg, UINT msg, WPARAM wparam, LPARAM lparam )
 	  SetDlgItemInt(hDlg,IDC_PXSIZE,dpi_threshold, FALSE);
       
       SendMessage(GetDlgItem(hDlg,IDC_ROUND_TO_PIXEL),BM_SETCHECK,
-		  round_to_pixel?BST_CHECKED:BST_UNCHECKED,0);
+		  round_pxl?BST_CHECKED:BST_UNCHECKED,0);
 	  
 	  /* Slider for Gamma */
 #define SLIDER_MAX 30 /* slider positions from 0 to MAX_SLIDER */
@@ -218,7 +218,7 @@ SettingsDialogProc( HWND hDlg, UINT msg, WPARAM wparam, LPARAM lparam )
 		  if (d != dpi_threshold)
 		  {
 			  dpi_threshold = d;
-			  hint_round_position(round_to_pixel, dpi_threshold);
+			  hint_round_position(round_pxl, dpi_threshold);
 			  InvalidateRect(hMainWnd, NULL, FALSE);
 		  }
 
@@ -258,7 +258,7 @@ SettingsDialogProc( HWND hDlg, UINT msg, WPARAM wparam, LPARAM lparam )
 	    t=GetDlgItemInt(hDlg,IDC_PXSIZE, NULL, FALSE);
 		if (t!=dpi_threshold) 
 		{  dpi_threshold=t; 
-		   if (round_to_pixel) result=TRUE; 
+		   if (round_pxl) result=TRUE; 
 		}
         EndDialog(hDlg, result);
         return TRUE;
@@ -266,12 +266,12 @@ SettingsDialogProc( HWND hDlg, UINT msg, WPARAM wparam, LPARAM lparam )
 	  else if ( LOWORD(wparam) == IDC_ROUND_TO_PIXEL )
 	  { int b=SendMessage(GetDlgItem(hDlg,IDC_ROUND_TO_PIXEL),BM_GETCHECK,0,0);
 	    if (b==BST_UNCHECKED)
-		  round_to_pixel=0;
+		  round_pxl=0;
 		else 
-		  round_to_pixel=1;
+		  round_pxl=1;
         SendMessage(GetDlgItem(hDlg,IDC_ROUND_TO_PIXEL),BM_SETCHECK,
-		  round_to_pixel?BST_CHECKED:BST_UNCHECKED,0);
-        hint_round_position(round_to_pixel, dpi_threshold);
+		  round_pxl?BST_CHECKED:BST_UNCHECKED,0);
+        hint_round_position(round_pxl, dpi_threshold);
 	    InvalidateRect(hMainWnd,NULL,FALSE);
 	  }
 	  else if (LOWORD(wparam) == IDCANCEL)

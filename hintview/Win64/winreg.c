@@ -32,7 +32,7 @@
 #include "settings.h"
 #include "winreg.h"
 
-extern int dpi_threshold, round_to_pixel;
+extern int dpi_threshold, round_pxl;
 
 #define PROJECT_KEY "HINT"
 #define PROGRAM_KEY "HintView"
@@ -62,7 +62,7 @@ regtable regtab= {
 	{"pxthr",&dpi_threshold,TYPE_INT32},
 	{KEY_FLAGS,&dark,0},
 	{KEY_FLAGS,&autoreload,1},
-	{KEY_FLAGS,&round_to_pixel,2},
+	{KEY_FLAGS,&round_pxl,2},
 	{NULL,NULL,0}};
 
 void write_regtab(void)

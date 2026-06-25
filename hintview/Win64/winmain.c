@@ -51,7 +51,7 @@
 #include "get.h"
 #include "hint.h"
 #include "rendernative.h"
-
+//include <shellscalingapi.h>
 
 /* Windows */
 WCHAR szClassName[] = L"HintView";    
@@ -85,7 +85,6 @@ static void set_dpi(HDC hdc)
   if (dpi_x != h_dpmm * 25.4 || dpi_y != v_dpmm * 25.4)
   { dpi_x = h_dpmm * 25.4;  /* dots per inch */
 	dpi_y = v_dpmm * 25.4;
-	hint_clear_fonts(false);
   }
 }
 
@@ -444,8 +443,11 @@ static BOOL set_monitor_dpi(
 	LPRECT rc,
 	LPARAM unnamedParam4
 )
-{ if (hm == hMonitor)
-    set_dpi(hMonitorDC);
+{
+	if (hm == hMonitor)
+	{   LOG("New Monitor found: %x\n",hm);
+		set_dpi(hMonitorDC);
+	}
   return TRUE;
 }
 
@@ -458,6 +460,8 @@ static BOOL init_contexts(void)
    hRCMain=GetGLContext(hDCMain);
    if (hRCMain==NULL)
      return FALSE;
+   hint_render_on();
+   LOG("Context inititialized\n");
    return TRUE;
 }
 
@@ -468,8 +472,7 @@ static void init_handles(void)
     {  hint_error("Fatal Error","Unable to create rendering context");
 		 exit(1);
     }
-    else
-       hint_render_on();
+       
     hMenu = LoadMenu(hInst,MAKEINTRESOURCE(IDR_MENU));
     hSizeNWSE=LoadCursor(NULL,IDC_SIZENWSE);
     hArrow=LoadCursor(NULL,IDC_ARROW);
@@ -478,12 +481,13 @@ static void init_handles(void)
 
 static void release_contexts(void)
 /* release all handles created by init_handles */
-{   nativeClear();
+{   hint_render_off();
     wglMakeCurrent(hDCMain, NULL);
     if (hRCMain!=NULL) wglDeleteContext(hRCMain);
     hRCMain=NULL;
     if (hDCMain!=NULL) ReleaseDC(hMainWnd, hDCMain);
     hDCMain=NULL;
+	LOG("Context released\n");
 }
 
 static void change_monitor(void)
@@ -493,7 +497,6 @@ static void change_monitor(void)
   {  hint_error("Fatal Error","Unable to move to other monitor");
 		 exit(1);
   }
-  nativeInit();
 }
 
 bool onTop=false;
@@ -508,7 +511,7 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	static double scale0;
     static bool OnLink=false;
     static bool loading=false;
-
+	//LOG("Message %x\n", uMsg);
     switch(uMsg) {
 	case WM_CREATE:
 	  hMainWnd=hWnd;
@@ -517,7 +520,6 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	  return 0;
 	case WM_DESTROY:
 	  hint_end();
-	  hint_render_off();
 	  release_contexts();
       PostQuitMessage(0);
       return 0;
@@ -596,15 +598,36 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		     HINT_TRY resize_page();
 		   return 0;
 		 case ID_KEY_NIGHT: /* toggle day or night mode */
+			 
+#if 1
+		 {
+			 RECT r;
+			 LOG("Toggle Dark\n");
+			 GetClientRect(hWnd, &r);
+			 client_width = r.right - r.left;
+			 client_height = r.bottom - r.top;
+			 //needs_resize = true;
+			 //needs_fonts = true;
+			 
+			 //HINT_TRY resize_page();
+			 hint_resize(client_width, client_height, dpi_x * scale, dpi_y * scale);
+			 render_page();
+			 InvalidateRect(hMainWnd, NULL, FALSE);
+			 return 0;
+		 }
+#else
   		   dark=!dark;
            hint_dark(dark);
            buttons_change();
-           InvalidateRect(hMainWnd,NULL,FALSE);
+		   InvalidateRect(hMainWnd, NULL, FALSE);
+#endif
+           
 		   return 0;
 		 case ID_KEY_ZOOM: /* zoom to 100% */
+		  LOG("Scale to 1\n");
 		  scale=SCALE_NORMAL;
-		  hint_clear_fonts(false);
 		  HINT_TRY resize_page();
+		  hint_clear_fonts(false);
 		  InvalidateRect(hMainWnd, NULL, FALSE);
 		  return 0;
 		case ID_KEY_OUTLINE: /* outline window */
@@ -667,6 +690,7 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
           InvalidateRect(hMainWnd,NULL,FALSE);
 		  return 0;
     case WM_PAINT:
+	  LOG("Painting\n");
 	  BeginPaint(hWnd, &ps);
 	  wglMakeCurrent(hDCMain,hRCMain);
 	  HINT_TRY hint_render();
@@ -687,10 +711,56 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		MESSAGE("new dpi x%d", dpi_x);
 		return 0;
 #endif
-#if 1
+	case WM_DPICHANGED:
+	{
+		HMONITOR n;
+		HDC hdc;
+		int newDpiX = LOWORD(wParam);
+		int newDpiY = HIWORD(wParam);
+		UINT dpiX = 0;
+		UINT dpiY = 0;
+		RECT* r = (RECT*)lParam;
+		RECT rc;
+		LOG("DPI %d x %d Window %d x %d\n", newDpiX, newDpiY,
+			r->right - r->left, r->bottom - r->top);
+		SetWindowPos(hWnd,
+			NULL,
+			r->left,
+			r->top,
+			r->right - r->left,
+			r->bottom - r->top,
+			SWP_NOZORDER | SWP_NOACTIVATE);
+		//change_monitor();
+		
+		n = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+		hMonitor = n;
+		hdc = hDCMain;
+		dpiX = GetDpiForWindow(hWnd);
+		//GetDpiForMonitor(hMonitor, 0, &dpiX, &dpiY);
+		//GetDpiForMonitor(hMonitor,0, //MDT_EFFECTIVE_DPI, 
+		//	&dpiX, &dpiY);
+		LOG("Monitor DPI: %d x %d\n", dpiX, dpiY);
+		GetWindowRect(hWnd, &rc);
+		LOG("New Pos: %d x %d\n", rc.top, rc.left);
+		EnumDisplayMonitors(hdc, NULL, set_monitor_dpi, 0);
+		//ReleaseDC(hWnd, hdc);
+		GetClientRect(hWnd, &rc);
+		client_width = rc.right - rc.left;
+		client_height = rc.bottom - rc.top;
+		LOG("New Dpi %.2f x %.2f, Window %d x %d\n", dpi_x, dpi_y,
+			client_width, client_height);
+		hint_resize(client_width, client_height, dpi_x * scale, dpi_y * scale);
+		hint_clear_fonts(false);
+		render_page();
+		InvalidateRect(hWnd, NULL, FALSE);
+	}
+	return 0;
+#if 0
 	case WM_WINDOWPOSCHANGED:
 	  { LPWINDOWPOS p;
-	  bool needs_resize = false;
+	  bool needs_resize = false, needs_fonts =false;
+	  LRESULT result = DefWindowProc(hWnd, uMsg, wParam, lParam);
+	  LOG("WINDOWPOSCHANGED\n");
 		p= (LPWINDOWPOS)lParam;
 		if (!(p->flags & SWP_NOMOVE) || !(p->flags & SWP_NOSIZE))
 		{ HMONITOR n;
@@ -699,39 +769,55 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		  { RECT rc;
 		    HDC hdc;
 		    hMonitor = n;
+			LOG("New monitor: %d\n", n);
 		    change_monitor();
-		    hdc = GetDC(hWnd);
+			hdc = GetDC(hWnd);
 		    GetClientRect(hWnd, &rc);
 		    EnumDisplayMonitors(hdc, &rc, set_monitor_dpi, 0);
 		    ReleaseDC(hWnd, hdc);
 		    needs_resize = true;
+			needs_fonts = true;
 		  }
 		  if (!(p->flags & SWP_NOSIZE)) 
-		  { RECT r;
+		  {
+			  RECT r;
 		    GetClientRect(hWnd, &r);
 		    client_width = r.right - r.left;
 		    client_height = r.bottom - r.top;
-		    needs_resize = true;
+			//needs_resize = true;
+			//needs_fonts = true;
+			LOG("Resize %d x %d\n", client_width, client_height);
+			//HINT_TRY resize_page();
+		    hint_resize(client_width, client_height, dpi_x* scale, dpi_y* scale);
+			render_page();
+			//InvalidateRect(hMainWnd, NULL, FALSE);
 		  }
 		  if (needs_resize)
-		  {
-			  hint_clear_fonts(false);
-			  HINT_TRY resize_page();
-			  InvalidateRect(hMainWnd, NULL, FALSE);
+		  {  HINT_TRY resize_page();  			 
 		  }
+		  if (needs_fonts)
+		  {  hint_clear_fonts(false);
+		    
+		  }
+		  //   if (needs_fonts || needs_resize)
+			//  InvalidateRect(hMainWnd, NULL, FALSE);
 		}
-		return 0;
+		return result;
 	  }
-#else
+#endif
+#if 1
 		/* the following messages are not sent if  WM_WINDOWPOSCHANGED returns zero.*/
     case WM_SIZE:
 	  client_width=LOWORD(lParam);
 	  client_height=HIWORD(lParam);
+	  LOG("WM_SIZE %d x %d\n", client_width, client_height);
   	  HINT_TRY resize_page();
 	  return 0;
+#endif
+#if 0
 	case WM_MOVE:
 	{
-		
+
 		HMONITOR n;
 		n = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
 		if (n != hMonitor)
@@ -743,6 +829,7 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			// rc.bottom = (rc.bottom - rc.top) / 2;
 			EnumDisplayMonitors(hdc, &rc, set_monitor_dpi, 0);
 		}
+		LOG("WM_MOVE\n");
 	}
 	return 0;
 #endif
@@ -887,7 +974,7 @@ wWinMain(
 	BOOL b;
 	INITCOMMONCONTROLSEX ic;
     HACCEL hAccel;
-
+	debugflags = 0x2000;
 #if 0
     hlog=freopen("hintview.log","w",stdout);
 	debugflags|=1;
@@ -899,7 +986,8 @@ wWinMain(
 	
 #if 1
 	//	dpi_ac = SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_UNAWARE);
-	dpi_ac = SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+	dpi_ac= SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+	//dpi_ac = SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
    //  dpi_ac = SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
 #else
 	//dpi_err = SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
@@ -940,6 +1028,7 @@ wWinMain(
 	init_button_class();
     hint_dark(dark);
     hint_gamma(gamma);
+	hint_round_position(round_pxl, dpi_threshold);
 	if (autoreload) SendMessage(hMainWnd,WM_COMMAND,ID_KEY_START_AUTORELOAD,0);
 	hAccel = LoadAccelerators(hInst, MAKEINTRESOURCE(IDR_ACCELERATOR));
 
@@ -995,4 +1084,12 @@ void hint_message(char *title, char *format, ...)
   va_start(vargs,format);
   vsnprintf(str, 1024, format, vargs);
   MessageBoxW(NULL,UTF8to16(str),Wtitle,MB_OK);
+}
+
+void hint_log(const char* format, ...)
+{ char str[1024];
+  va_list vargs;
+  va_start(vargs, format);
+  vsnprintf(str, 1024, format, vargs);
+  OutputDebugStringA(str);
 }

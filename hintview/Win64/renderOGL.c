@@ -523,7 +523,7 @@ unsigned int nativeTexture(unsigned char *bits, int w, int h) {
 
 unsigned int nativeFreeTexture(unsigned int t)
 { if (t != 0) {
-    glDeleteTextures(1, &t); // probably not needed
+   // glDeleteTextures(1, &t); // probably not needed
   }
   return 0;
 }

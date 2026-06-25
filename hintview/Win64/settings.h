@@ -31,6 +31,8 @@
 extern double gamma;
 extern int dark;
 extern enum units unit;
+extern int round_pxl;
+extern int dpi_threshold;
 
 INT_PTR CALLBACK    
 SettingsDialogProc( HWND hDlg, UINT message, WPARAM wparam, LPARAM lparam );
