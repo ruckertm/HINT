@@ -31,10 +31,7 @@
 #include <afxres.h>
 #include <stdio.h>
 #include <math.h>
-#if 0
-#include <ShellScalingApi.h>
-/* remove also the additional libraray score.lib */
-#endif
+
 #include "resource.h"
 #include "basetypes.h"
 #include "error.h"
@@ -50,8 +47,6 @@
 #include "button.h"
 #include "get.h"
 #include "hint.h"
-#include "rendernative.h"
-//include <shellscalingapi.h>
 
 /* Windows */
 WCHAR szClassName[] = L"HintView";    
@@ -489,7 +484,7 @@ static void release_contexts(void)
     hDCMain=NULL;
 	LOG("Context released\n");
 }
-
+#if 0
 static void change_monitor(void)
 /* refresh the handles after moving the window to a different monitor*/
 { release_contexts();
@@ -498,6 +493,7 @@ static void change_monitor(void)
 		 exit(1);
   }
 }
+#endif
 
 bool onTop=false;
 /* Windows message processing */
@@ -511,7 +507,7 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	static double scale0;
     static bool OnLink=false;
     static bool loading=false;
-	//LOG("Message %x\n", uMsg);
+
     switch(uMsg) {
 	case WM_CREATE:
 	  hMainWnd=hWnd;
@@ -598,30 +594,10 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		     HINT_TRY resize_page();
 		   return 0;
 		 case ID_KEY_NIGHT: /* toggle day or night mode */
-			 
-#if 1
-		 {
-			 RECT r;
-			 LOG("Toggle Dark\n");
-			 GetClientRect(hWnd, &r);
-			 client_width = r.right - r.left;
-			 client_height = r.bottom - r.top;
-			 //needs_resize = true;
-			 //needs_fonts = true;
-			 
-			 //HINT_TRY resize_page();
-			 hint_resize(client_width, client_height, dpi_x * scale, dpi_y * scale);
-			 render_page();
-			 InvalidateRect(hMainWnd, NULL, FALSE);
-			 return 0;
-		 }
-#else
   		   dark=!dark;
            hint_dark(dark);
            buttons_change();
 		   InvalidateRect(hMainWnd, NULL, FALSE);
-#endif
-           
 		   return 0;
 		 case ID_KEY_ZOOM: /* zoom to 100% */
 		  LOG("Scale to 1\n");
@@ -690,9 +666,7 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
           InvalidateRect(hMainWnd,NULL,FALSE);
 		  return 0;
     case WM_PAINT:
-	  LOG("Painting\n");
 	  BeginPaint(hWnd, &ps);
-	  wglMakeCurrent(hDCMain,hRCMain);
 	  HINT_TRY hint_render();
       SwapBuffers(hDCMain);
 	  EndPaint(hWnd, &ps);
@@ -701,53 +675,37 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		if (autoreload && new_file_time())
 		  SendMessage(hMainWnd,WM_COMMAND,ID_KEY_RELOAD,0);
 		return 0;
-#if 0
+
 	case WM_DPICHANGED:
-		/* the dpi values you get here are 96 for a standarf monitor
-		   and a scaled value if the mobitor is configured with a scale factor.
-		   Neither has anything to do with the true resolution of the monitor. */
-		dpi_x = LOWORD(wParam);
-		dpi_y = HIWORD(wParam);
-		MESSAGE("new dpi x%d", dpi_x);
-		return 0;
-#endif
-	case WM_DPICHANGED:
-	{
-		HMONITOR n;
+	{ 
 		HDC hdc;
-		int newDpiX = LOWORD(wParam);
-		int newDpiY = HIWORD(wParam);
-		UINT dpiX = 0;
-		UINT dpiY = 0;
-		RECT* r = (RECT*)lParam;
 		RECT rc;
-		LOG("DPI %d x %d Window %d x %d\n", newDpiX, newDpiY,
-			r->right - r->left, r->bottom - r->top);
-		SetWindowPos(hWnd,
-			NULL,
-			r->left,
-			r->top,
-			r->right - r->left,
-			r->bottom - r->top,
-			SWP_NOZORDER | SWP_NOACTIVATE);
-		//change_monitor();
-		
-		n = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
-		hMonitor = n;
-		hdc = hDCMain;
+		RECT* r = (RECT*)lParam;
+
+#if 0
+	    /* the dpi values you get here are 96 for a standard monitor
+		   and a scaled value (144) if the monitor is configured with a scale factor.
+		   Neither has anything to do with the true resolution of the monitor. */
+		UINT dpiX = LOWORD(wParam);
+		UINT dpiY = HIWORD(wParam);
 		dpiX = GetDpiForWindow(hWnd);
-		//GetDpiForMonitor(hMonitor, 0, &dpiX, &dpiY);
-		//GetDpiForMonitor(hMonitor,0, //MDT_EFFECTIVE_DPI, 
-		//	&dpiX, &dpiY);
-		LOG("Monitor DPI: %d x %d\n", dpiX, dpiY);
-		GetWindowRect(hWnd, &rc);
-		LOG("New Pos: %d x %d\n", rc.top, rc.left);
-		EnumDisplayMonitors(hdc, NULL, set_monitor_dpi, 0);
-		//ReleaseDC(hWnd, hdc);
+		GetDpiForMonitor(hMonitor, MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
+		LOG("New DPI: %d x %d\n", dpiX, dpiY);
+#endif
+		LOG("DPICHANGED New Window %d x %d\n", r->right - r->left, r->bottom - r->top);
+		/* make the window the size as proposed calling WM_SIZE */
+		SetWindowPos(hWnd, NULL, r->left, r->top, r->right - r->left, r->bottom - r->top,
+			SWP_NOZORDER | SWP_NOACTIVATE);
+#if 0
+		change_monitor(); //Not necessary!
+#endif
+		/* Determine DPI from the monitor */
+		hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+		EnumDisplayMonitors(hDCMain, NULL, set_monitor_dpi, 0); /*Restricting the position does not seem to work*/
 		GetClientRect(hWnd, &rc);
 		client_width = rc.right - rc.left;
 		client_height = rc.bottom - rc.top;
-		LOG("New Dpi %.2f x %.2f, Window %d x %d\n", dpi_x, dpi_y,
+		LOG("New DPI %.2f x %.2f, Client size %d x %d\n", dpi_x, dpi_y,
 			client_width, client_height);
 		hint_resize(client_width, client_height, dpi_x * scale, dpi_y * scale);
 		hint_clear_fonts(false);
@@ -755,84 +713,12 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		InvalidateRect(hWnd, NULL, FALSE);
 	}
 	return 0;
-#if 0
-	case WM_WINDOWPOSCHANGED:
-	  { LPWINDOWPOS p;
-	  bool needs_resize = false, needs_fonts =false;
-	  LRESULT result = DefWindowProc(hWnd, uMsg, wParam, lParam);
-	  LOG("WINDOWPOSCHANGED\n");
-		p= (LPWINDOWPOS)lParam;
-		if (!(p->flags & SWP_NOMOVE) || !(p->flags & SWP_NOSIZE))
-		{ HMONITOR n;
-		  n = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
-		  if (n!=NULL && n != hMonitor)
-		  { RECT rc;
-		    HDC hdc;
-		    hMonitor = n;
-			LOG("New monitor: %d\n", n);
-		    change_monitor();
-			hdc = GetDC(hWnd);
-		    GetClientRect(hWnd, &rc);
-		    EnumDisplayMonitors(hdc, &rc, set_monitor_dpi, 0);
-		    ReleaseDC(hWnd, hdc);
-		    needs_resize = true;
-			needs_fonts = true;
-		  }
-		  if (!(p->flags & SWP_NOSIZE)) 
-		  {
-			  RECT r;
-		    GetClientRect(hWnd, &r);
-		    client_width = r.right - r.left;
-		    client_height = r.bottom - r.top;
-			//needs_resize = true;
-			//needs_fonts = true;
-			LOG("Resize %d x %d\n", client_width, client_height);
-			//HINT_TRY resize_page();
-		    hint_resize(client_width, client_height, dpi_x* scale, dpi_y* scale);
-			render_page();
-			//InvalidateRect(hMainWnd, NULL, FALSE);
-		  }
-		  if (needs_resize)
-		  {  HINT_TRY resize_page();  			 
-		  }
-		  if (needs_fonts)
-		  {  hint_clear_fonts(false);
-		    
-		  }
-		  //   if (needs_fonts || needs_resize)
-			//  InvalidateRect(hMainWnd, NULL, FALSE);
-		}
-		return result;
-	  }
-#endif
-#if 1
-		/* the following messages are not sent if  WM_WINDOWPOSCHANGED returns zero.*/
     case WM_SIZE:
 	  client_width=LOWORD(lParam);
 	  client_height=HIWORD(lParam);
 	  LOG("WM_SIZE %d x %d\n", client_width, client_height);
   	  HINT_TRY resize_page();
 	  return 0;
-#endif
-#if 0
-	case WM_MOVE:
-	{
-
-		HMONITOR n;
-		n = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
-		if (n != hMonitor)
-		{	RECT rc;
-			HDC hdc;
-			hMonitor = n;
-			hdc = GetDC(hWnd);
-			GetClientRect(hWnd, &rc);
-			// rc.bottom = (rc.bottom - rc.top) / 2;
-			EnumDisplayMonitors(hdc, &rc, set_monitor_dpi, 0);
-		}
-		LOG("WM_MOVE\n");
-	}
-	return 0;
-#endif
     case WM_LBUTTONDOWN:
 	{ drag.x = LOWORD(lParam), drag.y=HIWORD(lParam);
       if (!DragDetect(hWnd,drag))
@@ -974,7 +860,7 @@ wWinMain(
 	BOOL b;
 	INITCOMMONCONTROLSEX ic;
     HACCEL hAccel;
-	debugflags = 0x2000;
+
 #if 0
     hlog=freopen("hintview.log","w",stdout);
 	debugflags|=1;
@@ -986,8 +872,8 @@ wWinMain(
 	
 #if 1
 	//	dpi_ac = SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_UNAWARE);
-	dpi_ac= SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-	//dpi_ac = SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+	//  dpi_ac= SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+	dpi_ac = SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
    //  dpi_ac = SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
 #else
 	//dpi_err = SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
