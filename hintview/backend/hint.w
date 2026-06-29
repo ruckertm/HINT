@@ -2901,8 +2901,9 @@ static pointer new_character(internal_font_number @!f, eight_bits @!c)
 {@+ pointer p; /*newly allocated node*/
     if (font_def[f].ff==no_format) hload_font(f);
 #ifdef DEBUG
-if (font_bc[f] > c || font_ec[f] < c ||
- (width_base[f]!=0 && ! char_exists(char_info(f, qi(c)))) ||
+if (
+ (width_base[f]!=0 && (font_bc[f] > c || font_ec[f] < c ||
+    ! char_exists(char_info(f, qi(c))))) ||
  (width_base[f]==0 && ! ft_char_exists(f, c)))
   DBG(DBGFONT,"Warning: Character 0x%0X in font %d does not exist\n",c,f);
 #endif
@@ -6616,7 +6617,6 @@ static void hget_definition_section(void)
   DBG(DBGDEF,"Reading list of definitions\n");
   while (hpos<hend) @/
     hget_def_node();
-  hget_font_metrics();
   @<initialize the default page template@>@;
   cur_bs=baseline_skip; cur_ls=line_skip; cur_lsl=line_skip_limit;
 }
@@ -6639,7 +6639,7 @@ static void hget_range_def(uint8_t a, uint8_t pg);
 static void hget_page_def(uint8_t a, uint8_t n);
 static void hget_outline_or_label_def(Info i, int n);
 static void hget_unknown_def(void);
-static void hget_font_metrics(void);
+static void hget_font_metrics(int f);
 static void hget_color_def(uint8_t a, int n);
 static pointer hget_definition(uint8_t a);
 static int hget_label_ref(void);
@@ -9423,7 +9423,7 @@ to take care of ending an incomplete paragraph.
 pointer hget_paragraph_initial(scaled x, uint8_t *to)
 { @+@<prepare for reading the paragraph list@>@;
     if (to>list_end) 
-    { LOG("Value of to greater than list_end"); 
+    { DBG(DBGPAGE,"Value of to greater than list_end"); 
       to=list_end;
     }
     @<read the paragraph list@>@;
@@ -12828,7 +12828,11 @@ static void hload_font(uint8_t f)
   { font_def[f].ff=ft_format;
     font_def[f].hpxs=0;
     font_def[f].vpxs=0;
-  } 
+  }
+  if (is_otf_font(f))
+    font_size[f]=font_def[f].s;
+  else
+    hget_font_metrics(f);
 }
 @
 
@@ -12855,7 +12859,7 @@ void  hinit_gh_cache(void)
 void hint_clear_fonts(bool rm)
 { int f;
   if (font_def==NULL) return;
-  DBG(DBGFONT,rm?"Clear font data":"Clear native glyph data");
+  DBG(DBGFONT,rm?"Clear font data\n":"Clear native glyph data\n");
   for(f=0;f<GCACHE_SIZE;f++)
   { if(glyph_cache[f].key!=EMPTY_KEY)
     { if (glyph_cache[f].OGLtexture!=0)
@@ -12908,16 +12912,12 @@ If the ``on demand'' loading works, this should also be done for
 the \.{.TFM} files.
 
 @<\HINT\ auxiliar functions@>=
-static void hget_font_metrics(void)
-{ int f;
-  font_ptr=max_ref[font_kind];
-  for (f=0; f<=max_ref[font_kind]; f++)
-    if (font_def[f].m!=0)
-    { hget_section(font_def[f].m);
-      read_font_info(f,font_def[f].n,font_def[f].s);
-    }
-    else
-      font_size[f]=font_def[f].s;
+static void hget_font_metrics(int f)
+{ unsigned char *spos, *sstart, *send;
+  spos=hpos; sstart=hstart;send=hend;@/
+  hget_section(font_def[f].m);
+  read_font_info(f,font_def[f].n,font_def[f].s);
+  hpos=spos; hstart=sstart;hend=send;
 }
 @
 
@@ -13402,7 +13402,8 @@ character map than to quit the program.
  { ft_err = FT_Select_Charmap(ft_face,FT_ENCODING_ADOBE_CUSTOM); 
    if (ft_err)  ft_err =FT_Select_Charmap(ft_face,FT_ENCODING_UNICODE);
  }
- if (ft_err)  LOG("Unable to select encoding for font %d\n",f);
+ if (ft_err)
+   LOG("Unable to select encoding for font %d\n",f);
 @
 
 We use the FreeType library to render outline fonts.
@@ -13427,7 +13428,9 @@ if (font_def[f].hpxs!=x_px_size || font_def[f].vpxs!=y_px_size)
             ft_size,  /* |char_height| in $1/64$th of points */
             (ONE*72.27)/(double)font_def[f].hpxs,     /* horizontal device resolution    */
             (ONE*72.27)/(double)font_def[f].vpxs);   /* vertical device resolution      */
-  if (ft_err) LOG("Unable to set FreeType glyph size"); 
+  if (ft_err) LOG("Unable to set FreeType glyph size");
+  DBG(DBGFONT,"Set Size for font %d: pixel=%.2fpt\n",
+    f, font_def[f].hpxs/(double)0x10000);
 }
 @
 
@@ -13551,6 +13554,8 @@ static void ft_unpack_glyph(uint8_t f, GHcache *g, uint32_t cc)
   memcpy(bits,ft_face->glyph->bitmap.buffer,g->w*g->h);
   g->OGLtexture=nativeTexture(bits,g->w, g->h);
   free(bits);
+  DBG(DBGFONT,"FONT %d: pixel=%.2fpt, char=%c width=%d Texture=%d\n",
+     f, font_def[f].hpxs/(double)0x10000,cc,g->w,g->OGLtexture);
   g->hoff*=font_def[f].hpxs;
   g->voff*=font_def[f].vpxs;@/
   g->w*=font_def[f].hpxs;
@@ -13894,6 +13899,7 @@ static void render_char(int x, int y, uint8_t f, uint32_t cc)
       top=top*y_px_size;
     }
   }
+  DBG(DBGRENDER, "Render Texture=%d, x=%.2f width=%.2f\n", g->OGLtexture,(double)left/x_px_size,(double)w/x_px_size);
   nativeGlyph(left,top,w,h,g->OGLtexture);
 }
 @

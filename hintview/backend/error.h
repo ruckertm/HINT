@@ -1,5 +1,5 @@
 /*682:*/
-#line 14683 "hint.w"
+#line 14689 "hint.w"
 
 #ifndef _ERROR_H
 #define _ERROR_H
