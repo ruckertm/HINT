@@ -678,7 +678,6 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	case WM_DPICHANGED:
 	{ 
-		HDC hdc;
 		RECT rc;
 		RECT* r = (RECT*)lParam;
 
