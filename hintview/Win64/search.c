@@ -75,11 +75,8 @@ SearchDialogProc( HWND hDlg, UINT msg, WPARAM wparam, LPARAM lparam )
 		  }
         return TRUE;
       case MAKEWPARAM(IDC_SEARCH_NEXT,BN_CLICKED): 
-        { uint64_t h=hint_page_get();
-          if (!hint_next_mark())
-			  hint_page_top(h);
-	      InvalidateRect(hMainWnd,NULL,FALSE);
-		}
+		  SendMessage(hMainWnd, WM_COMMAND, MAKEWPARAM(ID_KEY_SEARCH_NEXT,0), 0);
+        
         return TRUE;
       case IDCANCEL: 
 	    search_length=0;

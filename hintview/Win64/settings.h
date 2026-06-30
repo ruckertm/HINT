@@ -28,6 +28,9 @@
 #ifndef _SETTINGS_H_
 #define _SETTINGS_H_
 
+#define GAMMA_MAX 4.0
+#define GAMMA_MIN 0.1
+
 extern double gamma;
 extern int dark;
 extern enum units unit;

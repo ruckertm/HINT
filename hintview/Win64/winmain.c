@@ -508,7 +508,7 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     static bool OnLink=false;
     static bool loading=false;
 
-    switch(uMsg) {
+  switch(uMsg) {
 	case WM_CREATE:
 	  hMainWnd=hWnd;
 	  DragAcceptFiles(hWnd,TRUE);
@@ -539,6 +539,7 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 #endif
       switch(LOWORD(wParam))
 	{ case ID_FILE_OPEN:
+	  case ID_KEY_OPEN_FILE:
 	    if (get_file_name())
 		{ if (loading) return 0;
 		  loading=true;
@@ -556,10 +557,11 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         InvalidateRect(hWnd,NULL,FALSE);
 		return 0;
 	  case ID_FILE_AUTORELOAD:
-		  if (GetMenuState(hMenu,ID_FILE_AUTORELOAD,MF_BYCOMMAND)&MF_CHECKED) 
-			  SendMessage(hMainWnd,WM_COMMAND,ID_KEY_AUTORELOAD,0);
-		  else			  
-			  SendMessage(hMainWnd,WM_COMMAND,ID_KEY_AUTORELOAD,1);
+	  case ID_KEY_AUTORELOAD:
+		  autoreload = !autoreload;
+		  /* fall through */
+	   case ID_SET_AUTORELOAD:
+		  CheckMenuItem(hMenu, ID_FILE_AUTORELOAD, autoreload ? MF_CHECKED : MF_UNCHECKED);
 		  return 0;
 	  case ID_FILE_SAVE_IMAGE:
 		save_image();
@@ -576,8 +578,9 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		  }
 		  return 0;
       case IDM_EXIT:
-        PostMessage(hMainWnd,WM_CLOSE,0,0);
-  	    return 0;
+	  case ID_KEY_QUIT:
+		  PostMessage(hMainWnd, WM_CLOSE, 0, 0);
+		  return 0;
 	  case ID_KEY_MENU: /* system menu */
 		{ RECT      rc={0};
 		  HMENU     hPopupMenu = NULL;
@@ -589,6 +592,7 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             rc.left, rc.bottom, hMainWnd, NULL); 
         }
 		 return 0;
+		 case ID_KEY_PREFERENCES: /* currently no separate dialog */
 		 case ID_KEY_SETTINGS: /* settings dialog */
 		   if (DialogBox(hInst,MAKEINTRESOURCE(IDD_SETTINGS),hWnd,SettingsDialogProc))
 		     HINT_TRY resize_page();
@@ -636,12 +640,23 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
  		  HINT_TRY reload_file();
 		  loading=false;
 		return 0;
-	  case ID_KEY_AUTORELOAD:
-		  autoreload=lParam;
-		  CheckMenuItem(hMenu,ID_FILE_AUTORELOAD,autoreload?MF_CHECKED:MF_UNCHECKED);
+	  case ID_KEY_SEARCH_NEXT:
+		 HINT_TRY
+	     { uint64_t h = hint_page_get();
+		   if (!hint_next_mark())
+			 hint_page_top(h);
+		 }
+		 InvalidateRect(hMainWnd, NULL, FALSE);
+	     return 0;
+	  case ID_KEY_GAMMA_MINUS:
+		  gamma = gamma - 0.1;
+		  if (gamma < GAMMA_MIN) gamma = GAMMA_MIN;
+		  PostMessage(hMainWnd, WM_GAMMA, 0, 0);
 		  return 0;
-	  case ID_KEY_QUIT:
-		  PostMessage(hMainWnd,WM_CLOSE,0,0);
+	  case ID_KEY_GAMMA_PLUS:
+		  gamma = gamma + 0.1;
+		  if (gamma > GAMMA_MAX) gamma = GAMMA_MAX;
+		  PostMessage(hMainWnd, WM_GAMMA, 0, 0);
 		  return 0;
 	}
     return 0;
@@ -661,6 +676,7 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	  }
 	  break;
 #endif 
+	
 	case WM_GAMMA:
 		  hint_gamma(gamma);
           InvalidateRect(hMainWnd,NULL,FALSE);
@@ -784,6 +800,7 @@ WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 
 /* Command line */
+BOOL cl_home = FALSE, cl_outline=FALSE;
 
 static int do_command_line(WCHAR *c)
 { int i;
@@ -793,12 +810,59 @@ static int do_command_line(WCHAR *c)
     else if (*c=='-')
 	{ /* scan option */
       c++;
-	  if (*c=='d')
-	  { c++;
-	    debugflags=wcstol(c,&c,16);
-	  }
-	  else
-  	    while (*c!=0 && !isspace(*c)) c++; /* skip option */
+	  if (*c == '-') c++; /* treat -- like - */
+	  switch (*c)
+	  { case 'a':
+		  c++;
+		  autoreload = true;
+		  break;
+	    case 'd':
+		  c++;
+		  dark = true;
+		  break;
+		case 'l':
+			c++;
+			dark = false;
+			break;
+		case 'h':
+			c++;
+			cl_home = true;
+			break;
+		case 't':
+			c++;
+			cl_outline = true;
+			break;
+		case 'z':
+			c++;
+			scale = SCALE_NORMAL;
+			break;
+		case 'v':
+			fprintf(stdout,"HintView version %s\n"
+				"HINT file format version %d.%d\n",
+				UTF16to8(VERSION),
+				HINT_VERSION, HINT_MINOR_VERSION);
+			exit(0);
+       	case 'D':
+	      c++;
+		  debugflags = wcstol(c, &c, 16);
+		  break;
+	    default:
+		  fprintf(stdout, "%s",
+				"Usage: hintview [options] [file]\n"
+				"Options:\n"
+				"  -a         Start in autoreload mode.\n"
+				"  -h         Start with the documents home page.\n"
+				"  -d         Start in dark mode.\n"
+			    "  -l         Start in light mode.\n"
+				"  -t         Show the documents outline.\n"
+				"  -z         Start with zoom level 100%.\n"
+				"  -?         Display this message.\n"
+				"  --version  Display the version.\n"
+				"\n"
+				"See the hintview manual for more details.\n"
+			);
+		  exit(*c=='?'?0:1);
+		}
 	}
 	else
 	{ bool quoted=false;
@@ -914,7 +978,7 @@ wWinMain(
     hint_dark(dark);
     hint_gamma(gamma);
 	hint_round_position(round_pxl, dpi_threshold);
-	if (autoreload) SendMessage(hMainWnd,WM_COMMAND,ID_KEY_START_AUTORELOAD,0);
+	if (autoreload) SendMessage(hMainWnd,WM_COMMAND,ID_SET_AUTORELOAD,0);
 	hAccel = LoadAccelerators(hInst, MAKEINTRESOURCE(IDR_ACCELERATOR));
 
 #if 1
@@ -929,6 +993,10 @@ wWinMain(
 	SetWindowPos(hMainWnd, HWND_TOP, 0, 0, r.right - r.left, r.bottom - r.top, SWP_NOMOVE | SWP_SHOWWINDOW);
 #endif
 	//SetWindowPos(hMainWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW); /* show the window */
+	if (cl_home)
+		PostMessage(hMainWnd, WM_COMMAND, MAKEWPARAM(ID_KEY_HOME, 0), 0);
+	if (cl_outline)
+		PostMessage(hMainWnd, WM_COMMAND, MAKEWPARAM(ID_KEY_OUTLINE, 0), 0);
 
 	HINT_TRY render_file();
 	
@@ -939,6 +1007,7 @@ wWinMain(
       { hint_error("ERROR","Unexpected end of message loop");
         break;
       }
+
 #if 0
       else if (IsWindow(hSearchWnd) && IsDialogMessage(hSearchWnd, &msg))
 		  continue;

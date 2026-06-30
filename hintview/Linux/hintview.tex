@@ -1,5 +1,5 @@
-%\font\sans=lmsans10-regular.otf
-\font\sans=cmss10
+\font\sans=lmsans10-regular.otf
+%\font\sans=cmss10
 \font\large=cmss10 scaled 2000
 \sans
 \parskip 6pt plus 2pt minus 3pt
@@ -17,9 +17,9 @@
 \def\section#1{\bigskip\goodbreak\noindent
   \outline{#1}{0}#1\par}
 
-\def\itemize{\par\bigskip\bgroup\leftskip 1in}
+\def\itemize{\par\bigskip\bgroup\leftskip 0.6in}
 \def\item#1{\par\leavevmode
-  \outline{#1}{1}\label{#1}\hbox to 0pt{\hss\hbox to 1in {#1\hfill}}\ignorespaces}
+  \outline{#1}{1}\label{#1}\hbox to 0pt{\hss\hbox to 0.6in {#1\hfill}}\ignorespaces}
 \def\enditemize{\par\egroup}
 
 \noindent\lower 20pt \hbox{\HINTimage  "../resources/logo/HINTLogoBuchFG256.png" width 1in}
@@ -33,7 +33,8 @@
 
 \section{DESCRIPTION}
 
-       Hintview displays a binary HINT file, usually with the .hnt extension.
+       Hintview displays a binary HINT file.
+       These files usually have the {\tt .hnt} extension.
 
        The  binary HINT file format is designed for on-screen reading of documents.
        Using hintview to display a HINT file, its content will dynamically  adapt to
@@ -55,14 +56,6 @@
 
               See also the \link{Ctrl-A} and the \link{Ctrl-R} key.
 
-\item{-h}     Open the document on the "home" page. The home page is  a  location
-              specified  by the document author as a good starting point
-              for reading the document.
-
-              See also the \link{Ctrl-H} key.
-
-\item{--help} Print help message and exit.
-
 \item{-d}     Start the viewer in "dark" mode. In this mode the  viewer  will
               display  the  document  using  a dark background and light foreground
               color to reduce eye strain  in  a  surrounding  with  dim
@@ -70,8 +63,18 @@
 
               See also the \link{Ctrl-D} key.
 
-\item{--version}
-              Print version information and exit.
+\item{-l}     Start the viewer in "light" mode. In this mode the  viewer  will
+              display  the  document  using  black ink on white background.
+
+              See also the \link{Ctrl-D} key.
+
+\item{-h}     Open the document on the "home" page. The home page is  a  location
+              specified  by the document author as a good starting point
+              for reading the document.
+
+              See also the \link{Ctrl-H} key.
+
+\item{-v}     Print version information and exit.
 
 \item{-z}     Zoom  to  100\%.  The  HINT viewer can display a document using a
               given zoom factor to make characters appear larger or smaller to
@@ -81,6 +84,8 @@
               size as it would appear in a printed book.
 
               See also the \link{Ctrl-Z} key.
+
+\item{-?}     Print help message and exit.
               
 \enditemize
 
@@ -91,7 +96,8 @@
 \item{Ctrl-A} Toggle autoreload mode. See also the \link{-a} option  and  the  \link{Ctrl-R}
               key.
 
-\item{Ctrl-D} Toggle between dark and light mode. See also the \link{-d} option.
+\item{Ctrl-D} Toggle between dark and light mode.
+              See also the \link{-d} and \link{-l} option.
 
 \item{Ctrl-F} Open the Find dialog.
 
@@ -143,31 +149,32 @@
               zoom factor.  Dragging in the opposite direction  decreases  the
               zoom factor. See also the \link{Ctrl-Z} key and the \link{-z} option.
 
-\item{Scroll} wheel (EXPERIMENTAL)
-              Using the scroll wheel is a fast way of paging forward and backward.
+\item{Scroll} wheel (EXPERIMENTAL) With some implementations of HintView,
+              using the scroll wheel is a fast way of paging forward and backward.
               
 \enditemize
 
               
 \section{NOTES}
-       This is a program to render HINT files using GTK-3. Other  programs  to
+       This is a program to render HINT files. Other  programs  to
        display  HINT  files  are  available  on  the HINT project home page at
-       https://hint.userweb.mwn.de/ where you find viewers for the Windows and
-       Android operating systems.
+       https://hint.userweb.mwn.de/ where you find viewers for the Windows,
+       Linux, MacOS, iOS, and  Android.
 
-       Currently  the  best  way to produce HINT files is the use of hitex, or
-       hilatex, versions of TeX that produce HINT files as  output.  The  HINT
+       Currently  the  best  way to produce HINT files is the use of {\tt hitex},
+%       or {\tt hilatex},
+       versions of \TeX\ that produce HINT files as  output.  The  HINT
        file format is described in HINT: The file format which is available as
        a book or in electronic form from the HINT project home page. The  HINT
-       file format is independent of TeX and allows the implementation of
+       file format is independent of \TeX\ and allows the implementation of
        generators for all kind of word-processors. The hintview  program  however
-       uses parts of Donald E. Knuth's implementation of TeX, notably its line
+       uses parts of Donald E. Knuth's implementation of \TeX, notably its line
        breaking routine, to produce good quality rendering of documents.
 
 \section{AVAILABILITY}
        hintview is tested on the Linux platform but should compile on a  large
        variety  of machine architectures and operating systems.  hitex and hilatex
-       are part of the TeX Live distribution.
+       are part of the \TeX\ Live distribution.
 
 %\section{SEE ALSO}
 %       hitex(1), histretch(1), hishrink(1).

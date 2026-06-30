@@ -55,20 +55,26 @@
 #define ID_KEY_NIGHT                    40014
 #define ID_KEY_ZOOM                     40015
 #define ID_KEY_OUTLINE                  40016
-#define ID_KEY_HOME                     40018
-#define ID_KEY_RELOAD                   40020
-#define ID_KEY_START_AUTORELOAD         40021
-#define ID_KEY_AUTORELOAD               40021
-#define ID_KEY_STOP_AUTORELOAD          40022
-#define ID_FILE_AUTORELOAD              40023
-#define ID_KEY_QUIT                     40024
+#define ID_KEY_HOME                     40017
+#define ID_KEY_RELOAD                   40018
+#define ID_SET_AUTORELOAD               40019
+#define ID_KEY_AUTORELOAD               40020
+
+#define ID_FILE_AUTORELOAD              40022
+#define ID_KEY_QUIT                     40023
+#define ID_KEY_SEARCH_NEXT              40024
+#define ID_KEY_OPEN_FILE                40025
+
+#define ID_KEY_PREFERENCES              40027
+#define ID_KEY_GAMMA_PLUS               40028
+#define ID_KEY_GAMMA_MINUS              40029
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        122
-#define _APS_NEXT_COMMAND_VALUE         40029
+#define _APS_NEXT_COMMAND_VALUE         40030
 #define _APS_NEXT_CONTROL_VALUE         1029
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
