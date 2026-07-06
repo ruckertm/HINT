@@ -4,16 +4,14 @@ package edu.hm.cs.hintview;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
-//import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
-
-//import android.util.Log;
 import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
@@ -21,7 +19,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowInsets;
-
 import android.app.Dialog;
 import android.view.WindowInsetsController;
 import android.view.inputmethod.InputMethodManager;
@@ -32,19 +29,15 @@ import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.text.method.LinkMovementMethod;
-//import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.FitWindowsViewGroup;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
-import androidx.core.view.WindowInsetsCompat;
 
 public class HINTVIEWActivity extends AppCompatActivity {
     private static final String TAG = "HINTVIEWActivity";
@@ -57,52 +50,50 @@ public class HINTVIEWActivity extends AppCompatActivity {
 
     private static final int FILE_CHOOSER_REQUEST_CODE = 0x01;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_hintview);
 
-        //get shared preferences: file, pos, scale, mode
+        // Load preferences
         sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         String fileUriStr = sharedPref.getString("fileURI", null);
-        long filePos;
-        if (fileUriStr == null)
-            filePos = 0;
-        else
-            filePos = sharedPref.getLong("curPos", 0);
+        long filePos = sharedPref.getLong("curPos", 0);
         double scale = sharedPref.getFloat("textSize", (float) 1.0);
         darkMode = sharedPref.getBoolean("darkMode", false);
 
         mView = findViewById(R.id.hintview);
-        mView.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                //Gesture Handlers in HINTVIEWView are taking care of touchEvents
-                //  hideToolbar(mView, toolbar.getTranslationY() < 0);
-            }
-        });
-
-
         mView.init();
-        try {
-            mView.setFile(fileUriStr, filePos);
-        } catch (SecurityException e) {
-            openFileChooser();
-        }
         mView.setScale(scale);
         mView.setMode(darkMode);
 
+	    // Handle incoming tap (Intent)
+        Intent intent = getIntent();
+        boolean intentHandled = false;
+        if (intent != null && (Intent.ACTION_VIEW.equals(intent.getAction()) || Intent.ACTION_SEND.equals(intent.getAction()))) {
+            intentHandled = handleIntent(intent);
+        }
+
+        // Fallback to SharedPreferences if no intent was handled
+        if (!intentHandled)
+	{ if (fileUriStr==null)
+	     openFileChooser();
+	  else
+	  {
+	    try {
+            mView.setFile(fileUriStr, filePos);
+            } catch (SecurityException e) {
+              openFileChooser();
+            }
+	  }
+	}
+	
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setToolbar(darkMode);
 
         findViewById(R.id.root).setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
-
             Rect padding = null;
-
             @Override
             public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
                 if (padding == null) {
@@ -117,56 +108,64 @@ public class HINTVIEWActivity extends AppCompatActivity {
                         padding.right + insets.getInsets(WindowInsets.Type.systemBars()).right,
                         padding.bottom
                 );
-
                 return insets;
             }
         });
-
        //Log.w(TAG, "onCreate URI= " + fileUriStr);
-        if (fileUriStr == null)
-            openFileChooser();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleIntent(intent);
+    }
+
+    private boolean handleIntent(Intent intent) {
+        Uri uri = null;
+        if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+            uri = intent.getData();
+        } else if (Intent.ACTION_SEND.equals(intent.getAction())) {
+            uri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+        }
+
+        if (uri != null) {
+            try {
+                if ("content".equals(uri.getScheme())) {
+                    try {
+                        getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    } catch (SecurityException e) {
+                        // Temporary permission only.
+                    }
+                }
+                mView.setFile(uri.toString(), 0);
+                return true;
+            } catch (Exception e) {
+                Log.e(TAG, "Error handling intent", e);
+            }
+        }
+        return false;
     }
 
     public static void hideToolbar(View view, boolean toolbarVisible) {
         toolbar.setTranslationY(toolbarVisible ? 0 : -toolbar.getHeight());
-        //Log.w(TAG, "toolbar translation " + toolbar.getTranslationY());
         toolbar.requestTransparentRegion(toolbar);
-        // hide Nav- & Status-bar
-        WindowInsetsController windowInsetsController;
-        windowInsetsController= view.getWindowInsetsController();
-        if (!toolbarVisible)
-        {  int t,s;
-            t=WindowInsets.Type.displayCutout();
-            s=WindowInsets.Type.systemBars();
-            t=t|s;
-            windowInsetsController.hide(t);
-        }
-        else
+        WindowInsetsController windowInsetsController = view.getWindowInsetsController();
+        if (!toolbarVisible) {
+            windowInsetsController.hide(WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+        } else {
             windowInsetsController.show(WindowInsets.Type.systemBars());
-  /*
-        view.setSystemUiVisibility(toolbarVisible ?
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN :
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
-                        | View.SYSTEM_UI_FLAG_IMMERSIVE
-                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-    */
+        }
     }
 
     void setToolbar(boolean darkMode) {
-        int toolbar_color = ContextCompat.getColor(mView.getContext(),R.color.toolbar_color);
-        int text_color = ContextCompat.getColor(mView.getContext(),R.color.foreground_color);
-        int nightModeFlags = mView.getContext().getResources().getConfiguration().uiMode &
-                Configuration.UI_MODE_NIGHT_MASK;
+        int toolbar_color = ContextCompat.getColor(mView.getContext(), R.color.toolbar_color);
+        int text_color = ContextCompat.getColor(mView.getContext(), R.color.foreground_color);
+        int nightModeFlags = mView.getContext().getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
 
         if (darkMode && (nightModeFlags == Configuration.UI_MODE_NIGHT_NO)) {
-            toolbar_color = ContextCompat.getColor(mView.getContext(),R.color.toolbar_dark_color);
-            text_color = ContextCompat.getColor(mView.getContext(),R.color.foreground_dark_color);
+            toolbar_color = ContextCompat.getColor(mView.getContext(), R.color.toolbar_dark_color);
+            text_color = ContextCompat.getColor(mView.getContext(), R.color.foreground_dark_color);
         }
 
         toolbar.setBackgroundColor(toolbar_color);
@@ -184,7 +183,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
         }
     }
 
-    private void setSearchWidgetColor (final int color) {
+    private void setSearchWidgetColor(final int color) {
         if (searchView != null) {
             MenuItem searchItem = searchMenu.findItem(R.id.search);
             Drawable drawable = searchItem.getIcon();
@@ -193,57 +192,17 @@ public class HINTVIEWActivity extends AppCompatActivity {
                 DrawableCompat.setTint(drawable.mutate(), color);
                 searchItem.setIcon(drawable);
             }
-
-            //drawable.setColorFilter(BlendModeColorFilterCompat.createBlendModeColorFilterCompat(color, BlendModeCompat.SRC_ATOP));
-            EditText searchText = (EditText) searchView.findViewById(searchView.getContext()
-                    .getResources()
-                    .getIdentifier("android:id/search_src_text", null, null));
-            //AutoCompleteTextView searchText = (AutoCompleteTextView) searchView.findViewById(R.id.search_src_text);
-
+            EditText searchText = (EditText) searchView.findViewById(searchView.getContext().getResources().getIdentifier("android:id/search_src_text", null, null));
             if (searchText != null) {
                 searchText.setHintTextColor(color);
                 searchText.setTextColor(color);
                 searchText.setHighlightColor(color);
                 searchText.setLinkTextColor(color);
             }
-
-            ImageView searchIcon = (ImageView) searchView.findViewById(searchView.getContext()
-                    .getResources()
-                    .getIdentifier("android:id/search_go_btn", null, null));
-
-            if (searchIcon != null) {
-                searchIcon.setColorFilter(color);
-            }
-            searchIcon = (ImageView) searchView.findViewById(searchView.getContext()
-                    .getResources()
-                    .getIdentifier("android:id/search_close_btn", null, null));
-
-            if (searchIcon != null) {
-                searchIcon.setColorFilter(color);
-            }
-
-            searchIcon = (ImageView) searchView.findViewById(searchView.getContext()
-                    .getResources()
-                    .getIdentifier("android:id/search_mag_icon", null, null));
-
-            if (searchIcon != null) {
-                searchIcon.setColorFilter(color);
-            }
-
-            searchIcon = (ImageView) searchView.findViewById(searchView.getContext()
-                    .getResources()
-                    .getIdentifier("android:id/search_button", null, null));
-
-            if (searchIcon != null) {
-                searchIcon.setColorFilter(color);
-            }
-
-            searchIcon = (ImageView) searchView.findViewById(searchView.getContext()
-                    .getResources()
-                    .getIdentifier("android:id/search_voice_btn", null, null));
-
-            if (searchIcon != null) {
-                searchIcon.setColorFilter(color);
+            String[] iconIds = {"android:id/search_go_btn", "android:id/search_close_btn", "android:id/search_mag_icon", "android:id/search_button", "android:id/search_voice_btn"};
+            for (String id : iconIds) {
+                ImageView icon = (ImageView) searchView.findViewById(searchView.getContext().getResources().getIdentifier(id, null, null));
+                if (icon != null) icon.setColorFilter(color);
             }
         }
     }
@@ -253,19 +212,16 @@ public class HINTVIEWActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
         outState.putBoolean("toolbarVisible", toolbar.getTranslationY() >= 0);
         outState.putBoolean("darkMode", darkMode);
-        //Log.d(TAG, "toolbarVisible: " + (toolbar.getTranslationY() >= 0));
     }
 
     @Override
     protected void onRestoreInstanceState(final Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
-                final boolean toolbarVisible = savedInstanceState.getBoolean("toolbarVisible");
+                hideToolbar(mView, savedInstanceState.getBoolean("toolbarVisible"));
                 darkMode = savedInstanceState.getBoolean("darkMode");
-                hideToolbar(mView, toolbarVisible);
             }
         }, 80);
     }
@@ -273,9 +229,8 @@ public class HINTVIEWActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (mView != null) {
+        if (mView != null)
             mView.onPause();
-        }
     }
 
     @Override
@@ -291,70 +246,45 @@ public class HINTVIEWActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         SharedPreferences.Editor editor = sharedPref.edit();
-        String fileUriStr = mView.getFileUriStr();
-        editor.putString("fileURI", fileUriStr);
-        long filePos = mView.getPos();
-        editor.putLong("curPos", filePos);
-        editor.putFloat("textSize", (float)HINTVIEWView.scale);
+        editor.putString("fileURI", mView.getFileUriStr());
+        editor.putLong("curPos", mView.getPos());
+        editor.putFloat("textSize", (float) HINTVIEWView.scale);
         editor.putBoolean("darkMode", mView.getMode());
         editor.apply();
-        //Log.d(TAG, "onStop pos = " + Long.toHexString(filePos));
+        //Log.d(TAG,"onStop\n");
     }
-
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem checkable;
-        checkable = menu.findItem(R.id.dark);
-        checkable.setChecked(darkMode);
+        MenuItem checkable = menu.findItem(R.id.dark);
+        if (checkable != null) checkable.setChecked(darkMode);
         return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-	 searchMenu = menu;
+        searchMenu = menu;
         new MenuInflater(this).inflate(R.menu.hintview_menu, menu);
-        // Associate searchable configuration with the SearchView
-        SearchManager searchManager =
-                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        searchView =
-                (SearchView) menu.findItem(R.id.search).getActionView();
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        searchView = (SearchView) menu.findItem(R.id.search).getActionView();
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setSubmitButtonEnabled(true);
 
-        final SearchView.OnQueryTextListener queryTextListener = new SearchView.OnQueryTextListener() {
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextChange(String query) {
                 mView.setQueryString(query);
                 mView.requestRender();
                 return true;
             }
-
             @Override
             public boolean onQueryTextSubmit(String query) {
-                HINTVIEWView.Search_next=true;
+                HINTVIEWView.Search_next = true;
                 mView.requestRender();
-                //mView.nextSearch();
-                //mView.requestRender();
-                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(mView.getWindowToken(), 0);
-                 return true;
-            }
-        };
-
-        final SearchView.OnCloseListener closeListener = new SearchView.OnCloseListener(){
-            @Override
-            public boolean onClose() {
-                //mView.setQueryString(null);
-                //mView.requestRender();
+                ((InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(mView.getWindowToken(), 0);
                 return true;
             }
-        };
-
-        searchView.setOnQueryTextListener(queryTextListener);
-        searchView.setOnCloseListener(closeListener);
-
+        });
         return true;
     }
 
@@ -418,10 +348,7 @@ public class HINTVIEWActivity extends AppCompatActivity {
         }
         if (hideToolbar) {
             new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    hideToolbar(mView, false);
-                }
+                @Override public void run() { hideToolbar(mView, false); }
             }, 80);
         }
         return success;
@@ -434,28 +361,22 @@ public class HINTVIEWActivity extends AppCompatActivity {
         try {
             startActivityForResult(intent, FILE_CHOOSER_REQUEST_CODE);
         } catch (ActivityNotFoundException e) {
-            //Log.e(TAG, "", e);
+            Log.e(TAG, "No file chooser found", e);
         }
     }
 
-         @Override
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == FILE_CHOOSER_REQUEST_CODE && resultCode == RESULT_OK) {
+        if (requestCode == FILE_CHOOSER_REQUEST_CODE && resultCode == RESULT_OK && data != null) {
             try {
                 //check if file is accessible
-                getContentResolver().openInputStream(data.getData()).close();
+                //getContentResolver().openInputStream(data.getData()).close();
                 getContentResolver().takePersistableUriPermission(data.getData(), Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
                 mView.setFile(data.getData().toString(), 0);
-            } catch (FileNotFoundException e) {
-                //Log.e(TAG, "", e);
-                openFileChooser();
-            } catch (java.lang.SecurityException e) {
-                //no permissions after restart of the device
-                openFileChooser();
-            } catch (IOException e) {
+            } catch (Exception e) {
                //Log.e(TAG,"Exception in openFileChooser");
+                openFileChooser();
             }
         }
     }
