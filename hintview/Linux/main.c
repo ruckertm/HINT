@@ -396,7 +396,7 @@ static GdkGLContext* cb_create_context (GtkGLArea* self, gpointer user_data)
      c = gdk_window_create_gl_context (gdk_window,&error);
      if (c!=NULL)
        LOG("Has context\n");
-     gdk_gl_context_set_required_version (c,3,3);
+     gdk_gl_context_set_required_version (c,2,0);
  }
   LOG("Create Context\n");
  
