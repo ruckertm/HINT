@@ -1,5 +1,5 @@
 /*696:*/
-#line 15200 "hint.w"
+#line 15213 "hint.w"
 
 #ifndef _RENDERNATIVE_H
 #define _RENDERNATIVE_H
@@ -46,11 +46,11 @@ extern unsigned int nativeTexture(unsigned char*bits,int w,int h);
 
 unsigned int nativeFreeTexture(unsigned int t);
 /*:523*//*671:*/
-#line 13954 "hint.w"
+#line 13967 "hint.w"
 
 extern void nativeBackground(double x,double y,double h,double w,uint32_t bg);
 /*:671*/
-#line 15203 "hint.w"
+#line 15216 "hint.w"
 
 #endif
 /*:696*/

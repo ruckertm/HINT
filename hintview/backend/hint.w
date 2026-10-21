@@ -13527,11 +13527,13 @@ with the |FT_LOAD_RENDER| flag. Instead of using |FT_LOAD_TARGET_NORMAL|
 one could also use |FT_LOAD_TARGET_LIGHT| which will apply hinting only
 to horizontal strokes, thereby keeping the character spacing undisturbed 
 but using slightly fuzzier bitmaps.
-We decrement the |bitmap_top| value by 1, mainly because {\tt dvips} does it,
-but comparing pk fonts to FreeType fonts, one can observe that glyphs
-in FreeType fonts are positioned slighly higher. Unfortunately the vertical
-displacement is magnified for scaled fonts, so subtracting 1 is not enough
-in this cases.
+%We decrement the |bitmap_top| value by 1, mainly because {\tt dvips} does it,
+%but comparing pk fonts to FreeType fonts, one can observe that glyphs
+%in FreeType fonts are positioned slighly higher. Unfortunately the vertical
+%displacement is magnified for scaled fonts, so subtracting 1 is not enough
+%in this cases.
+%The above idea was removed because it causes a missalignment of the
+%OpenType glyphs for radicals with the rule that extends over the nucleus.
 
 @<render functions@>=
 static void ft_unpack_glyph(uint8_t f, GHcache *g, uint32_t cc)
@@ -13548,7 +13550,7 @@ static void ft_unpack_glyph(uint8_t f, GHcache *g, uint32_t cc)
   g->w=ft_face->glyph->bitmap.width;
   g->h=ft_face->glyph->bitmap.rows;
   g->hoff=-ft_face->glyph->bitmap_left;
-  g->voff=ft_face->glyph->bitmap_top-1;
+  g->voff=ft_face->glyph->bitmap_top;
   bits=calloc(g->w*g->h, 1);
   if (bits==NULL) QUIT("Out of memory for FreeType glyph %c (%u)",(char)cc,cc);
   memcpy(bits,ft_face->glyph->bitmap.buffer,g->w*g->h);
@@ -13920,7 +13922,18 @@ Rendering rules, that is black rectangles, is simpler.
 
 @<render functions@>=
 static void render_rule(int x, int y, int w, int h)
-{@+ if (w>0 &&  h>0)
+{@+ if (w<=0 ||  h<=0) return;
+ if (round_to_pixel)
+  { 
+    if (x_px_size>pxs_threshold)
+    { x=(x+(x_px_size/2))/x_px_size;
+      x=x*x_px_size;
+    }
+    if (y_px_size>pxs_threshold)
+    { y=(y+(y_px_size/2))/y_px_size;
+      y=y*y_px_size;
+    }
+  }
   nativeRule(x,y,w,h);@+
 }
 @

@@ -215,22 +215,12 @@ static const GLfloat uv[6][2] = {
 };
 
 static GLuint xybuffer, uvbuffer;
-
+static const int to_nearest=0;
 
 static void mkRuleTexture() /* the texture used for rules */
 {
-#define NO_TEST 1  
-#if NO_TEST	
   GLubyte rule[1][1][1]={{{0xFF}}};
-  /* for testing only */
-#else /* for testing only */
-  GLubyte rule[2][2][3]={{{0}}};
-  rule[0][0][0]=0xFF; // red top left
-  rule[0][1][0]=rule[0][1][1]=0xFF; // yellow top right
-  rule[1][0][2]=0xFF; // blue bottom left
-  rule[1][1][1]=0xFF; // green bottom right
-#endif
-	// Create one OpenGL texture
+  // Create one OpenGL texture
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   checkGlError("glPixelStorei");
 
@@ -238,17 +228,19 @@ static void mkRuleTexture() /* the texture used for rules */
   glBindTexture(GL_TEXTURE_2D, RuleID);
   checkGlError("glBindTexture RuleID");
 
-#if NO_TEST
   glTexImage2D(GL_TEXTURE_2D, 0,GL_R8, 1, 1 , 0, GL_RED, GL_UNSIGNED_BYTE, rule);
-#else
-  glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, 2, 2 , 0, GL_RGB, GL_UNSIGNED_BYTE, rule);
-#endif
-    checkGlError("glTeXImage2D Rule");
+  checkGlError("glTeXImage2D Rule");
   /* Set texture options */
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+ if (to_nearest) 
+ { glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+ }
+ else
+ { glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+ }
 }
 
 void nativeInit(void)
@@ -416,22 +408,7 @@ void nativeRule(double x, double y, double w, double h)
    x,y position
    w,h width and height
   */
-{ /* Moving using the vertex buffer */
-  xy[0][0]=x;   xy[0][1]=y;   // xy top left
-  xy[1][0]=x;   xy[1][1]=y-h; // xy bot left 0
-  xy[2][0]=x+w; xy[2][1]=y-h; // xy bot right 0
-
-  xy[3][0]=x+w; xy[3][1]=y;    // xy top right 1
-  xy[4][0]=x;   xy[4][1]=y;    // xy top left 1
-  xy[5][0]=x+w;  xy[5][1]=y-h; // xy bot right 1
-  glBindTexture(GL_TEXTURE_2D, RuleID);
-  checkGlError("glBindTexture RuleID");
-
-  glBindBuffer(GL_ARRAY_BUFFER, xybuffer);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(xy), xy, GL_STREAM_DRAW);
-  glDrawArrays(GL_TRIANGLES, 0, 2*3);
-  //LOG("nativeRule %f@%f %fx%f Done\n",x,y,w,h);
-}
+{ nativeGlyph(x,y,w,h,RuleID); }
 
 void nativeImage(double x, double y, double w, double h, unsigned char *b, unsigned char *e)
 /* render the image found between *b and *e at x,y with size w,h.
@@ -499,7 +476,7 @@ void nativeImage(double x, double y, double w, double h, unsigned char *b, unsig
   glUniform1i(IsImageID, 0);
 }
 
-static const int to_nearest=1;
+
 
 unsigned int nativeTexture(unsigned char *bits, int w, int h) {
     unsigned int textureID;
@@ -511,11 +488,6 @@ unsigned int nativeTexture(unsigned char *bits, int w, int h) {
     checkGlError("glBindTexture textureID");
 #if 0   /* testing pixel alignment */
     bits[0]=0xFF;      /* The first element in bits corresponds to the top left pixel.*/
-    bits[2]=0xFF; 
-    bits[4]=0xFF; 
-    bits[6]=0xFF; 
-    bits[8]=0xFF; 
-
     bits[w-1]=0xFF;    /* This is the top right pixel. */
     bits[w*h-1] =0xFF; /* The last element in bits is the bottom right pixel. */
 #endif    
